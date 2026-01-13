@@ -1,0 +1,181 @@
+name: Thea
+options:
+  bundleIdPrefix: app.thea
+  deploymentTarget:
+    macOS: "26.0"
+    iOS: "18.0"
+  xcodeVersion: "26.0"
+  generateEmptyDirectories: true
+  createIntermediateGroups: true
+  defaultConfig: Release
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+    SWIFT_STRICT_CONCURRENCY: complete
+    DEVELOPMENT_TEAM: 6B66PM4JLK
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    VERSIONING_SYSTEM: apple-generic
+    ENABLE_BITCODE: "NO"
+    
+  configs:
+    Debug:
+      SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+      SWIFT_COMPILATION_MODE: singlefile
+      ENABLE_TESTABILITY: "YES"
+      DEBUG_INFORMATION_FORMAT: dwarf
+      GCC_OPTIMIZATION_LEVEL: "0"
+      ONLY_ACTIVE_ARCH: "YES"
+      MTL_ENABLE_DEBUG_INFO: "INCLUDE_SOURCE"
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+      GCC_PREPROCESSOR_DEFINITIONS:
+        - "DEBUG=1"
+        - "$(inherited)"
+        
+    Release:
+      SWIFT_OPTIMIZATION_LEVEL: "-O"
+      SWIFT_COMPILATION_MODE: wholemodule
+      ENABLE_TESTABILITY: "NO"
+      DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
+      GCC_OPTIMIZATION_LEVEL: "s"
+      ONLY_ACTIVE_ARCH: "NO"
+      MTL_ENABLE_DEBUG_INFO: "NO"
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: ""
+      VALIDATE_PRODUCT: "YES"
+      COPY_PHASE_STRIP: "YES"
+      STRIP_INSTALLED_PRODUCT: "YES"
+      DEAD_CODE_STRIPPING: "YES"
+      ENABLE_NS_ASSERTIONS: "NO"
+
+packages:
+  OpenAI:
+    url: https://github.com/MacPaw/OpenAI
+    from: "0.2.0"
+  KeychainAccess:
+    url: https://github.com/kishikawakatsumi/KeychainAccess
+    from: "4.2.0"
+  MarkdownUI:
+    url: https://github.com/gonzalezreal/swift-markdown-ui
+    from: "2.0.0"
+  Highlightr:
+    url: https://github.com/raspu/Highlightr
+    from: "2.1.0"
+
+targets:
+  Thea-macOS:
+    type: application
+    platform: macOS
+    sources:
+      - path: Shared
+        excludes:
+          - "**/.DS_Store"
+          - "**/TheaApp.swift"
+      - path: macOS
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - package: OpenAI
+      - package: KeychainAccess
+      - package: MarkdownUI
+      - package: Highlightr
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos
+        INFOPLIST_FILE: ""
+        GENERATE_INFOPLIST_FILE: "YES"
+        MACOSX_DEPLOYMENT_TARGET: "26.0"
+        PRODUCT_NAME: Thea
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: macOS/Thea.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Thea
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.productivity"
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2025 Alexis. All rights reserved."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Thea needs microphone access for voice commands and dictation."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Thea uses speech recognition for voice commands."
+        INFOPLIST_KEY_NSAppleEventsUsageDescription: "Thea needs automation access to interact with other apps."
+        ENABLE_HARDENED_RUNTIME: "YES"
+        COMBINE_HIDPI_IMAGES: "YES"
+        ARCHS: "$(ARCHS_STANDARD)"
+        SUPPORTS_MACCATALYST: "NO"
+      configs:
+        Release:
+          CODE_SIGN_IDENTITY: "-"
+
+  Thea-iOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: Shared
+        excludes:
+          - "**/.DS_Store"
+          - "**/TheaApp.swift"
+      - path: iOS
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - package: OpenAI
+      - package: KeychainAccess
+      - package: MarkdownUI
+      - package: Highlightr
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios
+        INFOPLIST_FILE: ""
+        GENERATE_INFOPLIST_FILE: "YES"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        PRODUCT_NAME: Thea
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_CFBundleDisplayName: Thea
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.productivity"
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2025 Alexis. All rights reserved."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Thea needs microphone access for voice commands and dictation."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Thea uses speech recognition for voice commands."
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: "NO"
+
+  TheaTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: Thea-macOS
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: app.thea.tests
+      GENERATE_INFOPLIST_FILE: "YES"
+
+schemes:
+  Thea-macOS:
+    build:
+      targets:
+        Thea-macOS: all
+    run:
+      config: Release
+    test:
+      config: Debug
+      targets:
+        - TheaTests
+    profile:
+      config: Release
+    analyze:
+      config: Release
+    archive:
+      config: Release
+
+  Thea-iOS:
+    build:
+      targets:
+        Thea-iOS: all
+    run:
+      config: Release
+    profile:
+      config: Release
+    analyze:
+      config: Release
+    archive:
+      config: Release

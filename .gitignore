@@ -1,0 +1,41 @@
+# Xcode
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcworkspace
+!default.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Cocoapods
+Pods/
+
+# Build artifacts
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Secrets
+*.p12
+*.mobileprovision
+*.certSigningRequest
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+
+# Backup files
+*.backup
+*.backup2
+.backup-*
+
+# Python scripts (temporary)
+*.pyc
+__pycache__/
+fix_*.py
+add_*.py

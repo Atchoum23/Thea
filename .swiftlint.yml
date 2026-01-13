@@ -1,0 +1,51 @@
+# SwiftLint Configuration for Thea
+
+disabled_rules:
+  - line_length
+  - type_body_length
+  - file_length
+  - function_parameter_count
+  - large_tuple
+  - function_body_length
+  - cyclomatic_complexity
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - first_where
+  - sorted_first_last
+  - contains_over_first_not_nil
+  - last_where
+
+excluded:
+  - .build
+  - .swiftpm
+  - Pods
+  - Carthage
+  - DerivedData
+  - .backup*
+
+# Warnings
+warning_threshold: 0
+
+# Custom Rules
+identifier_name:
+  min_length:
+    warning: 2
+  max_length:
+    warning: 60
+  excluded:
+    - id
+    - x
+    - y
+    - ai
+    - db
+    - ok
+
+nesting:
+  type_level:
+    warning: 3
+  statement_level:
+    warning: 5
+
+reporter: "xcode"
