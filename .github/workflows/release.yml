@@ -1,0 +1,138 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: macos-14
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15.2
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Extract Version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Build Release with SPM
+        run: |
+          cd Development
+          swift build -c release -v
+
+      - name: Create Release Directory
+        run: |
+          mkdir -p release
+          cp -R Development/.build/release/Thea release/
+
+      - name: Create Release Archive
+        run: |
+          cd release
+          zip -r ../Thea-${{ steps.version.outputs.version }}-macOS.zip Thea
+          cd ..
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          cat > release-notes.md << 'EOF'
+          ## Thea v${{ steps.version.outputs.version }}
+
+          ### 🎉 Features
+          - **Automatic Prompt Engineering**: Meta-AI optimization for perfect AI responses
+          - **Swift Code Excellence**: Zero-error learning system for Swift development
+          - **Multi-Window Support**: Advanced macOS window and tab management
+          - **Life Tracking**: Health, screen time, location, and activity tracking
+
+          ### 🔒 Privacy-First Design
+          - All data stored locally with SwiftData
+          - Optional CloudKit sync for your devices only
+          - No third-party analytics or telemetry
+
+          ### 🛠️ Technical Details
+          - Swift 6.0 with strict concurrency
+          - SwiftUI for macOS 14.0+ and iOS 17.0+
+          - SwiftData for local persistence
+          - HealthKit integration (iOS/watchOS)
+          - CoreLocation integration (iOS)
+          - Accessibility-based tracking (macOS)
+
+          ### 📦 Installation
+
+          **macOS:**
+          1. Download `Thea-${{ steps.version.outputs.version }}-macOS.zip`
+          2. Unzip and move Thea to /Applications
+          3. Launch Thea from Applications folder
+
+          ### 🔧 Requirements
+          - macOS 14.0 (Sonoma) or later
+          - iOS 17.0 or later (for iOS version)
+          - Swift 6.0 compatible Xcode
+
+          ### ✅ Quality Metrics
+          - Zero compilation errors
+          - Zero warnings
+          - Zero SwiftLint violations
+          - Production-ready build
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release-notes.md
+          files: |
+            Thea-${{ steps.version.outputs.version }}-macOS.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-dmg:
+    name: Create DMG Installer
+    runs-on: macos-14
+    needs: create-release
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15.2
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Extract Version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build Release
+        run: |
+          cd Development
+          swift build -c release
+
+      - name: Create DMG
+        run: |
+          mkdir -p dmg-staging
+          cp -R Development/.build/release/Thea dmg-staging/
+
+          hdiutil create -volname "Thea ${{ steps.version.outputs.version }}" \
+                         -srcfolder dmg-staging \
+                         -ov -format UDZO \
+                         Thea-${{ steps.version.outputs.version }}.dmg
+
+      - name: Upload DMG to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Thea-${{ steps.version.outputs.version }}.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

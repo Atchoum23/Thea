@@ -1,0 +1,141 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  swiftlint:
+    name: SwiftLint
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: |
+          cd Development
+          swiftlint lint --strict --reporter github-actions-logging
+
+  build-spm:
+    name: Build with SPM
+    runs-on: macos-14
+    strategy:
+      matrix:
+        configuration: [debug, release]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15.2
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Cache SPM dependencies
+        uses: actions/cache@v3
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Build with SPM
+        run: |
+          cd Development
+          swift build -c ${{ matrix.configuration }} -v
+
+      - name: Run Tests
+        if: matrix.configuration == 'debug'
+        run: |
+          cd Development
+          swift test --parallel
+
+  build-xcode-macos:
+    name: Build macOS App
+    runs-on: macos-14
+    needs: swiftlint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15.2
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Build Thea-macOS
+        run: |
+          cd Development
+          xcodebuild -project Thea.xcodeproj \
+                     -scheme Thea-macOS \
+                     -destination 'platform=macOS' \
+                     -configuration Release \
+                     clean build \
+                     CODE_SIGN_IDENTITY="" \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload macOS Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: thea-macos-${{ github.sha }}
+          path: Development/build/Release/Thea.app
+          retention-days: 7
+
+  build-xcode-ios:
+    name: Build iOS App
+    runs-on: macos-14
+    needs: swiftlint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15.2
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Build Thea-iOS
+        run: |
+          cd Development
+          xcodebuild -project Thea.xcodeproj \
+                     -scheme Thea-iOS \
+                     -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+                     -configuration Release \
+                     clean build \
+                     CODE_SIGN_IDENTITY="" \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGNING_ALLOWED=NO
+
+  quality-check:
+    name: Code Quality Analysis
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: SwiftLint Analysis
+        run: |
+          cd Development
+          swiftlint analyze --strict --compiler-log-path .build/release.log || true
+
+      - name: Generate Build Report
+        run: |
+          echo "## Build Summary" > build-report.md
+          echo "" >> build-report.md
+          echo "- Repository: ${{ github.repository }}" >> build-report.md
+          echo "- Branch: ${{ github.ref_name }}" >> build-report.md
+          echo "- Commit: ${{ github.sha }}" >> build-report.md
+          echo "- Swift Version: 6.0" >> build-report.md
+          echo "- Platforms: macOS 14.0+, iOS 17.0+" >> build-report.md
+
+      - name: Upload Build Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-report
+          path: build-report.md

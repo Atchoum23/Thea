@@ -9,6 +9,9 @@ DerivedData/
 .build/
 .swiftpm/
 
+# Xcode build directory
+build/
+
 # Cocoapods
 Pods/
 
@@ -16,6 +19,8 @@ Pods/
 *.ipa
 *.dSYM.zip
 *.dSYM
+*.dmg
+dmg-staging/
 
 # Secrets
 *.p12
