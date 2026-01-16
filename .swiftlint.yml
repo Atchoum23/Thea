@@ -8,6 +8,8 @@ disabled_rules:
   - large_tuple
   - function_body_length
   - cyclomatic_complexity
+    - type_name
+      - multiple_closures_with_trailing_closure
 
 opt_in_rules:
   - empty_count
