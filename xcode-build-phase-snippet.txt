@@ -1,0 +1,4 @@
+# Auto Error Detection
+if [ -f "${SRCROOT}/Scripts/auto-build-check.sh" ]; then
+    "${SRCROOT}/Scripts/auto-build-check.sh"
+fi

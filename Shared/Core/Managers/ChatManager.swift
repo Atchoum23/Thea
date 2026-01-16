@@ -83,11 +83,16 @@ final class ChatManager: ObservableObject {
 
         let model = AppConfiguration.shared.providerConfig.defaultModel
 
-        // Create user message
+        // Calculate next order index for proper message ordering
+        let existingIndices = conversation.messages.map(\.orderIndex)
+        let nextUserIndex = (existingIndices.max() ?? -1) + 1
+
+        // Create user message with orderIndex
         let userMessage = Message(
             conversationID: conversation.id,
             role: .user,
-            content: .text(text)
+            content: .text(text),
+            orderIndex: nextUserIndex
         )
         conversation.messages.append(userMessage)
         context.insert(userMessage)
@@ -105,14 +110,23 @@ final class ChatManager: ObservableObject {
             )
         }
 
-        // Stream response
+        // Stream response - use defer to ALWAYS reset streaming state
         isStreaming = true
         streamingText = ""
+
+        defer {
+            isStreaming = false
+            streamingText = ""
+        }
+
+        // Calculate order index for assistant message (after user message was added)
+        let assistantOrderIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
 
         let assistantMessage = Message(
             conversationID: conversation.id,
             role: .assistant,
-            content: .text("")
+            content: .text(""),
+            orderIndex: assistantOrderIndex
         )
         assistantMessage.model = model
         conversation.messages.append(assistantMessage)
@@ -151,9 +165,6 @@ final class ChatManager: ObservableObject {
             conversation.messages.removeLast()
             throw error
         }
-
-        isStreaming = false
-        streamingText = ""
     }
 
     func cancelStreaming() {

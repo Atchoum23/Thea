@@ -1,0 +1,142 @@
+import Foundation
+import SwiftData
+
+// MARK: - ErrorKnowledgeBaseBridge
+// Bridge between old ErrorKnowledgeBaseManager interface and new ErrorKnowledgeBase actor
+// This allows legacy code to continue working while we migrate to the new architecture
+
+@MainActor
+public final class ErrorKnowledgeBaseBridge {
+    public static let shared = ErrorKnowledgeBaseBridge()
+
+    private init() {}
+
+    // MARK: - Legacy Interface Support
+
+    /// Records a Swift error (legacy interface)
+    public func recordError(
+        _ error: SwiftError,
+        code: String,
+        fix: String,
+        language: String = "swift"
+    ) async {
+        // Convert to new format and record in knowledge base
+        // For now, just log - full implementation would map SwiftError to ParsedError
+        print("[Bridge] Recording error: \(error.message)")
+    }
+
+    /// Records a successful fix (legacy interface)
+    public func recordSuccessfulFix(
+        errorID: UUID,
+        correction: CodeCorrection
+    ) async {
+        // Map to new knowledge base success tracking
+        print("[Bridge] Recording successful fix for error: \(errorID)")
+    }
+
+    /// Gets prevention guidance (legacy interface)
+    public func getPreventionGuidance(for code: String) async -> [String] {
+        // Return generic guidance based on new knowledge base
+        return [
+            "Use Sendable for types crossing actor boundaries",
+            "Mark UI code with @MainActor",
+            "Use public modifiers for cross-module access"
+        ]
+    }
+
+    /// Enhances prompt with learnings (legacy interface)
+    public func enhancePromptWithLearnings(
+        for prompt: String,
+        code: String
+    ) async -> String {
+        // Add error prevention context to prompt
+        return prompt + "\n\nNote: Ensure code is Swift 6 compatible with proper concurrency annotations."
+    }
+
+    /// Finds similar errors (legacy interface)
+    public func findSimilarErrors(_ error: SwiftError) async -> [CodeErrorRecord] {
+        // Return empty for now - would need to query new knowledge base
+        return []
+    }
+
+    /// Gets errors by category (legacy interface)
+    public func getErrors(for category: SwiftError.ErrorCategory) async -> [CodeErrorRecord] {
+        return []
+    }
+
+    /// Gets error statistics (legacy interface)
+    public func getErrorStats() async -> ErrorStats {
+        // Map new knowledge base stats to old format
+        let stats = await ErrorKnowledgeBase.shared.getStatistics()
+
+        return ErrorStats(
+            totalErrors: stats.totalFixes,
+            categoryCounts: [:], // Would need mapping
+            averageSuccessRate: stats.successRate
+        )
+    }
+
+    /// Gets top recurring errors (legacy interface)
+    public func getTopRecurringErrors(limit: Int) async -> [CodeErrorRecord] {
+        return []
+    }
+
+    /// Updates success rate (legacy interface)
+    public func updateSuccessRate(for errorID: UUID, successful: Bool) async {
+        print("[Bridge] Update success rate for \(errorID): \(successful)")
+    }
+}
+
+// MARK: - Legacy Type Placeholders
+
+public struct ErrorStats: Sendable {
+    public let totalErrors: Int
+    public let categoryCounts: [String: Int]
+    public let averageSuccessRate: Double
+
+    public init(totalErrors: Int, categoryCounts: [String: Int], averageSuccessRate: Double) {
+        self.totalErrors = totalErrors
+        self.categoryCounts = categoryCounts
+        self.averageSuccessRate = averageSuccessRate
+    }
+}
+
+// MARK: - Supporting Types
+
+public struct CodeCorrection: Sendable {
+    public let originalCode: String
+    public let correctedCode: String
+    public let errorID: UUID
+    public let wasSuccessful: Bool
+    public let modelUsed: String
+
+    public init(
+        originalCode: String,
+        correctedCode: String,
+        errorID: UUID,
+        wasSuccessful: Bool,
+        modelUsed: String
+    ) {
+        self.originalCode = originalCode
+        self.correctedCode = correctedCode
+        self.errorID = errorID
+        self.wasSuccessful = wasSuccessful
+        self.modelUsed = modelUsed
+    }
+}
+
+public struct CodeErrorRecord: Sendable, Identifiable {
+    public let id: UUID
+    public let errorPattern: String
+    public let message: String
+    public let occurrenceCount: Int
+
+    public init(id: UUID, errorPattern: String, message: String, occurrenceCount: Int) {
+        self.id = id
+        self.errorPattern = errorPattern
+        self.message = message
+        self.occurrenceCount = occurrenceCount
+    }
+}
+
+// Note: SwiftError is defined in SwiftValidator.swift as public

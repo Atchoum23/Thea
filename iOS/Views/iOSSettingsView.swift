@@ -335,7 +335,7 @@ struct iOSMigrationView: View {
                 }
             }
             .task {
-                await migrationManager.detectSources()
+                await $migrationManager.detectSources
             }
             .sheet(isPresented: $showingImport) {
                 if let source = selectedSource {
@@ -447,7 +447,7 @@ struct iOSMigrationImportView: View {
 
         Task {
             do {
-                _ = try await migrationManager.migrate(sourceID: sourceInfo.id, progressHandler: progressHandler)
+                _ = try await $migrationManager.migrate(sourceID: sourceInfo.id, progressHandler: progressHandler)
                 importComplete = true
                 isImporting = false
             } catch {

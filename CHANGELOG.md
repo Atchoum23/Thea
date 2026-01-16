@@ -5,6 +5,85 @@ All notable changes to THEA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2026-01-15 (PENDING)
+
+### Fixed
+- **CRITICAL: Settings Crash** - App crashed when opening Settings (Cmd+,) due to CloudSyncManager eagerly initializing CloudKit without error handling
+- **CRITICAL: Message Ordering** - AI responses appeared before user messages due to timestamp-based sorting; now uses orderIndex
+- **Keychain Prompts** - Repeated keychain access prompts due to mismatched service name ("ai.thea.app" vs bundle ID "app.thea.macos")
+- **API Key Storage** - Unified API key storage to use Keychain (SecureStorage) instead of mixed UserDefaults/Keychain approach
+
+### Changed
+- CloudSyncManager now lazily initializes CloudKit and gracefully handles unavailable CloudKit
+- Message model now includes `orderIndex` property for reliable ordering
+- SecureStorage service name now matches bundle identifier
+- SettingsManager API key methods now delegate to SecureStorage
+
+## [1.2.2] - 2026-01-15
+
+### Fixed
+- **CloudKit Crash Fix** - Prevented crash on launch caused by CloudSyncManager eagerly creating CKContainer
+- Fixed typo in CloudKit container identifier ("iCloud.app.teathe.thea" → "iCloud.app.thea.macos")
+- Made CloudKit initialization lazy and optional with availability checking
+
+### Added
+- `isCloudKitAvailable` and `cloudKitStatus` published properties in CloudSyncManager
+- Dynamic CloudKit status display in Sync settings
+
+## [1.2.1] - 2026-01-15
+
+### Fixed
+- **Message Ordering Bug** - Fixed issue where AI responses could appear before user messages
+- **Settings Persistence** - Fixed API key storage disconnect between SettingsManager (UserDefaults) and providers (Keychain)
+- Changed MacSettingsView from @StateObject to @ObservedObject for SettingsManager.shared
+
+### Changed
+- SettingsManager API key methods now use consistent key naming format
+
+## [1.2.0] - 2026-01-15
+
+### Added
+- **AI Orchestration System** - Intelligent query decomposition and model routing
+- **Query Decomposer** - Breaks complex queries into sub-tasks
+- **Model Router** - Routes tasks to appropriate AI models based on capabilities
+- **Agent Registry** - Centralized registry for AI agents and their capabilities
+- **Result Aggregator** - Combines results from multiple agents
+- **Task Classifier** - Classifies tasks for optimal routing
+
+### Technical
+- Phase 6 AI Orchestration complete
+- All orchestration components integrated and functional
+
+## [1.1.6] - 2026-01-15
+
+### Added
+- Core chat functionality with streaming responses
+- Message bubbles with proper styling
+- Chat input view with send functionality
+- Conversation document export
+
+## [1.1.5] - 2026-01-15
+
+### Added
+- Local models settings UI (MLX and Ollama configuration)
+- Model selection settings view
+- Orchestrator settings view
+- Complete settings manager with all configuration options
+
+## [1.1.1] - 2026-01-15
+
+### Fixed
+- Phase 5 build errors and crashes
+- Settings persistence issues
+
+## [1.1.0] - 2026-01-15
+
+### Added
+- Self-execution system foundation
+- Autonomous build loop capability
+- Code fixer integration
+- Error parser and knowledge base
+
 ## [1.0.0] - 2026-01-13
 
 ### Added
@@ -54,7 +133,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub CI/CD integration
 - Automated testing in CI
 - Code coverage reports
-- DMG installer creation
 - App Store distribution
 - TestFlight beta program
-

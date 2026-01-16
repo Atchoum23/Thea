@@ -5,7 +5,7 @@ import SwiftData
 
 @Model
 final class UserPromptPreference {
-    @Attribute(.unique) var id: UUID
+    @Attribute(.unique) public var id: UUID
     var category: String
     var preferenceKey: String
     var preferenceValue: String
@@ -32,20 +32,20 @@ final class UserPromptPreference {
 // MARK: - Code Error Model
 
 @Model
-final class CodeErrorRecord {
-    @Attribute(.unique) var id: UUID
-    var errorMessage: String
-    var errorPattern: String
-    var codeContext: String
-    var solution: String
-    var language: String
-    var occurrenceCount: Int
-    var lastOccurrence: Date
-    var preventionRule: String
-    var successRate: Float
-    var relatedErrorIDs: [UUID]
+public final class CodeErrorRecord {
+    @Attribute(.unique) public var id: UUID
+    public var errorMessage: String
+    public var errorPattern: String
+    public var codeContext: String
+    public var solution: String
+    public var language: String
+    public var occurrenceCount: Int
+    public var lastOccurrence: Date
+    public var preventionRule: String
+    public var successRate: Float
+    public var relatedErrorIDs: [UUID]
 
-    init(
+    public init(
         id: UUID = UUID(),
         errorMessage: String,
         errorPattern: String,
@@ -76,7 +76,7 @@ final class CodeErrorRecord {
 
 @Model
 final class CodeCorrection {
-    @Attribute(.unique) var id: UUID
+    @Attribute(.unique) public var id: UUID
     var originalCode: String
     var correctedCode: String
     var errorID: UUID
@@ -107,7 +107,7 @@ final class CodeCorrection {
 
 @Model
 final class PromptTemplate {
-    @Attribute(.unique) var id: UUID
+    @Attribute(.unique) public var id: UUID
     var name: String
     var category: String
     var templateText: String
@@ -145,7 +145,7 @@ final class PromptTemplate {
         self.isActive = isActive
     }
 
-    var successRate: Float {
+    public var successRate: Float {
         let total = successCount + failureCount
         return total > 0 ? Float(successCount) / Float(total) : 0
     }
@@ -155,7 +155,7 @@ final class PromptTemplate {
 
 @Model
 final class CodeFewShotExample {
-    @Attribute(.unique) var id: UUID
+    @Attribute(.unique) public var id: UUID
     var taskType: String
     var inputExample: String
     var outputExample: String

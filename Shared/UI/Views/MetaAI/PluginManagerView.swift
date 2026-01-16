@@ -379,7 +379,7 @@ struct PluginMarketplaceSheet: View {
     }
 }
 
-struct CategoryButton: View {
+private struct CategoryButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void

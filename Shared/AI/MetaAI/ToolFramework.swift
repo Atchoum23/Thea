@@ -13,83 +13,18 @@ final class ToolFramework {
 
     private init() {
         registerBuiltInTools()
+        
+        // Initialize MCP tool registry
+        Task { @MainActor in
+            _ = MCPToolRegistry.shared
+        }
     }
 
     // MARK: - Tool Registration
 
     private func registerBuiltInTools() {
-        // File System Tools
-        registerTool(Tool(
-            id: UUID(),
-            name: "read_file",
-            description: "Read contents of a file",
-            parameters: [
-                ToolParameter(name: "path", type: .string, required: true, description: "File path to read")
-            ],
-            category: .fileSystem,
-            handler: readFile
-        ))
-
-        registerTool(Tool(
-            id: UUID(),
-            name: "write_file",
-            description: "Write content to a file",
-            parameters: [
-                ToolParameter(name: "path", type: .string, required: true, description: "File path to write"),
-                ToolParameter(name: "content", type: .string, required: true, description: "Content to write")
-            ],
-            category: .fileSystem,
-            handler: writeFile
-        ))
-
-        registerTool(Tool(
-            id: UUID(),
-            name: "list_directory",
-            description: "List files in a directory",
-            parameters: [
-                ToolParameter(name: "path", type: .string, required: true, description: "Directory path")
-            ],
-            category: .fileSystem,
-            handler: listDirectory
-        ))
-
-        // Web Tools
-        registerTool(Tool(
-            id: UUID(),
-            name: "fetch_url",
-            description: "Fetch content from a URL",
-            parameters: [
-                ToolParameter(name: "url", type: .string, required: true, description: "URL to fetch")
-            ],
-            category: .web,
-            handler: fetchURL
-        ))
-
-        // Data Tools
-        registerTool(Tool(
-            id: UUID(),
-            name: "search_data",
-            description: "Search through data with a query",
-            parameters: [
-                ToolParameter(name: "query", type: .string, required: true, description: "Search query"),
-                ToolParameter(name: "source", type: .string, required: false, description: "Data source")
-            ],
-            category: .data,
-            handler: searchData
-        ))
-
-        // Code Tools
-        registerTool(Tool(
-            id: UUID(),
-            name: "execute_code",
-            description: "Execute code in a sandboxed environment",
-            parameters: [
-                ToolParameter(name: "code", type: .string, required: true, description: "Code to execute"),
-                ToolParameter(name: "language", type: .string, required: true, description: "Programming language")
-            ],
-            category: .code,
-            handler: executeCode
-        ))
+        // Use system tools from SystemToolBridge
+        registerSystemTools()
     }
 
     func registerTool(_ tool: Tool) {
@@ -164,72 +99,6 @@ final class ToolFramework {
         }
 
         return results
-    }
-
-    // MARK: - Built-in Tool Handlers
-
-    nonisolated private func readFile(parameters: [String: Any]) async throws -> Any {
-        guard let path = parameters["path"] as? String else {
-            throw ToolError.invalidParameters
-        }
-
-        let url = URL(fileURLWithPath: path)
-        let content = try String(contentsOf: url, encoding: .utf8)
-        return content
-    }
-
-    nonisolated private func writeFile(parameters: [String: Any]) async throws -> Any {
-        guard let path = parameters["path"] as? String,
-              let content = parameters["content"] as? String else {
-            throw ToolError.invalidParameters
-        }
-
-        let url = URL(fileURLWithPath: path)
-        try content.write(to: url, atomically: true, encoding: .utf8)
-        return "File written successfully"
-    }
-
-    nonisolated private func listDirectory(parameters: [String: Any]) async throws -> Any {
-        guard let path = parameters["path"] as? String else {
-            throw ToolError.invalidParameters
-        }
-
-        let url = URL(fileURLWithPath: path)
-        let contents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
-        return contents.map { $0.lastPathComponent }
-    }
-
-    nonisolated private func fetchURL(parameters: [String: Any]) async throws -> Any {
-        guard let urlString = parameters["url"] as? String,
-              let url = URL(string: urlString) else {
-            throw ToolError.invalidParameters
-        }
-
-        let (data, _) = try await URLSession.shared.data(from: url)
-        guard let content = String(data: data, encoding: .utf8) else {
-            throw ToolError.executionFailed
-        }
-
-        return content
-    }
-
-    nonisolated private func searchData(parameters: [String: Any]) async throws -> Any {
-        guard let query = parameters["query"] as? String else {
-            throw ToolError.invalidParameters
-        }
-
-        // Simplified - would integrate with KnowledgeManager in production
-        return "Search results for: \(query)"
-    }
-
-    nonisolated private func executeCode(parameters: [String: Any]) async throws -> Any {
-        guard let code = parameters["code"] as? String,
-              let language = parameters["language"] as? String else {
-            throw ToolError.invalidParameters
-        }
-
-        // Delegate to CodeSandbox (will be implemented next)
-        return "Code executed: \(language) - \(code.prefix(50))..."
     }
 
     // MARK: - Helper Methods

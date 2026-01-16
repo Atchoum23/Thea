@@ -1,5 +1,5 @@
 import Foundation
-import OpenAI
+internal import OpenAI
 
 final class OpenAIProvider: AIProvider, Sendable {
     let metadata = ProviderMetadata(

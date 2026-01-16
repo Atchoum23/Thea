@@ -307,7 +307,7 @@ struct iOSProjectDetailView: View {
 
     private func exportProject() {
         do {
-            let data = try projectManager.exportProject(project)
+            let data = try $projectManager.exportProject(project)
             exportedData = data
             showingShareSheet = true
         } catch {

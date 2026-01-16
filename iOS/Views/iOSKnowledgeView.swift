@@ -11,7 +11,7 @@ struct iOSKnowledgeView: View {
         VStack(spacing: 0) {
             searchBar
 
-            if knowledgeManager.isScanning {
+            if $knowledgeManager.isScanning {
                 scanningView
             } else if knowledgeManager.indexedFiles.isEmpty {
                 emptyStateView
@@ -197,7 +197,7 @@ struct iOSKnowledgeView: View {
     }
 
     private var totalSize: Int {
-        knowledgeManager.indexedFiles.reduce(0) { $0 + $1.size }
+        Int(knowledgeManager.indexedFiles.reduce(0) { $0 + $1.size })
     }
 
     private var uniqueLanguages: Int {
@@ -210,7 +210,7 @@ struct iOSKnowledgeView: View {
             return
         }
 
-        searchResults = knowledgeManager.search(query: query)
+        searchResults = knowledgeManager.search(query: query) as! [SearchResult]
     }
 
     private func formatBytes(_ bytes: Int) -> String {
@@ -429,7 +429,7 @@ struct iOSKnowledgeScannerView: View {
 
         Task {
             do {
-                try await knowledgeManager.scanDirectory(path) { progress in
+                try await $knowledgeManager.scanDirectory(path) { progress in
                     scanProgress = progress
                 }
                 isScanning = false

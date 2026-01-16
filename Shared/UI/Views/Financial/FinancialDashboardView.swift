@@ -162,7 +162,7 @@ struct FinancialDashboardView: View {
             } else {
                 VStack(spacing: 8) {
                     ForEach(recentTransactions.prefix(10)) { transaction in
-                        TransactionRow(transaction: transaction)
+                        TransactionRow(transaction: transaction, currency: <#String#>)
                     }
                 }
             }

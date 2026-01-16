@@ -1,5 +1,5 @@
 import Foundation
-import KeychainAccess
+internal import KeychainAccess
 
 @MainActor
 final class SecureStorage {

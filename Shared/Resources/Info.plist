@@ -2,6 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- ================================ -->
+	<!-- Bundle Information -->
+	<!-- ================================ -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -18,25 +21,181 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+
+	<!-- ================================ -->
+	<!-- macOS Specific -->
+	<!-- ================================ -->
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Microphone & Speech -->
+	<!-- ================================ -->
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Thea needs microphone access for voice activation ("Hey Thea").</string>
+	<string>Thea needs microphone access for voice commands, "Hey Thea" activation, and dictation features.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Thea uses speech recognition for voice commands.</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Thea needs access to play voice responses.</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>Thea tracks your health data to provide personalized insights and life coaching recommendations.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>Thea updates your health data based on your tracked activities and goals.</string>
+	<string>Thea uses on-device speech recognition to understand your voice commands and provide hands-free control.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Camera -->
+	<!-- ================================ -->
+	<key>NSCameraUsageDescription</key>
+	<string>Thea can use your camera for visual AI features like document scanning, image analysis, and video calls.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Location -->
+	<!-- ================================ -->
+	<key>NSLocationUsageDescription</key>
+	<string>Thea uses your location for context-aware assistance, local recommendations, and location-based reminders.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Thea tracks your location to understand your daily routines and provide context-aware assistance.</string>
+	<string>Thea uses your location while the app is active to provide context-aware assistance and local recommendations.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Thea tracks your location in the background to provide comprehensive life coaching insights.</string>
+	<string>Thea uses your location in the background for location-based reminders and proactive notifications.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Thea uses your location in the background for location-based reminders and proactive assistance.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Contacts & Calendar -->
+	<!-- ================================ -->
+	<key>NSContactsUsageDescription</key>
+	<string>Thea can access your contacts to help you communicate, set reminders about people, and personalize suggestions.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Thea can access your calendar to help manage events, provide schedule summaries, and suggest optimal meeting times.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Thea can create calendar events based on your voice commands and task management.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Reminders -->
+	<!-- ================================ -->
+	<key>NSRemindersUsageDescription</key>
+	<string>Thea can access and create reminders to help you stay organized and never miss important tasks.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Photos -->
+	<!-- ================================ -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Thea can access your photos for image analysis, memory assistance, and visual AI features.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Thea can save images and screenshots to your photo library when requested.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Health (iOS) -->
+	<!-- ================================ -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>Thea can read your health data to provide wellness insights, activity summaries, and health-related reminders.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Thea can write health data such as mindfulness sessions and workout logs you create through voice commands.</string>
+	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+	<string>Thea can access your clinical health records to provide comprehensive health summaries and medication reminders.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Music & Media -->
+	<!-- ================================ -->
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Thea can access Apple Music to play audio responses, control music playback, and create playlists via voice commands.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Motion (iOS) -->
+	<!-- ================================ -->
 	<key>NSMotionUsageDescription</key>
-	<string>Thea tracks your movement patterns to understand your activity levels and provide fitness insights.</string>
-	<key>NSSystemAdministrationUsageDescription</key>
-	<string>Thea needs accessibility access to track input activity for productivity insights. Your data never leaves your device.</string>
+	<string>Thea uses motion data to understand your activity context and provide fitness-aware assistance.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Bluetooth -->
+	<!-- ================================ -->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Thea uses Bluetooth to connect with nearby devices and accessories for enhanced functionality.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Thea can connect to Bluetooth peripherals for audio input/output and accessory control.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Local Network -->
+	<!-- ================================ -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Thea uses local network access to discover and control smart home devices and local AI servers.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_https._tcp</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Privacy - Face ID (iOS) -->
+	<!-- ================================ -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Thea uses Face ID to securely authenticate and protect sensitive features and data.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Automation (macOS) -->
+	<!-- ================================ -->
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Thea needs automation access to control other apps, execute workflows, and provide system-wide assistance.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Desktop & Documents (macOS) -->
+	<!-- ================================ -->
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Thea can access your Desktop folder to help organize files and find documents.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Thea can access your Documents folder to help manage and search your files.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Thea can access your Downloads folder to help organize downloaded files.</string>
+
+	<!-- ================================ -->
+	<!-- Privacy - Siri -->
+	<!-- ================================ -->
+	<key>NSSiriUsageDescription</key>
+	<string>Thea integrates with Siri to provide voice shortcuts and Siri Suggestions.</string>
+
+	<!-- ================================ -->
+	<!-- Background Modes (iOS) -->
+	<!-- ================================ -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+		<string>voip</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Supported Interface Orientations (iOS) -->
+	<!-- ================================ -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- App Transport Security -->
+	<!-- ================================ -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+
+	<!-- ================================ -->
+	<!-- File Provider (for Files app integration) -->
+	<!-- ================================ -->
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionFileProviderDocumentGroup</key>
+		<string>group.app.thea.Thea</string>
+	</dict>
 </dict>
 </plist>

@@ -33,6 +33,36 @@ final class WorkflowBuilder {
 
     private init() {
         initializeNodeLibrary()
+        Task {
+            await loadWorkflows()
+        }
+    }
+    
+    // MARK: - Persistence
+    
+    func loadWorkflows() async {
+        do {
+            let loaded = try await WorkflowPersistence.shared.load()
+            workflows = loaded
+            workflowIndex = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
+            
+            // Add templates if no workflows exist
+            if workflows.isEmpty {
+                for template in WorkflowTemplates.all {
+                    workflows.append(template)
+                    workflowIndex[template.id] = template
+                }
+                try await WorkflowPersistence.shared.save(workflows)
+            }
+        } catch {
+            // If loading fails, start with templates
+            workflows = WorkflowTemplates.all
+            workflowIndex = Dictionary(uniqueKeysWithValues: workflows.map { ($0.id, $0) })
+        }
+    }
+    
+    func saveWorkflows() async {
+        await WorkflowPersistence.shared.autoSave(workflows)
     }
 
     // MARK: - Workflow Management
@@ -52,6 +82,10 @@ final class WorkflowBuilder {
 
         workflows.append(workflow)
         workflowIndex[workflow.id] = workflow
+        
+        Task {
+            await saveWorkflows()
+        }
 
         return workflow
     }
@@ -755,18 +789,18 @@ final class WorkflowBuilder {
 
 // MARK: - Models
 
-class Workflow: Identifiable, Hashable, @unchecked Sendable {
-    let id: UUID
-    var name: String
-    var description: String
-    var nodes: [WorkflowNode]
-    var edges: [WorkflowEdge]
-    var variables: [String: Any]
-    var isActive: Bool
-    let createdAt: Date
-    var modifiedAt: Date
+public class Workflow: Identifiable, Hashable, @unchecked Sendable {
+    public let id: UUID
+    public var name: String
+    public var description: String
+    public var nodes: [WorkflowNode]
+    public var edges: [WorkflowEdge]
+    public var variables: [String: Any]
+    public var isActive: Bool
+    public let createdAt: Date
+    public var modifiedAt: Date
 
-    init(id: UUID, name: String, description: String, nodes: [WorkflowNode], edges: [WorkflowEdge], variables: [String: Any], isActive: Bool, createdAt: Date, modifiedAt: Date) {
+    public init(id: UUID, name: String, description: String, nodes: [WorkflowNode], edges: [WorkflowEdge], variables: [String: Any], isActive: Bool, createdAt: Date, modifiedAt: Date) {
         self.id = id
         self.name = name
         self.description = description
@@ -778,24 +812,24 @@ class Workflow: Identifiable, Hashable, @unchecked Sendable {
         self.modifiedAt = modifiedAt
     }
 
-    static func == (lhs: Workflow, rhs: Workflow) -> Bool {
+    public static func == (lhs: Workflow, rhs: Workflow) -> Bool {
         lhs.id == rhs.id
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
 }
 
-class WorkflowNode: Identifiable, @unchecked Sendable {
-    let id: UUID
-    let type: WorkflowNodeType
-    var position: CGPoint
-    var config: [String: Any]
-    let inputs: [NodePort]
-    let outputs: [NodePort]
+public class WorkflowNode: Identifiable, @unchecked Sendable {
+    public let id: UUID
+    public let type: WorkflowNodeType
+    public var position: CGPoint
+    public var config: [String: Any]
+    public let inputs: [NodePort]
+    public let outputs: [NodePort]
 
-    init(id: UUID, type: WorkflowNodeType, position: CGPoint, config: [String: Any], inputs: [NodePort], outputs: [NodePort]) {
+    public init(id: UUID, type: WorkflowNodeType, position: CGPoint, config: [String: Any], inputs: [NodePort], outputs: [NodePort]) {
         self.id = id
         self.type = type
         self.position = position
@@ -805,19 +839,19 @@ class WorkflowNode: Identifiable, @unchecked Sendable {
     }
 }
 
-struct WorkflowEdge: Identifiable {
-    let id: UUID
-    let sourceNodeId: UUID
-    let sourcePort: String
-    let targetNodeId: UUID
-    let targetPort: String
+public struct WorkflowEdge: Identifiable {
+    public let id: UUID
+    public let sourceNodeId: UUID
+    public let sourcePort: String
+    public let targetNodeId: UUID
+    public let targetPort: String
 }
 
-struct NodePort {
-    let name: String
-    let type: PortType
+public struct NodePort {
+    public let name: String
+    public let type: PortType
 
-    enum PortType {
+    public enum PortType {
         case string, number, boolean, array, object, any
     }
 }
@@ -830,7 +864,7 @@ struct NodeTemplate {
     let outputs: [NodePort]
 }
 
-enum WorkflowNodeType: String {
+public enum WorkflowNodeType: String {
     case input = "Input"
     case output = "Output"
     case aiInference = "AI Inference"

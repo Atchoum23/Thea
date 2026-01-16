@@ -79,6 +79,23 @@ final class AppConfiguration {
         }
     }
 
+    // MARK: - Execution Mode Configuration
+
+    var executionMode: ExecutionModeConfiguration {
+        get {
+            if let data = defaults.data(forKey: "AppConfiguration.executionMode"),
+               let config = try? JSONDecoder().decode(ExecutionModeConfiguration.self, from: data) {
+                return config
+            }
+            return ExecutionModeConfiguration()
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                defaults.set(data, forKey: "AppConfiguration.executionMode")
+            }
+        }
+    }
+
     // MARK: - Local Model Configuration
 
     var localModelConfig: LocalModelConfiguration {
@@ -92,6 +109,23 @@ final class AppConfiguration {
         set {
             if let data = try? JSONEncoder().encode(newValue) {
                 defaults.set(data, forKey: "AppConfiguration.localModelConfig")
+            }
+        }
+    }
+
+    // MARK: - Orchestrator Configuration
+
+    var orchestratorConfig: OrchestratorConfiguration {
+        get {
+            if let data = defaults.data(forKey: "AppConfiguration.orchestratorConfig"),
+               let config = try? JSONDecoder().decode(OrchestratorConfiguration.self, from: data) {
+                return config
+            }
+            return OrchestratorConfiguration()
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                defaults.set(data, forKey: "AppConfiguration.orchestratorConfig")
             }
         }
     }
@@ -640,4 +674,44 @@ struct LifeTrackingConfiguration: Codable, Sendable, Equatable {
     var screenTimeCheckInterval: TimeInterval = 60
     var inputActivityCheckInterval: TimeInterval = 300
     var locationUpdateInterval: TimeInterval = 600
+}
+
+// MARK: - Execution Mode Configuration
+
+public struct ExecutionModeConfiguration: Codable, Sendable {
+    public var mode: ExecutionMode = .normal
+    public var requireApprovalForFileEdits: Bool = true
+    public var requireApprovalForTerminalCommands: Bool = true
+    public var requireApprovalForBrowserActions: Bool = false
+    public var requireApprovalForSystemAutomation: Bool = true
+    public var autoApproveReadOperations: Bool = true
+    public var showPlanBeforeExecution: Bool = true
+    public var allowAutonomousContinuation: Bool = false
+    public var maxAutonomousSteps: Int = 50
+    public var executionTimeoutMinutes: Int = 60
+}
+
+public enum ExecutionMode: String, Codable, Sendable, CaseIterable {
+    case safe        // Ask for approval on every operation
+    case normal      // Ask for approval on destructive operations only
+    case aggressive  // Pre-approved, minimal interruptions
+
+    public var displayName: String {
+        switch self {
+        case .safe: return "Safe Mode (Manual Approval)"
+        case .normal: return "Normal Mode (Smart Approval)"
+        case .aggressive: return "Aggressive Mode (Autonomous)"
+        }
+    }
+
+    public var description: String {
+        switch self {
+        case .safe:
+            return "Every operation requires manual approval. Best for learning or sensitive work."
+        case .normal:
+            return "Approve plans upfront, allow safe operations automatically. Recommended for most users."
+        case .aggressive:
+            return "Pre-approve all operations. AI continues until mission complete. Use with caution."
+        }
+    }
 }

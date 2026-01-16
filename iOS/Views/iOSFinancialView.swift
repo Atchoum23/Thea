@@ -178,7 +178,7 @@ struct OverviewTabView: View {
                 } else {
                     Button {
                         Task {
-                            try? await financialManager.syncAccount(account)
+                            try? await $financialManager.syncAccount(account)
                         }
                     } label: {
                         Image(systemName: "arrow.clockwise")
@@ -202,7 +202,7 @@ struct OverviewTabView: View {
     }
 
     private func spendingChart(for account: FinancialAccount) -> some View {
-        let monthlyData = financialManager.getMonthlyTrend(for: account, months: 6)
+        let monthlyData = $financialManager.getMonthlyTrend(for: account, months: 6)
 
         return VStack(alignment: .leading, spacing: 16) {
             Text("Spending Trend")
@@ -241,7 +241,7 @@ struct OverviewTabView: View {
     }
 
     private func categoryBreakdown(for account: FinancialAccount) -> some View {
-        let categorySpending = financialManager.getSpendingByCategory(for: account, period: selectedPeriod)
+        let categorySpending = financialManager.getSpendingByCategory
         let sortedCategories = categorySpending.sorted { $0.value > $1.value }
 
         return VStack(alignment: .leading, spacing: 16) {
@@ -404,7 +404,7 @@ struct TransactionRow: View {
 
             Spacer()
 
-            Text(formatCurrency(transaction.amount, currency: currency))
+            Text(formatCurrency(Decimal(transaction.amount), currency: currency))
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .foregroundStyle(transaction.amount > 0 ? .green : .primary)
@@ -443,7 +443,7 @@ struct InsightsTabView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                if let account = selectedAccount {
+                if selectedAccount != nil {
                     recommendationsSection
                     anomaliesSection
                 } else {
@@ -503,7 +503,7 @@ struct InsightsTabView: View {
         guard let account = selectedAccount else { return }
 
         Task {
-            recommendations = await financialManager.getBudgetRecommendations(for: account)
+            recommendations = await $financialManager.getBudgetRecommendations(for: account)
             anomalies = financialManager.getAnomalies(for: account)
         }
     }
@@ -593,7 +593,7 @@ struct AnomalyCard: View {
 
                 Spacer()
 
-                Text(formatCurrency(anomaly.transaction.amount, currency: currency))
+                Text(formatCurrency(Decimal(anomaly.transaction.amount), currency: currency))
                     .font(.body)
                     .fontWeight(.semibold)
             }
@@ -669,7 +669,7 @@ struct iOSAddAccountView: View {
 
     private func addAccount() {
         Task {
-            try? await financialManager.connectAccount(
+            try? await $financialManager.connectAccount(
                 providerName: providerName,
                 accountName: accountName,
                 accountType: accountType,

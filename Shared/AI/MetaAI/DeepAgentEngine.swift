@@ -202,6 +202,64 @@ final class DeepAgentEngine {
         case .creation, .general:
             // Use AI to dynamically decompose
             return try await dynamicDecomposition(instruction, context: context)
+
+        case .simpleQA, .factual:
+            return [
+                Subtask(step: 1, description: "Parse question and identify key information needs", dependencies: []),
+                Subtask(step: 2, description: "Retrieve relevant information", dependencies: [1]),
+                Subtask(step: 3, description: "Formulate clear and accurate answer", dependencies: [2])
+            ]
+
+        case .complexReasoning, .analysis:
+            return [
+                Subtask(step: 1, description: "Break down problem into components", dependencies: []),
+                Subtask(step: 2, description: "Analyze each component systematically", dependencies: [1]),
+                Subtask(step: 3, description: "Synthesize findings and draw conclusions", dependencies: [2]),
+                Subtask(step: 4, description: "Verify reasoning and validate conclusions", dependencies: [3])
+            ]
+
+        case .creativeWriting:
+            return [
+                Subtask(step: 1, description: "Understand creative brief and requirements", dependencies: []),
+                Subtask(step: 2, description: "Brainstorm ideas and themes", dependencies: [1]),
+                Subtask(step: 3, description: "Create initial draft", dependencies: [2]),
+                Subtask(step: 4, description: "Refine style, voice, and tone", dependencies: [3]),
+                Subtask(step: 5, description: "Polish and finalize", dependencies: [4])
+            ]
+
+        case .mathLogic:
+            return [
+                Subtask(step: 1, description: "Parse problem and identify mathematical concepts", dependencies: []),
+                Subtask(step: 2, description: "Plan solution approach", dependencies: [1]),
+                Subtask(step: 3, description: "Execute calculations step by step", dependencies: [2]),
+                Subtask(step: 4, description: "Verify solution and check work", dependencies: [3])
+            ]
+
+        case .summarization:
+            return [
+                Subtask(step: 1, description: "Read and understand source material", dependencies: []),
+                Subtask(step: 2, description: "Identify key points and themes", dependencies: [1]),
+                Subtask(step: 3, description: "Condense into coherent summary", dependencies: [2]),
+                Subtask(step: 4, description: "Ensure accuracy and completeness", dependencies: [3])
+            ]
+
+        case .planning:
+            return [
+                Subtask(step: 1, description: "Define goals and constraints", dependencies: []),
+                Subtask(step: 2, description: "Research options and approaches", dependencies: [1]),
+                Subtask(step: 3, description: "Create structured plan with milestones", dependencies: [2]),
+                Subtask(step: 4, description: "Identify risks and mitigation strategies", dependencies: [3]),
+                Subtask(step: 5, description: "Finalize timeline and deliverables", dependencies: [4])
+            ]
+
+        case .debugging:
+            return [
+                Subtask(step: 1, description: "Reproduce and understand the issue", dependencies: []),
+                Subtask(step: 2, description: "Identify potential root causes", dependencies: [1]),
+                Subtask(step: 3, description: "Test hypotheses systematically", dependencies: [2]),
+                Subtask(step: 4, description: "Implement and verify fix", dependencies: [3]),
+                Subtask(step: 5, description: "Document solution and prevention", dependencies: [4])
+            ]
         }
     }
 
@@ -330,7 +388,15 @@ final class DeepAgentEngine {
     private func selfCorrect(subtask: SubtaskWithTools, failedResult: SubtaskResult, verification: VerificationResult, context: TaskContext) async throws -> SubtaskResult {
         // Attempt correction with different tools or approach
         var newContext = context
-        newContext.previousAttempts.append(failedResult)
+
+        // Convert SubtaskResult to SubtaskResultSnapshot for tracking
+        let snapshot = SubtaskResultSnapshot(
+            step: failedResult.subtask.step,
+            output: failedResult.output,
+            success: failedResult.success,
+            executionTime: failedResult.executionTime
+        )
+        newContext.previousAttempts.append(snapshot)
         newContext.verificationIssues = verification.issues
 
         // Retry with refined approach
@@ -364,7 +430,7 @@ struct DeepTask: Identifiable {
     let startTime: Date
 }
 
-struct TaskContext: @unchecked Sendable {
+private struct DeepAgentTaskContext: @unchecked Sendable {
     var retryCount: Int = 0
     var previousError: String?
     var previousAttempts: [SubtaskResult] = []
@@ -372,7 +438,7 @@ struct TaskContext: @unchecked Sendable {
     var userPreferences: [String: Any] = [:]
 }
 
-enum TaskType {
+private enum DeepAgentTaskType {
     case appDevelopment
     case research
     case contentCreation

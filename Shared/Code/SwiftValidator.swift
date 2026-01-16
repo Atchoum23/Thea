@@ -85,7 +85,7 @@ final class SwiftValidator {
         let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
         let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
 
-        let output = String(data: outputData, encoding: .utf8) ?? ""
+        _ = String(data: outputData, encoding: .utf8) ?? ""
         let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
 
         if process.terminationStatus == 0 {
@@ -327,20 +327,20 @@ enum SwiftValidationResult {
     }
 }
 
-struct SwiftError: Identifiable {
-    let id = UUID()
-    let message: String
-    let line: Int?
-    let column: Int?
-    let severity: Severity
-    let category: ErrorCategory
-    let suggestion: String?
+public struct SwiftError: Identifiable, Sendable {
+    public let id = UUID()
+    public let message: String
+    public let line: Int?
+    public let column: Int?
+    public let severity: Severity
+    public let category: ErrorCategory
+    public let suggestion: String?
 
-    enum Severity {
+    public enum Severity: Sendable {
         case error, warning, note
     }
 
-    enum ErrorCategory {
+    public enum ErrorCategory: Sendable {
         case syntax
         case type
         case undeclared
@@ -349,7 +349,16 @@ struct SwiftError: Identifiable {
         case other
     }
 
-    var displayMessage: String {
+    public init(message: String, line: Int?, column: Int?, severity: Severity, category: ErrorCategory, suggestion: String?) {
+        self.message = message
+        self.line = line
+        self.column = column
+        self.severity = severity
+        self.category = category
+        self.suggestion = suggestion
+    }
+
+    public var displayMessage: String {
         var msg = message
         if let line = line, let column = column {
             msg = "Line \(line):\(column): \(msg)"
