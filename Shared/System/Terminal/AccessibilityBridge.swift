@@ -230,12 +230,12 @@ struct AccessibilityBridge {
 // MARK: - Accessibility Monitoring
 
 /// Monitor for Terminal content changes using Accessibility observers
-final class TerminalAccessibilityMonitor {
+final class TerminalAccessibilityMonitor: @unchecked Sendable {
     private var observer: AXObserver?
     private var terminalPID: pid_t?
-    fileprivate var onChange: ((String) -> Void)?
+    fileprivate var onChange: (@MainActor (String) -> Void)?
 
-    func startMonitoring(onChange: @escaping (String) -> Void) throws {
+    func startMonitoring(onChange: @escaping @MainActor (String) -> Void) throws {
         guard AccessibilityBridge.isAccessibilityEnabled() else {
             throw AccessibilityBridge.AccessibilityError.accessDenied
         }
@@ -290,8 +290,10 @@ private func observerCallback(
 
     // Read the new content
     if let content = try? AccessibilityBridge.readTerminalText() {
-        DispatchQueue.main.async {
-            monitor.onChange?(content)
+        // Capture the callback to avoid data race - execute on MainActor
+        let callback = monitor.onChange
+        Task { @MainActor in
+            callback?(content)
         }
     }
 }

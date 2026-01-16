@@ -3,7 +3,7 @@ import Foundation
 
 /// Reads content from Terminal.app windows using AppleScript
 /// This is the core component for "Work with Apps" style Terminal reading
-final class TerminalWindowReader {
+final class TerminalWindowReader: @unchecked Sendable {
     enum ReaderError: LocalizedError {
         case terminalNotRunning
         case noWindowsOpen

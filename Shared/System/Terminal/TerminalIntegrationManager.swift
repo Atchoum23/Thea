@@ -47,8 +47,9 @@ final class TerminalIntegrationManager: ObservableObject {
 
     // MARK: - Internal Components
 
-    private let windowReader = TerminalWindowReader()
-    private var executor: TerminalCommandExecutor
+    // These are marked nonisolated(unsafe) because they are Sendable and thread-safe
+    private nonisolated(unsafe) let windowReader = TerminalWindowReader()
+    private nonisolated(unsafe) var executor: TerminalCommandExecutor
     private var monitorTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
     private let commandHistoryURL: URL
@@ -405,10 +406,13 @@ final class TerminalIntegrationManager: ObservableObject {
     private func saveCommandHistory() {
         guard let session = currentSession else { return }
 
-        Task.detached { [commandHistoryURL] in
-            let history = session.commandHistory.suffix(1_000) // Keep last 1000 commands
-            if let data = try? JSONEncoder().encode(Array(history)) {
-                try? data.write(to: commandHistoryURL)
+        // Capture the data we need before entering the detached task
+        let historyURL = commandHistoryURL
+        let historyToSave = Array(session.commandHistory.suffix(1_000))
+
+        Task.detached {
+            if let data = try? JSONEncoder().encode(historyToSave) {
+                try? data.write(to: historyURL)
             }
         }
     }

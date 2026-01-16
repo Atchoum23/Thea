@@ -312,10 +312,14 @@ final class CoworkManager {
     func processQueue() async {
         guard let session = currentSession else { return }
 
+        // Create a local reference to avoid capturing self in the closure
+        let manager = self
+        let targetSession = session
+
         await session.taskQueue.startProcessing { task in
-            let steps = try await self.createPlan(for: task.instruction, in: session)
+            let steps = try await manager.createPlan(for: task.instruction, in: targetSession)
             if !steps.isEmpty {
-                try await self.executePlan(session: session)
+                try await manager.executePlan(session: targetSession)
             }
         }
     }
