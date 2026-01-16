@@ -2,7 +2,7 @@ import SwiftUI
 
 /// View showing context information for the current Cowork session
 struct CoworkContextView: View {
-    @StateObject private var manager = CoworkManager.shared
+    @State private var manager = CoworkManager.shared
     @State private var selectedSection: ContextSection = .files
     @State private var showingRuleEditor = false
     @State private var editingRule: CoworkContext.Rule?

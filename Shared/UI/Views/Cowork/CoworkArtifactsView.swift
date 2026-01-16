@@ -3,7 +3,7 @@ import SwiftUI
 
 /// View for displaying artifacts (files) created during Cowork sessions
 struct CoworkArtifactsView: View {
-    @StateObject private var manager = CoworkManager.shared
+    @State private var manager = CoworkManager.shared
     @State private var selectedArtifact: CoworkArtifact?
     @State private var showingQuickLook = false
     @State private var viewMode: ViewMode = .grid

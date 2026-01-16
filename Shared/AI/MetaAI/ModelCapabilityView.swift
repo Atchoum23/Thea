@@ -197,7 +197,7 @@ public struct ModelCapabilityView: View {
             Text("Strengths")
                 .font(.headline)
             
-            FlowLayout(spacing: 8) {
+            ModelFlowLayout(spacing: 8) {
                 ForEach(model.strengths, id: \.self) { strength in
                     Text(strength.rawValue)
                         .font(.caption)
@@ -410,7 +410,7 @@ private struct SpecRow: View {
 
 // MARK: - Flow Layout
 
-private struct FlowLayout: Layout {
+private struct ModelFlowLayout: Layout {
     var spacing: CGFloat = 8
     
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
