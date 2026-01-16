@@ -69,7 +69,7 @@ struct CoworkSkillsView: View {
                     .frame(width: 32, height: 32)
 
                 Image(systemName: skill.icon)
-                    .foregroundStyle(skillsManager.isEnabled(skill) ? .accentColor : .secondary)
+                    .foregroundStyle(skillsManager.isEnabled(skill) ? Color.accentColor : Color.secondary)
             }
 
             // Name
@@ -170,7 +170,7 @@ struct CoworkSkillsView: View {
 
                 Image(systemName: skill.icon)
                     .font(.title)
-                    .foregroundStyle(skillsManager.isEnabled(skill) ? .accentColor : .secondary)
+                    .foregroundStyle(skillsManager.isEnabled(skill) ? Color.accentColor : Color.secondary)
             }
 
             VStack(alignment: .leading, spacing: 4) {

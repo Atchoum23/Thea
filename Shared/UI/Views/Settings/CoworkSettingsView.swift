@@ -213,7 +213,7 @@ struct CoworkSettingsView: View {
             ForEach(CoworkSkillsManager.SkillType.allCases, id: \.self) { skill in
                 HStack {
                     Image(systemName: skill.icon)
-                        .foregroundStyle(skills.isEnabled(skill) ? .accentColor : .secondary)
+                        .foregroundStyle(skills.isEnabled(skill) ? Color.accentColor : Color.secondary)
                         .frame(width: 24)
 
                     VStack(alignment: .leading) {

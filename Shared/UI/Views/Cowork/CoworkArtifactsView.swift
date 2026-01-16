@@ -59,7 +59,10 @@ struct CoworkArtifactsView: View {
                 }
             }
         }
-        .quickLookPreview($selectedArtifact.map { $0.fileURL })
+        .quickLookPreview(Binding(
+            get: { selectedArtifact?.fileURL },
+            set: { _ in }
+        ))
     }
 
     // MARK: - Toolbar

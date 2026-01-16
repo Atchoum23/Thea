@@ -60,7 +60,7 @@ final class TerminalIntegrationManager: ObservableObject {
     // MARK: - Initialization
 
     private init() {
-        self.executor = TerminalCommandExecutor(securityPolicy: securityPolicy)
+        self.executor = TerminalCommandExecutor(securityPolicy: .default)
 
         // Setup history storage
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
