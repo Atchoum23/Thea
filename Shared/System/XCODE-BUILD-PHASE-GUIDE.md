@@ -290,4 +290,14 @@ make lint       # Run SwiftLint
 
 ---
 
+## Phase 7.9: Programmatic QA Tools Integration
+
+For programmatic access to QA tools from within Thea, see the main development guide at `Development/XCODE-BUILD-PHASE-GUIDE.md`. Phase 7.9 provides:
+
+- **Settings UI**: Configure QA tools in **Settings → QA Tools**
+- **Programmatic API**: `QAToolsManager.shared.runSwiftLint()`, etc.
+- **Supported Tools**: SwiftLint, CodeCov, SonarCloud, DeepSource
+
+---
+
 **Next:** Run `./install-automatic-checks.sh` and follow the prompts!

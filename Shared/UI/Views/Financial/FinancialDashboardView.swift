@@ -1,5 +1,29 @@
 import SwiftUI
 import Charts
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
+
+// MARK: - Platform-specific colors
+private extension Color {
+    static var controlBackground: Color {
+        #if os(macOS)
+        return Color.controlBackground
+        #else
+        return Color(UIColor.secondarySystemBackground)
+        #endif
+    }
+
+    static var windowBackground: Color {
+        #if os(macOS)
+        return Color.windowBackground
+        #else
+        return Color(UIColor.systemBackground)
+        #endif
+    }
+}
 
 // MARK: - Financial Dashboard View
 // Overview of connected accounts, transactions, and insights
@@ -162,13 +186,13 @@ struct FinancialDashboardView: View {
             } else {
                 VStack(spacing: 8) {
                     ForEach(recentTransactions.prefix(10)) { transaction in
-                        TransactionRow(transaction: transaction, currency: <#String#>)
+                        TransactionRow(transaction: transaction, currency: selectedAccount?.currency ?? "USD")
                     }
                 }
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
         .cornerRadius(12)
     }
 
@@ -197,7 +221,7 @@ struct FinancialDashboardView: View {
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
         .cornerRadius(12)
     }
 
@@ -222,7 +246,7 @@ struct FinancialDashboardView: View {
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
         .cornerRadius(12)
     }
 
@@ -293,7 +317,7 @@ struct AccountCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
         .cornerRadius(12)
     }
 
@@ -318,6 +342,7 @@ struct AccountCard: View {
 
 struct TransactionRow: View {
     let transaction: Transaction
+    var currency: String = "USD"
 
     var body: some View {
         HStack {
@@ -386,7 +411,7 @@ struct InsightCard: View {
             Spacer()
         }
         .padding()
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.windowBackground)
         .cornerRadius(8)
     }
 
@@ -449,7 +474,7 @@ struct BudgetCard: View {
             }
         }
         .padding()
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.windowBackground)
         .cornerRadius(8)
     }
 }

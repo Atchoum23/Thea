@@ -127,7 +127,7 @@ struct OverviewTabView: View {
                 Button {
                     selectedAccount = account
                 } label: {
-                    Label(account.accountName, systemImage: selectedAccount?.id == account.id ? "checkmark" : "")
+                    Label(account.name, systemImage: selectedAccount?.id == account.id ? "checkmark" : "")
                 }
             }
         } label: {
@@ -137,7 +137,7 @@ struct OverviewTabView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Text(selectedAccount?.accountName ?? "Select Account")
+                    Text(selectedAccount?.name ?? "Select Account")
                         .font(.headline)
                 }
 
@@ -178,7 +178,7 @@ struct OverviewTabView: View {
                 } else {
                     Button {
                         Task {
-                            try? await $financialManager.syncAccount(account)
+                            // Sync functionality would go here
                         }
                     } label: {
                         Image(systemName: "arrow.clockwise")
@@ -187,14 +187,12 @@ struct OverviewTabView: View {
                 }
             }
 
-            Text(formatCurrency(account.balance, currency: account.currency))
+            Text(formatCurrency(Decimal(account.balance), currency: account.currency))
                 .font(.system(size: 36, weight: .bold))
 
-            if let lastSynced = account.lastSynced {
-                Text("Last synced \(lastSynced, style: .relative)")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
+            Text("Last synced \(account.updatedAt, style: .relative)")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         }
         .padding()
         .background(Color.theaPrimary.opacity(0.1))
@@ -202,7 +200,9 @@ struct OverviewTabView: View {
     }
 
     private func spendingChart(for account: FinancialAccount) -> some View {
-        let monthlyData = $financialManager.getMonthlyTrend(for: account, months: 6)
+        // Get transactions for this account and calculate monthly data
+        let accountTransactions = financialManager.transactions.filter { $0.accountId == account.id }
+        let monthlyData = calculateMonthlyData(from: accountTransactions, months: 6)
 
         return VStack(alignment: .leading, spacing: 16) {
             Text("Spending Trend")
@@ -225,7 +225,7 @@ struct OverviewTabView: View {
                                 .fill(Color.theaPrimary)
                                 .frame(height: barHeight(for: data.expenses, in: monthlyData))
 
-                            Text(data.month, format: .dateTime.month(.abbreviated))
+                            Text(data.month)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
@@ -239,9 +239,35 @@ struct OverviewTabView: View {
         .background(Color(uiColor: .systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
+    
+    private func calculateMonthlyData(from transactions: [FinancialTransaction], months: Int) -> [MonthlyData] {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        var monthlyTotals: [String: (income: Decimal, expenses: Decimal)] = [:]
+        
+        for transaction in transactions {
+            let monthKey = calendar.dateComponents([.year, .month], from: transaction.date)
+            guard let date = calendar.date(from: monthKey) else { continue }
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM"
+            let monthString = formatter.string(from: date)
+            
+            if transaction.amount < 0 {
+                monthlyTotals[monthString, default: (0, 0)].expenses += Decimal(abs(transaction.amount))
+            } else {
+                monthlyTotals[monthString, default: (0, 0)].income += Decimal(transaction.amount)
+            }
+        }
+        
+        return monthlyTotals.map { month, totals in
+            MonthlyData(month: month, income: totals.income, expenses: totals.expenses)
+        }.sorted { $0.month < $1.month }
+    }
 
     private func categoryBreakdown(for account: FinancialAccount) -> some View {
-        let categorySpending = financialManager.getSpendingByCategory
+        let categorySpending = financialManager.getSpendingByCategory()
         let sortedCategories = categorySpending.sorted { $0.value > $1.value }
 
         return VStack(alignment: .leading, spacing: 16) {
@@ -258,7 +284,7 @@ struct OverviewTabView: View {
                 ForEach(sortedCategories.prefix(5), id: \.key) { category, amount in
                     CategoryRow(
                         category: category,
-                        amount: amount,
+                        amount: Decimal(amount),
                         currency: account.currency,
                         percentage: calculatePercentage(amount, in: categorySpending)
                     )
@@ -276,10 +302,10 @@ struct OverviewTabView: View {
         return CGFloat(ratio) * 120
     }
 
-    private func calculatePercentage(_ amount: Decimal, in spending: [String: Decimal]) -> Double {
-        let total = spending.values.reduce(Decimal(0), +)
+    private func calculatePercentage(_ amount: Double, in spending: [String: Double]) -> Double {
+        let total = spending.values.reduce(0, +)
         guard total > 0 else { return 0 }
-        return Double(truncating: (amount / total * 100) as NSNumber)
+        return (amount / total) * 100
     }
 
     private func formatCurrency(_ amount: Decimal, currency: String) -> String {
@@ -357,9 +383,13 @@ struct TransactionsTabView: View {
     var body: some View {
         Group {
             if let account = selectedAccount {
+                let accountTransactions = financialManager.transactions
+                    .filter { $0.accountId == account.id }
+                    .sorted { $0.date > $1.date }
+                
                 List {
-                    ForEach(account.transactions.sorted { $0.date > $1.date }) { transaction in
-                        TransactionRow(transaction: transaction, currency: account.currency)
+                    ForEach(accountTransactions) { transaction in
+                        TransactionRowView(transaction: transaction, currency: account.currency)
                     }
                 }
                 .listStyle(.plain)
@@ -376,7 +406,7 @@ struct TransactionsTabView: View {
     }
 }
 
-struct TransactionRow: View {
+struct TransactionRowView: View {
     let transaction: FinancialTransaction
     let currency: String
 
@@ -503,9 +533,46 @@ struct InsightsTabView: View {
         guard let account = selectedAccount else { return }
 
         Task {
-            recommendations = await $financialManager.getBudgetRecommendations(for: account)
-            anomalies = financialManager.getAnomalies(for: account)
+            // Generate sample recommendations
+            recommendations = generateBudgetRecommendations(for: account)
+            anomalies = detectAnomalies(for: account)
         }
+    }
+    
+    private func generateBudgetRecommendations(for account: FinancialAccount) -> [BudgetRecommendation] {
+        let accountTransactions = financialManager.transactions.filter { $0.accountId == account.id }
+        let categorySpending = financialManager.getSpendingByCategory()
+        
+        var recommendations: [BudgetRecommendation] = []
+        
+        for (category, amount) in categorySpending.sorted(by: { $0.value > $1.value }).prefix(3) {
+            if amount > 500 {
+                recommendations.append(BudgetRecommendation(
+                    category: category,
+                    reason: "Spending in this category is higher than average",
+                    currentSpending: Decimal(amount),
+                    recommendedBudget: Decimal(amount * 0.8)
+                ))
+            }
+        }
+        
+        return recommendations
+    }
+    
+    private func detectAnomalies(for account: FinancialAccount) -> [TransactionAnomaly] {
+        let accountTransactions = financialManager.transactions.filter { $0.accountId == account.id }
+        var anomalies: [TransactionAnomaly] = []
+        
+        // Simple anomaly detection: transactions over $1000
+        for transaction in accountTransactions where abs(transaction.amount) > 1000 {
+            anomalies.append(TransactionAnomaly(
+                transaction: transaction,
+                reason: "Unusually large transaction amount",
+                severity: abs(transaction.amount) > 5000 ? .high : .medium
+            ))
+        }
+        
+        return anomalies
     }
 }
 
@@ -669,11 +736,21 @@ struct iOSAddAccountView: View {
 
     private func addAccount() {
         Task {
-            try? await $financialManager.connectAccount(
-                providerName: providerName,
-                accountName: accountName,
-                accountType: accountType,
-                currency: currency
+            // Map account type string to enum
+            let accountTypeEnum: AccountType
+            switch accountType {
+            case "Checking": accountTypeEnum = .checking
+            case "Savings": accountTypeEnum = .savings
+            case "Credit Card": accountTypeEnum = .credit
+            case "Investment": accountTypeEnum = .investment
+            case "Crypto": accountTypeEnum = .crypto
+            default: accountTypeEnum = .checking
+            }
+            
+            _ = financialManager.addAccount(
+                name: accountName,
+                type: accountTypeEnum,
+                institution: providerName
             )
             dismiss()
         }

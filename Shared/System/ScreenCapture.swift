@@ -121,23 +121,13 @@ public actor ScreenCapture {
     }
     
     // MARK: - Legacy Implementation (macOS 13 and earlier)
-    
-    @available(macOS, deprecated: 14.0, message: "Legacy fallback for macOS 13 and earlier")
-    private func capturScreenLegacy() throws -> CGImage {
-        let screenBounds = CGDisplayBounds(CGMainDisplayID())
-        
-        let image = CGWindowListCreateImage(
-            screenBounds,
-            .optionOnScreenOnly,
-            kCGNullWindowID,
-            [.boundsIgnoreFraming, .bestResolution]
-        )
-        
-        guard let image = image else {
+
+    // Legacy screen capture for macOS 12-13 (ScreenCaptureKit is used on macOS 14+)
+    @available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use captureScreenModern for macOS 14.0+")
+    nonisolated private func capturScreenLegacy() throws -> CGImage {
+        guard let image = legacyCaptureScreen() else {
             throw CaptureError.captureFailed("Failed to create screen image")
         }
-        
-        logger.info("Screen captured (legacy): \(image.width)x\(image.height)")
         return image
     }
     #endif
@@ -194,8 +184,9 @@ public actor ScreenCapture {
         return image
     }
     
-    @available(macOS, deprecated: 14.0, message: "Legacy fallback for macOS 13 and earlier")
-    private func captureWindowLegacy(named windowName: String) throws -> CGImage {
+    // Legacy window capture for macOS 12-13
+    @available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use captureWindowModern for macOS 14.0+")
+    nonisolated private func captureWindowLegacy(named windowName: String) throws -> CGImage {
         // Get window list
         guard let windowList = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else {
             throw CaptureError.captureFailed("Failed to get window list")
@@ -217,19 +208,10 @@ public actor ScreenCapture {
             throw CaptureError.windowNotFound(windowName)
         }
 
-        // Capture the window
-        let image = CGWindowListCreateImage(
-            .null,
-            .optionIncludingWindow,
-            windowID,
-            [.boundsIgnoreFraming, .bestResolution]
-        )
-
-        guard let image = image else {
+        guard let image = legacyCaptureWindow(windowID: windowID) else {
             throw CaptureError.captureFailed("Failed to create window image")
         }
 
-        logger.info("Window captured (legacy): \(image.width)x\(image.height)")
         return image
     }
     #endif
@@ -283,20 +265,12 @@ public actor ScreenCapture {
         return image
     }
     
-    @available(macOS, deprecated: 14.0, message: "Legacy fallback for macOS 13 and earlier")
-    private func captureRegionLegacy(_ rect: CGRect) throws -> CGImage {
-        let image = CGWindowListCreateImage(
-            rect,
-            .optionOnScreenOnly,
-            kCGNullWindowID,
-            [.boundsIgnoreFraming, .bestResolution]
-        )
-
-        guard let image = image else {
+    // Legacy region capture for macOS 12-13
+    @available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use captureRegionModern for macOS 14.0+")
+    nonisolated private func captureRegionLegacy(_ rect: CGRect) throws -> CGImage {
+        guard let image = legacyCaptureRegion(rect) else {
             throw CaptureError.captureFailed("Failed to capture region")
         }
-
-        logger.info("Region captured (legacy): \(image.width)x\(image.height)")
         return image
     }
     #endif

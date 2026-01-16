@@ -283,6 +283,23 @@ final class AppConfiguration {
         }
     }
 
+    // MARK: - QA Tools Configuration
+
+    var qaToolsConfig: QAToolsConfiguration {
+        get {
+            if let data = defaults.data(forKey: "AppConfiguration.qaToolsConfig"),
+               let config = try? JSONDecoder().decode(QAToolsConfiguration.self, from: data) {
+                return config
+            }
+            return QAToolsConfiguration()
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                defaults.set(data, forKey: "AppConfiguration.qaToolsConfig")
+            }
+        }
+    }
+
     // MARK: - Reset to Defaults
 
     func resetAllToDefaults() {
@@ -299,6 +316,7 @@ final class AppConfiguration {
         metaAIConfig = MetaAIConfiguration()
         promptEngineeringConfig = PromptEngineeringConfiguration()
         lifeTrackingConfig = LifeTrackingConfiguration()
+        qaToolsConfig = QAToolsConfiguration()
     }
 
     func resetProviderConfig() {
@@ -315,6 +333,10 @@ final class AppConfiguration {
 
     func resetMetaAIConfig() {
         metaAIConfig = MetaAIConfiguration()
+    }
+
+    func resetQAToolsConfig() {
+        qaToolsConfig = QAToolsConfiguration()
     }
 }
 
@@ -712,6 +734,185 @@ public enum ExecutionMode: String, Codable, Sendable, CaseIterable {
             return "Approve plans upfront, allow safe operations automatically. Recommended for most users."
         case .aggressive:
             return "Pre-approve all operations. AI continues until mission complete. Use with caution."
+        }
+    }
+}
+
+// MARK: - QA Tools Configuration
+
+struct QAToolsConfiguration: Codable, Sendable, Equatable {
+    // SwiftLint Configuration
+    var swiftLintEnabled: Bool = true
+    var swiftLintExecutablePath: String = "/opt/homebrew/bin/swiftlint"
+    var swiftLintConfigPath: String = ".swiftlint.yml"
+    var swiftLintAutoFix: Bool = false
+    var swiftLintRunOnBuild: Bool = true
+
+    // CodeCov Configuration
+    var codeCovEnabled: Bool = false
+    var codeCovToken: String = ""
+    var codeCovConfigPath: String = "codecov.yml"
+    var codeCovUploadOnCI: Bool = true
+
+    // SonarCloud Configuration
+    var sonarCloudEnabled: Bool = false
+    var sonarCloudToken: String = ""
+    var sonarCloudOrganization: String = ""
+    var sonarCloudProjectKey: String = ""
+    var sonarCloudConfigPath: String = "sonar-project.properties"
+    var sonarCloudBaseURL: String = "https://sonarcloud.io"
+
+    // DeepSource Configuration
+    var deepSourceEnabled: Bool = false
+    var deepSourceDSN: String = ""
+    var deepSourceConfigPath: String = ".deepsource.toml"
+
+    // Project Configuration
+    var projectRootPath: String = ""
+    var xcodeScheme: String = "Thea-macOS"
+    var xcodeDestination: String = "platform=macOS"
+
+    // Coverage Settings
+    var enableCodeCoverage: Bool = true
+    var coverageOutputPath: String = "build/coverage"
+    var testResultBundlePath: String = "build/test-results.xcresult"
+
+    // Automation Settings
+    var runQAOnBuild: Bool = false
+    var runQAOnCommit: Bool = false
+    var failBuildOnQAErrors: Bool = true
+    var showQANotifications: Bool = true
+
+    // History Settings
+    var keepHistoryDays: Int = 30
+    var maxHistoryEntries: Int = 100
+}
+
+// MARK: - QA Tool Result
+
+struct QAToolResult: Codable, Sendable, Identifiable {
+    let id: UUID
+    let tool: QATool
+    let timestamp: Date
+    let success: Bool
+    let issuesFound: Int
+    let warningsFound: Int
+    let errorsFound: Int
+    let duration: TimeInterval
+    let output: String
+    let details: [QAIssue]
+
+    init(
+        id: UUID = UUID(),
+        tool: QATool,
+        timestamp: Date = Date(),
+        success: Bool,
+        issuesFound: Int = 0,
+        warningsFound: Int = 0,
+        errorsFound: Int = 0,
+        duration: TimeInterval = 0,
+        output: String = "",
+        details: [QAIssue] = []
+    ) {
+        self.id = id
+        self.tool = tool
+        self.timestamp = timestamp
+        self.success = success
+        self.issuesFound = issuesFound
+        self.warningsFound = warningsFound
+        self.errorsFound = errorsFound
+        self.duration = duration
+        self.output = output
+        self.details = details
+    }
+}
+
+// MARK: - QA Tool
+
+enum QATool: String, Codable, Sendable, CaseIterable {
+    case swiftLint = "SwiftLint"
+    case codeCov = "CodeCov"
+    case sonarCloud = "SonarCloud"
+    case deepSource = "DeepSource"
+
+    var displayName: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .swiftLint: return "swift"
+        case .codeCov: return "chart.pie"
+        case .sonarCloud: return "cloud"
+        case .deepSource: return "magnifyingglass.circle"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .swiftLint:
+            return "Static code analysis for Swift style and conventions"
+        case .codeCov:
+            return "Code coverage reporting and tracking"
+        case .sonarCloud:
+            return "Continuous code quality and security analysis"
+        case .deepSource:
+            return "Automated code review and issue detection"
+        }
+    }
+}
+
+// MARK: - QA Issue
+
+struct QAIssue: Codable, Sendable, Identifiable {
+    let id: UUID
+    let severity: QAIssueSeverity
+    let message: String
+    let file: String?
+    let line: Int?
+    let column: Int?
+    let rule: String?
+
+    init(
+        id: UUID = UUID(),
+        severity: QAIssueSeverity,
+        message: String,
+        file: String? = nil,
+        line: Int? = nil,
+        column: Int? = nil,
+        rule: String? = nil
+    ) {
+        self.id = id
+        self.severity = severity
+        self.message = message
+        self.file = file
+        self.line = line
+        self.column = column
+        self.rule = rule
+    }
+}
+
+// MARK: - QA Issue Severity
+
+enum QAIssueSeverity: String, Codable, Sendable {
+    case error
+    case warning
+    case info
+    case hint
+
+    var color: String {
+        switch self {
+        case .error: return "red"
+        case .warning: return "orange"
+        case .info: return "blue"
+        case .hint: return "gray"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .error: return "xmark.circle.fill"
+        case .warning: return "exclamationmark.triangle.fill"
+        case .info: return "info.circle.fill"
+        case .hint: return "lightbulb.fill"
         }
     }
 }

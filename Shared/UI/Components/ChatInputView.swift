@@ -14,7 +14,10 @@ struct ChatInputView: View {
         VStack(spacing: 8) {
             // Model selector
             HStack {
-                CompactModelSelectorView(selectedModel: $selectedModel)
+                CompactModelSelectorView(
+                    selectedModel: $selectedModel,
+                    availableModels: ["GPT-4", "GPT-3.5", "Claude 3", "Gemini Pro", "Llama 3"]
+                )
                     .onChange(of: selectedModel) { _, newValue in
                         var providerConfig = AppConfiguration.shared.providerConfig
                         providerConfig.defaultModel = newValue
