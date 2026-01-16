@@ -93,7 +93,7 @@ public actor ErrorKnowledgeBase {
         }
 
         // If no exact match, return the highest confidence fix for the category
-        let bestCategoryFix = categoryMatches.max(by: { $0.confidence < $1.confidence })
+        let bestCategoryFix = categoryMatches.max { $0.confidence < $1.confidence }
         if let fix = bestCategoryFix {
             logger.info("Using best category fix: \(fix.fixStrategy.rawValue) (confidence: \(String(format: "%.2f", fix.confidence)))")
             return fix
@@ -104,7 +104,7 @@ public actor ErrorKnowledgeBase {
     }
 
     public func findFix(for error: ErrorParser.ParsedError) async -> KnownFix? {
-        return await findFix(forMessage: error.message, category: error.category)
+        await findFix(forMessage: error.message, category: error.category)
     }
 
     // MARK: - Pattern Matching
@@ -214,7 +214,7 @@ public actor ErrorKnowledgeBase {
         }
     }
 
-    private nonisolated static func loadFromDisk(url: URL) -> [KnownFix]? {
+    nonisolated private static func loadFromDisk(url: URL) -> [KnownFix]? {
         guard FileManager.default.fileExists(atPath: url.path) else {
             return nil
         }
@@ -331,6 +331,5 @@ extension ErrorKnowledgeBase {
         fixDescription: "Use Task.detached for unstructured concurrency or ensure proper isolation",
         confidence: 0.78
     )
-]
+    ]
 }
-

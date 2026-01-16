@@ -1,5 +1,5 @@
-import Foundation
 import CoreGraphics
+import Foundation
 import OSLog
 
 // MARK: - GUIVerifier
@@ -133,7 +133,7 @@ public actor GUIVerifier {
         }
 
         // Capture screenshot (top portion where title usually is)
-        let titleRegion = CGRect(x: 0, y: 0, width: 1000, height: 100)
+        let titleRegion = CGRect(x: 0, y: 0, width: 1_000, height: 100)
         let screenshot: CGImage
         do {
             screenshot = try await ScreenCapture.shared.captureRegion(titleRegion)

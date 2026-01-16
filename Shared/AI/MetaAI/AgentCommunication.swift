@@ -14,8 +14,8 @@ public final class AgentCommunication {
     private(set) var sharedContext: [String: Any] = [:]
     private(set) var subscriptions: [UUID: Set<MessageType>] = [:]
 
-    private let maxQueueSize = 1000
-    private let messageRetentionSeconds: TimeInterval = 3600 // 1 hour
+    private let maxQueueSize = 1_000
+    private let messageRetentionSeconds: TimeInterval = 3_600 // 1 hour
 
     private init() {
         // Start cleanup timer
@@ -71,7 +71,7 @@ public final class AgentCommunication {
 
     /// Get all messages of a specific type
     public func getMessages(ofType type: MessageType) -> [AgentMessage] {
-        return messageQueue.filter { $0.type == type }
+        messageQueue.filter { $0.type == type }
     }
 
     /// Get latest message from an agent
@@ -130,7 +130,7 @@ public final class AgentCommunication {
 
     /// Retrieve value from shared context
     public func getContext<T>(_ key: String) -> T? {
-        return sharedContext[key] as? T
+        sharedContext[key] as? T
     }
 
     /// Remove value from shared context
@@ -200,7 +200,7 @@ public final class AgentCommunication {
             payload: .structured([
                 "result": result,
                 "metadata": metadata
-            ] as [String : Any])
+            ] as [String: Any])
         )
     }
 
@@ -217,7 +217,7 @@ public final class AgentCommunication {
             payload: .structured([
                 "event": event.rawValue,
                 "data": data
-            ] as [String : Any])
+            ] as [String: Any])
         )
     }
 
@@ -255,9 +255,9 @@ public final class AgentCommunication {
 
     /// Get communication statistics
     public func getStats() -> CommunicationStats {
-        return CommunicationStats(
+        CommunicationStats(
             totalMessages: messageQueue.count,
-            messagesByType: Dictionary(grouping: messageQueue, by: { $0.type })
+            messagesByType: Dictionary(grouping: messageQueue) { $0.type }
                 .mapValues { $0.count },
             activeAgents: Set(messageQueue.map { $0.senderID }).count,
             subscribedAgents: subscriptions.count,
@@ -279,7 +279,7 @@ public struct AgentMessage: Identifiable {
 
     /// Check if message is a broadcast
     public var isBroadcast: Bool {
-        return recipientID == nil
+        recipientID == nil
     }
 }
 
@@ -351,7 +351,7 @@ public enum AgentEvent: String, Codable {
     case cancelled
 
     public var displayName: String {
-        return rawValue.capitalized
+        rawValue.capitalized
     }
 }
 

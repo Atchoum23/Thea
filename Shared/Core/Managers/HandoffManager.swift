@@ -15,7 +15,7 @@ final class HandoffManager: NSObject {
     private(set) var currentActivity: NSUserActivity?
     private(set) var isHandoffAvailable: Bool = false
 
-    private override init() {
+    override private init() {
         super.init()
     }
 

@@ -1,6 +1,6 @@
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 /// Central manager for Terminal.app integration
 /// Provides unified interface for reading, writing, and monitoring terminal
@@ -406,7 +406,7 @@ final class TerminalIntegrationManager: ObservableObject {
         guard let session = currentSession else { return }
 
         Task.detached { [commandHistoryURL] in
-            let history = session.commandHistory.suffix(1000) // Keep last 1000 commands
+            let history = session.commandHistory.suffix(1_000) // Keep last 1000 commands
             if let data = try? JSONEncoder().encode(Array(history)) {
                 try? data.write(to: commandHistoryURL)
             }

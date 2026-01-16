@@ -81,7 +81,7 @@ struct ModelSelectorView: View {
                 id: id,
                 name: id,
                 description: nil,
-                contextLength: 128000,
+                contextLength: 128_000,
                 pricing: OpenRouterPricing(prompt: "0", completion: "0"),
                 topProvider: nil,
                 architecture: nil
@@ -176,7 +176,7 @@ struct CompactModelSelectorView: View {
                 id: id,
                 name: id,
                 description: nil,
-                contextLength: 128000,
+                contextLength: 128_000,
                 pricing: OpenRouterPricing(prompt: "0", completion: "0"),
                 topProvider: nil,
                 architecture: nil

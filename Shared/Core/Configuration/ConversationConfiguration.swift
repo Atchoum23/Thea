@@ -5,12 +5,11 @@ import SwiftUI
 /// Configuration for conversation context and history management.
 /// Enables unlimited conversations with maximum context window utilization.
 public struct ConversationConfiguration: Codable, Sendable, Equatable {
-
     // MARK: - Context Window Settings
 
     /// Maximum context window size (tokens)
     /// Set to nil for unlimited (uses provider's maximum)
-    public var maxContextTokens: Int? = nil
+    public var maxContextTokens: Int?
 
     /// Context sizes by provider (for reference)
     public static let providerContextSizes: [String: Int] = [
@@ -28,11 +27,11 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
 
     /// Maximum conversation history length (messages)
     /// Set to nil for unlimited
-    public var maxConversationLength: Int? = nil
+    public var maxConversationLength: Int?
 
     /// Maximum age of messages to keep (days)
     /// Set to nil for unlimited retention
-    public var maxMessageAgeDays: Int? = nil
+    public var maxMessageAgeDays: Int?
 
     /// Whether to persist full conversation history to disk
     public var persistFullHistory: Bool = true
@@ -150,7 +149,7 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
 
     /// Check if context strategy allows unlimited history
     public var isUnlimited: Bool {
-        return contextStrategy == .unlimited &&
+        contextStrategy == .unlimited &&
                maxConversationLength == nil &&
                maxContextTokens == nil
     }

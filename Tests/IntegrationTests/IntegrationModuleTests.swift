@@ -1,10 +1,9 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 /// Test suite for Integration Coordinator and module management
 @MainActor
 final class IntegrationModuleTests: XCTestCase {
-
     // MARK: - Integration Coordinator Tests
 
     func testCoordinatorInitialization() async {
@@ -65,13 +64,13 @@ final class IntegrationModuleTests: XCTestCase {
     }
 
     func testNumberFormatting() {
-        let number: Double = 1234.5678
+        let number: Double = 1_234.5678
 
         XCTAssertEqual(number.formatted(decimals: 2), "1234.57")
         XCTAssertEqual(number.formattedAsPercentage(decimals: 1), "1234.6%")
-        XCTAssertEqual(number.rounded(toPlaces: 2), 1234.57)
+        XCTAssertEqual(number.rounded(toPlaces: 2), 1_234.57)
 
-        let integer = 1234567
+        let integer = 1_234_567
         XCTAssertEqual(integer.formattedWithSeparators, "1,234,567")
     }
 
@@ -275,7 +274,7 @@ final class IntegrationModuleTests: XCTestCase {
     // MARK: - Performance Tests
 
     func testStatisticsPerformance() {
-        let largeDataset = (0..<10000).map { Double($0) }
+        let largeDataset = (0..<10_000).map { Double($0) }
 
         measure {
             _ = Statistics.mean(largeDataset)
@@ -285,7 +284,7 @@ final class IntegrationModuleTests: XCTestCase {
     }
 
     func testTrendAnalysisPerformance() {
-        let largeDataset = (0..<1000).map { Double($0) }
+        let largeDataset = (0..<1_000).map { Double($0) }
 
         measure {
             _ = TrendAnalyzer.analyzeTrend(largeDataset)

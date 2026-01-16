@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 /// Advanced knowledge graph for semantic relationships and deep understanding
 @MainActor
@@ -407,7 +407,7 @@ final class KnowledgeGraph {
         // Generate using OpenAI embeddings API
         // Simplified - should use actual embedding API
         let hash = text.hashValue
-        let embedding = (0..<1536).map { i in
+        let embedding = (0..<1_536).map { i in
             Float(sin(Double(hash + i))) * 0.1
         }
 
@@ -440,7 +440,7 @@ final class KnowledgeGraph {
         var importance: Float = 0.5
 
         // Longer content tends to be more important
-        importance += Float(min(content.count, 1000)) / 2000
+        importance += Float(min(content.count, 1_000)) / 2_000
 
         // Type-based importance
         switch type {
@@ -464,7 +464,7 @@ final class KnowledgeGraph {
         var pairCount = 0
 
         for i in 0..<nodes.count {
-            for j in (i+1)..<nodes.count {
+            for j in (i + 1)..<nodes.count {
                 totalSimilarity += cosineSimilarity(nodes[i].embedding, nodes[j].embedding)
                 pairCount += 1
             }

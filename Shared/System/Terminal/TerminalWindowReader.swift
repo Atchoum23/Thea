@@ -1,10 +1,9 @@
-import Foundation
 import AppKit
+import Foundation
 
 /// Reads content from Terminal.app windows using AppleScript
 /// This is the core component for "Work with Apps" style Terminal reading
 final class TerminalWindowReader {
-
     enum ReaderError: LocalizedError {
         case terminalNotRunning
         case noWindowsOpen
@@ -245,7 +244,7 @@ final class TerminalWindowReader {
     // MARK: - Private Helpers
 
     private func runAppleScript(_ source: String) async throws -> Any? {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 let script = NSAppleScript(source: source)

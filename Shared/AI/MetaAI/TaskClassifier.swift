@@ -249,7 +249,7 @@ public final class TaskClassifier {
         // 2. Prompt: "Classify this query into one of: [task types]. Return JSON with type and confidence."
         // 3. Parse response and return TaskClassification
 
-        return fallback
+        fallback
     }
 }
 
@@ -276,11 +276,11 @@ public struct TaskClassification: Sendable {
 
     /// Check if classification is confident enough to use
     public func isConfident(threshold: Float = 0.7) -> Bool {
-        return confidence >= threshold
+        confidence >= threshold
     }
 
     /// Get all relevant task types (primary + secondary)
     public var allTypes: [TaskType] {
-        return [primaryType] + secondaryTypes
+        [primaryType] + secondaryTypes
     }
 }

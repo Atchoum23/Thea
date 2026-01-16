@@ -1,5 +1,5 @@
-import SwiftUI
 import QuickLook
+import SwiftUI
 
 /// View for displaying artifacts (files) created during Cowork sessions
 struct CoworkArtifactsView: View {

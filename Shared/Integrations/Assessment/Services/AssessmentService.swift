@@ -2,7 +2,6 @@ import Foundation
 
 /// Assessment service for managing psychological assessments
 public actor AssessmentService: AssessmentServiceProtocol {
-
     // MARK: - Properties
 
     private var activeProgress: [UUID: AssessmentProgress] = [:]
@@ -80,11 +79,11 @@ public actor AssessmentService: AssessmentServiceProtocol {
     }
 
     public func fetchCompletedAssessments() async throws -> [Assessment] {
-        return Array(completedAssessments.values).sorted { $0.completedDate > $1.completedDate }
+        Array(completedAssessments.values).sorted { $0.completedDate > $1.completedDate }
     }
 
     public func fetchProgress(assessmentID: UUID) async throws -> AssessmentProgress? {
-        return activeProgress[assessmentID]
+        activeProgress[assessmentID]
     }
 
     public func getQuestions(for type: AssessmentType) async throws -> [AssessmentQuestion] {
@@ -105,7 +104,6 @@ public actor AssessmentService: AssessmentServiceProtocol {
 
 /// Scoring engine for assessments
 public actor AssessmentScoringEngine: AssessmentScoringProtocol {
-
     public init() {}
 
     public func calculateScore(
@@ -285,7 +283,7 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
     // MARK: - Recommendation Helpers
 
     private func recommendationsForEQ(score: AssessmentScore) -> [String] {
-        return [
+        [
             "Practice emotional labeling: Name your emotions as they arise",
             "Keep an emotion journal to track patterns",
             "Develop active listening skills in conversations",
@@ -310,7 +308,7 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
     }
 
     private func recommendationsForCognitive(score: AssessmentScore) -> [String] {
-        return [
+        [
             "Engage in brain training exercises daily",
             "Practice problem-solving through puzzles and games",
             "Get adequate sleep to support cognitive function",

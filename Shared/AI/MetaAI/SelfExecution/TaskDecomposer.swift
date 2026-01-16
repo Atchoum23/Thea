@@ -157,7 +157,7 @@ public actor TaskDecomposer {
             tasks.append(dmgTask)
         }
 
-        let estimatedDuration = Double(phase.estimatedHours.lowerBound) * 3600
+        let estimatedDuration = Double(phase.estimatedHours.lowerBound) * 3_600
 
         logger.info("Created \(tasks.count) tasks for phase \(phase.number)")
 

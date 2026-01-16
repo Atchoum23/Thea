@@ -106,7 +106,7 @@ public actor HealthKitService: HealthDataProvider {
             if currentSession.isEmpty {
                 currentSession.append(sample)
             } else if let last = currentSession.last,
-                      sample.startDate.timeIntervalSince(last.endDate) < 3600 { // 1 hour gap
+                      sample.startDate.timeIntervalSince(last.endDate) < 3_600 { // 1 hour gap
                 currentSession.append(sample)
             } else {
                 sleepSessions.append(currentSession)

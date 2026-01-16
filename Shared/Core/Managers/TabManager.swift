@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 // MARK: - Tab Manager
 // Manages tabs within windows for multi-tab conversation support
@@ -132,7 +132,7 @@ final class TabManager {
             // Move pinned tabs to the front
             if openTabs[index].isPinned {
                 let tab = openTabs.remove(at: index)
-                let lastPinnedIndex = openTabs.lastIndex(where: { $0.isPinned }) ?? -1
+                let lastPinnedIndex = openTabs.lastIndex { $0.isPinned }?? -1
                 openTabs.insert(tab, at: lastPinnedIndex + 1)
             }
         }

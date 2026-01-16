@@ -1,8 +1,7 @@
-import XCTest
 @testable import TheaCoreCore
+import XCTest
 
 final class AllProvidersTests: XCTestCase {
-
     func testAllProvidersHaveMetadata() {
         let providers: [AIProvider] = [
             OpenAIProvider(apiKey: "test"),
@@ -58,11 +57,11 @@ final class AllProvidersTests: XCTestCase {
 
     func testGoogleHasLargestContext() {
         let google = GoogleProvider(apiKey: "test")
-        XCTAssertEqual(google.capabilities.maxContextTokens, 1000000, "Google should have 1M context window")
+        XCTAssertEqual(google.capabilities.maxContextTokens, 1_000_000, "Google should have 1M context window")
     }
 
     func testAnthropicHasLargestContext() {
         let anthropic = AnthropicProvider(apiKey: "test")
-        XCTAssertEqual(anthropic.capabilities.maxContextTokens, 200000, "Anthropic should have 200K context")
+        XCTAssertEqual(anthropic.capabilities.maxContextTokens, 200_000, "Anthropic should have 200K context")
     }
 }

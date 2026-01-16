@@ -8,7 +8,6 @@ import CoreGraphics
 @MainActor
 @Observable
 public final class DisplayViewModel {
-
     // MARK: - Published State
 
     public var displays: [Display] = []

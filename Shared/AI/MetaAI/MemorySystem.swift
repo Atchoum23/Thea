@@ -266,7 +266,7 @@ final class MemorySystem {
 
         // Decay long-term memories based on last access
         for i in 0..<longTermMemory.count {
-            let daysSinceAccess = now.timeIntervalSince(longTermMemory[i].lastAccessed) / 86400
+            let daysSinceAccess = now.timeIntervalSince(longTermMemory[i].lastAccessed) / 86_400
             let decayFactor = pow(config.generalDecayRate, Float(daysSinceAccess))
 
             longTermMemory[i].importance *= decayFactor
@@ -279,7 +279,7 @@ final class MemorySystem {
 
         // Decay episodic memories
         for i in 0..<episodicMemory.count {
-            let daysSinceAccess = now.timeIntervalSince(episodicMemory[i].lastAccessed) / 86400
+            let daysSinceAccess = now.timeIntervalSince(episodicMemory[i].lastAccessed) / 86_400
             let decayFactor = pow(config.generalDecayRate, Float(daysSinceAccess))
 
             episodicMemory[i].importance *= decayFactor
@@ -291,7 +291,7 @@ final class MemorySystem {
 
         // Semantic memories decay more slowly
         for i in 0..<semanticMemory.count {
-            let daysSinceAccess = now.timeIntervalSince(semanticMemory[i].lastAccessed) / 86400
+            let daysSinceAccess = now.timeIntervalSince(semanticMemory[i].lastAccessed) / 86_400
             let decayFactor = pow(config.semanticDecayRate, Float(daysSinceAccess))
 
             semanticMemory[i].importance *= decayFactor
@@ -379,7 +379,7 @@ final class MemorySystem {
         for i in 0..<longTermMemory.count {
             if toRemove.contains(longTermMemory[i].id) { continue }
 
-            for j in (i+1)..<longTermMemory.count {
+            for j in (i + 1)..<longTermMemory.count {
                 if toRemove.contains(longTermMemory[j].id) { continue }
 
                 let similarity = cosineSimilarity(longTermMemory[i].embedding, longTermMemory[j].embedding)
@@ -442,7 +442,7 @@ final class MemorySystem {
     }
 
     private func calculateRecencyBoost(_ lastAccessed: Date) -> Float {
-        let hoursSinceAccess = Date().timeIntervalSince(lastAccessed) / 3600
+        let hoursSinceAccess = Date().timeIntervalSince(lastAccessed) / 3_600
 
         // Exponential decay
         let boost = Float(exp(-hoursSinceAccess / 24))

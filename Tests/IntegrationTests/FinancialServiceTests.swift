@@ -1,11 +1,10 @@
-import Testing
 import Foundation
+import Testing
 @testable import Thea
 
 /// Tests for financial services
 @Suite("Financial Service Tests")
 struct FinancialServiceTests {
-
     // MARK: - Budget Service Tests
 
     @Test("Create budget")
@@ -15,7 +14,7 @@ struct FinancialServiceTests {
         let budget = Budget(
             name: "January Budget",
             month: Date(),
-            totalIncome: 5000,
+            totalIncome: 5_000,
             categories: []
         )
 
@@ -23,7 +22,7 @@ struct FinancialServiceTests {
 
         let fetched = try await service.fetchBudget(for: Date())
         #expect(fetched != nil)
-        #expect(fetched?.totalIncome == 5000)
+        #expect(fetched?.totalIncome == 5_000)
     }
 
     @Test("Allocate funds to category")
@@ -39,16 +38,16 @@ struct FinancialServiceTests {
         var budget = Budget(
             name: "Test Budget",
             month: Date(),
-            totalIncome: 5000,
+            totalIncome: 5_000,
             categories: [category]
         )
 
         try await service.createBudget(budget)
 
-        try await service.allocateFunds(budgetID: budget.id, categoryID: category.id, amount: 1500)
+        try await service.allocateFunds(budgetID: budget.id, categoryID: category.id, amount: 1_500)
 
         let allocated = await service.getTotalAllocated(budgetID: budget.id)
-        #expect(allocated == 1500)
+        #expect(allocated == 1_500)
     }
 
     // MARK: - Transaction Categorizer Tests
@@ -87,7 +86,7 @@ struct FinancialServiceTests {
         let service = TransactionCategorizerService()
 
         let transaction = Transaction(
-            amount: 5000,
+            amount: 5_000,
             description: "Salary deposit",
             category: .other
         )
@@ -154,7 +153,7 @@ struct FinancialServiceTests {
     func testCategoryPercentage() {
         let category = BudgetCategory(
             name: "Housing",
-            allocated: 1000,
+            allocated: 1_000,
             spent: 750,
             category: .housing
         )
@@ -181,7 +180,7 @@ struct FinancialServiceTests {
     @Test("Budget balance check")
     func testBudgetBalance() {
         let categories = [
-            BudgetCategory(name: "Housing", allocated: 1500, category: .housing),
+            BudgetCategory(name: "Housing", allocated: 1_500, category: .housing),
             BudgetCategory(name: "Food", allocated: 500, category: .food),
             BudgetCategory(name: "Transport", allocated: 300, category: .transportation)
         ]
@@ -189,14 +188,14 @@ struct FinancialServiceTests {
         var budget = Budget(
             name: "Test",
             month: Date(),
-            totalIncome: 2300,
+            totalIncome: 2_300,
             categories: categories
         )
 
         budget.unallocated = budget.totalIncome - budget.totalAllocated
 
         #expect(budget.isBalanced)
-        #expect(budget.totalAllocated == 2300)
+        #expect(budget.totalAllocated == 2_300)
     }
 
     // MARK: - Subscription Models Tests

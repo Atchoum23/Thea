@@ -354,7 +354,6 @@ final class WorkflowBuilder {
                 duration: execution.endTime!.timeIntervalSince(execution.startTime),
                 errors: []
             )
-
         } catch {
             execution.status = .failed
             execution.endTime = Date()
@@ -553,7 +552,7 @@ final class WorkflowBuilder {
         inputs: [String: Any]
     ) -> [String: Any] {
         // Merge all inputs into single output
-        return ["merged": inputs]
+        ["merged": inputs]
     }
 
     nonisolated private func executeSplit(

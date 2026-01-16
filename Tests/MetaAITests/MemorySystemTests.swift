@@ -1,5 +1,5 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 @MainActor
 final class MemorySystemTests: XCTestCase {
@@ -64,7 +64,7 @@ final class MemorySystemTests: XCTestCase {
 
         XCTAssertGreaterThan(results.count, 0, "Should retrieve relevant memories")
 
-        let programmingMemory = results.first(where: { $0.content.contains("Swift") })
+        let programmingMemory = results.first { $0.content.contains("Swift") }
         XCTAssertNotNil(programmingMemory, "Should find Swift memory for programming query")
     }
 

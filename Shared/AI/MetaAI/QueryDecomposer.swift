@@ -99,7 +99,7 @@ public final class QueryDecomposer {
     }
 
     private func createDecompositionPrompt(query: String, complexity: QueryComplexity) -> String {
-        return """
+        """
         You are a query decomposition expert. Break down the following query into sub-queries that can be executed independently.
 
         Original Query: "\(query)"
@@ -289,12 +289,12 @@ public struct QueryDecomposition: Sendable {
 
     /// Get sub-queries that can be executed in parallel (no dependencies)
     public var parallelizableQueries: [SubQuery] {
-        return subQueries.filter { $0.dependencies.isEmpty }
+        subQueries.filter { $0.dependencies.isEmpty }
     }
 
     /// Get sub-queries sorted by priority
     public var prioritizedQueries: [SubQuery] {
-        return subQueries.sorted { $0.priority < $1.priority }
+        subQueries.sorted { $0.priority < $1.priority }
     }
 }
 
@@ -322,7 +322,7 @@ public struct SubQuery: Identifiable, Sendable {
 
     /// Check if this sub-query can be executed (all dependencies resolved)
     public func canExecute(completed: Set<UUID>) -> Bool {
-        return dependencies.allSatisfy { completed.contains($0) }
+        dependencies.allSatisfy { completed.contains($0) }
     }
 }
 

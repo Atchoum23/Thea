@@ -162,12 +162,12 @@ public actor AICodeFixGenerator {
     public func hasConfiguredProviders() async -> Bool {
         // TODO: Check AppConfiguration for API keys
         // For now, return false since this is a stub
-        return false
+        false
     }
 
     public func getAvailableProviders() async -> [String] {
         // TODO: Return list of configured providers
         // Will check: Claude, OpenAI, OpenRouter, Local MLX
-        return []
+        []
     }
 }

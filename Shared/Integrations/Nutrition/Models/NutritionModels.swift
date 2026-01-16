@@ -196,7 +196,7 @@ public struct MealEntry: Sendable, Codable, Identifiable {
 
     /// Total nutrients for this meal
     public var totalNutrients: NutrientProfile {
-        foodItems.reduce(NutrientProfile()) { result, entry in
+        foodItems.reduce(NutrientProfile()) { _, entry in
             entry.scaledNutrients
         }
     }
@@ -241,22 +241,22 @@ public struct FoodItemEntry: Sendable, Codable, Identifiable {
 
 /// Daily nutrition goals
 public struct NutritionGoals: Sendable, Codable {
-    public var dailyCalories: Double = 2000.0
+    public var dailyCalories: Double = 2_000.0
     public var proteinGrams: Double = 50.0
     public var carbsGrams: Double = 300.0
     public var fatGrams: Double = 65.0
     public var fiberGrams: Double = 25.0
     public var sugarGrams: Double = 50.0
-    public var sodiumMg: Double = 2300.0
+    public var sodiumMg: Double = 2_300.0
 
     public init(
-        dailyCalories: Double = 2000.0,
+        dailyCalories: Double = 2_000.0,
         proteinGrams: Double = 50.0,
         carbsGrams: Double = 300.0,
         fatGrams: Double = 65.0,
         fiberGrams: Double = 25.0,
         sugarGrams: Double = 50.0,
-        sodiumMg: Double = 2300.0
+        sodiumMg: Double = 2_300.0
     ) {
         self.dailyCalories = dailyCalories
         self.proteinGrams = proteinGrams
@@ -306,7 +306,7 @@ public struct NutritionGoals: Sendable, Codable {
             fatGrams: fatGrams,
             fiberGrams: 25.0,
             sugarGrams: 50.0,
-            sodiumMg: 2300.0
+            sodiumMg: 2_300.0
         )
     }
 }

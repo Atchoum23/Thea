@@ -2,7 +2,6 @@ import Foundation
 
 /// Executes terminal commands either directly via Process or through Terminal.app
 final class TerminalCommandExecutor {
-
     enum ExecutorError: LocalizedError {
         case commandBlocked(String)
         case confirmationRequired(String)
@@ -303,7 +302,7 @@ final class TerminalCommandExecutor {
 
     @discardableResult
     private func runAppleScript(_ source: String) async throws -> Any? {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 let script = NSAppleScript(source: source)

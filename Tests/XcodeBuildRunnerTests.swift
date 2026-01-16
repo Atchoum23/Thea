@@ -1,8 +1,7 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 final class XcodeBuildRunnerTests: XCTestCase {
-
     func testBuildExecution() async throws {
         // This test verifies that XcodeBuildRunner can execute xcodebuild
         // and parse the output into structured errors and warnings

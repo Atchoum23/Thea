@@ -54,7 +54,7 @@ struct CommandHistoryView: View {
             commands = commands.sorted { $0.executedAt < $1.executedAt }
         case .mostUsed:
             // Group by command and sort by frequency
-            let grouped = Dictionary(grouping: commands, by: { $0.command })
+            let grouped = Dictionary(grouping: commands) { $0.command }
             let sorted = grouped.sorted { $0.value.count > $1.value.count }
             commands = sorted.flatMap { $0.value }
         }

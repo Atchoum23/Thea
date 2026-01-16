@@ -4,7 +4,6 @@ import Foundation
 /// Configuration for the AI Orchestration Engine.
 /// Controls query decomposition, model routing, and multi-agent coordination.
 public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
-
     // MARK: - Enable/Disable
 
     /// Master switch for orchestration features
@@ -49,13 +48,13 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
 
     /// Get preferred models for a task type
     public func preferredModels(for taskType: TaskType) -> [String] {
-        return taskRoutingRules[taskType.rawValue] ?? []
+        taskRoutingRules[taskType.rawValue] ?? []
     }
 
     // MARK: - Cost Management
 
     /// Maximum cost allowed per query (nil = unlimited)
-    public var costBudgetPerQuery: Decimal? = nil
+    public var costBudgetPerQuery: Decimal?
 
     /// When multiple models can handle a task, prefer cheaper ones
     public var preferCheaperModels: Bool = true

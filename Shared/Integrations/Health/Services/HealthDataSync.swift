@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 #if canImport(HealthKit)
 import HealthKit
 #endif
@@ -10,7 +10,7 @@ public actor HealthDataSync {
 
     private var syncTasks: [UUID: Task<Void, Never>] = [:]
     private var lastSyncDate: Date?
-    private let syncInterval: TimeInterval = 3600 // 1 hour
+    private let syncInterval: TimeInterval = 3_600 // 1 hour
 
     public enum SyncError: Error, Sendable, LocalizedError {
         case healthKitUnavailable
@@ -198,7 +198,7 @@ public actor HealthDataSync {
     ) async throws -> [HealthDataRecord] {
         // Would implement actual HealthKit query
         // Mock implementation for now
-        return []
+        []
     }
 
     private func fetchBloodPressureData(
@@ -209,7 +209,7 @@ public actor HealthDataSync {
         end: Date
     ) async throws -> [HealthDataRecord] {
         // Would implement actual HealthKit correlation query
-        return []
+        []
     }
     #endif
 
@@ -276,7 +276,7 @@ public actor HealthDataSync {
         var uuid = [UInt8](repeating: 0, count: size)
         sysctlbyname("kern.uuid", &uuid, &size, nil, 0)
         // Truncate null termination and decode as UTF-8
-        let truncatedUUID = uuid.prefix(while: { $0 != 0 })
+        let truncatedUUID = uuid.prefix { $0 != 0 }
         return String(decoding: truncatedUUID, as: UTF8.self)
         #else
         return "unknown-device"

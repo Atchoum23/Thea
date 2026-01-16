@@ -67,7 +67,6 @@ struct KnowledgeManagementView: View {
             }
             .formStyle(.grouped)
             .navigationTitle("Knowledge Base")
-
         } detail: {
             // Main content - Search
             VStack {

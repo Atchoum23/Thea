@@ -347,7 +347,7 @@ private struct EntryRow: View {
     let streams: [IncomeStream]
 
     private var streamName: String {
-        streams.first(where: { $0.id == entry.streamID })?.name ?? "Unknown"
+        streams.first { $0.id == entry.streamID }?.name ?? "Unknown"
     }
 
     var body: some View {

@@ -94,7 +94,7 @@ public final class ModelRouter {
     // MARK: - Candidate Selection
 
     private func getCandidateModels(for taskType: TaskType) -> [String] {
-        return config.preferredModels(for: taskType)
+        config.preferredModels(for: taskType)
     }
 
     private func selectDefaultModel(for taskType: TaskType) async throws -> ModelSelection {
@@ -122,7 +122,7 @@ public final class ModelRouter {
                 modelID: defaultModel,
                 providerID: defaultModel.split(separator: "/").first.map(String.init) ?? "unknown",
                 isLocal: false,
-                estimatedCost: estimatedCost(for: defaultModel, tokens: 1000),
+                estimatedCost: estimatedCost(for: defaultModel, tokens: 1_000),
                 reasoning: "Default model for \(taskType.displayName)"
             )
         }
@@ -209,7 +209,7 @@ public final class ModelRouter {
             providerID = modelID.split(separator: "/").first.map(String.init) ?? "unknown"
         }
 
-        let cost = estimatedCost(for: modelID, tokens: 1000)
+        let cost = estimatedCost(for: modelID, tokens: 1_000)
 
         return ModelSelection(
             modelID: modelID,
@@ -233,8 +233,8 @@ public final class ModelRouter {
 
         // Sort by estimated cost (local models first, then cloud by cost)
         let sorted = available.sorted { model1, model2 in
-            let cost1 = estimatedCost(for: model1, tokens: 1000)
-            let cost2 = estimatedCost(for: model2, tokens: 1000)
+            let cost1 = estimatedCost(for: model1, tokens: 1_000)
+            let cost2 = estimatedCost(for: model2, tokens: 1_000)
             return cost1 < cost2
         }
 

@@ -1,5 +1,5 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 @MainActor
 final class KnowledgeGraphTests: XCTestCase {
@@ -51,8 +51,8 @@ final class KnowledgeGraphTests: XCTestCase {
 
         XCTAssertGreaterThan(similar.count, 0, "Should find similar nodes")
 
-        let node2Similarity = similar.first(where: { $0.0.id == node2.id })
-        let node3Similarity = similar.first(where: { $0.0.id == node3.id })
+        let node2Similarity = similar.first { $0.0.id == node2.id }
+        let node3Similarity = similar.first { $0.0.id == node3.id }
 
         if let node2Sim = node2Similarity?.1, let node3Sim = node3Similarity?.1 {
             XCTAssertGreaterThan(node2Sim, node3Sim, "Swift language should be more similar than cooking")
@@ -68,7 +68,7 @@ final class KnowledgeGraphTests: XCTestCase {
         let results = try await knowledgeGraph.queryGraph("iOS")
 
         XCTAssertGreaterThan(results.count, 0, "Should find iOS-related nodes")
-        XCTAssertTrue(results.contains(where: { $0.id == iosNode.id }))
+        XCTAssertTrue(results.contains { $0.id == iosNode.id })
     }
 
     func testNodeTypes() {

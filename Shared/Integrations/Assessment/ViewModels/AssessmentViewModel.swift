@@ -5,7 +5,6 @@ import SwiftUI
 @MainActor
 @Observable
 public final class AssessmentViewModel {
-
     // MARK: - Published State
 
     public var completedAssessments: [Assessment] = []
@@ -84,7 +83,7 @@ public final class AssessmentViewModel {
     // MARK: - Computed Properties
 
     public var hasActiveAssessment: Bool {
-        return currentProgress != nil
+        currentProgress != nil
     }
 
     public var currentQuestion: AssessmentQuestion? {
@@ -96,6 +95,6 @@ public final class AssessmentViewModel {
     }
 
     public var progressPercentage: Double {
-        return currentProgress?.progressPercentage ?? 0.0
+        currentProgress?.progressPercentage ?? 0.0
     }
 }

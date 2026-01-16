@@ -58,7 +58,7 @@ final class APIIntegrator {
     func discoverAPI(from openAPISpec: String) async throws -> [APIEndpoint] {
         // Parse OpenAPI/Swagger spec and generate endpoints
         // Simplified - would use proper OpenAPI parser in production
-        return []
+        []
     }
 
     // MARK: - API Execution
@@ -143,7 +143,7 @@ final class APIIntegrator {
 
     nonisolated func checkRateLimit(for endpoint: APIEndpoint) async -> Bool {
         // Simplified rate limiting
-        return true
+        true
     }
 }
 

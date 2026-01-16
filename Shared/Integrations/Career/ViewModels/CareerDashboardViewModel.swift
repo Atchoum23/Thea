@@ -5,7 +5,6 @@ import SwiftUI
 @MainActor
 @Observable
 public final class CareerDashboardViewModel {
-
     // MARK: - Published State
 
     public var goals: [CareerGoal] = []

@@ -474,7 +474,7 @@ struct ProviderConfigurationView: View {
             }
 
             Section("Generation Defaults") {
-                Stepper("Max Tokens: \(config.defaultMaxTokens)", value: $config.defaultMaxTokens, in: 256...32768, step: 256)
+                Stepper("Max Tokens: \(config.defaultMaxTokens)", value: $config.defaultMaxTokens, in: 256...32_768, step: 256)
 
                 VStack(alignment: .leading) {
                     Text("Temperature: \(config.defaultTemperature, specifier: "%.2f")")
@@ -494,7 +494,7 @@ struct ProviderConfigurationView: View {
                 TextField("Summarization Model", text: $config.defaultSummarizationModel)
                 TextField("Reasoning Model", text: $config.defaultReasoningModel)
                 TextField("Embedding Model", text: $config.defaultEmbeddingModel)
-                Stepper("Embedding Dimensions: \(config.embeddingDimensions)", value: $config.embeddingDimensions, in: 256...4096, step: 256)
+                Stepper("Embedding Dimensions: \(config.embeddingDimensions)", value: $config.embeddingDimensions, in: 256...4_096, step: 256)
             }
 
             Section("Request Settings") {
@@ -559,7 +559,7 @@ struct VoiceConfigurationView: View {
             Section("Speech Recognition") {
                 TextField("Recognition Language", text: $config.recognitionLanguage)
                 Toggle("On-Device Recognition Only", isOn: $config.requiresOnDeviceRecognition)
-                Stepper("Audio Buffer Size: \(config.audioBufferSize)", value: $config.audioBufferSize, in: 256...4096, step: 256)
+                Stepper("Audio Buffer Size: \(config.audioBufferSize)", value: $config.audioBufferSize, in: 256...4_096, step: 256)
             }
 
             Section("Speech Synthesis") {
@@ -659,7 +659,7 @@ struct KnowledgeScannerConfigurationView: View {
             }
 
             Section("Embedding") {
-                Stepper("Embedding Dimension: \(config.embeddingDimension)", value: $config.embeddingDimension, in: 128...1536, step: 128)
+                Stepper("Embedding Dimension: \(config.embeddingDimension)", value: $config.embeddingDimension, in: 128...1_536, step: 128)
             }
 
             Section("Search") {
@@ -738,10 +738,10 @@ struct MemoryConfigurationView: View {
         Form {
             Section("Capacity") {
                 Stepper("Short-Term: \(config.shortTermCapacity)", value: $config.shortTermCapacity, in: 5...100, step: 5)
-                Stepper("Long-Term Max: \(config.longTermMaxItems)", value: $config.longTermMaxItems, in: 1000...50000, step: 1000)
-                Stepper("Episodic Max: \(config.episodicMaxItems)", value: $config.episodicMaxItems, in: 1000...20000, step: 1000)
-                Stepper("Semantic Max: \(config.semanticMaxItems)", value: $config.semanticMaxItems, in: 1000...20000, step: 1000)
-                Stepper("Procedural Max: \(config.proceduralMaxItems)", value: $config.proceduralMaxItems, in: 100...5000, step: 100)
+                Stepper("Long-Term Max: \(config.longTermMaxItems)", value: $config.longTermMaxItems, in: 1_000...50_000, step: 1_000)
+                Stepper("Episodic Max: \(config.episodicMaxItems)", value: $config.episodicMaxItems, in: 1_000...20_000, step: 1_000)
+                Stepper("Semantic Max: \(config.semanticMaxItems)", value: $config.semanticMaxItems, in: 1_000...20_000, step: 1_000)
+                Stepper("Procedural Max: \(config.proceduralMaxItems)", value: $config.proceduralMaxItems, in: 100...5_000, step: 100)
             }
 
             Section("Decay Rates") {
@@ -851,8 +851,8 @@ struct LocalModelConfigurationView: View {
             }
 
             Section("Defaults") {
-                Stepper("Context Tokens: \(config.defaultContextTokens)", value: $config.defaultContextTokens, in: 1024...32768, step: 1024)
-                Stepper("Max Output Tokens: \(config.defaultMaxOutputTokens)", value: $config.defaultMaxOutputTokens, in: 256...8192, step: 256)
+                Stepper("Context Tokens: \(config.defaultContextTokens)", value: $config.defaultContextTokens, in: 1_024...32_768, step: 1_024)
+                Stepper("Max Output Tokens: \(config.defaultMaxOutputTokens)", value: $config.defaultMaxOutputTokens, in: 256...8_192, step: 256)
                 TextField("Default Quantization", text: $config.defaultQuantization)
                 TextField("Default Parameters", text: $config.defaultParameters)
             }
@@ -1165,7 +1165,7 @@ struct TerminalSettingsView: View {
     @State private var fontSize: Double = 12
     @State private var fontFamily = "SF Mono"
     @State private var enableAutoComplete = true
-    @State private var historyLimit = 1000
+    @State private var historyLimit = 1_000
     @State private var colorScheme = "Default"
     
     var body: some View {
@@ -1204,7 +1204,7 @@ struct TerminalSettingsView: View {
             Section("Behavior") {
                 Toggle("Enable Auto-Complete", isOn: $enableAutoComplete)
                 
-                Stepper("History Limit: \(historyLimit)", value: $historyLimit, in: 100...10000, step: 100)
+                Stepper("History Limit: \(historyLimit)", value: $historyLimit, in: 100...10_000, step: 100)
             }
             
             Section {
@@ -1214,7 +1214,7 @@ struct TerminalSettingsView: View {
                     fontSize = 12
                     fontFamily = "SF Mono"
                     enableAutoComplete = true
-                    historyLimit = 1000
+                    historyLimit = 1_000
                     colorScheme = "Default"
                 }
                 .foregroundStyle(.red)

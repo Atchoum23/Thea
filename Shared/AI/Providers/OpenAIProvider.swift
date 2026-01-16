@@ -15,8 +15,8 @@ final class OpenAIProvider: AIProvider, Sendable {
         supportsVision: true,
         supportsFunctionCalling: true,
         supportsWebSearch: false,
-        maxContextTokens: 128000,
-        maxOutputTokens: 16384,
+        maxContextTokens: 128_000,
+        maxOutputTokens: 16_384,
         supportedModalities: [.text, .image]
     )
 
@@ -85,7 +85,6 @@ final class OpenAIProvider: AIProvider, Sendable {
                         )
                         continuation.yield(.complete(finalMessage))
                         continuation.finish()
-
                     } catch {
                         continuation.yield(.error(error))
                         continuation.finish(throwing: error)
@@ -123,13 +122,13 @@ final class OpenAIProvider: AIProvider, Sendable {
     func listModels() async throws -> [AIModel] {
         // OpenAI doesn't provide pricing/context info via API
         // Return hardcoded list of common models
-        return [
+        [
             AIModel(
                 id: "gpt-4o",
                 name: "GPT-4o",
                 description: "Most capable GPT-4 model with vision",
-                contextWindow: 128000,
-                maxOutputTokens: 16384,
+                contextWindow: 128_000,
+                maxOutputTokens: 16_384,
                 inputPricePerMillion: 2.50,
                 outputPricePerMillion: 10.00,
                 supportsVision: true,
@@ -139,8 +138,8 @@ final class OpenAIProvider: AIProvider, Sendable {
                 id: "gpt-4-turbo",
                 name: "GPT-4 Turbo",
                 description: "Fast and capable GPT-4",
-                contextWindow: 128000,
-                maxOutputTokens: 4096,
+                contextWindow: 128_000,
+                maxOutputTokens: 4_096,
                 inputPricePerMillion: 10.00,
                 outputPricePerMillion: 30.00,
                 supportsVision: true,
@@ -150,8 +149,8 @@ final class OpenAIProvider: AIProvider, Sendable {
                 id: "gpt-3.5-turbo",
                 name: "GPT-3.5 Turbo",
                 description: "Fast and cost-effective",
-                contextWindow: 16385,
-                maxOutputTokens: 4096,
+                contextWindow: 16_385,
+                maxOutputTokens: 4_096,
                 inputPricePerMillion: 0.50,
                 outputPricePerMillion: 1.50,
                 supportsVision: false,
@@ -161,8 +160,8 @@ final class OpenAIProvider: AIProvider, Sendable {
                 id: "o1",
                 name: "o1",
                 description: "Reasoning model",
-                contextWindow: 128000,
-                maxOutputTokens: 32768,
+                contextWindow: 128_000,
+                maxOutputTokens: 32_768,
                 inputPricePerMillion: 15.00,
                 outputPricePerMillion: 60.00,
                 supportsVision: false,

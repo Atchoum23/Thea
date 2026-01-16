@@ -1,5 +1,5 @@
-import Foundation
 import AppKit
+import Foundation
 
 /// Manages folder access permissions for Cowork sessions
 @Observable

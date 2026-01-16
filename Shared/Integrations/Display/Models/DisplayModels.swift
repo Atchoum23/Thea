@@ -134,10 +134,10 @@ public enum ColorTemperature: String, Sendable, Codable, CaseIterable {
 
     public var kelvin: Int {
         switch self {
-        case .cool: return 6500
-        case .standard: return 5500
-        case .warm: return 4500
-        case .veryWarm: return 3500
+        case .cool: return 6_500
+        case .standard: return 5_500
+        case .warm: return 4_500
+        case .veryWarm: return 3_500
         }
     }
 }

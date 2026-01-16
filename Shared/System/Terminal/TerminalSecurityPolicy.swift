@@ -79,7 +79,7 @@ struct TerminalSecurityPolicy: Codable, Equatable {
             allowNetworkCommands: true,
             allowFileModification: true,
             sandboxedDirectories: [],
-            maxExecutionTime: 1800, // 30 minutes
+            maxExecutionTime: 1_800, // 30 minutes
             logAllCommands: true,
             redactSensitiveOutput: false
         )

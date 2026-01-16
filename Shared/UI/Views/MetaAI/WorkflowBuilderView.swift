@@ -112,7 +112,7 @@ struct WorkflowCanvasView: View {
                             }
                     }
                 }
-                .frame(minWidth: 2000, minHeight: 2000)
+                .frame(minWidth: 2_000, minHeight: 2_000)
             }
 
             // Bottom toolbar
@@ -279,8 +279,8 @@ struct NodeLibrarySheet: View {
 
     private func addNode(_ template: NodeTemplate) {
         let position = CGPoint(
-            x: Double.random(in: 500...1500),
-            y: Double.random(in: 500...1500)
+            x: Double.random(in: 500...1_500),
+            y: Double.random(in: 500...1_500)
         )
 
         _ = try? WorkflowBuilder.shared.addNode(

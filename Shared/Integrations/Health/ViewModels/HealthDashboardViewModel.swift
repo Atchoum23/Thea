@@ -208,10 +208,10 @@ public final class HealthDashboardViewModel {
     /// Format distance based on user preference
     public func formatDistance(_ meters: Double, useMetric: Bool = true) -> String {
         if useMetric {
-            let km = meters / 1000
+            let km = meters / 1_000
             return String(format: "%.2f km", km)
         } else {
-            let miles = meters / 1609.34
+            let miles = meters / 1_609.34
             return String(format: "%.2f mi", miles)
         }
     }

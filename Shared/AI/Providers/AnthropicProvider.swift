@@ -14,8 +14,8 @@ final class AnthropicProvider: AIProvider, Sendable {
         supportsVision: true,
         supportsFunctionCalling: true,
         supportsWebSearch: false,
-        maxContextTokens: 200000,
-        maxOutputTokens: 8192,
+        maxContextTokens: 200_000,
+        maxOutputTokens: 8_192,
         supportedModalities: [.text, .image]
     )
 
@@ -196,13 +196,13 @@ final class AnthropicProvider: AIProvider, Sendable {
     // MARK: - Models
 
     func listModels() async throws -> [AIModel] {
-        return [
+        [
             AIModel(
                 id: "claude-opus-4-20250514",
                 name: "Claude Opus 4",
                 description: "Most capable Claude model",
-                contextWindow: 200000,
-                maxOutputTokens: 8192,
+                contextWindow: 200_000,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 15.00,
                 outputPricePerMillion: 75.00,
                 supportsVision: true,
@@ -212,8 +212,8 @@ final class AnthropicProvider: AIProvider, Sendable {
                 id: "claude-sonnet-4-20250514",
                 name: "Claude Sonnet 4",
                 description: "Balanced intelligence and speed",
-                contextWindow: 200000,
-                maxOutputTokens: 8192,
+                contextWindow: 200_000,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 3.00,
                 outputPricePerMillion: 15.00,
                 supportsVision: true,
@@ -223,8 +223,8 @@ final class AnthropicProvider: AIProvider, Sendable {
                 id: "claude-3-5-sonnet-20241022",
                 name: "Claude 3.5 Sonnet",
                 description: "Previous generation balanced model",
-                contextWindow: 200000,
-                maxOutputTokens: 8192,
+                contextWindow: 200_000,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 3.00,
                 outputPricePerMillion: 15.00,
                 supportsVision: true,
@@ -234,8 +234,8 @@ final class AnthropicProvider: AIProvider, Sendable {
                 id: "claude-3-5-haiku-20241022",
                 name: "Claude 3.5 Haiku",
                 description: "Fast and cost-effective",
-                contextWindow: 200000,
-                maxOutputTokens: 8192,
+                contextWindow: 200_000,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 1.00,
                 outputPricePerMillion: 5.00,
                 supportsVision: true,

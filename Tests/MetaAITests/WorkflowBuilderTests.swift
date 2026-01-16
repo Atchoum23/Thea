@@ -1,5 +1,5 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 @MainActor
 final class WorkflowBuilderTests: XCTestCase {
@@ -44,7 +44,7 @@ final class WorkflowBuilderTests: XCTestCase {
         let inputNode = try workflowBuilder.addNode(
             to: workflow.id,
             type: .input,
-            position: CGPoint(x: 0, y: 0)
+            position: CGPoint.zero
         )
 
         let outputNode = try workflowBuilder.addNode(

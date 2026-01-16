@@ -158,7 +158,6 @@ actor MLXModelScanner {
         if FileManager.default.fileExists(atPath: configURL.path),
            let data = try? Data(contentsOf: configURL),
            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-
             // Extract model parameters if available
             if let hiddenSize = json["hidden_size"] as? Int {
                 parameters = formatParameters(hiddenSize: hiddenSize)
@@ -251,13 +250,13 @@ actor MLXModelScanner {
         // Rough estimation based on hidden size
         // This is very approximate and model-dependent
         switch hiddenSize {
-        case ..<2048:
+        case ..<2_048:
             return "1B"
-        case 2048..<4096:
+        case 2_048..<4_096:
             return "3B"
-        case 4096..<6144:
+        case 4_096..<6_144:
             return "7B"
-        case 6144..<8192:
+        case 6_144..<8_192:
             return "13B"
         default:
             return "70B+"

@@ -1,6 +1,6 @@
+import Combine
 import Foundation
 import SwiftData
-import Combine
 
 @MainActor
 final class ChatManager: ObservableObject {
@@ -159,7 +159,6 @@ final class ChatManager: ObservableObject {
 
             conversation.updatedAt = Date()
             try context.save()
-
         } catch {
             context.delete(assistantMessage)
             conversation.messages.removeLast()

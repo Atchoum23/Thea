@@ -68,7 +68,7 @@ public final class AgentRegistry {
 
     /// Get agent information
     public func getAgent(_ agentID: UUID) -> AgentInfo? {
-        return registeredAgents[agentID]
+        registeredAgents[agentID]
     }
 
     /// Find available agent of specific type
@@ -88,14 +88,14 @@ public final class AgentRegistry {
 
     /// Find agents with specific capability
     public func findAgentsWithCapability(_ capability: AgentCapability) -> [UUID] {
-        return registeredAgents.values
+        registeredAgents.values
             .filter { $0.capabilities.contains(capability) }
             .map { $0.id }
     }
 
     /// Get all agents of a specific type
     public func getAgents(ofType type: AgentType) -> [UUID] {
-        return agentPool[type] ?? []
+        agentPool[type] ?? []
     }
 
     // MARK: - Agent Status Management
@@ -139,12 +139,12 @@ public final class AgentRegistry {
 
     /// Get health statistics for an agent
     public func getHealthStats(_ agentID: UUID) -> AgentHealthStats? {
-        return healthMonitor.getStats(agentID)
+        healthMonitor.getStats(agentID)
     }
 
     /// Get all unhealthy agents
     public func getUnhealthyAgents() -> [UUID] {
-        return registeredAgents.values
+        registeredAgents.values
             .filter { !isHealthy($0.id) }
             .map { $0.id }
     }
@@ -163,7 +163,7 @@ public final class AgentRegistry {
 
     /// Check if agent has capability
     public func hasCapability(_ agentID: UUID, capability: AgentCapability) -> Bool {
-        return registeredAgents[agentID]?.capabilities.contains(capability) ?? false
+        registeredAgents[agentID]?.capabilities.contains(capability) ?? false
     }
 
     // MARK: - Pool Management
@@ -281,7 +281,7 @@ public enum AgentType: String, Codable, CaseIterable {
     case specialized
 
     public var displayName: String {
-        return rawValue.capitalized
+        rawValue.capitalized
     }
 }
 

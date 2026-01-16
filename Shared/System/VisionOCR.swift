@@ -1,5 +1,5 @@
-import Foundation
 import CoreGraphics
+import Foundation
 import OSLog
 
 #if os(macOS) || os(iOS)

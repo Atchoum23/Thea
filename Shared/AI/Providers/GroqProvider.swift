@@ -14,8 +14,8 @@ final class GroqProvider: AIProvider, Sendable {
         supportsVision: false,
         supportsFunctionCalling: true,
         supportsWebSearch: false,
-        maxContextTokens: 32768,
-        maxOutputTokens: 8192,
+        maxContextTokens: 32_768,
+        maxOutputTokens: 8_192,
         supportedModalities: [.text]
     )
 
@@ -181,13 +181,13 @@ final class GroqProvider: AIProvider, Sendable {
     // MARK: - Models
 
     func listModels() async throws -> [AIModel] {
-        return [
+        [
             AIModel(
                 id: "llama-3.3-70b-versatile",
                 name: "Llama 3.3 70B",
                 description: "Most capable Llama model on Groq",
-                contextWindow: 32768,
-                maxOutputTokens: 8192,
+                contextWindow: 32_768,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 0.59,
                 outputPricePerMillion: 0.79,
                 supportsVision: false,
@@ -197,8 +197,8 @@ final class GroqProvider: AIProvider, Sendable {
                 id: "llama-3.1-8b-instant",
                 name: "Llama 3.1 8B",
                 description: "Ultra-fast Llama model",
-                contextWindow: 32768,
-                maxOutputTokens: 8192,
+                contextWindow: 32_768,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 0.05,
                 outputPricePerMillion: 0.08,
                 supportsVision: false,
@@ -208,8 +208,8 @@ final class GroqProvider: AIProvider, Sendable {
                 id: "mixtral-8x7b-32768",
                 name: "Mixtral 8x7B",
                 description: "Fast mixture of experts model",
-                contextWindow: 32768,
-                maxOutputTokens: 8192,
+                contextWindow: 32_768,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 0.24,
                 outputPricePerMillion: 0.24,
                 supportsVision: false,

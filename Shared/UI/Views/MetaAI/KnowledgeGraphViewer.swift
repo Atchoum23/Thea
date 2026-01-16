@@ -17,9 +17,9 @@ struct KnowledgeGraphViewer: View {
         if !searchText.isEmpty {
             nodes = nodes.filter { node in
                 node.content.lowercased().contains(searchText.lowercased()) ||
-                node.metadata.values.contains(where: { value in
+                node.metadata.values.contains { value in
                     String(describing: value).lowercased().contains(searchText.lowercased())
-                })
+                }
             }
         }
 
@@ -44,9 +44,9 @@ struct KnowledgeGraphViewer: View {
             if let node = selectedNode {
                 NodeDetailView(node: node, knowledgeGraph: knowledgeGraph)
             } else {
-                GraphOverviewView(nodes: filteredNodes, onNodeTap: { node in
+                GraphOverviewView(nodes: filteredNodes) { node in
                     selectedNode = node
-                })
+                }
             }
         }
     }
@@ -77,37 +77,32 @@ struct KnowledgeGraphViewer: View {
                 HStack(spacing: 8) {
                     FilterChip(
                         title: "All",
-                        isSelected: filterType == nil,
-                        action: { filterType = nil }
-                    )
+                        isSelected: filterType == nil
+                    )                        { filterType = nil }
 
                     FilterChip(
                         title: "Concepts",
                         icon: "brain",
-                        isSelected: filterType == .concept,
-                        action: { filterType = .concept }
-                    )
+                        isSelected: filterType == .concept
+                    )                        { filterType = .concept }
 
                     FilterChip(
                         title: "Facts",
                         icon: "doc.text",
-                        isSelected: filterType == .fact,
-                        action: { filterType = .fact }
-                    )
+                        isSelected: filterType == .fact
+                    )                        { filterType = .fact }
 
                     FilterChip(
                         title: "Insights",
                         icon: "lightbulb",
-                        isSelected: filterType == .insight,
-                        action: { filterType = .insight }
-                    )
+                        isSelected: filterType == .insight
+                    )                        { filterType = .insight }
 
                     FilterChip(
                         title: "References",
                         icon: "link",
-                        isSelected: filterType == .reference,
-                        action: { filterType = .reference }
-                    )
+                        isSelected: filterType == .reference
+                    )                        { filterType = .reference }
                 }
                 .padding(.horizontal, 4)
             }
@@ -455,7 +450,7 @@ struct GraphOverviewView: View {
                         Text("Recent Nodes")
                             .font(.headline)
 
-                        ForEach(nodes.sorted(by: { $0.createdAt > $1.createdAt }).prefix(5)) { node in
+                        ForEach(nodes.sorted { $0.createdAt > $1.createdAt }.prefix(5)) { node in
                             Button(action: { onNodeTap(node) }) {
                                 NodeRow(node: node)
                             }

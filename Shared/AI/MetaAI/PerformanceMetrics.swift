@@ -178,7 +178,7 @@ public final class PerformanceMetricsManager {
 
     // Configuration
     public var retentionPeriod: TimeInterval = 7 * 24 * 60 * 60  // 7 days
-    public var maxMetricsCount: Int = 10000
+    public var maxMetricsCount: Int = 10_000
 
     private init() {}
 
@@ -221,7 +221,7 @@ public final class PerformanceMetricsManager {
         record(.outputTokens, value: Double(outputTokens))
 
         if totalTime > 0 {
-            let tokensPerSecond = Double(outputTokens) / (totalTime / 1000.0)
+            let tokensPerSecond = Double(outputTokens) / (totalTime / 1_000.0)
             record(.tokensPerSecond, value: tokensPerSecond)
         }
 
@@ -300,8 +300,8 @@ public final class PerformanceMetricsManager {
         let maxValue = values.last ?? 0
         let average = values.reduce(0, +) / Double(count)
         let median = count % 2 == 0
-            ? (values[count/2 - 1] + values[count/2]) / 2
-            : values[count/2]
+            ? (values[count / 2 - 1] + values[count / 2]) / 2
+            : values[count / 2]
 
         // Standard deviation
         let variance = values.reduce(0) { $0 + pow($1 - average, 2) } / Double(count)
@@ -374,7 +374,7 @@ public final class PerformanceMetricsManager {
             if summary.metricType == .errorRate && summary.average > 5 {
                 return "High error rate: \(String(format: "%.1f", summary.average))%"
             }
-            if summary.metricType == .responseTime && summary.average > 3000 {
+            if summary.metricType == .responseTime && summary.average > 3_000 {
                 return "Slow response time: \(String(format: "%.0f", summary.average))ms"
             }
             return nil

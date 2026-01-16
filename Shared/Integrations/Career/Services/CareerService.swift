@@ -3,7 +3,6 @@ import SwiftData
 
 /// Career development service
 public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, CareerCareerReflectionServiceProtocol, GrowthRecommendationProtocol {
-
     // MARK: - Properties
 
     private var goals: [UUID: CareerGoal] = [:]
@@ -36,11 +35,11 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
     }
 
     public func fetchGoals() async throws -> [CareerGoal] {
-        return Array(goals.values).sorted { $0.startDate > $1.startDate }
+        Array(goals.values).sorted { $0.startDate > $1.startDate }
     }
 
     public func fetchGoals(status: CareerGoalStatus) async throws -> [CareerGoal] {
-        return goals.values.filter { $0.status == status }
+        goals.values.filter { $0.status == status }
             .sorted { $0.startDate > $1.startDate }
     }
 
@@ -108,11 +107,11 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
     }
 
     public func fetchSkills() async throws -> [Skill] {
-        return Array(skills.values).sorted { $0.name < $1.name }
+        Array(skills.values).sorted { $0.name < $1.name }
     }
 
     public func fetchSkills(category: SkillCategory) async throws -> [Skill] {
-        return skills.values.filter { $0.category == category }
+        skills.values.filter { $0.category == category }
             .sorted { $0.name < $1.name }
     }
 
@@ -148,7 +147,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
     }
 
     public func fetchCareerReflections(from startDate: Date, to endDate: Date) async throws -> [CareerReflection] {
-        return reflections.values.filter { reflection in
+        reflections.values.filter { reflection in
             reflection.date >= startDate && reflection.date <= endDate
         }.sorted { $0.date > $1.date }
     }
@@ -259,7 +258,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
     }
 
     public func fetchActiveRecommendations() async throws -> [GrowthRecommendation] {
-        return recommendations.values.filter { !$0.dismissed }
+        recommendations.values.filter { !$0.dismissed }
             .sorted { $0.priority > $1.priority }
     }
 

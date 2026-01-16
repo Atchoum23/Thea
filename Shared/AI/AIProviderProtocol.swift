@@ -61,8 +61,8 @@ struct ProviderCapabilities: Codable, Sendable {
         supportsVision: Bool = false,
         supportsFunctionCalling: Bool = false,
         supportsWebSearch: Bool = false,
-        maxContextTokens: Int = 128000,
-        maxOutputTokens: Int = 4096,
+        maxContextTokens: Int = 128_000,
+        maxOutputTokens: Int = 4_096,
         supportedModalities: [Modality] = [.text]
     ) {
         self.supportsStreaming = supportsStreaming

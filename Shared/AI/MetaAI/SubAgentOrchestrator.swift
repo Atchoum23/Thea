@@ -264,7 +264,7 @@ final class SubAgentOrchestrator {
     }
 
     private func decomposePlan(_ plan: TaskPlan) async throws -> [SubTask] {
-        return plan.steps.enumerated().map { index, step in
+        plan.steps.enumerated().map { index, step in
             SubTask(
                 id: UUID(),
                 description: step,
@@ -278,7 +278,7 @@ final class SubAgentOrchestrator {
     // MARK: - Agent Assignment
 
     private func assignAgents(to subTasks: [SubTask]) -> [AgentAssignment] {
-        return subTasks.map { subTask in
+        subTasks.map { subTask in
             let agent = getAgent(type: subTask.assignedAgentType)
             return AgentAssignment(
                 subTask: subTask,
@@ -584,17 +584,17 @@ final class SubAgentOrchestrator {
 
     private func extractSteps(from planText: String) -> [String] {
         // Simplified extraction - should use proper parsing
-        return planText.split(separator: "\n")
+        planText.split(separator: "\n")
             .filter { $0.contains("Step") || $0.contains(".") }
             .map { String($0) }
     }
 
     private func extractCriteria(from planText: String) -> [String] {
-        return ["Output is complete", "Output is accurate", "Output meets requirements"]
+        ["Output is complete", "Output is accurate", "Output meets requirements"]
     }
 
     private func calculatePriority(step: Int, total: Int) -> Int {
-        return total - step
+        total - step
     }
 
     // Helper to stream provider response into a single string

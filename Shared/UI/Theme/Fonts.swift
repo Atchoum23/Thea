@@ -1,7 +1,6 @@
 import SwiftUI
 
 extension Font {
-
     // MARK: - Helper to Convert Weight String
 
     private static func weight(from string: String) -> Font.Weight {

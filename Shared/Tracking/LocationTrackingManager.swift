@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 #if os(iOS)
 import CoreLocation
@@ -24,7 +24,7 @@ final class LocationTrackingManager: NSObject, CLLocationManagerDelegate {
         AppConfiguration.shared.lifeTrackingConfig
     }
 
-    private override init() {
+    override private init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters

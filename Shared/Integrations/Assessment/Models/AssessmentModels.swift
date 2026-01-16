@@ -206,7 +206,7 @@ public struct AssessmentTemplate: Sendable {
             AssessmentQuestion(text: "I often find it difficult to see things from another person's viewpoint", category: "Empathy"),
             AssessmentQuestion(text: "On the whole, I'm a highly motivated person", category: "Self-Motivation"),
             AssessmentQuestion(text: "I would normally find it difficult to keep myself motivated", category: "Self-Motivation"),
-            AssessmentQuestion(text: "I generally believe that things will work out fine in my life", category: "Optimism"),
+            AssessmentQuestion(text: "I generally believe that things will work out fine in my life", category: "Optimism")
             // ... Additional 25 questions would be added here
         ]
     )
@@ -219,7 +219,7 @@ public struct AssessmentTemplate: Sendable {
             AssessmentQuestion(text: "Do you seem to be aware of subtleties in your environment?", category: "Awareness"),
             AssessmentQuestion(text: "Do other people's moods affect you?", category: "Empathy"),
             AssessmentQuestion(text: "Do you tend to be more sensitive to pain?", category: "Physical Sensitivity"),
-            AssessmentQuestion(text: "Do you find yourself needing to withdraw during busy days?", category: "Overwhelm"),
+            AssessmentQuestion(text: "Do you find yourself needing to withdraw during busy days?", category: "Overwhelm")
             // ... Additional 22 questions would be added here
         ]
     )
@@ -232,7 +232,7 @@ public struct AssessmentTemplate: Sendable {
             AssessmentQuestion(text: "I easily remember names and faces", category: "Memory"),
             AssessmentQuestion(text: "I can focus on tasks without getting distracted", category: "Attention"),
             AssessmentQuestion(text: "I process information quickly", category: "Processing Speed"),
-            AssessmentQuestion(text: "I can see patterns others miss", category: "Pattern Recognition"),
+            AssessmentQuestion(text: "I can see patterns others miss", category: "Pattern Recognition")
             // ... Additional 15 questions would be added here
         ]
     )
@@ -245,7 +245,7 @@ public struct AssessmentTemplate: Sendable {
             AssessmentQuestion(text: "I am someone who tends to find fault with others", category: "Agreeableness"),
             AssessmentQuestion(text: "I am someone who does a thorough job", category: "Conscientiousness"),
             AssessmentQuestion(text: "I am someone who is depressed, blue", category: "Neuroticism"),
-            AssessmentQuestion(text: "I am someone who is original, comes up with new ideas", category: "Openness"),
+            AssessmentQuestion(text: "I am someone who is original, comes up with new ideas", category: "Openness")
             // ... Additional 45 questions would be added here
         ]
     )

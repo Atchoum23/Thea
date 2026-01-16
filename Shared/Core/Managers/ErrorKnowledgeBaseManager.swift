@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 // MARK: - Error Knowledge Base Manager
 // Manages SwiftData context lifecycle for error learning system
@@ -146,7 +146,7 @@ public final class ErrorKnowledgeBaseManager {
 
     /// Finds a fix for an error using the ErrorKnowledgeBase
     public func findFix(for error: ErrorParser.ParsedError) async -> ErrorKnowledgeBase.KnownFix? {
-        return await errorKnowledgeBase.findFix(for: error)
+        await errorKnowledgeBase.findFix(for: error)
     }
 
     /// Finds a fix by message and category
@@ -154,7 +154,7 @@ public final class ErrorKnowledgeBaseManager {
         forMessage message: String,
         category: ErrorParser.ErrorCategory
     ) async -> ErrorKnowledgeBase.KnownFix? {
-        return await errorKnowledgeBase.findFix(forMessage: message, category: category)
+        await errorKnowledgeBase.findFix(forMessage: message, category: category)
     }
 
     /// Records the result of applying a fix
@@ -198,7 +198,7 @@ public final class ErrorKnowledgeBaseManager {
 
     /// Gets error statistics from ErrorKnowledgeBase
     public func getKnowledgeBaseStatistics() async -> KnowledgeBaseStatistics {
-        return await errorKnowledgeBase.getStatistics()
+        await errorKnowledgeBase.getStatistics()
     }
 
     /// Gets error statistics from SwiftData

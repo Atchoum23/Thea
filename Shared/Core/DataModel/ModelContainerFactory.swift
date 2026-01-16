@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 /// Factory for creating ModelContainer with graceful error handling and fallback options
 @MainActor

@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 // MARK: - Browser History Tracker
 // Tracks browsing activity for context-aware assistance

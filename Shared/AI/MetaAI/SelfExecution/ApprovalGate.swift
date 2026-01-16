@@ -120,7 +120,7 @@ public actor ApprovalGate {
     }
 
     public func getPendingApproval() -> ApprovalRequest? {
-        return pendingApproval
+        pendingApproval
     }
 }
 

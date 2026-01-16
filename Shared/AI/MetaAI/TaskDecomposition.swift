@@ -404,12 +404,12 @@ public struct OrchestrationTaskBreakdown {
 
     /// Get total estimated duration
     public var estimatedDuration: TimeInterval {
-        return steps.reduce(0) { $0 + $1.estimatedDuration }
+        steps.reduce(0) { $0 + $1.estimatedDuration }
     }
 
     /// Get steps that can be executed in parallel
     public func getParallelSteps(completed: Set<UUID>) -> [TaskStep] {
-        return steps.filter { step in
+        steps.filter { step in
             !completed.contains(step.id) &&
             step.dependencies.allSatisfy { completed.contains($0) }
         }
@@ -426,7 +426,7 @@ public struct TaskStep: Identifiable {
 
     /// Check if step can be executed
     public func canExecute(completed: Set<UUID>) -> Bool {
-        return dependencies.allSatisfy { completed.contains($0) }
+        dependencies.allSatisfy { completed.contains($0) }
     }
 }
 
@@ -451,12 +451,12 @@ public struct DependencyGraph {
 
     /// Get children of a node
     public func getChildren(_ nodeID: UUID) -> [UUID] {
-        return adjacencyList[nodeID] ?? []
+        adjacencyList[nodeID] ?? []
     }
 
     /// Get parents of a node
     public func getParents(_ nodeID: UUID) -> [UUID] {
-        return adjacencyList.compactMap { (parentID, children) in
+        adjacencyList.compactMap { parentID, children in
             children.contains(nodeID) ? parentID : nil
         }
     }

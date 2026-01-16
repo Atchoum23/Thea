@@ -47,7 +47,7 @@ actor AgentCommunicationHub {
     }
     
     func getMessageHistory(for agentId: UUID) async -> [HubAgentMessage] {
-        return messageHistory[agentId] ?? []
+        messageHistory[agentId] ?? []
     }
     
     func clearHistory(for agentId: UUID) async {

@@ -1,6 +1,6 @@
+import CoreImage
 import Foundation
 import Vision
-import CoreImage
 
 #if os(macOS)
 import AppKit
@@ -51,7 +51,7 @@ final class MultiModalAI {
     }
 
     private func detectObjects(in image: CGImage) async throws -> [DetectedObject] {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             let request = VNDetectRectanglesRequest { request, error in
                 if let error = error {
                     continuation.resume(throwing: error)
@@ -75,7 +75,7 @@ final class MultiModalAI {
     }
 
     private func recognizeText(in image: CGImage) async throws -> String {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             let request = VNRecognizeTextRequest { request, error in
                 if let error = error {
                     continuation.resume(throwing: error)
@@ -95,7 +95,7 @@ final class MultiModalAI {
     }
 
     private func classifyScene(_ image: CGImage) async throws -> String {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             let request = VNClassifyImageRequest { request, error in
                 if let error = error {
                     continuation.resume(throwing: error)
@@ -114,14 +114,14 @@ final class MultiModalAI {
 
     private func extractDominantColors(_ image: CGImage) -> [String] {
         // Simplified color extraction
-        return ["#FFFFFF", "#000000"]
+        ["#FFFFFF", "#000000"]
     }
 
     // MARK: - Document Processing
 
     func parsePDF(data: Data) async throws -> DocumentContent {
         // Simplified PDF parsing
-        return DocumentContent(
+        DocumentContent(
             text: "PDF content",
             images: [],
             tables: [],
@@ -131,7 +131,7 @@ final class MultiModalAI {
 
     func extractTables(from data: Data) async throws -> [TableData] {
         // Simplified table extraction
-        return []
+        []
     }
 
     // MARK: - Data Analysis
@@ -149,7 +149,7 @@ final class MultiModalAI {
 
     func interpretStatistics(data: String) async throws -> StatisticalInsights {
         // Parse and analyze statistical data
-        return StatisticalInsights(
+        StatisticalInsights(
             summary: "Statistical summary",
             trends: [],
             correlations: [],

@@ -160,7 +160,6 @@ struct MigrationProgressView: View {
                     .font(.caption)
 
                     Spacer()
-
                 } else if migrationEngine.completedMigrations.contains(where: { $0.source == source.sourceName }) {
                     // Complete
                     VStack(spacing: 16) {

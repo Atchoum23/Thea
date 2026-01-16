@@ -4,7 +4,6 @@ import Foundation
 @MainActor
 @Observable
 public final class FeatureFlags {
-
     // MARK: - Integration Modules
 
     public var healthEnabled: Bool
@@ -195,7 +194,7 @@ public final class FeatureFlags {
 
     /// Check if any integration module is enabled
     public var hasEnabledModules: Bool {
-        return enabledModulesCount > 0
+        enabledModulesCount > 0
     }
 
     /// Get list of enabled module names

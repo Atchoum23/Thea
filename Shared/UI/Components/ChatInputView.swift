@@ -85,9 +85,8 @@ struct ChatInputView: View {
             if let image = capturedImage {
                 ScreenshotPreview(
                     image: NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height)),
-                    onSend: sendScreenshot,
-                    onCancel: { showingScreenshotPreview = false }
-                )
+                    onSend: sendScreenshot
+                )                    { showingScreenshotPreview = false }
             }
         }
         #endif

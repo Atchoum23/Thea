@@ -1,16 +1,16 @@
-import Foundation
-import Speech
 import Contacts
-import EventKit
-import Photos
-import UserNotifications
 import CoreLocation
+import EventKit
+import Foundation
+import Photos
+import Speech
+import UserNotifications
 
 #if os(macOS)
 import AppKit
 #else
-import UIKit
 import AVFoundation
+import UIKit
 #endif
 
 @MainActor
@@ -327,7 +327,7 @@ final class PermissionsManager {
     // MARK: - Computed Properties
 
     var allPermissionsGranted: Bool {
-        return speechRecognitionStatus == .authorized &&
+        speechRecognitionStatus == .authorized &&
                microphoneStatus == .authorized &&
                notificationsStatus == .authorized
         // Don't require optional permissions

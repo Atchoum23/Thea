@@ -57,7 +57,7 @@ public actor ContextManager {
         let totalTokens = config.getEffectiveContextSize(for: provider)
 
         // Calculate reserved space
-        let reservedForResponse = 4096 // Space for model's response
+        let reservedForResponse = 4_096 // Space for model's response
         let reservedForMetaAI = forMetaAI ? config.metaAIReservedTokens : 0
         let availableForMessages = totalTokens - reservedForResponse - reservedForMetaAI
 
@@ -83,7 +83,7 @@ public actor ContextManager {
         forMetaAI: Bool = false
     ) async -> [TokenizedMessage] {
         let totalTokens = config.getEffectiveContextSize(for: provider)
-        let reservedForResponse = 4096
+        let reservedForResponse = 4_096
         let reservedForMetaAI = forMetaAI ? config.metaAIReservedTokens : 0
         let availableForMessages = totalTokens - reservedForResponse - reservedForMetaAI
 
@@ -115,7 +115,7 @@ public actor ContextManager {
         guard config.contextStrategy != .unlimited else { return false }
 
         let maxTokens = config.getEffectiveContextSize(for: provider)
-        let reservedForResponse = 4096
+        let reservedForResponse = 4_096
         return (currentTokens + newMessageTokens) > (maxTokens - reservedForResponse)
     }
 
@@ -160,7 +160,7 @@ public actor ContextManager {
         // Add messages from most recent, going backwards
         for message in messages.reversed() where message.role != "system" {
             if totalTokens + message.tokenCount <= maxTokens {
-                selected.insert(message, at: selected.count > 0 && selected[0].role == "system" ? 1 : 0)
+                selected.insert(message, at: !selected.isEmpty && selected[0].role == "system" ? 1 : 0)
                 totalTokens += message.tokenCount
             } else {
                 break

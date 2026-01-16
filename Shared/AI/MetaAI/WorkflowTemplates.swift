@@ -11,7 +11,7 @@ public final class WorkflowTemplates {
 
     /// All available workflow templates
     public static var all: [Workflow] {
-        return [
+        [
             // Basic example template
             Workflow(
                 id: UUID(),

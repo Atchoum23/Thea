@@ -1,11 +1,11 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 /// Detailed sleep quality analysis with stage breakdown
 @MainActor
 public struct SleepQualityView: View {
     @State private var viewModel = SleepQualityViewModel()
-    @State private var selectedDate: Date = Date()
+    @State private var selectedDate = Date()
 
     public init() {}
 
@@ -220,7 +220,7 @@ public struct SleepQualityView: View {
             }
             .frame(height: 180)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .hour, count: 2)) { value in
+                AxisMarks(values: .stride(by: .hour, count: 2)) { _ in
                     AxisValueLabel(format: .dateTime.hour())
                     AxisGridLine()
                 }
@@ -648,7 +648,7 @@ final class SleepQualityViewModel {
         // Simulate loading
         try? await Task.sleep(for: .milliseconds(300))
 
-        let bedtime = Calendar.current.date(bySettingHour: 22, minute: 30, second: 0, of: date.addingTimeInterval(-86400))!
+        let bedtime = Calendar.current.date(bySettingHour: 22, minute: 30, second: 0, of: date.addingTimeInterval(-86_400))!
         let wakeTime = Calendar.current.date(bySettingHour: 6, minute: 45, second: 0, of: date)!
 
         let totalMinutes = 450 // 7h 30m

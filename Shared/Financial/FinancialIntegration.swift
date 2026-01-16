@@ -1,5 +1,5 @@
-import Foundation
 import CryptoKit
+import Foundation
 
 // MARK: - Financial Integration System
 // Monitor bank accounts, crypto wallets, and provide financial insights
@@ -205,7 +205,6 @@ final class FinancialIntegration {
         if let large = transactions
             .filter({ abs($0.amount) > averageTransaction * 3 })
             .first {
-
             return FinancialInsight(
                 id: UUID(),
                 type: .unusualSpending,
@@ -521,11 +520,11 @@ struct RevolutProvider: FinancialProvider {
 
     func fetchAccounts() async throws -> [ProviderAccount] {
         // Fetch from Revolut API
-        return []
+        []
     }
 
     func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction] {
-        return []
+        []
     }
 }
 
@@ -538,11 +537,11 @@ struct BinanceProvider: FinancialProvider {
     }
 
     func fetchAccounts() async throws -> [ProviderAccount] {
-        return []
+        []
     }
 
     func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction] {
-        return []
+        []
     }
 }
 
@@ -555,11 +554,11 @@ struct CoinbaseProvider: FinancialProvider {
     }
 
     func fetchAccounts() async throws -> [ProviderAccount] {
-        return []
+        []
     }
 
     func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction] {
-        return []
+        []
     }
 }
 
@@ -572,11 +571,11 @@ struct PlaidProvider: FinancialProvider {
     }
 
     func fetchAccounts() async throws -> [ProviderAccount] {
-        return []
+        []
     }
 
     func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction] {
-        return []
+        []
     }
 }
 

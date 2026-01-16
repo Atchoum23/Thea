@@ -93,7 +93,6 @@ final class HDKnowledgeScanner {
             if config.enableFileWatching {
                 startFileWatching()
             }
-
         } catch {
             isIndexing = false
             throw error
@@ -254,7 +253,7 @@ final class HDKnowledgeScanner {
 
         for (index, word) in words.prefix(dimension).enumerated() {
             let hash = abs(word.hashValue)
-            embedding[index] = Float(hash % 1000) / 1000.0
+            embedding[index] = Float(hash % 1_000) / 1_000.0
         }
 
         // Normalize
@@ -324,7 +323,7 @@ final class HDKnowledgeScanner {
         score += Float(min(matches, config.maxContentMatchBonus)) * config.contentMatchBonus
 
         // Recency bonus (files modified recently)
-        let daysSinceModified = Date().timeIntervalSince(file.lastModified) / (24 * 3600)
+        let daysSinceModified = Date().timeIntervalSince(file.lastModified) / (24 * 3_600)
         if daysSinceModified < config.recentFileDaysThreshold {
             score += config.recentFileBonus
         } else if daysSinceModified < config.moderateRecentFileDaysThreshold {
@@ -382,8 +381,8 @@ final class HDKnowledgeScanner {
             totalFiles: indexedFiles.count,
             totalSize: totalSize,
             fileTypeDistribution: typeCounts,
-            oldestFile: indexedFiles.min(by: { $0.lastModified < $1.lastModified }),
-            newestFile: indexedFiles.max(by: { $0.lastModified < $1.lastModified })
+            oldestFile: indexedFiles.min { $0.lastModified < $1.lastModified },
+            newestFile: indexedFiles.max { $0.lastModified < $1.lastModified }
         )
     }
 }
