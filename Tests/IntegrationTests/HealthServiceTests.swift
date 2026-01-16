@@ -7,7 +7,7 @@ final class HealthServiceTests: XCTestCase {
 
     // MARK: - Blood Pressure Tests
 
-    func testBloodPressureCategor ization() {
+    func testBloodPressureCategorization() {
         // Normal
         let normalReading = BloodPressureReading(
             systolic: 115,
