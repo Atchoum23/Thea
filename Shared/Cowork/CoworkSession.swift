@@ -1,6 +1,7 @@
 import Foundation
 
 /// Represents a Cowork work session
+@MainActor
 @Observable
 final class CoworkSession: Identifiable {
     let id: UUID

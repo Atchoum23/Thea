@@ -1,6 +1,7 @@
 import Foundation
 
 /// Task queue for managing multiple Cowork tasks
+@MainActor
 @Observable
 final class CoworkTaskQueue {
     var tasks: [CoworkTask] = []
@@ -72,41 +73,33 @@ final class CoworkTaskQueue {
             }
 
             // Start tasks concurrently
-            await withTaskGroup(of: Void.self) { group in
-                for task in pendingTasks {
-                    let taskId = task.id
-                    activeTasks.insert(taskId)
+            for task in pendingTasks {
+                let taskId = task.id
+                activeTasks.insert(taskId)
 
+                if let index = tasks.firstIndex(where: { $0.id == taskId }) {
+                    tasks[index].status = .inProgress
+                    tasks[index].startedAt = Date()
+                }
+
+                do {
+                    try await executor(task)
                     if let index = tasks.firstIndex(where: { $0.id == taskId }) {
-                        tasks[index].status = .inProgress
-                        tasks[index].startedAt = Date()
+                        tasks[index].status = .completed
+                        tasks[index].completedAt = Date()
                     }
-
-                    group.addTask { [weak self] in
-                        do {
-                            try await executor(task)
-                            await MainActor.run {
-                                if let index = self?.tasks.firstIndex(where: { $0.id == taskId }) {
-                                    self?.tasks[index].status = .completed
-                                    self?.tasks[index].completedAt = Date()
-                                }
-                                self?.activeTasks.remove(taskId)
-                                self?.completionHandlers[taskId]?(.success(()))
-                                self?.completionHandlers.removeValue(forKey: taskId)
-                            }
-                        } catch {
-                            await MainActor.run {
-                                if let index = self?.tasks.firstIndex(where: { $0.id == taskId }) {
-                                    self?.tasks[index].status = .failed
-                                    self?.tasks[index].completedAt = Date()
-                                    self?.tasks[index].error = error.localizedDescription
-                                }
-                                self?.activeTasks.remove(taskId)
-                                self?.completionHandlers[taskId]?(.failure(error))
-                                self?.completionHandlers.removeValue(forKey: taskId)
-                            }
-                        }
+                    activeTasks.remove(taskId)
+                    completionHandlers[taskId]?(.success(()))
+                    completionHandlers.removeValue(forKey: taskId)
+                } catch {
+                    if let index = tasks.firstIndex(where: { $0.id == taskId }) {
+                        tasks[index].status = .failed
+                        tasks[index].completedAt = Date()
+                        tasks[index].error = error.localizedDescription
                     }
+                    activeTasks.remove(taskId)
+                    completionHandlers[taskId]?(.failure(error))
+                    completionHandlers.removeValue(forKey: taskId)
                 }
             }
         }

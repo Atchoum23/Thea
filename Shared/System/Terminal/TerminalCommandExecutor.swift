@@ -1,7 +1,7 @@
 import Foundation
 
 /// Executes terminal commands either directly via Process or through Terminal.app
-final class TerminalCommandExecutor {
+final class TerminalCommandExecutor: @unchecked Sendable {
     enum ExecutorError: LocalizedError {
         case commandBlocked(String)
         case confirmationRequired(String)
