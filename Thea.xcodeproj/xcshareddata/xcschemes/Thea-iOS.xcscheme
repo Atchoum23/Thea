@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2620"
-   version = "1.3">
+   LastUpgradeVersion = "1500"
+   version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES">
+      buildImplicitDependencies = "YES"
+      runPostActionsOnFailure = "NO">
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -15,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "811660DEAC235163677871EC"
-               BuildableName = "Thea.app"
+               BuildableName = "Thea-iOS.app"
                BlueprintName = "Thea-iOS"
                ReferencedContainer = "container:Thea.xcodeproj">
             </BuildableReference>
@@ -26,21 +27,25 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      codeCoverageEnabled = "YES"
+      onlyGenerateCoverageForSpecifiedTargets = "NO">
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "811660DEAC235163677871EC"
-            BuildableName = "Thea.app"
+            BuildableName = "Thea-iOS.app"
             BlueprintName = "Thea-iOS"
             ReferencedContainer = "container:Thea.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
       </Testables>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -54,11 +59,13 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "811660DEAC235163677871EC"
-            BuildableName = "Thea.app"
+            BuildableName = "Thea-iOS.app"
             BlueprintName = "Thea-iOS"
             ReferencedContainer = "container:Thea.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -71,14 +78,16 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "811660DEAC235163677871EC"
-            BuildableName = "Thea.app"
+            BuildableName = "Thea-iOS.app"
             BlueprintName = "Thea-iOS"
             ReferencedContainer = "container:Thea.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </ProfileAction>
    <AnalyzeAction
-      buildConfiguration = "Release">
+      buildConfiguration = "Debug">
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Release"

@@ -1,6 +1,7 @@
 @testable import TheaCore
 import XCTest
 
+@MainActor
 final class AllProvidersTests: XCTestCase {
     func testAllProvidersHaveMetadata() {
         let providers: [AIProvider] = [
