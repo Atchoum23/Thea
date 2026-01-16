@@ -1,6 +1,7 @@
 import Foundation
 
 /// Manages skills (file type creation capabilities) for Cowork
+@MainActor
 @Observable
 final class CoworkSkillsManager {
     static let shared = CoworkSkillsManager()

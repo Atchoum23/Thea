@@ -1,3 +1,4 @@
+#if os(macOS)
 import AppKit
 import ApplicationServices
 import Foundation
@@ -31,14 +32,16 @@ struct AccessibilityBridge {
     // MARK: - Permission Check
 
     /// Check if accessibility access is granted
-    static func isAccessibilityEnabled() -> Bool {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: false] as CFDictionary
+    nonisolated static func isAccessibilityEnabled() -> Bool {
+        let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+        let options = [key: false] as CFDictionary
         return AXIsProcessTrustedWithOptions(options)
     }
 
     /// Request accessibility access (shows system prompt)
-    static func requestAccessibilityAccess() {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+    nonisolated static func requestAccessibilityAccess() {
+        let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+        let options = [key: true] as CFDictionary
         _ = AXIsProcessTrustedWithOptions(options)
     }
 
@@ -292,3 +295,4 @@ private func observerCallback(
         }
     }
 }
+#endif
