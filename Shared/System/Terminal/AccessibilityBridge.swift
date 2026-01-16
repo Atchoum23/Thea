@@ -1,6 +1,6 @@
 #if os(macOS)
 import AppKit
-import ApplicationServices
+@preconcurrency import ApplicationServices
 import Foundation
 
 /// Bridge for reading Terminal content via macOS Accessibility API
