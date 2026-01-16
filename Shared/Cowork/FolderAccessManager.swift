@@ -56,6 +56,7 @@ final class FolderAccessManager {
     // MARK: - Folder Access
 
     /// Request access to a folder via system dialog
+    @MainActor
     func requestFolderAccess(initialDirectory: URL? = nil) -> URL? {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false

@@ -4,7 +4,7 @@ import OSLog
 
 #if os(macOS)
 import AppKit
-import ScreenCaptureKit
+@preconcurrency import ScreenCaptureKit
 #endif
 
 // MARK: - ScreenCapture
