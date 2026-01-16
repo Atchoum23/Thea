@@ -1,4 +1,4 @@
-@testable import TheaCoreCore
+@testable import TheaCore
 import XCTest
 
 final class OpenAIProviderTests: XCTestCase {

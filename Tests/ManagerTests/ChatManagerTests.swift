@@ -1,5 +1,5 @@
 import SwiftData
-@testable import TheaCoreCore
+@testable import TheaCore
 import XCTest
 
 @MainActor
