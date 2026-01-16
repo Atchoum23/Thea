@@ -48,8 +48,8 @@ final class TerminalIntegrationManager: ObservableObject {
     // MARK: - Internal Components
 
     // These are marked nonisolated(unsafe) because they are Sendable and thread-safe
-    private nonisolated(unsafe) let windowReader = TerminalWindowReader()
-    private nonisolated(unsafe) var executor: TerminalCommandExecutor
+    nonisolated(unsafe) private let windowReader = TerminalWindowReader()
+    nonisolated(unsafe) private var executor: TerminalCommandExecutor
     private var monitorTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
     private let commandHistoryURL: URL
