@@ -131,7 +131,7 @@ enum HubMessagePayload: Sendable {
     case result(HubTaskResult)
     case status(AgentStatusUpdate)
     case data(Data)
-    case error(ErrorInfo)
+    case error(AgentErrorInfo)
     case text(String)
     case custom([String: String])
 }
@@ -156,11 +156,11 @@ struct AgentStatusUpdate: Sendable {
     let details: String?
 }
 
-struct ErrorInfo: Sendable {
+struct AgentErrorInfo: Sendable {
     let code: String
     let message: String
     let severity: ErrorSeverity
-    
+
     enum ErrorSeverity: String, Sendable {
         case warning
         case error

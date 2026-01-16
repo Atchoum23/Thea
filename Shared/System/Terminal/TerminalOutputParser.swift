@@ -89,8 +89,8 @@ struct TerminalOutputParser {
     }
 
     /// Parse common error patterns
-    static func parseErrors(_ text: String) -> [ErrorInfo] {
-        var errors: [ErrorInfo] = []
+    static func parseErrors(_ text: String) -> [TerminalErrorInfo] {
+        var errors: [TerminalErrorInfo] = []
 
         // Common error patterns
         let patterns: [(pattern: String, type: ErrorType)] = [
@@ -112,7 +112,7 @@ struct TerminalOutputParser {
 
         for line in text.components(separatedBy: .newlines) {
             for (pattern, type) in patterns where line.localizedCaseInsensitiveContains(pattern) {
-                errors.append(ErrorInfo(line: line, type: type))
+                errors.append(TerminalErrorInfo(line: line, type: type))
                 break
             }
         }
@@ -236,7 +236,7 @@ struct ANSIStyle {
     }
 }
 
-struct ErrorInfo: Identifiable {
+struct TerminalErrorInfo: Identifiable {
     let id = UUID()
     let line: String
     let type: ErrorType

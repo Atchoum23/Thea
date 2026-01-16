@@ -284,21 +284,3 @@ private func observerCallback(
     }
 }
 
-// Helper extension to manage callback
-extension TerminalAccessibilityMonitor {
-    fileprivate var onChange: ((String) -> Void)? {
-        get { _onChange }
-        set { _onChange = newValue }
-    }
-
-    private static var onChangeKey: UInt8 = 0
-
-    private var _onChange: ((String) -> Void)? {
-        get {
-            objc_getAssociatedObject(self, &Self.onChangeKey) as? (String) -> Void
-        }
-        set {
-            objc_setAssociatedObject(self, &Self.onChangeKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
-}
