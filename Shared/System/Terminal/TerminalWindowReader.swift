@@ -290,8 +290,8 @@ final class TerminalWindowReader {
         case typeAERecord:
             var dict: [String: Any] = [:]
             for i in 1...descriptor.numberOfItems {
-                if let item = descriptor.atIndex(i),
-                   let key = descriptor.keywordForDescriptor(at: i) {
+                if let item = descriptor.atIndex(i) {
+                    let key = descriptor.keywordForDescriptor(at: i)
                     let keyString = String(format: "%c%c%c%c",
                                           (key >> 24) & 0xFF,
                                           (key >> 16) & 0xFF,

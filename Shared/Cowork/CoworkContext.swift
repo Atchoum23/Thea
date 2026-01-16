@@ -187,25 +187,25 @@ struct CoworkContext: Codable, Equatable {
 extension CoworkContext.Rule {
     static var defaultRules: [CoworkContext.Rule] {
         [
-            Rule(
+            CoworkContext.Rule(
                 name: "Safe File Operations",
                 description: "Always confirm before deleting files",
                 isEnabled: true,
                 priority: 100
             ),
-            Rule(
+            CoworkContext.Rule(
                 name: "Backup Before Modify",
                 description: "Create backup before modifying important files",
                 isEnabled: true,
                 priority: 90
             ),
-            Rule(
+            CoworkContext.Rule(
                 name: "Respect .gitignore",
                 description: "Don't process files listed in .gitignore",
                 isEnabled: true,
                 priority: 80
             ),
-            Rule(
+            CoworkContext.Rule(
                 name: "Skip Hidden Files",
                 description: "Don't process files starting with .",
                 isEnabled: false,

@@ -67,8 +67,9 @@ struct AccessibilityBridge {
         }
 
         // Find the text area (scroll area > text area)
-        if let windowElement = window as? AXUIElement,
-           let textContent = try? findTextContent(in: windowElement) {
+        // swiftlint:disable:next force_cast
+        let windowElement = window as! AXUIElement
+        if let textContent = try? findTextContent(in: windowElement) {
             return textContent
         }
 
@@ -97,7 +98,8 @@ struct AccessibilityBridge {
         }
 
         var selectedText: CFTypeRef?
-        guard let axElement = element as? AXUIElement else { return nil }
+        // swiftlint:disable:next force_cast
+        let axElement = element as! AXUIElement
         let textResult = AXUIElementCopyAttributeValue(axElement, kAXSelectedTextAttribute as CFString, &selectedText)
 
         if textResult == .success, let text = selectedText as? String {
@@ -124,9 +126,12 @@ struct AccessibilityBridge {
         var focusedWindow: CFTypeRef?
         let windowResult = AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &focusedWindow)
 
-        guard windowResult == .success, let window = focusedWindow as? AXUIElement else {
+        guard windowResult == .success, let windowRef = focusedWindow else {
             throw AccessibilityError.noFocusedWindow
         }
+
+        // swiftlint:disable:next force_cast
+        let window = windowRef as! AXUIElement
 
         var positionValue: CFTypeRef?
         var sizeValue: CFTypeRef?
@@ -137,11 +142,15 @@ struct AccessibilityBridge {
         var position = CGPoint.zero
         var size = CGSize.zero
 
-        if let posValue = positionValue as? AXValue {
+        if let posRef = positionValue {
+            // swiftlint:disable:next force_cast
+            let posValue = posRef as! AXValue
             AXValueGetValue(posValue, .cgPoint, &position)
         }
 
-        if let szValue = sizeValue as? AXValue {
+        if let szRef = sizeValue {
+            // swiftlint:disable:next force_cast
+            let szValue = szRef as! AXValue
             AXValueGetValue(szValue, .cgSize, &size)
         }
 
@@ -221,7 +230,7 @@ struct AccessibilityBridge {
 final class TerminalAccessibilityMonitor {
     private var observer: AXObserver?
     private var terminalPID: pid_t?
-    private var onChange: ((String) -> Void)?
+    fileprivate var onChange: ((String) -> Void)?
 
     func startMonitoring(onChange: @escaping (String) -> Void) throws {
         guard AccessibilityBridge.isAccessibilityEnabled() else {

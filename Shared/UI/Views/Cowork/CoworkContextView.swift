@@ -59,29 +59,30 @@ struct CoworkContextView: View {
 
     @ViewBuilder
     private func countBadge(for section: ContextSection) -> some View {
-        if let session = manager.currentSession {
-            let count: Int
-            switch section {
-            case .files:
-                count = session.context.uniqueFilesAccessed.count
-            case .urls:
-                count = session.context.uniqueURLsAccessed.count
-            case .connectors:
-                count = session.context.activeConnectors.count
-            case .rules:
-                count = session.context.enabledRules.count
-            case .environment:
-                count = session.context.environmentVariables.count
-            }
+        let count = countForSection(section)
+        if count > 0 {
+            Text("\(count)")
+                .font(.caption2)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.accentColor.opacity(0.2))
+                .cornerRadius(4)
+        }
+    }
 
-            if count > 0 {
-                Text("\(count)")
-                    .font(.caption2)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.accentColor.opacity(0.2))
-                    .cornerRadius(4)
-            }
+    private func countForSection(_ section: ContextSection) -> Int {
+        guard let session = manager.currentSession else { return 0 }
+        switch section {
+        case .files:
+            return session.context.uniqueFilesAccessed.count
+        case .urls:
+            return session.context.uniqueURLsAccessed.count
+        case .connectors:
+            return session.context.activeConnectors.count
+        case .rules:
+            return session.context.enabledRules.count
+        case .environment:
+            return session.context.environmentVariables.count
         }
     }
 
