@@ -112,7 +112,7 @@ public struct ConversationSettingsView: View {
                         get: { config.maxConversationLength ?? 100 },
                         set: { config.maxConversationLength = $0 }
                     ),
-                    in: 10...1000,
+                    in: 10...1_000,
                     step: 10
                 )
             }
@@ -188,7 +188,7 @@ public struct ConversationSettingsView: View {
     private var providerContextSheet: some View {
         NavigationStack {
             List {
-                ForEach(ConversationConfiguration.providerContextSizes.sorted(by: { $0.value > $1.value }), id: \.key) { provider, size in
+                ForEach(ConversationConfiguration.providerContextSizes.sorted { $0.value > $1.value }, id: \.key) { provider, size in
                     HStack {
                         Text(provider)
                             .font(.system(.body, design: .monospaced))

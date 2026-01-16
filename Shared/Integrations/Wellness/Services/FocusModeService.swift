@@ -1,5 +1,5 @@
-import Foundation
 import AVFoundation
+import Foundation
 
 /// Service for managing focus modes and sessions
 public actor FocusModeService: FocusModeServiceProtocol {

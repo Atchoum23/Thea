@@ -68,7 +68,7 @@ final class AgentSwarm {
             for i in 0..<swarm.agentCount {
                 group.addTask {
                     let progress = Float(i) / Float(swarm.agentCount)
-                    progressHandler(SwarmProgress(phase: "Agent \(i+1) executing", percentage: progress))
+                    progressHandler(SwarmProgress(phase: "Agent \(i + 1) executing", percentage: progress))
 
                     return try await self.executeAgent(
                         task: swarm.task,
@@ -125,7 +125,7 @@ final class AgentSwarm {
         }
 
         // Select best result based on confidence
-        let bestResult = agentResults.max(by: { $0.confidence < $1.confidence })?.output ?? ""
+        let bestResult = agentResults.max { $0.confidence < $1.confidence }?.output ?? ""
 
         return SwarmResult(
             swarmID: swarm.id,
@@ -148,7 +148,7 @@ final class AgentSwarm {
         // Execute agents sequentially, each building on previous
         for i in 0..<swarm.agentCount {
             let progress = Float(i) / Float(swarm.agentCount)
-            progressHandler(SwarmProgress(phase: "Agent \(i+1) collaborating", percentage: progress))
+            progressHandler(SwarmProgress(phase: "Agent \(i + 1) collaborating", percentage: progress))
 
             let result = try await executeAgent(
                 task: currentContext,
@@ -157,7 +157,7 @@ final class AgentSwarm {
             )
 
             agentResults.append(result)
-            currentContext += "\n\nAgent \(i+1) contribution: \(result.output)"
+            currentContext += "\n\nAgent \(i + 1) contribution: \(result.output)"
         }
 
         let finalResult = agentResults.last?.output ?? ""

@@ -359,7 +359,6 @@ struct LocalModelsView: View {
                 alert.addButton(withTitle: "OK")
                 alert.runModal()
                 #endif
-
             } catch {
                 print("❌ Model test failed: \(error)")
 

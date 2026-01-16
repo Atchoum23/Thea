@@ -5,7 +5,6 @@ import SwiftUI
 @MainActor
 @Observable
 public final class IncomeViewModel {
-
     // MARK: - Published State
 
     public var streams: [IncomeStream] = []
@@ -57,7 +56,6 @@ public final class IncomeViewModel {
             // Load tax estimate
             let currentYear = Calendar.current.component(.year, from: now)
             taxEstimate = try await incomeService.calculateTaxEstimate(for: currentYear)
-
         } catch {
             errorMessage = error.localizedDescription
         }

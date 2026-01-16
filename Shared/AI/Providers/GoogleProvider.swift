@@ -14,8 +14,8 @@ final class GoogleProvider: AIProvider, Sendable {
         supportsVision: true,
         supportsFunctionCalling: true,
         supportsWebSearch: false,
-        maxContextTokens: 1000000, // Gemini 1.5 Pro
-        maxOutputTokens: 8192,
+        maxContextTokens: 1_000_000, // Gemini 1.5 Pro
+        maxOutputTokens: 8_192,
         supportedModalities: [.text, .image, .video, .audio]
     )
 
@@ -119,7 +119,6 @@ final class GoogleProvider: AIProvider, Sendable {
                         )
                         continuation.yield(.complete(finalMessage))
                         continuation.finish()
-
                     } catch {
                         continuation.yield(.error(error))
                         continuation.finish(throwing: error)
@@ -162,13 +161,13 @@ final class GoogleProvider: AIProvider, Sendable {
     // MARK: - Models
 
     func listModels() async throws -> [AIModel] {
-        return [
+        [
             AIModel(
                 id: "gemini-2.0-flash-exp",
                 name: "Gemini 2.0 Flash",
                 description: "Experimental next-gen model",
-                contextWindow: 1000000,
-                maxOutputTokens: 8192,
+                contextWindow: 1_000_000,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 0.00, // Free during preview
                 outputPricePerMillion: 0.00,
                 supportsVision: true,
@@ -178,8 +177,8 @@ final class GoogleProvider: AIProvider, Sendable {
                 id: "gemini-1.5-pro",
                 name: "Gemini 1.5 Pro",
                 description: "Most capable Gemini model",
-                contextWindow: 1000000,
-                maxOutputTokens: 8192,
+                contextWindow: 1_000_000,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 1.25,
                 outputPricePerMillion: 5.00,
                 supportsVision: true,
@@ -189,8 +188,8 @@ final class GoogleProvider: AIProvider, Sendable {
                 id: "gemini-1.5-flash",
                 name: "Gemini 1.5 Flash",
                 description: "Fast and cost-effective",
-                contextWindow: 1000000,
-                maxOutputTokens: 8192,
+                contextWindow: 1_000_000,
+                maxOutputTokens: 8_192,
                 inputPricePerMillion: 0.075,
                 outputPricePerMillion: 0.30,
                 supportsVision: true,

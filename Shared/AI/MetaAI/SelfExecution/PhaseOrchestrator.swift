@@ -107,7 +107,6 @@ public actor PhaseOrchestrator {
 
                 // Notify UI
                 await postProgressUpdate(phase: phase, filesCompleted: filesCreated)
-
             } catch {
                 errors.append("\(file.path): \(error.localizedDescription)")
                 try await ProgressTracker.shared.updateProgress(

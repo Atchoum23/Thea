@@ -5,7 +5,6 @@ import SwiftData
 @MainActor
 @Observable
 public final class IntegrationsManager {
-
     // MARK: - Singleton
 
     public static let shared = IntegrationsManager()
@@ -157,12 +156,12 @@ public final class IntegrationsManager {
 
     /// Check if a module is enabled
     public func isModuleEnabled(_ module: IntegrationModuleType) -> Bool {
-        return enabledModules.contains(module)
+        enabledModules.contains(module)
     }
 
     /// Get enabled modules count
     public var enabledModulesCount: Int {
-        return enabledModules.count
+        enabledModules.count
     }
 }
 

@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 #if os(macOS)
 import AppKit
 #else
@@ -588,7 +588,6 @@ struct ConnectAccountSheet: View {
 
                 isConnecting = false
                 dismiss()
-
             } catch {
                 errorMessage = error.localizedDescription
                 isConnecting = false

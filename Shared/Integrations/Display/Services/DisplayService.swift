@@ -9,7 +9,6 @@ import IOKit
 
 /// Service for managing displays
 public actor DisplayService: DisplayServiceProtocol {
-
     // MARK: - Properties
 
     private var displays: [CGDirectDisplayID: Display] = [:]
@@ -151,7 +150,7 @@ public actor DisplayService: DisplayServiceProtocol {
     private func getDisplayName(_ displayID: CGDirectDisplayID) -> String {
         // Try to get display name from IOKit
         // Simplified - production would use IODisplayCreateInfoDictionary
-        return "Display \(displayID)"
+        "Display \(displayID)"
     }
 
     private func setBuiltInBrightness(_ value: Int, for displayID: CGDirectDisplayID) async throws {
@@ -169,7 +168,6 @@ public actor DisplayService: DisplayServiceProtocol {
 
 /// Service for DDC/CI communication
 public actor DDCService: DDCProtocol {
-
     public init() {}
 
     public func sendCommand(displayID: CGDirectDisplayID, command: UInt8, value: UInt8) async throws {
@@ -191,7 +189,7 @@ public actor DDCService: DDCProtocol {
     public func readValue(displayID: CGDirectDisplayID, command: UInt8) async throws -> UInt8 {
         // Would read current value from display
         // For now, return 50% as default
-        return 128
+        128
     }
 
     public func supportsDDC(displayID: CGDirectDisplayID) async -> Bool {
@@ -213,7 +211,6 @@ public actor DDCService: DDCProtocol {
 
 /// Adapter for ambient light sensor
 public actor AmbientLightAdapter: AmbientLightAdapterProtocol {
-
     private var isMonitoring = false
     private var currentCallback: (@Sendable (Int) -> Void)?
 
@@ -223,7 +220,7 @@ public actor AmbientLightAdapter: AmbientLightAdapterProtocol {
         // Read ambient light sensor value
         // Requires IOKit integration with AppleLMUController
         // For now, return simulated value
-        return 50
+        50
     }
 
     public func startMonitoring(callback: @Sendable @escaping (Int) -> Void) async {

@@ -1,5 +1,5 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 @MainActor
 final class PluginSystemTests: XCTestCase {

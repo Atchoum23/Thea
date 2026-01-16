@@ -3,7 +3,6 @@ import SwiftUI
 
 /// Parser for terminal output including ANSI codes and structured data
 struct TerminalOutputParser {
-
     // MARK: - ANSI Color Parsing
 
     /// Parse ANSI escape codes and return attributed string segments

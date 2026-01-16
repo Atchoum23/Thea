@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 import SwiftUI
 
 // MARK: - Window Manager
@@ -294,11 +294,11 @@ struct WindowInstance: Identifiable, Codable, Sendable {
             case .chat:
                 return CGSize(width: 900, height: 600)
             case .codeEditor:
-                return CGSize(width: 1400, height: 900)
+                return CGSize(width: 1_400, height: 900)
             case .dashboard:
-                return CGSize(width: 1200, height: 800)
+                return CGSize(width: 1_200, height: 800)
             case .lifeTracking:
-                return CGSize(width: 1200, height: 800)
+                return CGSize(width: 1_200, height: 800)
             case .settings:
                 return CGSize(width: 600, height: 500)
             }

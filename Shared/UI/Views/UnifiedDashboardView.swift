@@ -15,7 +15,7 @@ public struct UnifiedDashboardView: View {
             // Sidebar
             List(selection: $selectedModule) {
                 Section("Active Modules") {
-                    ForEach(coordinator.activeModules.sorted(by: { $0.rawValue < $1.rawValue })) { module in
+                    ForEach(coordinator.activeModules.sorted { $0.rawValue < $1.rawValue }) { module in
                         ModuleRow(module: module, status: coordinator.getModuleStatus(module))
                             .tag(module)
                     }

@@ -353,7 +353,7 @@ struct ProviderConfiguration: Codable, Sendable, Equatable {
     var openRouterBaseURL: String = "https://openrouter.ai/api/v1"
 
     // Generation Defaults
-    var defaultMaxTokens: Int = 8192
+    var defaultMaxTokens: Int = 8_192
     var defaultTemperature: Double = 1.0
     var defaultTopP: Double = 1.0
     var streamResponses: Bool = true
@@ -363,7 +363,7 @@ struct ProviderConfiguration: Codable, Sendable, Equatable {
     var defaultSummarizationModel: String = "gpt-4o-mini"
     var defaultReasoningModel: String = "gpt-4o"
     var defaultEmbeddingModel: String = "text-embedding-3-small"
-    var embeddingDimensions: Int = 1536
+    var embeddingDimensions: Int = 1_536
 
     // Request Settings
     var requestTimeoutSeconds: Double = 60.0
@@ -376,10 +376,10 @@ struct ProviderConfiguration: Codable, Sendable, Equatable {
 struct MemoryConfiguration: Codable, Sendable, Equatable {
     // Capacity
     var shortTermCapacity: Int = 20
-    var longTermMaxItems: Int = 10000
-    var episodicMaxItems: Int = 5000
-    var semanticMaxItems: Int = 5000
-    var proceduralMaxItems: Int = 1000
+    var longTermMaxItems: Int = 10_000
+    var episodicMaxItems: Int = 5_000
+    var semanticMaxItems: Int = 5_000
+    var proceduralMaxItems: Int = 1_000
 
     // Consolidation
     var consolidationThresholdSeconds: TimeInterval = 300 // 5 minutes
@@ -454,8 +454,8 @@ struct LocalModelConfiguration: Codable, Sendable, Equatable {
     var sharedLLMsDirectory: String = "Library/Application Support/SharedLLMs"
 
     // Defaults
-    var defaultContextTokens: Int = 4096
-    var defaultMaxOutputTokens: Int = 2048
+    var defaultContextTokens: Int = 4_096
+    var defaultMaxOutputTokens: Int = 2_048
     var defaultQuantization: String = "Q4_K_M"
     var defaultParameters: String = "7B"
 
@@ -509,7 +509,7 @@ struct VoiceConfiguration: Codable, Sendable, Equatable {
     // Speech Recognition
     var recognitionLanguage: String = "en-US"
     var requiresOnDeviceRecognition: Bool = true
-    var audioBufferSize: Int = 1024
+    var audioBufferSize: Int = 1_024
 
     // Speech Synthesis
     var speechLanguage: String = "en-US"
@@ -526,7 +526,7 @@ struct VoiceConfiguration: Codable, Sendable, Equatable {
 
     // Feedback
     var activationSoundEnabled: Bool = true
-    var activationSoundID: UInt32 = 1054 // System tock sound
+    var activationSoundID: UInt32 = 1_054 // System tock sound
 }
 
 // MARK: - Knowledge Scanner Configuration
@@ -660,7 +660,7 @@ struct PromptEngineeringConfiguration: Codable, Sendable, Equatable {
     var enableFewShotLearning: Bool = true
     var enableABTesting: Bool = true
     var maxFewShotExamples: Int = 3
-    var templateRefreshInterval: TimeInterval = 86400 // 24 hours
+    var templateRefreshInterval: TimeInterval = 86_400 // 24 hours
     var minTemplateSuccessRate: Float = 0.7
     var enableUserPreferenceLearning: Bool = true
     var enableTemplateVersioning: Bool = true
@@ -692,7 +692,7 @@ struct LifeTrackingConfiguration: Codable, Sendable, Equatable {
     var achievementNotificationsEnabled: Bool = true
 
     // Update Intervals
-    var healthSyncInterval: TimeInterval = 3600
+    var healthSyncInterval: TimeInterval = 3_600
     var screenTimeCheckInterval: TimeInterval = 60
     var inputActivityCheckInterval: TimeInterval = 300
     var locationUpdateInterval: TimeInterval = 600

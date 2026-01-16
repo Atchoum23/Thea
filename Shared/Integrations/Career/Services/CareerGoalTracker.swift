@@ -1,6 +1,5 @@
 import Foundation
 
-import Foundation
 import Combine
 
 /// Service for tracking career goals and professional development
@@ -200,7 +199,7 @@ public actor CareerGoalTracker {
         let allReflections = reflections.values.flatMap { $0 }
         let reflectionStreak = calculateReflectionStreak(allReflections)
 
-        let goalsByCategory = Dictionary(grouping: goals, by: { $0.category })
+        let goalsByCategory = Dictionary(grouping: goals) { $0.category }
 
         return CareerStatistics(
             totalGoals: totalGoals,

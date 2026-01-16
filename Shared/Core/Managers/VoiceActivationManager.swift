@@ -1,7 +1,7 @@
-import Foundation
 import AVFoundation
-import Speech
+import Foundation
 import Observation
+import Speech
 
 @MainActor
 @Observable
@@ -85,7 +85,7 @@ final class VoiceActivationManager {
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
 
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+        inputNode.installTap(onBus: 0, bufferSize: 1_024, format: recordingFormat) { buffer, _ in
             request.append(buffer)
         }
 

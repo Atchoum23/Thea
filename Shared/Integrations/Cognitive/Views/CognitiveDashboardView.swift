@@ -132,8 +132,8 @@ public struct CognitiveDashboardView: View {
             // Subtasks
             ForEach(breakdown.subtasks) { subtask in
                 SubtaskRow(
-                    subtask: subtask,
-                    onToggle: {
+                    subtask: subtask
+                )                    {
                         Task {
                             await viewModel.completeSubtask(
                                 breakdownId: breakdown.id,
@@ -141,7 +141,6 @@ public struct CognitiveDashboardView: View {
                             )
                         }
                     }
-                )
             }
         }
         .padding()

@@ -12,20 +12,11 @@ struct MCPToolBridge: Sendable {
     let mcpServerName: String
     let mcpToolName: String
     
-    init(id: UUID, name: String, description: String, parameters: [ToolParameter], mcpServerName: String, mcpToolName: String) {
-        self.id = id
-        self.name = name
-        self.description = description
-        self.parameters = parameters
-        self.mcpServerName = mcpServerName
-        self.mcpToolName = mcpToolName
-    }
-    
     func execute(arguments: [String: Any]) async throws -> ToolResult {
         // Bridge to MCP server
         // This would integrate with actual MCP client when available
         // For now, return success
-        return ToolResult(
+        ToolResult(
             success: true,
             output: "MCP tool executed: \(mcpToolName)",
             error: nil,
@@ -182,11 +173,10 @@ final class MCPToolRegistry {
                 name: mcpTool.name,
                 description: mcpTool.description,
                 parameters: mcpTool.parameters,
-                category: .api,
-                handler: { parameters in
+                category: .api
+            )                { parameters in
                     try await mcpTool.execute(arguments: parameters).output ?? ""
                 }
-            )
             
             toolFramework.registerTool(tool)
         }

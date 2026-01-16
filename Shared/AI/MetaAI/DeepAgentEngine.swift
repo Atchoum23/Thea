@@ -60,7 +60,6 @@ final class DeepAgentEngine {
             activeTasks.removeAll { $0.id == task.id }
 
             return finalResult
-
         } catch {
             // Self-correction attempt
             if context.retryCount < config.maxRetryCount {
@@ -278,7 +277,7 @@ final class DeepAgentEngine {
     }
 
     private func assignTools(to subtasks: [Subtask]) async throws -> [SubtaskWithTools] {
-        return try await withThrowingTaskGroup(of: SubtaskWithTools.self) { group in
+        try await withThrowingTaskGroup(of: SubtaskWithTools.self) { group in
             for subtask in subtasks {
                 group.addTask {
                     let tools = await self.toolRegistry.selectTools(for: subtask.description)
@@ -296,7 +295,7 @@ final class DeepAgentEngine {
 
     private func estimateDuration(for subtasks: [SubtaskWithTools]) -> TimeInterval {
         // Estimate based on complexity using configurable base time
-        return Double(subtasks.count) * config.baseTaskDurationSeconds
+        Double(subtasks.count) * config.baseTaskDurationSeconds
     }
 
     private func extractDependencies(from subtasks: [SubtaskWithTools]) -> [Int: [Int]] {
@@ -514,7 +513,7 @@ struct EmptyDeepTool: DeepTool {
     let capabilities: [String] = []
 
     func execute(input: String, context: TaskContext, previousResults: [SubtaskResult]) async throws -> String {
-        return ""
+        ""
     }
 }
 
@@ -550,10 +549,10 @@ final class ToolRegistry {
     func selectTools(for task: String) async -> [DeepTool] {
         // Use AI to select optimal tools
         // For now, return empty tool
-        return [EmptyDeepTool()]
+        [EmptyDeepTool()]
     }
 
     func getAllTools() -> [DeepTool] {
-        return registeredTools
+        registeredTools
     }
 }

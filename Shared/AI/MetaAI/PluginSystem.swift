@@ -223,7 +223,7 @@ final class PluginSystem {
     private func requestPermissions(_ permissions: [PluginPermission]) async throws -> [PluginPermission] {
         // In production, this would show UI to request user approval
         // For now, auto-grant safe permissions
-        return permissions.filter { permission in
+        permissions.filter { permission in
             switch permission {
             case .fileSystemRead, .networkAccess, .aiProviderAccess:
                 return true
@@ -283,7 +283,7 @@ final class PluginSystem {
     func discoverPlugins() async throws -> [PluginManifest] {
         // In production, this would query a plugin marketplace API
         // For now, return sample plugins
-        return [
+        [
             PluginManifest(
                 name: "GitHub Integration",
                 version: "1.0.0",
@@ -339,8 +339,8 @@ final class PluginSystem {
         }
 
         // Keep only recent executions
-        if pluginExecutions.count > 1000 {
-            pluginExecutions.removeFirst(pluginExecutions.count - 1000)
+        if pluginExecutions.count > 1_000 {
+            pluginExecutions.removeFirst(pluginExecutions.count - 1_000)
         }
     }
 }

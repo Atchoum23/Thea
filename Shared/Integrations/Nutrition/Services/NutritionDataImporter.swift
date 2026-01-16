@@ -1,6 +1,5 @@
 import Foundation
 
-import Foundation
 import Combine
 
 /// Service for importing nutrition data from various sources (CSV, USDA API, barcode scanning)
@@ -289,7 +288,6 @@ public final class NutritionImportCoordinator: ObservableObject {
 
             importedItems = items
             importProgress = 1.0
-
         } catch {
             errorMessage = error.localizedDescription
         }

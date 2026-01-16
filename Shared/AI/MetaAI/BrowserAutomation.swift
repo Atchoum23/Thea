@@ -11,7 +11,7 @@ final class BrowserAutomation: NSObject {
     private var webView: WKWebView?
     private var navigationDelegate: WebNavigationDelegate?
 
-    private override init() {
+    override private init() {
         super.init()
         setupWebView()
     }

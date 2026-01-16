@@ -183,7 +183,7 @@ public actor CodeGenerator {
 
                 ### \(fileName)
                 ```swift
-                \(content.prefix(2000))
+                \(content.prefix(2_000))
                 ```
 
                 """
@@ -219,15 +219,15 @@ public actor CodeGenerator {
     private func hasAnthropicKey() async -> Bool {
         // Check AppConfiguration for Anthropic API key
         // TODO: Connect to actual configuration
-        return UserDefaults.standard.string(forKey: "anthropic_api_key")?.isEmpty == false
+        UserDefaults.standard.string(forKey: "anthropic_api_key")?.isEmpty == false
     }
 
     private func hasOpenAIKey() async -> Bool {
-        return UserDefaults.standard.string(forKey: "openai_api_key")?.isEmpty == false
+        UserDefaults.standard.string(forKey: "openai_api_key")?.isEmpty == false
     }
 
     private func hasOpenRouterKey() async -> Bool {
-        return UserDefaults.standard.string(forKey: "openrouter_api_key")?.isEmpty == false
+        UserDefaults.standard.string(forKey: "openrouter_api_key")?.isEmpty == false
     }
 
     private func hasLocalModels() async -> Bool {
@@ -265,7 +265,7 @@ public actor CodeGenerator {
 
         let body: [String: Any] = [
             "model": "claude-sonnet-4-20250514",
-            "max_tokens": 8192,
+            "max_tokens": 8_192,
             "messages": [
                 ["role": "user", "content": prompt]
             ]
@@ -310,7 +310,7 @@ public actor CodeGenerator {
 
         let body: [String: Any] = [
             "model": "gpt-4o",
-            "max_tokens": 8192,
+            "max_tokens": 8_192,
             "messages": [
                 ["role": "user", "content": prompt]
             ]
@@ -356,7 +356,7 @@ public actor CodeGenerator {
 
         let body: [String: Any] = [
             "model": "anthropic/claude-sonnet-4",
-            "max_tokens": 8192,
+            "max_tokens": 8_192,
             "messages": [
                 ["role": "user", "content": prompt]
             ]

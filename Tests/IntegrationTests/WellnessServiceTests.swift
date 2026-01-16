@@ -22,7 +22,7 @@ final class WellnessServiceTests: XCTestCase {
             (23, .lateNight)
         ]
 
-        for (hour, expected Phase) in phases {
+        for (hour, expectedPhase) in phases {
             let detected = CircadianPhase.phaseForHour(hour)
             XCTAssertEqual(detected, expectedPhase,
                           "Hour \(hour) should be \(expectedPhase.displayName), got \(detected.displayName)")

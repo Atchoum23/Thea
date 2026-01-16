@@ -1,5 +1,5 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 @MainActor
 final class ToolFrameworkTests: XCTestCase {
@@ -30,11 +30,10 @@ final class ToolFrameworkTests: XCTestCase {
             name: "custom_tool",
             description: "A custom tool",
             parameters: ["input": "string"],
-            category: .data,
-            handler: { _ in
-                return "Custom result"
-            }
-        ))
+            category: .data
+        )            { _ in
+                "Custom result"
+            })
 
         XCTAssertEqual(toolFramework.registeredTools.count, initialCount + 1)
     }
@@ -74,7 +73,7 @@ final class ToolFrameworkTests: XCTestCase {
     }
 
     func testToolExecution() async throws {
-        let tool = toolFramework.registeredTools.first(where: { $0.name == "search_data" })!
+        let tool = toolFramework.registeredTools.first { $0.name == "search_data" }!
 
         let result = try await toolFramework.executeTool(tool, parameters: [
             "query": "test",
@@ -87,7 +86,7 @@ final class ToolFrameworkTests: XCTestCase {
 
     func testToolChaining() async throws {
         let tools = [
-            toolFramework.registeredTools.first(where: { $0.name == "search_data" })!
+            toolFramework.registeredTools.first { $0.name == "search_data" }!
         ]
 
         let chainResult = try await toolFramework.executeToolChain(

@@ -64,7 +64,7 @@ public final class ApprovalManager {
     }
 
     private func requestUserApproval(_ request: ApprovalRequest) async throws -> ApprovalDecision {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { _ in
             DispatchQueue.main.async {
                 self.currentRequest = request
                 self.showApprovalDialog = true

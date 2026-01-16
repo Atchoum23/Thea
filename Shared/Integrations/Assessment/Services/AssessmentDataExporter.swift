@@ -1,9 +1,6 @@
 import Foundation
 
 import Combine
-import Foundation
-
-/// Service for exporting assessment results to various formats
 public actor AssessmentDataExporter {
     public static let shared = AssessmentDataExporter()
 

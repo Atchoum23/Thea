@@ -1,11 +1,10 @@
-import Foundation
 import AppKit
 import ApplicationServices
+import Foundation
 
 /// Bridge for reading Terminal content via macOS Accessibility API
 /// Provides an alternative to AppleScript for deeper Terminal access
 struct AccessibilityBridge {
-
     enum AccessibilityError: LocalizedError {
         case accessDenied
         case terminalNotFound
@@ -68,7 +67,8 @@ struct AccessibilityBridge {
         }
 
         // Find the text area (scroll area > text area)
-        if let textContent = try? findTextContent(in: window as! AXUIElement) {
+        if let windowElement = window as? AXUIElement,
+           let textContent = try? findTextContent(in: windowElement) {
             return textContent
         }
 
@@ -97,7 +97,8 @@ struct AccessibilityBridge {
         }
 
         var selectedText: CFTypeRef?
-        let textResult = AXUIElementCopyAttributeValue(element as! AXUIElement, kAXSelectedTextAttribute as CFString, &selectedText)
+        guard let axElement = element as? AXUIElement else { return nil }
+        let textResult = AXUIElementCopyAttributeValue(axElement, kAXSelectedTextAttribute as CFString, &selectedText)
 
         if textResult == .success, let text = selectedText as? String {
             return text
@@ -123,7 +124,7 @@ struct AccessibilityBridge {
         var focusedWindow: CFTypeRef?
         let windowResult = AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &focusedWindow)
 
-        guard windowResult == .success, let window = focusedWindow as! AXUIElement? else {
+        guard windowResult == .success, let window = focusedWindow as? AXUIElement else {
             throw AccessibilityError.noFocusedWindow
         }
 
@@ -136,12 +137,12 @@ struct AccessibilityBridge {
         var position = CGPoint.zero
         var size = CGSize.zero
 
-        if let posValue = positionValue {
-            AXValueGetValue(posValue as! AXValue, .cgPoint, &position)
+        if let posValue = positionValue as? AXValue {
+            AXValueGetValue(posValue, .cgPoint, &position)
         }
 
-        if let szValue = sizeValue {
-            AXValueGetValue(szValue as! AXValue, .cgSize, &size)
+        if let szValue = sizeValue as? AXValue {
+            AXValueGetValue(szValue, .cgSize, &size)
         }
 
         return CGRect(origin: position, size: size)

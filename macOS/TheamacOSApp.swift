@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct TheamacOSApp: App {
@@ -91,10 +91,10 @@ struct TheamacOSApp: App {
             if let container = modelContainer {
                 Text("Life Tracking (Coming Soon)")
                     .modelContainer(container)
-                    .frame(minWidth: 1000, minHeight: 700)
+                    .frame(minWidth: 1_000, minHeight: 700)
             }
         }
-        .defaultSize(width: 1200, height: 800)
+        .defaultSize(width: 1_200, height: 800)
 
         // SETTINGS (SINGLE INSTANCE)
         Settings {
@@ -150,10 +150,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return true
+        true
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
-        return true
+        true
     }
 }

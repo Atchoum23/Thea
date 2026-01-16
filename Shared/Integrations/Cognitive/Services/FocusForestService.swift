@@ -102,7 +102,7 @@ public actor FocusForestService: FocusForestServiceProtocol {
                 counts[tree.treeType, default: 0] += 1
             }
 
-        let favoriteType = treeTypeCounts.max(by: { $0.value < $1.value })?.key
+        let favoriteType = treeTypeCounts.max { $0.value < $1.value }?.key
 
         return ForestStats(
             totalTrees: totalTrees,

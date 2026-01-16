@@ -78,7 +78,6 @@ public actor SelfExecutionService {
                 if let dmg = result.dmgPath {
                     dmgPaths.append(dmg)
                 }
-
             } catch {
                 errors.append("Phase \(phaseNum): \(error.localizedDescription)")
                 logger.error("Phase \(phaseNum) failed: \(error.localizedDescription)")
@@ -104,7 +103,7 @@ public actor SelfExecutionService {
 
     /// Get current spec status
     public func getSpecStatus() async throws -> SpecParser.ParsedSpec {
-        return try await SpecParser.shared.parseSpec()
+        try await SpecParser.shared.parseSpec()
     }
 
     /// Get next phase to execute

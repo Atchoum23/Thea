@@ -9,7 +9,7 @@ public struct UserDirectivesView: View {
     @State private var showingAddDirective = false
     @State private var newDirectiveText = ""
     @State private var newDirectiveCategory: DirectiveCategory = .quality
-    @State private var selectedCategory: DirectiveCategory? = nil
+    @State private var selectedCategory: DirectiveCategory?
     @State private var showingImportExport = false
     
     public init() {}
@@ -105,22 +105,20 @@ public struct UserDirectivesView: View {
                 CategoryButton(
                     category: nil,
                     isSelected: selectedCategory == nil,
-                    count: config.directives.count,
-                    action: {
+                    count: config.directives.count
+                )                    {
                         selectedCategory = nil
                     }
-                )
                 
                 // Individual category buttons
                 ForEach(DirectiveCategory.allCases, id: \.self) { category in
                     CategoryButton(
                         category: category,
                         isSelected: selectedCategory == category,
-                        count: config.getDirectives(for: category).count,
-                        action: {
+                        count: config.getDirectives(for: category).count
+                    )                        {
                             selectedCategory = category
                         }
-                    )
                 }
             }
             .padding(.horizontal)

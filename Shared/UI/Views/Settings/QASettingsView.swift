@@ -327,7 +327,7 @@ struct QASettingsView: View {
 
             Stepper("Keep History: \(config.keepHistoryDays) days", value: $config.keepHistoryDays, in: 7...365, step: 7)
 
-            Stepper("Max History Entries: \(config.maxHistoryEntries)", value: $config.maxHistoryEntries, in: 10...1000, step: 10)
+            Stepper("Max History Entries: \(config.maxHistoryEntries)", value: $config.maxHistoryEntries, in: 10...1_000, step: 10)
         }
     }
 

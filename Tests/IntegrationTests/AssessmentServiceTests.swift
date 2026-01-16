@@ -1,11 +1,10 @@
-import Testing
 import Foundation
+import Testing
 @testable import Thea
 
 /// Tests for assessment service
 @Suite("Assessment Service Tests")
 struct AssessmentServiceTests {
-
     // MARK: - Assessment Management Tests
 
     @Test("Start assessment successfully")

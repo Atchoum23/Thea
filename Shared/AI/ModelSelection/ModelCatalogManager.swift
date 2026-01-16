@@ -15,7 +15,7 @@ final class ModelCatalogManager {
     private(set) var fetchError: Error?
 
     private let cacheKey = "ModelCatalogManager.cachedModels"
-    private let cacheExpirationSeconds: TimeInterval = 3600 // 1 hour
+    private let cacheExpirationSeconds: TimeInterval = 3_600 // 1 hour
 
     private init() {
         loadCachedModels()
@@ -152,8 +152,8 @@ struct OpenRouterModel: Codable, Identifiable, Sendable {
     var formattedContextLength: String {
         if contextLength >= 1_000_000 {
             return "\(contextLength / 1_000_000)M tokens"
-        } else if contextLength >= 1000 {
-            return "\(contextLength / 1000)K tokens"
+        } else if contextLength >= 1_000 {
+            return "\(contextLength / 1_000)K tokens"
         } else {
             return "\(contextLength) tokens"
         }

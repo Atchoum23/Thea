@@ -1,6 +1,6 @@
-import WidgetKit
-import SwiftUI
 import SwiftData
+import SwiftUI
+import WidgetKit
 
 struct TheaWidget: Widget {
     let kind: String = "TheaWidget"
@@ -36,7 +36,7 @@ struct TheaWidgetProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<TheaWidgetEntry>) -> Void) {
         Task {
             let entry = await fetchWidgetData()
-            let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(3600)))
+            let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(3_600)))
             completion(timeline)
         }
     }

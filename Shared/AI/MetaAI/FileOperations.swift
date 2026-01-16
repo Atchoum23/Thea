@@ -163,7 +163,7 @@ final class FileOperations {
     // MARK: - File Information
 
     nonisolated func fileExists(at path: String) -> Bool {
-        return FileManager.default.fileExists(atPath: path)
+        FileManager.default.fileExists(atPath: path)
     }
 
     nonisolated func fileSize(at path: String) async throws -> Int64 {

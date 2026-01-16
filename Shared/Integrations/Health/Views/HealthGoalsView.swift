@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 /// Health goal setting and tracking view
 @MainActor
@@ -547,7 +547,7 @@ public struct HealthGoal: Identifiable, Sendable {
     public var unit: String
     public var deadline: Date?
     public var milestones: [GoalMilestone]
-    public var createdDate: Date = Date()
+    public var createdDate = Date()
     public var completedDate: Date?
     public var isActive: Bool = true
 
@@ -734,14 +734,14 @@ final class HealthGoalsViewModel {
                 title: "10,000 Daily Steps",
                 description: "Walk 10,000 steps every day for better cardiovascular health",
                 category: .activity,
-                targetValue: 10000,
-                currentValue: 7500,
+                targetValue: 10_000,
+                currentValue: 7_500,
                 unit: "steps",
                 deadline: Calendar.current.date(byAdding: .day, value: 14, to: Date()),
                 milestones: [
-                    GoalMilestone(title: "First 5,000 steps", targetValue: 5000, isCompleted: true, completedDate: Date().addingTimeInterval(-86400 * 3)),
-                    GoalMilestone(title: "Reach 7,500 steps", targetValue: 7500, isCompleted: true, completedDate: Date()),
-                    GoalMilestone(title: "Hit 10,000 steps", targetValue: 10000)
+                    GoalMilestone(title: "First 5,000 steps", targetValue: 5_000, isCompleted: true, completedDate: Date().addingTimeInterval(-86_400 * 3)),
+                    GoalMilestone(title: "Reach 7,500 steps", targetValue: 7_500, isCompleted: true, completedDate: Date()),
+                    GoalMilestone(title: "Hit 10,000 steps", targetValue: 10_000)
                 ]
             ),
             HealthGoal(
@@ -763,7 +763,7 @@ final class HealthGoalsViewModel {
                 unit: "kg",
                 deadline: Calendar.current.date(byAdding: .month, value: 3, to: Date()),
                 milestones: [
-                    GoalMilestone(title: "Lose 2 kg", targetValue: 2, isCompleted: true, completedDate: Date().addingTimeInterval(-86400 * 15)),
+                    GoalMilestone(title: "Lose 2 kg", targetValue: 2, isCompleted: true, completedDate: Date().addingTimeInterval(-86_400 * 15)),
                     GoalMilestone(title: "Lose 3.5 kg", targetValue: 3, isCompleted: false),
                     GoalMilestone(title: "Reach target", targetValue: 5, isCompleted: false)
                 ]
@@ -783,7 +783,7 @@ final class HealthGoalsViewModel {
                 milestones: []
             )
         ]
-        completedGoals[0].completedDate = Date().addingTimeInterval(-86400 * 5)
+        completedGoals[0].completedDate = Date().addingTimeInterval(-86_400 * 5)
         completedGoals[0].isActive = false
 
         // Mock suggestions

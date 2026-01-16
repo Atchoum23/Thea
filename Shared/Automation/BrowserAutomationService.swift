@@ -7,7 +7,6 @@ import WebKit
 /// Provides navigation, form filling, data extraction, and screenshot capture
 @MainActor
 public final class BrowserAutomationService {
-
     // MARK: - Properties
 
     private var webView: WebViewWrapper?
@@ -224,12 +223,12 @@ public final class BrowserAutomationService {
 
     /// Get current URL
     public func getCurrentURL() -> URL? {
-        return currentURL
+        currentURL
     }
 
     /// Get navigation history
     public func getHistory() -> [URL] {
-        return navigationHistory
+        navigationHistory
     }
 
     // MARK: - JavaScript Execution
@@ -273,7 +272,7 @@ private final class WebViewWrapper: NSObject, WKNavigationDelegate {
     }
 
     func load(url: URL) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             navigationContinuation = continuation
             webView.load(URLRequest(url: url))
         }
@@ -300,14 +299,14 @@ private final class WebViewWrapper: NSObject, WKNavigationDelegate {
     }
 
     func reload() async throws {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             navigationContinuation = continuation
             webView.reload()
         }
     }
 
     func executeJavaScript(_ script: String) async throws -> Any? {
-        return try await webView.evaluateJavaScript(script)
+        try await webView.evaluateJavaScript(script)
     }
 
     func takeSnapshot() async throws -> Data {
@@ -323,7 +322,7 @@ private final class WebViewWrapper: NSObject, WKNavigationDelegate {
     }
 
     func getTitle() async throws -> String {
-        return webView.title ?? ""
+        webView.title ?? ""
     }
 
     // MARK: - WKNavigationDelegate

@@ -1,11 +1,10 @@
-import Testing
 import Foundation
+import Testing
 @testable import Thea
 
 /// Tests for nutrition service
 @Suite("Nutrition Service Tests")
 struct NutritionServiceTests {
-
     // MARK: - Meal Logging Tests
 
     @Test("Log meal successfully")
@@ -57,7 +56,7 @@ struct NutritionServiceTests {
         let results = try await service.searchFood(query: "apple")
 
         #expect(!results.isEmpty)
-        #expect(results.contains(where: { $0.name.localizedCaseInsensitiveContains("apple") }))
+        #expect(results.contains { $0.name.localizedCaseInsensitiveContains("apple") })
     }
 
     @Test("Search by barcode")
@@ -103,7 +102,7 @@ struct NutritionServiceTests {
         let service = NutritionService()
 
         let newGoals = NutritionGoals(
-            dailyCalories: 2500,
+            dailyCalories: 2_500,
             proteinGrams: 150,
             carbsGrams: 250,
             fatGrams: 70
@@ -113,7 +112,7 @@ struct NutritionServiceTests {
 
         let fetchedGoals = try await service.fetchGoals()
 
-        #expect(fetchedGoals.dailyCalories == 2500)
+        #expect(fetchedGoals.dailyCalories == 2_500)
         #expect(fetchedGoals.proteinGrams == 150)
     }
 
@@ -156,7 +155,7 @@ struct NutritionServiceTests {
         let engine = NutritionAnalysisEngine()
 
         var nutrients = NutrientProfile()
-        nutrients.calories = 2000
+        nutrients.calories = 2_000
         nutrients.protein = 150 // 600 cal = 30%
         nutrients.carbohydrates = 200 // 800 cal = 40%
         nutrients.totalFat = 67 // 603 cal = 30%
@@ -173,7 +172,7 @@ struct NutritionServiceTests {
         let engine = NutritionAnalysisEngine()
 
         var nutrients = NutrientProfile()
-        nutrients.calories = 2000
+        nutrients.calories = 2_000
         nutrients.protein = 50
         nutrients.carbohydrates = 250
         nutrients.totalFat = 70
@@ -183,7 +182,7 @@ struct NutritionServiceTests {
             date: Date(),
             totalNutrients: nutrients,
             meals: [],
-            caloriesConsumed: 2000,
+            caloriesConsumed: 2_000,
             caloriesRemaining: 0,
             macroBalance: MacroBalance(proteinPercent: 25, carbsPercent: 50, fatPercent: 25)
         )
@@ -207,7 +206,7 @@ struct NutritionServiceTests {
             date: Date(),
             totalNutrients: nutrients,
             meals: [],
-            caloriesConsumed: 1500,
+            caloriesConsumed: 1_500,
             caloriesRemaining: 500,
             macroBalance: MacroBalance(proteinPercent: 20, carbsPercent: 50, fatPercent: 30)
         )
@@ -216,7 +215,7 @@ struct NutritionServiceTests {
         let deficiencies = try await engine.identifyDeficiencies(summary: summary, goals: goals)
 
         #expect(!deficiencies.isEmpty)
-        #expect(deficiencies.contains(where: { $0.nutrientName == "Protein" }))
+        #expect(deficiencies.contains { $0.nutrientName == "Protein" })
     }
 
     // MARK: - Nutrient Profile Tests
@@ -237,7 +236,7 @@ struct NutritionServiceTests {
 
         var lowQuality = NutrientProfile()
         lowQuality.saturatedFat = 20
-        lowQuality.sodium = 2000
+        lowQuality.sodium = 2_000
         lowQuality.addedSugars = 50
         lowQuality.transFat = 5
 

@@ -159,7 +159,7 @@ struct ToolCallInfo: Identifiable, Sendable {
         guard let end = endTime else { return "..." }
         let interval = end.timeIntervalSince(startTime)
         if interval < 1.0 {
-            return String(format: "%.0fms", interval * 1000)
+            return String(format: "%.0fms", interval * 1_000)
         } else {
             return String(format: "%.2fs", interval)
         }

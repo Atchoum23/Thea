@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct SidebarView: View {
     @Binding var selection: Conversation?

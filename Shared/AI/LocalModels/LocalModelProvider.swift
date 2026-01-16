@@ -412,7 +412,6 @@ struct OllamaModelInstance: LocalModelInstance {
                     }
 
                     continuation.finish()
-
                 } catch {
                     continuation.finish(throwing: error)
                 }
@@ -461,7 +460,6 @@ struct MLXModelInstance: LocalModelInstance {
                     // iOS: MLX requires macOS - not available on iOS
                     throw LocalModelError.notImplemented
                     #endif
-
                 } catch {
                     continuation.finish(throwing: error)
                 }
@@ -504,8 +502,8 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
             supportsVision: false,
             supportsFunctionCalling: false,
             supportsWebSearch: false,
-            maxContextTokens: 4096,
-            maxOutputTokens: 2048,
+            maxContextTokens: 4_096,
+            maxOutputTokens: 2_048,
             supportedModalities: [.text]
         )
     }
@@ -517,7 +515,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
 
     func validateAPIKey(_ key: String) async throws -> ValidationResult {
         // Local models don't need API keys
-        return .success()
+        .success()
     }
 
     func listModels() async throws -> [AIModel] {
@@ -525,8 +523,8 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
             id: modelName,
             name: modelName,
             description: "Local model",
-            contextWindow: 4096,
-            maxOutputTokens: 2048,
+            contextWindow: 4_096,
+            maxOutputTokens: 2_048,
             inputPricePerMillion: 0,
             outputPricePerMillion: 0,
             supportsVision: false,
@@ -547,7 +545,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let stream = try await instance.generate(prompt: prompt, maxTokens: 2048)
+                    let stream = try await instance.generate(prompt: prompt, maxTokens: 2_048)
 
                     var fullText = ""
                     for try await text in stream {
@@ -566,7 +564,6 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
                     )
                     continuation.yield(.complete(completeMessage))
                     continuation.finish()
-
                 } catch {
                     continuation.yield(.error(error))
                     continuation.finish(throwing: error)

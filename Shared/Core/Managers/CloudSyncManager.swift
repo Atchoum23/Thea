@@ -1,7 +1,7 @@
-import Foundation
 import CloudKit
-import SwiftData
 import Combine
+import Foundation
+import SwiftData
 
 @MainActor
 final class CloudSyncManager: ObservableObject {

@@ -262,14 +262,14 @@ public final class ImprovementSuggestionsEngine {
     private func analyzeMetric(_ summary: MetricSummary) -> ImprovementSuggestion? {
         switch summary.metricType {
         case .responseTime:
-            if summary.average > 2000 {
+            if summary.average > 2_000 {
                 return ImprovementSuggestion(
                     category: .performance,
-                    priority: summary.average > 5000 ? .high : .medium,
+                    priority: summary.average > 5_000 ? .high : .medium,
                     title: "Reduce Response Latency",
                     description: "Average response time is \(String(format: "%.0f", summary.average))ms",
                     rationale: "Users expect responses within 1-2 seconds. Current latency may impact satisfaction.",
-                    impact: summary.average > 5000 ? .significant : .moderate,
+                    impact: summary.average > 5_000 ? .significant : .moderate,
                     effort: .medium,
                     actionItems: [
                         "Use faster models for simple queries",

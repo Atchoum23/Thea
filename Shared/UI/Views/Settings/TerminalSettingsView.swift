@@ -174,7 +174,7 @@ struct TerminalSettingsView: View {
                 Text("Max Execution Time: \(Int(manager.securityPolicy.maxExecutionTime))s")
                 Slider(
                     value: $manager.securityPolicy.maxExecutionTime,
-                    in: 30...1800,
+                    in: 30...1_800,
                     step: 30
                 )
                 .onChange(of: manager.securityPolicy.maxExecutionTime) { _, _ in
@@ -369,7 +369,6 @@ struct TerminalSettingsView: View {
             Text("Accessibility access enables advanced Terminal reading features.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-
         } header: {
             Text("Advanced")
         }

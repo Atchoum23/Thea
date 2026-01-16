@@ -5,7 +5,6 @@ import SwiftUI
 /// Configuration for Thea's self-execution engine.
 /// All settings are persisted to UserDefaults and can be changed in Settings.
 public struct SelfExecutionConfiguration: Codable, Sendable {
-
     // MARK: - Provider Configuration
 
     /// Ordered list of AI providers to try (first available is used)
@@ -97,7 +96,7 @@ public struct SelfExecutionConfiguration: Codable, Sendable {
     public var autoContinueToNextPhase: Bool = false
 
     /// Phases to execute in batch (when autoContinue is enabled)
-    public var batchPhaseRange: ClosedRange<Int>? = nil
+    public var batchPhaseRange: ClosedRange<Int>?
 
     // MARK: - Progress Tracking Configuration
 
@@ -131,17 +130,17 @@ public struct SelfExecutionConfiguration: Codable, Sendable {
     // MARK: - Convenience
 
     public func hasPermission(_ permission: Permission) -> Bool {
-        return approvalMode == .alwaysAllow || grantedPermissions.contains(permission)
+        approvalMode == .alwaysAllow || grantedPermissions.contains(permission)
     }
 
     public func getConfiguredProviders() -> [AIProvider] {
-        return providerPriority.filter { provider in
+        providerPriority.filter { provider in
             let key = UserDefaults.standard.string(forKey: provider.keyName) ?? ""
             return !key.isEmpty
         }
     }
 
     public func getPrimaryProvider() -> AIProvider? {
-        return getConfiguredProviders().first
+        getConfiguredProviders().first
     }
 }

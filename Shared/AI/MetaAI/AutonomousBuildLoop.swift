@@ -102,7 +102,8 @@ public actor AutonomousBuildLoop {
 
             // STEP 2: Parse errors
             logger.info("❌ Build failed with \(buildResult.errors.count) errors")
-            let parsedErrors = await ErrorParser.shared.parse(buildResult.errors as! [CompilerError])
+            let compilerErrors = buildResult.errors.compactMap { $0 as? CompilerError }
+            let parsedErrors = await ErrorParser.shared.parse(compilerErrors)
 
             guard !parsedErrors.isEmpty else {
                 logger.error("Build failed but no parseable errors found")
@@ -221,7 +222,8 @@ public actor AutonomousBuildLoop {
         }
 
         // Parse and analyze errors
-        let parsedErrors = await ErrorParser.shared.parse(buildResult.errors as! [CompilerError])
+        let compilerErrors = buildResult.errors.compactMap { $0 as? CompilerError }
+        let parsedErrors = await ErrorParser.shared.parse(compilerErrors)
         let stats = await ErrorParser.shared.analyzeErrors(parsedErrors)
 
         suggestedFixes.append("Found \(parsedErrors.count) errors in \(stats.categoryCounts.count) categories")
@@ -256,6 +258,6 @@ public actor AutonomousBuildLoop {
     // MARK: - Statistics
 
     public func getKnowledgeBaseStatistics() async -> KnowledgeBaseStatistics {
-        return await ErrorKnowledgeBase.shared.getStatistics()
+        await ErrorKnowledgeBase.shared.getStatistics()
     }
 }

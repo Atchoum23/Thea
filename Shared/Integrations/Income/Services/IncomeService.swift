@@ -4,7 +4,6 @@ import Foundation
 
 /// Service for tracking income streams
 public actor IncomeService: IncomeServiceProtocol {
-
     // MARK: - Properties
 
     private var streams: [UUID: IncomeStream] = [:]
@@ -31,7 +30,7 @@ public actor IncomeService: IncomeServiceProtocol {
     }
 
     public func fetchStreams() async throws -> [IncomeStream] {
-        return Array(streams.values).sorted { $0.monthlyAmount > $1.monthlyAmount }
+        Array(streams.values).sorted { $0.monthlyAmount > $1.monthlyAmount }
     }
 
     public func deleteStream(id: UUID) async throws {
@@ -49,7 +48,7 @@ public actor IncomeService: IncomeServiceProtocol {
     }
 
     public func fetchEntries(for dateRange: DateInterval) async throws -> [IncomeEntry] {
-        return entries.values.filter { entry in
+        entries.values.filter { entry in
             dateRange.contains(entry.receivedDate)
         }.sorted { $0.receivedDate > $1.receivedDate }
     }
@@ -116,11 +115,11 @@ public actor IncomeService: IncomeServiceProtocol {
     // MARK: - Analytics
 
     public func getActiveStreamsCount() async -> Int {
-        return streams.values.filter { $0.isActive }.count
+        streams.values.filter { $0.isActive }.count
     }
 
     public func getTotalMonthlyProjection() async -> Double {
-        return streams.values.filter { $0.isActive }.reduce(0.0) { $0 + $1.monthlyAmount }
+        streams.values.filter { $0.isActive }.reduce(0.0) { $0 + $1.monthlyAmount }
     }
 
     public func getTopCategory() async -> IncomeCategory? {
@@ -136,7 +135,6 @@ public actor IncomeService: IncomeServiceProtocol {
 
 /// Service for integrating with gig platforms
 public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
-
     // MARK: - Properties
 
     private var connectedPlatforms: [UUID: GigPlatform] = [:]
@@ -192,24 +190,24 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
     private func syncUpwork(apiKey: String) async throws -> [IncomeEntry] {
         // Would call Upwork API
         // GET /api/profiles/v2/search/jobs.json
-        return []
+        []
     }
 
     private func syncFiverr(apiKey: String) async throws -> [IncomeEntry] {
         // Would call Fiverr API
         // GET /sellers/{username}/gigs
-        return []
+        []
     }
 
     private func syncUber(apiKey: String) async throws -> [IncomeEntry] {
         // Would call Uber Driver API
         // GET /v1/partners/trips
-        return []
+        []
     }
 
     private func syncDoorDash(apiKey: String) async throws -> [IncomeEntry] {
         // Would call DoorDash API
         // GET /drive/v2/deliveries
-        return []
+        []
     }
 }

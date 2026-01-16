@@ -457,8 +457,8 @@ private struct FlowLayout: Layout {
 
 private struct CostCalculatorSheet: View {
     let model: ModelCapability
-    @State private var inputTokens: Double = 100000
-    @State private var outputTokens: Double = 50000
+    @State private var inputTokens: Double = 100_000
+    @State private var outputTokens: Double = 50_000
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -467,10 +467,10 @@ private struct CostCalculatorSheet: View {
                 Section("Token Usage") {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Input Tokens: \(Int(inputTokens).formatted())")
-                        Slider(value: $inputTokens, in: 1000...1000000, step: 1000)
+                        Slider(value: $inputTokens, in: 1_000...1_000_000, step: 1_000)
                         
                         Text("Output Tokens: \(Int(outputTokens).formatted())")
-                        Slider(value: $outputTokens, in: 1000...1000000, step: 1000)
+                        Slider(value: $outputTokens, in: 1_000...1_000_000, step: 1_000)
                     }
                 }
                 

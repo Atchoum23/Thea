@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 /// Blood pressure tracking view with trend analysis
 public struct BloodPressureView: View {

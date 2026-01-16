@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct iOSProjectsView: View {
     @State private var projectManager = ProjectManager.shared

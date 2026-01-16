@@ -5,7 +5,7 @@ import SwiftData
 
 @Model
 final class UserPromptPreference {
-    @Attribute(.unique) public var id: UUID
+    @Attribute(.unique) var id: UUID
     var category: String
     var preferenceKey: String
     var preferenceValue: String
@@ -76,7 +76,7 @@ public final class CodeErrorRecord {
 
 @Model
 final class CodeCorrection {
-    @Attribute(.unique) public var id: UUID
+    @Attribute(.unique) var id: UUID
     var originalCode: String
     var correctedCode: String
     var errorID: UUID
@@ -107,7 +107,7 @@ final class CodeCorrection {
 
 @Model
 final class PromptTemplate {
-    @Attribute(.unique) public var id: UUID
+    @Attribute(.unique) var id: UUID
     var name: String
     var category: String
     var templateText: String
@@ -145,7 +145,7 @@ final class PromptTemplate {
         self.isActive = isActive
     }
 
-    public var successRate: Float {
+    var successRate: Float {
         let total = successCount + failureCount
         return total > 0 ? Float(successCount) / Float(total) : 0
     }
@@ -155,7 +155,7 @@ final class PromptTemplate {
 
 @Model
 final class CodeFewShotExample {
-    @Attribute(.unique) public var id: UUID
+    @Attribute(.unique) var id: UUID
     var taskType: String
     var inputExample: String
     var outputExample: String

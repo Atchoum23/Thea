@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 // MARK: - Prompt Optimizer
 // Automatically optimizes prompts for maximum accuracy and effectiveness
@@ -77,7 +77,7 @@ final class PromptOptimizer {
         for agentType: SubAgentOrchestrator.AgentType,
         taskInstruction: String
     ) async -> PromptTemplate? {
-        return await templateLibrary.selectBestTemplate(
+        await templateLibrary.selectBestTemplate(
             for: agentType.rawValue,
             minSuccessRate: config.minTemplateSuccessRate
         )

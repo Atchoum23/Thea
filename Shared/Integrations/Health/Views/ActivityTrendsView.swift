@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 /// Activity pattern visualization and trend analysis
 @MainActor
@@ -661,7 +661,7 @@ final class ActivityActivityTrendsViewModel {
         case .steps:
             todayValue = "9,847"
             averageValue = "8,523"
-            goalValue = 10000
+            goalValue = 10_000
         case .distance:
             todayValue = "7.2"
             averageValue = "6.4"
@@ -684,7 +684,7 @@ final class ActivityActivityTrendsViewModel {
             let date = Calendar.current.date(byAdding: .day, value: -timeRange.days + dayOffset, to: Date())!
             let baseValue: Double
             switch metric {
-            case .steps: baseValue = 8500
+            case .steps: baseValue = 8_500
             case .distance: baseValue = 6.5
             case .calories: baseValue = 425
             case .activeMinutes: baseValue = 50
@@ -726,9 +726,9 @@ final class ActivityActivityTrendsViewModel {
 
         // Generate goals
         goals = [
-            ActivityGoal(name: "Daily Steps", current: 9847, target: 10000, unit: "steps"),
+            ActivityGoal(name: "Daily Steps", current: 9_847, target: 10_000, unit: "steps"),
             ActivityGoal(name: "Weekly Distance", current: 45, target: 50, unit: "km"),
-            ActivityGoal(name: "Monthly Calories", current: 12750, target: 15000, unit: "kcal")
+            ActivityGoal(name: "Monthly Calories", current: 12_750, target: 15_000, unit: "kcal")
         ]
 
         // Generate streaks

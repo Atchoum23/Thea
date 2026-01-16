@@ -78,7 +78,7 @@ public actor SleepPrevention {
 
     /// Check if currently preventing sleep
     public func isPreventing() -> Bool {
-        return isPreventingSleep
+        isPreventingSleep
     }
 
     /// Execute a block while preventing sleep

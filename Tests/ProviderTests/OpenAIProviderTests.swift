@@ -1,5 +1,5 @@
-import XCTest
 @testable import TheaCoreCore
+import XCTest
 
 final class OpenAIProviderTests: XCTestCase {
     var provider: OpenAIProvider!
@@ -25,8 +25,8 @@ final class OpenAIProviderTests: XCTestCase {
         XCTAssertTrue(capabilities.supportsVision)
         XCTAssertTrue(capabilities.supportsFunctionCalling)
         XCTAssertFalse(capabilities.supportsWebSearch)
-        XCTAssertEqual(capabilities.maxContextTokens, 128000)
-        XCTAssertEqual(capabilities.maxOutputTokens, 16384)
+        XCTAssertEqual(capabilities.maxContextTokens, 128_000)
+        XCTAssertEqual(capabilities.maxOutputTokens, 16_384)
     }
 
     func testListModels() async throws {

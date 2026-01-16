@@ -365,5 +365,5 @@ struct QuickActionButton: View {
 
 #Preview {
     CoworkView()
-        .frame(width: 1000, height: 700)
+        .frame(width: 1_000, height: 700)
 }

@@ -230,24 +230,24 @@ public struct TaxEstimate: Sendable, Codable {
     /// Calculate tax estimate for income
     public static func calculate(grossIncome: Double, year: Int = Calendar.current.component(.year, from: Date())) -> TaxEstimate {
         // Simplified 2024 US tax calculation (single filer)
-        let standardDeduction = 14600.0
+        let standardDeduction = 14_600.0
 
         let taxableIncome = max(0, grossIncome - standardDeduction)
 
         // Federal tax brackets (2024, single)
         var federalTax = 0.0
-        if taxableIncome > 578125 {
-            federalTax = 174238.25 + (taxableIncome - 578125) * 0.37
-        } else if taxableIncome > 231250 {
-            federalTax = 52832.75 + (taxableIncome - 231250) * 0.35
-        } else if taxableIncome > 182100 {
-            federalTax = 37104.0 + (taxableIncome - 182100) * 0.32
-        } else if taxableIncome > 95375 {
-            federalTax = 16290.0 + (taxableIncome - 95375) * 0.24
-        } else if taxableIncome > 44725 {
-            federalTax = 5147.0 + (taxableIncome - 44725) * 0.22
-        } else if taxableIncome > 11000 {
-            federalTax = 1100.0 + (taxableIncome - 11000) * 0.12
+        if taxableIncome > 578_125 {
+            federalTax = 174_238.25 + (taxableIncome - 578_125) * 0.37
+        } else if taxableIncome > 231_250 {
+            federalTax = 52_832.75 + (taxableIncome - 231_250) * 0.35
+        } else if taxableIncome > 182_100 {
+            federalTax = 37_104.0 + (taxableIncome - 182_100) * 0.32
+        } else if taxableIncome > 95_375 {
+            federalTax = 16_290.0 + (taxableIncome - 95_375) * 0.24
+        } else if taxableIncome > 44_725 {
+            federalTax = 5_147.0 + (taxableIncome - 44_725) * 0.22
+        } else if taxableIncome > 11_000 {
+            federalTax = 1_100.0 + (taxableIncome - 11_000) * 0.12
         } else {
             federalTax = taxableIncome * 0.10
         }

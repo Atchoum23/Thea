@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 // MARK: - Prompt Template Library
 // Manages a curated library of prompt templates with versioning and success tracking

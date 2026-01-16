@@ -212,7 +212,7 @@ public actor TerminalService {
         workingDirectory: String? = nil,
         timeout: TimeInterval = 60.0
     ) async throws -> CommandResult {
-        return try await run(
+        try await run(
             command: "/usr/bin/swift",
             arguments: arguments,
             workingDirectory: workingDirectory,
@@ -225,7 +225,7 @@ public actor TerminalService {
         workingDirectory: String? = nil,
         timeout: TimeInterval = 60.0
     ) async throws -> CommandResult {
-        return try await run(
+        try await run(
             command: "/usr/bin/git",
             arguments: arguments,
             workingDirectory: workingDirectory,

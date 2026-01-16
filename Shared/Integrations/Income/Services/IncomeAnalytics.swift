@@ -83,7 +83,7 @@ public actor IncomeAnalytics {
             )
         }
 
-        let categoryBreakdown = Dictionary(grouping: streams, by: { $0.category })
+        let categoryBreakdown = Dictionary(grouping: streams) { $0.category }
             .mapValues { categoryStreams in
                 let categoryTotal = categoryStreams.reduce(0.0) { $0 + $1.monthlyAmount }
                 return (categoryTotal / totalIncome) * 100
@@ -180,7 +180,7 @@ public actor IncomeAnalytics {
 
         // Convert to diversification score (0-100, higher is better)
         // HHI ranges from 1/n*10000 (perfectly diversified) to 10000 (monopoly)
-        let maxHHI = 10000.0
+        let maxHHI = 10_000.0
         return max(0, min(100, (1 - (hhi / maxHHI)) * 100))
     }
 
@@ -203,7 +203,7 @@ public actor IncomeAnalytics {
             insights.append("Income is stable with low volatility")
         }
 
-        if total > 100000 {
+        if total > 100_000 {
             insights.append("Excellent total income performance")
         }
 
@@ -212,7 +212,7 @@ public actor IncomeAnalytics {
 
     private func calculateConfidence(_ monthsAhead: Int) -> Double {
         // Confidence decreases with longer forecasts
-        return max(0.3, 1.0 - (Double(monthsAhead) * 0.05))
+        max(0.3, 1.0 - (Double(monthsAhead) * 0.05))
     }
 
     private func calculateOverallConfidence(_ months: Int) -> String {
@@ -224,11 +224,11 @@ public actor IncomeAnalytics {
     private func generateTaxRecommendations(_ estimate: TaxEstimate) -> [String] {
         var recommendations: [String] = []
 
-        if estimate.selfEmploymentTax > 5000 {
+        if estimate.selfEmploymentTax > 5_000 {
             recommendations.append("Consider S-Corp election to potentially reduce self-employment tax")
         }
 
-        if estimate.totalTax > 20000 {
+        if estimate.totalTax > 20_000 {
             recommendations.append("Make quarterly estimated tax payments to avoid penalties")
         }
 

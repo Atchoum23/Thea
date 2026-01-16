@@ -1,5 +1,5 @@
-import Foundation
 import CoreGraphics
+import Foundation
 
 #if os(macOS)
 // MARK: - Legacy Screen Capture Utilities

@@ -14,8 +14,8 @@ final class OpenRouterProvider: AIProvider, Sendable {
         supportsVision: true,
         supportsFunctionCalling: true,
         supportsWebSearch: false,
-        maxContextTokens: 200000, // Depends on model
-        maxOutputTokens: 16384,
+        maxContextTokens: 200_000, // Depends on model
+        maxOutputTokens: 16_384,
         supportedModalities: [.text, .image]
     )
 
@@ -188,17 +188,17 @@ final class OpenRouterProvider: AIProvider, Sendable {
                 return nil
             }
 
-            let contextWindow = modelData["context_length"] as? Int ?? 128000
+            let contextWindow = modelData["context_length"] as? Int ?? 128_000
             let pricing = modelData["pricing"] as? [String: Any]
-            let inputPrice = (pricing?["prompt"] as? String).flatMap { Double($0) }.map { Decimal($0) * 1000000 } ?? 0
-            let outputPrice = (pricing?["completion"] as? String).flatMap { Double($0) }.map { Decimal($0) * 1000000 } ?? 0
+            let inputPrice = (pricing?["prompt"] as? String).flatMap { Double($0) }.map { Decimal($0) * 1_000_000 } ?? 0
+            let outputPrice = (pricing?["completion"] as? String).flatMap { Double($0) }.map { Decimal($0) * 1_000_000 } ?? 0
 
             return AIModel(
                 id: id,
                 name: name,
                 description: modelData["description"] as? String,
                 contextWindow: contextWindow,
-                maxOutputTokens: 16384,
+                maxOutputTokens: 16_384,
                 inputPricePerMillion: inputPrice,
                 outputPricePerMillion: outputPrice,
                 supportsVision: id.contains("vision") || id.contains("gpt-4o") || id.contains("claude"),

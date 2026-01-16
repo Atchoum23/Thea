@@ -330,16 +330,16 @@ public struct ActivitySummary: Sendable, Codable, Identifiable {
 
     /// Distance in kilometers
     public var distanceKm: Double {
-        distance / 1000
+        distance / 1_000
     }
 
     /// Distance in miles
     public var distanceMiles: Double {
-        distance / 1609.34
+        distance / 1_609.34
     }
 
     /// Check if daily step goal is met (default 10,000 steps)
-    public func meetsStepGoal(_ goal: Int = 10000) -> Bool {
+    public func meetsStepGoal(_ goal: Int = 10_000) -> Bool {
         steps >= goal
     }
 
@@ -353,7 +353,7 @@ public struct ActivitySummary: Sendable, Codable, Identifiable {
         var score = 0
 
         // Steps contribution (max 40 points)
-        score += min(40, (steps * 40) / 10000)
+        score += min(40, (steps * 40) / 10_000)
 
         // Active minutes contribution (max 30 points)
         score += min(30, (activeMinutes * 30) / 30)

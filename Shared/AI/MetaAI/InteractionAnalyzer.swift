@@ -164,7 +164,7 @@ public final class InteractionAnalyzer {
     public static let shared = InteractionAnalyzer()
 
     private(set) var analyzedInteractions: [AnalyzedInteraction] = []
-    private(set) var aggregateMetrics: AggregateMetrics = AggregateMetrics()
+    private(set) var aggregateMetrics = AggregateMetrics()
     private(set) var isAnalyzing = false
 
     private init() {}

@@ -319,13 +319,13 @@ struct CoworkProgressView: View {
     private func formatDuration(_ duration: TimeInterval) -> String {
         if duration < 60 {
             return String(format: "%.1fs", duration)
-        } else if duration < 3600 {
+        } else if duration < 3_600 {
             let minutes = Int(duration / 60)
             let seconds = Int(duration.truncatingRemainder(dividingBy: 60))
             return "\(minutes)m \(seconds)s"
         } else {
-            let hours = Int(duration / 3600)
-            let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
+            let hours = Int(duration / 3_600)
+            let minutes = Int((duration.truncatingRemainder(dividingBy: 3_600)) / 60)
             return "\(hours)h \(minutes)m"
         }
     }

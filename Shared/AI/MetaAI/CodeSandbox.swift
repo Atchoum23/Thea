@@ -13,7 +13,7 @@ final class CodeSandbox {
     // Safety limits
     private let maxExecutionTime: TimeInterval = 30 // 30 seconds
     private let maxMemoryMB: Int = 100
-    private let maxOutputLength: Int = 10000
+    private let maxOutputLength: Int = 10_000
 
     private init() {}
 

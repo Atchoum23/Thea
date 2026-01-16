@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct ChatView: View {
     let conversation: Conversation
@@ -20,7 +20,7 @@ struct ChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 16) {
-                        ForEach(conversation.messages.sorted(by: { $0.orderIndex < $1.orderIndex })) { message in
+                        ForEach(conversation.messages.sorted { $0.orderIndex < $1.orderIndex }) { message in
                             MessageBubble(message: message)
                                 .id(message.id)
                         }
@@ -169,7 +169,7 @@ struct ConversationDocument: FileDocument, @unchecked Sendable {
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         let exportData = ExportedConversation(
             title: conversation.title,
-            messages: conversation.messages.sorted(by: { $0.orderIndex < $1.orderIndex }).map { message in
+            messages: conversation.messages.sorted { $0.orderIndex < $1.orderIndex }.map { message in
                 ExportedMessage(
                     role: message.role,
                     content: message.content.textValue,

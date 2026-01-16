@@ -564,11 +564,11 @@ struct InsightsTabView: View {
         var anomalies: [TransactionAnomaly] = []
         
         // Simple anomaly detection: transactions over $1000
-        for transaction in accountTransactions where abs(transaction.amount) > 1000 {
+        for transaction in accountTransactions where abs(transaction.amount) > 1_000 {
             anomalies.append(TransactionAnomaly(
                 transaction: transaction,
                 reason: "Unusually large transaction amount",
-                severity: abs(transaction.amount) > 5000 ? .high : .medium
+                severity: abs(transaction.amount) > 5_000 ? .high : .medium
             ))
         }
         

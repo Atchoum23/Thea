@@ -88,7 +88,6 @@ final class ModelTraining {
                 job.fineTunedModel = modelId
                 fineTunedModels.append(model)
             }
-
         } catch {
             await MainActor.run {
                 job.status = .failed
@@ -400,7 +399,7 @@ final class ModelTraining {
         // Analyze model performance across conversations
         // In production, gather metrics from actual usage
 
-        return PerformanceAnalysis(
+        PerformanceAnalysis(
             modelId: modelId,
             totalConversations: conversations.count,
             averageResponseQuality: 0.85,

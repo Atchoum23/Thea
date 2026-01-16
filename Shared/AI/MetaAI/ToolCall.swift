@@ -6,13 +6,13 @@ import SwiftData
 
 @Model
 final class ToolCall {
-    var id: UUID = UUID()
+    var id = UUID()
     var toolName: String = ""
     var parameters: String = ""
     var result: String = ""
     var error: String?
     var success: Bool = false
-    var startTime: Date = Date()
+    var startTime = Date()
     var endTime: Date?
     var messageId: UUID?
     

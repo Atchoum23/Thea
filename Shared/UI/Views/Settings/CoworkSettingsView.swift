@@ -190,7 +190,7 @@ struct CoworkSettingsView: View {
                     manager.saveConfiguration()
                 }
 
-            Stepper("Max Files Per Operation: \(manager.maxFilesPerOperation)", value: $manager.maxFilesPerOperation, in: 10...1000, step: 10)
+            Stepper("Max Files Per Operation: \(manager.maxFilesPerOperation)", value: $manager.maxFilesPerOperation, in: 10...1_000, step: 10)
                 .onChange(of: manager.maxFilesPerOperation) { _, _ in
                     manager.saveConfiguration()
                 }

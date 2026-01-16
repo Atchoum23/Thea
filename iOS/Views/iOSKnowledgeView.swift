@@ -210,7 +210,7 @@ struct iOSKnowledgeView: View {
             return
         }
 
-        searchResults = knowledgeManager.search(query: query) as! [SearchResult]
+        searchResults = (knowledgeManager.search(query: query) as? [SearchResult]) ?? []
     }
 
     private func formatBytes(_ bytes: Int) -> String {

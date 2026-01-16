@@ -173,7 +173,7 @@ struct CoworkQueueView: View {
             ForEach(filteredTasks) { task in
                 taskRow(task)
             }
-            .onMove { from, to in
+            .onMove { _, _ in
                 // Reorder tasks
             }
         }

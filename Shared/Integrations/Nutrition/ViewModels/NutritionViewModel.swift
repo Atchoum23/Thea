@@ -5,12 +5,11 @@ import SwiftUI
 @MainActor
 @Observable
 public final class NutritionViewModel {
-
     // MARK: - Published State
 
     public var todaySummary: NutritionSummary?
     public var todayMeals: [MealEntry] = []
-    public var nutritionGoals: NutritionGoals = NutritionGoals()
+    public var nutritionGoals = NutritionGoals()
     public var insights: [NutritionInsight] = []
     public var deficiencies: [NutrientDeficiency] = []
     public var searchResults: [FoodItem] = []
@@ -51,7 +50,6 @@ public final class NutritionViewModel {
 
             // Load deficiencies
             deficiencies = try await nutritionService.getDeficiencies(for: today)
-
         } catch {
             errorMessage = error.localizedDescription
         }

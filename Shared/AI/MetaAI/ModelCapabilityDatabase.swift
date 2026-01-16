@@ -88,7 +88,7 @@ public final class ModelCapabilityDatabase {
     public private(set) var isUpdating: Bool = false
     
     private let storageKey = "com.thea.model.capability.database"
-    private let cacheExpiration: TimeInterval = 86400 // 24 hours
+    private let cacheExpiration: TimeInterval = 86_400 // 24 hours
     
     public var autoUpdate: Bool = true {
         didSet {
@@ -110,9 +110,9 @@ public final class ModelCapabilityDatabase {
         
         public var interval: TimeInterval {
             switch self {
-            case .hourly: return 3600
-            case .daily: return 86400
-            case .weekly: return 604800
+            case .hourly: return 3_600
+            case .daily: return 86_400
+            case .weekly: return 604_800
             case .manual: return .infinity
             }
         }
@@ -148,7 +148,7 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 200_000,
                 costPerMillionInput: 15.0,
                 costPerMillionOutput: 75.0,
-                averageLatency: 2500,
+                averageLatency: 2_500,
                 qualityScore: 0.95,
                 source: .manual
             ),
@@ -160,7 +160,7 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 200_000,
                 costPerMillionInput: 3.0,
                 costPerMillionOutput: 15.0,
-                averageLatency: 1800,
+                averageLatency: 1_800,
                 qualityScore: 0.92,
                 source: .manual
             ),
@@ -174,7 +174,7 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 128_000,
                 costPerMillionInput: 5.0,
                 costPerMillionOutput: 15.0,
-                averageLatency: 1500,
+                averageLatency: 1_500,
                 qualityScore: 0.90,
                 source: .manual
             ),
@@ -200,7 +200,7 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 1_000_000,
                 costPerMillionInput: 0.10,
                 costPerMillionOutput: 0.40,
-                averageLatency: 1200,
+                averageLatency: 1_200,
                 qualityScore: 0.88,
                 source: .manual
             ),
@@ -214,7 +214,7 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 128_000,
                 costPerMillionInput: 0.14,
                 costPerMillionOutput: 0.28,
-                averageLatency: 1600,
+                averageLatency: 1_600,
                 qualityScore: 0.85,
                 source: .manual
             ),
@@ -228,7 +228,7 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 128_000,
                 costPerMillionInput: 3.0,
                 costPerMillionOutput: 3.0,
-                averageLatency: 2000,
+                averageLatency: 2_000,
                 qualityScore: 0.87,
                 source: .manual
             )
@@ -262,7 +262,7 @@ public final class ModelCapabilityDatabase {
     }
     
     public func getBestModel(for taskType: ModelCapability.TaskType, preferences: RoutingPreferences) -> ModelCapability? {
-        return models
+        models
             .filter { $0.strengths.contains(taskType) }
             .filter { preferences.localPreferred ? $0.provider == "local" : true }
             .sorted { model1, model2 in
@@ -275,15 +275,15 @@ public final class ModelCapabilityDatabase {
     }
     
     public func getModel(id: String) -> ModelCapability? {
-        return models.first { $0.modelId == id }
+        models.first { $0.modelId == id }
     }
     
     public func getModels(for provider: String) -> [ModelCapability] {
-        return models.filter { $0.provider == provider }
+        models.filter { $0.provider == provider }
     }
     
     public func getModels(strongIn taskType: ModelCapability.TaskType) -> [ModelCapability] {
-        return models.filter { $0.strengths.contains(taskType) }
+        models.filter { $0.strengths.contains(taskType) }
     }
     
     public struct RoutingPreferences: Sendable {

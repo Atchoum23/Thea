@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 /// Aggregated health insights dashboard with AI-powered recommendations
 @MainActor
@@ -725,7 +725,7 @@ final class HealthInsightsViewModel {
 
         // Mock averages
         averageSleepDuration = 420 // 7 hours
-        averageSteps = 8500
+        averageSteps = 8_500
         averageRestingHR = 62
         averageActiveCalories = 450
 
@@ -737,7 +737,7 @@ final class HealthInsightsViewModel {
 
         // Mock trend data
         sleepTrendData = generateMockTrendData(days: timeRange.days, baseValue: 7.0, variance: 1.5)
-        activityTrendData = generateMockTrendData(days: timeRange.days, baseValue: 8500, variance: 2000)
+        activityTrendData = generateMockTrendData(days: timeRange.days, baseValue: 8_500, variance: 2_000)
         heartRateTrendData = generateMockTrendData(days: timeRange.days, baseValue: 62, variance: 5)
 
         await generateInsights()

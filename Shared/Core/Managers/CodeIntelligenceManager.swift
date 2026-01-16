@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 @MainActor
 @Observable
@@ -51,12 +51,12 @@ final class CodeIntelligenceManager {
 
     func getSuggestions(for code: String, language: String) async -> [String] {
         // AI-powered code suggestions
-        return []
+        []
     }
 
     func explainCode(_ code: String, language: String) async -> String {
         // AI-powered code explanation
-        return "Code explanation would appear here."
+        "Code explanation would appear here."
     }
 }
 

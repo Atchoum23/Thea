@@ -1,11 +1,10 @@
-import Testing
 import Foundation
+import Testing
 @testable import Thea
 
 /// Tests for career development service
 @Suite("Career Service Tests")
 struct CareerServiceTests {
-
     // MARK: - Goal Tests
 
     @Test("Create goal successfully")

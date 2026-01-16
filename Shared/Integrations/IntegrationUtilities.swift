@@ -64,8 +64,8 @@ public struct DurationFormatter {
 
     /// Formats time interval as human-readable string
     public static func formatInterval(_ interval: TimeInterval) -> String {
-        let hours = Int(interval) / 3600
-        let minutes = (Int(interval) % 3600) / 60
+        let hours = Int(interval) / 3_600
+        let minutes = (Int(interval) % 3_600) / 60
 
         if hours == 0 {
             return "\(minutes) min"

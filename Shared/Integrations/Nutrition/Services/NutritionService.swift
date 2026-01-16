@@ -4,12 +4,11 @@ import Foundation
 
 /// Complete nutrition tracking service
 public actor NutritionService: NutritionServiceProtocol {
-
     // MARK: - Properties
 
     private var mealEntries: [UUID: MealEntry] = [:]
     private var foodDatabase: [UUID: FoodItem] = [:]
-    private var currentGoals: NutritionGoals = NutritionGoals()
+    private var currentGoals = NutritionGoals()
 
     private let usdaService: USDAFoodDatabaseService
     private let analysisEngine: NutritionAnalysisEngine
@@ -31,7 +30,7 @@ public actor NutritionService: NutritionServiceProtocol {
     }
 
     public func fetchMeals(for dateRange: DateInterval) async throws -> [MealEntry] {
-        return mealEntries.values.filter { entry in
+        mealEntries.values.filter { entry in
             dateRange.contains(entry.timestamp)
         }.sorted { $0.timestamp > $1.timestamp }
     }
@@ -112,7 +111,7 @@ public actor NutritionService: NutritionServiceProtocol {
     }
 
     public func fetchGoals() async throws -> NutritionGoals {
-        return currentGoals
+        currentGoals
     }
 
     // MARK: - Insights
@@ -132,7 +131,6 @@ public actor NutritionService: NutritionServiceProtocol {
 
 /// Service for querying USDA FoodData Central API
 public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
-
     // MARK: - Properties
 
     private let apiKey: String?
@@ -149,7 +147,7 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
     public func searchUSDA(query: String, pageSize: Int = 20) async throws -> [FoodItem] {
         // In production, would make actual API call
         // For now, return mock data
-        return [
+        [
             FoodItem(
                 name: "Apple, raw",
                 servingSize: 100,
@@ -172,7 +170,7 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
 
     public func fetchBrandedFood(barcode: String) async throws -> FoodItem? {
         // Would query: GET /v1/foods/search?query=gtinUpc:{barcode}
-        return nil
+        nil
     }
 
     // MARK: - Private Helpers
@@ -205,13 +203,12 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
 
 /// Engine for analyzing nutrition data
 public actor NutritionAnalysisEngine: NutritionAnalysisProtocol {
-
     public init() {}
 
     // MARK: - Scoring
 
     public func calculateNutritionScore(nutrients: NutrientProfile) async throws -> Double {
-        return nutrients.nutritionScore
+        nutrients.nutritionScore
     }
 
     // MARK: - Insights

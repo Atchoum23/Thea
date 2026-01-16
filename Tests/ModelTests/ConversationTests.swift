@@ -1,6 +1,6 @@
-import XCTest
 import SwiftData
 @testable import TheaCoreCore
+import XCTest
 
 @MainActor
 final class ConversationTests: XCTestCase {

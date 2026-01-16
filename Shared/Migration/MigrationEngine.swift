@@ -103,7 +103,6 @@ final class MigrationEngine {
 
                 activeMigrations.removeAll { $0.id == job.id }
                 completedMigrations.append(job)
-
             } catch {
                 job.status = .failed(error.localizedDescription)
                 job.endTime = Date()
@@ -386,7 +385,6 @@ struct ClaudeAppMigration: MigrationSource {
                     ))
 
                     continuation.finish()
-
                 } catch {
                     continuation.finish(throwing: error)
                 }
@@ -434,7 +432,7 @@ struct ChatGPTMigration: MigrationSource {
 
     func detectInstallation() async -> Bool {
         // ChatGPT requires manual export
-        return false
+        false
     }
 
     func estimateMigrationSize() async throws -> MigrationEstimate {
@@ -469,7 +467,6 @@ struct ChatGPTMigration: MigrationSource {
                     }
 
                     continuation.finish()
-
                 } catch {
                     continuation.finish(throwing: error)
                 }
@@ -489,7 +486,6 @@ struct ChatGPTMigration: MigrationSource {
                let parts = content["parts"] as? [String],
                let role = message["author"] as? [String: String],
                let roleValue = role["role"] {
-
                 let msgRole: MessageRole = roleValue == "user" ? .user : .assistant
                 let text = parts.joined(separator: "\n")
 

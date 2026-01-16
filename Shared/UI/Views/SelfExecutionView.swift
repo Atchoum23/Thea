@@ -239,7 +239,6 @@ public struct SelfExecutionView: View {
             if let dmg = result.dmgPath {
                 progress += "\nDMG: \(dmg)"
             }
-
         } catch {
             progress += "\n❌ Error: \(error.localizedDescription)"
         }

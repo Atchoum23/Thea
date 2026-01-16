@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 // MARK: - Life Tracking Dashboard (Simplified)
 // Placeholder view for life tracking features

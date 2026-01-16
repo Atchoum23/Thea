@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 // MARK: - User Preference Model
 // Learns and tracks user preferences for personalized prompt optimization
@@ -185,7 +185,7 @@ final class UserPreferenceModel {
         // Length
         if output.count < 500 {
             characteristics.append(("length", "short"))
-        } else if output.count < 2000 {
+        } else if output.count < 2_000 {
             characteristics.append(("length", "medium"))
         } else {
             characteristics.append(("length", "long"))

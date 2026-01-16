@@ -1,10 +1,10 @@
-import Foundation
 import CoreGraphics
+import Foundation
 import OSLog
 
 #if os(macOS)
-import ScreenCaptureKit
 import AppKit
+import ScreenCaptureKit
 #endif
 
 // MARK: - ScreenCapture

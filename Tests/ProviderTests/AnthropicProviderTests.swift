@@ -1,5 +1,5 @@
-import XCTest
 @testable import TheaCoreCore
+import XCTest
 
 final class AnthropicProviderTests: XCTestCase {
     var provider: AnthropicProvider!
@@ -24,8 +24,8 @@ final class AnthropicProviderTests: XCTestCase {
         XCTAssertTrue(capabilities.supportsStreaming)
         XCTAssertTrue(capabilities.supportsVision)
         XCTAssertTrue(capabilities.supportsFunctionCalling)
-        XCTAssertEqual(capabilities.maxContextTokens, 200000)
-        XCTAssertEqual(capabilities.maxOutputTokens, 8192)
+        XCTAssertEqual(capabilities.maxContextTokens, 200_000)
+        XCTAssertEqual(capabilities.maxOutputTokens, 8_192)
     }
 
     func testListModels() async throws {
@@ -50,7 +50,7 @@ final class AnthropicProviderTests: XCTestCase {
         let models = try await provider.listModels()
 
         for model in models {
-            XCTAssertEqual(model.contextWindow, 200000, "All Claude models should have 200K context")
+            XCTAssertEqual(model.contextWindow, 200_000, "All Claude models should have 200K context")
         }
     }
 }

@@ -3,7 +3,6 @@ import Foundation
 /// Permission manager for automation safety
 /// Implements a consequence-based permission system for automation actions
 public actor PermissionManager {
-
     // MARK: - Properties
 
     private var permissionCache: [String: PermissionDecision] = [:]
@@ -151,7 +150,7 @@ public actor PermissionManager {
 
     /// Get all cached permission decisions
     public func getPermissionHistory() -> [String: PermissionDecision] {
-        return permissionCache
+        permissionCache
     }
 }
 

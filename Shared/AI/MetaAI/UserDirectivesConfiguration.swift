@@ -136,11 +136,11 @@ public final class UserDirectivesConfiguration {
     }
     
     public func getActiveDirectives() -> [UserDirective] {
-        return directives.filter { $0.isEnabled }
+        directives.filter { $0.isEnabled }
     }
     
     public func getDirectives(for category: DirectiveCategory) -> [UserDirective] {
-        return directives.filter { $0.category == category }
+        directives.filter { $0.category == category }
     }
     
     public func getActiveDirectivesForPrompt() -> String {

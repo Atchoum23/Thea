@@ -95,7 +95,7 @@ public actor CodeFixer {
 
         // Add public modifier if not already present
         if !targetLine.contains("public ") {
-            let indent = String(targetLine.prefix(while: { $0.isWhitespace }))
+            let indent = String(targetLine.prefix { $0.isWhitespace })
             let trimmedLine = targetLine.trimmingCharacters(in: .whitespaces)
 
             if trimmedLine.hasPrefix("private ") || trimmedLine.hasPrefix("internal ") {
@@ -194,7 +194,7 @@ public actor CodeFixer {
         }
 
         // Add @MainActor attribute
-        let indent = String(lines[error.line - 1].prefix(while: { $0.isWhitespace }))
+        let indent = String(lines[error.line - 1].prefix { $0.isWhitespace })
         lines.insert(indent + "@MainActor", at: error.line - 1)
 
         try saveFile(error.file, content: lines.joined(separator: "\n"))
@@ -209,7 +209,7 @@ public actor CodeFixer {
 
     private func addAsyncAwait(to error: ErrorParser.ParsedError) async throws -> FixResult {
         // This is a placeholder - actual implementation would need more sophisticated analysis
-        return FixResult(
+        FixResult(
             applied: false,
             fileModified: error.file,
             changeDescription: "async/await fixes require AI assistance",
@@ -275,7 +275,7 @@ public actor CodeFixer {
 
     private func fixInitializer(for error: ErrorParser.ParsedError) async throws -> FixResult {
         // Placeholder - requires AI assistance
-        return FixResult(
+        FixResult(
             applied: false,
             fileModified: error.file,
             changeDescription: "Initializer fixes require AI assistance",
@@ -285,7 +285,7 @@ public actor CodeFixer {
 
     private func addIsolatedAttribute(to error: ErrorParser.ParsedError) async throws -> FixResult {
         // Placeholder - requires AI assistance
-        return FixResult(
+        FixResult(
             applied: false,
             fileModified: error.file,
             changeDescription: "Isolation fixes require AI assistance",
@@ -295,7 +295,7 @@ public actor CodeFixer {
 
     private func useTaskDetached(for error: ErrorParser.ParsedError) async throws -> FixResult {
         // Placeholder - requires AI assistance
-        return FixResult(
+        FixResult(
             applied: false,
             fileModified: error.file,
             changeDescription: "Task.detached fixes require AI assistance",
@@ -338,7 +338,7 @@ public actor CodeFixer {
 
             return FixResult(
                 applied: false,
-                fileModified: error.file,
+                fileModified: "unknown",
                 changeDescription: "AI fix generation failed: \(aiError.localizedDescription)",
                 linesChanged: 0
             )

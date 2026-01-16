@@ -1,7 +1,7 @@
 #if os(macOS)
-import Foundation
 import AppKit
 import CoreGraphics
+import Foundation
 
 /// Manager for display profiles and automated switching
 public actor DisplayProfileManager {

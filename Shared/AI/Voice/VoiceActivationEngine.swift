@@ -1,5 +1,5 @@
-import Foundation
 import AVFoundation
+import Foundation
 import Speech
 
 @MainActor
@@ -206,7 +206,6 @@ final class VoiceActivationEngine {
                 // Reset for next wake word
                 isProcessing = false
             }
-
         } catch {
             await speak("Sorry, I encountered an error: \(error.localizedDescription)")
             isProcessing = false
@@ -261,9 +260,9 @@ final class VoiceActivationEngine {
         currentUtterance = utterance
 
         await withCheckedContinuation { continuation in
-            let delegate = SpeechDelegate(onComplete: {
+            let delegate = SpeechDelegate {
                 continuation.resume()
-            })
+            }
 
             speechSynthesizer.delegate = delegate
             speechSynthesizer.speak(utterance)

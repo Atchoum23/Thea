@@ -14,8 +14,8 @@ final class PerplexityProvider: AIProvider, Sendable {
         supportsVision: false,
         supportsFunctionCalling: false,
         supportsWebSearch: true, // Perplexity's specialty!
-        maxContextTokens: 127000,
-        maxOutputTokens: 4096,
+        maxContextTokens: 127_000,
+        maxOutputTokens: 4_096,
         supportedModalities: [.text]
     )
 
@@ -178,13 +178,13 @@ final class PerplexityProvider: AIProvider, Sendable {
     // MARK: - Models
 
     func listModels() async throws -> [AIModel] {
-        return [
+        [
             AIModel(
                 id: "llama-3.1-sonar-large-128k-online",
                 name: "Sonar Large (Online)",
                 description: "Most capable with web search",
-                contextWindow: 127000,
-                maxOutputTokens: 4096,
+                contextWindow: 127_000,
+                maxOutputTokens: 4_096,
                 inputPricePerMillion: 1.00,
                 outputPricePerMillion: 1.00,
                 supportsVision: false,
@@ -194,8 +194,8 @@ final class PerplexityProvider: AIProvider, Sendable {
                 id: "llama-3.1-sonar-small-128k-online",
                 name: "Sonar Small (Online)",
                 description: "Fast with web search",
-                contextWindow: 127000,
-                maxOutputTokens: 4096,
+                contextWindow: 127_000,
+                maxOutputTokens: 4_096,
                 inputPricePerMillion: 0.20,
                 outputPricePerMillion: 0.20,
                 supportsVision: false,
@@ -205,8 +205,8 @@ final class PerplexityProvider: AIProvider, Sendable {
                 id: "llama-3.1-8b-instruct",
                 name: "Llama 3.1 8B",
                 description: "Fast open-source model (no search)",
-                contextWindow: 127000,
-                maxOutputTokens: 4096,
+                contextWindow: 127_000,
+                maxOutputTokens: 4_096,
                 inputPricePerMillion: 0.20,
                 outputPricePerMillion: 0.20,
                 supportsVision: false,

@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 #if os(macOS)
 import AppKit
@@ -213,7 +213,7 @@ final class ScreenTimeTracker {
     }
 
     func getProductivityScore() -> Double {
-        return calculateProductivityScore()
+        calculateProductivityScore()
     }
 
     // MARK: - Historical Data
