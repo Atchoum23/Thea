@@ -1,6 +1,8 @@
+#if os(macOS)
 import Foundation
 
 /// Manages file operations for Cowork sessions
+@MainActor
 final class FileOperationsManager {
     private let folderAccess = FolderAccessManager.shared
     private let fileManager = FileManager.default
@@ -337,3 +339,4 @@ struct FileAttributes {
         ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
 }
+#endif
