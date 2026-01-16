@@ -331,10 +331,10 @@ final class WorkflowBuilder {
                 // Execute node with sendable wrapper
                 // Wrap nodeInputs in SendableDict for safe transfer across isolation boundaries
                 let sendableInputs = SendableDict(nodeInputs)
-                let result = try await executeNode(node, inputs: sendableInputs, workflow: workflow)
+                let sendableResult = try await executeNode(node, inputs: sendableInputs, workflow: workflow)
 
-                // Store outputs
-                nodeOutputs[nodeId] = result
+                // Store outputs (unwrap SendableDict)
+                nodeOutputs[nodeId] = sendableResult.value
             }
 
             execution.status = .completed
@@ -375,40 +375,42 @@ final class WorkflowBuilder {
         _ node: WorkflowNode,
         inputs: SendableDict,
         workflow: Workflow
-    ) async throws -> [String: Any] {
+    ) async throws -> SendableDict {
         // Extract the dictionary from the sendable wrapper
         let inputDict = inputs.value
+        let result: [String: Any]
         switch node.type {
         case .input:
-            return inputDict
+            result = inputDict
 
         case .output:
-            return inputDict
+            result = inputDict
 
         case .aiInference:
-            return try await executeAIInference(node, inputs: inputDict)
+            result = try await executeAIInference(node, inputs: inputDict)
 
         case .toolExecution:
-            return try await executeToolNode(node, inputs: inputDict)
+            result = try await executeToolNode(node, inputs: inputDict)
 
         case .conditional:
-            return executeConditional(node, inputs: inputDict)
+            result = executeConditional(node, inputs: inputDict)
 
         case .loop:
-            return try await executeLoop(node, inputs: inputDict, workflow: workflow)
+            result = try await executeLoop(node, inputs: inputDict, workflow: workflow)
 
         case .variable:
-            return executeVariable(node, inputs: inputDict)
+            result = executeVariable(node, inputs: inputDict)
 
         case .transformation:
-            return executeTransformation(node, inputs: inputDict)
+            result = executeTransformation(node, inputs: inputDict)
 
         case .merge:
-            return executeMerge(node, inputs: inputDict)
+            result = executeMerge(node, inputs: inputDict)
 
         case .split:
-            return executeSplit(node, inputs: inputDict)
+            result = executeSplit(node, inputs: inputDict)
         }
+        return SendableDict(result)
     }
 
     nonisolated private func executeAIInference(

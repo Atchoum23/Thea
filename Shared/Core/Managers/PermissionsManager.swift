@@ -4,7 +4,7 @@ import EventKit
 import Foundation
 import Photos
 import Speech
-import UserNotifications
+@preconcurrency import UserNotifications
 
 #if os(macOS)
 import AppKit
