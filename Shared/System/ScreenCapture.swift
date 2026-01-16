@@ -8,19 +8,18 @@ import AppKit
 #endif
 
 // MARK: - ScreenCapture
-// Modern screen capture service with ScreenCaptureKit (macOS 14.0+) and legacy fallback
+// Modern screen capture service using ScreenCaptureKit (macOS 14.0+)
+// Note: Legacy CGWindowListCreateImage APIs were removed in macOS 15.0
+// Thea requires macOS 14.0+ so we use ScreenCaptureKit exclusively
 
 public actor ScreenCapture {
     public static let shared = ScreenCapture()
 
     private let logger = Logger(subsystem: "com.thea.system", category: "ScreenCapture")
-    
+
     #if os(macOS)
     // Cache for ScreenCaptureKit content
-    @available(macOS 14.0, *)
     private var availableContent: SCShareableContent?
-    
-    @available(macOS 14.0, *)
     private var lastContentUpdate: Date?
     #endif
 
@@ -54,34 +53,17 @@ public actor ScreenCapture {
         #if os(macOS)
         logger.info("Capturing full screen")
 
-        if #available(macOS 14.0, *) {
-            // Use modern ScreenCaptureKit
-            return try await captureScreenModern()
-        } else {
-            // Fall back to legacy API for macOS 13 and earlier
-            return try capturScreenLegacy()
-        }
-        #else
-        throw CaptureError.notSupported
-        #endif
-    }
-    
-    #if os(macOS)
-    // MARK: - Modern ScreenCaptureKit Implementation (macOS 14.0+)
-    
-    @available(macOS 14.0, *)
-    private func captureScreenModern() async throws -> CGImage {
         // Get available content
         let content = try await getShareableContent()
-        
+
         // Get the main display
         guard let display = content.displays.first else {
             throw CaptureError.captureFailed("No displays available")
         }
-        
+
         // Create filter for the display
         let filter = SCContentFilter(display: display, excludingWindows: [])
-        
+
         // Configure capture
         let config = SCStreamConfiguration()
         config.width = display.width
@@ -89,18 +71,21 @@ public actor ScreenCapture {
         config.pixelFormat = kCVPixelFormatType_32BGRA
         config.showsCursor = false
         config.scalesToFit = false
-        
+
         // Capture the image
         let image = try await SCScreenshotManager.captureImage(
             contentFilter: filter,
             configuration: config
         )
-        
-        logger.info("Screen captured (modern): \(image.width)x\(image.height)")
+
+        logger.info("Screen captured: \(image.width)x\(image.height)")
         return image
+        #else
+        throw CaptureError.notSupported
+        #endif
     }
-    
-    @available(macOS 14.0, *)
+
+    #if os(macOS)
     private func getShareableContent() async throws -> SCShareableContent {
         // Cache content for 5 seconds to avoid repeated queries
         if let cached = availableContent,
@@ -108,27 +93,16 @@ public actor ScreenCapture {
            Date().timeIntervalSince(lastUpdate) < 5 {
             return cached
         }
-        
+
         let content = try await SCShareableContent.excludingDesktopWindows(
             false,
             onScreenWindowsOnly: true
         )
-        
+
         self.availableContent = content
         self.lastContentUpdate = Date()
-        
-        return content
-    }
-    
-    // MARK: - Legacy Implementation (macOS 13 and earlier)
 
-    // Legacy screen capture for macOS 12-13 (ScreenCaptureKit is used on macOS 14+)
-    @available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use captureScreenModern for macOS 14.0+")
-    nonisolated private func capturScreenLegacy() throws -> CGImage {
-        guard let image = legacyCaptureScreen() else {
-            throw CaptureError.captureFailed("Failed to create screen image")
-        }
-        return image
+        return content
     }
     #endif
 
@@ -138,23 +112,8 @@ public actor ScreenCapture {
         #if os(macOS)
         logger.info("Capturing window: \(windowName)")
 
-        if #available(macOS 14.0, *) {
-            // Use modern ScreenCaptureKit
-            return try await captureWindowModern(named: windowName)
-        } else {
-            // Fall back to legacy API
-            return try captureWindowLegacy(named: windowName)
-        }
-        #else
-        throw CaptureError.notSupported
-        #endif
-    }
-    
-    #if os(macOS)
-    @available(macOS 14.0, *)
-    private func captureWindowModern(named windowName: String) async throws -> CGImage {
         let content = try await getShareableContent()
-        
+
         // Find window by name
         guard let window = content.windows.first(where: { window in
             window.title?.contains(windowName) ?? false ||
@@ -162,10 +121,10 @@ public actor ScreenCapture {
         }) else {
             throw CaptureError.windowNotFound(windowName)
         }
-        
+
         // Create filter for the window
         let filter = SCContentFilter(desktopIndependentWindow: window)
-        
+
         // Configure capture
         let config = SCStreamConfiguration()
         config.width = Int(window.frame.width)
@@ -173,48 +132,19 @@ public actor ScreenCapture {
         config.pixelFormat = kCVPixelFormatType_32BGRA
         config.showsCursor = false
         config.scalesToFit = false
-        
+
         // Capture the image
         let image = try await SCScreenshotManager.captureImage(
             contentFilter: filter,
             configuration: config
         )
-        
-        logger.info("Window captured (modern): \(image.width)x\(image.height)")
+
+        logger.info("Window captured: \(image.width)x\(image.height)")
         return image
+        #else
+        throw CaptureError.notSupported
+        #endif
     }
-    
-    // Legacy window capture for macOS 12-13
-    @available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use captureWindowModern for macOS 14.0+")
-    nonisolated private func captureWindowLegacy(named windowName: String) throws -> CGImage {
-        // Get window list
-        guard let windowList = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else {
-            throw CaptureError.captureFailed("Failed to get window list")
-        }
-
-        // Find window by name
-        var targetWindowID: CGWindowID?
-        for window in windowList {
-            if let name = window[kCGWindowName as String] as? String,
-               name.contains(windowName) {
-                if let windowID = window[kCGWindowNumber as String] as? CGWindowID {
-                    targetWindowID = windowID
-                    break
-                }
-            }
-        }
-
-        guard let windowID = targetWindowID else {
-            throw CaptureError.windowNotFound(windowName)
-        }
-
-        guard let image = legacyCaptureWindow(windowID: windowID) else {
-            throw CaptureError.captureFailed("Failed to create window image")
-        }
-
-        return image
-    }
-    #endif
 
     // MARK: - Capture Region
 
@@ -222,30 +152,15 @@ public actor ScreenCapture {
         #if os(macOS)
         logger.info("Capturing region: width=\(rect.width), height=\(rect.height)")
 
-        if #available(macOS 14.0, *) {
-            // Use modern ScreenCaptureKit
-            return try await captureRegionModern(rect)
-        } else {
-            // Fall back to legacy API
-            return try captureRegionLegacy(rect)
-        }
-        #else
-        throw CaptureError.notSupported
-        #endif
-    }
-    
-    #if os(macOS)
-    @available(macOS 14.0, *)
-    private func captureRegionModern(_ rect: CGRect) async throws -> CGImage {
         let content = try await getShareableContent()
-        
+
         guard let display = content.displays.first else {
             throw CaptureError.captureFailed("No displays available")
         }
-        
+
         // Create filter for the display
         let filter = SCContentFilter(display: display, excludingWindows: [])
-        
+
         // Configure capture with the specified region
         let config = SCStreamConfiguration()
         config.sourceRect = rect
@@ -254,26 +169,19 @@ public actor ScreenCapture {
         config.pixelFormat = kCVPixelFormatType_32BGRA
         config.showsCursor = false
         config.scalesToFit = false
-        
+
         // Capture the image
         let image = try await SCScreenshotManager.captureImage(
             contentFilter: filter,
             configuration: config
         )
-        
-        logger.info("Region captured (modern): \(image.width)x\(image.height)")
+
+        logger.info("Region captured: \(image.width)x\(image.height)")
         return image
+        #else
+        throw CaptureError.notSupported
+        #endif
     }
-    
-    // Legacy region capture for macOS 12-13
-    @available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use captureRegionModern for macOS 14.0+")
-    nonisolated private func captureRegionLegacy(_ rect: CGRect) throws -> CGImage {
-        guard let image = legacyCaptureRegion(rect) else {
-            throw CaptureError.captureFailed("Failed to capture region")
-        }
-        return image
-    }
-    #endif
 
     // MARK: - Save to File
 
@@ -301,13 +209,8 @@ public actor ScreenCapture {
 
     public func checkPermission() async -> Bool {
         #if os(macOS)
-        if #available(macOS 12.3, *) {
-            // Check screen recording permission
-            return CGPreflightScreenCaptureAccess()
-        } else {
-            // Assume permission on older systems
-            return true
-        }
+        // Check screen recording permission
+        return CGPreflightScreenCaptureAccess()
         #else
         return false
         #endif
@@ -315,11 +218,7 @@ public actor ScreenCapture {
 
     public func requestPermission() async -> Bool {
         #if os(macOS)
-        if #available(macOS 12.3, *) {
-            return CGRequestScreenCaptureAccess()
-        } else {
-            return true
-        }
+        return CGRequestScreenCaptureAccess()
         #else
         return false
         #endif

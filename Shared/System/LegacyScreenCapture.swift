@@ -3,52 +3,40 @@ import CoreGraphics
 
 #if os(macOS)
 // MARK: - Legacy Screen Capture Utilities
-// These functions use deprecated APIs intentionally for backward compatibility with macOS 12-13
-// When CGWindowListCreateImage is called from here, the deprecation warning is expected
-// but does not indicate a bug - ScreenCaptureKit is used on macOS 14+
+// NOTE: CGWindowListCreateImage was completely removed in macOS 15.0
+// Since Thea targets macOS 14.0+, we use ScreenCaptureKit exclusively.
+// These stub functions exist only for API compatibility and will throw errors
+// if somehow called on macOS 14 where ScreenCaptureKit should be used instead.
 
 // swiftlint:disable all
 
-/// Legacy helper for capturing full screen on macOS 12-13
-/// - Returns: CGImage of the captured screen
-/// - Note: Intentionally uses deprecated CGWindowListCreateImage for backward compatibility
-@available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use ScreenCaptureKit for macOS 14.0+")
+/// Legacy helper stub - not available on macOS 15+
+/// - Returns: nil - use ScreenCaptureKit instead
+@available(macOS, introduced: 12.0, obsoleted: 15.0, message: "CGWindowListCreateImage removed in macOS 15. Use ScreenCaptureKit.")
 func legacyCaptureScreen() -> CGImage? {
-    let screenBounds = CGDisplayBounds(CGMainDisplayID())
-    return CGWindowListCreateImage(
-        screenBounds,
-        .optionOnScreenOnly,
-        kCGNullWindowID,
-        [.boundsIgnoreFraming, .bestResolution]
-    )
+    // CGWindowListCreateImage is unavailable on macOS 15+
+    // ScreenCapture.swift should use ScreenCaptureKit for macOS 14+
+    return nil
 }
 
-/// Legacy helper for capturing a window on macOS 12-13
-/// - Parameter windowID: The CGWindowID of the window to capture
-/// - Returns: CGImage of the captured window
-/// - Note: Intentionally uses deprecated CGWindowListCreateImage for backward compatibility
-@available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use ScreenCaptureKit for macOS 14.0+")
+/// Legacy helper stub - not available on macOS 15+
+/// - Parameter windowID: The CGWindowID of the window (unused)
+/// - Returns: nil - use ScreenCaptureKit instead
+@available(macOS, introduced: 12.0, obsoleted: 15.0, message: "CGWindowListCreateImage removed in macOS 15. Use ScreenCaptureKit.")
 func legacyCaptureWindow(windowID: CGWindowID) -> CGImage? {
-    return CGWindowListCreateImage(
-        .null,
-        .optionIncludingWindow,
-        windowID,
-        [.boundsIgnoreFraming, .bestResolution]
-    )
+    // CGWindowListCreateImage is unavailable on macOS 15+
+    // ScreenCapture.swift should use ScreenCaptureKit for macOS 14+
+    return nil
 }
 
-/// Legacy helper for capturing a region on macOS 12-13
-/// - Parameter rect: The region to capture
-/// - Returns: CGImage of the captured region
-/// - Note: Intentionally uses deprecated CGWindowListCreateImage for backward compatibility
-@available(macOS, introduced: 12.0, deprecated: 14.0, message: "Use ScreenCaptureKit for macOS 14.0+")
+/// Legacy helper stub - not available on macOS 15+
+/// - Parameter rect: The region to capture (unused)
+/// - Returns: nil - use ScreenCaptureKit instead
+@available(macOS, introduced: 12.0, obsoleted: 15.0, message: "CGWindowListCreateImage removed in macOS 15. Use ScreenCaptureKit.")
 func legacyCaptureRegion(_ rect: CGRect) -> CGImage? {
-    return CGWindowListCreateImage(
-        rect,
-        .optionOnScreenOnly,
-        kCGNullWindowID,
-        [.boundsIgnoreFraming, .bestResolution]
-    )
+    // CGWindowListCreateImage is unavailable on macOS 15+
+    // ScreenCapture.swift should use ScreenCaptureKit for macOS 14+
+    return nil
 }
 
 // swiftlint:enable all
