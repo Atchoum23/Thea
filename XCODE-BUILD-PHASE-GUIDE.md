@@ -236,12 +236,46 @@ After Xcode build phase is set up:
 3. **View summary**: `make summary`
 4. **Optional**: Start file watcher: `make watch`
 
+## 📊 Phase 7.9: Programmatic QA Tools Integration
+
+Phase 7.9 implements programmatic access to all third-party QA tools mentioned in this guide and `QA_SETUP_GUIDE.md`. This allows Thea to run QA tools directly from within the app and configure them through the Settings UI.
+
+### QA Tools Available Programmatically
+
+| Tool | Purpose | Programmatic API |
+|------|---------|------------------|
+| **SwiftLint** | Static code analysis | `QAToolsManager.shared.runSwiftLint()` |
+| **CodeCov** | Coverage reporting | `QAToolsManager.shared.uploadCoverage()` |
+| **SonarCloud** | Code quality analysis | `QAToolsManager.shared.runSonarAnalysis()` |
+| **DeepSource** | Automated code review | `QAToolsManager.shared.runDeepSourceAnalysis()` |
+
+### Settings Integration
+
+Navigate to **Settings → QA Tools** to:
+- Configure API tokens for each service
+- Set project paths and configuration files
+- Run individual tools or full QA suite
+- View QA results and history
+- Toggle auto-run on build
+
+### Implementation Details
+
+See `QA_SETUP_GUIDE.md` for token setup and configuration details.
+
+**Files Modified:**
+- `Shared/Core/Configuration/AppConfiguration.swift` - Added `QAToolsConfiguration`
+- `Shared/Services/QAToolsManager.swift` - QA tools execution service
+- `Shared/UI/Views/Settings/QASettingsView.swift` - Settings UI
+
+---
+
 ## 📚 Related Documentation
 
 - `START-HERE.md` - Quick start guide
 - `QUICK-REFERENCE.md` - All commands
 - `Scripts/README.md` - Script documentation
 - `AUTO-ERROR-DETECTION-COMPLETE-GUIDE.md` - Full guide
+- `QA_SETUP_GUIDE.md` - QA tools setup and token configuration
 
 ---
 

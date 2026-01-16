@@ -40,6 +40,11 @@ struct SettingsView: View {
                     Label("Privacy", systemImage: "lock.shield")
                 }
 
+            QASettingsView()
+                .tabItem {
+                    Label("QA Tools", systemImage: "checkmark.seal")
+                }
+
             // TODO: Restore LifeTrackingSettingsView after implementation
             // LifeTrackingSettingsView()
             //     .tabItem {
