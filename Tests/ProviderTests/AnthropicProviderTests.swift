@@ -1,6 +1,7 @@
 @testable import TheaCore
 import XCTest
 
+@MainActor
 final class AnthropicProviderTests: XCTestCase {
     var provider: AnthropicProvider!
 
