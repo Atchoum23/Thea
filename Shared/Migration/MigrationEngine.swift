@@ -140,7 +140,7 @@ final class MigrationEngine {
                     role: migratedMsg.role,
                     content: migratedMsg.content,
                     timestamp: migratedMsg.timestamp,
-                    model: migratedConv.model ?? "unknown"
+                    model: migratedConv.model
                 )
                 context.insert(message)
             }
@@ -160,7 +160,7 @@ final class MigrationEngine {
             let project = Project(
                 id: UUID(),
                 title: migratedProj.name,
-                customInstructions: migratedProj.instructions ?? "",
+                customInstructions: migratedProj.instructions,
                 createdAt: migratedProj.createdAt,
                 updatedAt: migratedProj.updatedAt
             )

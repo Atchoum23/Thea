@@ -12,6 +12,11 @@ final class Message {
     var tokenCount: Int?
     var metadataData: Data? // Encoded MessageMetadata
 
+    /// Order index for deterministic message sorting within a conversation
+    /// This ensures messages appear in correct chronological order even when
+    /// timestamps might be identical (e.g., rapid message creation)
+    var orderIndex: Int
+
     var conversation: Conversation?
 
     init(
@@ -22,7 +27,8 @@ final class Message {
         timestamp: Date = Date(),
         model: String? = nil,
         tokenCount: Int? = nil,
-        metadata: MessageMetadata? = nil
+        metadata: MessageMetadata? = nil,
+        orderIndex: Int = 0
     ) {
         self.id = id
         self.conversationID = conversationID
@@ -32,6 +38,7 @@ final class Message {
         self.model = model
         self.tokenCount = tokenCount
         self.metadataData = metadata.flatMap { try? JSONEncoder().encode($0) }
+        self.orderIndex = orderIndex
     }
 
     // Computed properties for easy access

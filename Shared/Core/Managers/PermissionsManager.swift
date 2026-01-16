@@ -215,7 +215,9 @@ final class PermissionsManager {
             contactsStatus = .notDetermined
         case .restricted:
             contactsStatus = .restricted
-        @unknown default:
+        case .limited:
+            <#code#>
+@unknown default:
             contactsStatus = .notDetermined
         }
         #endif

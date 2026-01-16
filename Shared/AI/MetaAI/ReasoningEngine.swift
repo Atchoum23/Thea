@@ -315,6 +315,7 @@ final class ReasoningEngine {
         case .informationRetrieval: taskTypeName = "Information Retrieval"
         case .creation: taskTypeName = "Creation"
         case .general: taskTypeName = "General"
+        default: taskTypeName = taskType.displayName
         }
 
         let prompt = """

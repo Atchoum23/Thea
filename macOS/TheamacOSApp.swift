@@ -11,13 +11,17 @@ struct TheamacOSApp: App {
 
     init() {
         do {
-            let container = try ModelContainerFactory.shared.createContainer()
+            // TODO: Restore ModelContainerFactory once implemented
+            // let container = try ModelContainerFactory.shared.createContainer()
+            let schema = Schema([Conversation.self, Message.self, Project.self])
+            let container = try ModelContainer(for: schema)
             _modelContainer = State(initialValue: container)
 
             // Check if we're running in fallback mode
-            if ModelContainerFactory.shared.isInMemoryFallback {
-                _showingFallbackAlert = State(initialValue: true)
-            }
+            // TODO: Restore after ModelContainerFactory implementation
+            // if ModelContainerFactory.shared.isInMemoryFallback {
+            //     _showingFallbackAlert = State(initialValue: true)
+            // }
         } catch {
             _storageError = State(initialValue: error)
             print("❌ Failed to initialize ModelContainer: \(error)")
@@ -41,14 +45,16 @@ struct TheamacOSApp: App {
                         Text("Data storage initialization failed. Your data will not be saved between sessions. Please restart Thea to resolve this issue.")
                     }
             } else {
-                DataStorageErrorView(error: storageError)
+                // TODO: Restore DataStorageErrorView once implemented
+                Text("Storage initialization failed. Please restart Thea.")
                     .frame(minWidth: 900, minHeight: 600)
             }
         }
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Window") {
-                    WindowManager.shared.openNewChatWindow()
+                    // TODO: Restore WindowManager.shared.openNewChatWindow()
+                    NSApp.keyWindow?.makeKeyAndOrderFront(nil)
                 }
                 .keyboardShortcut("n", modifiers: .command)
 
@@ -65,7 +71,8 @@ struct TheamacOSApp: App {
                 Divider()
 
                 Button("New Life Tracking Window") {
-                    WindowManager.shared.openNewLifeTrackingWindow()
+                    // TODO: Restore WindowManager.shared.openNewLifeTrackingWindow()
+                    // Placeholder action
                 }
                 .keyboardShortcut("l", modifiers: [.command, .option])
             }
@@ -79,9 +86,10 @@ struct TheamacOSApp: App {
         }
 
         // LIFE TRACKING DASHBOARD WINDOW
+        // TODO: Restore LifeTrackingView once implemented
         WindowGroup("Life Tracking", id: "life-tracking") {
             if let container = modelContainer {
-                LifeTrackingView()
+                Text("Life Tracking (Coming Soon)")
                     .modelContainer(container)
                     .frame(minWidth: 1000, minHeight: 700)
             }
@@ -91,9 +99,8 @@ struct TheamacOSApp: App {
         // SETTINGS (SINGLE INSTANCE)
         Settings {
             if let container = modelContainer {
-                SettingsView()
+                MacSettingsView()
                     .modelContainer(container)
-                    .frame(width: 600, height: 500)
             }
         }
     }
@@ -110,17 +117,17 @@ struct TheamacOSApp: App {
         MigrationEngine.shared.setModelContext(context)
         CodeIntelligenceManager.shared.setModelContext(context)
 
-        // New prompt engineering managers
-        PromptOptimizer.shared.setModelContext(context)
-        ErrorKnowledgeBaseManager.shared.setModelContext(context)
+        // TODO: Restore prompt engineering managers after Phase 5+
+        // PromptOptimizer.shared.setModelContext(context)
+        // ErrorKnowledgeBaseManager.shared.setModelContext(context)
 
-        // Window management
-        WindowManager.shared.setModelContext(context)
+        // TODO: Restore window management after implementation
+        // WindowManager.shared.setModelContext(context)
 
-        // Life tracking managers (macOS)
-        ScreenTimeTracker.shared.setModelContext(context)
-        InputTrackingManager.shared.setModelContext(context)
-        BrowserHistoryTracker.shared.setModelContext(context)
+        // TODO: Restore life tracking managers (macOS) after implementation
+        // ScreenTimeTracker.shared.setModelContext(context)
+        // InputTrackingManager.shared.setModelContext(context)
+        // BrowserHistoryTracker.shared.setModelContext(context)
     }
 
     private func configureWindow() {

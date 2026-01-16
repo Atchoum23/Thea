@@ -1,0 +1,57 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "SwiftLint - Full Scan",
+            "type": "shell",
+            "command": "swiftlint",
+            "args": ["lint", "--config", ".swiftlint.yml"],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Error Summary",
+            "type": "shell",
+            "command": "./Scripts/error-summary.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Full Error Check",
+            "type": "shell",
+            "command": "./Scripts/build-with-all-errors.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Start File Watcher",
+            "type": "shell",
+            "command": "./Scripts/watch-and-check.sh",
+            "isBackground": true,
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Configure Xcode",
+            "type": "shell",
+            "command": "./Scripts/configure-xcode.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}

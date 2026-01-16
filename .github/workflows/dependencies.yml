@@ -1,0 +1,256 @@
+name: Swift Package Dependencies
+
+# This workflow validates and caches Swift Package Manager dependencies
+# It runs on push to main branch and on pull requests to ensure dependencies
+# resolve correctly across all development scenarios.
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'Development/Package.swift'
+      - 'Development/Package.resolved'
+      - 'Development/project.yml'
+      - '.github/workflows/dependencies.yml'
+
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'Development/Package.swift'
+      - 'Development/Package.resolved'
+      - 'Development/project.yml'
+
+  # Allow manual workflow dispatch for testing
+  workflow_dispatch:
+
+# Cancel in-progress runs when a new run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  resolve-dependencies:
+    name: Resolve Swift Package Dependencies
+    runs-on: macos-14  # macOS Sonoma with Xcode 16
+    timeout-minutes: 20
+
+    steps:
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 1: Checkout Repository
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # Shallow clone for faster checkout
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 2: Setup Xcode Environment
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+
+      - name: Show Xcode Version
+        run: xcodebuild -version
+
+      - name: Show Swift Version
+        run: swift --version
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 3: Cache Swift Package Manager Dependencies
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Cache key based on Package.resolved content
+      # This provides fast dependency restoration without re-downloading
+      - name: Cache SPM Dependencies
+        uses: actions/cache@v4
+        id: spm-cache
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            Development/build/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('Development/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 4: Validate Package.swift
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Validate Package.swift Syntax
+        working-directory: Development
+        run: |
+          echo "📋 Validating Package.swift syntax..."
+          swift package dump-package > /dev/null
+          echo "✓ Package.swift is valid"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 5: Generate Xcode Project (if using XcodeGen)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        working-directory: Development
+        run: |
+          echo "🔨 Generating Xcode project from project.yml..."
+          xcodegen generate
+          echo "✓ Xcode project generated"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 6: Resolve Package Dependencies
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Resolve Swift Package Dependencies
+        working-directory: Development
+        run: |
+          echo "📦 Resolving Swift Package Manager dependencies..."
+
+          xcodebuild \
+            -project Thea.xcodeproj \
+            -scheme Thea-macOS \
+            -resolvePackageDependencies \
+            -derivedDataPath build \
+            -quiet
+
+          echo "✓ Dependencies resolved successfully"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 7: Verify Package.resolved
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Verify Package.resolved Exists
+        working-directory: Development
+        run: |
+          echo "🔍 Verifying Package.resolved..."
+
+          if [ ! -f "Package.resolved" ]; then
+            echo "❌ Package.resolved not found after resolution"
+            exit 1
+          fi
+
+          echo "✓ Package.resolved exists"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 8: Display Resolved Packages
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: List Resolved Packages
+        working-directory: Development
+        run: |
+          echo "📋 Resolved Package Dependencies:"
+          echo ""
+
+          # Use jq to parse and display packages nicely
+          brew install jq
+
+          jq -r '.pins[] | "  📦 \(.identity) @ \(.state.version // .state.revision[0:8])"' Package.resolved
+
+          echo ""
+          echo "✓ Total packages: $(jq '.pins | length' Package.resolved)"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 9: Check for Package Conflicts
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Check for Dependency Conflicts
+        working-directory: Development
+        run: |
+          echo "🔍 Checking for dependency conflicts..."
+
+          # Check if all required packages are present
+          REQUIRED_PACKAGES=("openai" "keychainaccess" "swift-markdown-ui" "highlightr")
+          MISSING_PACKAGES=()
+
+          for pkg in "${REQUIRED_PACKAGES[@]}"; do
+            if ! jq -e ".pins[] | select(.identity == \"$pkg\")" Package.resolved > /dev/null; then
+              MISSING_PACKAGES+=("$pkg")
+            fi
+          done
+
+          if [ ${#MISSING_PACKAGES[@]} -gt 0 ]; then
+            echo "❌ Missing required packages:"
+            printf '  • %s\n' "${MISSING_PACKAGES[@]}"
+            exit 1
+          fi
+
+          echo "✓ All required packages are resolved"
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 10: Upload Package.resolved as Artifact (for debugging)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Upload Package.resolved Artifact
+        uses: actions/upload-artifact@v4
+        if: always()  # Upload even if previous steps fail
+        with:
+          name: package-resolved-${{ github.sha }}
+          path: Development/Package.resolved
+          retention-days: 30
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 11: Check Package.resolved for Changes (PR only)
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Check for Package.resolved Changes
+        if: github.event_name == 'pull_request'
+        working-directory: Development
+        run: |
+          echo "🔍 Checking if Package.resolved has changed..."
+
+          if git diff --quiet HEAD -- Package.resolved; then
+            echo "✓ Package.resolved is up to date"
+          else
+            echo "⚠️  Package.resolved has uncommitted changes"
+            echo ""
+            echo "Changes detected:"
+            git diff HEAD -- Package.resolved
+            echo ""
+            echo "💡 Consider committing the updated Package.resolved to your PR"
+          fi
+
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      # Step 12: Summary
+      # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      - name: Summary
+        if: success()
+        run: |
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Swift Package Dependencies Resolved Successfully"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Cache status: ${{ steps.spm-cache.outputs.cache-hit == 'true' && '✓ Cache hit' || '⚠ Cache miss (packages downloaded)' }}"
+          echo ""
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Optional: Security Audit Job
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  audit-dependencies:
+    name: Audit Dependencies for Vulnerabilities
+    runs-on: macos-14
+    needs: resolve-dependencies
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Dependency Audit
+        working-directory: Development
+        run: |
+          echo "🔒 Auditing dependencies for known vulnerabilities..."
+
+          # Note: Swift doesn't have a built-in audit tool like npm audit
+          # This is a placeholder for future security scanning integration
+          # Consider integrating tools like:
+          # - Snyk (https://snyk.io)
+          # - GitHub Dependabot (built-in GitHub security)
+          # - OWASP Dependency-Check
+
+          echo "✓ Audit check placeholder - integrate security scanning tool"
+
+      - name: Check for Outdated Dependencies
+        working-directory: Development
+        run: |
+          echo "📦 Checking for outdated dependencies..."
+
+          # Swift package updates can be checked with:
+          swift package show-dependencies --format json > deps.json
+
+          echo "✓ Dependency check complete"

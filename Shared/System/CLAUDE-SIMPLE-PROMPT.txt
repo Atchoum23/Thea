@@ -1,0 +1,58 @@
+Help me set up automatic error detection for my Swift/Xcode project.
+
+**Project:** Thea (macOS app)
+**Path:** `/Users/alexis/Documents/IT & Tech/MyApps/Thea`
+
+## Setup Already Done
+
+I have these files ready:
+- `install-automatic-checks.sh` - Main installer
+- `Scripts/` directory with 7 helper scripts
+- `.swiftlint.yml` - Configuration
+- `Makefile` - Quick commands
+- Multiple .md documentation files
+
+## What I Need
+
+Execute these commands and verify each works:
+
+```bash
+# 1. Navigate and make executable
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+chmod +x install-automatic-checks.sh Scripts/*.sh Scripts/pre-commit
+
+# 2. Run installer
+./install-automatic-checks.sh
+
+# 3. Copy snippet for Xcode
+cat xcode-build-phase-snippet.txt | pbcopy
+
+# 4. Verify everything
+make help
+make check
+```
+
+## Xcode Build Phase
+
+The installer will tell me to add a build phase. I need:
+- The exact snippet to paste
+- Where to paste it (Build Phases → above Compile Sources)
+- How to verify it works (build log should show "🔍 Running automatic error detection")
+
+## Expected Result
+
+After setup:
+- ✅ Errors appear as I type in Xcode
+- ✅ SwiftLint runs on every build
+- ✅ Git hook validates commits
+- ✅ `make check` shows all errors
+
+## Help Me
+
+1. Execute the setup commands
+2. Show me the output
+3. Verify components are working
+4. Provide the Xcode snippet
+5. Test with `make check`
+
+Ready to start!

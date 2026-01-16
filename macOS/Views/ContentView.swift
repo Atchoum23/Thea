@@ -206,13 +206,30 @@ struct ContentView: View {
 
 struct macOSChatDetailView: View {
     let conversation: Conversation
-
+    
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var chatManager = ChatManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
-
+    
+    // Use @Query to properly observe message changes
+    @Query private var allMessages: [Message]
+    
     @State private var messageText = ""
     @State private var isListeningForVoice = false
     @FocusState private var isInputFocused: Bool
+    
+    // Filter messages for this conversation
+    private var messages: [Message] {
+        allMessages
+            .filter { $0.conversationID == conversation.id }
+            .sorted { $0.timestamp < $1.timestamp }
+    }
+    
+    init(conversation: Conversation) {
+        self.conversation = conversation
+        // Initialize query - fetch all messages (we filter in computed property)
+        _allMessages = Query(sort: \Message.timestamp)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -234,72 +251,105 @@ struct macOSChatDetailView: View {
         }
         .onAppear {
             chatManager.selectConversation(conversation)
+            isInputFocused = true
         }
     }
 
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 20) {
-                    ForEach(conversation.messages) { message in
+                LazyVStack(spacing: 16) {
+                    ForEach(messages) { message in
                         MessageBubble(message: message)
                             .id(message.id)
                     }
-                }
-                .padding(24)
-            }
-            .onChange(of: conversation.messages.count) { _, _ in
-                if let lastMessage = conversation.messages.last {
-                    withAnimation {
-                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                    
+                    // Show streaming text as it comes in
+                    if chatManager.isStreaming && !chatManager.streamingText.isEmpty {
+                        HStack {
+                            Text(chatManager.streamingText)
+                                .padding(12)
+                                .background(Color(nsColor: .controlBackgroundColor))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            Spacer()
+                        }
+                        .id("streaming")
                     }
                 }
+                .padding(20)
+            }
+            .onChange(of: messages.count) { _, _ in
+                scrollToBottom(proxy: proxy)
+            }
+            .onChange(of: chatManager.streamingText) { _, _ in
+                scrollToBottom(proxy: proxy)
+            }
+        }
+    }
+    
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        withAnimation(.easeOut(duration: 0.2)) {
+            if chatManager.isStreaming {
+                proxy.scrollTo("streaming", anchor: .bottom)
+            } else if let lastMessage = messages.last {
+                proxy.scrollTo(lastMessage.id, anchor: .bottom)
             }
         }
     }
 
     private var inputArea: some View {
-        HStack(alignment: .bottom, spacing: 16) {
+        HStack(alignment: .bottom, spacing: 12) {
             TextField("Message THEA...", text: $messageText, axis: .vertical)
                 .textFieldStyle(.plain)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 14)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
                 .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .clipShape(RoundedRectangle(cornerRadius: 20))
                 .lineLimit(1...8)
                 .focused($isInputFocused)
                 .disabled(chatManager.isStreaming)
                 .onSubmit {
-                    if !messageText.isEmpty {
+                    if !messageText.isEmpty && !chatManager.isStreaming {
                         sendMessage()
                     }
                 }
 
             Button {
-                sendMessage()
+                if chatManager.isStreaming {
+                    chatManager.cancelStreaming()
+                } else {
+                    sendMessage()
+                }
             } label: {
                 Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
-                    .font(.system(size: 32))
-                    .foregroundStyle(messageText.isEmpty && !chatManager.isStreaming ? Color.secondary : Color.theaPrimary)
+                    .font(.system(size: 28))
+                    .foregroundStyle(
+                        messageText.isEmpty && !chatManager.isStreaming 
+                            ? Color.secondary 
+                            : Color.theaPrimary
+                    )
             }
             .buttonStyle(.plain)
             .disabled(messageText.isEmpty && !chatManager.isStreaming)
         }
-        .padding(24)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
     private func sendMessage() {
-        guard !messageText.isEmpty || chatManager.isStreaming else { return }
-
-        if chatManager.isStreaming {
-            chatManager.cancelStreaming()
-        } else {
-            let text = messageText
-            messageText = ""
-
-            Task {
-                try? await chatManager.sendMessage(text, in: conversation)
+        guard !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        
+        let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        messageText = ""
+        
+        Task {
+            do {
+                try await chatManager.sendMessage(text, in: conversation)
+            } catch {
+                print("❌ Failed to send message: \(error)")
+                // Restore the message if sending failed
+                messageText = text
             }
         }
     }

@@ -1,15 +1,40 @@
 import SwiftUI
 
 struct MacSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var settingsManager = SettingsManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
-    @StateObject private var cloudSyncManager = CloudSyncManager.shared
-
+    
     @State private var selectedTab: SettingsTab = .general
+    
+    // Temporary state for Cancel/OK pattern
+    @State private var tempDefaultProvider: String = ""
+    @State private var tempStreamResponses: Bool = false
+    @State private var tempTheme: String = ""
+    @State private var tempFontSize: String = ""
+    @State private var tempLaunchAtLogin: Bool = false
+    @State private var tempShowInMenuBar: Bool = false
+    @State private var tempNotificationsEnabled: Bool = false
+    @State private var tempReadResponsesAloud: Bool = false
+    @State private var tempSelectedVoice: String = ""
+    @State private var tempiCloudSyncEnabled: Bool = false
+    @State private var tempHandoffEnabled: Bool = false
+    @State private var tempAnalyticsEnabled: Bool = false
+    @State private var tempDebugMode: Bool = false
+    @State private var tempShowPerformanceMetrics: Bool = false
+    @State private var tempBetaFeaturesEnabled: Bool = false
+    
+    // API Keys (temporary)
+    @State private var tempAPIKeys: [String: String] = [:]
+    
+    @State private var hasChanges: Bool = false
 
     enum SettingsTab: String, CaseIterable {
         case general = "General"
         case aiProviders = "AI Providers"
+        case models = "Models"
+        case localModels = "Local Models"
+        case orchestrator = "Orchestrator"
         case voice = "Voice"
         case sync = "Sync"
         case privacy = "Privacy"
@@ -19,6 +44,9 @@ struct MacSettingsView: View {
             switch self {
             case .general: return "gear"
             case .aiProviders: return "brain.head.profile"
+            case .models: return "cube.box"
+            case .localModels: return "cpu"
+            case .orchestrator: return "network"
             case .voice: return "mic.fill"
             case .sync: return "icloud.fill"
             case .privacy: return "lock.fill"
@@ -28,16 +56,106 @@ struct MacSettingsView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ForEach(SettingsTab.allCases, id: \.self) { tab in
-                viewForTab(tab)
-                    .tabItem {
-                        Label(tab.rawValue, systemImage: tab.icon)
-                    }
-                    .tag(tab)
+        VStack(spacing: 0) {
+            TabView(selection: $selectedTab) {
+                ForEach(SettingsTab.allCases, id: \.self) { tab in
+                    viewForTab(tab)
+                        .tabItem {
+                            Label(tab.rawValue, systemImage: tab.icon)
+                        }
+                        .tag(tab)
+                }
+            }
+            
+            Divider()
+            
+            // Bottom bar with Cancel/OK buttons
+            HStack {
+                if hasChanges {
+                    Text("You have unsaved changes")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
+                
+                Button("Cancel") {
+                    dismiss()
+                }
+                .keyboardShortcut(.escape, modifiers: [])
+                
+                Button("OK") {
+                    saveAllSettings()
+                    dismiss()
+                }
+                .keyboardShortcut(.return, modifiers: [])
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+        }
+        .frame(width: 650, height: 550)
+        .onAppear {
+            loadCurrentSettings()
+        }
+    }
+    
+    // MARK: - Load/Save Settings
+    
+    private func loadCurrentSettings() {
+        tempDefaultProvider = settingsManager.defaultProvider
+        tempStreamResponses = settingsManager.streamResponses
+        tempTheme = settingsManager.theme
+        tempFontSize = settingsManager.fontSize
+        tempLaunchAtLogin = settingsManager.launchAtLogin
+        tempShowInMenuBar = settingsManager.showInMenuBar
+        tempNotificationsEnabled = settingsManager.notificationsEnabled
+        tempReadResponsesAloud = settingsManager.readResponsesAloud
+        tempSelectedVoice = settingsManager.selectedVoice
+        tempiCloudSyncEnabled = settingsManager.iCloudSyncEnabled
+        tempHandoffEnabled = settingsManager.handoffEnabled
+        tempAnalyticsEnabled = settingsManager.analyticsEnabled
+        tempDebugMode = settingsManager.debugMode
+        tempShowPerformanceMetrics = settingsManager.showPerformanceMetrics
+        tempBetaFeaturesEnabled = settingsManager.betaFeaturesEnabled
+        
+        // Load API keys
+        for provider in settingsManager.availableProviders {
+            tempAPIKeys[provider] = settingsManager.getAPIKey(for: provider) ?? ""
+        }
+        
+        hasChanges = false
+    }
+    
+    private func saveAllSettings() {
+        settingsManager.defaultProvider = tempDefaultProvider
+        settingsManager.streamResponses = tempStreamResponses
+        settingsManager.theme = tempTheme
+        settingsManager.fontSize = tempFontSize
+        settingsManager.launchAtLogin = tempLaunchAtLogin
+        settingsManager.showInMenuBar = tempShowInMenuBar
+        settingsManager.notificationsEnabled = tempNotificationsEnabled
+        settingsManager.readResponsesAloud = tempReadResponsesAloud
+        settingsManager.selectedVoice = tempSelectedVoice
+        settingsManager.iCloudSyncEnabled = tempiCloudSyncEnabled
+        settingsManager.handoffEnabled = tempHandoffEnabled
+        settingsManager.analyticsEnabled = tempAnalyticsEnabled
+        settingsManager.debugMode = tempDebugMode
+        settingsManager.showPerformanceMetrics = tempShowPerformanceMetrics
+        settingsManager.betaFeaturesEnabled = tempBetaFeaturesEnabled
+        
+        // Save API keys
+        for (provider, key) in tempAPIKeys {
+            if !key.isEmpty {
+                settingsManager.setAPIKey(key, for: provider)
             }
         }
-        .frame(width: 600, height: 500)
+        
+        UserDefaults.standard.synchronize()
+        print("✅ All settings saved")
+    }
+    
+    private func markChanged() {
+        hasChanges = true
     }
 
     @ViewBuilder
@@ -47,6 +165,12 @@ struct MacSettingsView: View {
             generalSettings
         case .aiProviders:
             aiProviderSettings
+        case .models:
+            ModelSettingsView()
+        case .localModels:
+            LocalModelsSettingsView()
+        case .orchestrator:
+            OrchestratorSettingsView()
         case .voice:
             voiceSettings
         case .sync:
@@ -63,25 +187,30 @@ struct MacSettingsView: View {
     private var generalSettings: some View {
         Form {
             Section("Appearance") {
-                Picker("Theme", selection: $settingsManager.theme) {
+                Picker("Theme", selection: $tempTheme) {
                     Text("System").tag("system")
                     Text("Light").tag("light")
                     Text("Dark").tag("dark")
                 }
                 .pickerStyle(.segmented)
+                .onChange(of: tempTheme) { _, _ in markChanged() }
 
-                Picker("Font Size", selection: $settingsManager.fontSize) {
+                Picker("Font Size", selection: $tempFontSize) {
                     Text("Small").tag("small")
                     Text("Medium").tag("medium")
                     Text("Large").tag("large")
                 }
                 .pickerStyle(.segmented)
+                .onChange(of: tempFontSize) { _, _ in markChanged() }
             }
 
             Section("Behavior") {
-                Toggle("Launch at Login", isOn: $settingsManager.launchAtLogin)
-                Toggle("Show in Menu Bar", isOn: $settingsManager.showInMenuBar)
-                Toggle("Enable Notifications", isOn: $settingsManager.notificationsEnabled)
+                Toggle("Launch at Login", isOn: $tempLaunchAtLogin)
+                    .onChange(of: tempLaunchAtLogin) { _, _ in markChanged() }
+                Toggle("Show in Menu Bar", isOn: $tempShowInMenuBar)
+                    .onChange(of: tempShowInMenuBar) { _, _ in markChanged() }
+                Toggle("Enable Notifications", isOn: $tempNotificationsEnabled)
+                    .onChange(of: tempNotificationsEnabled) { _, _ in markChanged() }
             }
         }
         .formStyle(.grouped)
@@ -93,13 +222,15 @@ struct MacSettingsView: View {
     private var aiProviderSettings: some View {
         Form {
             Section("Default Provider") {
-                Picker("Provider", selection: $settingsManager.defaultProvider) {
+                Picker("Provider", selection: $tempDefaultProvider) {
                     ForEach(settingsManager.availableProviders, id: \.self) { provider in
-                        Text(provider).tag(provider)
+                        Text(provider.capitalized).tag(provider)
                     }
                 }
+                .onChange(of: tempDefaultProvider) { _, _ in markChanged() }
 
-                Toggle("Stream Responses", isOn: $settingsManager.streamResponses)
+                Toggle("Stream Responses", isOn: $tempStreamResponses)
+                    .onChange(of: tempStreamResponses) { _, _ in markChanged() }
             }
 
             Section("API Keys") {
@@ -121,14 +252,18 @@ struct MacSettingsView: View {
                 .frame(width: 100, alignment: .leading)
 
             SecureField("API Key", text: Binding(
-                get: { settingsManager.getAPIKey(for: key) ?? "" },
+                get: { tempAPIKeys[key] ?? "" },
                 set: { newValue in
-                    if !newValue.isEmpty {
-                        settingsManager.setAPIKey(newValue, for: key)
-                    }
+                    tempAPIKeys[key] = newValue
+                    markChanged()
                 }
             ))
             .textFieldStyle(.roundedBorder)
+            
+            if let currentKey = tempAPIKeys[key], !currentKey.isEmpty {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            }
         }
     }
 
@@ -165,14 +300,16 @@ struct MacSettingsView: View {
             }
 
             Section("Text-to-Speech") {
-                Toggle("Read Responses Aloud", isOn: $settingsManager.readResponsesAloud)
+                Toggle("Read Responses Aloud", isOn: $tempReadResponsesAloud)
+                    .onChange(of: tempReadResponsesAloud) { _, _ in markChanged() }
 
-                if settingsManager.readResponsesAloud {
-                    Picker("Voice", selection: $settingsManager.selectedVoice) {
+                if tempReadResponsesAloud {
+                    Picker("Voice", selection: $tempSelectedVoice) {
                         Text("Default").tag("default")
                         Text("Samantha").tag("samantha")
                         Text("Alex").tag("alex")
                     }
+                    .onChange(of: tempSelectedVoice) { _, _ in markChanged() }
                 }
             }
         }
@@ -185,58 +322,23 @@ struct MacSettingsView: View {
     private var syncSettings: some View {
         Form {
             Section("iCloud Sync") {
-                Toggle("Enable iCloud Sync", isOn: $settingsManager.iCloudSyncEnabled)
+                Toggle("Enable iCloud Sync", isOn: $tempiCloudSyncEnabled)
+                    .onChange(of: tempiCloudSyncEnabled) { _, _ in markChanged() }
 
-                if settingsManager.iCloudSyncEnabled {
-                    HStack {
-                        Text("Status")
-                        Spacer()
-                        if cloudSyncManager.isSyncing {
-                            ProgressView()
-                                .scaleEffect(0.7)
-                            Text("Syncing...")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else if let lastSync = cloudSyncManager.lastSyncDate {
-                            Text("Last synced \(lastSync, style: .relative)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            Text("Never synced")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
+                if tempiCloudSyncEnabled {
+                    Text("iCloud sync configuration requires CloudKit entitlements")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
-                    HStack {
-                        Button("Sync Now") {
-                            Task {
-                                try? await cloudSyncManager.performFullSync()
-                            }
-                        }
-                        .disabled(cloudSyncManager.isSyncing)
-
-                        Spacer()
-                    }
-
-                    if !cloudSyncManager.syncErrors.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Recent Errors")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-
-                            ForEach(cloudSyncManager.syncErrors.prefix(3)) { error in
-                                Text(error.errorDescription)
-                                    .font(.caption)
-                                    .foregroundStyle(.red)
-                            }
-                        }
-                    }
+                    Text("Status: Not configured")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
             }
 
             Section("Handoff") {
-                Toggle("Enable Handoff", isOn: $settingsManager.handoffEnabled)
+                Toggle("Enable Handoff", isOn: $tempHandoffEnabled)
+                    .onChange(of: tempHandoffEnabled) { _, _ in markChanged() }
 
                 Text("Continue conversations seamlessly across your Apple devices")
                     .font(.caption)
@@ -252,7 +354,8 @@ struct MacSettingsView: View {
     private var privacySettings: some View {
         Form {
             Section("Data Collection") {
-                Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
+                Toggle("Analytics", isOn: $tempAnalyticsEnabled)
+                    .onChange(of: tempAnalyticsEnabled) { _, _ in markChanged() }
 
                 Text("Help improve THEA by sharing anonymous usage data")
                     .font(.caption)
@@ -285,12 +388,15 @@ struct MacSettingsView: View {
     private var advancedSettings: some View {
         Form {
             Section("Development") {
-                Toggle("Enable Debug Mode", isOn: $settingsManager.debugMode)
-                Toggle("Show Performance Metrics", isOn: $settingsManager.showPerformanceMetrics)
+                Toggle("Enable Debug Mode", isOn: $tempDebugMode)
+                    .onChange(of: tempDebugMode) { _, _ in markChanged() }
+                Toggle("Show Performance Metrics", isOn: $tempShowPerformanceMetrics)
+                    .onChange(of: tempShowPerformanceMetrics) { _, _ in markChanged() }
             }
 
             Section("Experimental Features") {
-                Toggle("Enable Beta Features", isOn: $settingsManager.betaFeaturesEnabled)
+                Toggle("Enable Beta Features", isOn: $tempBetaFeaturesEnabled)
+                    .onChange(of: tempBetaFeaturesEnabled) { _, _ in markChanged() }
 
                 Text("Beta features may be unstable and are subject to change")
                     .font(.caption)
@@ -324,7 +430,6 @@ struct MacSettingsView: View {
 
         panel.begin { response in
             if response == .OK, let url = panel.url {
-                // Export logic here
                 print("Exporting data to: \(url)")
             }
         }
@@ -339,62 +444,11 @@ struct MacSettingsView: View {
         alert.addButton(withTitle: "Clear All Data")
 
         if alert.runModal() == .alertSecondButtonReturn {
-            // Clear all data logic here
             print("Clearing all data")
         }
     }
 
     private func clearCache() {
-        // Clear cache logic here
         print("Clearing cache")
-    }
-}
-
-// MARK: - Settings Manager Extensions
-
-extension SettingsManager {
-    var launchAtLogin: Bool {
-        get { UserDefaults.standard.bool(forKey: "launchAtLogin") }
-        set { UserDefaults.standard.set(newValue, forKey: "launchAtLogin") }
-    }
-
-    var showInMenuBar: Bool {
-        get { UserDefaults.standard.bool(forKey: "showInMenuBar") }
-        set { UserDefaults.standard.set(newValue, forKey: "showInMenuBar") }
-    }
-
-    var notificationsEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: "notificationsEnabled") }
-        set { UserDefaults.standard.set(newValue, forKey: "notificationsEnabled") }
-    }
-
-    var readResponsesAloud: Bool {
-        get { UserDefaults.standard.bool(forKey: "readResponsesAloud") }
-        set { UserDefaults.standard.set(newValue, forKey: "readResponsesAloud") }
-    }
-
-    var selectedVoice: String {
-        get { UserDefaults.standard.string(forKey: "selectedVoice") ?? "default" }
-        set { UserDefaults.standard.set(newValue, forKey: "selectedVoice") }
-    }
-
-    var handoffEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: "handoffEnabled") }
-        set { UserDefaults.standard.set(newValue, forKey: "handoffEnabled") }
-    }
-
-    var debugMode: Bool {
-        get { UserDefaults.standard.bool(forKey: "debugMode") }
-        set { UserDefaults.standard.set(newValue, forKey: "debugMode") }
-    }
-
-    var showPerformanceMetrics: Bool {
-        get { UserDefaults.standard.bool(forKey: "showPerformanceMetrics") }
-        set { UserDefaults.standard.set(newValue, forKey: "showPerformanceMetrics") }
-    }
-
-    var betaFeaturesEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: "betaFeaturesEnabled") }
-        set { UserDefaults.standard.set(newValue, forKey: "betaFeaturesEnabled") }
     }
 }

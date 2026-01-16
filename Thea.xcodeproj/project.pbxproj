@@ -3,30 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C50DF8D740C94FEC911AB9B2 /* ModelContainerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD4E30763B04C60999FB5D4 /* ModelContainerFactory.swift */; };
-		E3817775289F47FD96F9DF9E /* DataStorageErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A72F38161E4241AFD67A87 /* DataStorageErrorView.swift */; };
-		00B2202C3E8E45ADAD26FC1E /* PromptOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DC4ED8765714A94A87060F0 /* PromptOptimizer.swift */; };
-		4F72E78F9E054D49945CB41E /* PromptTemplateLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7969E53150F42998B9F494A /* PromptTemplateLibrary.swift */; };
-		E87E8CE7C90C4360983EE757 /* UserPreferenceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350B04A962F149A69CDFBC0E /* UserPreferenceModel.swift */; };
-		13FDB574435D45979A1C3DDF /* ErrorKnowledgeBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C06B7B0E0B3490DB0C24A8B /* ErrorKnowledgeBase.swift */; };
-		4B0830AC6B2F4A5EAE6046C5 /* SwiftBestPracticesLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E8B8D722B9F4517A90EAC17 /* SwiftBestPracticesLibrary.swift */; };
-		D6A75666511046C5B541356B /* SwiftValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9F4913CA7F2479083C56BDB /* SwiftValidator.swift */; };
-		AA4A53FFFA814CB78885EFCA /* ErrorKnowledgeBaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD93310817CF4FBEAD4687FF /* ErrorKnowledgeBaseManager.swift */; };
-		CD3D200E5E414D9790BE1E84 /* TabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1DBCD8D02764FB0B049F8D0 /* TabManager.swift */; };
-		F8AC3EC8935A456A8664BFCB /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ACB8234A0D74030A57DBAA4 /* WindowManager.swift */; };
-		E14039C06CE1412A9603C4AC /* PromptEngineeringModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010CC11FE254EEBA4F4A1F4 /* PromptEngineeringModels.swift */; };
-		8DC15757869D463185CD9ABF /* TrackingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0020B3347BA458485427266 /* TrackingModels.swift */; };
-		92B203E20BF943B98B1357DA /* BrowserHistoryTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32D24E941464E8098A98F4C /* BrowserHistoryTracker.swift */; };
-		D8A3D1FD8F144C0887DCA12D /* HealthTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF2C74CE1584518B2C71719 /* HealthTrackingManager.swift */; };
-		5B39E3DAFB8E4C5CAEF8222D /* InputTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6E1BFD86EF34B8A8BD946F5 /* InputTrackingManager.swift */; };
-		A8AB7CD4E4F04CD489B8ECD2 /* LocationTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046F1E0B611A4F639788438F /* LocationTrackingManager.swift */; };
-		AB139639C6E840C3ACFF7EC6 /* ScreenTimeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F789683D392545D19E017DC1 /* ScreenTimeTracker.swift */; };
-		A30EE91D9C514B78BDD917B5 /* LifeTrackingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 883E7AEB0BB14EDBAE744C3E /* LifeTrackingView.swift */; };
-		3085B777150E4E159C6216EF /* LifeTrackingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF357B6EC74E4AF59BDFE845 /* LifeTrackingSettingsView.swift */; };
 		0116B01C6A69743C2B11DC3A /* MultiModalAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14C90AB11CADBCD38310D59 /* MultiModalAI.swift */; };
 		02924ADC634CBB6016900BF6 /* ToolFramework.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9FF2DB968C73922E7C3E8B8 /* ToolFramework.swift */; };
 		05EECDD0677AFD1F8DED3756 /* VoiceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2FFEF5C705E06B407DCE17 /* VoiceSettingsView.swift */; };
@@ -57,7 +37,6 @@
 		2D4C2D17107100618EECDCCE /* MigrationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C23C2BCE70110E703E0F6E6 /* MigrationEngine.swift */; };
 		2D94EB32A2BE606158407000 /* MigrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D519C71250884B37AAB18A /* MigrationView.swift */; };
 		2F668FEE623A3DACCB25D125 /* CloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDE656126F142E29F77BBD7 /* CloudSyncManager.swift */; };
-		2FD2FB1519624C018A7836D5 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CC5E9A02DF4C87912DC6C5BB /* Info.plist */; };
 		319AEEA1BA77634C2179C8EC /* WorkflowBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9417BAA798D141A01B3C8BC5 /* WorkflowBuilder.swift */; };
 		31C99100A7401916701A7626 /* DeepAgentEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742B37FF14DE15BECAB267AF /* DeepAgentEngine.swift */; };
 		3399E5E478131C44850E27D0 /* iOSProjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557907F0E5C4825634A1F740 /* iOSProjectsView.swift */; };
@@ -152,7 +131,6 @@
 		BE2D753A7CF4D7C11D050113 /* PermissionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C3B04EEB9870ABC2B1ACFDD /* PermissionsManager.swift */; };
 		C01BDE6417D0AB27F69F06AC /* CodeSandbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB8A72A557C97258F288C7B /* CodeSandbox.swift */; };
 		C61D00AAD8BE9268768B7B4F /* OpenAIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2388FEAE2CAC4AB7DE3EEE /* OpenAIProvider.swift */; };
-		C6243E052FCF593BF887C048 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CC5E9A02DF4C87912DC6C5BB /* Info.plist */; };
 		C76B195799024E3189B6FF9D /* iOSFinancialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE7B8A478508233697E1E58 /* iOSFinancialView.swift */; };
 		C9C80F79A14B4A96EFF0E7D8 /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 6FC04ED19713156D5983EB02 /* OpenAI */; };
 		CDE592A4BABBBB2009EA79A5 /* ShortcutsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE37BC8456F19E66D06219D /* ShortcutsManager.swift */; };
@@ -216,26 +194,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0FD4E30763B04C60999FB5D4 /* ModelContainerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelContainerFactory.swift; sourceTree = "<group>"; };
-		E3A72F38161E4241AFD67A87 /* DataStorageErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStorageErrorView.swift; sourceTree = "<group>"; };
-		9DC4ED8765714A94A87060F0 /* PromptOptimizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptOptimizer.swift; sourceTree = "<group>"; };
-		C7969E53150F42998B9F494A /* PromptTemplateLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptTemplateLibrary.swift; sourceTree = "<group>"; };
-		350B04A962F149A69CDFBC0E /* UserPreferenceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceModel.swift; sourceTree = "<group>"; };
-		3C06B7B0E0B3490DB0C24A8B /* ErrorKnowledgeBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorKnowledgeBase.swift; sourceTree = "<group>"; };
-		4E8B8D722B9F4517A90EAC17 /* SwiftBestPracticesLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftBestPracticesLibrary.swift; sourceTree = "<group>"; };
-		F9F4913CA7F2479083C56BDB /* SwiftValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftValidator.swift; sourceTree = "<group>"; };
-		CD93310817CF4FBEAD4687FF /* ErrorKnowledgeBaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorKnowledgeBaseManager.swift; sourceTree = "<group>"; };
-		F1DBCD8D02764FB0B049F8D0 /* TabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabManager.swift; sourceTree = "<group>"; };
-		7ACB8234A0D74030A57DBAA4 /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
-		F010CC11FE254EEBA4F4A1F4 /* PromptEngineeringModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptEngineeringModels.swift; sourceTree = "<group>"; };
-		E0020B3347BA458485427266 /* TrackingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingModels.swift; sourceTree = "<group>"; };
-		D32D24E941464E8098A98F4C /* BrowserHistoryTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserHistoryTracker.swift; sourceTree = "<group>"; };
-		BCF2C74CE1584518B2C71719 /* HealthTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthTrackingManager.swift; sourceTree = "<group>"; };
-		C6E1BFD86EF34B8A8BD946F5 /* InputTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTrackingManager.swift; sourceTree = "<group>"; };
-		046F1E0B611A4F639788438F /* LocationTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTrackingManager.swift; sourceTree = "<group>"; };
-		F789683D392545D19E017DC1 /* ScreenTimeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeTracker.swift; sourceTree = "<group>"; };
-		883E7AEB0BB14EDBAE744C3E /* LifeTrackingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeTrackingView.swift; sourceTree = "<group>"; };
-		DF357B6EC74E4AF59BDFE845 /* LifeTrackingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeTrackingSettingsView.swift; sourceTree = "<group>"; };
 		01A50B2681BEDB2A87499981 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		02813E8977620F4DC591C8A2 /* VoiceActivationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceActivationManager.swift; sourceTree = "<group>"; };
 		028DE98F628A0F693BC65625 /* ChatManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatManager.swift; sourceTree = "<group>"; };
@@ -283,9 +241,9 @@
 		60186CD089FDE324C756E64C /* ModelTraining.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTraining.swift; sourceTree = "<group>"; };
 		63BB741EC194E286376B9CC2 /* TheaWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaWidget.swift; sourceTree = "<group>"; };
 		6A342AA74736F692B933EE3F /* GroqProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqProvider.swift; sourceTree = "<group>"; };
-		6A4C6FB1D421301F8EA7A01A /* Thea-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Thea-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A4C6FB1D421301F8EA7A01A /* Thea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Thea.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CCBC9AE92AB2A7D38E15728 /* CodeIntelligenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeIntelligenceManager.swift; sourceTree = "<group>"; };
-		7074C624F79E21F8CD4F86E2 /* Thea-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Thea-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7074C624F79E21F8CD4F86E2 /* Thea.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Thea.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		73F9DEECAE6DA9191064C27B /* KnowledgeGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeGraph.swift; sourceTree = "<group>"; };
 		742B37FF14DE15BECAB267AF /* DeepAgentEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepAgentEngine.swift; sourceTree = "<group>"; };
 		79FDB0F45191FC92BF378C75 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
@@ -346,26 +304,6 @@
 				3A86A884CAB373A06BCA1A7B /* KeychainAccess in Frameworks */,
 				54FB5DF8124DD94685D0B852 /* MarkdownUI in Frameworks */,
 				BB1FAF69FBB1DFFE428D6920 /* Highlightr in Frameworks */,
-				00B2202C3E8E45ADAD26FC1E /* PromptOptimizer.swift in Sources */,
-				4F72E78F9E054D49945CB41E /* PromptTemplateLibrary.swift in Sources */,
-				E87E8CE7C90C4360983EE757 /* UserPreferenceModel.swift in Sources */,
-				13FDB574435D45979A1C3DDF /* ErrorKnowledgeBase.swift in Sources */,
-				4B0830AC6B2F4A5EAE6046C5 /* SwiftBestPracticesLibrary.swift in Sources */,
-				D6A75666511046C5B541356B /* SwiftValidator.swift in Sources */,
-				AA4A53FFFA814CB78885EFCA /* ErrorKnowledgeBaseManager.swift in Sources */,
-				CD3D200E5E414D9790BE1E84 /* TabManager.swift in Sources */,
-				F8AC3EC8935A456A8664BFCB /* WindowManager.swift in Sources */,
-				E14039C06CE1412A9603C4AC /* PromptEngineeringModels.swift in Sources */,
-				8DC15757869D463185CD9ABF /* TrackingModels.swift in Sources */,
-				92B203E20BF943B98B1357DA /* BrowserHistoryTracker.swift in Sources */,
-				D8A3D1FD8F144C0887DCA12D /* HealthTrackingManager.swift in Sources */,
-				5B39E3DAFB8E4C5CAEF8222D /* InputTrackingManager.swift in Sources */,
-				A8AB7CD4E4F04CD489B8ECD2 /* LocationTrackingManager.swift in Sources */,
-				AB139639C6E840C3ACFF7EC6 /* ScreenTimeTracker.swift in Sources */,
-				A30EE91D9C514B78BDD917B5 /* LifeTrackingView.swift in Sources */,
-				3085B777150E4E159C6216EF /* LifeTrackingSettingsView.swift in Sources */,
-				C50DF8D740C94FEC911AB9B2 /* ModelContainerFactory.swift in Sources */,
-				E3817775289F47FD96F9DF9E /* DataStorageErrorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -377,26 +315,6 @@
 				344C60E3556EAA68FB45F1D8 /* KeychainAccess in Frameworks */,
 				EF1E53F1519A320A8BF6EB2A /* MarkdownUI in Frameworks */,
 				3615BEA19B27B3A40FDE9EB9 /* Highlightr in Frameworks */,
-				00B2202C3E8E45ADAD26FC1E /* PromptOptimizer.swift in Sources */,
-				4F72E78F9E054D49945CB41E /* PromptTemplateLibrary.swift in Sources */,
-				E87E8CE7C90C4360983EE757 /* UserPreferenceModel.swift in Sources */,
-				13FDB574435D45979A1C3DDF /* ErrorKnowledgeBase.swift in Sources */,
-				4B0830AC6B2F4A5EAE6046C5 /* SwiftBestPracticesLibrary.swift in Sources */,
-				D6A75666511046C5B541356B /* SwiftValidator.swift in Sources */,
-				AA4A53FFFA814CB78885EFCA /* ErrorKnowledgeBaseManager.swift in Sources */,
-				CD3D200E5E414D9790BE1E84 /* TabManager.swift in Sources */,
-				F8AC3EC8935A456A8664BFCB /* WindowManager.swift in Sources */,
-				E14039C06CE1412A9603C4AC /* PromptEngineeringModels.swift in Sources */,
-				8DC15757869D463185CD9ABF /* TrackingModels.swift in Sources */,
-				92B203E20BF943B98B1357DA /* BrowserHistoryTracker.swift in Sources */,
-				D8A3D1FD8F144C0887DCA12D /* HealthTrackingManager.swift in Sources */,
-				5B39E3DAFB8E4C5CAEF8222D /* InputTrackingManager.swift in Sources */,
-				A8AB7CD4E4F04CD489B8ECD2 /* LocationTrackingManager.swift in Sources */,
-				AB139639C6E840C3ACFF7EC6 /* ScreenTimeTracker.swift in Sources */,
-				A30EE91D9C514B78BDD917B5 /* LifeTrackingView.swift in Sources */,
-				3085B777150E4E159C6216EF /* LifeTrackingSettingsView.swift in Sources */,
-				C50DF8D740C94FEC911AB9B2 /* ModelContainerFactory.swift in Sources */,
-				E3817775289F47FD96F9DF9E /* DataStorageErrorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -674,8 +592,8 @@
 		B2A3EDCBA5BFD6670FA8302A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7074C624F79E21F8CD4F86E2 /* Thea-iOS.app */,
-				6A4C6FB1D421301F8EA7A01A /* Thea-macOS.app */,
+				7074C624F79E21F8CD4F86E2 /* Thea.app */,
+				6A4C6FB1D421301F8EA7A01A /* Thea.app */,
 				96CDBEC6A338814FAB8F9B80 /* TheaTests.xctest */,
 			);
 			name = Products;
@@ -851,7 +769,7 @@
 				4A1DF1DA7F8F1BEF9B7B4124 /* Highlightr */,
 			);
 			productName = "Thea-iOS";
-			productReference = 7074C624F79E21F8CD4F86E2 /* Thea-iOS.app */;
+			productReference = 7074C624F79E21F8CD4F86E2 /* Thea.app */;
 			productType = "com.apple.product-type.application";
 		};
 		9BDCA26EA7E2E05D39AA6162 /* Thea-macOS */ = {
@@ -874,7 +792,7 @@
 				D423498831C5861F5C038909 /* Highlightr */,
 			);
 			productName = "Thea-macOS";
-			productReference = 6A4C6FB1D421301F8EA7A01A /* Thea-macOS.app */;
+			productReference = 6A4C6FB1D421301F8EA7A01A /* Thea.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FB9434F9F36955A38E5A8C91 /* TheaTests */ = {
@@ -902,7 +820,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					811660DEAC235163677871EC = {
 						DevelopmentTeam = 6B66PM4JLK;
@@ -934,7 +852,6 @@
 				1CD7F6D18D7627CE94FD1532 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				C4A58C09E3E276EBC3D656EE /* XCRemoteSwiftPackageReference "OpenAI" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -951,7 +868,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				07320B8E4DDF5A9929D378EC /* Assets.xcassets in Resources */,
-				2FD2FB1519624C018A7836D5 /* Info.plist in Resources */,
 				4784D4479DC0BAB6CA98F7CA /* icon.json in Resources */,
 				2BCDC96FD81EE16A9C953A15 /* thea_icon_master_1024.png in Resources */,
 			);
@@ -962,7 +878,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EFC2D372ED54A2F0053AC6D8 /* Assets.xcassets in Resources */,
-				C6243E052FCF593BF887C048 /* Info.plist in Resources */,
 				D389B55D09D7A6E59A83A3A7 /* icon.json in Resources */,
 				0A1011F8FAFFBDAE8E1F2FEB /* thea_icon_master_1024.png in Resources */,
 			);
@@ -1167,6 +1082,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = iOS/Thea.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "";
@@ -1180,7 +1096,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.thea.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = app.theathe.ios;
 				PRODUCT_NAME = Thea;
 				SDKROOT = iphoneos;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -1193,13 +1109,14 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.thea.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = app.theathe.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Thea-macOS.app/Contents/MacOS/Thea-macOS";
 			};
@@ -1210,9 +1127,23 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = macOS/Thea.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_CFBundleDisplayName = Thea;
@@ -1225,9 +1156,13 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.thea.macos;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.theathe.macos;
 				PRODUCT_NAME = Thea;
+				REGISTER_APP_GROUPS = YES;
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = YES;
 				SDKROOT = macosx;
 				SUPPORTS_MACCATALYST = NO;
 			};
@@ -1269,6 +1204,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 6B66PM4JLK;
 				ENABLE_BITCODE = NO;
@@ -1290,12 +1226,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1359,13 +1296,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRIP_INSTALLED_PRODUCT = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -1380,6 +1317,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = iOS/Thea.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "";
@@ -1393,7 +1331,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.thea.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = app.theathe.ios;
 				PRODUCT_NAME = Thea;
 				SDKROOT = iphoneos;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -1406,10 +1344,24 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = macOS/Thea.entitlements;
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_CFBundleDisplayName = Thea;
@@ -1422,9 +1374,13 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.thea.macos;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.theathe.macos;
 				PRODUCT_NAME = Thea;
+				REGISTER_APP_GROUPS = YES;
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = YES;
 				SDKROOT = macosx;
 				SUPPORTS_MACCATALYST = NO;
 			};
@@ -1435,13 +1391,14 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.thea.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = app.theathe.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Thea-macOS.app/Contents/MacOS/Thea-macOS";
 			};

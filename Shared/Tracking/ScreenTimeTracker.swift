@@ -77,7 +77,7 @@ final class ScreenTimeTracker {
         }
 
         let appName = frontmostApp.localizedName ?? "Unknown"
-        let bundleID = frontmostApp.bundleIdentifier ?? "unknown"
+        _ = frontmostApp.bundleIdentifier ?? "unknown"
 
         let now = Date()
 

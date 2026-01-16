@@ -1,7 +1,72 @@
+# DeepSource Configuration for Thea
+# Version: 1.0.0
+# Last Updated: January 16, 2026
+
 version = 1
 
+# ============================================
+# TEST COVERAGE
+# ============================================
+test_patterns = [
+  "Tests/**",
+  "**/Tests/**",
+  "**/*Tests.swift",
+  "**/*Test.swift"
+]
+
+# ============================================
+# EXCLUDE PATTERNS
+# ============================================
+exclude_patterns = [
+  "build/**",
+  ".build/**",
+  "DerivedData/**",
+  "Pods/**",
+  "Carthage/**",
+  "SourcePackages/**",
+  "*.generated.swift",
+  "Package.swift",
+  "*.xcodeproj/**",
+  "*.xcworkspace/**",
+  ".backup*/**"
+]
+
+# ============================================
+# SWIFT ANALYZER
+# ============================================
 [[analyzers]]
 name = "swift"
+enabled = true
 
-[[code_formatters]]
-name = "swift-format"
+  [analyzers.meta]
+  # Swift version
+  swift_version = "5.9"
+
+  # Minimum deployment targets
+  minimum_macos_version = "14.0"
+  minimum_ios_version = "17.0"
+  minimum_watchos_version = "10.0"
+  minimum_tvos_version = "17.0"
+
+# ============================================
+# TRANSFORMERS
+# ============================================
+[[transformers]]
+name = "swiftlint"
+enabled = true
+
+  [transformers.meta]
+  # Use our custom swiftlint configuration
+  config_file = ".swiftlint.yml"
+
+# ============================================
+# QUALITY THRESHOLDS
+# ============================================
+# These are recommendations - adjust based on your needs
+
+# Code coverage threshold (percentage)
+# Recommended: 70% for production apps
+# coverage_threshold = 70
+
+# Maximum allowed issues per 1000 lines of code
+# issues_threshold = 5

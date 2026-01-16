@@ -25,15 +25,26 @@ struct SettingsView: View {
                     Label("Advanced", systemImage: "gearshape.2")
                 }
 
+            TerminalSettingsView()
+                .tabItem {
+                    Label("Terminal", systemImage: "terminal")
+                }
+
+            CoworkSettingsView()
+                .tabItem {
+                    Label("Cowork", systemImage: "person.2.badge.gearshape")
+                }
+
             PrivacySettingsView()
                 .tabItem {
                     Label("Privacy", systemImage: "lock.shield")
                 }
 
-            LifeTrackingSettingsView()
-                .tabItem {
-                    Label("Life Tracking", systemImage: "chart.xyaxis.line")
-                }
+            // TODO: Restore LifeTrackingSettingsView after implementation
+            // LifeTrackingSettingsView()
+            //     .tabItem {
+            //         Label("Life Tracking", systemImage: "chart.xyaxis.line")
+            //     }
 
             AboutView()
                 .tabItem {
@@ -1138,6 +1149,149 @@ struct ExternalAPIsConfigurationView: View {
         .onChange(of: config) { _, newValue in
             AppConfiguration.shared.externalAPIsConfig = newValue
         }
+    }
+}
+
+// MARK: - Terminal Settings View
+
+struct TerminalSettingsView: View {
+    @State private var shellPath = "/bin/zsh"
+    @State private var enableSyntaxHighlighting = true
+    @State private var fontSize: Double = 12
+    @State private var fontFamily = "SF Mono"
+    @State private var enableAutoComplete = true
+    @State private var historyLimit = 1000
+    @State private var colorScheme = "Default"
+    
+    var body: some View {
+        Form {
+            Section("Terminal Configuration") {
+                Text("Configure terminal behavior and appearance")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            
+            Section("Shell") {
+                TextField("Shell Path", text: $shellPath)
+                    .help("Path to the shell executable")
+                LabeledContent("Current Shell", value: shellPath)
+            }
+            
+            Section("Appearance") {
+                Picker("Color Scheme", selection: $colorScheme) {
+                    Text("Default").tag("Default")
+                    Text("Dark").tag("Dark")
+                    Text("Light").tag("Light")
+                    Text("Solarized Dark").tag("Solarized Dark")
+                    Text("Solarized Light").tag("Solarized Light")
+                }
+                
+                TextField("Font Family", text: $fontFamily)
+                
+                VStack(alignment: .leading) {
+                    Text("Font Size: \(Int(fontSize))pt")
+                    Slider(value: $fontSize, in: 8...24, step: 1)
+                }
+                
+                Toggle("Syntax Highlighting", isOn: $enableSyntaxHighlighting)
+            }
+            
+            Section("Behavior") {
+                Toggle("Enable Auto-Complete", isOn: $enableAutoComplete)
+                
+                Stepper("History Limit: \(historyLimit)", value: $historyLimit, in: 100...10000, step: 100)
+            }
+            
+            Section {
+                Button("Reset to Defaults") {
+                    shellPath = "/bin/zsh"
+                    enableSyntaxHighlighting = true
+                    fontSize = 12
+                    fontFamily = "SF Mono"
+                    enableAutoComplete = true
+                    historyLimit = 1000
+                    colorScheme = "Default"
+                }
+                .foregroundStyle(.red)
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+// MARK: - Cowork Settings View
+
+struct CoworkSettingsView: View {
+    @State private var enableCowork = false
+    @State private var serverURL = ""
+    @State private var apiKey = ""
+    @State private var enableNotifications = true
+    @State private var autoSyncInterval: Double = 30
+    @State private var shareByDefault = false
+    @State private var maxCollaborators = 5
+    
+    var body: some View {
+        Form {
+            Section("Collaboration Features") {
+                Text("Configure real-time collaboration settings")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            
+            Section("Status") {
+                Toggle("Enable Cowork Mode", isOn: $enableCowork)
+                
+                if enableCowork {
+                    LabeledContent("Status", value: "Active")
+                        .foregroundStyle(.green)
+                } else {
+                    LabeledContent("Status", value: "Inactive")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            
+            Section("Server Configuration") {
+                TextField("Server URL", text: $serverURL)
+                    .help("URL of the collaboration server")
+                    .disabled(!enableCowork)
+                
+                SecureField("API Key", text: $apiKey)
+                    .disabled(!enableCowork)
+            }
+            
+            Section("Collaboration Settings") {
+                Toggle("Share by Default", isOn: $shareByDefault)
+                    .disabled(!enableCowork)
+                
+                Stepper("Max Collaborators: \(maxCollaborators)", value: $maxCollaborators, in: 1...20)
+                    .disabled(!enableCowork)
+                
+                Toggle("Enable Notifications", isOn: $enableNotifications)
+                    .disabled(!enableCowork)
+            }
+            
+            Section("Sync") {
+                VStack(alignment: .leading) {
+                    Text("Auto-Sync Interval: \(Int(autoSyncInterval))s")
+                    Slider(value: $autoSyncInterval, in: 10...300, step: 10)
+                }
+                .disabled(!enableCowork)
+            }
+            
+            Section {
+                Button("Reset to Defaults") {
+                    enableCowork = false
+                    serverURL = ""
+                    apiKey = ""
+                    enableNotifications = true
+                    autoSyncInterval = 30
+                    shareByDefault = false
+                    maxCollaborators = 5
+                }
+                .foregroundStyle(.red)
+            }
+        }
+        .formStyle(.grouped)
     }
 }
 

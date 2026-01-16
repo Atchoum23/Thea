@@ -1,0 +1,153 @@
+# CodeCov Configuration for Thea
+# Version: 1.0.0
+# Last Updated: January 16, 2026
+# Documentation: https://docs.codecov.com/docs/codecov-yaml
+
+# ============================================
+# COVERAGE SETTINGS
+# ============================================
+coverage:
+  # Precision of coverage percentage (2 decimal places)
+  precision: 2
+
+  # Round coverage percentage
+  round: down
+
+  # Range for coverage (red to green)
+  range: "50...90"
+
+  # Status checks
+  status:
+    # Project-level coverage
+    project:
+      default:
+        # Target coverage percentage
+        target: auto
+        # Threshold for coverage decrease allowed
+        threshold: 1%
+        # Only check coverage on files that were changed
+        only_changed_files: false
+        # Compare against base branch
+        base: auto
+        # Flags to include (if using multiple coverage uploads)
+        flags:
+          - unittests
+
+      # Separate status for each platform
+      macos:
+        target: auto
+        threshold: 2%
+        flags:
+          - macos
+
+      ios:
+        target: auto
+        threshold: 2%
+        flags:
+          - ios
+
+    # Patch-level coverage (only changed lines)
+    patch:
+      default:
+        target: auto
+        threshold: 5%
+        only_changed_files: true
+
+# ============================================
+# PARSING SETTINGS
+# ============================================
+parsers:
+  gcov:
+    branch_detection:
+      conditional: true
+      loop: true
+      macro: false
+      method: false
+
+# ============================================
+# FLAGS
+# ============================================
+flags:
+  unittests:
+    paths:
+      - Shared/
+      - Platforms/
+      - iOS/
+      - macOS/
+    carryforward: true
+    after_n_builds: 1
+
+  macos:
+    paths:
+      - Shared/
+      - macOS/
+      - Platforms/macOS/
+    carryforward: true
+
+  ios:
+    paths:
+      - Shared/
+      - iOS/
+      - Platforms/iOS/
+    carryforward: true
+
+# ============================================
+# IGNORE PATHS
+# ============================================
+ignore:
+  - "build/**/*"
+  - ".build/**/*"
+  - "DerivedData/**/*"
+  - "Pods/**/*"
+  - "Carthage/**/*"
+  - "SourcePackages/**/*"
+  - "Tests/**/*"
+  - "**/*Tests.swift"
+  - "**/*Test.swift"
+  - "**/Preview Content/**/*"
+  - "*.generated.swift"
+  - "Package.swift"
+
+# ============================================
+# COMMENT SETTINGS
+# ============================================
+comment:
+  # Layout of the comment
+  layout: "reach,diff,flags,files,footer"
+
+  # Comment behavior
+  behavior: default
+
+  # Require changes for comment
+  require_changes: false
+
+  # Show project coverage
+  require_base: false
+  require_head: true
+
+  # Branches to comment on
+  branches:
+    - main
+    - develop
+    - "feature/*"
+    - "release/*"
+
+# ============================================
+# GITHUB CHECKS
+# ============================================
+github_checks:
+  # Show annotations on files in PR
+  annotations: true
+
+# ============================================
+# NOTIFICATIONS
+# ============================================
+# Configure if you want Slack/email notifications
+# notify:
+#   slack:
+#     default:
+#       url: "https://hooks.slack.com/services/..."
+#       threshold: 1%
+#       only_pulls: false
+#       branches:
+#         - main
