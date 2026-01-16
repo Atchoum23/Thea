@@ -1,7 +1,9 @@
+#if os(macOS)
 import AppKit
 import Foundation
 
 /// Manages folder access permissions for Cowork sessions
+@MainActor
 @Observable
 final class FolderAccessManager {
     static let shared = FolderAccessManager()
@@ -287,3 +289,4 @@ final class FolderAccessManager {
         recentFolders = paths.map { URL(fileURLWithPath: $0) }
     }
 }
+#endif
