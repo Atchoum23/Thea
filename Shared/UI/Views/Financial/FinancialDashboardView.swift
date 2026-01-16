@@ -1,29 +1,5 @@
 import Charts
 import SwiftUI
-#if os(macOS)
-import AppKit
-#else
-import UIKit
-#endif
-
-// MARK: - Platform-specific colors
-private extension Color {
-    static var controlBackground: Color {
-        #if os(macOS)
-        return Color.controlBackground
-        #else
-        return Color(UIColor.secondarySystemBackground)
-        #endif
-    }
-
-    static var windowBackground: Color {
-        #if os(macOS)
-        return Color.windowBackground
-        #else
-        return Color(UIColor.systemBackground)
-        #endif
-    }
-}
 
 // MARK: - Financial Dashboard View
 // Overview of connected accounts, transactions, and insights

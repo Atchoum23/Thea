@@ -1157,9 +1157,9 @@ struct ExternalAPIsConfigurationView: View {
     }
 }
 
-// MARK: - Terminal Settings View
+// MARK: - Terminal Settings Section View
 
-struct TerminalSettingsView: View {
+struct TerminalSettingsSectionView: View {
     @State private var shellPath = "/bin/zsh"
     @State private var enableSyntaxHighlighting = true
     @State private var fontSize: Double = 12
@@ -1224,9 +1224,9 @@ struct TerminalSettingsView: View {
     }
 }
 
-// MARK: - Cowork Settings View
+// MARK: - Cowork Settings Section View
 
-struct CoworkSettingsView: View {
+struct CoworkSettingsSectionView: View {
     @State private var enableCowork = false
     @State private var serverURL = ""
     @State private var apiKey = ""

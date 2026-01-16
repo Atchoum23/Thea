@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Main Cowork view - the agentic desktop assistant interface
 struct CoworkView: View {
-    @StateObject private var manager = CoworkManager.shared
+    @State private var manager = CoworkManager.shared
     @State private var instructionText = ""
     @State private var showingFolderPicker = false
     @State private var showingPlanPreview = false

@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Detailed progress view showing step-by-step execution
 struct CoworkProgressView: View {
-    @StateObject private var manager = CoworkManager.shared
+    @State private var manager = CoworkManager.shared
     @State private var expandedSteps: Set<UUID> = []
 
     var body: some View {

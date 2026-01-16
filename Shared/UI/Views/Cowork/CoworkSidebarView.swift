@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Sidebar view showing working folder, progress, and context summary
 struct CoworkSidebarView: View {
-    @StateObject private var manager = CoworkManager.shared
+    @State private var manager = CoworkManager.shared
     @State private var showingFolderPicker = false
 
     var body: some View {
