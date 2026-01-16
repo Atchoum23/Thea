@@ -2,7 +2,7 @@ import SwiftUI
 
 /// View for managing Cowork skills (file type creation capabilities)
 struct CoworkSkillsView: View {
-    @StateObject private var skillsManager = CoworkSkillsManager.shared
+    @State private var skillsManager = CoworkSkillsManager.shared
     @State private var searchText = ""
     @State private var selectedSkill: CoworkSkillsManager.SkillType?
 
@@ -260,7 +260,7 @@ struct CoworkSkillsView: View {
     private func capabilityItem(_ text: String, icon: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
-                .foregroundStyle(.accentColor)
+                .foregroundStyle(Color.accentColor)
                 .frame(width: 20)
             Text(text)
                 .font(.body)

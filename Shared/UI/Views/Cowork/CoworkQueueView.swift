@@ -2,7 +2,7 @@ import SwiftUI
 
 /// View for managing the Cowork task queue
 struct CoworkQueueView: View {
-    @StateObject private var manager = CoworkManager.shared
+    @State private var manager = CoworkManager.shared
     @State private var newTaskInstruction = ""
     @State private var newTaskPriority: CoworkTask.TaskPriority = .normal
     @State private var showingAddTask = false
