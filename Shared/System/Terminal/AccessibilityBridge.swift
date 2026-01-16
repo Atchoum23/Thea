@@ -292,4 +292,3 @@ private func observerCallback(
         }
     }
 }
-
