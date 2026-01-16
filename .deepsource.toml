@@ -39,25 +39,8 @@ name = "swift"
 enabled = true
 
   [analyzers.meta]
-  # Swift version
+  # Swift version (only supported meta key for Swift analyzer)
   swift_version = "5.9"
-
-  # Minimum deployment targets
-  minimum_macos_version = "14.0"
-  minimum_ios_version = "17.0"
-  minimum_watchos_version = "10.0"
-  minimum_tvos_version = "17.0"
-
-# ============================================
-# TRANSFORMERS
-# ============================================
-[[transformers]]
-name = "swiftlint"
-enabled = true
-
-  [transformers.meta]
-  # Use our custom swiftlint configuration
-  config_file = ".swiftlint.yml"
 
 # ============================================
 # QUALITY THRESHOLDS
