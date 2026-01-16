@@ -19,7 +19,7 @@ jobs:
 
       - name: Run SwiftLint
         run: |
-          cd Development
+          
           swiftlint lint --strict --reporter github-actions-logging
 
   build-spm:
@@ -45,13 +45,13 @@ jobs:
 
       - name: Build with SPM
         run: |
-          cd Development
+          
           swift build -c ${{ matrix.configuration }} -v
 
       - name: Run Tests
         if: matrix.configuration == 'debug'
         run: |
-          cd Development
+          
           swift test --parallel
 
   build-xcode-macos:
@@ -67,7 +67,7 @@ jobs:
 
       - name: Build Thea-macOS
         run: |
-          cd Development
+          
           xcodebuild -project Thea.xcodeproj \
                      -scheme Thea-macOS \
                      -destination 'platform=macOS' \
@@ -97,7 +97,7 @@ jobs:
 
       - name: Build Thea-iOS
         run: |
-          cd Development
+          
           xcodebuild -project Thea.xcodeproj \
                      -scheme Thea-iOS \
                      -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
@@ -121,7 +121,7 @@ jobs:
 
       - name: SwiftLint Analysis
         run: |
-          cd Development
+          
           swiftlint analyze --strict --compiler-log-path .build/release.log || true
 
       - name: Generate Build Report
