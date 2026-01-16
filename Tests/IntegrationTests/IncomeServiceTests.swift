@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import Thea
+@testable import TheaCore
 
 /// Tests for income service
 @Suite("Income Service Tests")
