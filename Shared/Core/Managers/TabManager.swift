@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 // MARK: - Tab Manager
 // Manages tabs within windows for multi-tab conversation support
@@ -8,271 +8,274 @@ import Observation
 @MainActor
 @Observable
 final class TabManager {
-    private(set) var openTabs: [ConversationTab] = []
-    var selectedTab: UUID?
+  private(set) var openTabs: [ConversationTab] = []
+  var selectedTab: UUID?
 
-    private var modelContext: ModelContext?
+  private var modelContext: ModelContext?
 
-    init() {}
+  init() {}
 
-    func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+  func setModelContext(_ context: ModelContext) {
+    self.modelContext = context
+  }
+
+  // MARK: - Tab Operations
+
+  /// Opens a new tab with optional conversation
+  func openNewTab(conversation: Conversation? = nil) {
+    let tab: ConversationTab
+
+    if let conversation = conversation {
+      tab = ConversationTab(
+        conversation: conversation,
+        title: conversation.title,
+        isPinned: false
+      )
+    } else {
+      // Create new conversation
+      guard let context = modelContext else { return }
+
+      let newConversation = Conversation(
+        title: "New Conversation",
+        createdAt: Date()
+      )
+      context.insert(newConversation)
+      try? context.save()
+
+      tab = ConversationTab(
+        conversation: newConversation,
+        title: newConversation.title,
+        isPinned: false
+      )
     }
 
-    // MARK: - Tab Operations
+    openTabs.append(tab)
+    selectedTab = tab.id
+  }
 
-    /// Opens a new tab with optional conversation
-    func openNewTab(conversation: Conversation? = nil) {
-        let tab: ConversationTab
+  /// Closes a tab
+  func closeTab(_ tabID: UUID) {
+    guard let index = openTabs.firstIndex(where: { $0.id == tabID }) else {
+      return
+    }
 
-        if let conversation = conversation {
-            tab = ConversationTab(
-                conversation: conversation,
-                title: conversation.title,
-                isPinned: false
-            )
+    openTabs.remove(at: index)
+
+    // Select adjacent tab if closing selected tab
+    if selectedTab == tabID {
+      if !openTabs.isEmpty {
+        if index < openTabs.count {
+          selectedTab = openTabs[index].id
+        } else if index > 0 {
+          selectedTab = openTabs[index - 1].id
         } else {
-            // Create new conversation
-            guard let context = modelContext else { return }
-
-            let newConversation = Conversation(
-                title: "New Conversation",
-                createdAt: Date()
-            )
-            context.insert(newConversation)
-            try? context.save()
-
-            tab = ConversationTab(
-                conversation: newConversation,
-                title: newConversation.title,
-                isPinned: false
-            )
+          selectedTab = openTabs.first?.id
         }
-
-        openTabs.append(tab)
-        selectedTab = tab.id
-    }
-
-    /// Closes a tab
-    func closeTab(_ tabID: UUID) {
-        guard let index = openTabs.firstIndex(where: { $0.id == tabID }) else {
-            return
-        }
-
-        openTabs.remove(at: index)
-
-        // Select adjacent tab if closing selected tab
-        if selectedTab == tabID {
-            if !openTabs.isEmpty {
-                if index < openTabs.count {
-                    selectedTab = openTabs[index].id
-                } else if index > 0 {
-                    selectedTab = openTabs[index - 1].id
-                } else {
-                    selectedTab = openTabs.first?.id
-                }
-            } else {
-                selectedTab = nil
-            }
-        }
-    }
-
-    /// Closes all tabs
-    func closeAllTabs() {
-        openTabs.removeAll()
+      } else {
         selectedTab = nil
+      }
+    }
+  }
+
+  /// Closes all tabs
+  func closeAllTabs() {
+    openTabs.removeAll()
+    selectedTab = nil
+  }
+
+  /// Closes all tabs except pinned ones
+  func closeAllUnpinnedTabs() {
+    openTabs.removeAll { !$0.isPinned }
+
+    if let selected = selectedTab,
+      !openTabs.contains(where: { $0.id == selected })
+    {
+      selectedTab = openTabs.first?.id
+    }
+  }
+
+  /// Selects a tab
+  func selectTab(_ tabID: UUID) {
+    if openTabs.contains(where: { $0.id == tabID }) {
+      selectedTab = tabID
+    }
+  }
+
+  /// Selects the next tab
+  func selectNextTab() {
+    guard let currentID = selectedTab,
+      let currentIndex = openTabs.firstIndex(where: { $0.id == currentID })
+    else {
+      return
     }
 
-    /// Closes all tabs except pinned ones
-    func closeAllUnpinnedTabs() {
-        openTabs.removeAll { !$0.isPinned }
+    let nextIndex = (currentIndex + 1) % openTabs.count
+    selectedTab = openTabs[nextIndex].id
+  }
 
-        if let selected = selectedTab,
-           !openTabs.contains(where: { $0.id == selected }) {
-            selectedTab = openTabs.first?.id
-        }
+  /// Selects the previous tab
+  func selectPreviousTab() {
+    guard let currentID = selectedTab,
+      let currentIndex = openTabs.firstIndex(where: { $0.id == currentID })
+    else {
+      return
     }
 
-    /// Selects a tab
-    func selectTab(_ tabID: UUID) {
-        if openTabs.contains(where: { $0.id == tabID }) {
-            selectedTab = tabID
-        }
-    }
+    let previousIndex = (currentIndex - 1 + openTabs.count) % openTabs.count
+    selectedTab = openTabs[previousIndex].id
+  }
 
-    /// Selects the next tab
-    func selectNextTab() {
-        guard let currentID = selectedTab,
-              let currentIndex = openTabs.firstIndex(where: { $0.id == currentID }) else {
-            return
-        }
+  // MARK: - Tab Modifications
 
-        let nextIndex = (currentIndex + 1) % openTabs.count
-        selectedTab = openTabs[nextIndex].id
-    }
+  /// Pins or unpins a tab
+  func togglePin(_ tabID: UUID) {
+    if let index = openTabs.firstIndex(where: { $0.id == tabID }) {
+      openTabs[index].isPinned.toggle()
 
-    /// Selects the previous tab
-    func selectPreviousTab() {
-        guard let currentID = selectedTab,
-              let currentIndex = openTabs.firstIndex(where: { $0.id == currentID }) else {
-            return
-        }
-
-        let previousIndex = (currentIndex - 1 + openTabs.count) % openTabs.count
-        selectedTab = openTabs[previousIndex].id
-    }
-
-    // MARK: - Tab Modifications
-
-    /// Pins or unpins a tab
-    func togglePin(_ tabID: UUID) {
-        if let index = openTabs.firstIndex(where: { $0.id == tabID }) {
-            openTabs[index].isPinned.toggle()
-
-            // Move pinned tabs to the front
-            if openTabs[index].isPinned {
-                let tab = openTabs.remove(at: index)
-                let lastPinnedIndex = openTabs.lastIndex(where: { $0.isPinned }) ?? -1
-                openTabs.insert(tab, at: lastPinnedIndex + 1)
-            }
-        }
-    }
-
-    /// Reorders tabs
-    func reorderTabs(from source: IndexSet, to destination: Int) {
-        openTabs.move(fromOffsets: source, toOffset: destination)
-    }
-
-    /// Updates tab title
-    func updateTabTitle(_ tabID: UUID, title: String) {
-        if let index = openTabs.firstIndex(where: { $0.id == tabID }) {
-            openTabs[index].title = title
-        }
-    }
-
-    // MARK: - Tab Queries
-
-    /// Gets currently selected tab
-    func getSelectedTab() -> ConversationTab? {
-        guard let selectedID = selectedTab else { return nil }
-        return openTabs.first { $0.id == selectedID }
-    }
-
-    /// Gets tab by ID
-    func getTab(_ tabID: UUID) -> ConversationTab? {
-        openTabs.first { $0.id == tabID }
-    }
-
-    /// Gets tab for conversation
-    func getTab(forConversation conversationID: UUID) -> ConversationTab? {
-        openTabs.first { $0.conversation.id == conversationID }
-    }
-
-    /// Gets all pinned tabs
-    func getPinnedTabs() -> [ConversationTab] {
-        openTabs.filter { $0.isPinned }
-    }
-
-    /// Gets all unpinned tabs
-    func getUnpinnedTabs() -> [ConversationTab] {
-        openTabs.filter { !$0.isPinned }
-    }
-
-    // MARK: - Bulk Operations
-
-    /// Duplicates a tab
-    func duplicateTab(_ tabID: UUID) {
-        guard let tab = openTabs.first(where: { $0.id == tabID }) else {
-            return
-        }
-
-        // Create new conversation with same title
-        guard let context = modelContext else { return }
-
-        let newConversation = Conversation(
-            title: "\(tab.conversation.title) (Copy)",
-            createdAt: Date()
-        )
-        context.insert(newConversation)
-        try? context.save()
-
-        let newTab = ConversationTab(
-            conversation: newConversation,
-            title: newConversation.title,
-            isPinned: false
-        )
-
-        // Insert after current tab
-        if let index = openTabs.firstIndex(where: { $0.id == tabID }) {
-            openTabs.insert(newTab, at: index + 1)
-        } else {
-            openTabs.append(newTab)
-        }
-
-        selectedTab = newTab.id
-    }
-
-    /// Moves tab to a new window
-    func moveTabToNewWindow(_ tabID: UUID) -> ConversationTab? {
-        guard let index = openTabs.firstIndex(where: { $0.id == tabID }) else {
-            return nil
-        }
-
+      // Move pinned tabs to the front
+      if openTabs[index].isPinned {
         let tab = openTabs.remove(at: index)
+        let lastPinnedIndex = openTabs.lastIndex(where: { $0.isPinned }) ?? -1
+        openTabs.insert(tab, at: lastPinnedIndex + 1)
+      }
+    }
+  }
 
-        // Select adjacent tab
-        if selectedTab == tabID {
-            if !openTabs.isEmpty {
-                selectedTab = openTabs.first?.id
-            } else {
-                selectedTab = nil
-            }
-        }
+  /// Reorders tabs
+  func reorderTabs(from source: IndexSet, to destination: Int) {
+    openTabs.move(fromOffsets: source, toOffset: destination)
+  }
 
-        return tab
+  /// Updates tab title
+  func updateTabTitle(_ tabID: UUID, title: String) {
+    if let index = openTabs.firstIndex(where: { $0.id == tabID }) {
+      openTabs[index].title = title
+    }
+  }
+
+  // MARK: - Tab Queries
+
+  /// Gets currently selected tab
+  func getSelectedTab() -> ConversationTab? {
+    guard let selectedID = selectedTab else { return nil }
+    return openTabs.first { $0.id == selectedID }
+  }
+
+  /// Gets tab by ID
+  func getTab(_ tabID: UUID) -> ConversationTab? {
+    openTabs.first { $0.id == tabID }
+  }
+
+  /// Gets tab for conversation
+  func getTab(forConversation conversationID: UUID) -> ConversationTab? {
+    openTabs.first { $0.conversation.id == conversationID }
+  }
+
+  /// Gets all pinned tabs
+  func getPinnedTabs() -> [ConversationTab] {
+    openTabs.filter { $0.isPinned }
+  }
+
+  /// Gets all unpinned tabs
+  func getUnpinnedTabs() -> [ConversationTab] {
+    openTabs.filter { !$0.isPinned }
+  }
+
+  // MARK: - Bulk Operations
+
+  /// Duplicates a tab
+  func duplicateTab(_ tabID: UUID) {
+    guard let tab = openTabs.first(where: { $0.id == tabID }) else {
+      return
     }
 
-    /// Adds an existing tab (from another window)
-    func addTab(_ tab: ConversationTab) {
-        openTabs.append(tab)
-        selectedTab = tab.id
+    // Create new conversation with same title
+    guard let context = modelContext else { return }
+
+    let newConversation = Conversation(
+      title: "\(tab.conversation.title) (Copy)",
+      createdAt: Date()
+    )
+    context.insert(newConversation)
+    try? context.save()
+
+    let newTab = ConversationTab(
+      conversation: newConversation,
+      title: newConversation.title,
+      isPinned: false
+    )
+
+    // Insert after current tab
+    if let index = openTabs.firstIndex(where: { $0.id == tabID }) {
+      openTabs.insert(newTab, at: index + 1)
+    } else {
+      openTabs.append(newTab)
     }
 
-    // MARK: - Tab State
+    selectedTab = newTab.id
+  }
 
-    /// Gets tab count
-    var tabCount: Int {
-        openTabs.count
+  /// Moves tab to a new window
+  func moveTabToNewWindow(_ tabID: UUID) -> ConversationTab? {
+    guard let index = openTabs.firstIndex(where: { $0.id == tabID }) else {
+      return nil
     }
 
-    /// Checks if there are any tabs
-    var hasOpenTabs: Bool {
-        !openTabs.isEmpty
+    let tab = openTabs.remove(at: index)
+
+    // Select adjacent tab
+    if selectedTab == tabID {
+      if !openTabs.isEmpty {
+        selectedTab = openTabs.first?.id
+      } else {
+        selectedTab = nil
+      }
     }
 
-    /// Checks if a tab is selected
-    var hasSelectedTab: Bool {
-        selectedTab != nil
-    }
+    return tab
+  }
+
+  /// Adds an existing tab (from another window)
+  func addTab(_ tab: ConversationTab) {
+    openTabs.append(tab)
+    selectedTab = tab.id
+  }
+
+  // MARK: - Tab State
+
+  /// Gets tab count
+  var tabCount: Int {
+    openTabs.count
+  }
+
+  /// Checks if there are any tabs
+  var hasOpenTabs: Bool {
+    !openTabs.isEmpty
+  }
+
+  /// Checks if a tab is selected
+  var hasSelectedTab: Bool {
+    selectedTab != nil
+  }
 }
 
 // MARK: - Conversation Tab
 
 struct ConversationTab: Identifiable {
-    let id: UUID
-    let conversation: Conversation
-    var title: String
-    var isPinned: Bool
+  let id: UUID
+  let conversation: Conversation
+  var title: String
+  var isPinned: Bool
 
-    init(
-        id: UUID = UUID(),
-        conversation: Conversation,
-        title: String,
-        isPinned: Bool = false
-    ) {
-        self.id = id
-        self.conversation = conversation
-        self.title = title
-        self.isPinned = isPinned
-    }
+  init(
+    id: UUID = UUID(),
+    conversation: Conversation,
+    title: String,
+    isPinned: Bool = false
+  ) {
+    self.id = id
+    self.conversation = conversation
+    self.title = title
+    self.isPinned = isPinned
+  }
 }

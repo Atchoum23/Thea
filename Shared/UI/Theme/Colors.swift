@@ -1,126 +1,129 @@
 import SwiftUI
 
 extension Color {
-    // MARK: - Primary Colors (Configurable)
+  // MARK: - Primary Colors (Configurable)
 
-    @MainActor
-    static var theaPrimary: Color {
-        Color(hex: AppConfiguration.shared.themeConfig.primaryColor)
-    }
+  @MainActor
+  static var theaPrimary: Color {
+    Color(hex: AppConfiguration.shared.themeConfig.primaryColor)
+  }
 
-    @MainActor
-    static var theaAccent: Color {
-        Color(hex: AppConfiguration.shared.themeConfig.accentColor)
-    }
+  @MainActor
+  static var theaAccent: Color {
+    Color(hex: AppConfiguration.shared.themeConfig.accentColor)
+  }
 
-    // MARK: - Secondary Colors (Configurable)
+  // MARK: - Secondary Colors (Configurable)
 
-    @MainActor
-    static var theaPurple: Color {
-        Color(hex: AppConfiguration.shared.themeConfig.purpleColor)
-    }
+  @MainActor
+  static var theaPurple: Color {
+    Color(hex: AppConfiguration.shared.themeConfig.purpleColor)
+  }
 
-    @MainActor
-    static var theaGold: Color {
-        Color(hex: AppConfiguration.shared.themeConfig.goldColor)
-    }
+  @MainActor
+  static var theaGold: Color {
+    Color(hex: AppConfiguration.shared.themeConfig.goldColor)
+  }
 
-    // MARK: - Static Defaults (for use in non-MainActor contexts)
+  // MARK: - Static Defaults (for use in non-MainActor contexts)
 
-    static let theaPrimaryDefault = Color(hex: "0066FF")
-    static let theaAccentDefault = Color(hex: "00D4AA")
-    static let theaPurpleDefault = Color(hex: "8B5CF6")
-    static let theaGoldDefault = Color(hex: "FFB84D")
+  static let theaPrimaryDefault = Color(hex: "0066FF")
+  static let theaAccentDefault = Color(hex: "00D4AA")
+  static let theaPurpleDefault = Color(hex: "8B5CF6")
+  static let theaGoldDefault = Color(hex: "FFB84D")
 
-    // MARK: - Semantic Colors
+  // MARK: - Semantic Colors
 
-    static let theaSuccess = Color.green
-    static let theaWarning = Color.orange
-    static let theaError = Color.red
-    static let theaInfo = Color.blue
+  static let theaSuccess = Color.green
+  static let theaWarning = Color.orange
+  static let theaError = Color.red
+  static let theaInfo = Color.blue
 
-    // MARK: - Gradients
+  // MARK: - Gradients
 
-    @MainActor
-    static var theaPrimaryGradient: LinearGradient {
-        LinearGradient(
-            colors: [theaPrimary, theaAccent],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    @MainActor
-    static var theaHeroGradient: LinearGradient {
-        LinearGradient(
-            colors: [theaPurple, theaPrimary, theaAccent],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    // MARK: - Static Gradients (for non-MainActor contexts)
-
-    static let theaPrimaryGradientDefault = LinearGradient(
-        colors: [theaPrimaryDefault, theaAccentDefault],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
+  @MainActor
+  static var theaPrimaryGradient: LinearGradient {
+    LinearGradient(
+      colors: [theaPrimary, theaAccent],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
     )
+  }
 
-    static let theaHeroGradientDefault = LinearGradient(
-        colors: [theaPurpleDefault, theaPrimaryDefault, theaAccentDefault],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
+  @MainActor
+  static var theaHeroGradient: LinearGradient {
+    LinearGradient(
+      colors: [theaPurple, theaPrimary, theaAccent],
+      startPoint: .topLeading,
+      endPoint: .bottomTrailing
     )
+  }
 
-    // MARK: - Hex Initializer
+  // MARK: - Static Gradients (for non-MainActor contexts)
 
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (255, 0, 0, 0)
-        }
+  static let theaPrimaryGradientDefault = LinearGradient(
+    colors: [theaPrimaryDefault, theaAccentDefault],
+    startPoint: .topLeading,
+    endPoint: .bottomTrailing
+  )
 
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
+  static let theaHeroGradientDefault = LinearGradient(
+    colors: [theaPurpleDefault, theaPrimaryDefault, theaAccentDefault],
+    startPoint: .topLeading,
+    endPoint: .bottomTrailing
+  )
+
+  // MARK: - Hex Initializer
+
+  init(hex: String) {
+    let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    var int: UInt64 = 0
+    Scanner(string: hex).scanHexInt64(&int)
+    let a: UInt64
+    let r: UInt64
+    let g: UInt64
+    let b: UInt64
+    switch hex.count {
+    case 3:  // RGB (12-bit)
+      (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+    case 6:  // RGB (24-bit)
+      (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+    case 8:  // ARGB (32-bit)
+      (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+    default:
+      (a, r, g, b) = (255, 0, 0, 0)
     }
+
+    self.init(
+      .sRGB,
+      red: Double(r) / 255,
+      green: Double(g) / 255,
+      blue: Double(b) / 255,
+      opacity: Double(a) / 255
+    )
+  }
 }
 
 // MARK: - ShapeStyle Extension for Nonisolated Context
 
 extension ShapeStyle where Self == Color {
-    /// Primary brand color for Thea - nonisolated version using default
-    static var theaPrimary: Color {
-        Color.theaPrimaryDefault
-    }
+  /// Primary brand color for Thea - nonisolated version using default
+  static var theaPrimary: Color {
+    Color.theaPrimaryDefault
+  }
 
-    /// Accent brand color for Thea - nonisolated version using default
-    static var theaAccent: Color {
-        Color.theaAccentDefault
-    }
+  /// Accent brand color for Thea - nonisolated version using default
+  static var theaAccent: Color {
+    Color.theaAccentDefault
+  }
 
-    /// Purple brand color for Thea - nonisolated version using default
-    static var theaPurple: Color {
-        Color.theaPurpleDefault
-    }
+  /// Purple brand color for Thea - nonisolated version using default
+  static var theaPurple: Color {
+    Color.theaPurpleDefault
+  }
 
-    /// Gold brand color for Thea - nonisolated version using default
-    static var theaGold: Color {
-        Color.theaGoldDefault
-    }
+  /// Gold brand color for Thea - nonisolated version using default
+  static var theaGold: Color {
+    Color.theaGoldDefault
+  }
 }

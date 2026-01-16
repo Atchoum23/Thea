@@ -6,372 +6,377 @@ import Foundation
 @MainActor
 @Observable
 final class AgentSwarm {
-    static let shared = AgentSwarm()
+  static let shared = AgentSwarm()
 
-    private(set) var activeSwarms: [Swarm] = []
-    private(set) var swarmResults: [SwarmResult] = []
+  private(set) var activeSwarms: [Swarm] = []
+  private(set) var swarmResults: [SwarmResult] = []
 
-    private let maxConcurrentAgents = 10
+  private let maxConcurrentAgents = 10
 
-    private init() {}
+  private init() {}
 
-    // MARK: - Swarm Execution
+  // MARK: - Swarm Execution
 
-    func executeSwarm(
-        task: String,
-        agentCount: Int = 5,
-        strategy: SwarmStrategy = .parallel,
-        progressHandler: @escaping @Sendable (SwarmProgress) -> Void
-    ) async throws -> SwarmResult {
-        let swarm = Swarm(
-            id: UUID(),
-            task: task,
-            agentCount: min(agentCount, maxConcurrentAgents),
-            strategy: strategy,
-            startTime: Date()
-        )
+  func executeSwarm(
+    task: String,
+    agentCount: Int = 5,
+    strategy: SwarmStrategy = .parallel,
+    progressHandler: @escaping @Sendable (SwarmProgress) -> Void
+  ) async throws -> SwarmResult {
+    let swarm = Swarm(
+      id: UUID(),
+      task: task,
+      agentCount: min(agentCount, maxConcurrentAgents),
+      strategy: strategy,
+      startTime: Date()
+    )
 
-        activeSwarms.append(swarm)
+    activeSwarms.append(swarm)
 
-        let result: SwarmResult
+    let result: SwarmResult
 
-        switch strategy {
-        case .parallel:
-            result = try await executeParallel(swarm: swarm, progressHandler: progressHandler)
-        case .competitive:
-            result = try await executeCompetitive(swarm: swarm, progressHandler: progressHandler)
-        case .collaborative:
-            result = try await executeCollaborative(swarm: swarm, progressHandler: progressHandler)
-        case .consensus:
-            result = try await executeConsensus(swarm: swarm, progressHandler: progressHandler)
-        }
-
-        swarmResults.append(result)
-
-        if let index = activeSwarms.firstIndex(where: { $0.id == swarm.id }) {
-            activeSwarms.remove(at: index)
-        }
-
-        return result
+    switch strategy {
+    case .parallel:
+      result = try await executeParallel(swarm: swarm, progressHandler: progressHandler)
+    case .competitive:
+      result = try await executeCompetitive(swarm: swarm, progressHandler: progressHandler)
+    case .collaborative:
+      result = try await executeCollaborative(swarm: swarm, progressHandler: progressHandler)
+    case .consensus:
+      result = try await executeConsensus(swarm: swarm, progressHandler: progressHandler)
     }
 
-    // MARK: - Execution Strategies
+    swarmResults.append(result)
 
-    private func executeParallel(
-        swarm: Swarm,
-        progressHandler: @escaping @Sendable (SwarmProgress) -> Void
-    ) async throws -> SwarmResult {
-        var agentResults: [AgentResult] = []
+    if let index = activeSwarms.firstIndex(where: { $0.id == swarm.id }) {
+      activeSwarms.remove(at: index)
+    }
 
-        // Execute all agents in parallel
-        try await withThrowingTaskGroup(of: AgentResult.self) { group in
-            for i in 0..<swarm.agentCount {
-                group.addTask {
-                    let progress = Float(i) / Float(swarm.agentCount)
-                    progressHandler(SwarmProgress(phase: "Agent \(i+1) executing", percentage: progress))
+    return result
+  }
 
-                    return try await self.executeAgent(
-                        task: swarm.task,
-                        agentIndex: i,
-                        totalAgents: swarm.agentCount
-                    )
-                }
-            }
+  // MARK: - Execution Strategies
 
-            for try await result in group {
-                agentResults.append(result)
-            }
-        }
+  private func executeParallel(
+    swarm: Swarm,
+    progressHandler: @escaping @Sendable (SwarmProgress) -> Void
+  ) async throws -> SwarmResult {
+    var agentResults: [AgentResult] = []
 
-        progressHandler(SwarmProgress(phase: "Aggregating results", percentage: 1.0))
+    // Execute all agents in parallel
+    try await withThrowingTaskGroup(of: AgentResult.self) { group in
+      for i in 0..<swarm.agentCount {
+        group.addTask {
+          let progress = Float(i) / Float(swarm.agentCount)
+          progressHandler(SwarmProgress(phase: "Agent \(i+1) executing", percentage: progress))
 
-        // Aggregate results
-        let aggregated = try await aggregateResults(agentResults)
-
-        return SwarmResult(
-            swarmID: swarm.id,
+          return try await self.executeAgent(
             task: swarm.task,
-            strategy: .parallel,
-            agentResults: agentResults,
-            finalResult: aggregated,
-            executionTime: Date().timeIntervalSince(swarm.startTime),
-            consensus: nil
-        )
+            agentIndex: i,
+            totalAgents: swarm.agentCount
+          )
+        }
+      }
+
+      for try await result in group {
+        agentResults.append(result)
+      }
     }
 
-    private func executeCompetitive(
-        swarm: Swarm,
-        progressHandler: @escaping @Sendable (SwarmProgress) -> Void
-    ) async throws -> SwarmResult {
-        var agentResults: [AgentResult] = []
+    progressHandler(SwarmProgress(phase: "Aggregating results", percentage: 1.0))
 
-        // Execute all agents and pick the best result
-        try await withThrowingTaskGroup(of: AgentResult.self) { group in
-            for i in 0..<swarm.agentCount {
-                group.addTask {
-                    try await self.executeAgent(
-                        task: swarm.task,
-                        agentIndex: i,
-                        totalAgents: swarm.agentCount
-                    )
-                }
-            }
+    // Aggregate results
+    let aggregated = try await aggregateResults(agentResults)
 
-            for try await result in group {
-                agentResults.append(result)
-                let progress = Float(agentResults.count) / Float(swarm.agentCount)
-                progressHandler(SwarmProgress(phase: "Agent \(agentResults.count) complete", percentage: progress))
-            }
-        }
+    return SwarmResult(
+      swarmID: swarm.id,
+      task: swarm.task,
+      strategy: .parallel,
+      agentResults: agentResults,
+      finalResult: aggregated,
+      executionTime: Date().timeIntervalSince(swarm.startTime),
+      consensus: nil
+    )
+  }
 
-        // Select best result based on confidence
-        let bestResult = agentResults.max(by: { $0.confidence < $1.confidence })?.output ?? ""
+  private func executeCompetitive(
+    swarm: Swarm,
+    progressHandler: @escaping @Sendable (SwarmProgress) -> Void
+  ) async throws -> SwarmResult {
+    var agentResults: [AgentResult] = []
 
-        return SwarmResult(
-            swarmID: swarm.id,
+    // Execute all agents and pick the best result
+    try await withThrowingTaskGroup(of: AgentResult.self) { group in
+      for i in 0..<swarm.agentCount {
+        group.addTask {
+          try await self.executeAgent(
             task: swarm.task,
-            strategy: .competitive,
-            agentResults: agentResults,
-            finalResult: bestResult,
-            executionTime: Date().timeIntervalSince(swarm.startTime),
-            consensus: nil
-        )
+            agentIndex: i,
+            totalAgents: swarm.agentCount
+          )
+        }
+      }
+
+      for try await result in group {
+        agentResults.append(result)
+        let progress = Float(agentResults.count) / Float(swarm.agentCount)
+        progressHandler(
+          SwarmProgress(phase: "Agent \(agentResults.count) complete", percentage: progress))
+      }
     }
 
-    private func executeCollaborative(
-        swarm: Swarm,
-        progressHandler: @escaping @Sendable (SwarmProgress) -> Void
-    ) async throws -> SwarmResult {
-        var agentResults: [AgentResult] = []
-        var currentContext = swarm.task
+    // Select best result based on confidence
+    let bestResult = agentResults.max(by: { $0.confidence < $1.confidence })?.output ?? ""
 
-        // Execute agents sequentially, each building on previous
-        for i in 0..<swarm.agentCount {
-            let progress = Float(i) / Float(swarm.agentCount)
-            progressHandler(SwarmProgress(phase: "Agent \(i+1) collaborating", percentage: progress))
+    return SwarmResult(
+      swarmID: swarm.id,
+      task: swarm.task,
+      strategy: .competitive,
+      agentResults: agentResults,
+      finalResult: bestResult,
+      executionTime: Date().timeIntervalSince(swarm.startTime),
+      consensus: nil
+    )
+  }
 
-            let result = try await executeAgent(
-                task: currentContext,
-                agentIndex: i,
-                totalAgents: swarm.agentCount
-            )
+  private func executeCollaborative(
+    swarm: Swarm,
+    progressHandler: @escaping @Sendable (SwarmProgress) -> Void
+  ) async throws -> SwarmResult {
+    var agentResults: [AgentResult] = []
+    var currentContext = swarm.task
 
-            agentResults.append(result)
-            currentContext += "\n\nAgent \(i+1) contribution: \(result.output)"
-        }
+    // Execute agents sequentially, each building on previous
+    for i in 0..<swarm.agentCount {
+      let progress = Float(i) / Float(swarm.agentCount)
+      progressHandler(SwarmProgress(phase: "Agent \(i+1) collaborating", percentage: progress))
 
-        let finalResult = agentResults.last?.output ?? ""
+      let result = try await executeAgent(
+        task: currentContext,
+        agentIndex: i,
+        totalAgents: swarm.agentCount
+      )
 
-        return SwarmResult(
-            swarmID: swarm.id,
+      agentResults.append(result)
+      currentContext += "\n\nAgent \(i+1) contribution: \(result.output)"
+    }
+
+    let finalResult = agentResults.last?.output ?? ""
+
+    return SwarmResult(
+      swarmID: swarm.id,
+      task: swarm.task,
+      strategy: .collaborative,
+      agentResults: agentResults,
+      finalResult: finalResult,
+      executionTime: Date().timeIntervalSince(swarm.startTime),
+      consensus: nil
+    )
+  }
+
+  private func executeConsensus(
+    swarm: Swarm,
+    progressHandler: @escaping @Sendable (SwarmProgress) -> Void
+  ) async throws -> SwarmResult {
+    var agentResults: [AgentResult] = []
+
+    // Execute all agents
+    try await withThrowingTaskGroup(of: AgentResult.self) { group in
+      for i in 0..<swarm.agentCount {
+        group.addTask {
+          try await self.executeAgent(
             task: swarm.task,
-            strategy: .collaborative,
-            agentResults: agentResults,
-            finalResult: finalResult,
-            executionTime: Date().timeIntervalSince(swarm.startTime),
-            consensus: nil
-        )
+            agentIndex: i,
+            totalAgents: swarm.agentCount
+          )
+        }
+      }
+
+      for try await result in group {
+        agentResults.append(result)
+      }
     }
 
-    private func executeConsensus(
-        swarm: Swarm,
-        progressHandler: @escaping @Sendable (SwarmProgress) -> Void
-    ) async throws -> SwarmResult {
-        var agentResults: [AgentResult] = []
+    progressHandler(SwarmProgress(phase: "Building consensus", percentage: 0.9))
 
-        // Execute all agents
-        try await withThrowingTaskGroup(of: AgentResult.self) { group in
-            for i in 0..<swarm.agentCount {
-                group.addTask {
-                    try await self.executeAgent(
-                        task: swarm.task,
-                        agentIndex: i,
-                        totalAgents: swarm.agentCount
-                    )
-                }
-            }
+    // Build consensus through voting/averaging
+    let consensus = try await buildConsensus(from: agentResults)
 
-            for try await result in group {
-                agentResults.append(result)
-            }
-        }
+    return SwarmResult(
+      swarmID: swarm.id,
+      task: swarm.task,
+      strategy: .consensus,
+      agentResults: agentResults,
+      finalResult: consensus.result,
+      executionTime: Date().timeIntervalSince(swarm.startTime),
+      consensus: consensus
+    )
+  }
 
-        progressHandler(SwarmProgress(phase: "Building consensus", percentage: 0.9))
+  // MARK: - Agent Execution
 
-        // Build consensus through voting/averaging
-        let consensus = try await buildConsensus(from: agentResults)
-
-        return SwarmResult(
-            swarmID: swarm.id,
-            task: swarm.task,
-            strategy: .consensus,
-            agentResults: agentResults,
-            finalResult: consensus.result,
-            executionTime: Date().timeIntervalSince(swarm.startTime),
-            consensus: consensus
-        )
+  private func executeAgent(
+    task: String,
+    agentIndex: Int,
+    totalAgents: Int
+  ) async throws -> AgentResult {
+    guard
+      let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+    else {
+      throw SwarmError.providerNotAvailable
     }
 
-    // MARK: - Agent Execution
+    _ = """
+      You are Agent #\(agentIndex + 1) in a swarm of \(totalAgents) agents.
+      Provide your unique perspective and analysis.
+      """
 
-    private func executeAgent(
-        task: String,
-        agentIndex: Int,
-        totalAgents: Int
-    ) async throws -> AgentResult {
-        guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw SwarmError.providerNotAvailable
-        }
+    let message = AIMessage(
+      id: UUID(),
+      conversationID: UUID(),
+      role: .user,
+      content: .text(task),
+      timestamp: Date(),
+      model: "gpt-4o"
+    )
 
-        _ = """
-        You are Agent #\(agentIndex + 1) in a swarm of \(totalAgents) agents.
-        Provide your unique perspective and analysis.
-        """
+    var output = ""
+    let stream = try await provider.chat(messages: [message], model: "gpt-4o", stream: true)
 
-        let message = AIMessage(
-            id: UUID(),
-            conversationID: UUID(),
-            role: .user,
-            content: .text(task),
-            timestamp: Date(),
-            model: "gpt-4o"
-        )
-
-        var output = ""
-        let stream = try await provider.chat(messages: [message], model: "gpt-4o", stream: true)
-
-        for try await chunk in stream {
-            switch chunk.type {
-            case .delta(let text):
-                output += text
-            case .complete:
-                break
-            case .error(let error):
-                throw error
-            }
-        }
-
-        return AgentResult(
-            agentIndex: agentIndex,
-            output: output,
-            confidence: 0.8,
-            executionTime: 1.0
-        )
+    for try await chunk in stream {
+      switch chunk.type {
+      case .delta(let text):
+        output += text
+      case .complete:
+        break
+      case .error(let error):
+        throw error
+      }
     }
 
-    // MARK: - Result Processing
+    return AgentResult(
+      agentIndex: agentIndex,
+      output: output,
+      confidence: 0.8,
+      executionTime: 1.0
+    )
+  }
 
-    private func aggregateResults(_ results: [AgentResult]) async throws -> String {
-        let outputs = results.map { $0.output }.joined(separator: "\n\n---\n\n")
+  // MARK: - Result Processing
 
-        guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw SwarmError.providerNotAvailable
-        }
+  private func aggregateResults(_ results: [AgentResult]) async throws -> String {
+    let outputs = results.map { $0.output }.joined(separator: "\n\n---\n\n")
 
-        let prompt = """
-        Aggregate these results from \(results.count) agents:
-
-        \(outputs)
-
-        Provide a unified, comprehensive summary.
-        """
-
-        let message = AIMessage(
-            id: UUID(),
-            conversationID: UUID(),
-            role: .user,
-            content: .text(prompt),
-            timestamp: Date(),
-            model: "gpt-4o"
-        )
-
-        var aggregated = ""
-        let stream = try await provider.chat(messages: [message], model: "gpt-4o", stream: true)
-
-        for try await chunk in stream {
-            switch chunk.type {
-            case .delta(let text):
-                aggregated += text
-            case .complete:
-                break
-            case .error(let error):
-                throw error
-            }
-        }
-
-        return aggregated
+    guard
+      let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+    else {
+      throw SwarmError.providerNotAvailable
     }
 
-    private func buildConsensus(from results: [AgentResult]) async throws -> Consensus {
-        // Simplified consensus building
-        let agreementLevel = Float(results.count) / Float(results.count)
+    let prompt = """
+      Aggregate these results from \(results.count) agents:
 
-        let consensusResult = try await aggregateResults(results)
+      \(outputs)
 
-        return Consensus(
-            agreementLevel: agreementLevel,
-            result: consensusResult,
-            dissenting: []
-        )
+      Provide a unified, comprehensive summary.
+      """
+
+    let message = AIMessage(
+      id: UUID(),
+      conversationID: UUID(),
+      role: .user,
+      content: .text(prompt),
+      timestamp: Date(),
+      model: "gpt-4o"
+    )
+
+    var aggregated = ""
+    let stream = try await provider.chat(messages: [message], model: "gpt-4o", stream: true)
+
+    for try await chunk in stream {
+      switch chunk.type {
+      case .delta(let text):
+        aggregated += text
+      case .complete:
+        break
+      case .error(let error):
+        throw error
+      }
     }
+
+    return aggregated
+  }
+
+  private func buildConsensus(from results: [AgentResult]) async throws -> Consensus {
+    // Simplified consensus building
+    let agreementLevel = Float(results.count) / Float(results.count)
+
+    let consensusResult = try await aggregateResults(results)
+
+    return Consensus(
+      agreementLevel: agreementLevel,
+      result: consensusResult,
+      dissenting: []
+    )
+  }
 }
 
 // MARK: - Models
 
 struct Swarm: Identifiable {
-    let id: UUID
-    let task: String
-    let agentCount: Int
-    let strategy: SwarmStrategy
-    let startTime: Date
+  let id: UUID
+  let task: String
+  let agentCount: Int
+  let strategy: SwarmStrategy
+  let startTime: Date
 }
 
 struct SwarmResult: Identifiable {
-    let id = UUID()
-    let swarmID: UUID
-    let task: String
-    let strategy: SwarmStrategy
-    let agentResults: [AgentResult]
-    let finalResult: String
-    let executionTime: TimeInterval
-    let consensus: Consensus?
+  let id = UUID()
+  let swarmID: UUID
+  let task: String
+  let strategy: SwarmStrategy
+  let agentResults: [AgentResult]
+  let finalResult: String
+  let executionTime: TimeInterval
+  let consensus: Consensus?
 }
 
 struct AgentResult {
-    let agentIndex: Int
-    let output: String
-    let confidence: Float
-    let executionTime: TimeInterval
+  let agentIndex: Int
+  let output: String
+  let confidence: Float
+  let executionTime: TimeInterval
 }
 
 struct Consensus {
-    let agreementLevel: Float
-    let result: String
-    let dissenting: [Int]
+  let agreementLevel: Float
+  let result: String
+  let dissenting: [Int]
 }
 
 struct SwarmProgress: Sendable {
-    let phase: String
-    let percentage: Float
+  let phase: String
+  let percentage: Float
 }
 
 enum SwarmStrategy {
-    case parallel       // All agents execute independently
-    case competitive    // Best result wins
-    case collaborative  // Agents build on each other
-    case consensus      // Vote/agree on final result
+  case parallel  // All agents execute independently
+  case competitive  // Best result wins
+  case collaborative  // Agents build on each other
+  case consensus  // Vote/agree on final result
 }
 
 enum SwarmError: LocalizedError {
-    case providerNotAvailable
-    case executionFailed
+  case providerNotAvailable
+  case executionFailed
 
-    var errorDescription: String? {
-        switch self {
-        case .providerNotAvailable:
-            return "AI provider not available"
-        case .executionFailed:
-            return "Swarm execution failed"
-        }
+  var errorDescription: String? {
+    switch self {
+    case .providerNotAvailable:
+      return "AI provider not available"
+    case .executionFailed:
+      return "Swarm execution failed"
     }
+  }
 }

@@ -1,45 +1,46 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct TheaApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .modelContainer(for: [
-                    Conversation.self,
-                    AIMessage.self,
-                    Project.self
-                ])
-        }
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
+        .modelContainer(for: [
+          Conversation.self,
+          AIMessage.self,
+          Project.self,
+        ])
     }
+  }
 }
 
 struct ContentView: View {
-    @State private var showingSettings = false
+  @State private var showingSettings = false
 
-    var body: some View {
-        NavigationStack {
-            HomeView()
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: { showingSettings = true }) {
-                            Label("Settings", systemImage: "gear")
-                        }
-                    }
-                }
-                .sheet(isPresented: $showingSettings) {
-                    SettingsView()
-                }
+  var body: some View {
+    NavigationStack {
+      HomeView()
+        .toolbar {
+          ToolbarItem(placement: .topBarTrailing) {
+            Button(action: { showingSettings = true }) {
+              Label("Settings", systemImage: "gear")
+            }
+          }
+        }
+        .sheet(isPresented: $showingSettings) {
+          SettingsView()
         }
     }
+  }
 }
 
 #Preview {
-    ContentView()
-        .modelContainer(for: [
-            Conversation.self,
-            AIMessage.self,
-            Project.self
-        ], inMemory: true)
+  ContentView()
+    .modelContainer(
+      for: [
+        Conversation.self,
+        AIMessage.self,
+        Project.self,
+      ], inMemory: true)
 }

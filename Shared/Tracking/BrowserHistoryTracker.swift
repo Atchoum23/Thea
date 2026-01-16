@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 // MARK: - Browser History Tracker
 // Tracks browsing activity for context-aware assistance
@@ -8,217 +8,229 @@ import Observation
 @MainActor
 @Observable
 final class BrowserHistoryTracker {
-    static let shared = BrowserHistoryTracker()
+  static let shared = BrowserHistoryTracker()
 
-    private var modelContext: ModelContext?
-    private(set) var isTracking = false
-    private(set) var browsingHistory: [BrowsingSession] = []
-    private(set) var currentSession: BrowsingSession?
+  private var modelContext: ModelContext?
+  private(set) var isTracking = false
+  private(set) var browsingHistory: [BrowsingSession] = []
+  private(set) var currentSession: BrowsingSession?
 
-    private var config: LifeTrackingConfiguration {
-        AppConfiguration.shared.lifeTrackingConfig
+  private var config: LifeTrackingConfiguration {
+    AppConfiguration.shared.lifeTrackingConfig
+  }
+
+  private init() {}
+
+  func setModelContext(_ context: ModelContext) {
+    self.modelContext = context
+  }
+
+  // MARK: - Tracking Control
+
+  func startTracking() {
+    guard config.browserTrackingEnabled, !isTracking else { return }
+
+    isTracking = true
+    currentSession = BrowsingSession(startTime: Date(), visits: [])
+  }
+
+  func stopTracking() {
+    isTracking = false
+
+    if let session = currentSession {
+      Task {
+        await saveSession(session)
+      }
+    }
+    currentSession = nil
+  }
+
+  // MARK: - Page Visit Tracking
+
+  func trackPageVisit(url: URL, title: String?, content: String?) {
+    guard isTracking else { return }
+
+    let visit = PageVisit(
+      url: url,
+      title: title ?? url.absoluteString,
+      timestamp: Date(),
+      duration: 0,
+      contentSummary: nil,
+      category: categorizeURL(url)
+    )
+
+    currentSession?.visits.append(visit)
+
+    Task {
+      await saveVisit(visit)
+    }
+  }
+
+  // MARK: - URL Categorization
+
+  private func categorizeURL(_ url: URL) -> URLCategory {
+    let host = url.host?.lowercased() ?? ""
+
+    // Work-related
+    if host.contains("github") || host.contains("stackoverflow") || host.contains("docs.")
+      || host.contains("developer")
+    {
+      return .work
     }
 
-    private init() {}
-
-    func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+    // Learning
+    if host.contains("coursera") || host.contains("udemy")
+      || host.contains("youtube") && url.path.contains("watch")
+    {
+      return .learning
     }
 
-    // MARK: - Tracking Control
-
-    func startTracking() {
-        guard config.browserTrackingEnabled, !isTracking else { return }
-
-        isTracking = true
-        currentSession = BrowsingSession(startTime: Date(), visits: [])
+    // Social media
+    if host.contains("twitter") || host.contains("facebook") || host.contains("instagram")
+      || host.contains("reddit") || host.contains("linkedin")
+    {
+      return .social
     }
 
-    func stopTracking() {
-        isTracking = false
-
-        if let session = currentSession {
-            Task {
-                await saveSession(session)
-            }
-        }
-        currentSession = nil
+    // Shopping
+    if host.contains("amazon") || host.contains("ebay") || host.contains("shop")
+      || host.contains("store")
+    {
+      return .shopping
     }
 
-    // MARK: - Page Visit Tracking
-
-    func trackPageVisit(url: URL, title: String?, content: String?) {
-        guard isTracking else { return }
-
-        let visit = PageVisit(
-            url: url,
-            title: title ?? url.absoluteString,
-            timestamp: Date(),
-            duration: 0,
-            contentSummary: nil,
-            category: categorizeURL(url)
-        )
-
-        currentSession?.visits.append(visit)
-
-        Task {
-            await saveVisit(visit)
-        }
+    // News
+    if host.contains("news") || host.contains("cnn") || host.contains("bbc")
+      || host.contains("nytimes")
+    {
+      return .news
     }
 
-    // MARK: - URL Categorization
-
-    private func categorizeURL(_ url: URL) -> URLCategory {
-        let host = url.host?.lowercased() ?? ""
-
-        // Work-related
-        if host.contains("github") || host.contains("stackoverflow") || host.contains("docs.") || host.contains("developer") {
-            return .work
-        }
-
-        // Learning
-        if host.contains("coursera") || host.contains("udemy") || host.contains("youtube") && url.path.contains("watch") {
-            return .learning
-        }
-
-        // Social media
-        if host.contains("twitter") || host.contains("facebook") || host.contains("instagram") || host.contains("reddit") || host.contains("linkedin") {
-            return .social
-        }
-
-        // Shopping
-        if host.contains("amazon") || host.contains("ebay") || host.contains("shop") || host.contains("store") {
-            return .shopping
-        }
-
-        // News
-        if host.contains("news") || host.contains("cnn") || host.contains("bbc") || host.contains("nytimes") {
-            return .news
-        }
-
-        // Entertainment
-        if host.contains("netflix") || host.contains("hulu") || host.contains("spotify") || host.contains("youtube") {
-            return .entertainment
-        }
-
-        // Reference
-        if host.contains("wikipedia") || host.contains("google") {
-            return .reference
-        }
-
-        return .other
+    // Entertainment
+    if host.contains("netflix") || host.contains("hulu") || host.contains("spotify")
+      || host.contains("youtube")
+    {
+      return .entertainment
     }
 
-    // MARK: - Data Persistence
-
-    private func saveVisit(_ visit: PageVisit) async {
-        guard let context = modelContext else { return }
-
-        let sessionID = currentSession?.id ?? UUID()
-
-        let record = BrowsingRecord(
-            sessionID: sessionID,
-            url: visit.url.absoluteString,
-            title: visit.title,
-            timestamp: visit.timestamp,
-            duration: visit.duration,
-            category: visit.category.rawValue,
-            contentSummary: visit.contentSummary
-        )
-
-        context.insert(record)
-        try? context.save()
+    // Reference
+    if host.contains("wikipedia") || host.contains("google") {
+      return .reference
     }
 
-    private func saveSession(_ session: BrowsingSession) async {
-        // Session data is already saved through individual visits
-        browsingHistory.append(session)
+    return .other
+  }
+
+  // MARK: - Data Persistence
+
+  private func saveVisit(_ visit: PageVisit) async {
+    guard let context = modelContext else { return }
+
+    let sessionID = currentSession?.id ?? UUID()
+
+    let record = BrowsingRecord(
+      sessionID: sessionID,
+      url: visit.url.absoluteString,
+      title: visit.title,
+      timestamp: visit.timestamp,
+      duration: visit.duration,
+      category: visit.category.rawValue,
+      contentSummary: visit.contentSummary
+    )
+
+    context.insert(record)
+    try? context.save()
+  }
+
+  private func saveSession(_ session: BrowsingSession) async {
+    // Session data is already saved through individual visits
+    browsingHistory.append(session)
+  }
+
+  // MARK: - Reports
+
+  func getDailyBrowsingReport() -> BrowsingReport {
+    let today = Calendar.current.startOfDay(for: Date())
+    let visits = currentSession?.visits ?? []
+
+    var categoryDurations: [URLCategory: TimeInterval] = [:]
+
+    for visit in visits {
+      categoryDurations[visit.category, default: 0] += visit.duration
     }
 
-    // MARK: - Reports
+    return BrowsingReport(
+      date: today,
+      totalVisits: visits.count,
+      categoryBreakdown: categoryDurations,
+      topSites: Array(visits.prefix(10))
+    )
+  }
 
-    func getDailyBrowsingReport() -> BrowsingReport {
-        let today = Calendar.current.startOfDay(for: Date())
-        let visits = currentSession?.visits ?? []
+  // MARK: - Historical Data
 
-        var categoryDurations: [URLCategory: TimeInterval] = [:]
+  func getVisits(for date: Date) async -> [BrowsingRecord] {
+    guard let context = modelContext else { return [] }
 
-        for visit in visits {
-            categoryDurations[visit.category, default: 0] += visit.duration
-        }
+    let calendar = Calendar.current
+    let startOfDay = calendar.startOfDay(for: date)
+    let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        return BrowsingReport(
-            date: today,
-            totalVisits: visits.count,
-            categoryBreakdown: categoryDurations,
-            topSites: Array(visits.prefix(10))
-        )
-    }
+    let descriptor = FetchDescriptor<BrowsingRecord>(
+      predicate: #Predicate { $0.timestamp >= startOfDay && $0.timestamp < endOfDay },
+      sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+    )
 
-    // MARK: - Historical Data
+    return (try? context.fetch(descriptor)) ?? []
+  }
 
-    func getVisits(for date: Date) async -> [BrowsingRecord] {
-        guard let context = modelContext else { return [] }
+  func getVisits(from start: Date, to end: Date) async -> [BrowsingRecord] {
+    guard let context = modelContext else { return [] }
 
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: date)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+    let descriptor = FetchDescriptor<BrowsingRecord>(
+      predicate: #Predicate { $0.timestamp >= start && $0.timestamp <= end },
+      sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+    )
 
-        let descriptor = FetchDescriptor<BrowsingRecord>(
-            predicate: #Predicate { $0.timestamp >= startOfDay && $0.timestamp < endOfDay },
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
-    }
-
-    func getVisits(from start: Date, to end: Date) async -> [BrowsingRecord] {
-        guard let context = modelContext else { return [] }
-
-        let descriptor = FetchDescriptor<BrowsingRecord>(
-            predicate: #Predicate { $0.timestamp >= start && $0.timestamp <= end },
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
-    }
+    return (try? context.fetch(descriptor)) ?? []
+  }
 }
 
 // MARK: - Supporting Structures
 
 struct BrowsingSession: Identifiable {
-    let id = UUID()
-    let startTime: Date
-    var visits: [PageVisit]
+  let id = UUID()
+  let startTime: Date
+  var visits: [PageVisit]
 
-    var totalDuration: TimeInterval {
-        visits.reduce(0) { $0 + $1.duration }
-    }
+  var totalDuration: TimeInterval {
+    visits.reduce(0) { $0 + $1.duration }
+  }
 }
 
 struct PageVisit {
-    let url: URL
-    let title: String
-    let timestamp: Date
-    var duration: TimeInterval
-    let contentSummary: String?
-    let category: URLCategory
+  let url: URL
+  let title: String
+  let timestamp: Date
+  var duration: TimeInterval
+  let contentSummary: String?
+  let category: URLCategory
 }
 
 enum URLCategory: String {
-    case work = "Work"
-    case learning = "Learning"
-    case social = "Social"
-    case entertainment = "Entertainment"
-    case shopping = "Shopping"
-    case news = "News"
-    case reference = "Reference"
-    case other = "Other"
+  case work = "Work"
+  case learning = "Learning"
+  case social = "Social"
+  case entertainment = "Entertainment"
+  case shopping = "Shopping"
+  case news = "News"
+  case reference = "Reference"
+  case other = "Other"
 }
 
 struct BrowsingReport {
-    let date: Date
-    let totalVisits: Int
-    let categoryBreakdown: [URLCategory: TimeInterval]
-    let topSites: [PageVisit]
+  let date: Date
+  let totalVisits: Int
+  let categoryBreakdown: [URLCategory: TimeInterval]
+  let topSites: [PageVisit]
 }
