@@ -1,70 +1,70 @@
 import Foundation
-import SwiftData
 import Observation
+import SwiftData
 
 @MainActor
 @Observable
 final class KnowledgeManager {
-    static let shared = KnowledgeManager()
+  static let shared = KnowledgeManager()
 
-    private(set) var indexedFiles: [IndexedFile] = []
-    private(set) var isIndexing: Bool = false
-    private(set) var indexProgress: Double = 0.0
+  private(set) var indexedFiles: [IndexedFile] = []
+  private(set) var isIndexing: Bool = false
+  private(set) var indexProgress: Double = 0.0
 
-    private var modelContext: ModelContext?
+  private var modelContext: ModelContext?
 
-    private init() {}
+  private init() {}
 
-    func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
-        loadIndexedFiles()
+  func setModelContext(_ context: ModelContext) {
+    self.modelContext = context
+    loadIndexedFiles()
+  }
+
+  func startIndexing(paths: [URL]) async throws {
+    isIndexing = true
+    indexProgress = 0.0
+
+    let total = paths.count
+    for (index, path) in paths.enumerated() {
+      try await indexFile(at: path)
+      indexProgress = Double(index + 1) / Double(total)
     }
 
-    func startIndexing(paths: [URL]) async throws {
-        isIndexing = true
-        indexProgress = 0.0
+    isIndexing = false
+  }
 
-        let total = paths.count
-        for (index, path) in paths.enumerated() {
-            try await indexFile(at: path)
-            indexProgress = Double(index + 1) / Double(total)
-        }
+  func indexFile(at url: URL) async throws {
+    let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+    let size = (attributes[.size] as? Int64) ?? 0
 
-        isIndexing = false
-    }
+    let file = IndexedFile(
+      id: UUID(),
+      path: url.path,
+      name: url.lastPathComponent,
+      size: size,
+      indexedAt: Date()
+    )
 
-    func indexFile(at url: URL) async throws {
-        let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
-        let size = (attributes[.size] as? Int64) ?? 0
+    modelContext?.insert(file)
+    try? modelContext?.save()
+    indexedFiles.append(file)
+  }
 
-        let file = IndexedFile(
-            id: UUID(),
-            path: url.path,
-            name: url.lastPathComponent,
-            size: size,
-            indexedAt: Date()
-        )
+  func removeFile(_ file: IndexedFile) {
+    modelContext?.delete(file)
+    try? modelContext?.save()
+    indexedFiles.removeAll { $0.id == file.id }
+  }
 
-        modelContext?.insert(file)
-        try? modelContext?.save()
-        indexedFiles.append(file)
-    }
+  func search(query: String) -> [IndexedFile] {
+    indexedFiles.filter { $0.name.localizedCaseInsensitiveContains(query) }
+  }
 
-    func removeFile(_ file: IndexedFile) {
-        modelContext?.delete(file)
-        try? modelContext?.save()
-        indexedFiles.removeAll { $0.id == file.id }
-    }
-
-    func search(query: String) -> [IndexedFile] {
-        indexedFiles.filter { $0.name.localizedCaseInsensitiveContains(query) }
-    }
-
-    private func loadIndexedFiles() {
-        guard let context = modelContext else { return }
-        let descriptor = FetchDescriptor<IndexedFile>(
-            sortBy: [SortDescriptor(\.indexedAt, order: .reverse)]
-        )
-        indexedFiles = (try? context.fetch(descriptor)) ?? []
-    }
+  private func loadIndexedFiles() {
+    guard let context = modelContext else { return }
+    let descriptor = FetchDescriptor<IndexedFile>(
+      sortBy: [SortDescriptor(\.indexedAt, order: .reverse)]
+    )
+    indexedFiles = (try? context.fetch(descriptor)) ?? []
+  }
 }

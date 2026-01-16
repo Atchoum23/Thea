@@ -1,112 +1,112 @@
+import Combine
 import Foundation
 import SwiftData
-import Combine
 
 @MainActor
 final class ProjectManager: ObservableObject {
-    static let shared = ProjectManager()
+  static let shared = ProjectManager()
 
-    @Published private(set) var projects: [Project] = []
-    @Published private(set) var activeProject: Project?
+  @Published private(set) var projects: [Project] = []
+  @Published private(set) var activeProject: Project?
 
-    private var modelContext: ModelContext?
+  private var modelContext: ModelContext?
 
-    private init() {}
+  private init() {}
 
-    // MARK: - Setup
+  // MARK: - Setup
 
-    func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
-        loadProjects()
+  func setModelContext(_ context: ModelContext) {
+    self.modelContext = context
+    loadProjects()
+  }
+
+  // MARK: - Project CRUD
+
+  func createProject(title: String, customInstructions: String = "") -> Project {
+    let project = Project(
+      id: UUID(),
+      title: title,
+      customInstructions: customInstructions
+    )
+
+    modelContext?.insert(project)
+    try? modelContext?.save()
+
+    projects.insert(project, at: 0)
+    return project
+  }
+
+  func updateProject(_ project: Project, title: String? = nil, customInstructions: String? = nil) {
+    if let title = title {
+      project.title = title
     }
 
-    // MARK: - Project CRUD
-
-    func createProject(title: String, customInstructions: String = "") -> Project {
-        let project = Project(
-            id: UUID(),
-            title: title,
-            customInstructions: customInstructions
-        )
-
-        modelContext?.insert(project)
-        try? modelContext?.save()
-
-        projects.insert(project, at: 0)
-        return project
+    if let customInstructions = customInstructions {
+      project.customInstructions = customInstructions
     }
 
-    func updateProject(_ project: Project, title: String? = nil, customInstructions: String? = nil) {
-        if let title = title {
-            project.title = title
-        }
+    project.updatedAt = Date()
+    try? modelContext?.save()
+  }
 
-        if let customInstructions = customInstructions {
-            project.customInstructions = customInstructions
-        }
+  func deleteProject(_ project: Project) {
+    modelContext?.delete(project)
+    try? modelContext?.save()
 
-        project.updatedAt = Date()
-        try? modelContext?.save()
+    projects.removeAll { $0.id == project.id }
+
+    if activeProject?.id == project.id {
+      activeProject = nil
     }
+  }
 
-    func deleteProject(_ project: Project) {
-        modelContext?.delete(project)
-        try? modelContext?.save()
+  func setActiveProject(_ project: Project?) {
+    activeProject = project
+  }
 
-        projects.removeAll { $0.id == project.id }
+  // MARK: - Conversation Management
 
-        if activeProject?.id == project.id {
-            activeProject = nil
-        }
-    }
+  func addConversation(_ conversation: Conversation, to project: Project) {
+    conversation.projectID = project.id
+    project.conversations.append(conversation)
+    try? modelContext?.save()
+  }
 
-    func setActiveProject(_ project: Project?) {
-        activeProject = project
-    }
+  func removeConversation(_ conversation: Conversation, from project: Project) {
+    conversation.projectID = nil
+    project.conversations.removeAll { $0.id == conversation.id }
+    try? modelContext?.save()
+  }
 
-    // MARK: - Conversation Management
+  // MARK: - File Management
 
-    func addConversation(_ conversation: Conversation, to project: Project) {
-        conversation.projectID = project.id
-        project.conversations.append(conversation)
-        try? modelContext?.save()
-    }
+  func addFile(to project: Project, name: String, path: String, size: Int64) {
+    let file = ProjectFile(
+      id: UUID(),
+      name: name,
+      path: path,
+      size: size,
+      addedAt: Date()
+    )
 
-    func removeConversation(_ conversation: Conversation, from project: Project) {
-        conversation.projectID = nil
-        project.conversations.removeAll { $0.id == conversation.id }
-        try? modelContext?.save()
-    }
+    project.files.append(file)
+    try? modelContext?.save()
+  }
 
-    // MARK: - File Management
+  func removeFile(from project: Project, fileID: UUID) {
+    project.files.removeAll { $0.id == fileID }
+    try? modelContext?.save()
+  }
 
-    func addFile(to project: Project, name: String, path: String, size: Int64) {
-        let file = ProjectFile(
-            id: UUID(),
-            name: name,
-            path: path,
-            size: size,
-            addedAt: Date()
-        )
+  // MARK: - Private Methods
 
-        project.files.append(file)
-        try? modelContext?.save()
-    }
+  private func loadProjects() {
+    guard let context = modelContext else { return }
 
-    func removeFile(from project: Project, fileID: UUID) {
-        project.files.removeAll { $0.id == fileID }
-        try? modelContext?.save()
-    }
+    let descriptor = FetchDescriptor<Project>(
+      sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+    )
 
-    // MARK: - Private Methods
-
-    private func loadProjects() {
-        guard let context = modelContext else { return }
-
-        let descriptor = FetchDescriptor<Project>(
-            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
-        )
-
-        projects = (try? context.fetch(descriptor)) ?? []
-    }
+    projects = (try? context.fetch(descriptor)) ?? []
+  }
 }

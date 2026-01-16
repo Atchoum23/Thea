@@ -5,321 +5,344 @@ import Observation
 @MainActor
 @Observable
 final class ReflectionEngine {
-    static let shared = ReflectionEngine()
+  static let shared = ReflectionEngine()
 
-    private(set) var reflectionHistory: [Reflection] = []
-    private(set) var improvements: [Improvement] = []
-    private(set) var learnings: [Learning] = []
+  private(set) var reflectionHistory: [Reflection] = []
+  private(set) var improvements: [Improvement] = []
+  private(set) var learnings: [Learning] = []
 
-    // Configuration accessor
-    private var config: MetaAIConfiguration {
-        AppConfiguration.shared.metaAIConfig
+  // Configuration accessor
+  private var config: MetaAIConfiguration {
+    AppConfiguration.shared.metaAIConfig
+  }
+
+  private init() {}
+
+  // MARK: - Reflection Process
+
+  /// Analyze an AI output and identify improvements
+  func reflect(
+    on output: String,
+    task: String,
+    context: [String: Any] = [:]
+  ) async throws -> Reflection {
+    // Step 1: Self-critique
+    let critique = try await selfCritique(output: output, task: task)
+
+    // Step 2: Identify weaknesses
+    let weaknesses = try await identifyWeaknesses(output: output, critique: critique)
+
+    // Step 3: Generate improvements
+    let suggestions = try await generateImprovements(
+      output: output,
+      weaknesses: weaknesses
+    )
+
+    // Step 4: Apply improvements
+    let improved = try await applyImprovements(
+      original: output,
+      suggestions: suggestions
+    )
+
+    // Step 5: Extract learnings
+    let learning = try await extractLearnings(
+      original: output,
+      improved: improved,
+      weaknesses: weaknesses
+    )
+
+    let reflection = Reflection(
+      id: UUID(),
+      originalOutput: output,
+      task: task,
+      critique: critique,
+      weaknesses: weaknesses,
+      improvements: suggestions,
+      improvedOutput: improved,
+      learning: learning,
+      timestamp: Date()
+    )
+
+    reflectionHistory.append(reflection)
+    learnings.append(learning)
+
+    return reflection
+  }
+
+  // MARK: - Apply Historical Learnings
+
+  func applyHistoricalLearnings(to prompt: String) -> String {
+    guard !learnings.isEmpty else { return prompt }
+
+    let recentLearnings = learnings.suffix(5)
+    let learningsSummary = recentLearnings.map { $0.insight }.joined(separator: "\n")
+
+    return """
+      \(prompt)
+
+      [Previous learnings to apply:]
+      \(learningsSummary)
+      """
+  }
+
+  // MARK: - Private Helper Methods
+
+  private func selfCritique(output: String, task: String) async throws -> Critique {
+    guard
+      let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+    else {
+      throw ReflectionError.providerNotAvailable
     }
 
-    private init() {}
+    let prompt = """
+      You are a highly critical AI evaluator. Analyze this output objectively.
 
-    // MARK: - Reflection Process
+      Task: \(task)
+      Output: \(output)
 
-    /// Analyze an AI output and identify improvements
-    func reflect(
-        on output: String,
-        task: String,
-        context: [String: Any] = [:]
-    ) async throws -> Reflection {
-        // Step 1: Self-critique
-        let critique = try await selfCritique(output: output, task: task)
+      Evaluate:
+      1. Accuracy (0-10)
+      2. Completeness (0-10)
+      3. Clarity (0-10)
+      4. Efficiency (0-10)
+      5. Creativity (0-10)
 
-        // Step 2: Identify weaknesses
-        let weaknesses = try await identifyWeaknesses(output: output, critique: critique)
+      Identify specific flaws, gaps, and areas for improvement.
+      Be brutally honest. Don't hold back criticism.
 
-        // Step 3: Generate improvements
-        let suggestions = try await generateImprovements(
-            output: output,
-            weaknesses: weaknesses
-        )
+      Format as JSON with scores and detailed feedback.
+      """
 
-        // Step 4: Apply improvements
-        let improved = try await applyImprovements(
-            original: output,
-            suggestions: suggestions
-        )
+    let critiqueText = try await streamProviderResponse(
+      provider: provider, prompt: prompt, model: config.reflectionModel)
 
-        // Step 5: Extract learnings
-        let learning = try await extractLearnings(
-            original: output,
-            improved: improved,
-            weaknesses: weaknesses
-        )
+    return Critique(
+      accuracy: 7.0,
+      completeness: 7.0,
+      clarity: 7.0,
+      efficiency: 7.0,
+      creativity: 7.0,
+      overallScore: 7.0,
+      feedback: critiqueText
+    )
+  }
 
-        let reflection = Reflection(
-            id: UUID(),
-            originalOutput: output,
-            task: task,
-            critique: critique,
-            weaknesses: weaknesses,
-            improvements: suggestions,
-            improvedOutput: improved,
-            learning: learning,
-            timestamp: Date()
-        )
-
-        reflectionHistory.append(reflection)
-        learnings.append(learning)
-
-        return reflection
+  private func identifyWeaknesses(output: String, critique: Critique) async throws -> [Weakness] {
+    guard
+      let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+    else {
+      throw ReflectionError.providerNotAvailable
     }
 
-    // MARK: - Apply Historical Learnings
+    let prompt = """
+      Based on this critique:
+      \(critique.feedback)
 
-    func applyHistoricalLearnings(to prompt: String) -> String {
-        guard !learnings.isEmpty else { return prompt }
+      For this output:
+      \(output)
 
-        let recentLearnings = learnings.suffix(5)
-        let learningsSummary = recentLearnings.map { $0.insight }.joined(separator: "\n")
+      List the specific weaknesses. For each, specify:
+      - What is wrong
+      - Why it matters
+      - Severity (low/medium/high)
 
-        return """
-        \(prompt)
+      Format as JSON array.
+      """
 
-        [Previous learnings to apply:]
-        \(learningsSummary)
-        """
+    let weaknessesText = try await streamProviderResponse(
+      provider: provider, prompt: prompt, model: config.reflectionModel)
+
+    return [
+      Weakness(
+        description: "Identified from critique",
+        impact: weaknessesText,
+        severity: .medium
+      )
+    ]
+  }
+
+  private func generateImprovements(output: String, weaknesses: [Weakness]) async throws
+    -> [Improvement]
+  {
+    guard
+      let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+    else {
+      throw ReflectionError.providerNotAvailable
     }
 
-    // MARK: - Private Helper Methods
+    let weaknessDescriptions = weaknesses.map { $0.description }.joined(separator: "\n")
 
-    private func selfCritique(output: String, task: String) async throws -> Critique {
-        guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw ReflectionError.providerNotAvailable
-        }
+    let prompt = """
+      Original output:
+      \(output)
 
-        let prompt = """
-        You are a highly critical AI evaluator. Analyze this output objectively.
+      Identified weaknesses:
+      \(weaknessDescriptions)
 
-        Task: \(task)
-        Output: \(output)
+      For each weakness, provide:
+      1. A specific improvement suggestion
+      2. Expected impact
+      3. Implementation steps
 
-        Evaluate:
-        1. Accuracy (0-10)
-        2. Completeness (0-10)
-        3. Clarity (0-10)
-        4. Efficiency (0-10)
-        5. Creativity (0-10)
+      Format as JSON array.
+      """
 
-        Identify specific flaws, gaps, and areas for improvement.
-        Be brutally honest. Don't hold back criticism.
+    let improvementsText = try await streamProviderResponse(
+      provider: provider, prompt: prompt, model: config.reflectionModel)
 
-        Format as JSON with scores and detailed feedback.
-        """
+    return [
+      Improvement(
+        suggestion: improvementsText,
+        expectedImpact: "Better output quality",
+        priority: .high
+      )
+    ]
+  }
 
-        let critiqueText = try await streamProviderResponse(provider: provider, prompt: prompt, model: config.reflectionModel)
-
-        return Critique(
-            accuracy: 7.0,
-            completeness: 7.0,
-            clarity: 7.0,
-            efficiency: 7.0,
-            creativity: 7.0,
-            overallScore: 7.0,
-            feedback: critiqueText
-        )
+  private func applyImprovements(original: String, suggestions: [Improvement]) async throws
+    -> String
+  {
+    guard
+      let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+    else {
+      throw ReflectionError.providerNotAvailable
     }
 
-    private func identifyWeaknesses(output: String, critique: Critique) async throws -> [Weakness] {
-        guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw ReflectionError.providerNotAvailable
-        }
+    let suggestionList = suggestions.map { $0.suggestion }.joined(separator: "\n")
 
-        let prompt = """
-        Based on this critique:
-        \(critique.feedback)
+    let prompt = """
+      Original output:
+      \(original)
 
-        For this output:
-        \(output)
+      Apply these improvements:
+      \(suggestionList)
 
-        List the specific weaknesses. For each, specify:
-        - What is wrong
-        - Why it matters
-        - Severity (low/medium/high)
+      Provide the improved version incorporating all suggestions.
+      """
 
-        Format as JSON array.
-        """
+    return try await streamProviderResponse(
+      provider: provider, prompt: prompt, model: config.reflectionModel)
+  }
 
-        let weaknessesText = try await streamProviderResponse(provider: provider, prompt: prompt, model: config.reflectionModel)
-
-        return [
-            Weakness(
-                description: "Identified from critique",
-                impact: weaknessesText,
-                severity: .medium
-            )
-        ]
+  private func extractLearnings(original: String, improved: String, weaknesses: [Weakness])
+    async throws -> Learning
+  {
+    guard
+      let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+    else {
+      throw ReflectionError.providerNotAvailable
     }
 
-    private func generateImprovements(output: String, weaknesses: [Weakness]) async throws -> [Improvement] {
-        guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw ReflectionError.providerNotAvailable
-        }
+    let prompt = """
+      Original: \(original)
+      Improved: \(improved)
 
-        let weaknessDescriptions = weaknesses.map { $0.description }.joined(separator: "\n")
+      What general lesson can we learn from this improvement?
+      What should we remember for future tasks?
 
-        let prompt = """
-        Original output:
-        \(output)
+      Provide a concise, actionable insight.
+      """
 
-        Identified weaknesses:
-        \(weaknessDescriptions)
+    let insight = try await streamProviderResponse(
+      provider: provider, prompt: prompt, model: "gpt-4o-mini")
 
-        For each weakness, provide:
-        1. A specific improvement suggestion
-        2. Expected impact
-        3. Implementation steps
+    return Learning(
+      insight: insight,
+      context: "Reflection on improvements",
+      applicability: ["general"],
+      timestamp: Date()
+    )
+  }
 
-        Format as JSON array.
-        """
+  // Helper to stream provider response into a single string
+  private func streamProviderResponse(provider: AIProvider, prompt: String, model: String)
+    async throws -> String
+  {
+    let message = AIMessage(
+      id: UUID(),
+      conversationID: UUID(),
+      role: .user,
+      content: .text(prompt),
+      timestamp: Date(),
+      model: model
+    )
 
-        let improvementsText = try await streamProviderResponse(provider: provider, prompt: prompt, model: config.reflectionModel)
+    var result = ""
+    let stream = try await provider.chat(messages: [message], model: model, stream: true)
 
-        return [
-            Improvement(
-                suggestion: improvementsText,
-                expectedImpact: "Better output quality",
-                priority: .high
-            )
-        ]
+    for try await chunk in stream {
+      switch chunk.type {
+      case .delta(let text):
+        result += text
+      case .complete:
+        break
+      case .error(let error):
+        throw error
+      }
     }
 
-    private func applyImprovements(original: String, suggestions: [Improvement]) async throws -> String {
-        guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw ReflectionError.providerNotAvailable
-        }
-
-        let suggestionList = suggestions.map { $0.suggestion }.joined(separator: "\n")
-
-        let prompt = """
-        Original output:
-        \(original)
-
-        Apply these improvements:
-        \(suggestionList)
-
-        Provide the improved version incorporating all suggestions.
-        """
-
-        return try await streamProviderResponse(provider: provider, prompt: prompt, model: config.reflectionModel)
-    }
-
-    private func extractLearnings(original: String, improved: String, weaknesses: [Weakness]) async throws -> Learning {
-        guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw ReflectionError.providerNotAvailable
-        }
-
-        let prompt = """
-        Original: \(original)
-        Improved: \(improved)
-
-        What general lesson can we learn from this improvement?
-        What should we remember for future tasks?
-
-        Provide a concise, actionable insight.
-        """
-
-        let insight = try await streamProviderResponse(provider: provider, prompt: prompt, model: "gpt-4o-mini")
-
-        return Learning(
-            insight: insight,
-            context: "Reflection on improvements",
-            applicability: ["general"],
-            timestamp: Date()
-        )
-    }
-
-    // Helper to stream provider response into a single string
-    private func streamProviderResponse(provider: AIProvider, prompt: String, model: String) async throws -> String {
-        let message = AIMessage(
-            id: UUID(),
-            conversationID: UUID(),
-            role: .user,
-            content: .text(prompt),
-            timestamp: Date(),
-            model: model
-        )
-
-        var result = ""
-        let stream = try await provider.chat(messages: [message], model: model, stream: true)
-
-        for try await chunk in stream {
-            switch chunk.type {
-            case .delta(let text):
-                result += text
-            case .complete:
-                break
-            case .error(let error):
-                throw error
-            }
-        }
-
-        return result
-    }
+    return result
+  }
 }
 
 // MARK: - Models
 
 struct Reflection: Identifiable, Codable, Sendable {
-    let id: UUID
-    let originalOutput: String
-    let task: String
-    let critique: Critique
-    let weaknesses: [Weakness]
-    let improvements: [Improvement]
-    let improvedOutput: String
-    let learning: Learning
-    let timestamp: Date
+  let id: UUID
+  let originalOutput: String
+  let task: String
+  let critique: Critique
+  let weaknesses: [Weakness]
+  let improvements: [Improvement]
+  let improvedOutput: String
+  let learning: Learning
+  let timestamp: Date
 }
 
 struct Critique: Codable, Sendable {
-    let accuracy: Float
-    let completeness: Float
-    let clarity: Float
-    let efficiency: Float
-    let creativity: Float
-    let overallScore: Float
-    let feedback: String
+  let accuracy: Float
+  let completeness: Float
+  let clarity: Float
+  let efficiency: Float
+  let creativity: Float
+  let overallScore: Float
+  let feedback: String
 }
 
 struct Weakness: Codable, Sendable {
-    let description: String
-    let impact: String
-    let severity: WeaknessSeverity
+  let description: String
+  let impact: String
+  let severity: WeaknessSeverity
 
-    enum WeaknessSeverity: String, Codable, Sendable {
-        case low, medium, high
-    }
+  enum WeaknessSeverity: String, Codable, Sendable {
+    case low, medium, high
+  }
 }
 
 struct Improvement: Codable, Sendable {
-    let suggestion: String
-    let expectedImpact: String
-    let priority: ImprovementPriority
+  let suggestion: String
+  let expectedImpact: String
+  let priority: ImprovementPriority
 
-    enum ImprovementPriority: String, Codable, Sendable {
-        case low, medium, high
-    }
+  enum ImprovementPriority: String, Codable, Sendable {
+    case low, medium, high
+  }
 }
 
 struct Learning: Codable, Sendable {
-    let insight: String
-    let context: String
-    let applicability: [String]
-    let timestamp: Date
+  let insight: String
+  let context: String
+  let applicability: [String]
+  let timestamp: Date
 }
 
 enum ReflectionError: LocalizedError {
-    case providerNotAvailable
+  case providerNotAvailable
 
-    var errorDescription: String? {
-        switch self {
-        case .providerNotAvailable:
-            return "AI provider not available for reflection"
-        }
+  var errorDescription: String? {
+    switch self {
+    case .providerNotAvailable:
+      return "AI provider not available for reflection"
     }
+  }
 }
