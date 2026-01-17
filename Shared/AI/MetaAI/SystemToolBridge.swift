@@ -3,14 +3,14 @@ import Foundation
 // MARK: - Built-in System Tools
 // Native filesystem, terminal, and system tools
 
-struct FileReadTool {
+struct FileReadTool: Sendable {
     static let name = "file_read"
     static let description = "Read contents of a file"
     static let parameters = [
         ToolParameter(name: "path", type: .string, required: true, description: "File path to read")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let path = arguments["path"] as? String else {
             throw ToolError.invalidParameters
         }
@@ -21,15 +21,15 @@ struct FileReadTool {
     }
 }
 
-struct FileWriteTool {
+struct FileWriteTool: Sendable {
     static let name = "file_write"
     static let description = "Write content to a file"
     static let parameters = [
         ToolParameter(name: "path", type: .string, required: true, description: "File path to write"),
         ToolParameter(name: "content", type: .string, required: true, description: "Content to write")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let path = arguments["path"] as? String,
               let content = arguments["content"] as? String else {
             throw ToolError.invalidParameters
@@ -41,15 +41,15 @@ struct FileWriteTool {
     }
 }
 
-struct FileSearchTool {
+struct FileSearchTool: Sendable {
     static let name = "file_search"
     static let description = "Search for files matching a pattern"
     static let parameters = [
         ToolParameter(name: "directory", type: .string, required: true, description: "Directory to search"),
         ToolParameter(name: "pattern", type: .string, required: true, description: "Search pattern (glob or regex)")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let directory = arguments["directory"] as? String,
               let pattern = arguments["pattern"] as? String else {
             throw ToolError.invalidParameters
@@ -71,15 +71,15 @@ struct FileSearchTool {
     }
 }
 
-struct FileListTool {
+struct FileListTool: Sendable {
     static let name = "file_list"
     static let description = "List files in a directory"
     static let parameters = [
         ToolParameter(name: "path", type: .string, required: true, description: "Directory path"),
         ToolParameter(name: "recursive", type: .boolean, required: false, description: "List recursively")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let path = arguments["path"] as? String else {
             throw ToolError.invalidParameters
         }
@@ -105,15 +105,15 @@ struct FileListTool {
     }
 }
 
-struct TerminalTool {
+struct TerminalTool: Sendable {
     static let name = "terminal"
     static let description = "Execute a shell command"
     static let parameters = [
         ToolParameter(name: "command", type: .string, required: true, description: "Command to execute"),
         ToolParameter(name: "workingDirectory", type: .string, required: false, description: "Working directory")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let command = arguments["command"] as? String else {
             throw ToolError.invalidParameters
         }
@@ -145,14 +145,14 @@ struct TerminalTool {
     }
 }
 
-struct WebSearchTool {
+struct WebSearchTool: Sendable {
     static let name = "web_search"
     static let description = "Search the web (stub - requires API integration)"
     static let parameters = [
         ToolParameter(name: "query", type: .string, required: true, description: "Search query")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let query = arguments["query"] as? String else {
             throw ToolError.invalidParameters
         }
@@ -162,7 +162,7 @@ struct WebSearchTool {
     }
 }
 
-struct HTTPRequestTool {
+struct HTTPRequestTool: Sendable {
     static let name = "http_request"
     static let description = "Make HTTP request"
     static let parameters = [
@@ -171,8 +171,8 @@ struct HTTPRequestTool {
         ToolParameter(name: "headers", type: .object, required: false, description: "Request headers"),
         ToolParameter(name: "body", type: .string, required: false, description: "Request body")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let urlString = arguments["url"] as? String,
               let url = URL(string: urlString) else {
             throw ToolError.invalidParameters
@@ -202,14 +202,14 @@ struct HTTPRequestTool {
     }
 }
 
-struct JSONParseTool {
+struct JSONParseTool: Sendable {
     static let name = "json_parse"
     static let description = "Parse JSON string"
     static let parameters = [
         ToolParameter(name: "json", type: .string, required: true, description: "JSON string to parse")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let jsonString = arguments["json"] as? String,
               let data = jsonString.data(using: .utf8) else {
             throw ToolError.invalidParameters
@@ -221,15 +221,15 @@ struct JSONParseTool {
     }
 }
 
-struct RegexMatchTool {
+struct RegexMatchTool: Sendable {
     static let name = "regex_match"
     static let description = "Match text against regex pattern"
     static let parameters = [
         ToolParameter(name: "text", type: .string, required: true, description: "Text to search"),
         ToolParameter(name: "pattern", type: .string, required: true, description: "Regex pattern")
     ]
-    
-    static func execute(arguments: [String: Any]) async throws -> String {
+
+    static func execute(arguments: [String: Any]) async throws -> Any {
         guard let text = arguments["text"] as? String,
               let pattern = arguments["pattern"] as? String else {
             throw ToolError.invalidParameters
@@ -260,36 +260,36 @@ extension ToolFramework {
             description: FileReadTool.description,
             parameters: FileReadTool.parameters,
             category: .fileSystem,
-            handler: FileReadTool.execute
+            handler: { @Sendable args in try await FileReadTool.execute(arguments: args) }
         ))
-        
+
         registerTool(Tool(
             id: UUID(),
             name: FileWriteTool.name,
             description: FileWriteTool.description,
             parameters: FileWriteTool.parameters,
             category: .fileSystem,
-            handler: FileWriteTool.execute
+            handler: { @Sendable args in try await FileWriteTool.execute(arguments: args) }
         ))
-        
+
         registerTool(Tool(
             id: UUID(),
             name: FileSearchTool.name,
             description: FileSearchTool.description,
             parameters: FileSearchTool.parameters,
             category: .fileSystem,
-            handler: FileSearchTool.execute
+            handler: { @Sendable args in try await FileSearchTool.execute(arguments: args) }
         ))
-        
+
         registerTool(Tool(
             id: UUID(),
             name: FileListTool.name,
             description: FileListTool.description,
             parameters: FileListTool.parameters,
             category: .fileSystem,
-            handler: FileListTool.execute
+            handler: { @Sendable args in try await FileListTool.execute(arguments: args) }
         ))
-        
+
         // Terminal Tools
         registerTool(Tool(
             id: UUID(),
@@ -297,9 +297,9 @@ extension ToolFramework {
             description: TerminalTool.description,
             parameters: TerminalTool.parameters,
             category: .code,
-            handler: TerminalTool.execute
+            handler: { @Sendable args in try await TerminalTool.execute(arguments: args) }
         ))
-        
+
         // Web Tools
         registerTool(Tool(
             id: UUID(),
@@ -307,18 +307,18 @@ extension ToolFramework {
             description: WebSearchTool.description,
             parameters: WebSearchTool.parameters,
             category: .web,
-            handler: WebSearchTool.execute
+            handler: { @Sendable args in try await WebSearchTool.execute(arguments: args) }
         ))
-        
+
         registerTool(Tool(
             id: UUID(),
             name: HTTPRequestTool.name,
             description: HTTPRequestTool.description,
             parameters: HTTPRequestTool.parameters,
             category: .web,
-            handler: HTTPRequestTool.execute
+            handler: { @Sendable args in try await HTTPRequestTool.execute(arguments: args) }
         ))
-        
+
         // Data Tools
         registerTool(Tool(
             id: UUID(),
@@ -326,16 +326,16 @@ extension ToolFramework {
             description: JSONParseTool.description,
             parameters: JSONParseTool.parameters,
             category: .data,
-            handler: JSONParseTool.execute
+            handler: { @Sendable args in try await JSONParseTool.execute(arguments: args) }
         ))
-        
+
         registerTool(Tool(
             id: UUID(),
             name: RegexMatchTool.name,
             description: RegexMatchTool.description,
             parameters: RegexMatchTool.parameters,
             category: .data,
-            handler: RegexMatchTool.execute
+            handler: { @Sendable args in try await RegexMatchTool.execute(arguments: args) }
         ))
     }
 }
