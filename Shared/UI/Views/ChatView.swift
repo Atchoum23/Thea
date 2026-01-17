@@ -56,7 +56,9 @@ struct ChatView: View {
             )
         }
         .navigationTitle(conversation.title)
+        #if os(macOS)
         .navigationSubtitle("\(conversation.messages.count) messages")
+        #endif
         .toolbar {
             ToolbarItem {
                 Menu {

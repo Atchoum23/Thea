@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// Settings view for Terminal.app integration
@@ -580,3 +581,4 @@ struct QuickCommandsEditorView: View {
     }
     .frame(width: 600, height: 800)
 }
+#endif

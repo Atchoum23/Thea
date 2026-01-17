@@ -509,7 +509,7 @@ struct InsightsTabView: View {
     }
 }
 
-struct RecommendationCard: View {
+private struct RecommendationCard: View {
     let recommendation: BudgetRecommendation
     let currency: String
 
