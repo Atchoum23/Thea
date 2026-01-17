@@ -9,7 +9,7 @@ struct TerminalOutputParser {
     static func parseANSI(_ text: String) -> [ANSISegment] {
         var segments: [ANSISegment] = []
         var currentStyle = ANSIStyle()
-        var currentText = ""
+        _ = ""
 
         let pattern = "\u{001B}\\[([0-9;]*)m"
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {

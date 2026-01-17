@@ -94,6 +94,19 @@ targets:
           - "**/*watchOS*"
           - "**/*tvOS*"
           - "**/*.md"
+          - "**/Terminal/**"
+          - "**/ScreenCapture.swift"
+          - "**/InputTrackingManager.swift"
+          - "**/AutomationEngine.swift"
+          - "**/DisplayProfileManager.swift"
+          - "**/DisplayService.swift"
+          - "**/DisplayModels.swift"
+          - "**/MLXModelManager.swift"
+          - "**/ScreenshotPreview.swift"
+          - "**/HandoffManager.swift"
+          - "**/LocalModelsView.swift"
+          - "**/LocalModelsSettingsView.swift"
+          - "**/FolderAccessManager.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
     settings:

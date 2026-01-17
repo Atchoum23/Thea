@@ -1,28 +1,8 @@
 import Foundation
 import OSLog
 
-// MARK: - Compiler Error Model
-// Temporary stub until XcodeBuildRunner is implemented
-
-public struct CompilerError: Sendable {
-    public let file: String
-    public let line: Int
-    public let column: Int
-    public let message: String
-    public let errorType: ErrorType
-    
-    public enum ErrorType: Sendable {
-        case error, warning, note
-    }
-    
-    public init(file: String, line: Int, column: Int, message: String, errorType: ErrorType) {
-        self.file = file
-        self.line = line
-        self.column = column
-        self.message = message
-        self.errorType = errorType
-    }
-}
+public typealias CompilerError = XcodeBuildRunner.CompilerError
+// For explicit namespacing when importing both modules, refer to ErrorParser.CompilerError
 
 // MARK: - ErrorParser
 // Parses compiler errors and enriches them with context and suggested fixes
@@ -90,7 +70,7 @@ public actor ErrorParser {
 
         for error in errors {
             // Skip notes for now, focus on actual errors
-            guard error.errorType == .error else { continue }
+            guard error.isError else { continue }
 
             // Categorize error
             let category = categorizeError(message: error.message)
@@ -321,3 +301,4 @@ public struct ErrorStatistics: Sendable {
         self.fixCoverage = fixCoverage
     }
 }
+

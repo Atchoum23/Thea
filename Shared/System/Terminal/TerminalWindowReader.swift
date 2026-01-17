@@ -1,3 +1,4 @@
+#if os(macOS)
 import AppKit
 import Foundation
 
@@ -354,3 +355,4 @@ struct TabInfo: Identifiable {
     let processes: [String]
     let tty: String
 }
+#endif

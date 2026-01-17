@@ -239,8 +239,8 @@ public struct ModelCapabilityView: View {
             }
             
             VStack(spacing: 8) {
-                SpecRow(label: "Input", value: String(format: "$%.2f / 1M tokens", model.costPerMillionInput ?? 0))
-                SpecRow(label: "Output", value: String(format: "$%.2f / 1M tokens", model.costPerMillionOutput ?? 0))
+                SpecRow(label: "Input", value: String(format: "$%.2f / 1M tokens", model.costPerMillionInput))
+                SpecRow(label: "Output", value: String(format: "$%.2f / 1M tokens", model.costPerMillionOutput))
                 SpecRow(label: "Quality/Cost Ratio", value: String(format: "%.2f", model.qualityCostRatio))
             }
         }

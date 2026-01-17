@@ -1,5 +1,8 @@
 import QuickLook
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 /// View for displaying artifacts (files) created during Cowork sessions
 struct CoworkArtifactsView: View {
@@ -257,6 +260,7 @@ struct CoworkArtifactsView: View {
             Label("Preview", systemImage: "eye")
         }
 
+        #if os(macOS)
         Button {
             NSWorkspace.shared.activateFileViewerSelecting([artifact.fileURL])
         } label: {
@@ -268,6 +272,7 @@ struct CoworkArtifactsView: View {
         } label: {
             Label("Open", systemImage: "arrow.up.forward.square")
         }
+        #endif
 
         Divider()
 
