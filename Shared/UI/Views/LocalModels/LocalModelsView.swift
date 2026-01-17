@@ -118,7 +118,7 @@ struct LocalModelsView: View {
                     .padding(.bottom, 8)
             }
         }
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
     }
 
     private var customPathsSection: some View {
@@ -161,7 +161,7 @@ struct LocalModelsView: View {
             }
         }
         .padding(.bottom, 8)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.windowBackground)
     }
 
     // MARK: - Model Detail
@@ -478,17 +478,17 @@ struct ModelDownloadSheet: View {
                 Text("ollama pull llama3.2:3b")
                     .font(.system(.caption, design: .monospaced))
                     .padding(8)
-                    .background(Color(NSColor.controlBackgroundColor))
+                    .background(Color.controlBackground)
                     .cornerRadius(4)
 
                 Text("ollama pull mistral:7b")
                     .font(.system(.caption, design: .monospaced))
                     .padding(8)
-                    .background(Color(NSColor.controlBackgroundColor))
+                    .background(Color.controlBackground)
                     .cornerRadius(4)
             }
             .padding()
-            .background(Color(NSColor.windowBackgroundColor))
+            .background(Color.windowBackground)
             .cornerRadius(8)
 
             Spacer()

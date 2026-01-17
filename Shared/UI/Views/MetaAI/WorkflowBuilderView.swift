@@ -206,7 +206,7 @@ struct NodeView: View {
                 .font(.title2)
         }
         .frame(width: 100, height: 80)
-        .background(isSelected ? Color.accentColor.opacity(0.2) : Color(NSColor.controlBackgroundColor))
+        .background(isSelected ? Color.accentColor.opacity(0.2) : Color.controlBackground)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
