@@ -1,4 +1,4 @@
-import SwiftData
+@preconcurrency import SwiftData
 @testable import TheaCore
 import XCTest
 

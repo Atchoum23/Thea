@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - User Preference Model
 // Learns and tracks user preferences for personalized prompt optimization

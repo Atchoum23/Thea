@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - Tab Manager
 // Manages tabs within windows for multi-tab conversation support

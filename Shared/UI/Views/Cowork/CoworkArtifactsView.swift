@@ -317,8 +317,8 @@ struct CoworkArtifactsView: View {
 
 // MARK: - QuickLook Preview Extension
 
-extension Binding {
-    func map<T>(_ transform: @escaping (Value) -> T?) -> Binding<T?> where Value: Equatable {
+extension Binding where Value: Equatable & Sendable {
+    func map<T>(_ transform: @escaping @Sendable (Value) -> T?) -> Binding<T?> {
         Binding<T?>(
             get: { transform(self.wrappedValue) },
             set: { _ in }

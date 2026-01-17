@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - Memory System
 // Advanced multi-tier memory architecture with consolidation, retrieval, and decay

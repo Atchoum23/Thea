@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - Sendable Wrapper for [String: Any]
 // Safely transfers dictionaries across actor boundaries

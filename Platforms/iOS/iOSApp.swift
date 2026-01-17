@@ -1,4 +1,4 @@
-import SwiftData
+@preconcurrency import SwiftData
 import SwiftUI
 
 @main

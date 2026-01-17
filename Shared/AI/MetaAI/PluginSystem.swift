@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - Plugin System
 // Extensible plugin architecture with sandboxing and permissions

@@ -1,4 +1,4 @@
-import SwiftData
+@preconcurrency import SwiftData
 import SwiftUI
 
 // Note: @main is defined in platform-specific app files

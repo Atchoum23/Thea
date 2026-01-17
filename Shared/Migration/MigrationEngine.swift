@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - Migration Engine
 // Universal migration system for importing data from competitor apps

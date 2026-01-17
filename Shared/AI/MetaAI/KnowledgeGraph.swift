@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import SwiftData
+@preconcurrency import SwiftData
 
 /// Advanced knowledge graph for semantic relationships and deep understanding
 @MainActor

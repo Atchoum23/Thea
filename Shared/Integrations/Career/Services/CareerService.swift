@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 
 /// Career development service
 public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, CareerCareerReflectionServiceProtocol, GrowthRecommendationProtocol {
