@@ -43,14 +43,11 @@ final class UserPreferenceModel {
     ) async {
         guard let context = modelContext else { return }
 
-        // Find existing preference
-        let descriptor = FetchDescriptor<UserPromptPreference>(
-            predicate: #Predicate {
-                $0.category == category && $0.preferenceKey == key
-            }
-        )
+        // Find existing preference - fetch all and filter to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<UserPromptPreference>()
+        let allPreferences = (try? context.fetch(descriptor)) ?? []
 
-        if let existing = try? context.fetch(descriptor).first {
+        if let existing = allPreferences.first(where: { $0.category == category && $0.preferenceKey == key }) {
             // Update existing preference
             if existing.preferenceValue == value {
                 // Reinforce existing preference
@@ -257,12 +254,12 @@ final class UserPreferenceModel {
     func resetPreferences(for category: String) async {
         guard let context = modelContext else { return }
 
-        let descriptor = FetchDescriptor<UserPromptPreference>(
-            predicate: #Predicate { $0.category == category }
-        )
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<UserPromptPreference>()
 
         do {
-            let preferences = try context.fetch(descriptor)
+            let allPreferences = try context.fetch(descriptor)
+            let preferences = allPreferences.filter { $0.category == category }
             for preference in preferences {
                 context.delete(preference)
             }

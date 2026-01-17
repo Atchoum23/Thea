@@ -140,12 +140,12 @@ final class LocationTrackingManager: NSObject, CLLocationManagerDelegate {
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        let descriptor = FetchDescriptor<LocationVisitRecord>(
-            predicate: #Predicate { $0.arrivalTime >= startOfDay && $0.arrivalTime < endOfDay },
-            sortBy: [SortDescriptor(\.arrivalTime, order: .reverse)]
-        )
-
-        let records = (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<LocationVisitRecord>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
+        let records = allRecords
+            .filter { $0.arrivalTime >= startOfDay && $0.arrivalTime < endOfDay }
+            .sorted { $0.arrivalTime > $1.arrivalTime }
 
         return records.map { record in
             LocationVisit(
@@ -161,12 +161,12 @@ final class LocationTrackingManager: NSObject, CLLocationManagerDelegate {
     func getVisits(from start: Date, to end: Date) async -> [LocationVisitRecord] {
         guard let context = modelContext else { return [] }
 
-        let descriptor = FetchDescriptor<LocationVisitRecord>(
-            predicate: #Predicate { $0.arrivalTime >= start && $0.arrivalTime <= end },
-            sortBy: [SortDescriptor(\.arrivalTime, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<LocationVisitRecord>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
+        return allRecords
+            .filter { $0.arrivalTime >= start && $0.arrivalTime <= end }
+            .sorted { $0.arrivalTime > $1.arrivalTime }
     }
 }
 

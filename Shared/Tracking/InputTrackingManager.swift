@@ -161,13 +161,12 @@ final class InputTrackingManager {
             activityLevel: stats.activityLevel.rawValue
         )
 
-        // Check if record exists
+        // Check if record exists - fetch all and filter to avoid Swift 6 #Predicate Sendable issues
         let targetDate = record.date
-        let descriptor = FetchDescriptor<DailyInputStatistics>(
-            predicate: #Predicate { $0.date == targetDate }
-        )
+        let descriptor = FetchDescriptor<DailyInputStatistics>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
 
-        if let existing = try? context.fetch(descriptor).first {
+        if let existing = allRecords.first(where: { $0.date == targetDate }) {
             existing.mouseClicks = record.mouseClicks
             existing.keystrokes = record.keystrokes
             existing.mouseDistancePixels = record.mouseDistancePixels
@@ -187,22 +186,21 @@ final class InputTrackingManager {
 
         let startOfDay = Calendar.current.startOfDay(for: date)
 
-        let descriptor = FetchDescriptor<DailyInputStatistics>(
-            predicate: #Predicate { $0.date == startOfDay }
-        )
-
-        return try? context.fetch(descriptor).first
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<DailyInputStatistics>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
+        return allRecords.first { $0.date == startOfDay }
     }
 
     func getRecords(from start: Date, to end: Date) async -> [DailyInputStatistics] {
         guard let context = modelContext else { return [] }
 
-        let descriptor = FetchDescriptor<DailyInputStatistics>(
-            predicate: #Predicate { $0.date >= start && $0.date <= end },
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<DailyInputStatistics>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
+        return allRecords
+            .filter { $0.date >= start && $0.date <= end }
+            .sorted { $0.date > $1.date }
     }
 }
 

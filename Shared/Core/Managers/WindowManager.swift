@@ -138,12 +138,11 @@ final class WindowManager {
             lastOpened: Date()
         )
 
-        // Check if state already exists
-        let descriptor = FetchDescriptor<WindowState>(
-            predicate: #Predicate { $0.id == window.id }
-        )
+        // Check if state already exists - fetch all and filter to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<WindowState>()
+        let allStates = (try? context.fetch(descriptor)) ?? []
 
-        if let existingState = try? context.fetch(descriptor).first {
+        if let existingState = allStates.first(where: { $0.id == window.id }) {
             // Update existing
             existingState.position = positionData ?? Data()
             existingState.size = sizeData ?? Data()
@@ -160,11 +159,11 @@ final class WindowManager {
     private func deleteWindowState(_ windowID: UUID) {
         guard let context = modelContext else { return }
 
-        let descriptor = FetchDescriptor<WindowState>(
-            predicate: #Predicate { $0.id == windowID }
-        )
+        // Fetch all and filter to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<WindowState>()
+        let allStates = (try? context.fetch(descriptor)) ?? []
 
-        if let state = try? context.fetch(descriptor).first {
+        if let state = allStates.first(where: { $0.id == windowID }) {
             context.delete(state)
             try? context.save()
         }
@@ -174,12 +173,12 @@ final class WindowManager {
     func restoreWindowState() async {
         guard let context = modelContext else { return }
 
-        let descriptor = FetchDescriptor<WindowState>(
-            sortBy: [SortDescriptor(\.lastOpened, order: .reverse)]
-        )
+        // Fetch all and sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<WindowState>()
 
         do {
-            let states = try context.fetch(descriptor)
+            let allStates = try context.fetch(descriptor)
+            let states = allStates.sorted { $0.lastOpened > $1.lastOpened }
 
             for state in states {
                 guard let windowType = WindowInstance.WindowType(rawValue: state.windowType) else {

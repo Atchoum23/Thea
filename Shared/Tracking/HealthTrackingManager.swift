@@ -190,15 +190,14 @@ final class HealthTrackingManager {
     private func saveSnapshot(_ snapshot: HealthSnapshot) async {
         guard let context = modelContext else { return }
 
-        // Check if snapshot for this date already exists
+        // Check if snapshot for this date already exists - fetch all and filter to avoid Swift 6 #Predicate Sendable issues
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: snapshot.date)
 
-        let descriptor = FetchDescriptor<HealthSnapshot>(
-            predicate: #Predicate { $0.date == startOfDay }
-        )
+        let descriptor = FetchDescriptor<HealthSnapshot>()
+        let allSnapshots = (try? context.fetch(descriptor)) ?? []
 
-        if let existing = try? context.fetch(descriptor).first {
+        if let existing = allSnapshots.first(where: { $0.date == startOfDay }) {
             // Update existing
             existing.steps = snapshot.steps
             existing.activeCalories = snapshot.activeCalories
@@ -223,22 +222,21 @@ final class HealthTrackingManager {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
 
-        let descriptor = FetchDescriptor<HealthSnapshot>(
-            predicate: #Predicate { $0.date == startOfDay }
-        )
-
-        return try? context.fetch(descriptor).first
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<HealthSnapshot>()
+        let allSnapshots = (try? context.fetch(descriptor)) ?? []
+        return allSnapshots.first { $0.date == startOfDay }
     }
 
     func getSnapshots(from start: Date, to end: Date) async -> [HealthSnapshot] {
         guard let context = modelContext else { return [] }
 
-        let descriptor = FetchDescriptor<HealthSnapshot>(
-            predicate: #Predicate { $0.date >= start && $0.date <= end },
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<HealthSnapshot>()
+        let allSnapshots = (try? context.fetch(descriptor)) ?? []
+        return allSnapshots
+            .filter { $0.date >= start && $0.date <= end }
+            .sorted { $0.date > $1.date }
     }
 }
 

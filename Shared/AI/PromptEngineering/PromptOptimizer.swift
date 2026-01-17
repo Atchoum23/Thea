@@ -118,13 +118,14 @@ final class PromptOptimizer {
     private func getCodeFewShotExamples(for agentType: SubAgentOrchestrator.AgentType, limit: Int) async -> [CodeFewShotExample] {
         guard let context = modelContext else { return [] }
 
-        let descriptor = FetchDescriptor<CodeFewShotExample>(
-            predicate: #Predicate { $0.taskType == agentType.rawValue },
-            sortBy: [SortDescriptor(\.quality, order: .reverse), SortDescriptor(\.usageCount, order: .forward)]
-        )
+        // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<CodeFewShotExample>()
 
         do {
-            let examples = try context.fetch(descriptor)
+            let allExamples = try context.fetch(descriptor)
+            let examples = allExamples
+                .filter { $0.taskType == agentType.rawValue }
+                .sorted { ($0.quality, $0.usageCount) > ($1.quality, $1.usageCount) }
             return Array(examples.prefix(limit))
         } catch {
             print("Error fetching few-shot examples: \(error)")
@@ -317,12 +318,12 @@ final class PromptOptimizer {
     func getTemplates(for category: String) async -> [PromptTemplate] {
         guard let context = modelContext else { return [] }
 
-        let descriptor = FetchDescriptor<PromptTemplate>(
-            predicate: #Predicate { $0.category == category && $0.isActive },
-            sortBy: [SortDescriptor(\.successRate, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<PromptTemplate>()
+        let allTemplates = (try? context.fetch(descriptor)) ?? []
+        return allTemplates
+            .filter { $0.category == category && $0.isActive }
+            .sorted { $0.successRate > $1.successRate }
     }
 
     // MARK: - Analytics

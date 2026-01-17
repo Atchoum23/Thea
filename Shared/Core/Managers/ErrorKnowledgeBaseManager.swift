@@ -32,18 +32,13 @@ public final class ErrorKnowledgeBaseManager {
     ) async {
         guard let context = modelContext else { return }
 
-        // Capture the error message for use in the predicate
-        let errorMessage = error.message
-        
         // Create or update CodeErrorRecord in SwiftData
-        let descriptor = FetchDescriptor<CodeErrorRecord>(
-            predicate: #Predicate<CodeErrorRecord> { record in
-                record.errorMessage == errorMessage
-            }
-        )
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<CodeErrorRecord>()
 
         do {
-            if let existing = try context.fetch(descriptor).first {
+            let allRecords = try context.fetch(descriptor)
+            if let existing = allRecords.first(where: { $0.errorMessage == error.message }) {
                 // Update existing record
                 existing.occurrenceCount += 1
                 existing.lastOccurrence = Date()
@@ -108,15 +103,15 @@ public final class ErrorKnowledgeBaseManager {
     public func getPreventionGuidance(forCode code: String) async -> [String] {
         guard let context = modelContext else { return [] }
 
-        // Get recent errors with solutions
-        let descriptor = FetchDescriptor<CodeErrorRecord>(
-            predicate: #Predicate { !$0.preventionRule.isEmpty },
-            sortBy: [SortDescriptor(\.occurrenceCount, order: .reverse)]
-        )
+        // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<CodeErrorRecord>()
 
         do {
-            let records = try context.fetch(descriptor)
-            return records.prefix(5).map { $0.preventionRule }
+            let allRecords = try context.fetch(descriptor)
+            let filteredRecords = allRecords
+                .filter { !$0.preventionRule.isEmpty }
+                .sorted { $0.occurrenceCount > $1.occurrenceCount }
+            return filteredRecords.prefix(5).map { $0.preventionRule }
         } catch {
             return []
         }
@@ -173,27 +168,22 @@ public final class ErrorKnowledgeBaseManager {
     public func getErrors(byPattern pattern: String) async -> [CodeErrorRecord] {
         guard let context = modelContext else { return [] }
 
-        // Capture the pattern for use in the predicate
-        let searchPattern = pattern
-        
-        let descriptor = FetchDescriptor<CodeErrorRecord>(
-            predicate: #Predicate { $0.errorPattern.contains(searchPattern) },
-            sortBy: [SortDescriptor(\.occurrenceCount, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<CodeErrorRecord>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
+        return allRecords
+            .filter { $0.errorPattern.contains(pattern) }
+            .sorted { $0.occurrenceCount > $1.occurrenceCount }
     }
 
     /// Gets top recurring errors
     public func getTopRecurringErrors(limit: Int = 10) async -> [CodeErrorRecord] {
         guard let context = modelContext else { return [] }
 
-        var descriptor = FetchDescriptor<CodeErrorRecord>(
-            sortBy: [SortDescriptor(\.occurrenceCount, order: .reverse)]
-        )
-        descriptor.fetchLimit = limit
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<CodeErrorRecord>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
+        return Array(allRecords.sorted { $0.occurrenceCount > $1.occurrenceCount }.prefix(limit))
     }
 
     /// Gets error statistics from ErrorKnowledgeBase
@@ -235,15 +225,12 @@ public final class ErrorKnowledgeBaseManager {
     private func updateSuccessRate(for errorID: UUID, successful: Bool) async {
         guard let context = modelContext else { return }
 
-        // Capture the errorID for use in the predicate
-        let targetID = errorID
-        
-        let descriptor = FetchDescriptor<CodeErrorRecord>(
-            predicate: #Predicate { $0.id == targetID }
-        )
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<CodeErrorRecord>()
 
         do {
-            if let record = try context.fetch(descriptor).first {
+            let allRecords = try context.fetch(descriptor)
+            if let record = allRecords.first(where: { $0.id == errorID }) {
                 // Simple moving average update
                 let weight: Float = 0.1
                 let newValue: Float = successful ? 1.0 : 0.0
@@ -261,15 +248,14 @@ public final class ErrorKnowledgeBaseManager {
     public func deleteOldErrors(olderThan days: Int) async {
         guard let context = modelContext else { return }
 
-        // Capture the cutoff date for use in the predicate
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
 
-        let descriptor = FetchDescriptor<CodeErrorRecord>(
-            predicate: #Predicate { $0.lastOccurrence < cutoffDate }
-        )
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<CodeErrorRecord>()
 
         do {
-            let oldErrors = try context.fetch(descriptor)
+            let allErrors = try context.fetch(descriptor)
+            let oldErrors = allErrors.filter { $0.lastOccurrence < cutoffDate }
             for error in oldErrors {
                 context.delete(error)
             }
