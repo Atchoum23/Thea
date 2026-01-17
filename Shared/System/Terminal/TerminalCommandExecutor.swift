@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Executes terminal commands either directly via Process or through Terminal.app
@@ -319,3 +320,4 @@ final class TerminalCommandExecutor: @unchecked Sendable {
         }
     }
 }
+#endif

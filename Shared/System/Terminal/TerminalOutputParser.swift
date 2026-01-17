@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import SwiftUI
 
@@ -282,3 +283,5 @@ enum ErrorType {
         }
     }
 }
+
+#endif

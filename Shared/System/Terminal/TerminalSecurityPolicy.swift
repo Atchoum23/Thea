@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Security policy for terminal command execution
@@ -176,3 +177,5 @@ enum SecurityLevel: String, CaseIterable, Codable {
         }
     }
 }
+
+#endif
