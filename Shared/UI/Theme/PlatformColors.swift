@@ -31,4 +31,31 @@ extension Color {
         Color(.systemBackground)
         #endif
     }
+
+    /// Tertiary label color
+    static var tertiaryLabel: Color {
+        #if os(macOS)
+        Color(nsColor: .tertiaryLabelColor)
+        #else
+        Color(.tertiaryLabel)
+        #endif
+    }
+
+    /// Quaternary label color
+    static var quaternaryLabel: Color {
+        #if os(macOS)
+        Color(nsColor: .quaternaryLabelColor)
+        #else
+        Color(.quaternaryLabel)
+        #endif
+    }
+
+    /// Separator color
+    static var separatorColor: Color {
+        #if os(macOS)
+        Color(nsColor: .separatorColor)
+        #else
+        Color(.separator)
+        #endif
+    }
 }
