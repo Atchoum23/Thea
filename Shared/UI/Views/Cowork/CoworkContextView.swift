@@ -1,4 +1,7 @@
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 /// View showing context information for the current Cowork session
 struct CoworkContextView: View {
@@ -165,11 +168,13 @@ struct CoworkContextView: View {
         }
         .padding(.vertical, 4)
         .contextMenu {
+            #if os(macOS)
             Button {
                 NSWorkspace.shared.activateFileViewerSelecting([access.url])
             } label: {
                 Label("Show in Finder", systemImage: "folder")
             }
+            #endif
 
             Button {
                 copyToClipboard(access.url.path)
@@ -231,6 +236,7 @@ struct CoworkContextView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                    #if os(macOS)
                     .contextMenu {
                         Button {
                             NSWorkspace.shared.open(access.url)
@@ -238,6 +244,7 @@ struct CoworkContextView: View {
                             Label("Open URL", systemImage: "arrow.up.forward.square")
                         }
                     }
+                    #endif
                 }
                 .listStyle(.inset)
             } else {

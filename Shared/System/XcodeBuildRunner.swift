@@ -187,6 +187,10 @@ public actor XcodeBuildRunner {
             logger.info("✅ Build succeeded in \(String(format: "%.2f", duration))s")
         } else {
             logger.error("❌ Build failed with \(errors.count) errors, \(warnings.count) warnings in \(String(format: "%.2f", duration))s")
+            let displayList = errors.deduplicated().sortedByLocation().map { "  • \($0.compactDisplayString)" }.joined(separator: "\n")
+            if !displayList.isEmpty {
+                logger.error("\nCompiler issues:\n\(displayList)")
+            }
         }
 
         return BuildResult(
@@ -287,3 +291,36 @@ public actor XcodeBuildRunner {
         return warnings
     }
 }
+// Helper extensions likely needed for the added logging:
+
+private extension Array where Element == XcodeBuildRunner.CompilerError {
+    func deduplicated() -> [XcodeBuildRunner.CompilerError] {
+        var seen = Set<UUID>()
+        return self.filter { error in
+            if seen.contains(error.id) {
+                return false
+            } else {
+                seen.insert(error.id)
+                return true
+            }
+        }
+    }
+    func sortedByLocation() -> [XcodeBuildRunner.CompilerError] {
+        self.sorted {
+            if $0.file != $1.file {
+                return $0.file < $1.file
+            }
+            if $0.line != $1.line {
+                return $0.line < $1.line
+            }
+            return $0.column < $1.column
+        }
+    }
+}
+
+private extension XcodeBuildRunner.CompilerError {
+    var compactDisplayString: String {
+        "\(file):\(line):\(column): \(message)"
+    }
+}
+

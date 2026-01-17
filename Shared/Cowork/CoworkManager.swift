@@ -317,9 +317,13 @@ final class CoworkManager {
         let targetSession = session
 
         await session.taskQueue.startProcessing { task in
-            let steps = try await manager.createPlan(for: task.instruction, in: targetSession)
-            if !steps.isEmpty {
-                try await manager.executePlan(session: targetSession)
+            do {
+                let steps = try await manager.createPlan(for: task.instruction, in: targetSession)
+                if !steps.isEmpty {
+                    try await manager.executePlan(session: targetSession)
+                }
+            } catch {
+                manager.onError?(error)
             }
         }
     }
@@ -418,3 +422,4 @@ enum CoworkError: LocalizedError {
         }
     }
 }
+

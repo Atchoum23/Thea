@@ -182,7 +182,7 @@ final class FolderAccessManager {
     func startAccessing(_ url: URL) -> Bool {
         if let folder = allowedFolder(containing: url),
            let bookmark = folder.bookmark,
-           var isStale = Optional(false) {
+           var isStale: Bool = false {
             do {
                 let resolvedURL = try URL(
                     resolvingBookmarkData: bookmark,
@@ -256,11 +256,14 @@ final class FolderAccessManager {
                 return nil
             }
 
+            let addedAt = Date(timeIntervalSince1970: addedAtInterval)
+
             var folder = AllowedFolder(
                 url: URL(fileURLWithPath: urlPath),
                 permissions: AllowedFolder.Permissions(rawValue: permissionsRaw)
             )
             folder.bookmark = bookmark
+            folder.addedAt = addedAt
 
             // Verify bookmark is still valid
             var isStale = false
@@ -290,3 +293,4 @@ final class FolderAccessManager {
     }
 }
 #endif
+
