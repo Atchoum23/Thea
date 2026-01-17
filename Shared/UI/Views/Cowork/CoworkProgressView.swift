@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// Detailed progress view showing step-by-step execution
@@ -382,3 +383,5 @@ struct FlowLayout: Layout {
     CoworkProgressView()
         .frame(width: 600, height: 800)
 }
+
+#endif

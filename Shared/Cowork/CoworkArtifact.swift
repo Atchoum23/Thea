@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import UniformTypeIdentifiers
 
@@ -195,3 +196,5 @@ extension Array where Element == CoworkArtifact {
         filter { $0.stepId == stepId }
     }
 }
+
+#endif

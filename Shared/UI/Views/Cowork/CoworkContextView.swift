@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 #if os(macOS)
 import AppKit
@@ -494,3 +495,5 @@ struct RuleEditorView: View {
     CoworkContextView()
         .frame(width: 700, height: 500)
 }
+
+#endif

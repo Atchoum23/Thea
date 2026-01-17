@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// View for managing Cowork skills (file type creation capabilities)
@@ -283,3 +284,5 @@ struct CoworkSkillsView: View {
     CoworkSkillsView()
         .frame(width: 800, height: 600)
 }
+
+#endif

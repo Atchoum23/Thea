@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// View for managing the Cowork task queue
@@ -404,3 +405,5 @@ struct CoworkQueueView: View {
     CoworkQueueView()
         .frame(width: 600, height: 500)
 }
+
+#endif
