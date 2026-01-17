@@ -1,4 +1,7 @@
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 // MARK: - Knowledge Graph Viewer
 // Interactive visualization of the knowledge graph with nodes and relationships
@@ -69,7 +72,7 @@ struct KnowledgeGraphViewer: View {
                 }
             }
             .padding(8)
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(Color.controlBackground)
             .cornerRadius(8)
 
             // Type filter
@@ -108,7 +111,7 @@ struct KnowledgeGraphViewer: View {
             }
         }
         .padding()
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.windowBackground)
     }
 
     private var nodeList: some View {
@@ -190,7 +193,7 @@ struct FilterChip: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(isSelected ? Color.blue : Color(NSColor.controlBackgroundColor))
+            .background(isSelected ? Color.blue : Color.controlBackground)
             .foregroundColor(isSelected ? .white : .primary)
             .cornerRadius(16)
         }
@@ -343,7 +346,7 @@ struct RelatedNodeCard: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(12)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
         .cornerRadius(8)
     }
 
@@ -489,7 +492,7 @@ struct KnowledgeStatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
         .cornerRadius(12)
     }
 }

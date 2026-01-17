@@ -66,7 +66,11 @@ struct LifeTrackingView: View {
                 }
             }
             .padding()
+            #if os(macOS)
             .background(Color(NSColor.controlBackgroundColor))
+            #else
+            .background(Color(.secondarySystemBackground))
+            #endif
             .cornerRadius(12)
         }
     }

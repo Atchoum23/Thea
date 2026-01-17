@@ -103,7 +103,7 @@ struct CodeProjectView: View {
                     .padding()
             }
         }
-        .background(Color(NSColor.textBackgroundColor))
+        .background(Color.textBackground)
     }
 
     private func codeFileHeader(_ file: CodeFile) -> some View {
@@ -131,7 +131,7 @@ struct CodeProjectView: View {
                 .cornerRadius(4)
         }
         .padding()
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.windowBackground)
     }
 
     // MARK: - Empty States
