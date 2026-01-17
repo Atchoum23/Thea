@@ -102,7 +102,7 @@ public actor AutonomousBuildLoop {
 
             // STEP 2: Parse errors
             logger.info("❌ Build failed with \(buildResult.errors.count) errors")
-            let previewList = buildResult.errors.errorsOnly.sortedByLocation().prefix(5).map { "   • \($0.compactDisplayString)" }.joined(separator: "\n")
+            let previewList = buildResult.errors.sortedByLocation().filter { $0.isError }.prefix(5).map { "   • \($0.compactDisplayString)" }.joined(separator: "\n")
             if !previewList.isEmpty {
                 logger.info("Top issues:\n\(previewList)")
             }

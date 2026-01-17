@@ -62,3 +62,8 @@ public extension Sequence where Element == XcodeBuildRunner.CompilerError {
     }
 }
 
+public extension Array where Element == XcodeBuildRunner.CompilerError {
+    var errorsOnly: [XcodeBuildRunner.CompilerError] { (self as any Sequence).errorsOnly }
+    var warningsOnly: [XcodeBuildRunner.CompilerError] { (self as any Sequence).warningsOnly }
+    var notesOnly: [XcodeBuildRunner.CompilerError] { (self as any Sequence).notesOnly }
+}
