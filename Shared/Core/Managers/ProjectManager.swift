@@ -103,10 +103,9 @@ final class ProjectManager: ObservableObject {
     private func loadProjects() {
         guard let context = modelContext else { return }
 
-        let descriptor = FetchDescriptor<Project>(
-            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
-        )
-
-        projects = (try? context.fetch(descriptor)) ?? []
+        // Fetch all and sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<Project>()
+        let allProjects = (try? context.fetch(descriptor)) ?? []
+        projects = allProjects.sorted { $0.updatedAt > $1.updatedAt }
     }
 }

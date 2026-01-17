@@ -59,12 +59,12 @@ final class PromptTemplateLibrary {
     private func refreshCache() async {
         guard let context = modelContext else { return }
 
-        let descriptor = FetchDescriptor<PromptTemplate>(
-            predicate: #Predicate { $0.isActive }
-        )
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<PromptTemplate>()
 
         do {
-            let templates = try context.fetch(descriptor)
+            let allTemplates = try context.fetch(descriptor)
+            let templates = allTemplates.filter { $0.isActive }
 
             templatesCache.removeAll()
             for template in templates {
@@ -414,25 +414,21 @@ final class PromptTemplateLibrary {
     func getAllTemplates() async -> [PromptTemplate] {
         guard let context = modelContext else { return [] }
 
-        let descriptor = FetchDescriptor<PromptTemplate>(
-            sortBy: [
-                SortDescriptor(\.category),
-                SortDescriptor(\.successRate, order: .reverse)
-            ]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<PromptTemplate>()
+        let allTemplates = (try? context.fetch(descriptor)) ?? []
+        return allTemplates.sorted { ($0.category, $1.successRate) < ($1.category, $0.successRate) }
     }
 
     func getTemplatesByCategory(_ category: String) async -> [PromptTemplate] {
         guard let context = modelContext else { return [] }
 
-        let descriptor = FetchDescriptor<PromptTemplate>(
-            predicate: #Predicate { $0.category == category },
-            sortBy: [SortDescriptor(\.successRate, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<PromptTemplate>()
+        let allTemplates = (try? context.fetch(descriptor)) ?? []
+        return allTemplates
+            .filter { $0.category == category }
+            .sorted { $0.successRate > $1.successRate }
     }
 
     func createTemplate(

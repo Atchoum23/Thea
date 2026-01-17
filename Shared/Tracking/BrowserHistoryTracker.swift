@@ -164,23 +164,23 @@ final class BrowserHistoryTracker {
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        let descriptor = FetchDescriptor<BrowsingRecord>(
-            predicate: #Predicate { $0.timestamp >= startOfDay && $0.timestamp < endOfDay },
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<BrowsingRecord>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
+        return allRecords
+            .filter { $0.timestamp >= startOfDay && $0.timestamp < endOfDay }
+            .sorted { $0.timestamp > $1.timestamp }
     }
 
     func getVisits(from start: Date, to end: Date) async -> [BrowsingRecord] {
         guard let context = modelContext else { return [] }
 
-        let descriptor = FetchDescriptor<BrowsingRecord>(
-            predicate: #Predicate { $0.timestamp >= start && $0.timestamp <= end },
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
-
-        return (try? context.fetch(descriptor)) ?? []
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<BrowsingRecord>()
+        let allRecords = (try? context.fetch(descriptor)) ?? []
+        return allRecords
+            .filter { $0.timestamp >= start && $0.timestamp <= end }
+            .sorted { $0.timestamp > $1.timestamp }
     }
 }
 
