@@ -181,8 +181,8 @@ final class FolderAccessManager {
     /// Start accessing a security-scoped URL
     func startAccessing(_ url: URL) -> Bool {
         if let folder = allowedFolder(containing: url),
-           let bookmark = folder.bookmark,
-           var isStale: Bool = false {
+           let bookmark = folder.bookmark {
+            var isStale = false
             do {
                 let resolvedURL = try URL(
                     resolvingBookmarkData: bookmark,
