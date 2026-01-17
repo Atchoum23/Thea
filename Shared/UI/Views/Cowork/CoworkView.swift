@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// Main Cowork view - the agentic desktop assistant interface
@@ -367,3 +368,5 @@ struct QuickActionButton: View {
     CoworkView()
         .frame(width: 1_000, height: 700)
 }
+
+#endif

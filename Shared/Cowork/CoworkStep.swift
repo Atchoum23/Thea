@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Represents a single step in a Cowork task execution
@@ -199,3 +200,5 @@ extension CoworkStep {
         Builder()
     }
 }
+
+#endif

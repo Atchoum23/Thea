@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// Sidebar view showing working folder, progress, and context summary
@@ -246,3 +247,5 @@ struct CoworkSidebarView: View {
     CoworkSidebarView()
         .frame(width: 300, height: 600)
 }
+
+#endif

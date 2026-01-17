@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Represents a Cowork work session
@@ -290,3 +291,5 @@ extension CoworkSession {
         return session
     }
 }
+
+#endif

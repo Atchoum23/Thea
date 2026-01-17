@@ -1,3 +1,4 @@
+#if os(macOS)
 import QuickLook
 import SwiftUI
 #if os(macOS)
@@ -335,3 +336,5 @@ extension Binding where Value: Equatable & Sendable {
     CoworkArtifactsView()
         .frame(width: 600, height: 500)
 }
+
+#endif

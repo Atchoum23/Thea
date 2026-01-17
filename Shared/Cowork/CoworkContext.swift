@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Context information for a Cowork session
@@ -214,3 +215,5 @@ extension CoworkContext.Rule {
         ]
     }
 }
+
+#endif

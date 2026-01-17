@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Task queue for managing multiple Cowork tasks
@@ -271,3 +272,5 @@ struct CoworkTask: Identifiable, Equatable {
         status == .completed || status == .failed || status == .cancelled
     }
 }
+
+#endif

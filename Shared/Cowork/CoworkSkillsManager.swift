@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Manages skills (file type creation capabilities) for Cowork
@@ -394,3 +395,5 @@ final class CoworkSkillsManager {
         }
     }
 }
+
+#endif
