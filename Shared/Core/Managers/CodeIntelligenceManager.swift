@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import SwiftData
+@preconcurrency import SwiftData
 
 @MainActor
 @Observable

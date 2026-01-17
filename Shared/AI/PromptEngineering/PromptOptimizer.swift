@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - Prompt Optimizer
 // Automatically optimizes prompts for maximum accuracy and effectiveness

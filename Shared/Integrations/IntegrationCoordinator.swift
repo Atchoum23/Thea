@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 import SwiftUI
 
 /// Central coordinator for all integration modules

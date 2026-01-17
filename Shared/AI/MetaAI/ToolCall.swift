@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - Tool Call Model
 // Tracks tool execution for messages

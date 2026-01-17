@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import SwiftData
+@preconcurrency import SwiftData
 
 // MARK: - Error Knowledge Base Manager
 // Manages SwiftData context lifecycle for error learning system
