@@ -120,11 +120,10 @@ final class CloudSyncManager: ObservableObject {
     private func syncConversationsSince(_ date: Date) async throws {
         guard let modelContext = modelContext else { return }
 
-        let predicate = #Predicate<Conversation> { conversation in
-            conversation.updatedAt > date
-        }
-        let descriptor = FetchDescriptor<Conversation>(predicate: predicate)
-        let updatedConversations = try modelContext.fetch(descriptor)
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<Conversation>()
+        let allConversations = try modelContext.fetch(descriptor)
+        let updatedConversations = allConversations.filter { $0.updatedAt > date }
 
         for conversation in updatedConversations {
             try await uploadConversation(conversation)
@@ -210,10 +209,10 @@ final class CloudSyncManager: ObservableObject {
         let projectIDString = record["projectID"] as? String
         let projectID = projectIDString != nil ? UUID(uuidString: projectIDString!) : nil
 
-        let descriptor = FetchDescriptor<Conversation>(
-            predicate: #Predicate { $0.id == conversationID }
-        )
-        let existingConversations = try modelContext.fetch(descriptor)
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<Conversation>()
+        let allConversations = try modelContext.fetch(descriptor)
+        let existingConversations = allConversations.filter { $0.id == conversationID }
 
         if let existing = existingConversations.first {
             if updatedAt > existing.updatedAt {
@@ -266,10 +265,10 @@ final class CloudSyncManager: ObservableObject {
         let timestamp = record["timestamp"] as? Date ?? Date()
         let model = record["model"] as? String
 
-        let descriptor = FetchDescriptor<Message>(
-            predicate: #Predicate { $0.id == messageID }
-        )
-        let existingMessages = try modelContext.fetch(descriptor)
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<Message>()
+        let allMessages = try modelContext.fetch(descriptor)
+        let existingMessages = allMessages.filter { $0.id == messageID }
 
         if existingMessages.isEmpty {
             let newMessage = Message(
@@ -304,11 +303,10 @@ final class CloudSyncManager: ObservableObject {
     private func syncProjectsSince(_ date: Date) async throws {
         guard let modelContext = modelContext else { return }
 
-        let predicate = #Predicate<Project> { project in
-            project.updatedAt > date
-        }
-        let descriptor = FetchDescriptor<Project>(predicate: predicate)
-        let updatedProjects = try modelContext.fetch(descriptor)
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<Project>()
+        let allProjects = try modelContext.fetch(descriptor)
+        let updatedProjects = allProjects.filter { $0.updatedAt > date }
 
         for project in updatedProjects {
             try await uploadProject(project)
@@ -368,10 +366,10 @@ final class CloudSyncManager: ObservableObject {
         let createdAt = record["createdAt"] as? Date ?? Date()
         let updatedAt = record["updatedAt"] as? Date ?? Date()
 
-        let descriptor = FetchDescriptor<Project>(
-            predicate: #Predicate { $0.id == projectID }
-        )
-        let existingProjects = try modelContext.fetch(descriptor)
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let descriptor = FetchDescriptor<Project>()
+        let allProjects = try modelContext.fetch(descriptor)
+        let existingProjects = allProjects.filter { $0.id == projectID }
 
         if let existing = existingProjects.first {
             if updatedAt > existing.updatedAt {

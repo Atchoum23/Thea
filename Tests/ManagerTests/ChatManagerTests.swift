@@ -44,10 +44,10 @@ final class ChatManagerTests: XCTestCase {
 
         chatManager.deleteConversation(conversation)
 
-        let fetchDescriptor = FetchDescriptor<Conversation>(
-            predicate: #Predicate { $0.id == conversationID }
-        )
-        let conversations = try modelContext.fetch(fetchDescriptor)
+        // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
+        let fetchDescriptor = FetchDescriptor<Conversation>()
+        let allConversations = try modelContext.fetch(fetchDescriptor)
+        let conversations = allConversations.filter { $0.id == conversationID }
 
         XCTAssertEqual(conversations.count, 0)
     }
