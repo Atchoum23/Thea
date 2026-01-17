@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// Main Terminal integration view
@@ -535,3 +536,5 @@ struct TerminalOutputView: View {
     TerminalView()
         .frame(width: 900, height: 600)
 }
+
+#endif

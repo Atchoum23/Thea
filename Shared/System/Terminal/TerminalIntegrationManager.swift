@@ -1,3 +1,4 @@
+#if os(macOS)
 import Combine
 import Foundation
 import SwiftUI
@@ -477,3 +478,4 @@ struct QuickCommand: Identifiable, Codable, Equatable {
         ]
     }
 }
+#endif

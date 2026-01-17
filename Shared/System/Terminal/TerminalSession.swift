@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 /// Represents a terminal session with command history and state
@@ -144,3 +145,5 @@ struct TerminalState {
         let ttyName: String
     }
 }
+
+#endif

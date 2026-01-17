@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// View for browsing and searching command history
@@ -310,3 +311,5 @@ struct CommandHistoryRow: View {
     CommandHistoryView()
         .frame(width: 800, height: 600)
 }
+
+#endif
