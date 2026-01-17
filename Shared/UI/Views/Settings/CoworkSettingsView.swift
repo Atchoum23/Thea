@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 /// Settings view for Cowork feature configuration
@@ -288,3 +289,4 @@ struct CoworkSettingsView: View {
     }
     .frame(width: 600, height: 800)
 }
+#endif

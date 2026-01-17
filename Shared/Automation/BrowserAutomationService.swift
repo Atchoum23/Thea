@@ -9,7 +9,9 @@ import WebKit
 public final class BrowserAutomationService {
     // MARK: - Properties
 
+    #if os(macOS)
     private var webView: WebViewWrapper?
+    #endif
     private var navigationHistory: [URL] = []
     private var currentURL: URL?
 
@@ -250,7 +252,9 @@ public final class BrowserAutomationService {
 
     /// Close the web view
     public func close() async {
+        #if os(macOS)
         webView = nil
+        #endif
         currentURL = nil
     }
 }
