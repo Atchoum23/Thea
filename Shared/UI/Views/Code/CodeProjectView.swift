@@ -208,7 +208,7 @@ struct CodeProjectView: View {
 
 // MARK: - Project Row
 
-struct ProjectRow: View {
+private struct ProjectRow: View {
     let project: CodeProject
 
     var body: some View {
@@ -236,7 +236,7 @@ struct ProjectRow: View {
 
 // MARK: - File Row
 
-struct FileRow: View {
+private struct FileRow: View {
     let file: CodeFile
 
     var body: some View {

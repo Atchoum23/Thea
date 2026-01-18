@@ -1,3 +1,4 @@
+#if os(macOS)
 import CoreGraphics
 import Foundation
 import OSLog
@@ -230,3 +231,5 @@ public actor GUIVerifier {
         )
     }
 }
+
+#endif

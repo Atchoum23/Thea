@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 // MARK: - Code Intelligence
@@ -551,3 +552,5 @@ enum CodeError: LocalizedError {
         }
     }
 }
+
+#endif
