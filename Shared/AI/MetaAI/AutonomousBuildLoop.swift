@@ -2,58 +2,6 @@
 import Foundation
 import OSLog
 
-@MainActor fileprivate enum _AutonomousBuildLoopDiagnostics {
-    static var loggedFallbackNotice = false
-}
-
-/// Fallback implementations of some helpers if shared helpers are not available
-fileprivate extension Array where Element == XcodeBuildRunner.CompilerError {
-    func deduplicated() -> [XcodeBuildRunner.CompilerError] {
-        var seen = Set<String>()
-        return self.filter { error in
-            let key = "\(error.file):\(error.line):\(error.column):\(error.message)"
-            if seen.contains(key) { return false }
-            seen.insert(key)
-            return true
-        }
-    }
-
-    func sortedByLocation() -> [XcodeBuildRunner.CompilerError] {
-        self.sorted { (lhs, rhs) in
-            if lhs.file != rhs.file { return lhs.file < rhs.file }
-            if lhs.line != rhs.line { return lhs.line < rhs.line }
-            return lhs.column < rhs.column
-        }
-    }
-}
-
-// New sorting helper as requested
-fileprivate extension Sequence where Element == XcodeBuildRunner.CompilerError {
-    func sortedByPriorityThenLocation() -> [XcodeBuildRunner.CompilerError] {
-        func priority(_ e: XcodeBuildRunner.CompilerError) -> Int {
-            switch e.errorType {
-            case .error: return 0
-            case .warning: return 1
-            case .note: return 2
-            }
-        }
-        return self.sorted { (lhs, rhs) in
-            let lp = priority(lhs), rp = priority(rhs)
-            if lp != rp { return lp < rp }
-            if lhs.file != rhs.file { return lhs.file < rhs.file }
-            if lhs.line != rhs.line { return lhs.line < rhs.line }
-            return lhs.column < rhs.column
-        }
-    }
-}
-
-fileprivate func _logFallbackNoticeIfNeeded(_ logger: Logger) {
-    if !_AutonomousBuildLoopDiagnostics.loggedFallbackNotice {
-        _AutonomousBuildLoopDiagnostics.loggedFallbackNotice = true
-        logger.debug("AutonomousBuildLoop: Using local fallback extensions for CompilerError utilities.")
-    }
-}
-
 // MARK: - AutonomousBuildLoop
 // Autonomous build-fix-retry loop for self-healing code
 
@@ -113,16 +61,13 @@ public actor AutonomousBuildLoop {
     public func run(
         maxIterations: Int = 10,
         scheme: String = "Thea-macOS",
-        configuration: String = "Debug",
-        stallWindow: Int = 3,
-        stallThreshold: Int = 3
+        configuration: String = "Debug"
     ) async throws -> LoopResult {
         logger.info("🚀 Starting autonomous build loop (max \(maxIterations) iterations)")
 
         var iteration = 0
         var errorsFixed = 0
         var errorsFailed = 0
-        var recentFingerprints: [String] = []
         let startTime = Date()
 
         // Create savepoint before starting
@@ -159,27 +104,12 @@ public actor AutonomousBuildLoop {
             // STEP 2: Parse errors
             logger.info("❌ Build failed with \(buildResult.errors.count) errors")
 
-            // Prefer shared helpers if available; fallbacks are provided in this file
-            let topIssues: [XcodeBuildRunner.CompilerError] = {
-                let dedup = buildResult.errors.deduplicated()
-
-                // Compute a normalized fingerprint of top issues for stall detection
-                let fingerprint: String = topIssues.map {
-                    let msg = $0.message.prefix(120) // limit noise from long messages
-                    return "\($0.file):\($0.line):\($0.column):\(msg):\($0.errorType.rawValue)"
-                }.joined(separator: "|")
-
-                if !fingerprint.isEmpty {
-                    recentFingerprints.append(fingerprint)
-                    if recentFingerprints.count > stallWindow { recentFingerprints.removeFirst() }
-                    if recentFingerprints.count == stallWindow && Set(recentFingerprints).count <= max(1, stallWindow - (stallThreshold - 1)) {
-                        logger.warning("Detected repeated top issues across iterations (window=\(stallWindow)); stopping early to avoid stalls.")
-                        break
-                    }
-                }
-
-                return dedup.sortedByPriorityThenLocation().filter { $0.isError }.prefix(5).map { $0 }
-            }()
+            // Get top issues for logging
+            let topIssues = buildResult.errors
+                .deduplicated()
+                .sortedByLocation()
+                .filter { $0.isError }
+                .prefix(5)
 
             if !topIssues.isEmpty {
                 let previewList = topIssues.map { "   • \($0.compactDisplayString)" }.joined(separator: "\n")
@@ -297,9 +227,7 @@ public actor AutonomousBuildLoop {
 
     public func dryRun(
         maxIterations: Int = 10,
-        scheme: String = "Thea-macOS",
-        stallWindow: Int = 3,
-        stallThreshold: Int = 3
+        scheme: String = "Thea-macOS"
     ) async throws -> [String] {
         logger.info("🔍 Running dry run analysis")
 
@@ -353,4 +281,3 @@ public actor AutonomousBuildLoop {
 }
 
 #endif
-

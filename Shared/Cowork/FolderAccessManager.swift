@@ -248,7 +248,7 @@ final class FolderAccessManager {
 
         allowedFolders = bookmarks.compactMap { dict -> AllowedFolder? in
             guard let idString = dict["id"] as? String,
-                  let id = UUID(uuidString: idString),
+                  let _ = UUID(uuidString: idString),
                   let urlPath = dict["url"] as? String,
                   let bookmark = dict["bookmark"] as? Data,
                   let permissionsRaw = dict["permissions"] as? Int,

@@ -197,7 +197,7 @@ public actor XcodeBuildRunner {
             logger.info("✅ Build succeeded in \(String(format: "%.2f", duration))s")
         } else {
             logger.error("❌ Build failed with \(errors.count) errors, \(warnings.count) warnings in \(String(format: "%.2f", duration))s")
-            let displayList = sortedByLocation(errors.deduplicated()).map { "  • \($0.compactDisplayString)" }.joined(separator: "\n")
+            let displayList = errors.deduplicated().sortedByLocation().map { "  • \($0.compactDisplayString)" }.joined(separator: "\n")
             if !displayList.isEmpty {
                 logger.error("\nCompiler issues:\n\(displayList)")
             }
