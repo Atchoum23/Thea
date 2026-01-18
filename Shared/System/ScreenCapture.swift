@@ -187,11 +187,11 @@ public actor ScreenCapture {
 
     public func checkPermission() async -> Bool {
         // Check screen recording permission
-        return CGPreflightScreenCaptureAccess()
+        CGPreflightScreenCaptureAccess()
     }
 
     public func requestPermission() async -> Bool {
-        return CGRequestScreenCaptureAccess()
+        CGRequestScreenCaptureAccess()
     }
 }
 
