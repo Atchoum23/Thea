@@ -23,7 +23,7 @@ struct AssessmentServiceTests {
     func testSubmitResponse() async throws {
         let service = AssessmentService()
         let progress = try await service.startAssessment(.highSensitivity)
-        let assessmentID = UUID()
+        let assessmentID = progress.id  // Use the ID from the started assessment
 
         let response = QuestionResponse(questionID: UUID(), value: 4)
         try await service.submitResponse(assessmentID: assessmentID, response: response)

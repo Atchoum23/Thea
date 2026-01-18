@@ -10,56 +10,56 @@ final class HealthServiceTests: XCTestCase {
     func testBloodPressureCategorization() {
         // Normal
         let normalReading = BloodPressureReading(
+            timestamp: Date(),
             systolic: 115,
             diastolic: 75,
-            pulse: 65,
-            timestamp: Date()
+            pulse: 65
         )
         XCTAssertEqual(normalReading.category, .normal, "115/75 should be categorized as Normal")
 
         // Elevated
         let elevatedReading = BloodPressureReading(
+            timestamp: Date(),
             systolic: 125,
             diastolic: 75,
-            pulse: 68,
-            timestamp: Date()
+            pulse: 68
         )
         XCTAssertEqual(elevatedReading.category, .elevated, "125/75 should be categorized as Elevated")
 
         // Stage 1 Hypertension
         let stage1Reading = BloodPressureReading(
+            timestamp: Date(),
             systolic: 135,
             diastolic: 85,
-            pulse: 72,
-            timestamp: Date()
+            pulse: 72
         )
         XCTAssertEqual(stage1Reading.category, .stage1Hypertension, "135/85 should be categorized as Stage 1")
 
         // Stage 2 Hypertension
         let stage2Reading = BloodPressureReading(
+            timestamp: Date(),
             systolic: 145,
             diastolic: 95,
-            pulse: 75,
-            timestamp: Date()
+            pulse: 75
         )
         XCTAssertEqual(stage2Reading.category, .stage2Hypertension, "145/95 should be categorized as Stage 2")
 
         // Hypertensive Crisis
         let crisisReading = BloodPressureReading(
+            timestamp: Date(),
             systolic: 185,
             diastolic: 125,
-            pulse: 90,
-            timestamp: Date()
+            pulse: 90
         )
         XCTAssertEqual(crisisReading.category, .hypertensiveCrisis, "185/125 should be categorized as Crisis")
     }
 
     func testBloodPressureCategoryColors() {
-        XCTAssertEqual(BPCategory.normal.color, "green")
-        XCTAssertEqual(BPCategory.elevated.color, "yellow")
-        XCTAssertEqual(BPCategory.stage1Hypertension.color, "orange")
-        XCTAssertEqual(BPCategory.stage2Hypertension.color, "red")
-        XCTAssertEqual(BPCategory.hypertensiveCrisis.color, "purple")
+        XCTAssertEqual(BloodPressureReading.Category.normal.color, "#10B981")
+        XCTAssertEqual(BloodPressureReading.Category.elevated.color, "#F59E0B")
+        XCTAssertEqual(BloodPressureReading.Category.stage1Hypertension.color, "#F97316")
+        XCTAssertEqual(BloodPressureReading.Category.stage2Hypertension.color, "#EF4444")
+        XCTAssertEqual(BloodPressureReading.Category.hypertensiveCrisis.color, "#DC2626")
     }
 
     // MARK: - Sleep Quality Tests
@@ -340,14 +340,14 @@ final class HealthServiceTests: XCTestCase {
 
     func testNegativeValues() {
         // Blood pressure should not accept negative values
-        let reading = BloodPressureReading(systolic: -10, diastolic: -5, pulse: -60, timestamp: Date())
+        let reading = BloodPressureReading(timestamp: Date(), systolic: -10, diastolic: -5, pulse: -60)
         // The system should handle this gracefully (not crash)
         _ = reading.category
     }
 
     func testFutureTimestamps() {
         let futureDate = Date().addingTimeInterval(86400 * 365) // 1 year in future
-        let reading = BloodPressureReading(systolic: 120, diastolic: 80, pulse: 70, timestamp: futureDate)
+        let reading = BloodPressureReading(timestamp: futureDate, systolic: 120, diastolic: 80, pulse: 70)
 
         XCTAssertEqual(reading.timestamp, futureDate, "Should accept future timestamps")
     }
@@ -365,7 +365,7 @@ final class HealthServiceTests: XCTestCase {
 
     func testChartDataGeneration() async {
         measure {
-            let viewModel = ActivityTrendsViewModel()
+            let viewModel = ActivityActivityTrendsViewModel()
             Task {
                 await viewModel.loadData(metric: .steps, timeRange: .year)
             }

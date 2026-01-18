@@ -18,8 +18,7 @@ public actor AssessmentService: AssessmentServiceProtocol {
 
     public func startAssessment(_ type: AssessmentType) async throws -> AssessmentProgress {
         let progress = AssessmentProgress(assessmentType: type)
-        let progressID = UUID()
-        activeProgress[progressID] = progress
+        activeProgress[progress.id] = progress
         return progress
     }
 
