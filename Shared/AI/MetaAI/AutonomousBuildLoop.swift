@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import OSLog
 
@@ -267,6 +268,41 @@ public actor AutonomousBuildLoop {
         await ErrorKnowledgeBase.shared.getStatistics()
     }
 
+    // MARK: - Local Convenience (fallbacks)
+    // These mirror implementations in CompilerError+Convenience.swift to avoid
+    // target-membership issues. If the other extensions are available, these
+    // just duplicate the same behavior.
+    private extension XcodeBuildRunner.CompilerError {
+        var isError: Bool { errorType == .error }
+
+        var severityDescription: String {
+            switch errorType {
+            case .error: return "error"
+            case .warning: return "warning"
+            case .note: return "note"
+            }
+        }
+
+        var compactDisplayString: String {
+            "[\(severityDescription)] \(file):\(line):\(column) — \(message)"
+        }
+    }
+
+    private extension Sequence where Element == XcodeBuildRunner.CompilerError {
+        func deduplicated() -> [XcodeBuildRunner.CompilerError] {
+            var seen: Set<String> = []
+            var result: [XcodeBuildRunner.CompilerError] = []
+            for e in self {
+                let key = "\(e.file)|\(e.line)|\(e.column)|\(e.message)|\(e.errorType.rawValue)"
+                if !seen.contains(key) {
+                    seen.insert(key)
+                    result.append(e)
+                }
+            }
+            return result
+        }
+    }
+
     // MARK: - Local Helpers
     private func sortedByLocation(_ errors: [XcodeBuildRunner.CompilerError]) -> [XcodeBuildRunner.CompilerError] {
         errors.sorted { lhs, rhs in
@@ -278,3 +314,5 @@ public actor AutonomousBuildLoop {
     }
 }
 
+
+#endif

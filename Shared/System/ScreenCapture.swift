@@ -1,11 +1,9 @@
+#if os(macOS)
 import CoreGraphics
 import Foundation
 import OSLog
-
-#if os(macOS)
 import AppKit
 @preconcurrency import ScreenCaptureKit
-#endif
 
 // MARK: - ScreenCapture
 // Modern screen capture service using ScreenCaptureKit (macOS 14.0+)
@@ -17,11 +15,9 @@ public actor ScreenCapture {
 
     private let logger = Logger(subsystem: "com.thea.system", category: "ScreenCapture")
 
-    #if os(macOS)
     // Cache for ScreenCaptureKit content
     private var availableContent: SCShareableContent?
     private var lastContentUpdate: Date?
-    #endif
 
     private init() {}
 
@@ -50,7 +46,6 @@ public actor ScreenCapture {
     // MARK: - Capture Full Screen
 
     public func captureScreen() async throws -> CGImage {
-        #if os(macOS)
         logger.info("Capturing full screen")
 
         // Get available content
@@ -80,12 +75,8 @@ public actor ScreenCapture {
 
         logger.info("Screen captured: \(image.width)x\(image.height)")
         return image
-        #else
-        throw CaptureError.notSupported
-        #endif
     }
 
-    #if os(macOS)
     private func getShareableContent() async throws -> SCShareableContent {
         // Cache content for 5 seconds to avoid repeated queries
         if let cached = availableContent,
@@ -104,12 +95,10 @@ public actor ScreenCapture {
 
         return content
     }
-    #endif
 
     // MARK: - Capture Window
 
     public func captureWindow(named windowName: String) async throws -> CGImage {
-        #if os(macOS)
         logger.info("Capturing window: \(windowName)")
 
         let content = try await getShareableContent()
@@ -141,15 +130,11 @@ public actor ScreenCapture {
 
         logger.info("Window captured: \(image.width)x\(image.height)")
         return image
-        #else
-        throw CaptureError.notSupported
-        #endif
     }
 
     // MARK: - Capture Region
 
     public func captureRegion(_ rect: CGRect) async throws -> CGImage {
-        #if os(macOS)
         logger.info("Capturing region: width=\(rect.width), height=\(rect.height)")
 
         let content = try await getShareableContent()
@@ -178,15 +163,11 @@ public actor ScreenCapture {
 
         logger.info("Region captured: \(image.width)x\(image.height)")
         return image
-        #else
-        throw CaptureError.notSupported
-        #endif
     }
 
     // MARK: - Save to File
 
     public func saveToFile(_ image: CGImage, path: String) throws {
-        #if os(macOS)
         let url = URL(fileURLWithPath: path)
 
         guard let destination = CGImageDestinationCreateWithURL(url as CFURL, "public.png" as CFString, 1, nil) else {
@@ -200,27 +181,18 @@ public actor ScreenCapture {
         }
 
         logger.info("Saved screenshot to: \(path)")
-        #else
-        throw CaptureError.notSupported
-        #endif
     }
 
     // MARK: - Permission Check
 
     public func checkPermission() async -> Bool {
-        #if os(macOS)
         // Check screen recording permission
         return CGPreflightScreenCaptureAccess()
-        #else
-        return false
-        #endif
     }
 
     public func requestPermission() async -> Bool {
-        #if os(macOS)
         return CGRequestScreenCaptureAccess()
-        #else
-        return false
-        #endif
     }
 }
+
+#endif
