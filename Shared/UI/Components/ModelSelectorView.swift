@@ -47,7 +47,7 @@ struct ModelSelectorView: View {
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Color(.controlBackgroundColor))
+                .background(Color.secondary.opacity(0.15))
                 .cornerRadius(6)
             }
             .help("Model category: \(selectedCategory.description)")
@@ -154,7 +154,7 @@ struct CompactModelSelectorView: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color(.controlBackgroundColor))
+            .background(Color.secondary.opacity(0.15))
             .cornerRadius(6)
         }
         .help("Select AI model")

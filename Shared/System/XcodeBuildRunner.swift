@@ -12,15 +12,6 @@ public actor XcodeBuildRunner {
 
     private init() {}
 
-    private func sortedByLocation(_ errors: [CompilerError]) -> [CompilerError] {
-        errors.sorted { lhs, rhs in
-            if lhs.file != rhs.file { return lhs.file < rhs.file }
-            if lhs.line != rhs.line { return lhs.line < rhs.line }
-            if lhs.column != rhs.column { return lhs.column < rhs.column }
-            return lhs.message < rhs.message
-        }
-    }
-
     // MARK: - Public Types
 
     public struct BuildResult: Sendable {
@@ -69,6 +60,15 @@ public actor XcodeBuildRunner {
             self.column = column
             self.message = message
             self.errorType = errorType
+        }
+        
+        public var isError: Bool {
+            errorType == .error
+        }
+        
+        public var compactDisplayString: String {
+            let fileName = (file as NSString).lastPathComponent
+            return "\(fileName):\(line):\(column): \(errorType.rawValue): \(message)"
         }
     }
 
@@ -302,5 +302,29 @@ public actor XcodeBuildRunner {
     }
 }
 
+// MARK: - Array Extensions
+
+extension Array where Element == XcodeBuildRunner.CompilerError {
+    public func deduplicated() -> [XcodeBuildRunner.CompilerError] {
+        var seen = Set<String>()
+        return filter { error in
+            let key = "\(error.file):\(error.line):\(error.column):\(error.message)"
+            if seen.contains(key) {
+                return false
+            }
+            seen.insert(key)
+            return true
+        }
+    }
+    
+    public func sortedByLocation() -> [XcodeBuildRunner.CompilerError] {
+        sorted { lhs, rhs in
+            if lhs.file != rhs.file { return lhs.file < rhs.file }
+            if lhs.line != rhs.line { return lhs.line < rhs.line }
+            if lhs.column != rhs.column { return lhs.column < rhs.column }
+            return lhs.message < rhs.message
+        }
+    }
+}
 
 #endif

@@ -3,6 +3,9 @@ import Foundation
 #if canImport(HealthKit)
 import HealthKit
 #endif
+#if os(iOS)
+import UIKit
+#endif
 
 /// Health data synchronization service for cross-device sync and cloud backup
 public actor HealthDataSync {

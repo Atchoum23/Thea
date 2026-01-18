@@ -117,7 +117,11 @@ struct ModelSettingsView: View {
                         .tag(category)
                     }
                 }
+                #if os(macOS)
                 .pickerStyle(.radioGroup)
+                #else
+                .pickerStyle(.inline)
+                #endif
                 .onChange(of: config.preferredCategory) { _, _ in
                     AppConfiguration.shared.modelSelectionConfig = config
                 }

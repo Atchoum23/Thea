@@ -1,5 +1,10 @@
+// NotificationExtensions.swift
+// Notification.Name extensions are defined in Shared/TheaApp.swift
+// This file is kept for project structure but contains no code
+
 import Foundation
 
-extension Notification.Name {
-    static let newConversation = Notification.Name("newConversation")
-}
+// Note: All notification names are defined in Shared/TheaApp.swift:
+// - Notification.Name.newConversation
+// - Notification.Name.newProject
+// - Notification.Name.refreshData

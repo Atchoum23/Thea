@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 // MARK: - Known Swift Fixes
@@ -230,3 +231,5 @@ public let knownSwiftFixes: [ErrorKnowledgeBase.KnownFix] = [
         confidence: 0.5
     )
 ]
+
+#endif

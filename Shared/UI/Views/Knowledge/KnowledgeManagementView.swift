@@ -96,7 +96,7 @@ struct KnowledgeManagementView: View {
                     )
                 } else if !searchResults.isEmpty {
                     List(searchResults) { result in
-                        SearchResultRow(result: result)
+                        KnowledgeSearchResultRow(result: result)
                     }
                 } else {
                     ContentUnavailableView(
@@ -125,7 +125,7 @@ struct KnowledgeManagementView: View {
     }
 }
 
-struct SearchResultRow: View {
+private struct KnowledgeSearchResultRow: View {
     let result: SearchResult
 
     var body: some View {
