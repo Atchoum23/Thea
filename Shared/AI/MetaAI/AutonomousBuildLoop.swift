@@ -2,6 +2,58 @@
 import Foundation
 import OSLog
 
+@MainActor fileprivate enum _AutonomousBuildLoopDiagnostics {
+    static var loggedFallbackNotice = false
+}
+
+/// Fallback implementations of some helpers if shared helpers are not available
+fileprivate extension Array where Element == XcodeBuildRunner.CompilerError {
+    func deduplicated() -> [XcodeBuildRunner.CompilerError] {
+        var seen = Set<String>()
+        return self.filter { error in
+            let key = "\(error.file):\(error.line):\(error.column):\(error.message)"
+            if seen.contains(key) { return false }
+            seen.insert(key)
+            return true
+        }
+    }
+
+    func sortedByLocation() -> [XcodeBuildRunner.CompilerError] {
+        self.sorted { (lhs, rhs) in
+            if lhs.file != rhs.file { return lhs.file < rhs.file }
+            if lhs.line != rhs.line { return lhs.line < rhs.line }
+            return lhs.column < rhs.column
+        }
+    }
+}
+
+// New sorting helper as requested
+fileprivate extension Sequence where Element == XcodeBuildRunner.CompilerError {
+    func sortedByPriorityThenLocation() -> [XcodeBuildRunner.CompilerError] {
+        func priority(_ e: XcodeBuildRunner.CompilerError) -> Int {
+            switch e.errorType {
+            case .error: return 0
+            case .warning: return 1
+            case .note: return 2
+            }
+        }
+        return self.sorted { (lhs, rhs) in
+            let lp = priority(lhs), rp = priority(rhs)
+            if lp != rp { return lp < rp }
+            if lhs.file != rhs.file { return lhs.file < rhs.file }
+            if lhs.line != rhs.line { return lhs.line < rhs.line }
+            return lhs.column < rhs.column
+        }
+    }
+}
+
+fileprivate func _logFallbackNoticeIfNeeded(_ logger: Logger) {
+    if !_AutonomousBuildLoopDiagnostics.loggedFallbackNotice {
+        _AutonomousBuildLoopDiagnostics.loggedFallbackNotice = true
+        logger.debug("AutonomousBuildLoop: Using local fallback extensions for CompilerError utilities.")
+    }
+}
+
 // MARK: - AutonomousBuildLoop
 // Autonomous build-fix-retry loop for self-healing code
 
@@ -61,13 +113,16 @@ public actor AutonomousBuildLoop {
     public func run(
         maxIterations: Int = 10,
         scheme: String = "Thea-macOS",
-        configuration: String = "Debug"
+        configuration: String = "Debug",
+        stallWindow: Int = 3,
+        stallThreshold: Int = 3
     ) async throws -> LoopResult {
         logger.info("🚀 Starting autonomous build loop (max \(maxIterations) iterations)")
 
         var iteration = 0
         var errorsFixed = 0
         var errorsFailed = 0
+        var recentFingerprints: [String] = []
         let startTime = Date()
 
         // Create savepoint before starting
@@ -103,14 +158,40 @@ public actor AutonomousBuildLoop {
 
             // STEP 2: Parse errors
             logger.info("❌ Build failed with \(buildResult.errors.count) errors")
-            let previewList = sortedByLocation(buildResult.errors.deduplicated())
-                .filter { $0.isError }
-                .prefix(5)
-                .map { "   • \($0.compactDisplayString)" }
-                .joined(separator: "\n")
-            if !previewList.isEmpty {
+
+            // Prefer shared helpers if available; fallbacks are provided in this file
+            let topIssues: [XcodeBuildRunner.CompilerError] = {
+                let dedup = buildResult.errors.deduplicated()
+
+                // Compute a normalized fingerprint of top issues for stall detection
+                let fingerprint: String = topIssues.map {
+                    let msg = $0.message.prefix(120) // limit noise from long messages
+                    return "\($0.file):\($0.line):\($0.column):\(msg):\($0.errorType.rawValue)"
+                }.joined(separator: "|")
+
+                if !fingerprint.isEmpty {
+                    recentFingerprints.append(fingerprint)
+                    if recentFingerprints.count > stallWindow { recentFingerprints.removeFirst() }
+                    if recentFingerprints.count == stallWindow && Set(recentFingerprints).count <= max(1, stallWindow - (stallThreshold - 1)) {
+                        logger.warning("Detected repeated top issues across iterations (window=\(stallWindow)); stopping early to avoid stalls.")
+                        break
+                    }
+                }
+
+                return dedup.sortedByPriorityThenLocation().filter { $0.isError }.prefix(5).map { $0 }
+            }()
+
+            if !topIssues.isEmpty {
+                let previewList = topIssues.map { "   • \($0.compactDisplayString)" }.joined(separator: "\n")
                 logger.info("Top issues:\n\(previewList)")
             }
+
+            // Debug severity summary for observability
+            let errorCount = buildResult.errors.filter { $0.errorType == .error }.count
+            let warningCount = buildResult.errors.filter { $0.errorType == .warning }.count
+            let noteCount = buildResult.errors.filter { $0.errorType == .note }.count
+            logger.debug("Severity summary — errors: \(errorCount), warnings: \(warningCount), notes: \(noteCount)")
+
             let parsedErrors = await ErrorParser.shared.parse(buildResult.errors)
 
             guard !parsedErrors.isEmpty else {
@@ -216,7 +297,9 @@ public actor AutonomousBuildLoop {
 
     public func dryRun(
         maxIterations: Int = 10,
-        scheme: String = "Thea-macOS"
+        scheme: String = "Thea-macOS",
+        stallWindow: Int = 3,
+        stallThreshold: Int = 3
     ) async throws -> [String] {
         logger.info("🔍 Running dry run analysis")
 
@@ -267,52 +350,7 @@ public actor AutonomousBuildLoop {
     public func getKnowledgeBaseStatistics() async -> KnowledgeBaseStatistics {
         await ErrorKnowledgeBase.shared.getStatistics()
     }
-
-    // MARK: - Local Convenience (fallbacks)
-    // These mirror implementations in CompilerError+Convenience.swift to avoid
-    // target-membership issues. If the other extensions are available, these
-    // just duplicate the same behavior.
-    private extension XcodeBuildRunner.CompilerError {
-        var isError: Bool { errorType == .error }
-
-        var severityDescription: String {
-            switch errorType {
-            case .error: return "error"
-            case .warning: return "warning"
-            case .note: return "note"
-            }
-        }
-
-        var compactDisplayString: String {
-            "[\(severityDescription)] \(file):\(line):\(column) — \(message)"
-        }
-    }
-
-    private extension Sequence where Element == XcodeBuildRunner.CompilerError {
-        func deduplicated() -> [XcodeBuildRunner.CompilerError] {
-            var seen: Set<String> = []
-            var result: [XcodeBuildRunner.CompilerError] = []
-            for e in self {
-                let key = "\(e.file)|\(e.line)|\(e.column)|\(e.message)|\(e.errorType.rawValue)"
-                if !seen.contains(key) {
-                    seen.insert(key)
-                    result.append(e)
-                }
-            }
-            return result
-        }
-    }
-
-    // MARK: - Local Helpers
-    private func sortedByLocation(_ errors: [XcodeBuildRunner.CompilerError]) -> [XcodeBuildRunner.CompilerError] {
-        errors.sorted { lhs, rhs in
-            if lhs.file != rhs.file { return lhs.file < rhs.file }
-            if lhs.line != rhs.line { return lhs.line < rhs.line }
-            if lhs.column != rhs.column { return lhs.column < rhs.column }
-            return lhs.message < rhs.message
-        }
-    }
 }
 
-
 #endif
+
