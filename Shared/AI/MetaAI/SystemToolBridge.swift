@@ -260,36 +260,40 @@ extension ToolFramework {
             name: FileReadTool.name,
             description: FileReadTool.description,
             parameters: FileReadTool.parameters,
-            category: .fileSystem,
-            handler: { @Sendable args in try await FileReadTool.execute(arguments: args) }
-        ))
+            category: .fileSystem
+        ) { @Sendable args in
+            try await FileReadTool.execute(arguments: args)
+        })
 
         registerTool(Tool(
             id: UUID(),
             name: FileWriteTool.name,
             description: FileWriteTool.description,
             parameters: FileWriteTool.parameters,
-            category: .fileSystem,
-            handler: { @Sendable args in try await FileWriteTool.execute(arguments: args) }
-        ))
+            category: .fileSystem
+        ) { @Sendable args in
+            try await FileWriteTool.execute(arguments: args)
+        })
 
         registerTool(Tool(
             id: UUID(),
             name: FileSearchTool.name,
             description: FileSearchTool.description,
             parameters: FileSearchTool.parameters,
-            category: .fileSystem,
-            handler: { @Sendable args in try await FileSearchTool.execute(arguments: args) }
-        ))
+            category: .fileSystem
+        ) { @Sendable args in
+            try await FileSearchTool.execute(arguments: args)
+        })
 
         registerTool(Tool(
             id: UUID(),
             name: FileListTool.name,
             description: FileListTool.description,
             parameters: FileListTool.parameters,
-            category: .fileSystem,
-            handler: { @Sendable args in try await FileListTool.execute(arguments: args) }
-        ))
+            category: .fileSystem
+        ) { @Sendable args in
+            try await FileListTool.execute(arguments: args)
+        })
 
         // Terminal Tools
         registerTool(Tool(
@@ -297,9 +301,10 @@ extension ToolFramework {
             name: TerminalTool.name,
             description: TerminalTool.description,
             parameters: TerminalTool.parameters,
-            category: .code,
-            handler: { @Sendable args in try await TerminalTool.execute(arguments: args) }
-        ))
+            category: .code
+        ) { @Sendable args in
+            try await TerminalTool.execute(arguments: args)
+        })
 
         // Web Tools
         registerTool(Tool(
@@ -307,18 +312,20 @@ extension ToolFramework {
             name: WebSearchTool.name,
             description: WebSearchTool.description,
             parameters: WebSearchTool.parameters,
-            category: .web,
-            handler: { @Sendable args in try await WebSearchTool.execute(arguments: args) }
-        ))
+            category: .web
+        ) { @Sendable args in
+            try await WebSearchTool.execute(arguments: args)
+        })
 
         registerTool(Tool(
             id: UUID(),
             name: HTTPRequestTool.name,
             description: HTTPRequestTool.description,
             parameters: HTTPRequestTool.parameters,
-            category: .web,
-            handler: { @Sendable args in try await HTTPRequestTool.execute(arguments: args) }
-        ))
+            category: .web
+        ) { @Sendable args in
+            try await HTTPRequestTool.execute(arguments: args)
+        })
 
         // Data Tools
         registerTool(Tool(
@@ -326,18 +333,20 @@ extension ToolFramework {
             name: JSONParseTool.name,
             description: JSONParseTool.description,
             parameters: JSONParseTool.parameters,
-            category: .data,
-            handler: { @Sendable args in try await JSONParseTool.execute(arguments: args) }
-        ))
+            category: .data
+        ) { @Sendable args in
+            try await JSONParseTool.execute(arguments: args)
+        })
 
         registerTool(Tool(
             id: UUID(),
             name: RegexMatchTool.name,
             description: RegexMatchTool.description,
             parameters: RegexMatchTool.parameters,
-            category: .data,
-            handler: { @Sendable args in try await RegexMatchTool.execute(arguments: args) }
-        ))
+            category: .data
+        ) { @Sendable args in
+            try await RegexMatchTool.execute(arguments: args)
+        })
     }
 }
 
