@@ -1,5 +1,6 @@
+// NOTE: If your app module name differs, update the @testable import below.
 import Testing
-@testable import YourAppModuleName
+@testable import Thea
 
 // Replace `YourAppModuleName` with the actual module name if needed.
 
@@ -41,3 +42,4 @@ struct CompilerErrorUtilitiesTests {
         #expect(sorted[1].errorType == .warning || sorted[1].errorType == .note)
     }
 }
+
