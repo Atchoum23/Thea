@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 // MARK: - QA Tools Manager
@@ -459,3 +460,5 @@ final class QAToolsManager {
         print("QA Result: \(result.tool.displayName) - \(result.success ? "Passed" : "Failed")")
     }
 }
+
+#endif

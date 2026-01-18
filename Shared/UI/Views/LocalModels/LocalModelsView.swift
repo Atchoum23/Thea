@@ -1,7 +1,6 @@
-import SwiftUI
 #if os(macOS)
+import SwiftUI
 import AppKit
-#endif
 
 // MARK: - Local Models View
 // Manage locally-run AI models (Ollama, MLX, GGUF)
@@ -506,3 +505,5 @@ struct ModelDownloadSheet: View {
 #Preview {
     LocalModelsView()
 }
+
+#endif
