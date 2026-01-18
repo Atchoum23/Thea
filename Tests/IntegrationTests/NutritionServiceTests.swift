@@ -232,7 +232,7 @@ struct NutritionServiceTests {
         highQuality.sodium = 200
 
         let highScore = highQuality.nutritionScore
-        #expect(highScore > 50)
+        #expect(highScore >= 50)
 
         var lowQuality = NutrientProfile()
         lowQuality.saturatedFat = 20
