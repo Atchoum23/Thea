@@ -1,3 +1,4 @@
+#if os(macOS)
 // SelfExecutionService.swift
 import Foundation
 import OSLog
@@ -149,3 +150,5 @@ public actor SelfExecutionService {
         return (missing.isEmpty, missing)
     }
 }
+
+#endif

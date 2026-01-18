@@ -11,7 +11,7 @@ struct SidebarView: View {
             if !pinnedConversations.isEmpty {
                 Section("Pinned") {
                     ForEach(pinnedConversations) { conversation in
-                        ConversationRow(conversation: conversation)
+                        SidebarConversationRow(conversation: conversation)
                             .tag(conversation)
                     }
                 }
@@ -19,7 +19,7 @@ struct SidebarView: View {
 
             Section("Recent") {
                 ForEach(filteredConversations) { conversation in
-                    ConversationRow(conversation: conversation)
+                    SidebarConversationRow(conversation: conversation)
                         .tag(conversation)
                 }
             }
@@ -56,9 +56,9 @@ struct SidebarView: View {
     }
 }
 
-// MARK: - Conversation Row
+// MARK: - Sidebar Conversation Row
 
-struct ConversationRow: View {
+private struct SidebarConversationRow: View {
     let conversation: Conversation
 
     var body: some View {

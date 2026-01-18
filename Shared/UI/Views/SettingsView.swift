@@ -25,6 +25,7 @@ struct SettingsView: View {
                     Label("Advanced", systemImage: "gearshape.2")
                 }
 
+            #if os(macOS)
             TerminalSettingsView()
                 .tabItem {
                     Label("Terminal", systemImage: "terminal")
@@ -34,6 +35,7 @@ struct SettingsView: View {
                 .tabItem {
                     Label("Cowork", systemImage: "person.2.badge.gearshape")
                 }
+            #endif
 
             PrivacySettingsView()
                 .tabItem {
@@ -329,13 +331,13 @@ struct FeaturesSettingsView: View {
                 } label: {
                     Label("Code Intelligence", systemImage: "chevron.left.forwardslash.chevron.right")
                 }
-                #endif
 
                 NavigationLink {
                     LocalModelsView()
                 } label: {
                     Label("Local Models", systemImage: "cpu")
                 }
+                #endif
             }
 
             Section("Financial") {

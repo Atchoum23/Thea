@@ -271,7 +271,10 @@ public actor HealthDataSync {
 
     private func getDeviceIdentifier() -> String {
         #if os(iOS)
-        return UIDevice.current.identifierForVendor?.uuidString ?? "unknown-ios"
+        // UIDevice.current is MainActor-isolated, so we need to access it on MainActor
+        return MainActor.assumeIsolated {
+            UIDevice.current.identifierForVendor?.uuidString ?? "unknown-ios"
+        }
         #elseif os(macOS)
         // macOS device identifier
         var size = 0

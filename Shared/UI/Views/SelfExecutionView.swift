@@ -1,3 +1,4 @@
+#if os(macOS)
 // SelfExecutionView.swift
 import SwiftUI
 
@@ -246,3 +247,5 @@ public struct SelfExecutionView: View {
         isExecuting = false
     }
 }
+
+#endif
