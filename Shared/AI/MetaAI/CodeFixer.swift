@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import OSLog
 
@@ -368,3 +369,5 @@ public actor CodeFixer {
         }
     }
 }
+
+#endif

@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import Observation
 @preconcurrency import SwiftData
@@ -371,3 +372,5 @@ public struct SwiftDataErrorStats: Sendable {
     public let averageSuccessRate: Float
     public let mostCommonError: String?
 }
+
+#endif

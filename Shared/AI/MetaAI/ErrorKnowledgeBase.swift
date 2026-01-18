@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import OSLog
 
@@ -333,3 +334,5 @@ extension ErrorKnowledgeBase {
     )
     ]
 }
+
+#endif
