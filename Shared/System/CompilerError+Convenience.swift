@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 extension XcodeBuildRunner.CompilerError {
@@ -61,3 +62,5 @@ public extension Sequence where Element == XcodeBuildRunner.CompilerError {
         return result
     }
 }
+
+#endif

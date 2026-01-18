@@ -67,3 +67,9 @@ public extension Array where Element == XcodeBuildRunner.CompilerError {
     var warningsOnly: [XcodeBuildRunner.CompilerError] { (self as any Sequence).warningsOnly }
     var notesOnly: [XcodeBuildRunner.CompilerError] { (self as any Sequence).notesOnly }
 }
+public extension Array where Element == XcodeBuildRunner.CompilerError {
+    func sortedByLocation() -> [XcodeBuildRunner.CompilerError] {
+        (self as any Sequence).sortedByLocation()
+    }
+}
+

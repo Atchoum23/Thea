@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import OSLog
 
@@ -301,4 +302,6 @@ public struct ErrorStatistics: Sendable {
         self.fixCoverage = fixCoverage
     }
 }
+
+#endif
 

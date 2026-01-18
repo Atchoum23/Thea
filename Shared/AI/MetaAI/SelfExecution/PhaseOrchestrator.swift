@@ -1,3 +1,4 @@
+#if os(macOS)
 // PhaseOrchestrator.swift
 import Foundation
 import OSLog
@@ -304,3 +305,5 @@ public actor PhaseOrchestrator {
         }
     }
 }
+
+#endif
