@@ -61,15 +61,9 @@ public actor XcodeBuildRunner {
             self.message = message
             self.errorType = errorType
         }
-        
-        public var isError: Bool {
-            errorType == .error
-        }
-        
-        public var compactDisplayString: String {
-            let fileName = (file as NSString).lastPathComponent
-            return "\(fileName):\(line):\(column): \(errorType.rawValue): \(message)"
-        }
+
+        // Note: isError, isWarning, isNote, compactDisplayString, severityDescription
+        // are defined as extensions in CompilerError+Convenience.swift
     }
 
     public struct CompilerWarning: Sendable, Codable, Identifiable {
