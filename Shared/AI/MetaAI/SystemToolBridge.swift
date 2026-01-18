@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 // MARK: - Built-in System Tools

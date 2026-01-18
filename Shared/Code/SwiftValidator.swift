@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import Observation
 
@@ -374,3 +375,5 @@ struct QuickValidationResult {
     let isLikelyValid: Bool
     let issues: [String]
 }
+
+#endif
