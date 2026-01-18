@@ -15,7 +15,7 @@ final class Message {
     /// Order index for deterministic message sorting within a conversation
     /// This ensures messages appear in correct chronological order even when
     /// timestamps might be identical (e.g., rapid message creation)
-    var orderIndex: Int
+    var orderIndex: Int = 0
 
     var conversation: Conversation?
 
