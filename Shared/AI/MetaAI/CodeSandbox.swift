@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 
 // MARK: - Code Execution Sandbox
@@ -346,3 +347,5 @@ enum SandboxError: LocalizedError {
         }
     }
 }
+
+#endif
