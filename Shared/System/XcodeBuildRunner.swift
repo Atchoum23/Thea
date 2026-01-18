@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import OSLog
 
@@ -301,3 +302,5 @@ public actor XcodeBuildRunner {
     }
 }
 
+
+#endif
