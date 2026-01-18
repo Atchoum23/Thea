@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 // MARK: - QA Settings View
@@ -479,3 +480,5 @@ struct QAIssuesDetailView: View {
 #Preview {
     QASettingsView()
 }
+
+#endif
