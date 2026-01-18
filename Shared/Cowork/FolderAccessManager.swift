@@ -293,4 +293,3 @@ final class FolderAccessManager {
     }
 }
 #endif
-

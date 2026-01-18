@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Compact model selector for chat input (iOS-specific version)
-struct iOSCompactModelSelectorView: View {
+struct IOSCompactModelSelectorView: View {
     @Binding var selectedModel: String
     let availableModels: [String]
     
@@ -42,7 +42,7 @@ struct iOSCompactModelSelectorView: View {
 }
 
 #Preview {
-    iOSCompactModelSelectorView(
+    IOSCompactModelSelectorView(
         selectedModel: .constant("GPT-4"),
         availableModels: ["GPT-4", "GPT-3.5", "Claude", "Llama"]
     )

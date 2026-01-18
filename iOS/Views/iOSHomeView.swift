@@ -168,7 +168,7 @@ struct iOSChatListView: View {
         List {
             ForEach(chatManager.conversations) { conversation in
                 NavigationLink(destination: iOSChatView(conversation: conversation)) {
-                    iOSConversationRow(conversation: conversation)
+                    IOSConversationRow(conversation: conversation)
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                     Button(role: .destructive) {
@@ -194,7 +194,7 @@ struct iOSChatListView: View {
     }
 }
 
-private struct iOSConversationRow: View {
+private struct IOSConversationRow: View {
     let conversation: Conversation
 
     var body: some View {
