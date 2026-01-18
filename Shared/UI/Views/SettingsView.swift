@@ -323,11 +323,13 @@ struct FeaturesSettingsView: View {
                     Label("Knowledge Base", systemImage: "folder.badge.questionmark")
                 }
 
+                #if os(macOS)
                 NavigationLink {
                     CodeProjectView()
                 } label: {
                     Label("Code Intelligence", systemImage: "chevron.left.forwardslash.chevron.right")
                 }
+                #endif
 
                 NavigationLink {
                     LocalModelsView()
@@ -421,11 +423,13 @@ struct AdvancedSettingsView: View {
                 }
             }
 
+            #if os(macOS)
             Section("Code Intelligence") {
                 NavigationLink("Code Models & Executables") {
                     CodeIntelligenceConfigurationView()
                 }
             }
+            #endif
 
             Section("API Validation") {
                 NavigationLink("Test Models for Key Validation") {
@@ -1022,6 +1026,7 @@ struct AboutView: View {
     }
 }
 
+#if os(macOS)
 // MARK: - Code Intelligence Configuration View
 
 struct CodeIntelligenceConfigurationView: View {
@@ -1086,6 +1091,7 @@ struct CodeIntelligenceConfigurationView: View {
         }
     }
 }
+#endif
 
 // MARK: - API Validation Configuration View
 
