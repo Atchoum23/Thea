@@ -18,8 +18,10 @@ public final class IntegrationsManager {
     public var visualTimerService: VisualTimerService?
     public var focusForestService: FocusForestService?
     public var careerService: CareerService?
+    #if os(macOS)
     public var automationEngine: AutomationEngine?
     public var browserAutomationService: BrowserAutomationService?
+    #endif
     public var taskScheduler: TaskScheduler?
     public var permissionManager: PermissionManager?
 
@@ -68,8 +70,10 @@ public final class IntegrationsManager {
 
         // Automation (ChatGPT Agent Parity)
         if featureFlags.automationEnabled {
+            #if os(macOS)
             automationEngine = AutomationEngine()
             browserAutomationService = BrowserAutomationService()
+            #endif
             taskScheduler = TaskScheduler()
             permissionManager = PermissionManager()
             enabledModules.insert(.automation)
@@ -105,8 +109,10 @@ public final class IntegrationsManager {
             enabledModules.insert(.career)
 
         case .automation:
+            #if os(macOS)
             automationEngine = AutomationEngine()
             browserAutomationService = BrowserAutomationService()
+            #endif
             taskScheduler = TaskScheduler()
             permissionManager = PermissionManager()
             enabledModules.insert(.automation)
@@ -142,8 +148,10 @@ public final class IntegrationsManager {
             enabledModules.remove(.career)
 
         case .automation:
+            #if os(macOS)
             automationEngine = nil
             browserAutomationService = nil
+            #endif
             taskScheduler = nil
             permissionManager = nil
             enabledModules.remove(.automation)
