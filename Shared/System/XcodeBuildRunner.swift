@@ -11,6 +11,15 @@ public actor XcodeBuildRunner {
 
     private init() {}
 
+    private func sortedByLocation(_ errors: [CompilerError]) -> [CompilerError] {
+        errors.sorted { lhs, rhs in
+            if lhs.file != rhs.file { return lhs.file < rhs.file }
+            if lhs.line != rhs.line { return lhs.line < rhs.line }
+            if lhs.column != rhs.column { return lhs.column < rhs.column }
+            return lhs.message < rhs.message
+        }
+    }
+
     // MARK: - Public Types
 
     public struct BuildResult: Sendable {
@@ -187,7 +196,7 @@ public actor XcodeBuildRunner {
             logger.info("✅ Build succeeded in \(String(format: "%.2f", duration))s")
         } else {
             logger.error("❌ Build failed with \(errors.count) errors, \(warnings.count) warnings in \(String(format: "%.2f", duration))s")
-            let displayList = errors.deduplicated().sortedByLocation().map { "  • \($0.compactDisplayString)" }.joined(separator: "\n")
+            let displayList = sortedByLocation(errors.deduplicated()).map { "  • \($0.compactDisplayString)" }.joined(separator: "\n")
             if !displayList.isEmpty {
                 logger.error("\nCompiler issues:\n\(displayList)")
             }

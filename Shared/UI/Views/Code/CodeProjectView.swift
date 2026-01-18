@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 // MARK: - Code Project View
@@ -285,3 +286,5 @@ private struct FileRow: View {
 #Preview {
     CodeProjectView()
 }
+
+#endif

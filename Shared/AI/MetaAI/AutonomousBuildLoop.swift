@@ -102,7 +102,11 @@ public actor AutonomousBuildLoop {
 
             // STEP 2: Parse errors
             logger.info("❌ Build failed with \(buildResult.errors.count) errors")
-            let previewList = buildResult.errors.sortedByLocation().filter { $0.isError }.prefix(5).map { "   • \($0.compactDisplayString)" }.joined(separator: "\n")
+            let previewList = sortedByLocation(buildResult.errors.deduplicated())
+                .filter { $0.isError }
+                .prefix(5)
+                .map { "   • \($0.compactDisplayString)" }
+                .joined(separator: "\n")
             if !previewList.isEmpty {
                 logger.info("Top issues:\n\(previewList)")
             }
@@ -261,6 +265,16 @@ public actor AutonomousBuildLoop {
 
     public func getKnowledgeBaseStatistics() async -> KnowledgeBaseStatistics {
         await ErrorKnowledgeBase.shared.getStatistics()
+    }
+
+    // MARK: - Local Helpers
+    private func sortedByLocation(_ errors: [XcodeBuildRunner.CompilerError]) -> [XcodeBuildRunner.CompilerError] {
+        errors.sorted { lhs, rhs in
+            if lhs.file != rhs.file { return lhs.file < rhs.file }
+            if lhs.line != rhs.line { return lhs.line < rhs.line }
+            if lhs.column != rhs.column { return lhs.column < rhs.column }
+            return lhs.message < rhs.message
+        }
     }
 }
 
