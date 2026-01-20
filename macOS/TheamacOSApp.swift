@@ -11,17 +11,16 @@ struct TheamacOSApp: App {
 
     init() {
         do {
-            // TODO: Restore ModelContainerFactory once implemented
-            // let container = try ModelContainerFactory.shared.createContainer()
+            // Configure for local-only storage (no CloudKit sync)
+            // This avoids CloudKit requirements for relationships and unique constraints
             let schema = Schema([Conversation.self, Message.self, Project.self])
-            let container = try ModelContainer(for: schema)
+            let modelConfiguration = ModelConfiguration(
+                schema: schema,
+                isStoredInMemoryOnly: false,
+                cloudKitDatabase: .none  // Disable CloudKit to avoid sync requirements
+            )
+            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
             _modelContainer = State(initialValue: container)
-
-            // Check if we're running in fallback mode
-            // TODO: Restore after ModelContainerFactory implementation
-            // if ModelContainerFactory.shared.isInMemoryFallback {
-            //     _showingFallbackAlert = State(initialValue: true)
-            // }
         } catch {
             _storageError = State(initialValue: error)
             print("❌ Failed to initialize ModelContainer: \(error)")

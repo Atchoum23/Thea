@@ -35,6 +35,7 @@ struct MacSettingsView: View {
         case models = "Models"
         case localModels = "Local Models"
         case orchestrator = "Orchestrator"
+        case selfExecution = "Self-Execution"
         case voice = "Voice"
         case sync = "Sync"
         case privacy = "Privacy"
@@ -47,6 +48,7 @@ struct MacSettingsView: View {
             case .models: return "cube.box"
             case .localModels: return "cpu"
             case .orchestrator: return "network"
+            case .selfExecution: return "bolt.fill"
             case .voice: return "mic.fill"
             case .sync: return "icloud.fill"
             case .privacy: return "lock.fill"
@@ -171,6 +173,8 @@ struct MacSettingsView: View {
             LocalModelsSettingsView()
         case .orchestrator:
             OrchestratorSettingsView()
+        case .selfExecution:
+            SelfExecutionView()
         case .voice:
             voiceSettings
         case .sync:

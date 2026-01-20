@@ -115,18 +115,49 @@ public actor XcodeBuildRunner {
 
     // MARK: - Build Execution
 
+    // Configurable project path
+    private var _configuredPath: String?
+
+    public func setProjectPath(_ path: String) {
+        _configuredPath = path
+    }
+
+    // Dynamic project path - use Bundle location or fallback to known path
+    private var defaultProjectPath: String {
+        if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
+            return configured
+        }
+        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
+           FileManager.default.fileExists(atPath: envPath) {
+            return envPath
+        }
+        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
+           FileManager.default.fileExists(atPath: savedPath) {
+            return savedPath
+        }
+        if let bundlePath = Bundle.main.resourcePath {
+            let appPath = (bundlePath as NSString).deletingLastPathComponent
+            let devPath = (appPath as NSString).deletingLastPathComponent
+            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
+                return devPath
+            }
+        }
+        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+    }
+
     public func build(
-        scheme: String = "TheamacOS",
+        scheme: String = "Thea-macOS",
         configuration: String = "Debug",
-        projectPath: String = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development",
+        projectPath: String? = nil,
         timeout: TimeInterval = 300.0
     ) async throws -> BuildResult {
-        logger.info("Starting build - scheme: \(scheme), configuration: \(configuration)")
+        let effectivePath = projectPath ?? defaultProjectPath
+        logger.info("Starting build - scheme: \(scheme), configuration: \(configuration), path: \(effectivePath)")
 
         let startTime = Date()
 
         // Verify project path exists
-        guard FileManager.default.fileExists(atPath: projectPath) else {
+        guard FileManager.default.fileExists(atPath: effectivePath) else {
             throw BuildError.invalidProjectPath
         }
 
@@ -138,7 +169,7 @@ public actor XcodeBuildRunner {
             "-configuration", configuration,
             "build"
         ]
-        process.currentDirectoryURL = URL(fileURLWithPath: projectPath)
+        process.currentDirectoryURL = URL(fileURLWithPath: effectivePath)
 
         // Set up pipes for output capture
         let stdoutPipe = Pipe()

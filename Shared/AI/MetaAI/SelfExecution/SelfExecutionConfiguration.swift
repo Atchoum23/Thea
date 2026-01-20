@@ -133,13 +133,27 @@ public struct SelfExecutionConfiguration: Codable, Sendable {
         approvalMode == .alwaysAllow || grantedPermissions.contains(permission)
     }
 
+    @MainActor
     public func getConfiguredProviders() -> [AIProvider] {
         providerPriority.filter { provider in
-            let key = UserDefaults.standard.string(forKey: provider.keyName) ?? ""
-            return !key.isEmpty
+            // Use SecureStorage (Keychain) for API keys
+            switch provider {
+            case .anthropic:
+                return SecureStorage.shared.hasAPIKey(for: "anthropic")
+            case .openAI:
+                return SecureStorage.shared.hasAPIKey(for: "openai")
+            case .openRouter:
+                return SecureStorage.shared.hasAPIKey(for: "openrouter")
+            case .local:
+                // Check for local models in the SharedLLMs directory
+                let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+                let sharedLLMsPath = (homeDir as NSString).appendingPathComponent("Library/Application Support/SharedLLMs")
+                return FileManager.default.fileExists(atPath: sharedLLMsPath)
+            }
         }
     }
 
+    @MainActor
     public func getPrimaryProvider() -> AIProvider? {
         getConfiguredProviders().first
     }

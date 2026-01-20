@@ -311,8 +311,15 @@ final class QAToolsManager {
         if !config.projectRootPath.isEmpty {
             return config.projectRootPath
         }
-        // Default to the Thea Development directory
-        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development"
+        // Dynamic base path for the project
+        if let bundlePath = Bundle.main.resourcePath {
+            let appPath = (bundlePath as NSString).deletingLastPathComponent
+            let devPath = (appPath as NSString).deletingLastPathComponent
+            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
+                return devPath
+            }
+        }
+        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
     }
 
     private func runCommand(
