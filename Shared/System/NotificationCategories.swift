@@ -167,7 +167,11 @@ public enum NotificationCategory: String, Codable, Sendable, CaseIterable {
     private var categoryOptions: UNNotificationCategoryOptions {
         switch self {
         case .aiResponse:
+            #if os(iOS)
             return [.allowInCarPlay, .customDismissAction]
+            #else
+            return [.customDismissAction]
+            #endif
         case .reminder:
             return [.customDismissAction, .hiddenPreviewsShowTitle]
         case .error:

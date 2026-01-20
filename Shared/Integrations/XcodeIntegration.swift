@@ -14,7 +14,7 @@ import AppKit
 // MARK: - Xcode Integration
 
 /// Integration module for Xcode
-public actor XcodeIntegration: IntegrationModule {
+public actor XcodeIntegration: AppIntegrationModule {
     public static let shared = XcodeIntegration()
 
     public let moduleId = "xcode"
@@ -29,11 +29,11 @@ public actor XcodeIntegration: IntegrationModule {
     public func connect() async throws {
         #if os(macOS)
         guard NSWorkspace.shared.runningApplications.contains(where: { $0.bundleIdentifier == bundleIdentifier }) else {
-            throw IntegrationModuleError.appNotRunning(displayName)
+            throw AppIntegrationModuleError.appNotRunning(displayName)
         }
         isConnected = true
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -55,7 +55,7 @@ public actor XcodeIntegration: IntegrationModule {
             NSWorkspace.shared.open(url)
         }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -72,7 +72,7 @@ public actor XcodeIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -89,7 +89,7 @@ public actor XcodeIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -106,7 +106,7 @@ public actor XcodeIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -122,7 +122,7 @@ public actor XcodeIntegration: IntegrationModule {
         """
         return try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -135,7 +135,7 @@ public actor XcodeIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -152,7 +152,7 @@ public actor XcodeIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -169,7 +169,7 @@ public actor XcodeIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -236,18 +236,18 @@ public actor XcodeIntegration: IntegrationModule {
 
     #if os(macOS)
     private func executeAppleScript(_ source: String) async throws -> String? {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 if let script = NSAppleScript(source: source) {
                     let result = script.executeAndReturnError(&error)
                     if let error = error {
-                        continuation.resume(throwing: IntegrationModuleError.scriptError(error.description))
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
                     } else {
                         continuation.resume(returning: result.stringValue)
                     }
                 } else {
-                    continuation.resume(throwing: IntegrationModuleError.scriptError("Failed to create script"))
+                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }

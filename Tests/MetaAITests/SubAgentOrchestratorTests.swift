@@ -1,4 +1,4 @@
-@testable import TheaCore
+@testable import Thea
 import XCTest
 
 // MARK: - SubAgentOrchestrator Tests

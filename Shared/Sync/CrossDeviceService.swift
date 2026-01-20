@@ -54,7 +54,7 @@ public actor CrossDeviceService {
         // Check iCloud account status
         let status = try await container.accountStatus()
         guard status == .available else {
-            throw SyncError.iCloudNotAvailable
+            throw CrossDeviceSyncError.iCloudNotAvailable
         }
 
         // Setup subscriptions
@@ -90,7 +90,7 @@ public actor CrossDeviceService {
     /// Perform a full sync
     public func performFullSync() async throws {
         guard syncEnabled else {
-            throw SyncError.syncDisabled
+            throw CrossDeviceSyncError.syncDisabled
         }
 
         // Sync conversations
@@ -400,9 +400,9 @@ public enum ConflictResolutionStrategy: String, Codable, Sendable, CaseIterable 
     }
 }
 
-// MARK: - Sync Error
+// MARK: - Cross Device Sync Error
 
-public enum SyncError: Error, LocalizedError, Sendable {
+public enum CrossDeviceSyncError: Error, LocalizedError, Sendable {
     case iCloudNotAvailable
     case syncDisabled
     case networkError(String)

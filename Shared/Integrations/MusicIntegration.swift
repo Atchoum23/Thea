@@ -14,7 +14,7 @@ import AppKit
 // MARK: - Music Integration
 
 /// Integration module for Music app
-public actor MusicIntegration: IntegrationModule {
+public actor MusicIntegration: AppIntegrationModule {
     public static let shared = MusicIntegration()
 
     public let moduleId = "music"
@@ -30,7 +30,7 @@ public actor MusicIntegration: IntegrationModule {
         #if os(macOS)
         isConnected = true
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -50,7 +50,7 @@ public actor MusicIntegration: IntegrationModule {
         let script = "tell application \"Music\" to playpause"
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -60,7 +60,7 @@ public actor MusicIntegration: IntegrationModule {
         let script = "tell application \"Music\" to next track"
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -70,7 +70,7 @@ public actor MusicIntegration: IntegrationModule {
         let script = "tell application \"Music\" to previous track"
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -99,7 +99,7 @@ public actor MusicIntegration: IntegrationModule {
             duration: Double(parts[3]) ?? 0
         )
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -110,7 +110,7 @@ public actor MusicIntegration: IntegrationModule {
         let script = "tell application \"Music\" to set sound volume to \(clampedVolume)"
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -128,24 +128,24 @@ public actor MusicIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     #if os(macOS)
     private func executeAppleScript(_ source: String) async throws -> String? {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 if let script = NSAppleScript(source: source) {
                     let result = script.executeAndReturnError(&error)
                     if let error = error {
-                        continuation.resume(throwing: IntegrationModuleError.scriptError(error.description))
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
                     } else {
                         continuation.resume(returning: result.stringValue)
                     }
                 } else {
-                    continuation.resume(throwing: IntegrationModuleError.scriptError("Failed to create script"))
+                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }

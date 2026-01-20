@@ -166,12 +166,12 @@ final class APIGeneratorTests: XCTestCase {
         XCTAssertEqual(HTTPMethod.delete.rawValue, "DELETE")
     }
 
-    // MARK: - APIError Tests
+    // MARK: - GeneratedAPIError Tests
 
-    func testAPIErrorDescriptions() {
-        XCTAssertEqual(APIError.invalidURL("/bad").errorDescription, "Invalid URL: /bad")
-        XCTAssertEqual(APIError.invalidResponse.errorDescription, "Invalid response from server")
-        XCTAssertEqual(APIError.httpError(statusCode: 404, data: Data()).errorDescription, "HTTP error: 404")
+    func testGeneratedAPIErrorDescriptions() {
+        XCTAssertEqual(GeneratedAPIError.invalidURL("/bad").errorDescription, "Invalid URL: /bad")
+        XCTAssertEqual(GeneratedAPIError.invalidResponse.errorDescription, "Invalid response from server")
+        XCTAssertEqual(GeneratedAPIError.httpError(statusCode: 404, data: Data()).errorDescription, "HTTP error: 404")
     }
 
     // MARK: - APIGeneratorError Tests
@@ -185,8 +185,9 @@ final class APIGeneratorTests: XCTestCase {
     // MARK: - Generator Tests
 
     func testGetAvailableTemplates() async {
+        await APIGenerator.shared.initialize()
         let templates = await APIGenerator.shared.getAvailableTemplates()
-        XCTAssertGreaterThan(templates.count, 0, "Should have default templates")
+        XCTAssertGreaterThan(templates.count, 0, "Should have default templates after initialization")
     }
 
     func testGenerateAPI() async throws {

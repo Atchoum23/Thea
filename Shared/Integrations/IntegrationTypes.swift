@@ -226,8 +226,8 @@ public struct OperationResult: Sendable, Codable {
     }
 }
 
-/// Generic error for integrations
-public enum IntegrationError: Error, Sendable, LocalizedError {
+/// Generic error for service integrations
+public enum ServiceIntegrationError: Error, Sendable, LocalizedError {
     case authorizationDenied
     case dataNotAvailable
     case invalidConfiguration

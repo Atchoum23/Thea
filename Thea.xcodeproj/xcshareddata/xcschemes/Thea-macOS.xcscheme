@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1500"
-   version = "1.3">
+   version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES">
+      buildImplicitDependencies = "YES"
+      runPostActionsOnFailure = "NO">
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -15,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9BDCA26EA7E2E05D39AA6162"
-               BuildableName = "Thea.app"
+               BuildableName = "Thea-macOS.app"
                BlueprintName = "Thea-macOS"
                ReferencedContainer = "container:Thea.xcodeproj">
             </BuildableReference>
@@ -27,12 +28,13 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
-      codeCoverageEnabled = "YES">
+      codeCoverageEnabled = "YES"
+      onlyGenerateCoverageForSpecifiedTargets = "NO">
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BDCA26EA7E2E05D39AA6162"
-            BuildableName = "Thea.app"
+            BuildableName = "Thea-macOS.app"
             BlueprintName = "Thea-macOS"
             ReferencedContainer = "container:Thea.xcodeproj">
          </BuildableReference>
@@ -50,6 +52,8 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -66,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BDCA26EA7E2E05D39AA6162"
-            BuildableName = "Thea.app"
+            BuildableName = "Thea-macOS.app"
             BlueprintName = "Thea-macOS"
             ReferencedContainer = "container:Thea.xcodeproj">
          </BuildableReference>
@@ -89,11 +93,13 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9BDCA26EA7E2E05D39AA6162"
-            BuildableName = "Thea.app"
+            BuildableName = "Thea-macOS.app"
             BlueprintName = "Thea-macOS"
             ReferencedContainer = "container:Thea.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

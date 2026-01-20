@@ -228,17 +228,17 @@ public enum AssertionType: String, Codable, Sendable, CaseIterable {
     var ioPMAssertionType: String {
         switch self {
         case .preventUserIdleSystemSleep:
-            return kIOPMAssertionTypePreventUserIdleSystemSleep
+            return kIOPMAssertionTypePreventUserIdleSystemSleep as String
         case .preventUserIdleDisplaySleep:
-            return kIOPMAssertionTypePreventUserIdleDisplaySleep
+            return kIOPMAssertionTypePreventUserIdleDisplaySleep as String
         case .preventSystemSleep:
-            return kIOPMAssertionTypePreventSystemSleep
+            return kIOPMAssertionTypePreventSystemSleep as String
         case .preventDisplaySleep:
-            return kIOPMAssertPreventDisplaySleep
+            return kIOPMAssertionTypePreventUserIdleDisplaySleep as String
         case .backgroundTask:
-            return kIOPMAssertionTypeBackgroundTask
+            return kIOPMAssertionTypePreventUserIdleSystemSleep as String
         case .externalMedia:
-            return kIOPMAssertionTypeExternalMedia
+            return kIOPMAssertionTypePreventUserIdleSystemSleep as String
         }
     }
     #endif

@@ -15,7 +15,7 @@ import SafariServices
 // MARK: - Safari Integration
 
 /// Integration module for Safari browser automation
-public actor SafariIntegration: IntegrationModule {
+public actor SafariIntegration: AppIntegrationModule {
     public static let shared = SafariIntegration()
 
     // MARK: - Module Info
@@ -38,11 +38,11 @@ public actor SafariIntegration: IntegrationModule {
     public func connect() async throws {
         #if os(macOS)
         guard NSWorkspace.shared.runningApplications.contains(where: { $0.bundleIdentifier == bundleIdentifier }) else {
-            throw IntegrationModuleError.appNotRunning(displayName)
+            throw AppIntegrationModuleError.appNotRunning(displayName)
         }
         isConnected = true
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -52,7 +52,7 @@ public actor SafariIntegration: IntegrationModule {
 
     public func isAvailable() async -> Bool {
         #if os(macOS)
-        return NSWorkspace.shared.runningApplications.contains(where: { $0.bundleIdentifier == bundleIdentifier })
+        return NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == bundleIdentifier }
         #else
         return false
         #endif
@@ -73,7 +73,7 @@ public actor SafariIntegration: IntegrationModule {
         let result = try await executeAppleScript(script)
         return result.flatMap { URL(string: $0) }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -89,7 +89,7 @@ public actor SafariIntegration: IntegrationModule {
         """
         return try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -107,7 +107,7 @@ public actor SafariIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -130,7 +130,7 @@ public actor SafariIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -165,7 +165,7 @@ public actor SafariIntegration: IntegrationModule {
         }
         return tabs
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -180,7 +180,7 @@ public actor SafariIntegration: IntegrationModule {
         """
         return try await executeAppleScript(appleScript)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -204,7 +204,7 @@ public actor SafariIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -223,7 +223,7 @@ public actor SafariIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -242,7 +242,7 @@ public actor SafariIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -250,18 +250,18 @@ public actor SafariIntegration: IntegrationModule {
 
     #if os(macOS)
     private func executeAppleScript(_ source: String) async throws -> String? {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 if let script = NSAppleScript(source: source) {
                     let result = script.executeAndReturnError(&error)
                     if let error = error {
-                        continuation.resume(throwing: IntegrationModuleError.scriptError(error.description))
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
                     } else {
                         continuation.resume(returning: result.stringValue)
                     }
                 } else {
-                    continuation.resume(throwing: IntegrationModuleError.scriptError("Failed to create script"))
+                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }

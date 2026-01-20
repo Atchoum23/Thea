@@ -22,6 +22,11 @@ public actor APIGenerator {
     // MARK: - Initialization
 
     private init() {
+        // Templates are initialized lazily
+    }
+
+    /// Initialize default templates - call before first use
+    public func initialize() {
         loadDefaultTemplates()
     }
 
@@ -137,7 +142,7 @@ public actor APIGenerator {
     }
 
     private func generateAPIClient(for spec: APISpec) -> String {
-        return """
+        """
 
         // MARK: - \(spec.name) API Client
 
@@ -750,9 +755,9 @@ public enum HTTPMethod: String, Codable, Sendable {
     case options = "OPTIONS"
 }
 
-// MARK: - API Error
+// MARK: - Generated API Error
 
-public enum APIError: Error, LocalizedError, Sendable {
+public enum GeneratedAPIError: Error, LocalizedError, Sendable {
     case invalidURL(String)
     case invalidResponse
     case httpError(statusCode: Int, data: Data)

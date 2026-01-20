@@ -607,7 +607,8 @@ public struct ActivityGoal: Identifiable, Sendable {
     public var unit: String
 
     public var progress: Double {
-        min(Double(current) / Double(target), 1.0)
+        guard target > 0 else { return 0 }
+        return min(Double(current) / Double(target), 1.0)
     }
 
     public var progressColor: Color {

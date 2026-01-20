@@ -227,25 +227,25 @@ public struct ActivityStatsView: View {
                     GridItem(.flexible()),
                     GridItem(.flexible())
                 ], spacing: 12) {
-                    StatCard(
+                    PrivacyStatCard(
                         title: "Screen Time",
                         value: stats.formattedScreenTime,
                         icon: "desktopcomputer"
                     )
 
-                    StatCard(
+                    PrivacyStatCard(
                         title: "Idle Periods",
                         value: "\(stats.idlePeriods)",
                         icon: "moon.zzz"
                     )
 
-                    StatCard(
+                    PrivacyStatCard(
                         title: "Activities",
                         value: "\(stats.entryCount)",
                         icon: "list.bullet"
                     )
 
-                    StatCard(
+                    PrivacyStatCard(
                         title: "Top Apps",
                         value: "\(stats.appUsage.count)",
                         icon: "app"
@@ -297,9 +297,9 @@ public struct ActivityStatsView: View {
     }
 }
 
-// MARK: - Stat Card
+// MARK: - Privacy Stat Card
 
-private struct StatCard: View {
+private struct PrivacyStatCard: View {
     let title: String
     let value: String
     let icon: String

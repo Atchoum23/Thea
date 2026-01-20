@@ -199,7 +199,7 @@ public struct BadgeSummary: Sendable {
     }
 
     public var topCategory: NotificationCategory? {
-        categoryCounts.max(by: { $0.value < $1.value })?.key
+        categoryCounts.max { $0.value < $1.value }?.key
     }
 }
 
@@ -242,6 +242,7 @@ public struct BadgeView: View {
     }
 
     public var body: some View {
+        // swiftlint:disable:next empty_count
         if count > 0 {
             Text(count > 99 ? "99+" : "\(count)")
                 .font(.caption2)

@@ -211,7 +211,7 @@ public actor SelfExecutionService {
 
     /// Check if execution was cancelled
     public func checkCancellation() async -> Bool {
-        return isCancelled
+        isCancelled
     }
 
     /// Reset cancellation flag

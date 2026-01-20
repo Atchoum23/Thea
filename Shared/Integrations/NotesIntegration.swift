@@ -14,7 +14,7 @@ import AppKit
 // MARK: - Notes Integration
 
 /// Integration module for Notes app
-public actor NotesIntegration: IntegrationModule {
+public actor NotesIntegration: AppIntegrationModule {
     public static let shared = NotesIntegration()
 
     public let moduleId = "notes"
@@ -30,7 +30,7 @@ public actor NotesIntegration: IntegrationModule {
         #if os(macOS)
         isConnected = true
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -56,7 +56,7 @@ public actor NotesIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -87,7 +87,7 @@ public actor NotesIntegration: IntegrationModule {
         }
         return notes
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -101,7 +101,7 @@ public actor NotesIntegration: IntegrationModule {
         """
         return try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -120,24 +120,24 @@ public actor NotesIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     #if os(macOS)
     private func executeAppleScript(_ source: String) async throws -> String? {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 if let script = NSAppleScript(source: source) {
                     let result = script.executeAndReturnError(&error)
                     if let error = error {
-                        continuation.resume(throwing: IntegrationModuleError.scriptError(error.description))
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
                     } else {
                         continuation.resume(returning: result.stringValue)
                     }
                 } else {
-                    continuation.resume(throwing: IntegrationModuleError.scriptError("Failed to create script"))
+                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }

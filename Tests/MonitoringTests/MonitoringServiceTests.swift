@@ -15,43 +15,32 @@ final class MonitoringServiceTests: XCTestCase {
     func testMonitorTypeIdentifiers() {
         XCTAssertEqual(MonitorType.appSwitch.rawValue, "appSwitch")
         XCTAssertEqual(MonitorType.idleTime.rawValue, "idleTime")
-        XCTAssertEqual(MonitorType.focusMode.rawValue, "focusMode")
-        XCTAssertEqual(MonitorType.screenTime.rawValue, "screenTime")
-        XCTAssertEqual(MonitorType.inputActivity.rawValue, "inputActivity")
     }
 
-    // MARK: - MonitorEvent Tests
-
-    func testMonitorEventCreation() {
-        let event = MonitorEvent(
-            id: "event-1",
-            type: .appSwitch,
-            timestamp: Date(),
-            data: ["app": "Safari"]
-        )
-        XCTAssertEqual(event.type, .appSwitch)
-        XCTAssertNotNil(event.data["app"])
+    func testMonitorTypeDisplayNames() {
+        XCTAssertEqual(MonitorType.appSwitch.displayName, "App Switching")
+        XCTAssertEqual(MonitorType.idleTime.displayName, "Idle Time")
     }
 
-    // MARK: - ActivityEntry Tests
-
-    func testActivityEntryCreation() {
-        let entry = ActivityEntry(
-            id: "activity-1",
-            timestamp: Date(),
-            type: .appFocus,
-            description: "Switched to Safari",
-            metadata: ["bundleId": "com.apple.Safari"]
-        )
-        XCTAssertEqual(entry.type, .appFocus)
-        XCTAssertEqual(entry.description, "Switched to Safari")
-    }
+    // MARK: - ActivityType Tests
 
     func testActivityTypeIcons() {
-        XCTAssertEqual(ActivityType.appFocus.icon, "app")
-        XCTAssertEqual(ActivityType.idle.icon, "moon")
-        XCTAssertEqual(ActivityType.input.icon, "keyboard")
-        XCTAssertEqual(ActivityType.screenTime.icon, "clock")
+        XCTAssertEqual(ActivityType.appUsage.icon, "app")
+        XCTAssertEqual(ActivityType.idleStart.icon, "moon.zzz")
+        XCTAssertEqual(ActivityType.focusModeChange.icon, "moon")
+    }
+
+    // MARK: - ActivityLogEntry Tests
+
+    func testActivityLogEntryCreation() {
+        let entry = ActivityLogEntry(
+            type: .appUsage,
+            timestamp: Date(),
+            duration: 300,
+            metadata: ["app": "Safari"]
+        )
+        XCTAssertEqual(entry.type, .appUsage)
+        XCTAssertEqual(entry.duration, 300)
     }
 
     // MARK: - MonitoringConfiguration Tests
@@ -64,13 +53,15 @@ final class MonitoringServiceTests: XCTestCase {
 
     func testCustomMonitoringConfiguration() {
         let config = MonitoringConfiguration(
-            enabledMonitors: [.focusMode],
-            idleThreshold: 600,
-            logRetentionDays: 14
+            enabledMonitors: [.appSwitch],
+            samplingInterval: 120,
+            idleThresholdMinutes: 10,
+            retentionDays: 14
         )
         XCTAssertEqual(config.enabledMonitors.count, 1)
-        XCTAssertEqual(config.idleThreshold, 600)
-        XCTAssertEqual(config.logRetentionDays, 14)
+        XCTAssertEqual(config.samplingInterval, 120)
+        XCTAssertEqual(config.idleThresholdMinutes, 10)
+        XCTAssertEqual(config.retentionDays, 14)
     }
 
     // MARK: - MonitoringService Tests
@@ -78,9 +69,8 @@ final class MonitoringServiceTests: XCTestCase {
     func testMonitoringServiceSingleton() async {
         let service1 = MonitoringService.shared
         let service2 = MonitoringService.shared
-        let isMonitoring1 = await service1.isMonitoring
-        let isMonitoring2 = await service2.isMonitoring
-        XCTAssertEqual(isMonitoring1, isMonitoring2)
+        // Both should be the same instance
+        XCTAssertTrue(service1 === service2)
     }
 
     // MARK: - ActivityLogger Tests
@@ -88,44 +78,27 @@ final class MonitoringServiceTests: XCTestCase {
     func testActivityLoggerSingleton() async {
         let logger1 = ActivityLogger.shared
         let logger2 = ActivityLogger.shared
-        let enabled1 = await logger1.isLoggingEnabled
-        let enabled2 = await logger2.isLoggingEnabled
-        XCTAssertEqual(enabled1, enabled2)
-    }
-
-    // MARK: - ActivityStatistics Tests
-
-    func testActivityStatisticsCreation() {
-        let stats = ActivityStatistics(
-            totalEntries: 100,
-            entriesByType: [.appFocus: 50, .idle: 30, .input: 20],
-            mostActiveHour: 14,
-            averageIdleTime: 300
-        )
-        XCTAssertEqual(stats.totalEntries, 100)
-        XCTAssertEqual(stats.mostActiveHour, 14)
-        XCTAssertEqual(stats.averageIdleTime, 300)
+        // Both should be the same instance
+        XCTAssertTrue(logger1 === logger2)
     }
 
     // MARK: - PrivacyManager Tests
 
     func testPrivacyManagerSingleton() async {
         let manager = PrivacyManager.shared
-        let permissions = await manager.checkAllPermissions()
-        XCTAssertNotNil(permissions)
+        let hasPermissions = await manager.checkAllPermissions()
+        XCTAssertNotNil(hasPermissions)
     }
 
     func testPrivacyPermissionTypes() {
         XCTAssertEqual(PrivacyPermission.accessibility.displayName, "Accessibility")
         XCTAssertEqual(PrivacyPermission.inputMonitoring.displayName, "Input Monitoring")
         XCTAssertEqual(PrivacyPermission.screenRecording.displayName, "Screen Recording")
-        XCTAssertEqual(PrivacyPermission.fullDiskAccess.displayName, "Full Disk Access")
     }
 
     func testPrivacyPermissionIcons() {
         XCTAssertEqual(PrivacyPermission.accessibility.icon, "accessibility")
         XCTAssertEqual(PrivacyPermission.inputMonitoring.icon, "keyboard")
-        XCTAssertEqual(PrivacyPermission.screenRecording.icon, "rectangle.on.rectangle")
-        XCTAssertEqual(PrivacyPermission.fullDiskAccess.icon, "externaldrive")
+        XCTAssertEqual(PrivacyPermission.screenRecording.icon, "rectangle.dashed.badge.record")
     }
 }

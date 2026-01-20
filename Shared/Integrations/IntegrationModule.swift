@@ -1,5 +1,5 @@
 //
-//  IntegrationModule.swift
+//  AppIntegrationModule.swift
 //  Thea
 //
 //  Created by Claude Code on 2026-01-20
@@ -11,7 +11,7 @@ import Foundation
 // MARK: - Integration Module Protocol
 
 /// Protocol for all integration modules
-public protocol IntegrationModule: Actor {
+public protocol AppIntegrationModule: Actor {
     /// Unique module identifier
     var moduleId: String { get }
 
@@ -36,7 +36,7 @@ public protocol IntegrationModule: Actor {
 
 // MARK: - Integration Module Error
 
-public enum IntegrationModuleError: Error, LocalizedError, Sendable {
+public enum AppIntegrationModuleError: Error, LocalizedError, Sendable {
     case notSupported
     case appNotRunning(String)
     case appNotInstalled(String)
@@ -79,39 +79,43 @@ public actor IntegrationRegistry {
 
     // MARK: - State
 
-    private var modules: [String: any IntegrationModule] = [:]
+    private var modules: [String: any AppIntegrationModule] = [:]
     private var activeConnections: Set<String> = []
 
     // MARK: - Initialization
 
     private init() {
-        registerDefaultModules()
+        // Default modules are registered lazily on first access
     }
 
-    private func registerDefaultModules() {
+    /// Initialize and register default modules
+    public func initializeDefaultModules() async {
         // Register built-in modules
-        register(SafariIntegration.shared)
-        register(FinderIntegration.shared)
-        register(MailIntegration.shared)
-        register(CalendarIntegration.shared)
-        register(NotesIntegration.shared)
-        register(RemindersIntegration.shared)
-        register(MessagesIntegration.shared)
-        register(MusicIntegration.shared)
-        register(TerminalIntegration.shared)
-        register(XcodeIntegration.shared)
-        register(SystemIntegration.shared)
-        register(ShortcutsIntegration.shared)
+        await registerModule(SafariIntegration.shared)
+        await registerModule(FinderIntegration.shared)
+        await registerModule(MailIntegration.shared)
+        await registerModule(CalendarIntegration.shared)
+        await registerModule(NotesIntegration.shared)
+        await registerModule(RemindersIntegration.shared)
+        await registerModule(MessagesIntegration.shared)
+        await registerModule(MusicIntegration.shared)
+        await registerModule(TerminalIntegration.shared)
+        await registerModule(XcodeIntegration.shared)
+        await registerModule(SystemIntegration.shared)
+        await registerModule(ShortcutsIntegration.shared)
+    }
+
+    private func registerModule(_ module: any AppIntegrationModule) async {
+        let moduleId = await module.moduleId
+        modules[moduleId] = module
     }
 
     // MARK: - Registration
 
     /// Register an integration module
-    public func register(_ module: any IntegrationModule) {
-        Task {
-            let moduleId = await module.moduleId
-            modules[moduleId] = module
-        }
+    public func register(_ module: any AppIntegrationModule) async {
+        let moduleId = await module.moduleId
+        modules[moduleId] = module
     }
 
     /// Unregister an integration module
@@ -123,18 +127,18 @@ public actor IntegrationRegistry {
     // MARK: - Module Access
 
     /// Get a module by ID
-    public func getModule(_ moduleId: String) -> (any IntegrationModule)? {
+    public func getModule(_ moduleId: String) -> (any AppIntegrationModule)? {
         modules[moduleId]
     }
 
     /// Get all registered modules
-    public func getAllModules() -> [any IntegrationModule] {
+    public func getAllModules() -> [any AppIntegrationModule] {
         Array(modules.values)
     }
 
     /// Get available modules
-    public func getAvailableModules() async -> [any IntegrationModule] {
-        var available: [any IntegrationModule] = []
+    public func getAvailableModules() async -> [any AppIntegrationModule] {
+        var available: [any AppIntegrationModule] = []
         for module in modules.values {
             if await module.isAvailable() {
                 available.append(module)
@@ -148,7 +152,7 @@ public actor IntegrationRegistry {
     /// Connect to a module
     public func connect(_ moduleId: String) async throws {
         guard let module = modules[moduleId] else {
-            throw IntegrationModuleError.operationFailed("Module not found: \(moduleId)")
+            throw AppIntegrationModuleError.operationFailed("Module not found: \(moduleId)")
         }
 
         try await module.connect()

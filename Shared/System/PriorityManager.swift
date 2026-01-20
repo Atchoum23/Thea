@@ -117,13 +117,13 @@ public final class PriorityManager {
     // MARK: - Focus Mode
 
     /// Set the current focus mode
-    public func setFocusMode(_ mode: FocusMode?) {
+    public func setFocusMode(_ mode: SystemFocusMode?) {
         configuration.currentFocusMode = mode
     }
 
     /// Add a focus mode override for a category
     public func setFocusModeOverride(
-        mode: FocusMode,
+        mode: SystemFocusMode,
         category: NotificationCategory,
         priority: NotificationPriority
     ) {
@@ -215,10 +215,10 @@ public struct PriorityConfiguration: Codable, Sendable, Equatable {
     public var doNotDisturbAllowUrgent: Bool = true
 
     /// Current focus mode (if any)
-    public var currentFocusMode: FocusMode?
+    public var currentFocusMode: SystemFocusMode?
 
     /// Focus mode category overrides
-    public var focusModeOverrides: [FocusMode: [NotificationCategory: NotificationPriority]] = [
+    public var focusModeOverrides: [SystemFocusMode: [NotificationCategory: NotificationPriority]] = [
         .work: [
             .achievement: .silent,
             .health: .low,
@@ -312,9 +312,9 @@ public struct PriorityContext: Sendable {
     public static let timeSensitive = PriorityContext(isTimeSensitive: true)
 }
 
-// MARK: - Focus Mode
+// MARK: - System Focus Mode
 
-public enum FocusMode: String, Codable, Sendable, CaseIterable {
+public enum SystemFocusMode: String, Codable, Sendable, CaseIterable {
     case work
     case personal
     case sleep
