@@ -83,6 +83,30 @@ public actor AppStateMonitor {
         #endif
     }
 
+    /// Sendable struct for passing app notification data across actor boundaries
+    private struct AppNotificationData: Sendable {
+        let bundleIdentifier: String
+        let name: String
+        let isActive: Bool
+        let isHidden: Bool
+        let processIdentifier: Int32
+    }
+
+    /// Extract Sendable data from notification
+    private static func extractAppData(from notification: Notification) -> AppNotificationData? {
+        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+              let bundleId = app.bundleIdentifier else {
+            return nil
+        }
+        return AppNotificationData(
+            bundleIdentifier: bundleId,
+            name: app.localizedName ?? bundleId,
+            isActive: app.isActive,
+            isHidden: app.isHidden,
+            processIdentifier: app.processIdentifier
+        )
+    }
+
     #if os(macOS)
     private func setupMacOSMonitoring() async {
         let notificationCenter = NSWorkspace.shared.notificationCenter
@@ -94,8 +118,9 @@ public actor AppStateMonitor {
                 object: nil,
                 queue: .main
             ) { [weak self] notification in
+                guard let appData = Self.extractAppData(from: notification) else { return }
                 Task { [weak self] in
-                    await self?.handleAppLaunched(notification)
+                    await self?.handleAppLaunched(appData: appData)
                 }
             }
             ObserverStorage.shared.add(observer)
@@ -108,8 +133,9 @@ public actor AppStateMonitor {
                 object: nil,
                 queue: .main
             ) { [weak self] notification in
+                guard let appData = Self.extractAppData(from: notification) else { return }
                 Task { [weak self] in
-                    await self?.handleAppTerminated(notification)
+                    await self?.handleAppTerminated(bundleId: appData.bundleIdentifier)
                 }
             }
             ObserverStorage.shared.add(observer)
@@ -122,8 +148,9 @@ public actor AppStateMonitor {
                 object: nil,
                 queue: .main
             ) { [weak self] notification in
+                guard let appData = Self.extractAppData(from: notification) else { return }
                 Task { [weak self] in
-                    await self?.handleAppActivated(notification)
+                    await self?.handleAppActivated(appData: appData)
                 }
             }
             ObserverStorage.shared.add(observer)
@@ -136,8 +163,9 @@ public actor AppStateMonitor {
                 object: nil,
                 queue: .main
             ) { [weak self] notification in
+                guard let appData = Self.extractAppData(from: notification) else { return }
                 Task { [weak self] in
-                    await self?.handleAppDeactivated(notification)
+                    await self?.handleAppDeactivated(bundleId: appData.bundleIdentifier)
                 }
             }
             ObserverStorage.shared.add(observer)
@@ -150,8 +178,9 @@ public actor AppStateMonitor {
                 object: nil,
                 queue: .main
             ) { [weak self] notification in
+                guard let appData = Self.extractAppData(from: notification) else { return }
                 Task { [weak self] in
-                    await self?.handleAppHidden(notification)
+                    await self?.handleAppHidden(bundleId: appData.bundleIdentifier)
                 }
             }
             ObserverStorage.shared.add(observer)
@@ -164,78 +193,59 @@ public actor AppStateMonitor {
                 object: nil,
                 queue: .main
             ) { [weak self] notification in
+                guard let appData = Self.extractAppData(from: notification) else { return }
                 Task { [weak self] in
-                    await self?.handleAppUnhidden(notification)
+                    await self?.handleAppUnhidden(bundleId: appData.bundleIdentifier)
                 }
             }
             ObserverStorage.shared.add(observer)
         }
     }
 
-    private func handleAppLaunched(_ notification: Notification) async {
-        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let bundleId = app.bundleIdentifier else {
-            return
-        }
-
+    private func handleAppLaunched(appData: AppNotificationData) async {
         let info = AppInfo(
-            bundleIdentifier: bundleId,
-            name: app.localizedName ?? bundleId,
-            isActive: app.isActive,
-            isHidden: app.isHidden,
-            processIdentifier: app.processIdentifier
+            bundleIdentifier: appData.bundleIdentifier,
+            name: appData.name,
+            isActive: appData.isActive,
+            isHidden: appData.isHidden,
+            processIdentifier: appData.processIdentifier
         )
 
-        appStates[bundleId] = AppState(
-            bundleIdentifier: bundleId,
+        appStates[appData.bundleIdentifier] = AppState(
+            bundleIdentifier: appData.bundleIdentifier,
             isRunning: true,
-            isActive: app.isActive,
-            isHidden: app.isHidden,
+            isActive: appData.isActive,
+            isHidden: appData.isHidden,
             launchTime: Date()
         )
 
         onAppLaunched?(info)
     }
 
-    private func handleAppTerminated(_ notification: Notification) async {
-        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let bundleId = app.bundleIdentifier else {
-            return
-        }
-
+    private func handleAppTerminated(bundleId: String) async {
         appStates.removeValue(forKey: bundleId)
         onAppTerminated?(bundleId)
     }
 
-    private func handleAppActivated(_ notification: Notification) async {
-        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let bundleId = app.bundleIdentifier else {
-            return
-        }
-
-        if var state = appStates[bundleId] {
+    private func handleAppActivated(appData: AppNotificationData) async {
+        if var state = appStates[appData.bundleIdentifier] {
             state.isActive = true
             state.lastActivatedTime = Date()
-            appStates[bundleId] = state
+            appStates[appData.bundleIdentifier] = state
         }
 
         let info = AppInfo(
-            bundleIdentifier: bundleId,
-            name: app.localizedName ?? bundleId,
+            bundleIdentifier: appData.bundleIdentifier,
+            name: appData.name,
             isActive: true,
-            isHidden: app.isHidden,
-            processIdentifier: app.processIdentifier
+            isHidden: appData.isHidden,
+            processIdentifier: appData.processIdentifier
         )
 
         onAppActivated?(info)
     }
 
-    private func handleAppDeactivated(_ notification: Notification) async {
-        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let bundleId = app.bundleIdentifier else {
-            return
-        }
-
+    private func handleAppDeactivated(bundleId: String) async {
         if var state = appStates[bundleId] {
             state.isActive = false
             appStates[bundleId] = state
@@ -244,12 +254,7 @@ public actor AppStateMonitor {
         onAppDeactivated?(bundleId)
     }
 
-    private func handleAppHidden(_ notification: Notification) async {
-        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let bundleId = app.bundleIdentifier else {
-            return
-        }
-
+    private func handleAppHidden(bundleId: String) async {
         if var state = appStates[bundleId] {
             state.isHidden = true
             appStates[bundleId] = state
@@ -258,12 +263,7 @@ public actor AppStateMonitor {
         onAppHidden?(bundleId)
     }
 
-    private func handleAppUnhidden(_ notification: Notification) async {
-        guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let bundleId = app.bundleIdentifier else {
-            return
-        }
-
+    private func handleAppUnhidden(bundleId: String) async {
         if var state = appStates[bundleId] {
             state.isHidden = false
             appStates[bundleId] = state
@@ -390,12 +390,15 @@ public actor VisualAnalysisService {
     }
 
     /// Capture a specific window
+    @available(macOS, deprecated: 14.0, message: "Use ScreenCaptureKit for macOS 14+")
     public func captureWindow(windowId: CGWindowID) async throws -> CGImage? {
         #if os(macOS)
         guard CGPreflightScreenCaptureAccess() else {
             throw IntegrationError.accessibilityNotGranted
         }
 
+        // Note: CGWindowListCreateImage is deprecated in macOS 14.0
+        // TODO: Migrate to ScreenCaptureKit for macOS 14+
         return CGWindowListCreateImage(
             .null,
             .optionIncludingWindow,

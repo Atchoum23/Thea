@@ -115,7 +115,7 @@ public actor MCPServerGenerator {
     }
 
     private func generateServerClass(for spec: MCPServerSpec) -> String {
-        var code = """
+        let code = """
 
         // MARK: - Server Implementation
 

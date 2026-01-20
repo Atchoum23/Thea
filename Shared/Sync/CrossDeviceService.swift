@@ -67,9 +67,11 @@ public actor CrossDeviceService {
     /// Setup CloudKit subscriptions for real-time sync
     private func setupSubscriptions() async throws {
         // Subscribe to conversation changes
+        let subscriptionID = "conversation-changes-\(UUID().uuidString)"
         let conversationSubscription = CKQuerySubscription(
             recordType: "Conversation",
             predicate: NSPredicate(value: true),
+            subscriptionID: subscriptionID,
             options: [.firesOnRecordCreation, .firesOnRecordUpdate, .firesOnRecordDeletion]
         )
 

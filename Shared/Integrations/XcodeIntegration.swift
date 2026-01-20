@@ -52,7 +52,7 @@ public actor XcodeIntegration: AppIntegrationModule {
         #if os(macOS)
         let url = URL(fileURLWithPath: path)
         await MainActor.run {
-            NSWorkspace.shared.open(url)
+            _ = NSWorkspace.shared.open(url)
         }
         #else
         throw AppIntegrationModuleError.notSupported

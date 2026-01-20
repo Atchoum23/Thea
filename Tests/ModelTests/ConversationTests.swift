@@ -1,5 +1,5 @@
 @preconcurrency import SwiftData
-@testable import Thea
+@testable import TheaCore
 import XCTest
 
 @MainActor

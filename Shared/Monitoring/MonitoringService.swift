@@ -301,7 +301,7 @@ final class AppSwitchObserverHelper {
 
     private init() {}
 
-    func setup(handler: @escaping @Sendable (Notification) -> Void) -> String? {
+    func setup(handler: @escaping @Sendable (String?) -> Void) -> String? {
         let currentApp = NSWorkspace.shared.frontmostApplication?.localizedName
 
         observer = NSWorkspace.shared.notificationCenter.addObserver(
@@ -309,7 +309,9 @@ final class AppSwitchObserverHelper {
             object: nil,
             queue: .main
         ) { notification in
-            handler(notification)
+            // Extract app name on MainActor, pass only Sendable String
+            let appName = (notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.localizedName
+            handler(appName)
         }
 
         return currentApp
@@ -342,9 +344,9 @@ public actor AppSwitchMonitor: ActivityMonitor {
         isActive = true
 
         #if os(macOS)
-        let initialApp = await AppSwitchObserverHelper.shared.setup { [weak self] notification in
+        let initialApp = await AppSwitchObserverHelper.shared.setup { [weak self] appName in
             Task { [weak self] in
-                await self?.handleAppSwitch(notification)
+                await self?.handleAppSwitch(appName: appName)
             }
         }
         currentApp = initialApp
@@ -366,8 +368,8 @@ public actor AppSwitchMonitor: ActivityMonitor {
     }
 
     #if os(macOS)
-    private func handleAppSwitch(_ notification: Notification) async {
-        guard let app = (notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.localizedName else {
+    private func handleAppSwitch(appName: String?) async {
+        guard let app = appName else {
             return
         }
 
