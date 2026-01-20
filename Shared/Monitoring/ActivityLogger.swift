@@ -201,7 +201,8 @@ public actor ActivityLogger {
         for entry in entries {
             switch entry.type {
             case .appUsage:
-                if let app = entry.metadata["app"] as? String,
+                if let appCodable = entry.metadata["app"],
+                   let app = appCodable.value as? String,
                    let duration = entry.duration {
                     appUsage[app, default: 0] += duration
                     totalScreenTime += duration
@@ -255,7 +256,7 @@ public actor ActivityLogger {
     /// Delete all logs
     public func deleteAllLogs() async {
         try? fileManager.removeItem(at: logsDirectory)
-        await ensureLogsDirectory()
+        ensureLogsDirectory()
         inMemoryBuffer.removeAll()
     }
 

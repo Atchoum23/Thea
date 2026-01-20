@@ -1,4 +1,4 @@
-@testable import Thea
+@testable import TheaCore
 import XCTest
 
 /// Test suite for Integration Coordinator and module management

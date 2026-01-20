@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Thea
+@testable import TheaCore
 
 final class PowerManagementTests: XCTestCase {
 

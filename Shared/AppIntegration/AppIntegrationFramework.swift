@@ -118,8 +118,8 @@ public actor AppIntegrationFramework {
             throw IntegrationError.appNotFound(bundleId)
         }
 
-        await MainActor.run {
-            app.activate(options: [.activateIgnoringOtherApps])
+        _ = await MainActor.run { [app] in
+            app.activate()
         }
         #else
         throw IntegrationError.notSupported
@@ -149,7 +149,7 @@ public actor AppIntegrationFramework {
             throw IntegrationError.appNotFound(bundleId)
         }
 
-        await MainActor.run {
+        _ = await MainActor.run { [app] in
             app.hide()
         }
         #else

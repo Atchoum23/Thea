@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import UserNotifications
+@preconcurrency import UserNotifications
 #if os(macOS)
 import AppKit
 #else

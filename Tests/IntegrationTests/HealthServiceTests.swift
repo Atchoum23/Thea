@@ -1,5 +1,5 @@
 import XCTest
-@testable import Thea
+@testable import TheaCore
 
 /// Test suite for Health module services
 @MainActor

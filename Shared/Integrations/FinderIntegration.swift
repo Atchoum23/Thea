@@ -101,7 +101,7 @@ public actor FinderIntegration: AppIntegrationModule {
     public func openFolder(_ url: URL) async throws {
         #if os(macOS)
         await MainActor.run {
-            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path)
+            _ = NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path)
         }
         #else
         throw AppIntegrationModuleError.notSupported

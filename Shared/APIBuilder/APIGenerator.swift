@@ -434,7 +434,7 @@ public actor APIGenerator {
         guard let name = param["name"] as? String else { return nil }
 
         let schema = param["schema"] as? [String: Any] ?? [:]
-        let type = parseTypeFromSchema(schema)
+        _ = parseTypeFromSchema(schema)
         let isRequired = param["required"] as? Bool ?? false
         let description = param["description"] as? String ?? ""
 

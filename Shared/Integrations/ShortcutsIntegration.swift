@@ -100,7 +100,7 @@ public actor ShortcutsIntegration: AppIntegrationModule {
             throw AppIntegrationModuleError.appNotInstalled(displayName)
         }
         await MainActor.run {
-            NSWorkspace.shared.open(url)
+            _ = NSWorkspace.shared.open(url)
         }
         #else
         throw AppIntegrationModuleError.notSupported
@@ -113,7 +113,7 @@ public actor ShortcutsIntegration: AppIntegrationModule {
         let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? name
         if let url = URL(string: "shortcuts://open-shortcut?name=\(encodedName)") {
             await MainActor.run {
-                NSWorkspace.shared.open(url)
+                _ = NSWorkspace.shared.open(url)
             }
         }
         #else
@@ -126,7 +126,7 @@ public actor ShortcutsIntegration: AppIntegrationModule {
         #if os(macOS)
         if let url = URL(string: "shortcuts://create-shortcut") {
             await MainActor.run {
-                NSWorkspace.shared.open(url)
+                _ = NSWorkspace.shared.open(url)
             }
         }
         #else
