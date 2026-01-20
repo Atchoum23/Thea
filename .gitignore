@@ -44,3 +44,4 @@ dmg-staging/
 __pycache__/
 fix_*.py
 add_*.py
+*.txt
