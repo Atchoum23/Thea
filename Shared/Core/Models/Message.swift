@@ -17,7 +17,7 @@ final class Message {
     /// timestamps might be identical (e.g., rapid message creation)
     var orderIndex: Int = 0
 
-    var conversation: Conversation?
+    @Relationship var conversation: Conversation?
 
     init(
         id: UUID = UUID(),
