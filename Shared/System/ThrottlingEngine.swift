@@ -197,9 +197,9 @@ public final class ThrottlingEngine {
     }
 
     /// Execute an operation with appropriate throttling
-    public func throttled<T>(
+    public func throttled<T: Sendable>(
         category: OperationCategory,
-        operation: @escaping () async throws -> T
+        operation: @escaping @Sendable () async throws -> T
     ) async throws -> T {
         // Check if should defer entirely
         if shouldDefer(category) {
