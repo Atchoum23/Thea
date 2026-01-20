@@ -6,7 +6,36 @@ public actor FileCreator {
     public static let shared = FileCreator()
 
     private let logger = Logger(subsystem: "com.thea.app", category: "FileCreator")
-    private let basePath = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development"
+
+    // Configurable project path
+    private var _configuredPath: String?
+
+    public func setProjectPath(_ path: String) {
+        _configuredPath = path
+    }
+
+    // Dynamic base path - use Bundle location or fallback to known path
+    private var basePath: String {
+        if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
+            return configured
+        }
+        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
+           FileManager.default.fileExists(atPath: envPath) {
+            return envPath
+        }
+        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
+           FileManager.default.fileExists(atPath: savedPath) {
+            return savedPath
+        }
+        if let bundlePath = Bundle.main.resourcePath {
+            let appPath = (bundlePath as NSString).deletingLastPathComponent
+            let devPath = (appPath as NSString).deletingLastPathComponent
+            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
+                return devPath
+            }
+        }
+        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+    }
 
     public struct CreationResult: Sendable {
         public let success: Bool

@@ -5,8 +5,57 @@ import OSLog
 public actor SpecParser {
     public static let shared = SpecParser()
 
-    private let specPath = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development/THEA_MASTER_SPEC.md"
     private let logger = Logger(subsystem: "com.thea.app", category: "SpecParser")
+
+    // Configurable project path - can be set at runtime
+    private var _configuredPath: String?
+
+    /// Set a custom project path (useful when running from installed app)
+    public func setProjectPath(_ path: String) {
+        _configuredPath = path
+    }
+
+    // Dynamic base path for the project
+    private var basePath: String {
+        // 1. Use configured path if set
+        if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
+            return configured
+        }
+
+        // 2. Try environment variable
+        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
+           FileManager.default.fileExists(atPath: envPath) {
+            return envPath
+        }
+
+        // 3. Try UserDefaults (persisted setting)
+        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
+           FileManager.default.fileExists(atPath: savedPath) {
+            return savedPath
+        }
+
+        // 4. Try Bundle path resolution (works when running from Xcode)
+        if let bundlePath = Bundle.main.resourcePath {
+            let appPath = (bundlePath as NSString).deletingLastPathComponent
+            let devPath = (appPath as NSString).deletingLastPathComponent
+            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
+                return devPath
+            }
+        }
+
+        // 5. Fallback to known development path
+        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+    }
+
+    private var specPath: String {
+        // Check multiple possible locations for the spec file
+        let locations = [
+            (basePath as NSString).appendingPathComponent("Documentation/Architecture/THEA_MASTER_SPEC.md"),
+            (basePath as NSString).appendingPathComponent("Planning/THEA_SPECIFICATION.md"),
+            (basePath as NSString).appendingPathComponent("THEA_MASTER_SPEC.md")
+        ]
+        return locations.first { FileManager.default.fileExists(atPath: $0) } ?? locations[0]
+    }
 
     public struct ParsedSpec: Sendable {
         public let version: String

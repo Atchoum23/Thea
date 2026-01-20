@@ -6,7 +6,36 @@ public actor CodeGenerator {
     public static let shared = CodeGenerator()
 
     private let logger = Logger(subsystem: "com.thea.app", category: "CodeGenerator")
-    private let basePath = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development"
+
+    // Configurable project path
+    private var _configuredPath: String?
+
+    public func setProjectPath(_ path: String) {
+        _configuredPath = path
+    }
+
+    // Dynamic base path - use Bundle location or fallback to known path
+    private var basePath: String {
+        if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
+            return configured
+        }
+        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
+           FileManager.default.fileExists(atPath: envPath) {
+            return envPath
+        }
+        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
+           FileManager.default.fileExists(atPath: savedPath) {
+            return savedPath
+        }
+        if let bundlePath = Bundle.main.resourcePath {
+            let appPath = (bundlePath as NSString).deletingLastPathComponent
+            let devPath = (appPath as NSString).deletingLastPathComponent
+            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
+                return devPath
+            }
+        }
+        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+    }
 
     public struct GenerationResult: Sendable {
         public let success: Bool
@@ -196,7 +225,7 @@ public actor CodeGenerator {
     // MARK: - Provider Integration
 
     private func getConfiguredProviders() async -> [String] {
-        // Check which providers have API keys configured
+        // Check which providers have API keys configured via SecureStorage (Keychain)
         var providers: [String] = []
 
         // Priority order: Claude (best for Swift) → OpenAI → OpenRouter → Local
@@ -216,23 +245,26 @@ public actor CodeGenerator {
         return providers
     }
 
-    private func hasAnthropicKey() async -> Bool {
-        // Check AppConfiguration for Anthropic API key
-        // TODO: Connect to actual configuration
-        UserDefaults.standard.string(forKey: "anthropic_api_key")?.isEmpty == false
+    @MainActor
+    private func hasAnthropicKey() -> Bool {
+        SecureStorage.shared.hasAPIKey(for: "anthropic")
     }
 
-    private func hasOpenAIKey() async -> Bool {
-        UserDefaults.standard.string(forKey: "openai_api_key")?.isEmpty == false
+    @MainActor
+    private func hasOpenAIKey() -> Bool {
+        SecureStorage.shared.hasAPIKey(for: "openai")
     }
 
-    private func hasOpenRouterKey() async -> Bool {
-        UserDefaults.standard.string(forKey: "openrouter_api_key")?.isEmpty == false
+    @MainActor
+    private func hasOpenRouterKey() -> Bool {
+        SecureStorage.shared.hasAPIKey(for: "openrouter")
     }
 
     private func hasLocalModels() async -> Bool {
-        let modelsPath = UserDefaults.standard.string(forKey: "local_models_path") ?? ""
-        return FileManager.default.fileExists(atPath: modelsPath)
+        // Check for local models in the SharedLLMs directory
+        let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+        let sharedLLMsPath = (homeDir as NSString).appendingPathComponent("Library/Application Support/SharedLLMs")
+        return FileManager.default.fileExists(atPath: sharedLLMsPath)
     }
 
     private func callProvider(_ provider: String, prompt: String) async throws -> GenerationResult {
@@ -251,8 +283,10 @@ public actor CodeGenerator {
     }
 
     private func callAnthropic(prompt: String) async throws -> GenerationResult {
-        guard let apiKey = UserDefaults.standard.string(forKey: "anthropic_api_key"),
-              !apiKey.isEmpty else {
+        let apiKey = try await MainActor.run {
+            try SecureStorage.shared.loadAPIKey(for: "anthropic")
+        }
+        guard let apiKey, !apiKey.isEmpty else {
             throw GenerationError.noProvidersConfigured
         }
 
@@ -297,8 +331,10 @@ public actor CodeGenerator {
     }
 
     private func callOpenAI(prompt: String) async throws -> GenerationResult {
-        guard let apiKey = UserDefaults.standard.string(forKey: "openai_api_key"),
-              !apiKey.isEmpty else {
+        let apiKey = try await MainActor.run {
+            try SecureStorage.shared.loadAPIKey(for: "openai")
+        }
+        guard let apiKey, !apiKey.isEmpty else {
             throw GenerationError.noProvidersConfigured
         }
 
@@ -343,8 +379,10 @@ public actor CodeGenerator {
     }
 
     private func callOpenRouter(prompt: String) async throws -> GenerationResult {
-        guard let apiKey = UserDefaults.standard.string(forKey: "openrouter_api_key"),
-              !apiKey.isEmpty else {
+        let apiKey = try await MainActor.run {
+            try SecureStorage.shared.loadAPIKey(for: "openrouter")
+        }
+        guard let apiKey, !apiKey.isEmpty else {
             throw GenerationError.noProvidersConfigured
         }
 

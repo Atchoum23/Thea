@@ -13,6 +13,7 @@ public actor SelfExecutionService {
     public enum ExecutionMode: String, Sendable {
         case automatic   // Execute with minimal approval gates
         case supervised  // Approval required at each step
+        case fullAuto    // No interruptions - all approvals auto-granted
         case dryRun      // Simulate without making changes
     }
 
@@ -122,32 +123,100 @@ public actor SelfExecutionService {
         return nil
     }
 
+    // Configurable project path - can be set at runtime
+    private var _configuredPath: String?
+
+    /// Set a custom project path (useful when running from installed app)
+    public func setProjectPath(_ path: String) {
+        _configuredPath = path
+        // Also save to UserDefaults for persistence
+        UserDefaults.standard.set(path, forKey: "TheaProjectPath")
+    }
+
+    // Dynamic base path - use Bundle location or fallback to known path
+    private var basePath: String {
+        // 1. Use configured path if set
+        if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
+            return configured
+        }
+
+        // 2. Try environment variable
+        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
+           FileManager.default.fileExists(atPath: envPath) {
+            return envPath
+        }
+
+        // 3. Try UserDefaults (persisted setting)
+        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
+           FileManager.default.fileExists(atPath: savedPath) {
+            return savedPath
+        }
+
+        // 4. Try Bundle path resolution (works when running from Xcode)
+        if let bundlePath = Bundle.main.resourcePath {
+            let appPath = (bundlePath as NSString).deletingLastPathComponent
+            let devPath = (appPath as NSString).deletingLastPathComponent
+            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
+                return devPath
+            }
+        }
+
+        // 5. Fallback to known development path
+        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+    }
+
     /// Check if ready to execute (API keys configured)
     public func checkReadiness() async -> (ready: Bool, missingRequirements: [String]) {
         var missing: [String] = []
 
-        // Check for at least one AI provider
-        let hasAnthropic = UserDefaults.standard.string(forKey: "anthropic_api_key")?.isEmpty == false
-        let hasOpenAI = UserDefaults.standard.string(forKey: "openai_api_key")?.isEmpty == false
-        let hasOpenRouter = UserDefaults.standard.string(forKey: "openrouter_api_key")?.isEmpty == false
+        // Check for at least one AI provider via SecureStorage (Keychain)
+        let hasAnthropic = await MainActor.run { SecureStorage.shared.hasAPIKey(for: "anthropic") }
+        let hasOpenAI = await MainActor.run { SecureStorage.shared.hasAPIKey(for: "openai") }
+        let hasOpenRouter = await MainActor.run { SecureStorage.shared.hasAPIKey(for: "openrouter") }
 
         if !hasAnthropic && !hasOpenAI && !hasOpenRouter {
             missing.append("No AI provider configured. Add an API key in Settings → Providers.")
         }
 
         // Check git
-        let gitPath = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development/.git"
+        let gitPath = (basePath as NSString).appendingPathComponent(".git")
         if !FileManager.default.fileExists(atPath: gitPath) {
             missing.append("Git repository not initialized")
         }
 
-        // Check spec file
-        let specPath = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development/THEA_MASTER_SPEC.md"
-        if !FileManager.default.fileExists(atPath: specPath) {
-            missing.append("THEA_MASTER_SPEC.md not found")
+        // Check spec file - look in multiple locations
+        let specLocations = [
+            (basePath as NSString).appendingPathComponent("THEA_MASTER_SPEC.md"),
+            (basePath as NSString).appendingPathComponent("Planning/THEA_SPECIFICATION.md"),
+            (basePath as NSString).appendingPathComponent("Documentation/Architecture/THEA_MASTER_SPEC.md")
+        ]
+
+        let hasSpec = specLocations.contains { FileManager.default.fileExists(atPath: $0) }
+        if !hasSpec {
+            missing.append("THEA_MASTER_SPEC.md not found (checked Planning/ and Documentation/Architecture/)")
         }
 
         return (missing.isEmpty, missing)
+    }
+
+    // MARK: - Execution Control
+
+    private var isCancelled = false
+
+    /// Cancel the current execution
+    public func cancelExecution() async {
+        isCancelled = true
+        logger.info("Execution cancelled by user")
+    }
+
+    /// Check if execution was cancelled
+    public func checkCancellation() async -> Bool {
+        return isCancelled
+    }
+
+    /// Reset cancellation flag
+    public func resetCancellation() async {
+        isCancelled = false
     }
 }
 

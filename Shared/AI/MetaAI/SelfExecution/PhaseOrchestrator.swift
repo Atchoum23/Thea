@@ -229,9 +229,39 @@ public actor PhaseOrchestrator {
         }
     }
 
+    // Configurable project path
+    private var _configuredPath: String?
+
+    public func setProjectPath(_ path: String) {
+        _configuredPath = path
+    }
+
+    // Dynamic base path for the project
+    private var basePath: String {
+        if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
+            return configured
+        }
+        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
+           FileManager.default.fileExists(atPath: envPath) {
+            return envPath
+        }
+        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
+           FileManager.default.fileExists(atPath: savedPath) {
+            return savedPath
+        }
+        if let bundlePath = Bundle.main.resourcePath {
+            let appPath = (bundlePath as NSString).deletingLastPathComponent
+            let devPath = (appPath as NSString).deletingLastPathComponent
+            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
+                return devPath
+            }
+        }
+        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+    }
+
     private func createDMG(name: String) async throws -> String {
-        let dmgDir = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development/macOS/DMG files"
-        let appPath = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development/build/Release/Thea.app"
+        let dmgDir = (basePath as NSString).appendingPathComponent("macOS/DMG files")
+        let appPath = (basePath as NSString).appendingPathComponent("build/Release/Thea.app")
         let dmgPath = "\(dmgDir)/\(name)"
 
         // Build release
@@ -266,8 +296,18 @@ public actor PhaseOrchestrator {
     }
 
     private func updateSpecWithCompletion(phase: PhaseDefinition) async throws {
-        // Read spec
-        let specPath = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development/THEA_MASTER_SPEC.md"
+        // Read spec - check multiple locations
+        let specLocations = [
+            (basePath as NSString).appendingPathComponent("Documentation/Architecture/THEA_MASTER_SPEC.md"),
+            (basePath as NSString).appendingPathComponent("Planning/THEA_SPECIFICATION.md"),
+            (basePath as NSString).appendingPathComponent("THEA_MASTER_SPEC.md")
+        ]
+
+        guard let specPath = specLocations.first(where: { FileManager.default.fileExists(atPath: $0) }) else {
+            logger.warning("No spec file found to update")
+            return
+        }
+
         var content = try String(contentsOfFile: specPath, encoding: .utf8)
 
         // Update checklist items for this phase

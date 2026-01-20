@@ -6,7 +6,50 @@ public actor ProgressTracker {
     public static let shared = ProgressTracker()
 
     private let logger = Logger(subsystem: "com.thea.app", category: "ProgressTracker")
-    private let progressFile = "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development/.thea_progress.json"
+
+    // Configurable project path - can be set at runtime
+    private var _configuredPath: String?
+
+    /// Set a custom project path (useful when running from installed app)
+    public func setProjectPath(_ path: String) {
+        _configuredPath = path
+    }
+
+    // Dynamic base path for the project
+    private var basePath: String {
+        // 1. Use configured path if set
+        if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
+            return configured
+        }
+
+        // 2. Try environment variable
+        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
+           FileManager.default.fileExists(atPath: envPath) {
+            return envPath
+        }
+
+        // 3. Try UserDefaults (persisted setting)
+        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
+           FileManager.default.fileExists(atPath: savedPath) {
+            return savedPath
+        }
+
+        // 4. Try Bundle path resolution (works when running from Xcode)
+        if let bundlePath = Bundle.main.resourcePath {
+            let appPath = (bundlePath as NSString).deletingLastPathComponent
+            let devPath = (appPath as NSString).deletingLastPathComponent
+            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
+                return devPath
+            }
+        }
+
+        // 5. Fallback to known development path
+        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+    }
+
+    private var progressFile: String {
+        (basePath as NSString).appendingPathComponent(".thea_progress.json")
+    }
 
     private var currentProgress: ExecutionProgress?
 

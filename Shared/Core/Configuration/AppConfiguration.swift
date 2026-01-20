@@ -16,7 +16,7 @@ final class AppConfiguration {
     // MARK: - App Info
 
     struct AppInfo {
-        static let version = "1.0.0"
+        static let version = "1.4.0"
         static let buildType = "Beta"
         static let domain = "theathe.app"
         static let bundleIdentifier = "app.thea.Thea"
