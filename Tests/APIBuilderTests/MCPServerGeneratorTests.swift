@@ -168,8 +168,9 @@ final class MCPServerGeneratorTests: XCTestCase {
     // MARK: - Generator Tests
 
     func testGetAvailableTemplates() async {
+        await MCPServerGenerator.shared.initialize()
         let templates = await MCPServerGenerator.shared.getAvailableTemplates()
-        XCTAssertGreaterThan(templates.count, 0, "Should have default templates")
+        XCTAssertGreaterThan(templates.count, 0, "Should have default templates after initialization")
     }
 
     func testGenerateServer() async throws {

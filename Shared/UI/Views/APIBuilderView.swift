@@ -27,7 +27,7 @@ public struct APIBuilderView: View {
                 Section("MCP Servers") {
                     ForEach(mcpServers) { server in
                         NavigationLink(value: BuilderItem.mcp(server)) {
-                            MCPServerRow(server: server)
+                            GeneratedMCPServerRow(server: server)
                         }
                     }
 
@@ -124,7 +124,7 @@ private enum BuilderItem: Hashable {
 
 // MARK: - MCP Server Row
 
-private struct MCPServerRow: View {
+private struct GeneratedMCPServerRow: View {
     let server: GeneratedMCPServer
 
     var body: some View {

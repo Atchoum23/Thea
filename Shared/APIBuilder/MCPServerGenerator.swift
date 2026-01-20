@@ -18,11 +18,19 @@ public actor MCPServerGenerator {
 
     private var generatedServers: [String: GeneratedMCPServer] = [:]
     private var templates: [String: MCPTemplate] = [:]
+    private var isInitialized = false
 
     // MARK: - Initialization
 
     private init() {
+        // Templates are loaded lazily on first use
+    }
+
+    /// Initialize default templates (call before first use)
+    public func initialize() {
+        guard !isInitialized else { return }
         loadDefaultTemplates()
+        isInitialized = true
     }
 
     // MARK: - Server Generation
@@ -226,7 +234,7 @@ public actor MCPServerGenerator {
     }
 
     private func generateResourceHandler(_ resource: MCPResourceSpec, serverName: String) -> String {
-        return """
+        """
 
             // MARK: - \(resource.name) Resource
 
@@ -243,7 +251,7 @@ public actor MCPServerGenerator {
     }
 
     private func generatePromptHandler(_ prompt: MCPPromptSpec, serverName: String) -> String {
-        return """
+        """
 
             // MARK: - \(prompt.name) Prompt
 
@@ -661,13 +669,13 @@ public enum MCPGeneratorError: Error, LocalizedError, Sendable {
 // MARK: - MCP Protocol Types
 
 public protocol MCPServer: Actor {
-    var serverInfo: MCPServerInfo { get }
+    var serverMetadata: MCPServerMetadata { get }
     func start() async throws
     func stop() async
     func handleRequest(_ request: MCPRequest) async throws -> MCPResponse
 }
 
-public struct MCPServerInfo: Sendable {
+public struct MCPServerMetadata: Sendable {
     public let name: String
     public let version: String
     public let capabilities: MCPCapabilities
@@ -713,7 +721,7 @@ public struct MCPConnection: Sendable, Identifiable {
     }
 }
 
-public struct MCPRequest: Sendable {
+public struct MCPRequest: @unchecked Sendable {
     public let id: String
     public let method: String
     public let params: [String: Any]?
@@ -725,7 +733,7 @@ public struct MCPRequest: Sendable {
     }
 }
 
-public struct MCPResponse: Sendable {
+public struct MCPResponse: @unchecked Sendable {
     public let id: String
     public let result: [String: Any]?
     public let error: MCPError?

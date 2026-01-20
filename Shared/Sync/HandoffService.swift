@@ -55,7 +55,9 @@ public final class HandoffService {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.handleAppBecameActive()
+            Task { @MainActor in
+                self?.handleAppBecameActive()
+            }
         }
         #endif
     }
@@ -78,7 +80,9 @@ public final class HandoffService {
         activity.title = "Continue Conversation: \(title)"
         activity.isEligibleForHandoff = true
         activity.isEligibleForSearch = true
+        #if os(iOS)
         activity.isEligibleForPrediction = true
+        #endif
 
         activity.userInfo = [
             "conversationId": conversationId,
@@ -154,6 +158,9 @@ public final class HandoffService {
     public func handleIncomingActivity(_ activity: NSUserActivity) -> HandoffContext? {
         guard let userInfo = activity.userInfo else { return nil }
 
+        // Convert userInfo to Sendable dictionary
+        let metadata = convertToSendableDict(userInfo)
+
         switch activity.activityType {
         case Self.conversationActivityType:
             guard let conversationId = userInfo["conversationId"] as? String,
@@ -164,7 +171,7 @@ public final class HandoffService {
                 type: .conversation,
                 id: conversationId,
                 title: title,
-                metadata: userInfo
+                metadata: metadata
             )
 
         case Self.projectActivityType:
@@ -176,7 +183,7 @@ public final class HandoffService {
                 type: .project,
                 id: projectId,
                 title: name,
-                metadata: userInfo
+                metadata: metadata
             )
 
         case Self.searchActivityType:
@@ -187,12 +194,29 @@ public final class HandoffService {
                 type: .search,
                 id: query,
                 title: "Search: \(query)",
-                metadata: userInfo
+                metadata: metadata
             )
 
         default:
             return nil
         }
+    }
+
+    private func convertToSendableDict(_ dict: [AnyHashable: Any]) -> [String: any Sendable] {
+        var result: [String: any Sendable] = [:]
+        for (key, value) in dict {
+            guard let stringKey = key as? String else { continue }
+            // Convert known types to Sendable
+            switch value {
+            case let str as String: result[stringKey] = str
+            case let num as Int: result[stringKey] = num
+            case let num as Double: result[stringKey] = num
+            case let bool as Bool: result[stringKey] = bool
+            case let date as Date: result[stringKey] = date
+            default: break
+            }
+        }
+        return result
     }
 
     // MARK: - Configuration

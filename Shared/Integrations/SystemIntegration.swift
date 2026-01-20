@@ -15,7 +15,7 @@ import IOKit.ps
 // MARK: - System Integration
 
 /// Integration module for system-level operations
-public actor SystemIntegration: IntegrationModule {
+public actor SystemIntegration: AppIntegrationModule {
     public static let shared = SystemIntegration()
 
     public let moduleId = "system"
@@ -83,7 +83,7 @@ public actor SystemIntegration: IntegrationModule {
         let result = try await executeAppleScript(script)
         return Float(result ?? "1") ?? 1.0
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -94,7 +94,7 @@ public actor SystemIntegration: IntegrationModule {
         let script = "do shell script \"brightness \(clampedBrightness)\""
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -107,7 +107,7 @@ public actor SystemIntegration: IntegrationModule {
         let result = try await executeAppleScript(script)
         return Int(result ?? "50") ?? 50
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -118,7 +118,7 @@ public actor SystemIntegration: IntegrationModule {
         let script = "set volume output volume \(clampedVolume)"
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -128,7 +128,7 @@ public actor SystemIntegration: IntegrationModule {
         let script = "set volume output muted \(muted)"
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -152,7 +152,7 @@ public actor SystemIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -164,7 +164,7 @@ public actor SystemIntegration: IntegrationModule {
         let script = "do shell script \"pmset displaysleepnow\""
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -178,7 +178,7 @@ public actor SystemIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -228,11 +228,11 @@ public actor SystemIntegration: IntegrationModule {
     public func quitApplication(_ bundleId: String) async throws {
         #if os(macOS)
         guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == bundleId }) else {
-            throw IntegrationModuleError.appNotRunning(bundleId)
+            throw AppIntegrationModuleError.appNotRunning(bundleId)
         }
         app.terminate()
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -240,28 +240,28 @@ public actor SystemIntegration: IntegrationModule {
     public func forceQuitApplication(_ bundleId: String) async throws {
         #if os(macOS)
         guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == bundleId }) else {
-            throw IntegrationModuleError.appNotRunning(bundleId)
+            throw AppIntegrationModuleError.appNotRunning(bundleId)
         }
         app.forceTerminate()
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     #if os(macOS)
     private func executeAppleScript(_ source: String) async throws -> String? {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 if let script = NSAppleScript(source: source) {
                     let result = script.executeAndReturnError(&error)
                     if let error = error {
-                        continuation.resume(throwing: IntegrationModuleError.scriptError(error.description))
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
                     } else {
                         continuation.resume(returning: result.stringValue)
                     }
                 } else {
-                    continuation.resume(throwing: IntegrationModuleError.scriptError("Failed to create script"))
+                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }

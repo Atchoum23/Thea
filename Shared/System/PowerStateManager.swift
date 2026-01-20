@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 #if os(macOS)
+import AppKit
 import IOKit
 import IOKit.ps
 import IOKit.pwr_mgt

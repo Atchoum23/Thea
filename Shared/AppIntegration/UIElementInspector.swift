@@ -9,7 +9,7 @@
 import Foundation
 #if os(macOS)
 import AppKit
-import ApplicationServices
+@preconcurrency import ApplicationServices
 #endif
 
 // MARK: - UI Element Inspector
@@ -27,18 +27,16 @@ public actor UIElementInspector {
     /// Get the UI element at a specific screen position
     public func getElementAt(point: CGPoint) async throws -> UIElementInfo? {
         #if os(macOS)
-        var element: AXUIElement?
         let systemWide = AXUIElementCreateSystemWide()
 
-        var elementRef: CFTypeRef?
+        var elementRef: AXUIElement?
         let result = AXUIElementCopyElementAtPosition(systemWide, Float(point.x), Float(point.y), &elementRef)
 
-        guard result == .success, let ref = elementRef else {
+        guard result == .success, let element = elementRef else {
             return nil
         }
 
-        element = (ref as! AXUIElement)
-        return try await getElementInfo(element!)
+        return try await getElementInfo(element)
         #else
         throw IntegrationError.notSupported
         #endif
@@ -60,7 +58,9 @@ public actor UIElementInspector {
             return nil
         }
 
-        return try await getElementInfo(element as! AXUIElement)
+        // swiftlint:disable:next force_cast
+        let axElement = element as! AXUIElement
+        return try await getElementInfo(axElement)
         #else
         throw IntegrationError.notSupported
         #endif
@@ -176,14 +176,18 @@ public actor UIElementInspector {
         var frame = CGRect.zero
 
         if let positionValue = position {
+            // swiftlint:disable:next force_cast
+            let axPosition = positionValue as! AXValue
             var point = CGPoint.zero
-            AXValueGetValue(positionValue as! AXValue, .cgPoint, &point)
+            AXValueGetValue(axPosition, .cgPoint, &point)
             frame.origin = point
         }
 
         if let sizeValue = size {
+            // swiftlint:disable:next force_cast
+            let axSize = sizeValue as! AXValue
             var sizeVal = CGSize.zero
-            AXValueGetValue(sizeValue as! AXValue, .cgSize, &sizeVal)
+            AXValueGetValue(axSize, .cgSize, &sizeVal)
             frame.size = sizeVal
         }
 
@@ -222,7 +226,7 @@ public actor UIElementInspector {
 
 // MARK: - UI Element Info
 
-public struct UIElementInfo: Sendable, Identifiable {
+public struct UIElementInfo: @unchecked Sendable, Identifiable {
     public let id = UUID()
     public let role: String
     public let title: String?
@@ -230,7 +234,8 @@ public struct UIElementInfo: Sendable, Identifiable {
     public let frame: CGRect
 
     #if os(macOS)
-    public let axElement: AXUIElement?
+    // swiftlint:disable:next modifier_order
+    public nonisolated(unsafe) let axElement: AXUIElement?
     #else
     public let axElement: AnyObject? = nil
     #endif
@@ -280,17 +285,8 @@ public actor AppCapabilityRegistry {
 
     // MARK: - State
 
-    private var capabilities: [String: AppCapabilities] = [:]
-
-    // MARK: - Initialization
-
-    private init() {
-        loadDefaultCapabilities()
-    }
-
-    private func loadDefaultCapabilities() {
-        // Register common app capabilities
-        capabilities["com.apple.Safari"] = AppCapabilities(
+    private var capabilities: [String: AppCapabilities] = [
+        "com.apple.Safari": AppCapabilities(
             canReadContent: true,
             canNavigate: true,
             canExecuteScript: true,
@@ -298,9 +294,8 @@ public actor AppCapabilityRegistry {
                 "AXTextField": "URL bar",
                 "AXWebArea": "Web content"
             ]
-        )
-
-        capabilities["com.apple.finder"] = AppCapabilities(
+        ),
+        "com.apple.finder": AppCapabilities(
             canReadContent: true,
             canNavigate: true,
             canExecuteScript: false,
@@ -308,9 +303,8 @@ public actor AppCapabilityRegistry {
                 "AXList": "File list",
                 "AXOutline": "Sidebar"
             ]
-        )
-
-        capabilities["com.apple.TextEdit"] = AppCapabilities(
+        ),
+        "com.apple.TextEdit": AppCapabilities(
             canReadContent: true,
             canNavigate: false,
             canExecuteScript: false,
@@ -318,7 +312,11 @@ public actor AppCapabilityRegistry {
                 "AXTextArea": "Document content"
             ]
         )
-    }
+    ]
+
+    // MARK: - Initialization
+
+    private init() {}
 
     // MARK: - Registry
 

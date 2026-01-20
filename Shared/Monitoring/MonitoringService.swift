@@ -6,7 +6,7 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
+@preconcurrency import Foundation
 #if os(macOS)
 import AppKit
 #endif
@@ -219,7 +219,7 @@ public enum MonitorType: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Monitoring Configuration
 
-public struct MonitoringConfiguration: Codable, Sendable {
+public struct MonitoringConfiguration: Codable, Sendable, Equatable {
     public var enabledMonitors: Set<MonitorType>
     public var samplingInterval: TimeInterval
     public var idleThresholdMinutes: Int
@@ -292,13 +292,44 @@ public enum MonitoringError: Error, LocalizedError, Sendable {
 
 // MARK: - Individual Monitors
 
+#if os(macOS)
+/// MainActor-isolated helper for app switch monitoring
+@MainActor
+final class AppSwitchObserverHelper {
+    static let shared = AppSwitchObserverHelper()
+    private var observer: NSObjectProtocol?
+
+    private init() {}
+
+    func setup(handler: @escaping @Sendable (Notification) -> Void) -> String? {
+        let currentApp = NSWorkspace.shared.frontmostApplication?.localizedName
+
+        observer = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            handler(notification)
+        }
+
+        return currentApp
+    }
+
+    func cleanup() {
+        if let observer = observer {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        }
+        observer = nil
+    }
+}
+#endif
+
 /// Monitors app switching activity
 public actor AppSwitchMonitor: ActivityMonitor {
     public let type: MonitorType = .appSwitch
     public private(set) var isActive = false
 
     private let logger: ActivityLogger
-    private var observer: NSObjectProtocol?
     private var currentApp: String?
     private var appStartTime: Date?
 
@@ -311,20 +342,13 @@ public actor AppSwitchMonitor: ActivityMonitor {
         isActive = true
 
         #if os(macOS)
-        await MainActor.run {
-            currentApp = NSWorkspace.shared.frontmostApplication?.localizedName
-            appStartTime = Date()
-
-            observer = NSWorkspace.shared.notificationCenter.addObserver(
-                forName: NSWorkspace.didActivateApplicationNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] notification in
-                Task { [weak self] in
-                    await self?.handleAppSwitch(notification)
-                }
+        let initialApp = await AppSwitchObserverHelper.shared.setup { [weak self] notification in
+            Task { [weak self] in
+                await self?.handleAppSwitch(notification)
             }
         }
+        currentApp = initialApp
+        appStartTime = Date()
         #endif
     }
 
@@ -332,12 +356,7 @@ public actor AppSwitchMonitor: ActivityMonitor {
         isActive = false
 
         #if os(macOS)
-        if let observer = observer {
-            await MainActor.run {
-                NSWorkspace.shared.notificationCenter.removeObserver(observer)
-            }
-        }
-        observer = nil
+        await AppSwitchObserverHelper.shared.cleanup()
         #endif
 
         // Log final session

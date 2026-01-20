@@ -59,8 +59,11 @@ targets:
         CODE_SIGN_ENTITLEMENTS: macOS/Thea.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MACOSX_DEPLOYMENT_TARGET: "14.0"
-        ENABLE_HARDENED_RUNTIME: true
+        ENABLE_HARDENED_RUNTIME: false
         COMBINE_HIDPI_IMAGES: true
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
     dependencies:
       - package: OpenAI
       - package: KeychainAccess
@@ -156,6 +159,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.tests
         INFOPLIST_FILE: Tests/Info.plist
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Thea.app/Contents/MacOS/Thea"
+        BUNDLE_LOADER: "$(TEST_HOST)"
     dependencies:
       - target: Thea-macOS
       - package: OpenAI

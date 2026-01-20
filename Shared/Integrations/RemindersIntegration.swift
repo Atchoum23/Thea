@@ -12,7 +12,7 @@ import EventKit
 // MARK: - Reminders Integration
 
 /// Integration module for Reminders app
-public actor RemindersIntegration: IntegrationModule {
+public actor RemindersIntegration: AppIntegrationModule {
     public static let shared = RemindersIntegration()
 
     public let moduleId = "reminders"
@@ -28,7 +28,7 @@ public actor RemindersIntegration: IntegrationModule {
     public func connect() async throws {
         let granted = try await eventStore.requestFullAccessToReminders()
         guard granted else {
-            throw IntegrationModuleError.permissionDenied("Reminders access denied")
+            throw AppIntegrationModuleError.permissionDenied("Reminders access denied")
         }
         isConnected = true
     }
@@ -79,7 +79,7 @@ public actor RemindersIntegration: IntegrationModule {
     /// Complete a reminder
     public func completeReminder(_ reminderId: String) async throws {
         guard let reminder = eventStore.calendarItem(withIdentifier: reminderId) as? EKReminder else {
-            throw IntegrationModuleError.operationFailed("Reminder not found")
+            throw AppIntegrationModuleError.operationFailed("Reminder not found")
         }
         reminder.isCompleted = true
         try eventStore.save(reminder, commit: true)
@@ -88,7 +88,7 @@ public actor RemindersIntegration: IntegrationModule {
     /// Delete a reminder
     public func deleteReminder(_ reminderId: String) async throws {
         guard let reminder = eventStore.calendarItem(withIdentifier: reminderId) as? EKReminder else {
-            throw IntegrationModuleError.operationFailed("Reminder not found")
+            throw AppIntegrationModuleError.operationFailed("Reminder not found")
         }
         try eventStore.remove(reminder, commit: true)
     }

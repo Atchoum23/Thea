@@ -22,6 +22,7 @@ public actor PrivacyManager {
 
     private var permissionStatus: [PrivacyPermission: PermissionStatus] = [:]
     private var consentGiven: Set<PrivacyPermission> = []
+    private var isInitialized = false
 
     // MARK: - Storage
 
@@ -31,7 +32,12 @@ public actor PrivacyManager {
     // MARK: - Initialization
 
     private init() {
-        loadConsentStatus()
+        // Load consent synchronously from UserDefaults
+        if let data = defaults.data(forKey: consentKey),
+           let consent = try? JSONDecoder().decode(Set<String>.self, from: data) {
+            consentGiven = Set(consent.compactMap { PrivacyPermission(rawValue: $0) })
+        }
+        isInitialized = true
     }
 
     private func loadConsentStatus() {
@@ -124,12 +130,14 @@ public actor PrivacyManager {
     }
 
     #if os(macOS)
-    private func requestMacOSPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
+    // swiftlint:disable:next modifier_order
+    private nonisolated func requestMacOSPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
         switch permission {
         case .accessibility, .inputMonitoring:
             // Open System Settings to Accessibility
-            let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true]
-            let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
+            // Use string constant directly to avoid concurrency issues with kAXTrustedCheckOptionPrompt
+            let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
+            let trusted = AXIsProcessTrustedWithOptions(options)
             return trusted ? .granted : .denied
 
         case .screenRecording:

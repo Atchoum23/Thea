@@ -14,7 +14,7 @@ import AppKit
 // MARK: - Finder Integration
 
 /// Integration module for Finder file management
-public actor FinderIntegration: IntegrationModule {
+public actor FinderIntegration: AppIntegrationModule {
     public static let shared = FinderIntegration()
 
     // MARK: - Module Info
@@ -38,7 +38,7 @@ public actor FinderIntegration: IntegrationModule {
         #if os(macOS)
         isConnected = true
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -76,7 +76,7 @@ public actor FinderIntegration: IntegrationModule {
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .compactMap { URL(fileURLWithPath: $0) }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -93,7 +93,7 @@ public actor FinderIntegration: IntegrationModule {
         let result = try await executeAppleScript(script)
         return result.map { URL(fileURLWithPath: $0) }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -104,7 +104,7 @@ public actor FinderIntegration: IntegrationModule {
             NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path)
         }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -115,7 +115,7 @@ public actor FinderIntegration: IntegrationModule {
             NSWorkspace.shared.activateFileViewerSelecting([url])
         }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -132,7 +132,7 @@ public actor FinderIntegration: IntegrationModule {
         var resultURL: NSURL?
         try FileManager.default.trashItem(at: url, resultingItemURL: &resultURL)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -181,7 +181,7 @@ public actor FinderIntegration: IntegrationModule {
         """
         _ = try await executeAppleScript(script)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -203,19 +203,17 @@ public actor FinderIntegration: IntegrationModule {
         let resourceValues = try url.resourceValues(forKeys: [.tagNamesKey])
         return resourceValues.tagNames ?? []
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Set file tags
     public func setTags(_ tags: [String], for url: URL) async throws {
         #if os(macOS)
-        var resourceValues = URLResourceValues()
-        resourceValues.tagNames = tags
-        var mutableURL = url
-        try mutableURL.setResourceValues(resourceValues)
+        // Use NSURL extended attributes for tag setting
+        try (url as NSURL).setResourceValue(tags, forKey: .tagNamesKey)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -223,18 +221,18 @@ public actor FinderIntegration: IntegrationModule {
 
     #if os(macOS)
     private func executeAppleScript(_ source: String) async throws -> String? {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 var error: NSDictionary?
                 if let script = NSAppleScript(source: source) {
                     let result = script.executeAndReturnError(&error)
                     if let error = error {
-                        continuation.resume(throwing: IntegrationModuleError.scriptError(error.description))
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
                     } else {
                         continuation.resume(returning: result.stringValue)
                     }
                 } else {
-                    continuation.resume(throwing: IntegrationModuleError.scriptError("Failed to create script"))
+                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }

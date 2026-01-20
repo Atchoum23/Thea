@@ -63,10 +63,23 @@ public actor ActivityLogger {
         type: ActivityType,
         metadata: [String: Any] = [:]
     ) {
+        // Convert metadata to Sendable-compatible dictionary
+        var sendableMetadata: [String: any Sendable] = [:]
+        for (key, value) in metadata {
+            switch value {
+            case let str as String: sendableMetadata[key] = str
+            case let num as Int: sendableMetadata[key] = num
+            case let num as Double: sendableMetadata[key] = num
+            case let bool as Bool: sendableMetadata[key] = bool
+            case let date as Date: sendableMetadata[key] = date
+            default: break
+            }
+        }
+
         let entry = ActivityLogEntry(
             type: type,
             timestamp: Date(),
-            metadata: metadata.compactMapValues { $0 as? any Sendable }
+            metadata: sendableMetadata
         )
         log(entry)
     }
@@ -128,7 +141,7 @@ public actor ActivityLogger {
 
     private func decrypt(_ data: Data) -> Data? {
         // XOR is symmetric
-        return encrypt(data)
+        encrypt(data)
     }
 
     // MARK: - Query

@@ -6,9 +6,33 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
+@preconcurrency import Foundation
 #if os(macOS)
 import AppKit
+#endif
+
+// MARK: - Observer Storage (MainActor isolated)
+
+#if os(macOS)
+/// MainActor-isolated storage for notification observers
+@MainActor
+final class ObserverStorage {
+    static let shared = ObserverStorage()
+    private var observers: [NSObjectProtocol] = []
+
+    private init() {}
+
+    func add(_ observer: NSObjectProtocol) {
+        observers.append(observer)
+    }
+
+    func removeAll() {
+        for observer in observers {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        }
+        observers.removeAll()
+    }
+}
 #endif
 
 // MARK: - App State Monitor
@@ -20,7 +44,6 @@ public actor AppStateMonitor {
     // MARK: - State
 
     private var isMonitoring = false
-    private var observers: [NSObjectProtocol] = []
     private var appStates: [String: AppState] = [:]
 
     // MARK: - Callbacks
@@ -56,12 +79,7 @@ public actor AppStateMonitor {
         isMonitoring = false
 
         #if os(macOS)
-        await MainActor.run {
-            for observer in observers {
-                NSWorkspace.shared.notificationCenter.removeObserver(observer)
-            }
-        }
-        observers.removeAll()
+        await ObserverStorage.shared.removeAll()
         #endif
     }
 
@@ -70,8 +88,8 @@ public actor AppStateMonitor {
         let notificationCenter = NSWorkspace.shared.notificationCenter
 
         // App launched
-        let launchObserver = await MainActor.run {
-            notificationCenter.addObserver(
+        await MainActor.run {
+            let observer = notificationCenter.addObserver(
                 forName: NSWorkspace.didLaunchApplicationNotification,
                 object: nil,
                 queue: .main
@@ -80,12 +98,12 @@ public actor AppStateMonitor {
                     await self?.handleAppLaunched(notification)
                 }
             }
+            ObserverStorage.shared.add(observer)
         }
-        observers.append(launchObserver)
 
         // App terminated
-        let terminateObserver = await MainActor.run {
-            notificationCenter.addObserver(
+        await MainActor.run {
+            let observer = notificationCenter.addObserver(
                 forName: NSWorkspace.didTerminateApplicationNotification,
                 object: nil,
                 queue: .main
@@ -94,12 +112,12 @@ public actor AppStateMonitor {
                     await self?.handleAppTerminated(notification)
                 }
             }
+            ObserverStorage.shared.add(observer)
         }
-        observers.append(terminateObserver)
 
         // App activated
-        let activateObserver = await MainActor.run {
-            notificationCenter.addObserver(
+        await MainActor.run {
+            let observer = notificationCenter.addObserver(
                 forName: NSWorkspace.didActivateApplicationNotification,
                 object: nil,
                 queue: .main
@@ -108,12 +126,12 @@ public actor AppStateMonitor {
                     await self?.handleAppActivated(notification)
                 }
             }
+            ObserverStorage.shared.add(observer)
         }
-        observers.append(activateObserver)
 
         // App deactivated
-        let deactivateObserver = await MainActor.run {
-            notificationCenter.addObserver(
+        await MainActor.run {
+            let observer = notificationCenter.addObserver(
                 forName: NSWorkspace.didDeactivateApplicationNotification,
                 object: nil,
                 queue: .main
@@ -122,12 +140,12 @@ public actor AppStateMonitor {
                     await self?.handleAppDeactivated(notification)
                 }
             }
+            ObserverStorage.shared.add(observer)
         }
-        observers.append(deactivateObserver)
 
         // App hidden
-        let hideObserver = await MainActor.run {
-            notificationCenter.addObserver(
+        await MainActor.run {
+            let observer = notificationCenter.addObserver(
                 forName: NSWorkspace.didHideApplicationNotification,
                 object: nil,
                 queue: .main
@@ -136,12 +154,12 @@ public actor AppStateMonitor {
                     await self?.handleAppHidden(notification)
                 }
             }
+            ObserverStorage.shared.add(observer)
         }
-        observers.append(hideObserver)
 
         // App unhidden
-        let unhideObserver = await MainActor.run {
-            notificationCenter.addObserver(
+        await MainActor.run {
+            let observer = notificationCenter.addObserver(
                 forName: NSWorkspace.didUnhideApplicationNotification,
                 object: nil,
                 queue: .main
@@ -150,8 +168,8 @@ public actor AppStateMonitor {
                     await self?.handleAppUnhidden(notification)
                 }
             }
+            ObserverStorage.shared.add(observer)
         }
-        observers.append(unhideObserver)
     }
 
     private func handleAppLaunched(_ notification: Notification) async {
@@ -395,14 +413,14 @@ public actor VisualAnalysisService {
     public func detectElements(in image: CGImage) async throws -> [DetectedElement] {
         // This would use Vision framework for element detection
         // Simplified implementation
-        return []
+        []
     }
 
     /// Find text in an image using OCR
     public func detectText(in image: CGImage) async throws -> [DetectedText] {
         // This would use Vision framework for OCR
         // Simplified implementation
-        return []
+        []
     }
 }
 

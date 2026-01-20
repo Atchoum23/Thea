@@ -14,7 +14,7 @@ import AppKit
 // MARK: - Shortcuts Integration
 
 /// Integration module for Shortcuts app
-public actor ShortcutsIntegration: IntegrationModule {
+public actor ShortcutsIntegration: AppIntegrationModule {
     public static let shared = ShortcutsIntegration()
 
     public let moduleId = "shortcuts"
@@ -32,7 +32,7 @@ public actor ShortcutsIntegration: IntegrationModule {
         isConnected = true
         try await refreshShortcutsList()
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -60,12 +60,12 @@ public actor ShortcutsIntegration: IntegrationModule {
         let result = try await TerminalIntegration.shared.runShellCommand(command)
 
         if !result.succeeded {
-            throw IntegrationModuleError.operationFailed("Shortcut failed: \(result.error)")
+            throw AppIntegrationModuleError.operationFailed("Shortcut failed: \(result.error)")
         }
 
         return result.output.trimmingCharacters(in: .whitespacesAndNewlines)
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -81,7 +81,7 @@ public actor ShortcutsIntegration: IntegrationModule {
         let result = try await TerminalIntegration.shared.runShellCommand("shortcuts list")
 
         if !result.succeeded {
-            throw IntegrationModuleError.operationFailed("Failed to list shortcuts: \(result.error)")
+            throw AppIntegrationModuleError.operationFailed("Failed to list shortcuts: \(result.error)")
         }
 
         cachedShortcuts = result.output
@@ -89,7 +89,7 @@ public actor ShortcutsIntegration: IntegrationModule {
             .filter { !$0.isEmpty }
             .map { ShortcutInfo(name: $0) }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -97,13 +97,13 @@ public actor ShortcutsIntegration: IntegrationModule {
     public func openShortcutsApp() async throws {
         #if os(macOS)
         guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) else {
-            throw IntegrationModuleError.appNotInstalled(displayName)
+            throw AppIntegrationModuleError.appNotInstalled(displayName)
         }
         await MainActor.run {
             NSWorkspace.shared.open(url)
         }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -117,7 +117,7 @@ public actor ShortcutsIntegration: IntegrationModule {
             }
         }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -130,7 +130,7 @@ public actor ShortcutsIntegration: IntegrationModule {
             }
         }
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -146,12 +146,12 @@ public actor ShortcutsIntegration: IntegrationModule {
         let result = try await TerminalIntegration.shared.runShellCommand(command)
 
         if !result.succeeded {
-            throw IntegrationModuleError.operationFailed("Failed to sign shortcut: \(result.error)")
+            throw AppIntegrationModuleError.operationFailed("Failed to sign shortcut: \(result.error)")
         }
 
         return outputPath
         #else
-        throw IntegrationModuleError.notSupported
+        throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -172,13 +172,24 @@ public struct ShortcutInfo: Sendable, Identifiable {
 
 // MARK: - Shortcuts Builder
 
+/// Represents a shortcut to run with optional input
+public struct ShortcutRunItem: Sendable {
+    public let shortcutName: String
+    public let input: String?
+
+    public init(shortcutName: String, input: String? = nil) {
+        self.shortcutName = shortcutName
+        self.input = input
+    }
+}
+
 /// Helper for building complex shortcut automations
 public struct ShortcutBuilder {
-    private var actions: [ShortcutAction] = []
+    private var actions: [ShortcutRunItem] = []
 
     public init() {}
 
-    public mutating func addAction(_ action: ShortcutAction) {
+    public mutating func addAction(_ action: ShortcutRunItem) {
         actions.append(action)
     }
 
@@ -195,15 +206,5 @@ public struct ShortcutBuilder {
             results.append(result)
         }
         return results
-    }
-}
-
-public struct ShortcutAction: Sendable {
-    public let shortcutName: String
-    public let input: String?
-
-    public init(shortcutName: String, input: String? = nil) {
-        self.shortcutName = shortcutName
-        self.input = input
     }
 }

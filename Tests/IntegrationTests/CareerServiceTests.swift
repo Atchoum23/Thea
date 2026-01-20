@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import TheaCore
+@testable import Thea
 
 /// Tests for career development service
 @Suite("Career Service Tests")

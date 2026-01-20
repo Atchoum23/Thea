@@ -182,44 +182,39 @@ final class CoworkManager {
         targetSession.execute()
         isProcessing = true
 
-        do {
-            for stepIndex in targetSession.steps.indices {
-                guard targetSession.status == .executing else { break }
+        for stepIndex in targetSession.steps.indices {
+            guard targetSession.status == .executing else { break }
 
-                var step = targetSession.steps[stepIndex]
-                guard step.status == .pending else { continue }
+            var step = targetSession.steps[stepIndex]
+            guard step.status == .pending else { continue }
 
-                // Start step
-                step.start()
-                targetSession.steps[stepIndex] = step
-                onStepStarted?(step)
+            // Start step
+            step.start()
+            targetSession.steps[stepIndex] = step
+            onStepStarted?(step)
 
-                // Execute step
-                do {
-                    try await executeStep(&step, in: targetSession)
-                    step.complete()
-                    onStepCompleted?(step)
-                } catch {
-                    step.fail(with: error.localizedDescription)
-                    onError?(error)
+            // Execute step
+            do {
+                try await executeStep(&step, in: targetSession)
+                step.complete()
+                onStepCompleted?(step)
+            } catch {
+                step.fail(with: error.localizedDescription)
+                onError?(error)
 
-                    // Decide whether to continue or fail
-                    if case CoworkError.criticalError = error {
-                        targetSession.fail(with: error.localizedDescription)
-                        break
-                    }
+                // Decide whether to continue or fail
+                if case CoworkError.criticalError = error {
+                    targetSession.fail(with: error.localizedDescription)
+                    break
                 }
-
-                targetSession.steps[stepIndex] = step
             }
 
-            if targetSession.status == .executing {
-                targetSession.complete()
-                onSessionCompleted?(targetSession)
-            }
-        } catch {
-            targetSession.fail(with: error.localizedDescription)
-            onError?(error)
+            targetSession.steps[stepIndex] = step
+        }
+
+        if targetSession.status == .executing {
+            targetSession.complete()
+            onSessionCompleted?(targetSession)
         }
 
         isProcessing = false

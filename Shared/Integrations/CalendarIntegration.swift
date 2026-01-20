@@ -12,7 +12,7 @@ import EventKit
 // MARK: - Calendar Integration
 
 /// Integration module for Calendar app
-public actor CalendarIntegration: IntegrationModule {
+public actor CalendarIntegration: AppIntegrationModule {
     public static let shared = CalendarIntegration()
 
     public let moduleId = "calendar"
@@ -28,7 +28,7 @@ public actor CalendarIntegration: IntegrationModule {
     public func connect() async throws {
         let granted = try await eventStore.requestFullAccessToEvents()
         guard granted else {
-            throw IntegrationModuleError.permissionDenied("Calendar access denied")
+            throw AppIntegrationModuleError.permissionDenied("Calendar access denied")
         }
         isConnected = true
     }
@@ -79,7 +79,7 @@ public actor CalendarIntegration: IntegrationModule {
     /// Delete an event
     public func deleteEvent(_ eventId: String) async throws {
         guard let event = eventStore.event(withIdentifier: eventId) else {
-            throw IntegrationModuleError.operationFailed("Event not found")
+            throw AppIntegrationModuleError.operationFailed("Event not found")
         }
         try eventStore.remove(event, span: .thisEvent)
     }
