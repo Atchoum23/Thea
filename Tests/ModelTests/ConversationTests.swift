@@ -101,7 +101,11 @@ final class ConversationTests: XCTestCase {
         let message1 = Message(conversationID: conversation.id, role: .user, content: .text("1"))
         let message2 = Message(conversationID: conversation.id, role: .assistant, content: .text("2"))
 
+        // Establish the bidirectional relationship
+        message1.conversation = conversation
+        message2.conversation = conversation
         conversation.messages.append(contentsOf: [message1, message2])
+
         modelContext.insert(conversation)
         try modelContext.save()
 

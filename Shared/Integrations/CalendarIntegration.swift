@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import EventKit
+@preconcurrency import EventKit
 
 // MARK: - Calendar Integration
 
