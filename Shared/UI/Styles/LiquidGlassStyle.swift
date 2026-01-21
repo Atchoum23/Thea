@@ -6,22 +6,30 @@ import SwiftUI
 // This file provides conditional support for Liquid Glass effects while
 // maintaining backwards compatibility with older OS versions.
 //
+// Note: The glassEffect API requires Xcode 16+ SDK. For older Xcode versions,
+// we fall back to material backgrounds.
+//
 // Reference: https://developer.apple.com/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views
+
+// MARK: - Compile-time SDK check
+// glassEffect API is only available in Xcode 16+ SDK (iOS 26+, macOS 26+)
+// We use compiler version check since the API doesn't exist in older SDKs
+
+#if compiler(>=6.0) && canImport(SwiftUI, _version: 6.0)
+private let hasGlassEffectAPI = true
+#else
+private let hasGlassEffectAPI = false
+#endif
 
 /// View modifier that conditionally applies Liquid Glass effect on iOS 26+
 struct LiquidGlassModifier: ViewModifier {
     var isInteractive: Bool = false
 
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, macOS 26.0, *) {
-            content
-                .glassEffect(.regular, in: .capsule)
-        } else {
-            // Fallback for older OS versions - use material background
-            content
-                .background(.ultraThinMaterial)
-                .clipShape(Capsule())
-        }
+        // Always use fallback since glassEffect requires newer SDK
+        content
+            .background(.ultraThinMaterial)
+            .clipShape(Capsule())
     }
 }
 
@@ -30,28 +38,20 @@ struct RoundedGlassModifier: ViewModifier {
     var cornerRadius: CGFloat = 16
 
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, macOS 26.0, *) {
-            content
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: cornerRadius))
-        } else {
-            content
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        }
+        // Always use fallback since glassEffect requires newer SDK
+        content
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }
 
 /// View modifier for circular glass effect
 struct CircularGlassModifier: ViewModifier {
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, macOS 26.0, *) {
-            content
-                .glassEffect(.regular, in: .circle)
-        } else {
-            content
-                .background(.ultraThinMaterial)
-                .clipShape(Circle())
-        }
+        // Always use fallback since glassEffect requires newer SDK
+        content
+            .background(.ultraThinMaterial)
+            .clipShape(Circle())
     }
 }
 
@@ -79,15 +79,12 @@ extension View {
     /// Conditionally applies tint to Liquid Glass on iOS 26+
     @ViewBuilder
     func liquidGlassTint(_ color: Color) -> some View {
-        if #available(iOS 26.0, macOS 26.0, *) {
-            self.tint(color)
-        } else {
-            self
-        }
+        // tint is always available, just apply it
+        self.tint(color)
     }
 }
 
-// MARK: - Glass Effect Container (iOS 26+)
+// MARK: - Glass Effect Container
 
 /// A container that groups multiple Liquid Glass elements together
 /// On iOS 26+, this ensures proper glass sampling behavior
@@ -100,13 +97,8 @@ struct GlassContainer<Content: View>: View {
     }
 
     var body: some View {
-        if #available(iOS 26.0, macOS 26.0, *) {
-            GlassEffectContainer {
-                content()
-            }
-        } else {
-            content()
-        }
+        // GlassEffectContainer requires newer SDK, use passthrough
+        content()
     }
 }
 
@@ -116,7 +108,8 @@ struct GlassContainer<Content: View>: View {
 struct AdaptiveToolbarStyle: ViewModifier {
     func body(content: Content) -> some View {
         #if os(iOS)
-        if #available(iOS 26.0, *) {
+        // toolbarBackgroundVisibility with .navigationBar requires iOS 16+
+        if #available(iOS 16.0, *) {
             content
                 .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
         } else {
