@@ -10,7 +10,7 @@ final class ChatManagerTests: XCTestCase {
 
     override func setUp() async throws {
         let schema = Schema([Conversation.self, Message.self])
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         modelContainer = try ModelContainer(for: schema, configurations: [config])
         modelContext = ModelContext(modelContainer)
 
