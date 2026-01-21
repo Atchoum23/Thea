@@ -60,6 +60,18 @@ final class ProjectManager: ObservableObject {
         }
     }
 
+    func clearAllData() {
+        guard let context = modelContext else { return }
+
+        for project in projects {
+            context.delete(project)
+        }
+        try? context.save()
+
+        projects.removeAll()
+        activeProject = nil
+    }
+
     func setActiveProject(_ project: Project?) {
         activeProject = project
     }

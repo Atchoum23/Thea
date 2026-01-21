@@ -72,6 +72,35 @@ final class FinancialManager {
         transactions.removeAll { $0.id == transaction.id }
     }
 
+    func clearAllData() {
+        guard let context = modelContext else { return }
+
+        for transaction in transactions {
+            context.delete(transaction)
+        }
+        for account in accounts {
+            context.delete(account)
+        }
+        try? context.save()
+
+        transactions.removeAll()
+        accounts.removeAll()
+        isSyncing = false
+    }
+
+    func syncAccount(_ account: FinancialAccount) async {
+        isSyncing = true
+
+        // Simulate sync delay
+        try? await Task.sleep(for: .seconds(1))
+
+        // Update the account's last sync time
+        account.updatedAt = Date()
+        try? modelContext?.save()
+
+        isSyncing = false
+    }
+
     // MARK: - Analytics
 
     func getBalance(for accountId: UUID) -> Double {

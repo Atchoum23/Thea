@@ -56,6 +56,19 @@ final class KnowledgeManager {
         indexedFiles.removeAll { $0.id == file.id }
     }
 
+    func clearAllData() {
+        guard let context = modelContext else { return }
+
+        for file in indexedFiles {
+            context.delete(file)
+        }
+        try? context.save()
+
+        indexedFiles.removeAll()
+        isIndexing = false
+        indexProgress = 0.0
+    }
+
     func search(query: String) -> [IndexedFile] {
         indexedFiles.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }

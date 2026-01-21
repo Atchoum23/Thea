@@ -8,6 +8,7 @@ struct iOSSettingsView: View {
     @State private var showingMigration = false
     @State private var showingAbout = false
     @State private var showingAPIKeys = false
+    @State private var showingClearDataConfirmation = false
 
     var body: some View {
         Form {
@@ -27,6 +28,27 @@ struct iOSSettingsView: View {
         .sheet(isPresented: $showingAPIKeys) {
             iOSAPIKeysView()
         }
+        .confirmationDialog(
+            "Clear All Data",
+            isPresented: $showingClearDataConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Clear All Data", role: .destructive) {
+                clearAllData()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete all your conversations, projects, and settings. This action cannot be undone.")
+        }
+    }
+
+    private func clearAllData() {
+        // Clear all managers' data
+        ChatManager.shared.clearAllData()
+        ProjectManager.shared.clearAllData()
+        KnowledgeManager.shared.clearAllData()
+        FinancialManager.shared.clearAllData()
+        settingsManager.resetToDefaults()
     }
 
     private var aiProvidersSection: some View {
@@ -101,7 +123,7 @@ struct iOSSettingsView: View {
             Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
 
             Button("Clear All Data") {
-                // Will implement with confirmation dialog
+                showingClearDataConfirmation = true
             }
             .foregroundStyle(.red)
         } header: {
