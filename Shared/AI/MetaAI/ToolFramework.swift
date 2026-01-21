@@ -62,7 +62,7 @@ final class ToolFramework {
 
     // MARK: - Tool Execution
 
-    nonisolated func executeTool(_ tool: Tool, parameters: [String: Any]) async throws -> ToolResult {
+    func executeTool(_ tool: Tool, parameters: [String: Any]) async throws -> ToolResult {
         let startTime = Date()
 
         do {
@@ -84,7 +84,7 @@ final class ToolFramework {
         }
     }
 
-    nonisolated func executeToolChain(_ tools: [Tool], initialInput: [String: Any]) async throws -> [ToolResult] {
+    func executeToolChain(_ tools: [Tool], initialInput: [String: Any]) async throws -> [ToolResult] {
         var results: [ToolResult] = []
         var currentInput = initialInput
 
