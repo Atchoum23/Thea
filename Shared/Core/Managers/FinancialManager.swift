@@ -121,14 +121,12 @@ final class FinancialManager {
     private func loadData() {
         guard let context = modelContext else { return }
 
-        let accountDescriptor = FetchDescriptor<FinancialAccount>(
-            sortBy: [SortDescriptor(\.name)]
-        )
+        var accountDescriptor = FetchDescriptor<FinancialAccount>()
+        accountDescriptor.sortBy = [SortDescriptor(\.name)]
         accounts = (try? context.fetch(accountDescriptor)) ?? []
 
-        let transactionDescriptor = FetchDescriptor<FinancialTransaction>(
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
+        var transactionDescriptor = FetchDescriptor<FinancialTransaction>()
+        transactionDescriptor.sortBy = [SortDescriptor(\.date, order: .reverse)]
         transactions = (try? context.fetch(transactionDescriptor)) ?? []
     }
 }

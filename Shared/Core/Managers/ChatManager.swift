@@ -30,9 +30,8 @@ final class ChatManager: ObservableObject {
 
     func loadConversations() {
         guard let context = modelContext else { return }
-        let descriptor = FetchDescriptor<Conversation>(
-            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
-        )
+        var descriptor = FetchDescriptor<Conversation>()
+        descriptor.sortBy = [SortDescriptor(\.updatedAt, order: .reverse)]
         conversations = (try? context.fetch(descriptor)) ?? []
     }
 

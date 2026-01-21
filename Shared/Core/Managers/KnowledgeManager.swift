@@ -75,9 +75,8 @@ final class KnowledgeManager {
 
     private func loadIndexedFiles() {
         guard let context = modelContext else { return }
-        let descriptor = FetchDescriptor<IndexedFile>(
-            sortBy: [SortDescriptor(\.indexedAt, order: .reverse)]
-        )
+        var descriptor = FetchDescriptor<IndexedFile>()
+        descriptor.sortBy = [SortDescriptor(\.indexedAt, order: .reverse)]
         indexedFiles = (try? context.fetch(descriptor)) ?? []
     }
 }

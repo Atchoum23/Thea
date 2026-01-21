@@ -11,8 +11,8 @@ struct MCPToolBridge: Sendable {
     let parameters: [ToolParameter]
     let mcpServerName: String
     let mcpToolName: String
-    
-    func execute(arguments: [String: Any]) async throws -> ToolResult {
+
+    @MainActor func execute(arguments: [String: Any]) async throws -> ToolResult {
         // Bridge to MCP server
         // This would integrate with actual MCP client when available
         // For now, return success

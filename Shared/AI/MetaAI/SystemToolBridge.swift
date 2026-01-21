@@ -11,7 +11,7 @@ struct FileReadTool: Sendable {
         ToolParameter(name: "path", type: .string, required: true, description: "File path to read")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let path = arguments["path"] as? String else {
             throw ToolError.invalidParameters
         }
@@ -30,7 +30,7 @@ struct FileWriteTool: Sendable {
         ToolParameter(name: "content", type: .string, required: true, description: "Content to write")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let path = arguments["path"] as? String,
               let content = arguments["content"] as? String else {
             throw ToolError.invalidParameters
@@ -50,7 +50,7 @@ struct FileSearchTool: Sendable {
         ToolParameter(name: "pattern", type: .string, required: true, description: "Search pattern (glob or regex)")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let directory = arguments["directory"] as? String,
               let pattern = arguments["pattern"] as? String else {
             throw ToolError.invalidParameters
@@ -80,7 +80,7 @@ struct FileListTool: Sendable {
         ToolParameter(name: "recursive", type: .boolean, required: false, description: "List recursively")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let path = arguments["path"] as? String else {
             throw ToolError.invalidParameters
         }
@@ -114,7 +114,7 @@ struct TerminalTool: Sendable {
         ToolParameter(name: "workingDirectory", type: .string, required: false, description: "Working directory")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let command = arguments["command"] as? String else {
             throw ToolError.invalidParameters
         }
@@ -153,7 +153,7 @@ struct WebSearchTool: Sendable {
         ToolParameter(name: "query", type: .string, required: true, description: "Search query")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let query = arguments["query"] as? String else {
             throw ToolError.invalidParameters
         }
@@ -173,7 +173,7 @@ struct HTTPRequestTool: Sendable {
         ToolParameter(name: "body", type: .string, required: false, description: "Request body")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let urlString = arguments["url"] as? String,
               let url = URL(string: urlString) else {
             throw ToolError.invalidParameters
@@ -210,7 +210,7 @@ struct JSONParseTool: Sendable {
         ToolParameter(name: "json", type: .string, required: true, description: "JSON string to parse")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let jsonString = arguments["json"] as? String,
               let data = jsonString.data(using: .utf8) else {
             throw ToolError.invalidParameters
@@ -230,7 +230,7 @@ struct RegexMatchTool: Sendable {
         ToolParameter(name: "pattern", type: .string, required: true, description: "Regex pattern")
     ]
 
-    static func execute(arguments: [String: Any]) async throws -> Any {
+    @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
         guard let text = arguments["text"] as? String,
               let pattern = arguments["pattern"] as? String else {
             throw ToolError.invalidParameters
