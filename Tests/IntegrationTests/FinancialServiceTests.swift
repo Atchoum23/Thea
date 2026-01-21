@@ -1,4 +1,8 @@
+#if SWIFT_PACKAGE
 @testable import TheaCore
+#else
+@testable import Thea
+#endif
 import XCTest
 
 // MARK: - Financial Service Tests

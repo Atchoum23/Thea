@@ -1,5 +1,9 @@
 import XCTest
+#if SWIFT_PACKAGE
 @testable import TheaCore
+#else
+@testable import Thea
+#endif
 
 /// Test suite for Health module services
 @MainActor
