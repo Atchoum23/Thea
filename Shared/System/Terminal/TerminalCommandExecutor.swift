@@ -59,6 +59,7 @@ final class TerminalCommandExecutor: @unchecked Sendable {
         }
 
         let startTime = Date()
+        let timeoutSeconds = securityPolicy.maxExecutionTime
 
         return try await withThrowingTaskGroup(of: CommandResult.self) { group in
             group.addTask {
@@ -102,9 +103,9 @@ final class TerminalCommandExecutor: @unchecked Sendable {
                 )
             }
 
-            // Timeout task
+            // Timeout task - capture timeout value to avoid self capture
             group.addTask {
-                try await Task.sleep(nanoseconds: UInt64(self.securityPolicy.maxExecutionTime * 1_000_000_000))
+                try await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
                 throw ExecutorError.timeout
             }
 
