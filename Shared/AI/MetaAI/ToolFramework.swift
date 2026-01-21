@@ -62,7 +62,7 @@ final class ToolFramework {
 
     // MARK: - Tool Execution
 
-    nonisolated func executeTool(_ tool: Tool, parameters: [String: Any]) async throws -> ToolResult {
+    func executeTool(_ tool: Tool, parameters: [String: Any]) async throws -> ToolResult {
         let startTime = Date()
 
         do {
@@ -84,7 +84,7 @@ final class ToolFramework {
         }
     }
 
-    nonisolated func executeToolChain(_ tools: [Tool], initialInput: [String: Any]) async throws -> [ToolResult] {
+    func executeToolChain(_ tools: [Tool], initialInput: [String: Any]) async throws -> [ToolResult] {
         var results: [ToolResult] = []
         var currentInput = initialInput
 
@@ -133,19 +133,19 @@ final class ToolFramework {
 
 // MARK: - Models
 
-struct Tool: Identifiable, Codable, Sendable {
+struct Tool: Identifiable, Codable, @unchecked Sendable {
     let id: UUID
     let name: String
     let description: String
     let parameters: [ToolParameter]
     let category: ToolCategory
-    let handler: @Sendable ([String: Any]) async throws -> Any
+    let handler: @MainActor ([String: Any]) async throws -> Any
 
     enum CodingKeys: String, CodingKey {
         case id, name, description, parameters, category
     }
 
-    init(id: UUID, name: String, description: String, parameters: [ToolParameter], category: ToolCategory, handler: @escaping @Sendable ([String: Any]) async throws -> Any) {
+    init(id: UUID, name: String, description: String, parameters: [ToolParameter], category: ToolCategory, handler: @escaping @MainActor ([String: Any]) async throws -> Any) {
         self.id = id
         self.name = name
         self.description = description
@@ -212,7 +212,7 @@ struct ToolExecution: Identifiable {
     }
 }
 
-struct ToolResult {
+struct ToolResult: @unchecked Sendable {
     let success: Bool
     let output: Any?
     let error: String?

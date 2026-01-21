@@ -261,7 +261,7 @@ extension ToolFramework {
             description: FileReadTool.description,
             parameters: FileReadTool.parameters,
             category: .fileSystem
-        ) { @Sendable args in
+        ) { args in
             try await FileReadTool.execute(arguments: args)
         })
 
@@ -271,7 +271,7 @@ extension ToolFramework {
             description: FileWriteTool.description,
             parameters: FileWriteTool.parameters,
             category: .fileSystem
-        ) { @Sendable args in
+        ) { args in
             try await FileWriteTool.execute(arguments: args)
         })
 
@@ -281,7 +281,7 @@ extension ToolFramework {
             description: FileSearchTool.description,
             parameters: FileSearchTool.parameters,
             category: .fileSystem
-        ) { @Sendable args in
+        ) { args in
             try await FileSearchTool.execute(arguments: args)
         })
 
@@ -291,7 +291,7 @@ extension ToolFramework {
             description: FileListTool.description,
             parameters: FileListTool.parameters,
             category: .fileSystem
-        ) { @Sendable args in
+        ) { args in
             try await FileListTool.execute(arguments: args)
         })
 
@@ -302,7 +302,7 @@ extension ToolFramework {
             description: TerminalTool.description,
             parameters: TerminalTool.parameters,
             category: .code
-        ) { @Sendable args in
+        ) { args in
             try await TerminalTool.execute(arguments: args)
         })
 
@@ -313,7 +313,7 @@ extension ToolFramework {
             description: WebSearchTool.description,
             parameters: WebSearchTool.parameters,
             category: .web
-        ) { @Sendable args in
+        ) { args in
             try await WebSearchTool.execute(arguments: args)
         })
 
@@ -323,7 +323,7 @@ extension ToolFramework {
             description: HTTPRequestTool.description,
             parameters: HTTPRequestTool.parameters,
             category: .web
-        ) { @Sendable args in
+        ) { args in
             try await HTTPRequestTool.execute(arguments: args)
         })
 
@@ -334,7 +334,7 @@ extension ToolFramework {
             description: JSONParseTool.description,
             parameters: JSONParseTool.parameters,
             category: .data
-        ) { @Sendable args in
+        ) { args in
             try await JSONParseTool.execute(arguments: args)
         })
 
@@ -344,7 +344,7 @@ extension ToolFramework {
             description: RegexMatchTool.description,
             parameters: RegexMatchTool.parameters,
             category: .data
-        ) { @Sendable args in
+        ) { args in
             try await RegexMatchTool.execute(arguments: args)
         })
     }

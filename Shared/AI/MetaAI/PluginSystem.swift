@@ -92,7 +92,7 @@ final class PluginSystem {
 
     // MARK: - Plugin Execution
 
-    nonisolated func executePlugin(
+    func executePlugin(
         _ pluginId: UUID,
         input: [String: Any],
         context: PluginContext
@@ -128,7 +128,7 @@ final class PluginSystem {
         return result
     }
 
-    nonisolated private func executeSandboxed(
+    private func executeSandboxed(
         plugin: Plugin,
         input: [String: Any],
         context: PluginContext
@@ -161,7 +161,7 @@ final class PluginSystem {
 
     // MARK: - Inter-Plugin Communication
 
-    nonisolated func sendMessage(
+    func sendMessage(
         from sourcePluginId: UUID,
         to targetPluginId: UUID,
         message: PluginMessage
@@ -187,7 +187,7 @@ final class PluginSystem {
         return response
     }
 
-    nonisolated private func deliverMessage(
+    private func deliverMessage(
         to plugin: Plugin,
         message: PluginMessage
     ) async throws -> PluginMessage {
@@ -235,7 +235,7 @@ final class PluginSystem {
         }
     }
 
-    nonisolated private func validateExecutionPermissions(
+    private func validateExecutionPermissions(
         plugin: Plugin,
         context: PluginContext
     ) async throws {
@@ -359,7 +359,7 @@ class PluginSandbox {
         self.maxDuration = maxDuration
     }
 
-    nonisolated func execute(input: [String: Any], context: PluginContext) async throws -> Any {
+    func execute(input: [String: Any], context: PluginContext) async throws -> Any {
         log("Starting plugin execution: \(plugin.manifest.name)")
 
         let startTime = Date()

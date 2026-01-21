@@ -371,7 +371,7 @@ final class WorkflowBuilder {
 
     // MARK: - Node Execution
 
-    nonisolated private func executeNode(
+    private func executeNode(
         _ node: WorkflowNode,
         inputs: SendableDict,
         workflow: Workflow
@@ -413,7 +413,7 @@ final class WorkflowBuilder {
         return SendableDict(result)
     }
 
-    nonisolated private func executeAIInference(
+    private func executeAIInference(
         _ node: WorkflowNode,
         inputs: [String: Any]
     ) async throws -> [String: Any] {
@@ -450,7 +450,7 @@ final class WorkflowBuilder {
         return ["output": result]
     }
 
-    nonisolated private func executeToolNode(
+    private func executeToolNode(
         _ node: WorkflowNode,
         inputs: [String: Any]
     ) async throws -> [String: Any] {
@@ -468,7 +468,7 @@ final class WorkflowBuilder {
         return ["output": result.output ?? "", "success": result.success]
     }
 
-    nonisolated private func executeConditional(
+    private func executeConditional(
         _ node: WorkflowNode,
         inputs: [String: Any]
     ) -> [String: Any] {
@@ -482,7 +482,7 @@ final class WorkflowBuilder {
         return ["result": result, "branch": result ? "true" : "false"]
     }
 
-    nonisolated private func executeLoop(
+    private func executeLoop(
         _ node: WorkflowNode,
         inputs: [String: Any],
         workflow: Workflow
@@ -503,7 +503,7 @@ final class WorkflowBuilder {
         return ["results": results, "count": iterations]
     }
 
-    nonisolated private func executeVariable(
+    private func executeVariable(
         _ node: WorkflowNode,
         inputs: [String: Any]
     ) -> [String: Any] {
@@ -518,7 +518,7 @@ final class WorkflowBuilder {
         return ["value": node.config["defaultValue"] ?? ""]
     }
 
-    nonisolated private func executeTransformation(
+    private func executeTransformation(
         _ node: WorkflowNode,
         inputs: [String: Any]
     ) -> [String: Any] {
@@ -549,7 +549,7 @@ final class WorkflowBuilder {
         return inputs
     }
 
-    nonisolated private func executeMerge(
+    private func executeMerge(
         _ node: WorkflowNode,
         inputs: [String: Any]
     ) -> [String: Any] {
@@ -557,7 +557,7 @@ final class WorkflowBuilder {
         ["merged": inputs]
     }
 
-    nonisolated private func executeSplit(
+    private func executeSplit(
         _ node: WorkflowNode,
         inputs: [String: Any]
     ) -> [String: Any] {
@@ -688,7 +688,7 @@ final class WorkflowBuilder {
         return false
     }
 
-    nonisolated private func evaluateCondition(
+    private func evaluateCondition(
         _ condition: String,
         inputs: [String: Any]
     ) -> Bool {
