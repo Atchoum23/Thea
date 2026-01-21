@@ -303,7 +303,7 @@ public final class ResultAggregator {
 // MARK: - Models
 
 /// Result from a single agent or processing step for aggregation
-public struct AggregatorInput: Sendable {
+public struct AggregatorInput: @unchecked Sendable {
     public let source: String
     public let content: String
     public let confidence: Double
@@ -334,7 +334,7 @@ public struct AggregatorInput: Sendable {
 }
 
 /// Aggregated result from multiple sources
-public struct AggregatedResult: Sendable {
+public struct AggregatedResult: @unchecked Sendable {
     public let content: String
     public let sources: [String]
     public let confidence: Double
