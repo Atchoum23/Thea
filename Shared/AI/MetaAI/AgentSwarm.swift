@@ -63,24 +63,17 @@ final class AgentSwarm {
     ) async throws -> SwarmResult {
         var agentResults: [AgentResult] = []
 
-        // Execute all agents in parallel
-        try await withThrowingTaskGroup(of: AgentResult.self) { group in
-            for i in 0..<swarm.agentCount {
-                group.addTask { @MainActor in
-                    let progress = Float(i) / Float(swarm.agentCount)
-                    progressHandler(SwarmProgress(phase: "Agent \(i + 1) executing", percentage: progress))
+        // Execute all agents sequentially (satisfies Swift 6 region-based isolation)
+        for i in 0..<swarm.agentCount {
+            let progress = Float(i) / Float(swarm.agentCount)
+            progressHandler(SwarmProgress(phase: "Agent \(i + 1) executing", percentage: progress))
 
-                    return try await self.executeAgent(
-                        task: swarm.task,
-                        agentIndex: i,
-                        totalAgents: swarm.agentCount
-                    )
-                }
-            }
-
-            for try await result in group {
-                agentResults.append(result)
-            }
+            let result = try await executeAgent(
+                task: swarm.task,
+                agentIndex: i,
+                totalAgents: swarm.agentCount
+            )
+            agentResults.append(result)
         }
 
         progressHandler(SwarmProgress(phase: "Aggregating results", percentage: 1.0))
@@ -105,23 +98,16 @@ final class AgentSwarm {
     ) async throws -> SwarmResult {
         var agentResults: [AgentResult] = []
 
-        // Execute all agents and pick the best result
-        try await withThrowingTaskGroup(of: AgentResult.self) { group in
-            for i in 0..<swarm.agentCount {
-                group.addTask { @MainActor in
-                    try await self.executeAgent(
-                        task: swarm.task,
-                        agentIndex: i,
-                        totalAgents: swarm.agentCount
-                    )
-                }
-            }
-
-            for try await result in group {
-                agentResults.append(result)
-                let progress = Float(agentResults.count) / Float(swarm.agentCount)
-                progressHandler(SwarmProgress(phase: "Agent \(agentResults.count) complete", percentage: progress))
-            }
+        // Execute all agents sequentially (satisfies Swift 6 region-based isolation)
+        for i in 0..<swarm.agentCount {
+            let result = try await executeAgent(
+                task: swarm.task,
+                agentIndex: i,
+                totalAgents: swarm.agentCount
+            )
+            agentResults.append(result)
+            let progress = Float(agentResults.count) / Float(swarm.agentCount)
+            progressHandler(SwarmProgress(phase: "Agent \(agentResults.count) complete", percentage: progress))
         }
 
         // Select best result based on confidence
@@ -179,21 +165,14 @@ final class AgentSwarm {
     ) async throws -> SwarmResult {
         var agentResults: [AgentResult] = []
 
-        // Execute all agents
-        try await withThrowingTaskGroup(of: AgentResult.self) { group in
-            for i in 0..<swarm.agentCount {
-                group.addTask { @MainActor in
-                    try await self.executeAgent(
-                        task: swarm.task,
-                        agentIndex: i,
-                        totalAgents: swarm.agentCount
-                    )
-                }
-            }
-
-            for try await result in group {
-                agentResults.append(result)
-            }
+        // Execute all agents sequentially (satisfies Swift 6 region-based isolation)
+        for i in 0..<swarm.agentCount {
+            let result = try await executeAgent(
+                task: swarm.task,
+                agentIndex: i,
+                totalAgents: swarm.agentCount
+            )
+            agentResults.append(result)
         }
 
         progressHandler(SwarmProgress(phase: "Building consensus", percentage: 0.9))
