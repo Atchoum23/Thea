@@ -164,8 +164,10 @@ struct ConversationDocument: FileDocument, @unchecked Sendable {
     }
 
     init(configuration: ReadConfiguration) throws {
-        // Not implementing reading for now
-        fatalError("Reading not supported")
+        // Reading from file not supported - this is an export-only document type
+        throw CocoaError(.fileReadUnsupportedScheme, userInfo: [
+            NSLocalizedDescriptionKey: "Reading conversation files is not supported. This document type is for export only."
+        ])
     }
 
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
