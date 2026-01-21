@@ -1,9 +1,5 @@
 @preconcurrency import SwiftData
-#if SWIFT_PACKAGE
 @testable import TheaCore
-#else
-@testable import Thea
-#endif
 import XCTest
 
 @MainActor

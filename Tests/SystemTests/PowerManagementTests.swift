@@ -6,11 +6,7 @@
 //
 
 import XCTest
-#if SWIFT_PACKAGE
 @testable import TheaCore
-#else
-@testable import Thea
-#endif
 
 final class PowerManagementTests: XCTestCase {
 
