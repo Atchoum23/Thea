@@ -141,28 +141,20 @@ public actor AICodeFixGenerator {
     /// Generate fixes for multiple errors efficiently
     public func generateFixes(for errors: [ErrorParser.ParsedError]) async -> [BatchFixResult] {
         var results: [BatchFixResult] = []
-        
-        // Process in batches to avoid overwhelming the API
+
+        // Process in batches sequentially to satisfy Swift 6 isolation checker
         let batchSize = 5
         for batch in errors.chunked(into: batchSize) {
-            await withTaskGroup(of: BatchFixResult.self) { group in
-                for parsedError in batch {
-                    group.addTask {
-                        do {
-                            let fix = try await self.generateFix(for: parsedError)
-                            return BatchFixResult(error: parsedError, fix: fix, failureReason: nil)
-                        } catch let err {
-                            return BatchFixResult(error: parsedError, fix: nil, failureReason: err.localizedDescription)
-                        }
-                    }
-                }
-                
-                for await result in group {
-                    results.append(result)
+            for parsedError in batch {
+                do {
+                    let fix = try await generateFix(for: parsedError)
+                    results.append(BatchFixResult(error: parsedError, fix: fix, failureReason: nil))
+                } catch let err {
+                    results.append(BatchFixResult(error: parsedError, fix: nil, failureReason: err.localizedDescription))
                 }
             }
         }
-        
+
         return results
     }
 
