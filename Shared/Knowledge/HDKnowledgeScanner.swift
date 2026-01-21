@@ -149,18 +149,11 @@ final class HDKnowledgeScanner {
     }
 
     private func indexBatch(_ files: [URL]) async throws {
-        await withTaskGroup(of: ScannedFile?.self) { group in
-            for fileURL in files {
-                group.addTask {
-                    try? await self.indexFile(fileURL)
-                }
-            }
-
-            for await indexedFile in group {
-                if let file = indexedFile {
-                    indexedFiles.append(file)
-                    totalFilesIndexed += 1
-                }
+        // Execute sequentially to satisfy Swift 6 region-based isolation checker
+        for fileURL in files {
+            if let file = try? await indexFile(fileURL) {
+                indexedFiles.append(file)
+                totalFilesIndexed += 1
             }
         }
     }
