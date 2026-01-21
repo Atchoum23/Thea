@@ -113,9 +113,8 @@ final class UserPreferenceModel {
     private func loadPreferences() async {
         guard let context = modelContext else { return }
 
-        let descriptor = FetchDescriptor<UserPromptPreference>(
-            sortBy: [SortDescriptor(\.confidence, order: .reverse)]
-        )
+        var descriptor = FetchDescriptor<UserPromptPreference>()
+        descriptor.sortBy = [SortDescriptor(\.confidence, order: .reverse)]
 
         do {
             let preferences = try context.fetch(descriptor)
