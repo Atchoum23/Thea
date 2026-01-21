@@ -4,7 +4,7 @@ import SwiftUI
 /// iPad-optimized home view using three-column NavigationSplitView
 /// Provides a native iPad experience with sidebar navigation, list content, and detail view
 @MainActor
-struct iPadHomeView: View {
+struct IPadHomeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var chatManager = ChatManager.shared
     @State private var projectManager = ProjectManager.shared
@@ -65,7 +65,7 @@ struct iPadHomeView: View {
             iOSNewConversationView()
         }
         .sheet(isPresented: $showingNewProject) {
-            iPadNewProjectView()
+            IPadNewProjectView()
         }
         .sheet(isPresented: $showingVoiceSettings) {
             iOSVoiceSettingsView()
@@ -134,7 +134,7 @@ struct iPadHomeView: View {
             } else {
                 List(chatManager.conversations, selection: $selectedConversation) { conversation in
                     NavigationLink(value: conversation) {
-                        iPadConversationRow(conversation: conversation)
+                        IPadConversationRow(conversation: conversation)
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
@@ -187,7 +187,7 @@ struct iPadHomeView: View {
             } else {
                 List(projectManager.projects, selection: $selectedProject) { project in
                     NavigationLink(value: project) {
-                        iPadProjectRow(project: project)
+                        IPadProjectRow(project: project)
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
@@ -243,13 +243,13 @@ struct iPadHomeView: View {
         switch selectedSection {
         case .chat:
             if let conversation = selectedConversation {
-                iPadChatDetailView(conversation: conversation)
+                IPadChatDetailView(conversation: conversation)
             } else {
                 chatPlaceholderView
             }
         case .projects:
             if let project = selectedProject {
-                iPadProjectDetailView(project: project)
+                IPadProjectDetailView(project: project)
             } else {
                 projectPlaceholderView
             }
@@ -367,7 +367,7 @@ struct iPadHomeView: View {
 
 // MARK: - iPad Conversation Row
 
-private struct iPadConversationRow: View {
+private struct IPadConversationRow: View {
     let conversation: Conversation
 
     var body: some View {
@@ -398,7 +398,7 @@ private struct iPadConversationRow: View {
                     .font(.caption)
                     .foregroundStyle(.tertiary)
 
-                if conversation.messages.count > 0 {
+                if !conversation.messages.isEmpty {
                     Text("•")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
@@ -415,7 +415,7 @@ private struct iPadConversationRow: View {
 
 // MARK: - iPad Project Row
 
-private struct iPadProjectRow: View {
+private struct IPadProjectRow: View {
     let project: Project
 
     var body: some View {
@@ -449,7 +449,7 @@ private struct iPadProjectRow: View {
 
 // MARK: - iPad Chat Detail View
 
-struct iPadChatDetailView: View {
+struct IPadChatDetailView: View {
     let conversation: Conversation
 
     @Environment(\.modelContext) private var modelContext
@@ -659,7 +659,7 @@ struct iPadChatDetailView: View {
 
 // MARK: - iPad Project Detail View
 
-struct iPadProjectDetailView: View {
+struct IPadProjectDetailView: View {
     let project: Project
 
     @State private var projectManager = ProjectManager.shared
@@ -706,8 +706,8 @@ struct iPadProjectDetailView: View {
             if !project.conversations.isEmpty {
                 Section("Conversations") {
                     ForEach(project.conversations) { conversation in
-                        NavigationLink(destination: iPadChatDetailView(conversation: conversation)) {
-                            iPadConversationRow(conversation: conversation)
+                        NavigationLink(destination: IPadChatDetailView(conversation: conversation)) {
+                            IPadConversationRow(conversation: conversation)
                         }
                     }
                 }
@@ -756,7 +756,7 @@ struct iPadProjectDetailView: View {
 
 // MARK: - iPad New Project View
 
-struct iPadNewProjectView: View {
+struct IPadNewProjectView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var projectManager = ProjectManager.shared
 

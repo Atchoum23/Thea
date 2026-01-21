@@ -20,7 +20,7 @@ struct AdaptiveHomeView: View {
     var body: some View {
         Group {
             if shouldUseiPadLayout {
-                iPadHomeView()
+                IPadHomeView()
             } else {
                 iOSHomeView()
             }
