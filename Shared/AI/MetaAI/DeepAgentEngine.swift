@@ -277,20 +277,13 @@ final class DeepAgentEngine {
     }
 
     private func assignTools(to subtasks: [Subtask]) async throws -> [SubtaskWithTools] {
-        try await withThrowingTaskGroup(of: SubtaskWithTools.self) { group in
-            for subtask in subtasks {
-                group.addTask { @MainActor in
-                    let tools = await self.toolRegistry.selectTools(for: subtask.description)
-                    return SubtaskWithTools(subtask: subtask, tools: tools)
-                }
-            }
-
-            var result: [SubtaskWithTools] = []
-            for try await item in group {
-                result.append(item)
-            }
-            return result.sorted { $0.subtask.step < $1.subtask.step }
+        // Execute sequentially to satisfy Swift 6 region-based isolation checker
+        var result: [SubtaskWithTools] = []
+        for subtask in subtasks {
+            let tools = await toolRegistry.selectTools(for: subtask.description)
+            result.append(SubtaskWithTools(subtask: subtask, tools: tools))
         }
+        return result.sorted { $0.subtask.step < $1.subtask.step }
     }
 
     private func estimateDuration(for subtasks: [SubtaskWithTools]) -> TimeInterval {

@@ -322,18 +322,12 @@ final class SubAgentOrchestrator {
                 progress: batchProgress
             ))
 
-            let batchResults = try await withThrowingTaskGroup(of: SubTaskResult.self) { group in
-                for assignment in batch {
-                    group.addTask { @MainActor in
-                        try await self.executeSubTask(assignment)
-                    }
-                }
-
-                var collected: [SubTaskResult] = []
-                for try await result in group {
-                    collected.append(result)
-                }
-                return collected
+            // Execute batch tasks - using sequential execution to satisfy
+            // Swift 6 region-based isolation checker
+            var batchResults: [SubTaskResult] = []
+            for assignment in batch {
+                let result = try await executeSubTask(assignment)
+                batchResults.append(result)
             }
 
             results.append(contentsOf: batchResults)
