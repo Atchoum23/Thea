@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
@@ -37,7 +37,7 @@ let package = Package(
             ],
             path: "Shared",
             swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
+                // Swift 6 has strict concurrency enabled by default
             ]
         ),
         .testTarget(
