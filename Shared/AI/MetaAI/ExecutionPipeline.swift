@@ -541,7 +541,7 @@ public struct Pipeline: Identifiable, Sendable {
 }
 
 /// Pipeline stage definition
-public struct PipelineStage: Identifiable, Sendable {
+public struct PipelineStage: Identifiable, @unchecked Sendable {
     public let id: UUID
     public let name: String
     public let type: StageType
@@ -632,7 +632,7 @@ public class PipelineExecution: Identifiable, @unchecked Sendable {
 }
 
 /// Result from a single stage
-public struct StageResult: Sendable {
+public struct StageResult: @unchecked Sendable {
     public let stageId: UUID
     public let stageName: String
     public let success: Bool
@@ -642,7 +642,7 @@ public struct StageResult: Sendable {
 }
 
 /// Final pipeline result
-public struct PipelineResult: Sendable {
+public struct PipelineResult: @unchecked Sendable {
     public let executionId: UUID
     public let success: Bool
     public let finalOutput: [String: Any]
@@ -671,7 +671,7 @@ public struct PipelineError: Sendable {
 }
 
 /// Context passed between pipeline stages
-public struct PipelineContext: Sendable {
+public struct PipelineContext: @unchecked Sendable {
     public let input: [String: Any]
     public var output: [String: Any]
     public var stageHistory: [String: [String: Any]]
