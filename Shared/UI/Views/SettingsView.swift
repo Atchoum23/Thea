@@ -993,7 +993,10 @@ struct DataExportDocument: FileDocument, @unchecked Sendable {
     init() {}
 
     init(configuration: ReadConfiguration) throws {
-        fatalError("Reading not supported")
+        // Reading from file not supported - this is an export-only document type
+        throw CocoaError(.fileReadUnsupportedScheme, userInfo: [
+            NSLocalizedDescriptionKey: "Reading data export files is not supported. This document type is for export only."
+        ])
     }
 
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
