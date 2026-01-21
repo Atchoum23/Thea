@@ -224,7 +224,6 @@
 		5179515ADD5C22657D7949E5 /* IntegrationModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58FB08F521CDE9F944C7836C /* IntegrationModule.swift */; };
 		519267961C3F248C4279A1C2 /* PermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2BFC6536B6A14AFE7DF537 /* PermissionManager.swift */; };
 		51B1F0F3023F6B34CE739523 /* APIGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E6203C2845080FEA998CD3 /* APIGenerator.swift */; };
-		51D190A8068CD07CAF0843FC /* iPadHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C231965359E8B76509245861 /* iPadHomeView.swift */; };
 		5216C14A999719550495DE3E /* AnthropicProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5028FD03DD32838DE36130A7 /* AnthropicProvider.swift */; };
 		52A765CC79584E7F6ACDC653 /* MigrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D519C71250884B37AAB18A /* MigrationView.swift */; };
 		52D1B6E0721D6A1AA34EE6CF /* IntegrationUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9651EDC1926D96C968DE6E34 /* IntegrationUtilities.swift */; };
@@ -233,6 +232,7 @@
 		53F4E532987C1DB0B2505F1B /* ExecutionPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D586516894A5FC8597A247 /* ExecutionPipeline.swift */; };
 		5454F71070E9C399119D4162 /* KnowledgeManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4AD63B8991F00AB890CC10 /* KnowledgeManagementView.swift */; };
 		54A76886048C97F412033D9C /* verify-phase-6.3-6.7.sh in Resources */ = {isa = PBXBuildFile; fileRef = 3845D8E9697E7814AA46EBC6 /* verify-phase-6.3-6.7.sh */; };
+		54BE1E84F22F769D6BA510CF /* IPadHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A4798DE5D53BB98D694DAA /* IPadHomeView.swift */; };
 		54FB5DF8124DD94685D0B852 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = D7A9B6C8B31A6116C57C645A /* MarkdownUI */; };
 		550E3E71CEF6674A9570AC78 /* CoworkContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2462375E2C0637F6F13B2C /* CoworkContext.swift */; };
 		553928F8C81FE6A34AB9003E /* ProviderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C86307C650BB9254C7061A8C /* ProviderRegistry.swift */; };
@@ -821,6 +821,7 @@
 		615C40704209149E9345C411 /* NotificationCategories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCategories.swift; sourceTree = "<group>"; };
 		61E987E8F72EC93271972697 /* LocationTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTrackingManager.swift; sourceTree = "<group>"; };
 		62ED35AE71B25B379BB0C260 /* WorkflowPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowPersistence.swift; sourceTree = "<group>"; };
+		63A4798DE5D53BB98D694DAA /* IPadHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadHomeView.swift; sourceTree = "<group>"; };
 		63BB741EC194E286376B9CC2 /* TheaWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaWidget.swift; sourceTree = "<group>"; };
 		65A701A0A188D2D2FF28903F /* IncomeServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeServiceTests.swift; sourceTree = "<group>"; };
 		6605B72FE8117798058EE77C /* PlatformColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformColors.swift; sourceTree = "<group>"; };
@@ -947,7 +948,6 @@
 		C03FE4EC65D90AA08EA689E8 /* ProjectPathManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectPathManager.swift; sourceTree = "<group>"; };
 		C073055CA3B54601DAA60B82 /* TaskClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskClassifier.swift; sourceTree = "<group>"; };
 		C16E67A34622FD4131400956 /* FocusForestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusForestService.swift; sourceTree = "<group>"; };
-		C231965359E8B76509245861 /* iPadHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadHomeView.swift; sourceTree = "<group>"; };
 		C2ABEACF5247936B5C241F15 /* IntegrationModuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationModuleTests.swift; sourceTree = "<group>"; };
 		C2C9E67F316E11C79A15D6FC /* PromptEngineeringModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptEngineeringModels.swift; sourceTree = "<group>"; };
 		C317A416D1B86598194C7C7F /* AssessmentProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentProtocols.swift; sourceTree = "<group>"; };
@@ -1965,7 +1965,7 @@
 				8105F90A4C25CB92A1349820 /* iOSKnowledgeView.swift */,
 				557907F0E5C4825634A1F740 /* iOSProjectsView.swift */,
 				12D843CD7F24B89C084064F2 /* iOSSettingsView.swift */,
-				C231965359E8B76509245861 /* iPadHomeView.swift */,
+				63A4798DE5D53BB98D694DAA /* IPadHomeView.swift */,
 				B97FE44F4D796289AD62ADC9 /* NotificationExtensions.swift */,
 				1BDDCCBB3B72669B2C56E08E /* OnboardingView.swift */,
 			);
@@ -2682,6 +2682,7 @@
 				4EF34FD085656D93B23B66B4 /* HelpButton.swift in Sources */,
 				59969363D9FB9D83F69C1430 /* HomeView.swift in Sources */,
 				792682C9E0C1F6CD83943EE5 /* HypothesisTesting.swift in Sources */,
+				54BE1E84F22F769D6BA510CF /* IPadHomeView.swift in Sources */,
 				158CF1F2243F3A06620DA467 /* ImprovementSuggestions.swift in Sources */,
 				5DFE79EC23DFB8222EE47495 /* IncomeAnalytics.swift in Sources */,
 				494FB5AA8C15F0AA7C59D60C /* IncomeDashboardView.swift in Sources */,
@@ -2841,7 +2842,6 @@
 				E2EFE18F6E13E0D0D43C95E4 /* iOSKnowledgeView.swift in Sources */,
 				3399E5E478131C44850E27D0 /* iOSProjectsView.swift in Sources */,
 				DC37F7A213CB08AE40EF244E /* iOSSettingsView.swift in Sources */,
-				51D190A8068CD07CAF0843FC /* iPadHomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
