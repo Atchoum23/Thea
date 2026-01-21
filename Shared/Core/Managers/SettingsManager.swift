@@ -168,40 +168,68 @@ final class SettingsManager: ObservableObject {
         self.maxConcurrentTasks = UserDefaults.standard.integer(forKey: "maxConcurrentTasks") != 0 ? UserDefaults.standard.integer(forKey: "maxConcurrentTasks") : 3
     }
 
-    // API Key Management - Using consistent key naming for compatibility with SelfExecutionConfiguration
-    // Format: "\(provider)_api_key" (e.g., "openrouter_api_key", "anthropic_api_key")
+    // API Key Management - SECURITY: Uses Keychain via SecureStorage
+    // Format: "apikey.\(provider)" stored in Keychain
     func getAPIKey(for provider: String) -> String? {
-        // Try new format first, then old format for backwards compatibility
-        if let key = UserDefaults.standard.string(forKey: "\(provider)_api_key"), !key.isEmpty {
+        // SECURITY: Always use Keychain for API keys
+        if let key = try? SecureStorage.shared.loadAPIKey(for: provider), !key.isEmpty {
             return key
         }
-        // Migration: check old format
-        if let oldKey = UserDefaults.standard.string(forKey: "apiKey_\(provider)"), !oldKey.isEmpty {
-            // Migrate to new format
-            UserDefaults.standard.set(oldKey, forKey: "\(provider)_api_key")
-            UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
-            print("✅ Migrated API key for \(provider) to new format")
+
+        // Migration: check old UserDefaults format and migrate to Keychain
+        if let oldKey = UserDefaults.standard.string(forKey: "\(provider)_api_key"), !oldKey.isEmpty {
+            // Migrate to Keychain
+            try? SecureStorage.shared.saveAPIKey(oldKey, for: provider)
+            UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
+            print("✅ Migrated API key for \(provider) from UserDefaults to Keychain")
             return oldKey
         }
+
+        // Also check legacy format
+        if let legacyKey = UserDefaults.standard.string(forKey: "apiKey_\(provider)"), !legacyKey.isEmpty {
+            // Migrate to Keychain
+            try? SecureStorage.shared.saveAPIKey(legacyKey, for: provider)
+            UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
+            print("✅ Migrated legacy API key for \(provider) from UserDefaults to Keychain")
+            return legacyKey
+        }
+
         return nil
     }
 
     func setAPIKey(_ key: String, for provider: String) {
-        UserDefaults.standard.set(key, forKey: "\(provider)_api_key")
-        UserDefaults.standard.synchronize()
-        print("✅ API key saved for \(provider)")
+        do {
+            // SECURITY: Store in Keychain, not UserDefaults
+            try SecureStorage.shared.saveAPIKey(key, for: provider)
+            // Clean up any legacy UserDefaults entries
+            UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
+            UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
+            print("✅ API key saved securely for \(provider)")
+        } catch {
+            print("❌ Failed to save API key for \(provider): \(error)")
+        }
     }
 
     func deleteAPIKey(for provider: String) {
-        UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
-        UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)") // Clean old format too
-        UserDefaults.standard.synchronize()
-        print("✅ API key deleted for \(provider)")
+        do {
+            // SECURITY: Remove from Keychain
+            try SecureStorage.shared.deleteAPIKey(for: provider)
+            // Also clean up legacy UserDefaults entries
+            UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
+            UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
+            print("✅ API key deleted for \(provider)")
+        } catch {
+            print("❌ Failed to delete API key for \(provider): \(error)")
+        }
     }
 
     func hasAPIKey(for provider: String) -> Bool {
-        guard let key = getAPIKey(for: provider) else { return false }
-        return !key.isEmpty
+        // Check Keychain first
+        if SecureStorage.shared.hasAPIKey(for: provider) {
+            return true
+        }
+        // Also check if migration is needed from UserDefaults
+        return getAPIKey(for: provider) != nil
     }
 
     func resetToDefaults() {

@@ -116,15 +116,17 @@ final class QAToolsManager {
         }
 
         // Upload to CodeCov using their uploader
+        // SECURITY: Pass token via environment variable, not command line args
         let (output, exitCode) = await runCommand(
             "bash",
             arguments: [
                 "-c",
                 "curl -Os https://cli.codecov.io/latest/macos/codecov && " +
                 "chmod +x codecov && " +
-                "./codecov upload-process --token \(config.codeCovToken)"
+                "./codecov upload-process"
             ],
-            workingDirectory: projectPath
+            workingDirectory: projectPath,
+            environment: ["CODECOV_TOKEN": config.codeCovToken]
         )
 
         let duration = Date().timeIntervalSince(startTime)
@@ -176,15 +178,16 @@ final class QAToolsManager {
         let projectPath = resolveProjectPath()
 
         // Run sonar-scanner (requires installation: brew install sonar-scanner)
+        // SECURITY: Pass token via environment variable, not command line args
         let (output, exitCode) = await runCommand(
             "sonar-scanner",
             arguments: [
-                "-Dsonar.token=\(config.sonarCloudToken)",
                 "-Dsonar.organization=\(config.sonarCloudOrganization)",
                 "-Dsonar.projectKey=\(config.sonarCloudProjectKey)",
                 "-Dsonar.host.url=\(config.sonarCloudBaseURL)"
             ],
-            workingDirectory: projectPath
+            workingDirectory: projectPath,
+            environment: ["SONAR_TOKEN": config.sonarCloudToken]
         )
 
         let duration = Date().timeIntervalSince(startTime)
@@ -319,7 +322,8 @@ final class QAToolsManager {
                 return devPath
             }
         }
-        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+        // Return current directory as fallback - never hardcode paths
+        return FileManager.default.currentDirectoryPath
     }
 
     private func runCommand(

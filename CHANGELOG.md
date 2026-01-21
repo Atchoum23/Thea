@@ -5,6 +5,31 @@ All notable changes to THEA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-01-21
+
+### Security - Comprehensive Security Audit Fixes
+- **CRITICAL: QA Token Exposure** - Fixed tokens being passed as command-line arguments; now use environment variables (CODECOV_TOKEN, SONAR_TOKEN)
+- **HIGH: API Key Storage** - Migrated all API keys from UserDefaults to Keychain via SecureStorage
+- **HIGH: Weak Encryption** - Replaced XOR encryption in ActivityLogger with AES-GCM (CryptoKit)
+- **HIGH: Hardcoded Paths** - Removed all developer hardcoded paths; created ProjectPathManager for centralized path resolution
+- **MEDIUM: Path Traversal** - Added comprehensive path traversal validation in FileCreator to prevent directory escape attacks
+- **MEDIUM: Terminal Security** - Strengthened default security policy: sudo disabled by default, added blocked patterns for reverse shells/cryptominers/data exfiltration
+
+### Added
+- **ProjectPathManager** - Centralized path resolution with runtime detection
+- **PathSecurityError** - Security-specific error types for path validation
+- **iPad-Optimized UI** - Three-column NavigationSplitView layout for iPad
+- **AdaptiveHomeView** - Automatic layout switching based on device size class
+- **Apple Liquid Glass** - iOS 26+ Liquid Glass design support with fallbacks
+
+### Changed
+- Terminal security defaults now require explicit opt-in for sudo commands
+- Execution timeout reduced from 5 to 2 minutes
+- Added confirmation requirements for chmod, chown, osascript, security commands
+
+### Documentation
+- Created SECURITY.md with security policy and vulnerability reporting
+
 ## [1.2.3] - 2026-01-15 (PENDING)
 
 ### Fixed

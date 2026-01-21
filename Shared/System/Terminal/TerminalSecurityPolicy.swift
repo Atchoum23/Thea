@@ -15,10 +15,12 @@ struct TerminalSecurityPolicy: Codable, Equatable {
     var logAllCommands: Bool           // Log all executed commands
     var redactSensitiveOutput: Bool    // Redact passwords, keys in output
 
+    // SECURITY: Secure defaults - user must explicitly enable dangerous features
     static var `default`: TerminalSecurityPolicy {
         TerminalSecurityPolicy(
             allowedCommands: [],
             blockedCommands: [
+                // Catastrophic system damage
                 "rm -rf /",
                 "rm -rf /*",
                 ":(){ :|:& };:",  // Fork bomb
@@ -27,13 +29,30 @@ struct TerminalSecurityPolicy: Codable, Equatable {
                 "> /dev/sda",
                 "mv ~ /dev/null",
                 "chmod -R 777 /",
-                "chown -R nobody /"
+                "chown -R nobody /",
+                // Data exfiltration
+                "base64 /etc/passwd",
+                "xxd /etc/shadow",
+                // Cryptominers
+                "xmrig",
+                "minerd",
+                "cpuminer"
             ],
             blockedPatterns: [
                 "rm\\s+-rf\\s+/(?!tmp|var/tmp)",  // rm -rf on root dirs except tmp
                 "\\|\\s*rm\\s+-rf",               // Piped rm -rf
                 "wget.*\\|.*bash",                // Remote code execution
-                "curl.*\\|.*sh"                   // Remote code execution
+                "curl.*\\|.*sh",                  // Remote code execution
+                "curl.*\\|.*python",              // Remote code execution via Python
+                "\\|\\s*base64\\s+-d\\s*\\|",     // Decode and execute patterns
+                "python.*-c.*exec",               // Python exec injection
+                "eval\\s*\\(",                    // Shell eval
+                "\\$\\(.*\\).*\\|.*sh",           // Command substitution to shell
+                "nc\\s+-e",                       // Netcat reverse shell
+                "bash\\s+-i.*>&",                 // Bash reverse shell
+                "/dev/tcp/",                      // Bash TCP device
+                "export\\s+.*PASSWORD",           // Credential exposure
+                "echo.*>.*\\.ssh/authorized"      // SSH key injection
             ],
             requireConfirmation: [
                 "sudo",
@@ -48,13 +67,22 @@ struct TerminalSecurityPolicy: Codable, Equatable {
                 "csrutil",
                 "nvram",
                 "diskutil eraseDisk",
-                "diskutil partitionDisk"
+                "diskutil partitionDisk",
+                // SECURITY: Additional confirmation requirements
+                "chmod",
+                "chown",
+                "xattr",
+                "defaults write",
+                "security",
+                "codesign",
+                "spctl",
+                "osascript"
             ],
-            allowSudo: true,
-            allowNetworkCommands: true,
-            allowFileModification: true,
-            sandboxedDirectories: [],
-            maxExecutionTime: 300, // 5 minutes
+            allowSudo: false,              // SECURITY: Require explicit opt-in
+            allowNetworkCommands: true,    // Allow for development workflows
+            allowFileModification: true,   // Allow for development workflows
+            sandboxedDirectories: [],      // No sandbox by default (user can configure)
+            maxExecutionTime: 120,         // SECURITY: 2 minutes default (was 5)
             logAllCommands: true,
             redactSensitiveOutput: true
         )

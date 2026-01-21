@@ -15,40 +15,23 @@ public actor ProgressTracker {
         _configuredPath = path
     }
 
-    // Dynamic base path for the project
-    private var basePath: String {
-        // 1. Use configured path if set
+    // Dynamic base path - SECURITY: No hardcoded paths
+    private func getBasePath() async -> String {
         if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
             return configured
         }
 
-        // 2. Try environment variable
-        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
-           FileManager.default.fileExists(atPath: envPath) {
-            return envPath
+        // Use centralized ProjectPathManager
+        if let path = await MainActor.run(body: { ProjectPathManager.shared.projectPath }) {
+            return path
         }
 
-        // 3. Try UserDefaults (persisted setting)
-        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
-           FileManager.default.fileExists(atPath: savedPath) {
-            return savedPath
-        }
-
-        // 4. Try Bundle path resolution (works when running from Xcode)
-        if let bundlePath = Bundle.main.resourcePath {
-            let appPath = (bundlePath as NSString).deletingLastPathComponent
-            let devPath = (appPath as NSString).deletingLastPathComponent
-            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
-                return devPath
-            }
-        }
-
-        // 5. Fallback to known development path
-        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+        // Fallback to current working directory
+        return FileManager.default.currentDirectoryPath
     }
 
-    private var progressFile: String {
-        (basePath as NSString).appendingPathComponent(".thea_progress.json")
+    private func getProgressFile() async -> String {
+        (await getBasePath() as NSString).appendingPathComponent(".thea_progress.json")
     }
 
     private var currentProgress: ExecutionProgress?
@@ -133,12 +116,12 @@ public actor ProgressTracker {
     }
 
     public func loadProgress() async -> ExecutionProgress? {
-        guard FileManager.default.fileExists(atPath: progressFile) else {
+        guard FileManager.default.fileExists(atPath: await getProgressFile()) else {
             return nil
         }
 
         do {
-            let data = try Data(contentsOf: URL(fileURLWithPath: progressFile))
+            let data = try Data(contentsOf: URL(fileURLWithPath: await getProgressFile()))
             let progress = try JSONDecoder().decode(ExecutionProgress.self, from: data)
             currentProgress = progress
             return progress
@@ -163,7 +146,7 @@ public actor ProgressTracker {
 
     public func clearProgress() async throws {
         currentProgress = nil
-        try? FileManager.default.removeItem(atPath: progressFile)
+        try? FileManager.default.removeItem(atPath: await getProgressFile())
         logger.info("Cleared progress tracking")
     }
 
@@ -177,6 +160,6 @@ public actor ProgressTracker {
         encoder.dateEncodingStrategy = .iso8601
 
         let data = try encoder.encode(progress)
-        try data.write(to: URL(fileURLWithPath: progressFile))
+        try data.write(to: URL(fileURLWithPath: await getProgressFile()))
     }
 }

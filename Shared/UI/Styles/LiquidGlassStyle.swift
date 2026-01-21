@@ -115,12 +115,17 @@ struct GlassContainer<Content: View>: View {
 /// Toolbar style that adapts to Liquid Glass on iOS 26+
 struct AdaptiveToolbarStyle: ViewModifier {
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, macOS 26.0, *) {
+        #if os(iOS)
+        if #available(iOS 26.0, *) {
             content
                 .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
         } else {
             content
         }
+        #else
+        // macOS doesn't have navigationBar toolbar placement
+        content
+        #endif
     }
 }
 

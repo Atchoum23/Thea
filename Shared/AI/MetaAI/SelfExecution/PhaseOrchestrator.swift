@@ -236,32 +236,25 @@ public actor PhaseOrchestrator {
         _configuredPath = path
     }
 
-    // Dynamic base path for the project
-    private var basePath: String {
+    // Dynamic base path - SECURITY: No hardcoded paths
+    private func getBasePath() async -> String {
         if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
             return configured
         }
-        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
-           FileManager.default.fileExists(atPath: envPath) {
-            return envPath
+
+        // Use centralized ProjectPathManager
+        if let path = await MainActor.run(body: { ProjectPathManager.shared.projectPath }) {
+            return path
         }
-        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
-           FileManager.default.fileExists(atPath: savedPath) {
-            return savedPath
-        }
-        if let bundlePath = Bundle.main.resourcePath {
-            let appPath = (bundlePath as NSString).deletingLastPathComponent
-            let devPath = (appPath as NSString).deletingLastPathComponent
-            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
-                return devPath
-            }
-        }
-        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+        // Fallback to current working directory
+        return FileManager.default.currentDirectoryPath
     }
 
     private func createDMG(name: String) async throws -> String {
-        let dmgDir = (basePath as NSString).appendingPathComponent("macOS/DMG files")
-        let appPath = (basePath as NSString).appendingPathComponent("build/Release/Thea.app")
+        let base = await getBasePath()
+        let dmgDir = (base as NSString).appendingPathComponent("macOS/DMG files")
+        let appPath = (base as NSString).appendingPathComponent("build/Release/Thea.app")
         let dmgPath = "\(dmgDir)/\(name)"
 
         // Build release
@@ -298,9 +291,9 @@ public actor PhaseOrchestrator {
     private func updateSpecWithCompletion(phase: PhaseDefinition) async throws {
         // Read spec - check multiple locations
         let specLocations = [
-            (basePath as NSString).appendingPathComponent("Documentation/Architecture/THEA_MASTER_SPEC.md"),
-            (basePath as NSString).appendingPathComponent("Planning/THEA_SPECIFICATION.md"),
-            (basePath as NSString).appendingPathComponent("THEA_MASTER_SPEC.md")
+            (await getBasePath() as NSString).appendingPathComponent("Documentation/Architecture/THEA_MASTER_SPEC.md"),
+            (await getBasePath() as NSString).appendingPathComponent("Planning/THEA_SPECIFICATION.md"),
+            (await getBasePath() as NSString).appendingPathComponent("THEA_MASTER_SPEC.md")
         ]
 
         guard let specPath = specLocations.first(where: { FileManager.default.fileExists(atPath: $0) }) else {

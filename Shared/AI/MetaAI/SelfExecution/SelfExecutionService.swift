@@ -133,36 +133,19 @@ public actor SelfExecutionService {
         UserDefaults.standard.set(path, forKey: "TheaProjectPath")
     }
 
-    // Dynamic base path - use Bundle location or fallback to known path
-    private var basePath: String {
-        // 1. Use configured path if set
+    // Dynamic base path - SECURITY: No hardcoded paths
+    private func getBasePath() async -> String {
         if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
             return configured
         }
 
-        // 2. Try environment variable
-        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
-           FileManager.default.fileExists(atPath: envPath) {
-            return envPath
+        // Use centralized ProjectPathManager
+        if let path = await MainActor.run(body: { ProjectPathManager.shared.projectPath }) {
+            return path
         }
 
-        // 3. Try UserDefaults (persisted setting)
-        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
-           FileManager.default.fileExists(atPath: savedPath) {
-            return savedPath
-        }
-
-        // 4. Try Bundle path resolution (works when running from Xcode)
-        if let bundlePath = Bundle.main.resourcePath {
-            let appPath = (bundlePath as NSString).deletingLastPathComponent
-            let devPath = (appPath as NSString).deletingLastPathComponent
-            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
-                return devPath
-            }
-        }
-
-        // 5. Fallback to known development path
-        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+        // Fallback to current working directory
+        return FileManager.default.currentDirectoryPath
     }
 
     /// Check if ready to execute (API keys configured)
@@ -179,16 +162,17 @@ public actor SelfExecutionService {
         }
 
         // Check git
-        let gitPath = (basePath as NSString).appendingPathComponent(".git")
+        let base = await getBasePath()
+        let gitPath = (base as NSString).appendingPathComponent(".git")
         if !FileManager.default.fileExists(atPath: gitPath) {
             missing.append("Git repository not initialized")
         }
 
         // Check spec file - look in multiple locations
         let specLocations = [
-            (basePath as NSString).appendingPathComponent("THEA_MASTER_SPEC.md"),
-            (basePath as NSString).appendingPathComponent("Planning/THEA_SPECIFICATION.md"),
-            (basePath as NSString).appendingPathComponent("Documentation/Architecture/THEA_MASTER_SPEC.md")
+            (base as NSString).appendingPathComponent("THEA_MASTER_SPEC.md"),
+            (base as NSString).appendingPathComponent("Planning/THEA_SPECIFICATION.md"),
+            (base as NSString).appendingPathComponent("Documentation/Architecture/THEA_MASTER_SPEC.md")
         ]
 
         let hasSpec = specLocations.contains { FileManager.default.fileExists(atPath: $0) }
