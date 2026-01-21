@@ -3184,6 +3184,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.thea.ios;
+				PRODUCT_MODULE_NAME = TheaCore;
 				PRODUCT_NAME = Thea;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -3225,6 +3226,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.thea.macos;
+				PRODUCT_MODULE_NAME = TheaCore;
 				PRODUCT_NAME = Thea;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -3386,6 +3388,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.thea.ios;
+				PRODUCT_MODULE_NAME = TheaCore;
 				PRODUCT_NAME = Thea;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -3408,6 +3411,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.thea.macos;
+				PRODUCT_MODULE_NAME = TheaCore;
 				PRODUCT_NAME = Thea;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;

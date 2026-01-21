@@ -1,10 +1,6 @@
 import Foundation
 import Testing
-#if SWIFT_PACKAGE
 @testable import TheaCore
-#else
-@testable import Thea
-#endif
 
 /// Tests for career development service
 @Suite("Career Service Tests")
