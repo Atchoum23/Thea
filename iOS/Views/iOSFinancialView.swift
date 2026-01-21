@@ -178,7 +178,7 @@ struct OverviewTabView: View {
                 } else {
                     Button {
                         Task {
-                            // Sync functionality would go here
+                            await financialManager.syncAccount(account)
                         }
                     } label: {
                         Image(systemName: "arrow.clockwise")

@@ -203,4 +203,46 @@ final class SettingsManager: ObservableObject {
         guard let key = getAPIKey(for: provider) else { return false }
         return !key.isEmpty
     }
+
+    func resetToDefaults() {
+        // Reset all settings to defaults
+        defaultProvider = "openrouter"
+        streamResponses = true
+        theme = "system"
+        fontSize = "medium"
+        iCloudSyncEnabled = false
+        analyticsEnabled = false
+        handoffEnabled = true
+
+        launchAtLogin = false
+        showInMenuBar = true
+        notificationsEnabled = true
+
+        readResponsesAloud = false
+        selectedVoice = "default"
+
+        debugMode = false
+        showPerformanceMetrics = false
+        betaFeaturesEnabled = false
+
+        mlxModelsPath = "~/.cache/huggingface/hub/"
+        ollamaEnabled = false
+        ollamaURL = "http://localhost:11434"
+
+        executionMode = "manual"
+        allowFileCreation = false
+        allowFileEditing = false
+        allowCodeExecution = false
+        allowExternalAPICalls = false
+        requireDestructiveApproval = true
+        enableRollback = true
+        createBackups = true
+        preventSleepDuringExecution = true
+        maxConcurrentTasks = 3
+
+        // Clear API keys
+        for provider in availableProviders {
+            deleteAPIKey(for: provider)
+        }
+    }
 }

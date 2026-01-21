@@ -25,7 +25,7 @@ struct TheaiOSApp: App {
     var body: some Scene {
         WindowGroup {
             if let container = modelContainer {
-                iOSHomeView()
+                AdaptiveHomeView()
                     .modelContainer(container)
                     .onAppear {
                         setupManagers(container: container)

@@ -58,6 +58,21 @@ final class ChatManager: ObservableObject {
         }
     }
 
+    func clearAllData() {
+        guard let context = modelContext else { return }
+
+        // Delete all conversations (messages are cascade deleted)
+        for conversation in conversations {
+            context.delete(conversation)
+        }
+        try? context.save()
+
+        conversations.removeAll()
+        activeConversation = nil
+        isStreaming = false
+        streamingText = ""
+    }
+
     func updateConversationTitle(_ conversation: Conversation, title: String) {
         conversation.title = title
         conversation.updatedAt = Date()
