@@ -122,27 +122,19 @@ public actor XcodeBuildRunner {
         _configuredPath = path
     }
 
-    // Dynamic project path - use Bundle location or fallback to known path
-    private var defaultProjectPath: String {
+    // Dynamic project path - SECURITY: No hardcoded paths
+    private func getDefaultProjectPath() async -> String {
         if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
             return configured
         }
-        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
-           FileManager.default.fileExists(atPath: envPath) {
-            return envPath
+
+        // Use centralized ProjectPathManager
+        if let path = await MainActor.run(body: { ProjectPathManager.shared.projectPath }) {
+            return path
         }
-        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
-           FileManager.default.fileExists(atPath: savedPath) {
-            return savedPath
-        }
-        if let bundlePath = Bundle.main.resourcePath {
-            let appPath = (bundlePath as NSString).deletingLastPathComponent
-            let devPath = (appPath as NSString).deletingLastPathComponent
-            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
-                return devPath
-            }
-        }
-        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+        // Fallback to current working directory
+        return FileManager.default.currentDirectoryPath
     }
 
     public func build(
@@ -151,7 +143,13 @@ public actor XcodeBuildRunner {
         projectPath: String? = nil,
         timeout: TimeInterval = 300.0
     ) async throws -> BuildResult {
-        let effectivePath = projectPath ?? defaultProjectPath
+        // Resolve effective path - can't use ?? with async on right side
+        let effectivePath: String
+        if let path = projectPath {
+            effectivePath = path
+        } else {
+            effectivePath = await getDefaultProjectPath()
+        }
         logger.info("Starting build - scheme: \(scheme), configuration: \(configuration), path: \(effectivePath)")
 
         let startTime = Date()

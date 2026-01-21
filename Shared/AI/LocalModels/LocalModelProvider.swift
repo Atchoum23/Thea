@@ -169,7 +169,7 @@ final class LocalModelManager {
                     let model = LocalModel(
                         id: UUID(),
                         name: modelName,
-                        path: URL(fileURLWithPath: "/tmp/ollama/\(modelName)"),
+                        path: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ollama/\(modelName)"),
                         type: .ollama,
                         format: "GGUF",
                         sizeInBytes: nil,

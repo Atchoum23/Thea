@@ -145,10 +145,15 @@ public struct SelfExecutionConfiguration: Codable, Sendable {
             case .openRouter:
                 return SecureStorage.shared.hasAPIKey(for: "openrouter")
             case .local:
-                // Check for local models in the SharedLLMs directory
+                #if os(macOS)
+                // Check for local models in the SharedLLMs directory (macOS only)
                 let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
                 let sharedLLMsPath = (homeDir as NSString).appendingPathComponent("Library/Application Support/SharedLLMs")
                 return FileManager.default.fileExists(atPath: sharedLLMsPath)
+                #else
+                // Local models not supported on iOS
+                return false
+                #endif
             }
         }
     }

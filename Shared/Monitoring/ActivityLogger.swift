@@ -6,6 +6,7 @@
 //  Copyright © 2026. All rights reserved.
 //
 
+import CryptoKit
 import Foundation
 
 // MARK: - Activity Logger
@@ -114,7 +115,7 @@ public actor ActivityLogger {
             // Load existing entries
             var existingEntries: [ActivityLogEntry] = []
             if let data = try? Data(contentsOf: filePath) {
-                let decodedData = encryptionEnabled ? decrypt(data) : data
+                let decodedData = encryptionEnabled ? await decrypt(data) : data
                 if let decoded = try? JSONDecoder().decode([ActivityLogEntry].self, from: decodedData ?? data) {
                     existingEntries = decoded
                 }
@@ -124,24 +125,50 @@ public actor ActivityLogger {
             existingEntries.append(contentsOf: dayEntries)
 
             if let encoded = try? JSONEncoder().encode(existingEntries) {
-                let dataToWrite = encryptionEnabled ? encrypt(encoded) : encoded
+                let dataToWrite = encryptionEnabled ? await encrypt(encoded) : encoded
                 try? dataToWrite?.write(to: filePath)
             }
         }
     }
 
-    // MARK: - Encryption
+    // MARK: - Encryption (AES-GCM via CryptoKit)
 
-    private func encrypt(_ data: Data) -> Data? {
-        // Simple XOR encryption for demonstration
-        // In production, use CryptoKit with proper key management
-        let key: UInt8 = 0x42
-        return Data(data.map { $0 ^ key })
+    private func encrypt(_ data: Data) async -> Data? {
+        do {
+            // Get encryption key from secure storage (Keychain)
+            let keyData = try await MainActor.run {
+                try SecureStorage.shared.getOrCreateEncryptionKey()
+            }
+            let symmetricKey = SymmetricKey(data: keyData)
+
+            // AES-GCM encryption with authentication
+            let sealedBox = try AES.GCM.seal(data, using: symmetricKey)
+
+            // Return combined data (nonce + ciphertext + tag)
+            return sealedBox.combined
+        } catch {
+            print("⚠️ ActivityLogger encryption failed: \(error)")
+            return nil
+        }
     }
 
-    private func decrypt(_ data: Data) -> Data? {
-        // XOR is symmetric
-        encrypt(data)
+    private func decrypt(_ data: Data) async -> Data? {
+        do {
+            // Get encryption key from secure storage (Keychain)
+            let keyData = try await MainActor.run {
+                try SecureStorage.shared.getOrCreateEncryptionKey()
+            }
+            let symmetricKey = SymmetricKey(data: keyData)
+
+            // Restore sealed box from combined data
+            let sealedBox = try AES.GCM.SealedBox(combined: data)
+
+            // Decrypt and authenticate
+            return try AES.GCM.open(sealedBox, using: symmetricKey)
+        } catch {
+            print("⚠️ ActivityLogger decryption failed: \(error)")
+            return nil
+        }
     }
 
     // MARK: - Query
@@ -158,7 +185,7 @@ public actor ActivityLogger {
             return []
         }
 
-        let decodedData = encryptionEnabled ? decrypt(data) : data
+        let decodedData = encryptionEnabled ? await decrypt(data) : data
         guard let decoded = try? JSONDecoder().decode([ActivityLogEntry].self, from: decodedData ?? data) else {
             return []
         }

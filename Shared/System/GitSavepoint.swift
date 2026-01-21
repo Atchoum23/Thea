@@ -17,36 +17,22 @@ public actor GitSavepoint {
         _configuredPath = path
     }
 
-    // Dynamic base path for the project
+    // Dynamic base path for the project - SECURITY: No hardcoded paths
     private var repoPath: String {
-        // 1. Use configured path if set
-        if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
-            return configured
-        }
-
-        // 2. Try environment variable
-        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
-           FileManager.default.fileExists(atPath: envPath) {
-            return envPath
-        }
-
-        // 3. Try UserDefaults (persisted setting)
-        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
-           FileManager.default.fileExists(atPath: savedPath) {
-            return savedPath
-        }
-
-        // 4. Try Bundle path resolution (works when running from Xcode)
-        if let bundlePath = Bundle.main.resourcePath {
-            let appPath = (bundlePath as NSString).deletingLastPathComponent
-            let devPath = (appPath as NSString).deletingLastPathComponent
-            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
-                return devPath
+        get async {
+            // 1. Use configured path if set
+            if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
+                return configured
             }
-        }
 
-        // 5. Fallback to known development path
-        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+            // 2. Use centralized ProjectPathManager
+            if let path = await MainActor.run(body: { ProjectPathManager.shared.projectPath }) {
+                return path
+            }
+
+            // 3. Fallback to current working directory
+            return FileManager.default.currentDirectoryPath
+        }
     }
 
     private init() {}
@@ -95,7 +81,7 @@ public actor GitSavepoint {
         // Check if there are uncommitted changes
         let statusResult = try await TerminalService.shared.git(
             arguments: ["status", "--porcelain"],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard statusResult.isSuccess else {
@@ -134,7 +120,7 @@ public actor GitSavepoint {
         // List recent commits that might be savepoints
         let logResult = try await TerminalService.shared.git(
             arguments: ["log", "--format=%H|%s|%at", "-n", "\(limit)"],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard logResult.isSuccess else {
@@ -170,7 +156,7 @@ public actor GitSavepoint {
         // Stage all changes
         let addResult = try await TerminalService.shared.git(
             arguments: ["add", "-A"],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard addResult.isSuccess else {
@@ -181,7 +167,7 @@ public actor GitSavepoint {
         let commitMessage = "SAVEPOINT: \(message)"
         let commitResult = try await TerminalService.shared.git(
             arguments: ["commit", "--no-verify", "-m", commitMessage],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard commitResult.isSuccess else {
@@ -197,7 +183,7 @@ public actor GitSavepoint {
     private func getCurrentCommit() async throws -> String {
         let result = try await TerminalService.shared.git(
             arguments: ["rev-parse", "HEAD"],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard result.isSuccess else {
@@ -211,7 +197,7 @@ public actor GitSavepoint {
         // Reset to the commit (keeping working directory changes)
         let resetResult = try await TerminalService.shared.git(
             arguments: ["reset", "--hard", commitHash],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard resetResult.isSuccess else {
@@ -225,7 +211,7 @@ public actor GitSavepoint {
         // Apply the stash
         let stashResult = try await TerminalService.shared.git(
             arguments: ["stash", "apply", stashRef],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard stashResult.isSuccess else {
@@ -241,7 +227,7 @@ public actor GitSavepoint {
         // Discard all uncommitted changes
         let cleanResult = try await TerminalService.shared.git(
             arguments: ["reset", "--hard", "HEAD"],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard cleanResult.isSuccess else {
@@ -251,7 +237,7 @@ public actor GitSavepoint {
         // Remove untracked files
         let removeResult = try await TerminalService.shared.git(
             arguments: ["clean", "-fd"],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         if !removeResult.isSuccess {
@@ -267,7 +253,7 @@ public actor GitSavepoint {
     public func hasUncommittedChanges() async throws -> Bool {
         let statusResult = try await TerminalService.shared.git(
             arguments: ["status", "--porcelain"],
-            workingDirectory: repoPath
+            workingDirectory: await repoPath
         )
 
         guard statusResult.isSuccess else {

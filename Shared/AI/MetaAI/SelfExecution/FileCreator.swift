@@ -14,27 +14,19 @@ public actor FileCreator {
         _configuredPath = path
     }
 
-    // Dynamic base path - use Bundle location or fallback to known path
-    private var basePath: String {
+    // Dynamic base path - SECURITY: No hardcoded paths
+    private func getBasePath() async -> String {
         if let configured = _configuredPath, FileManager.default.fileExists(atPath: configured) {
             return configured
         }
-        if let envPath = ProcessInfo.processInfo.environment["THEA_PROJECT_PATH"],
-           FileManager.default.fileExists(atPath: envPath) {
-            return envPath
+
+        // Use centralized ProjectPathManager
+        if let path = await MainActor.run(body: { ProjectPathManager.shared.projectPath }) {
+            return path
         }
-        if let savedPath = UserDefaults.standard.string(forKey: "TheaProjectPath"),
-           FileManager.default.fileExists(atPath: savedPath) {
-            return savedPath
-        }
-        if let bundlePath = Bundle.main.resourcePath {
-            let appPath = (bundlePath as NSString).deletingLastPathComponent
-            let devPath = (appPath as NSString).deletingLastPathComponent
-            if FileManager.default.fileExists(atPath: (devPath as NSString).appendingPathComponent("Shared")) {
-                return devPath
-            }
-        }
-        return "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+        // Fallback to current working directory
+        return FileManager.default.currentDirectoryPath
     }
 
     public struct CreationResult: Sendable {
@@ -49,6 +41,7 @@ public actor FileCreator {
         case directoryCreationFailed(path: String)
         case writeFailure(path: String, reason: String)
         case invalidPath(path: String)
+        case pathTraversalBlocked(path: String)
 
         public var errorDescription: String? {
             switch self {
@@ -60,14 +53,34 @@ public actor FileCreator {
                 return "Failed to write \(path): \(reason)"
             case .invalidPath(let path):
                 return "Invalid path: \(path)"
+            case .pathTraversalBlocked(let path):
+                return "SECURITY: Path traversal attempt blocked for: \(path)"
             }
+        }
+    }
+
+    // MARK: - Security
+
+    /// SECURITY: Validate path to prevent traversal attacks
+    private func validateAndResolvePath(_ relativePath: String) async throws -> String {
+        let basePath = await getBasePath()
+
+        // Use centralized path validation from ProjectPathManager
+        do {
+            return try await MainActor.run {
+                try ProjectPathManager.shared.validatePath(relativePath, basePath: basePath)
+            }
+        } catch {
+            logger.error("⚠️ Path traversal blocked: \(relativePath)")
+            throw CreationError.pathTraversalBlocked(path: relativePath)
         }
     }
 
     // MARK: - Public API
 
     public func createFile(at relativePath: String, content: String, overwrite: Bool = false) async throws -> CreationResult {
-        let fullPath = (basePath as NSString).appendingPathComponent(relativePath)
+        // SECURITY: Validate path before any file operations
+        let fullPath = try await validateAndResolvePath(relativePath)
 
         logger.info("Creating file: \(fullPath)")
 
@@ -105,7 +118,8 @@ public actor FileCreator {
     }
 
     public func editFile(at relativePath: String, newContent: String) async throws -> CreationResult {
-        let fullPath = (basePath as NSString).appendingPathComponent(relativePath)
+        // SECURITY: Validate path before any file operations
+        let fullPath = try await validateAndResolvePath(relativePath)
 
         logger.info("Editing file: \(fullPath)")
 
@@ -142,12 +156,15 @@ public actor FileCreator {
     }
 
     public func readFile(at relativePath: String) async throws -> String {
-        let fullPath = (basePath as NSString).appendingPathComponent(relativePath)
+        // SECURITY: Validate path before any file operations
+        let fullPath = try await validateAndResolvePath(relativePath)
         return try String(contentsOfFile: fullPath, encoding: .utf8)
     }
 
     public func fileExists(at relativePath: String) async -> Bool {
-        let fullPath = (basePath as NSString).appendingPathComponent(relativePath)
+        guard let fullPath = try? await validateAndResolvePath(relativePath) else {
+            return false // Invalid paths don't exist
+        }
         return FileManager.default.fileExists(atPath: fullPath)
     }
 
@@ -156,15 +173,22 @@ public actor FileCreator {
 
         // Get files in same directory
         let directory = (path as NSString).deletingLastPathComponent
-        let fullDir = (basePath as NSString).appendingPathComponent(directory)
 
-        guard let contents = try? FileManager.default.contentsOfDirectory(atPath: fullDir) else {
+        // SECURITY: Validate directory path
+        guard let validatedDir = try? await validateAndResolvePath(directory) else {
+            return related
+        }
+
+        guard let contents = try? FileManager.default.contentsOfDirectory(atPath: validatedDir) else {
             return related
         }
 
         for file in contents where file.hasSuffix(".swift") {
             let relativePath = (directory as NSString).appendingPathComponent(file)
-            let fullPath = (basePath as NSString).appendingPathComponent(relativePath)
+            // SECURITY: Validate each file path
+            guard let fullPath = try? await validateAndResolvePath(relativePath) else {
+                continue
+            }
             if let content = try? String(contentsOfFile: fullPath, encoding: .utf8) {
                 related[relativePath] = content
             }
