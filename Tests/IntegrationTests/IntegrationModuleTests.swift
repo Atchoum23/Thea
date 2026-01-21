@@ -1,4 +1,8 @@
+#if SWIFT_PACKAGE
 @testable import TheaCore
+#else
+@testable import Thea
+#endif
 import XCTest
 
 /// Test suite for Integration Coordinator and module management
