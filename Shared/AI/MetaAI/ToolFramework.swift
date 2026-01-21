@@ -212,7 +212,7 @@ struct ToolExecution: Identifiable {
     }
 }
 
-struct ToolResult {
+struct ToolResult: @unchecked Sendable {
     let success: Bool
     let output: Any?
     let error: String?
