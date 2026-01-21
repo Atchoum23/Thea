@@ -14,6 +14,7 @@ import AppKit
 // MARK: - Mail Integration
 
 /// Integration module for Mail app
+/// Security: All user inputs are properly escaped for AppleScript
 public actor MailIntegration: AppIntegrationModule {
     public static let shared = MailIntegration()
 
@@ -48,18 +49,46 @@ public actor MailIntegration: AppIntegrationModule {
     }
 
     /// Compose a new email
+    /// - Parameters:
+    ///   - to: Array of email addresses (validated)
+    ///   - subject: Email subject (safely escaped)
+    ///   - body: Email body (safely escaped)
+    ///   - attachments: Array of file URLs (validated)
     public func composeEmail(to: [String], subject: String, body: String, attachments: [URL] = []) async throws {
         #if os(macOS)
-        var attachmentScript = ""
-        for url in attachments {
-            attachmentScript += "make new attachment with properties {file name:POSIX file \"\(url.path)\"} at after the last paragraph\n"
+        // Validate email addresses
+        for email in to {
+            try validateEmailAddress(email)
         }
+        
+        // Validate attachments exist
+        for url in attachments {
+            try validateAttachmentPath(url)
+        }
+        
+        // Build attachment script with proper escaping
+        var attachmentLines: [String] = []
+        for url in attachments {
+            let escapedPath = escapeForAppleScript(url.path)
+            attachmentLines.append("make new attachment with properties {file name:POSIX file \(escapedPath)} at after the last paragraph")
+        }
+        let attachmentScript = attachmentLines.joined(separator: "\n")
+        
+        // Build recipient script
+        let recipientLines = to.map { email in
+            "make new to recipient at end of to recipients with properties {address:\(escapeForAppleScript(email))}"
+        }
+        let recipientScript = recipientLines.joined(separator: "\n")
+        
+        // Build the full script with escaped values
+        let escapedSubject = escapeForAppleScript(subject)
+        let escapedBody = escapeForAppleScript(body)
 
         let script = """
         tell application "Mail"
-            set newMessage to make new outgoing message with properties {subject:"\(subject)", content:"\(body)", visible:true}
+            set newMessage to make new outgoing message with properties {subject:\(escapedSubject), content:\(escapedBody), visible:true}
             tell newMessage
-                \(to.map { "make new to recipient at end of to recipients with properties {address:\"\($0)\"}" }.joined(separator: "\n"))
+                \(recipientScript)
                 \(attachmentScript)
             end tell
             activate
@@ -98,6 +127,59 @@ public actor MailIntegration: AppIntegrationModule {
         #else
         throw AppIntegrationModuleError.notSupported
         #endif
+    }
+    
+    // MARK: - Security Helpers
+    
+    /// Escape a string for safe use in AppleScript
+    /// Returns a properly quoted AppleScript string literal
+    private func escapeForAppleScript(_ input: String) -> String {
+        var escaped = input
+        // Escape backslashes first, then quotes
+        escaped = escaped.replacingOccurrences(of: "\\", with: "\\\\")
+        escaped = escaped.replacingOccurrences(of: "\"", with: "\\\"")
+        // Prevent newline/carriage return injection
+        escaped = escaped.replacingOccurrences(of: "\n", with: "\\n")
+        escaped = escaped.replacingOccurrences(of: "\r", with: "\\r")
+        escaped = escaped.replacingOccurrences(of: "\t", with: "\\t")
+        return "\"\(escaped)\""
+    }
+    
+    /// Validate email address format
+    private func validateEmailAddress(_ email: String) throws {
+        // Basic email validation
+        let emailRegex = #"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"#
+        guard let regex = try? NSRegularExpression(pattern: emailRegex),
+              regex.firstMatch(in: email, range: NSRange(email.startIndex..., in: email)) != nil else {
+            throw AppIntegrationModuleError.invalidInput("Invalid email address format: \(email)")
+        }
+        
+        // Check for injection attempts
+        guard !email.contains("\n") && !email.contains("\r") && !email.contains("\0") else {
+            throw AppIntegrationModuleError.securityError("Invalid characters in email address")
+        }
+    }
+    
+    /// Validate attachment path exists and is safe
+    private func validateAttachmentPath(_ url: URL) throws {
+        let path = url.path
+        
+        // Check for null bytes
+        guard !path.contains("\0") else {
+            throw AppIntegrationModuleError.securityError("Null byte detected in attachment path")
+        }
+        
+        // Verify file exists
+        guard FileManager.default.fileExists(atPath: path) else {
+            throw AppIntegrationModuleError.invalidPath("Attachment does not exist: \(path)")
+        }
+        
+        // Verify it's a file, not a directory
+        var isDirectory: ObjCBool = false
+        FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
+        guard !isDirectory.boolValue else {
+            throw AppIntegrationModuleError.invalidPath("Attachment path is a directory, not a file")
+        }
     }
 
     #if os(macOS)

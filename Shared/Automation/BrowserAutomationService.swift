@@ -5,6 +5,9 @@ import WebKit
 
 /// Browser automation service for web interaction (ChatGPT Agent equivalent)
 /// Provides navigation, form filling, data extraction, and screenshot capture
+///
+/// Security Note: All user inputs are properly escaped to prevent JavaScript injection.
+/// The WebView is configured with restricted permissions for security.
 @MainActor
 public final class BrowserAutomationService {
     // MARK: - Properties
@@ -83,14 +86,24 @@ public final class BrowserAutomationService {
     // MARK: - Form Interaction
 
     /// Fill a form field by selector
+    /// - Parameters:
+    ///   - selector: CSS selector for the element (safely escaped)
+    ///   - value: Value to set (safely escaped)
     public func fillField(selector: String, value: String) async throws {
         #if os(macOS)
         guard let webView = webView else {
             throw BrowserAutomationError.noWebView
         }
 
+        // Use JSON encoding to safely pass parameters
+        let params = try encodeJSONParameters(["selector": selector, "value": value])
         let script = """
-        document.querySelector('\(selector)').value = '\(value)';
+        (function() {
+            const params = \(params);
+            const el = document.querySelector(params.selector);
+            if (el) { el.value = params.value; return true; }
+            return false;
+        })();
         """
         _ = try await webView.executeJavaScript(script)
         #else
@@ -99,14 +112,21 @@ public final class BrowserAutomationService {
     }
 
     /// Click an element by selector
+    /// - Parameter selector: CSS selector for the element (safely escaped)
     public func click(selector: String) async throws {
         #if os(macOS)
         guard let webView = webView else {
             throw BrowserAutomationError.noWebView
         }
 
+        let params = try encodeJSONParameters(["selector": selector])
         let script = """
-        document.querySelector('\(selector)').click();
+        (function() {
+            const params = \(params);
+            const el = document.querySelector(params.selector);
+            if (el) { el.click(); return true; }
+            return false;
+        })();
         """
         _ = try await webView.executeJavaScript(script)
         #else
@@ -115,14 +135,21 @@ public final class BrowserAutomationService {
     }
 
     /// Submit a form by selector
+    /// - Parameter selector: CSS selector for the form (safely escaped)
     public func submitForm(selector: String) async throws {
         #if os(macOS)
         guard let webView = webView else {
             throw BrowserAutomationError.noWebView
         }
 
+        let params = try encodeJSONParameters(["selector": selector])
         let script = """
-        document.querySelector('\(selector)').submit();
+        (function() {
+            const params = \(params);
+            const el = document.querySelector(params.selector);
+            if (el) { el.submit(); return true; }
+            return false;
+        })();
         """
         _ = try await webView.executeJavaScript(script)
         #else
@@ -133,14 +160,21 @@ public final class BrowserAutomationService {
     // MARK: - Data Extraction
 
     /// Extract text content by selector
+    /// - Parameter selector: CSS selector for the element (safely escaped)
+    /// - Returns: Text content of the element
     public func extractText(selector: String) async throws -> String {
         #if os(macOS)
         guard let webView = webView else {
             throw BrowserAutomationError.noWebView
         }
 
+        let params = try encodeJSONParameters(["selector": selector])
         let script = """
-        document.querySelector('\(selector)').textContent;
+        (function() {
+            const params = \(params);
+            const el = document.querySelector(params.selector);
+            return el ? el.textContent : null;
+        })();
         """
         let result = try await webView.executeJavaScript(script)
 
@@ -154,14 +188,23 @@ public final class BrowserAutomationService {
     }
 
     /// Extract attribute value by selector
+    /// - Parameters:
+    ///   - selector: CSS selector for the element (safely escaped)
+    ///   - attribute: Attribute name to extract (safely escaped)
+    /// - Returns: Attribute value
     public func extractAttribute(selector: String, attribute: String) async throws -> String {
         #if os(macOS)
         guard let webView = webView else {
             throw BrowserAutomationError.noWebView
         }
 
+        let params = try encodeJSONParameters(["selector": selector, "attribute": attribute])
         let script = """
-        document.querySelector('\(selector)').getAttribute('\(attribute)');
+        (function() {
+            const params = \(params);
+            const el = document.querySelector(params.selector);
+            return el ? el.getAttribute(params.attribute) : null;
+        })();
         """
         let result = try await webView.executeJavaScript(script)
 
@@ -181,6 +224,7 @@ public final class BrowserAutomationService {
             throw BrowserAutomationError.noWebView
         }
 
+        // This script doesn't take user input, so it's safe
         let script = """
         Array.from(document.querySelectorAll('a')).map(a => a.href);
         """
@@ -236,6 +280,9 @@ public final class BrowserAutomationService {
     // MARK: - JavaScript Execution
 
     /// Execute arbitrary JavaScript
+    /// - Warning: This method executes raw JavaScript. Ensure input is trusted or sanitized.
+    /// - Parameter script: JavaScript code to execute
+    /// - Returns: Result of execution as string, if any
     public func executeJavaScript(_ script: String) async throws -> String? {
         #if os(macOS)
         guard let webView = webView else {
@@ -257,6 +304,18 @@ public final class BrowserAutomationService {
         #endif
         currentURL = nil
     }
+    
+    // MARK: - Security Helpers
+    
+    /// Encode parameters as JSON for safe JavaScript injection
+    /// This prevents injection attacks by properly escaping all values
+    private func encodeJSONParameters(_ params: [String: String]) throws -> String {
+        let data = try JSONEncoder().encode(params)
+        guard let jsonString = String(data: data, encoding: .utf8) else {
+            throw BrowserAutomationError.extractionFailed("Failed to encode parameters")
+        }
+        return jsonString
+    }
 }
 
 // MARK: - WebView Wrapper (macOS only)
@@ -269,7 +328,13 @@ private final class WebViewWrapper: NSObject, WKNavigationDelegate {
 
     override init() {
         let configuration = WKWebViewConfiguration()
-        configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        // SECURITY: Disable file access from file URLs to prevent local file exfiltration
+        // This was previously enabled which allowed JavaScript to read local files
+        configuration.preferences.setValue(false, forKey: "allowFileAccessFromFileURLs")
+        
+        // SECURITY: Set additional security preferences
+        configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
+        
         self.webView = WKWebView(frame: .zero, configuration: configuration)
         super.init()
         webView.navigationDelegate = self

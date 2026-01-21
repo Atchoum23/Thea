@@ -115,28 +115,65 @@ final class FolderAccessManager {
     // MARK: - Access Checking
 
     /// Check if a URL is within an allowed folder
+    /// Security: Uses proper path component comparison to prevent traversal attacks
     func isAllowed(_ url: URL) -> Bool {
-        let path = url.standardizedFileURL.path
-        return allowedFolders.contains { folder in
-            path.hasPrefix(folder.url.standardizedFileURL.path)
-        }
+        isPathWithinAllowedFolder(url) != nil
     }
 
     /// Check if a URL has specific permission
+    /// Security: Uses proper path component comparison to prevent traversal attacks
     func hasPermission(_ permission: AllowedFolder.Permissions, for url: URL) -> Bool {
-        let path = url.standardizedFileURL.path
-        return allowedFolders.contains { folder in
-            path.hasPrefix(folder.url.standardizedFileURL.path) &&
-            folder.permissions.contains(permission)
+        guard let folder = isPathWithinAllowedFolder(url) else {
+            return false
         }
+        return folder.permissions.contains(permission)
     }
 
     /// Get the allowed folder containing a URL
+    /// Security: Uses proper path component comparison to prevent traversal attacks
     func allowedFolder(containing url: URL) -> AllowedFolder? {
-        let path = url.standardizedFileURL.path
-        return allowedFolders.first { folder in
-            path.hasPrefix(folder.url.standardizedFileURL.path)
+        isPathWithinAllowedFolder(url)
+    }
+    
+    /// Securely check if a path is within an allowed folder
+    /// This prevents path traversal attacks by:
+    /// 1. Resolving symlinks to canonical paths
+    /// 2. Comparing path components (not string prefixes)
+    /// 3. Ensuring the target path is actually within the allowed directory
+    private func isPathWithinAllowedFolder(_ url: URL) -> AllowedFolder? {
+        // Resolve to canonical path (resolves symlinks and removes . and ..)
+        let targetPath = url.standardizedFileURL.resolvingSymlinksInPath().path
+        
+        // Check for null bytes (path truncation attack)
+        guard !targetPath.contains("\0") else {
+            return nil
         }
+        
+        for folder in allowedFolders {
+            let allowedPath = folder.url.standardizedFileURL.resolvingSymlinksInPath().path
+            
+            // Use path components for proper comparison
+            let targetComponents = targetPath.components(separatedBy: "/")
+            let allowedComponents = allowedPath.components(separatedBy: "/")
+            
+            // Target must have at least as many components as allowed path
+            guard targetComponents.count >= allowedComponents.count else {
+                continue
+            }
+            
+            // All components of allowed path must match the start of target path
+            let matchingComponents = zip(targetComponents, allowedComponents).allSatisfy { $0 == $1 }
+            
+            if matchingComponents {
+                // Additional check: ensure no path traversal in the remaining components
+                let remainingComponents = Array(targetComponents.dropFirst(allowedComponents.count))
+                if !remainingComponents.contains("..") && !remainingComponents.contains(".") {
+                    return folder
+                }
+            }
+        }
+        
+        return nil
     }
 
     /// Validate operation before executing
