@@ -14,6 +14,7 @@ import AppKit
 // MARK: - Shortcuts Integration
 
 /// Integration module for Shortcuts app
+/// Security: All command-line parameters are passed via Process arguments array
 public actor ShortcutsIntegration: AppIntegrationModule {
     public static let shared = ShortcutsIntegration()
 
@@ -50,20 +51,51 @@ public actor ShortcutsIntegration: AppIntegrationModule {
     }
 
     /// Run a shortcut by name
+    /// - Parameters:
+    ///   - name: Name of the shortcut (validated)
+    ///   - input: Optional input text to pass to the shortcut
+    /// - Returns: Output from the shortcut, if any
     public func runShortcut(_ name: String, input: String? = nil) async throws -> String? {
         #if os(macOS)
-        var command = "shortcuts run '\(name)'"
-        if let input = input {
-            command += " <<< '\(input)'"
+        // Validate shortcut name
+        try validateShortcutName(name)
+        
+        let process = Process()
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
+        let inputPipe = Pipe()
+        
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/shortcuts")
+        process.arguments = ["run", name]
+        process.standardOutput = outputPipe
+        process.standardError = errorPipe
+        
+        // If input is provided, pass it via stdin
+        if let inputText = input {
+            process.standardInput = inputPipe
+        }
+        
+        try process.run()
+        
+        // Write input if provided
+        if let inputText = input {
+            let inputData = inputText.data(using: .utf8) ?? Data()
+            inputPipe.fileHandleForWriting.write(inputData)
+            inputPipe.fileHandleForWriting.closeFile()
+        }
+        
+        process.waitUntilExit()
+        
+        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+
+        if process.terminationStatus != 0 {
+            let errorMessage = String(data: errorData, encoding: .utf8) ?? "Unknown error"
+            throw AppIntegrationModuleError.operationFailed("Shortcut failed: \(errorMessage)")
         }
 
-        let result = try await TerminalIntegration.shared.runShellCommand(command)
-
-        if !result.succeeded {
-            throw AppIntegrationModuleError.operationFailed("Shortcut failed: \(result.error)")
-        }
-
-        return result.output.trimmingCharacters(in: .whitespacesAndNewlines)
+        let output = String(data: outputData, encoding: .utf8) ?? ""
+        return output.trimmingCharacters(in: .whitespacesAndNewlines)
         #else
         throw AppIntegrationModuleError.notSupported
         #endif
@@ -78,13 +110,28 @@ public actor ShortcutsIntegration: AppIntegrationModule {
     /// Refresh the shortcuts list
     public func refreshShortcutsList() async throws {
         #if os(macOS)
-        let result = try await TerminalIntegration.shared.runShellCommand("shortcuts list")
+        let process = Process()
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
+        
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/shortcuts")
+        process.arguments = ["list"]
+        process.standardOutput = outputPipe
+        process.standardError = errorPipe
+        
+        try process.run()
+        process.waitUntilExit()
+        
+        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: outputData, encoding: .utf8) ?? ""
 
-        if !result.succeeded {
-            throw AppIntegrationModuleError.operationFailed("Failed to list shortcuts: \(result.error)")
+        if process.terminationStatus != 0 {
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorMessage = String(data: errorData, encoding: .utf8) ?? "Unknown error"
+            throw AppIntegrationModuleError.operationFailed("Failed to list shortcuts: \(errorMessage)")
         }
 
-        cachedShortcuts = result.output
+        cachedShortcuts = output
             .components(separatedBy: .newlines)
             .filter { !$0.isEmpty }
             .map { ShortcutInfo(name: $0) }
@@ -108,8 +155,10 @@ public actor ShortcutsIntegration: AppIntegrationModule {
     }
 
     /// Open a specific shortcut for editing
+    /// - Parameter name: Name of the shortcut (validated and URL-encoded)
     public func editShortcut(_ name: String) async throws {
         #if os(macOS)
+        try validateShortcutName(name)
         let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? name
         if let url = URL(string: "shortcuts://open-shortcut?name=\(encodedName)") {
             await MainActor.run {
@@ -135,24 +184,65 @@ public actor ShortcutsIntegration: AppIntegrationModule {
     }
 
     /// Sign a shortcut for sharing
+    /// - Parameters:
+    ///   - name: Name of the shortcut (validated)
+    ///   - mode: Signing mode (anyone or people-who-know-me)
+    /// - Returns: URL to the signed shortcut file
     public func signShortcut(_ name: String, mode: SigningMode = .anyone) async throws -> URL {
         #if os(macOS)
+        // Validate shortcut name
+        try validateShortcutName(name)
+        
         let tempDir = FileManager.default.temporaryDirectory
-        let outputPath = tempDir.appendingPathComponent("\(name).shortcut")
+        // Use UUID to avoid path injection through name
+        let safeFilename = UUID().uuidString + ".shortcut"
+        let outputPath = tempDir.appendingPathComponent(safeFilename)
 
-        let modeFlag = mode == .anyone ? "--mode anyone" : "--mode people-who-know-me"
-        let command = "shortcuts sign --input '\(name)' --output '\(outputPath.path)' \(modeFlag)"
+        let process = Process()
+        let errorPipe = Pipe()
+        
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/shortcuts")
+        process.arguments = ["sign", "--input", name, "--output", outputPath.path, "--mode", mode.rawValue]
+        process.standardError = errorPipe
+        
+        try process.run()
+        process.waitUntilExit()
 
-        let result = try await TerminalIntegration.shared.runShellCommand(command)
-
-        if !result.succeeded {
-            throw AppIntegrationModuleError.operationFailed("Failed to sign shortcut: \(result.error)")
+        if process.terminationStatus != 0 {
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorMessage = String(data: errorData, encoding: .utf8) ?? "Unknown error"
+            throw AppIntegrationModuleError.operationFailed("Failed to sign shortcut: \(errorMessage)")
         }
 
         return outputPath
         #else
         throw AppIntegrationModuleError.notSupported
         #endif
+    }
+    
+    // MARK: - Security Validation
+    
+    /// Validate shortcut name doesn't contain injection attempts
+    private func validateShortcutName(_ name: String) throws {
+        // Check for empty name
+        guard !name.isEmpty else {
+            throw AppIntegrationModuleError.invalidInput("Shortcut name cannot be empty")
+        }
+        
+        // Check for reasonable length
+        guard name.count < 256 else {
+            throw AppIntegrationModuleError.invalidInput("Shortcut name too long")
+        }
+        
+        // Check for null bytes
+        guard !name.contains("\0") else {
+            throw AppIntegrationModuleError.securityError("Null byte detected in shortcut name")
+        }
+        
+        // Check for newlines (potential injection)
+        guard !name.contains("\n") && !name.contains("\r") else {
+            throw AppIntegrationModuleError.securityError("Newline detected in shortcut name")
+        }
     }
 
     public enum SigningMode: String, Sendable {

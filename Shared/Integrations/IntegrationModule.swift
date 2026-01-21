@@ -46,6 +46,8 @@ public enum AppIntegrationModuleError: Error, LocalizedError, Sendable {
     case operationFailed(String)
     case timeout
     case invalidInput(String)
+    case invalidPath(String)
+    case securityError(String)
 
     public var errorDescription: String? {
         switch self {
@@ -67,6 +69,10 @@ public enum AppIntegrationModuleError: Error, LocalizedError, Sendable {
             return "Operation timed out"
         case .invalidInput(let reason):
             return "Invalid input: \(reason)"
+        case .invalidPath(let reason):
+            return "Invalid path: \(reason)"
+        case .securityError(let reason):
+            return "Security error: \(reason)"
         }
     }
 }

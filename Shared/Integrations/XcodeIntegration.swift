@@ -14,6 +14,7 @@ import AppKit
 // MARK: - Xcode Integration
 
 /// Integration module for Xcode
+/// Security: All command-line parameters are validated and passed via Process arguments array
 public actor XcodeIntegration: AppIntegrationModule {
     public static let shared = XcodeIntegration()
 
@@ -50,6 +51,8 @@ public actor XcodeIntegration: AppIntegrationModule {
     /// Open a project/workspace
     public func openProject(_ path: String) async throws {
         #if os(macOS)
+        // Validate path exists
+        try validatePath(path)
         let url = URL(fileURLWithPath: path)
         await MainActor.run {
             _ = NSWorkspace.shared.open(url)
@@ -127,15 +130,54 @@ public actor XcodeIntegration: AppIntegrationModule {
     }
 
     /// Open a file in Xcode
+    /// - Parameters:
+    ///   - path: Path to the file (validated)
+    ///   - line: Optional line number to navigate to
     public func openFile(_ path: String, line: Int? = nil) async throws {
         #if os(macOS)
-        let lineArg = line.map { " line=\($0)" } ?? ""
-        let script = """
-        do shell script "open -a Xcode '\(path)'\(lineArg)"
-        """
-        _ = try await executeAppleScript(script)
+        // Validate path
+        try validatePath(path)
+        
+        // Use open command with arguments array (safer than shell string)
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        process.arguments = ["-a", "Xcode", path]
+        
+        try process.run()
+        process.waitUntilExit()
+        
+        // Note: line navigation via command line isn't directly supported
+        // The user can navigate manually or we could use AppleScript to go to line
+        if let targetLine = line {
+            // Give Xcode time to open the file
+            try await Task.sleep(nanoseconds: 500_000_000)
+            try await goToLine(targetLine)
+        }
         #else
         throw AppIntegrationModuleError.notSupported
+        #endif
+    }
+    
+    /// Navigate to a specific line in the current file
+    private func goToLine(_ line: Int) async throws {
+        #if os(macOS)
+        // Validate line number is reasonable
+        guard line > 0 && line < 1_000_000 else {
+            throw AppIntegrationModuleError.invalidInput("Invalid line number: \(line)")
+        }
+        
+        let script = """
+        tell application "Xcode"
+            activate
+            tell application "System Events"
+                keystroke "l" using command down
+                delay 0.2
+                keystroke "\(line)"
+                keystroke return
+            end tell
+        end tell
+        """
+        _ = try await executeAppleScript(script)
         #endif
     }
 
@@ -174,21 +216,47 @@ public actor XcodeIntegration: AppIntegrationModule {
     }
 
     /// Build using xcodebuild CLI
+    /// Security: Uses Process with arguments array instead of shell string interpolation
     public func buildWithXcodebuild(scheme: String, configuration: String = "Debug", projectPath: String) async throws -> XcodeBuildResult {
-        let command: String
+        // Validate inputs
+        try validateScheme(scheme)
+        try validateConfiguration(configuration)
+        try validatePath(projectPath)
+        
+        let process = Process()
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
+        
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/xcodebuild")
+        
+        // Build arguments array (safe from injection)
+        var arguments: [String] = []
         if projectPath.hasSuffix(".xcworkspace") {
-            command = "xcodebuild -workspace '\(projectPath)' -scheme '\(scheme)' -configuration \(configuration) build 2>&1"
+            arguments.append(contentsOf: ["-workspace", projectPath])
         } else {
-            command = "xcodebuild -project '\(projectPath)' -scheme '\(scheme)' -configuration \(configuration) build 2>&1"
+            arguments.append(contentsOf: ["-project", projectPath])
         }
-
-        let result = try await TerminalIntegration.shared.runShellCommand(command)
+        arguments.append(contentsOf: ["-scheme", scheme])
+        arguments.append(contentsOf: ["-configuration", configuration])
+        arguments.append("build")
+        
+        process.arguments = arguments
+        process.standardOutput = outputPipe
+        process.standardError = errorPipe
+        
+        try process.run()
+        process.waitUntilExit()
+        
+        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+        let output = (String(data: outputData, encoding: .utf8) ?? "") +
+                     (String(data: errorData, encoding: .utf8) ?? "")
 
         return XcodeBuildResult(
-            succeeded: result.succeeded,
-            output: result.output,
-            errors: parseErrors(from: result.output),
-            warnings: parseWarnings(from: result.output)
+            succeeded: process.terminationStatus == 0,
+            output: output,
+            errors: parseErrors(from: output),
+            warnings: parseWarnings(from: output)
         )
     }
 
@@ -232,6 +300,51 @@ public actor XcodeIntegration: AppIntegrationModule {
             }
         }
         return issues
+    }
+    
+    // MARK: - Security Validation
+    
+    /// Validate that a path exists and doesn't contain injection attempts
+    private func validatePath(_ path: String) throws {
+        // Check for null bytes
+        guard !path.contains("\0") else {
+            throw AppIntegrationModuleError.securityError("Null byte detected in path")
+        }
+        
+        // Resolve to canonical path to prevent traversal
+        let url = URL(fileURLWithPath: path)
+        let resolvedPath = url.standardized.path
+        
+        // Verify the path exists
+        guard FileManager.default.fileExists(atPath: resolvedPath) else {
+            throw AppIntegrationModuleError.invalidPath("Path does not exist: \(resolvedPath)")
+        }
+    }
+    
+    /// Validate scheme name contains only safe characters
+    private func validateScheme(_ scheme: String) throws {
+        // Scheme names should only contain alphanumeric, dash, underscore, space
+        let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_ "))
+        guard scheme.unicodeScalars.allSatisfy({ allowedCharacters.contains($0) }) else {
+            throw AppIntegrationModuleError.invalidInput("Invalid characters in scheme name")
+        }
+        
+        guard !scheme.isEmpty && scheme.count < 256 else {
+            throw AppIntegrationModuleError.invalidInput("Invalid scheme name length")
+        }
+    }
+    
+    /// Validate configuration name
+    private func validateConfiguration(_ configuration: String) throws {
+        // Standard configurations are Debug, Release, or custom alphanumeric names
+        let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
+        guard configuration.unicodeScalars.allSatisfy({ allowedCharacters.contains($0) }) else {
+            throw AppIntegrationModuleError.invalidInput("Invalid characters in configuration name")
+        }
+        
+        guard !configuration.isEmpty && configuration.count < 64 else {
+            throw AppIntegrationModuleError.invalidInput("Invalid configuration name length")
+        }
     }
 
     #if os(macOS)

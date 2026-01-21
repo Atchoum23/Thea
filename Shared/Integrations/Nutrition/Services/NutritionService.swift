@@ -175,20 +175,27 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
 
     // MARK: - Private Helpers
 
+    /// Make a secure API request with API key in header (not URL parameters)
+    /// Security: API keys in URL parameters are logged in server access logs and browser history
     private func makeRequest(endpoint: String, parameters: [String: String] = [:]) async throws -> Data {
         guard let apiKey = apiKey else {
             throw NutritionError.usdaAPIError("API key not configured")
         }
 
         var components = URLComponents(string: "\(baseURL)\(endpoint)")
+        // Only add non-sensitive query parameters
         components?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
-        components?.queryItems?.append(URLQueryItem(name: "api_key", value: apiKey))
 
         guard let url = components?.url else {
             throw NutritionError.usdaAPIError("Invalid URL")
         }
 
-        let (data, response) = try await URLSession.shared.data(from: url)
+        // Create request with API key in header (more secure than URL parameter)
+        var request = URLRequest(url: url)
+        request.setValue(apiKey, forHTTPHeaderField: "X-Api-Key")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {

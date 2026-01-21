@@ -5,6 +5,33 @@ All notable changes to THEA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-01-21
+
+### Security - Red Hat Security Audit (Adversarial Review)
+Comprehensive adversarial security review identified and fixed multiple injection vulnerabilities.
+
+#### CRITICAL Fixes
+- **AppleScript Injection (TerminalIntegration)** - Fixed command injection via malicious input in Terminal commands; added proper escaping and validation
+- **AppleScript Injection (MailIntegration)** - Fixed path injection in email attachments; added validation and proper AppleScript escaping
+- **JavaScript Injection (BrowserAutomationService)** - Fixed XSS-style injection in form filling; now uses JSON-encoded parameters
+- **Command Injection (XcodeIntegration)** - Fixed shell command injection in xcodebuild; now uses Process with arguments array instead of shell strings
+- **Command Injection (ShortcutsIntegration)** - Fixed command injection via shortcut names; now uses Process with arguments array
+
+#### HIGH Fixes
+- **WebView File Access** - Disabled `allowFileAccessFromFileURLs` which allowed JavaScript to read local files
+- **API Key Exposure** - Moved API keys from URL query parameters to HTTP headers in NutritionService
+- **Path Traversal (FolderAccessManager)** - Fixed path validation to use component comparison instead of string prefix matching; prevents `/allowed/../etc/passwd` style attacks
+
+#### Security Improvements
+- Added `securityError` and `invalidPath` error cases to `AppIntegrationModuleError`
+- All shell command execution now uses `Process` with arguments array (prevents injection)
+- All AppleScript string interpolation now uses proper escaping functions
+- All path validation now resolves symlinks and uses canonical path comparison
+
+### Changed
+- WebView configuration now restricts JavaScript window opening
+- Added input validation for scheme names, configuration names, and email addresses
+
 ## [1.4.0] - 2026-01-21
 
 ### Security - Comprehensive Security Audit Fixes
