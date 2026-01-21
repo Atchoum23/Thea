@@ -29,6 +29,8 @@ settings:
     # Recommended settings from Xcode
     DEAD_CODE_STRIPPING: YES
     SWIFT_EMIT_LOC_STRINGS: YES
+    # Enable String Catalog Symbol Generation (Xcode recommended)
+    LOCALIZATION_EXPORT_SUPPORTED: YES
 
 packages:
   OpenAI:
@@ -71,6 +73,8 @@ targets:
         COMBINE_HIDPI_IMAGES: true
         # Hardened runtime for macOS (recommended)
         ENABLE_HARDENED_RUNTIME: YES
+        # Enable Register App Groups (Xcode recommended)
+        REGISTER_APP_GROUPS: YES
       debug:
         ENABLE_HARDENED_RUNTIME: YES
       release:
