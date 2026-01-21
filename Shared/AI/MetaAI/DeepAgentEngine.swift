@@ -279,7 +279,7 @@ final class DeepAgentEngine {
     private func assignTools(to subtasks: [Subtask]) async throws -> [SubtaskWithTools] {
         try await withThrowingTaskGroup(of: SubtaskWithTools.self) { group in
             for subtask in subtasks {
-                group.addTask {
+                group.addTask { @MainActor in
                     let tools = await self.toolRegistry.selectTools(for: subtask.description)
                     return SubtaskWithTools(subtask: subtask, tools: tools)
                 }

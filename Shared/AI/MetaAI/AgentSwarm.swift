@@ -66,7 +66,7 @@ final class AgentSwarm {
         // Execute all agents in parallel
         try await withThrowingTaskGroup(of: AgentResult.self) { group in
             for i in 0..<swarm.agentCount {
-                group.addTask {
+                group.addTask { @MainActor in
                     let progress = Float(i) / Float(swarm.agentCount)
                     progressHandler(SwarmProgress(phase: "Agent \(i + 1) executing", percentage: progress))
 
@@ -108,7 +108,7 @@ final class AgentSwarm {
         // Execute all agents and pick the best result
         try await withThrowingTaskGroup(of: AgentResult.self) { group in
             for i in 0..<swarm.agentCount {
-                group.addTask {
+                group.addTask { @MainActor in
                     try await self.executeAgent(
                         task: swarm.task,
                         agentIndex: i,
@@ -182,7 +182,7 @@ final class AgentSwarm {
         // Execute all agents
         try await withThrowingTaskGroup(of: AgentResult.self) { group in
             for i in 0..<swarm.agentCount {
-                group.addTask {
+                group.addTask { @MainActor in
                     try await self.executeAgent(
                         task: swarm.task,
                         agentIndex: i,

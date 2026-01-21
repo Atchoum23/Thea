@@ -324,7 +324,7 @@ final class SubAgentOrchestrator {
 
             let batchResults = try await withThrowingTaskGroup(of: SubTaskResult.self) { group in
                 for assignment in batch {
-                    group.addTask {
+                    group.addTask { @MainActor in
                         try await self.executeSubTask(assignment)
                     }
                 }
