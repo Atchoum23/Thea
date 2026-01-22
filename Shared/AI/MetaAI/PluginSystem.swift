@@ -347,6 +347,7 @@ final class PluginSystem {
 
 // MARK: - Plugin Sandbox
 
+@MainActor
 class PluginSandbox {
     let plugin: Plugin
     let maxMemory: Int
