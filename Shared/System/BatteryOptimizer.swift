@@ -67,13 +67,15 @@ public final class BatteryOptimizer {
 
     private func setupObservers() {
         powerManager.onPowerSourceChanged = { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.evaluateOptimizationMode()
             }
         }
 
         powerManager.onBatteryLevelChanged = { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.evaluateOptimizationMode()
             }
         }

@@ -111,7 +111,8 @@ public final class PowerStateManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.handleWillSleep()
             }
         }
@@ -121,7 +122,8 @@ public final class PowerStateManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.handleDidWake()
             }
         }
@@ -131,7 +133,8 @@ public final class PowerStateManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.handleScreensDidSleep()
             }
         }
@@ -141,7 +144,8 @@ public final class PowerStateManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.handleScreensDidWake()
             }
         }
@@ -155,7 +159,8 @@ public final class PowerStateManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.updatePowerState()
             }
         }
@@ -165,7 +170,8 @@ public final class PowerStateManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.updatePowerState()
             }
         }
@@ -175,7 +181,8 @@ public final class PowerStateManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.updatePowerState()
             }
         }
@@ -188,7 +195,8 @@ public final class PowerStateManager {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.updateThermalState()
             }
         }

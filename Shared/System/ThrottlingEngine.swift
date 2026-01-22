@@ -72,19 +72,22 @@ public final class ThrottlingEngine {
     private func setupObservers() {
         // Observe power state changes
         powerManager.onPowerSourceChanged = { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.evaluateThrottleLevel()
             }
         }
 
         powerManager.onBatteryLevelChanged = { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.evaluateThrottleLevel()
             }
         }
 
         powerManager.onThermalStateChanged = { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.evaluateThrottleLevel()
             }
         }
