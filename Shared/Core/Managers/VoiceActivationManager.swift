@@ -96,7 +96,8 @@ final class VoiceActivationManager {
         transcriptionText = ""
 
         recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 guard let self = self else { return }
 
                 if let result = result {
