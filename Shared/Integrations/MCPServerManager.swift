@@ -604,9 +604,9 @@ struct MCPToolCallRequest: Codable {
     let params: MCPToolCallParams
 }
 
-struct MCPToolCallParams: Codable {
+struct MCPToolCallParams: Codable, Sendable {
     let name: String
-    let arguments: [String: AnyCodable]
+    let arguments: [String: MCPAnyCodable]
 
     enum CodingKeys: String, CodingKey {
         case name, arguments
@@ -614,13 +614,13 @@ struct MCPToolCallParams: Codable {
 
     init(name: String, arguments: [String: Any]) {
         self.name = name
-        self.arguments = arguments.mapValues { AnyCodable($0) }
+        self.arguments = arguments.mapValues { MCPAnyCodable($0) }
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)
-        arguments = try container.decodeIfPresent([String: AnyCodable].self, forKey: .arguments) ?? [:]
+        arguments = try container.decodeIfPresent([String: MCPAnyCodable].self, forKey: .arguments) ?? [:]
     }
 
     func encode(to encoder: Encoder) throws {
@@ -630,8 +630,9 @@ struct MCPToolCallParams: Codable {
     }
 }
 
-/// Type-erased Codable wrapper for heterogeneous dictionary values
-struct AnyCodable: Codable, Sendable {
+/// Type-erased Codable wrapper for heterogeneous dictionary values in MCP context
+/// Uses @unchecked Sendable since values are only primitive types
+struct MCPAnyCodable: Codable, @unchecked Sendable {
     let value: Any
 
     init(_ value: Any) {
@@ -650,9 +651,9 @@ struct AnyCodable: Codable, Sendable {
             value = double
         } else if let string = try? container.decode(String.self) {
             value = string
-        } else if let array = try? container.decode([AnyCodable].self) {
+        } else if let array = try? container.decode([MCPAnyCodable].self) {
             value = array.map { $0.value }
-        } else if let dict = try? container.decode([String: AnyCodable].self) {
+        } else if let dict = try? container.decode([String: MCPAnyCodable].self) {
             value = dict.mapValues { $0.value }
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode value")
@@ -673,9 +674,9 @@ struct AnyCodable: Codable, Sendable {
         case let string as String:
             try container.encode(string)
         case let array as [Any]:
-            try container.encode(array.map { AnyCodable($0) })
+            try container.encode(array.map { MCPAnyCodable($0) })
         case let dict as [String: Any]:
-            try container.encode(dict.mapValues { AnyCodable($0) })
+            try container.encode(dict.mapValues { MCPAnyCodable($0) })
         default:
             try container.encodeNil()
         }
