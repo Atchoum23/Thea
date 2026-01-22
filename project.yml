@@ -33,6 +33,8 @@ settings:
     LOCALIZATION_EXPORT_SUPPORTED: YES
     # Enable String Catalog Symbol Generation (from Xcode recommended settings)
     SWIFT_EMIT_LOC_STRINGS: YES
+    # Enable String Catalog Symbol Generation for accessing manually-added strings
+    STRINGS_CATALOG_GENERATE_SYMBOL: YES
     # Enable Asset Catalog Compiler options
     ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
 

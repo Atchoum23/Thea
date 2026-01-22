@@ -417,7 +417,8 @@ public enum ClaudeBridgeError: Error, LocalizedError {
     case accessibilityError(String)
     case scriptError(String)
     case configurationError(String)
-    
+    case notSupported
+
     public var errorDescription: String? {
         switch self {
         case .claudeNotInstalled:
@@ -430,6 +431,8 @@ public enum ClaudeBridgeError: Error, LocalizedError {
             return "Script error: \(message)"
         case .configurationError(let message):
             return "Configuration error: \(message)"
+        case .notSupported:
+            return "Claude.app integration is only available on macOS"
         }
     }
 }
@@ -441,23 +444,41 @@ public class ClaudeAppBridge: ObservableObject {
     public static let shared = ClaudeAppBridge()
     @Published public private(set) var isClaudeInstalled = false
     @Published public private(set) var isClaudeRunning = false
-    
+
     private init() {}
-    
+
     public func launchClaude() async throws {
         throw ClaudeBridgeError.notSupported
     }
-    
+
     public func sendPrompt(_ prompt: String) async throws -> String {
         throw ClaudeBridgeError.notSupported
     }
 }
 
 public enum ClaudeBridgeError: Error, LocalizedError {
+    case claudeNotInstalled
+    case claudeNotRunning
+    case accessibilityError(String)
+    case scriptError(String)
+    case configurationError(String)
     case notSupported
-    
+
     public var errorDescription: String? {
-        "Claude.app integration is only available on macOS"
+        switch self {
+        case .claudeNotInstalled:
+            return "Claude.app is not installed. Please install it from claude.ai"
+        case .claudeNotRunning:
+            return "Claude.app is not running"
+        case .accessibilityError(let message):
+            return "Accessibility error: \(message)"
+        case .scriptError(let message):
+            return "Script error: \(message)"
+        case .configurationError(let message):
+            return "Configuration error: \(message)"
+        case .notSupported:
+            return "Claude.app integration is only available on macOS"
+        }
     }
 }
 #endif
