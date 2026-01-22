@@ -45,6 +45,10 @@
 		<string>applinks:theathe.app</string>
 	</array>
 
+	<!-- Network Capabilities for Remote Server/Client -->
+	<key>com.apple.developer.networking.multicast</key>
+	<true/>
+
 	<!-- Background Modes are configured in Info.plist, not entitlements -->
 </dict>
 </plist>

@@ -31,6 +31,10 @@ settings:
     SWIFT_EMIT_LOC_STRINGS: YES
     # Enable String Catalog Symbol Generation (Xcode recommended)
     LOCALIZATION_EXPORT_SUPPORTED: YES
+    # Enable String Catalog Symbol Generation (from Xcode recommended settings)
+    SWIFT_EMIT_LOC_STRINGS: YES
+    # Enable Asset Catalog Compiler options
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
 
 packages:
   OpenAI:
@@ -128,6 +132,10 @@ targets:
           - "**/LocalModelsView.swift"
           - "**/LocalModelsSettingsView.swift"
           - "**/FolderAccessManager.swift"
+          # Remote server macOS-specific files excluded on iOS
+          - "**/RemoteScreenService.swift"
+          - "**/RemoteInputService.swift"
+          - "**/RemoteSystemService.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
     settings:
