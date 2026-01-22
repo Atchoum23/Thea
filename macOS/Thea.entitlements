@@ -32,5 +32,13 @@
 			<string>com.apple.systemevents.processes</string>
 		</array>
 	</dict>
+	<!-- Network Server Capabilities for Remote Server -->
+	<key>com.apple.security.network.server</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<!-- Bonjour Services for Network Discovery -->
+	<key>com.apple.developer.networking.multicast</key>
+	<true/>
 </dict>
 </plist>
