@@ -345,6 +345,7 @@ public actor AppSwitchMonitor: ActivityMonitor {
 
         #if os(macOS)
         let initialApp = await AppSwitchObserverHelper.shared.setup { [weak self] appName in
+            guard self != nil else { return }
             Task { [weak self] in
                 await self?.handleAppSwitch(appName: appName)
             }
