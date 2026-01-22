@@ -108,9 +108,11 @@ final class VoiceActivationEngine {
 
         // Start recognition task
         recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { [weak self] result, error in
-            guard let self = self else { return }
+            guard self != nil else { return }
 
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+
                 if let result = result {
                     let transcript = result.bestTranscription.formattedString.lowercased()
                     self.lastTranscript = transcript
