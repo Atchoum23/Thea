@@ -191,7 +191,7 @@ public class RemoteFileService: ObservableObject {
         // Extra safety check for critical paths
         let criticalPaths = ["/", "/Users", "/System", "/Library", "/Applications", "/bin", "/sbin", "/usr"]
         for critical in criticalPaths {
-            if resolvedPath == critical || resolvedPath.hasPrefix(critical + "/") && resolvedPath.components(separatedBy: "/").count <= 3 {
+            if resolvedPath == critical || (resolvedPath.hasPrefix(critical + "/") && resolvedPath.components(separatedBy: "/").count <= 3) {
                 return .error("Cannot delete critical system path")
             }
         }
