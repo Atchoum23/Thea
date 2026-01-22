@@ -67,14 +67,16 @@ final class InputTrackingManager {
 
         // Monitor mouse and keyboard events
         eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown, .mouseMoved]) { [weak self] event in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 await self?.handleEvent(event)
             }
         }
 
         // Periodic save
         Timer.scheduledTimer(withTimeInterval: config.inputActivityCheckInterval, repeats: true) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 await self?.saveCurrentStats()
             }
         }

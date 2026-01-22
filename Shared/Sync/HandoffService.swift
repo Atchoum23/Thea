@@ -55,7 +55,8 @@ public final class HandoffService {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard self != nil else { return }
+            Task { @MainActor [weak self] in
                 self?.handleAppBecameActive()
             }
         }

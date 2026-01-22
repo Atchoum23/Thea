@@ -61,49 +61,58 @@ final class TerminalCommandExecutor: @unchecked Sendable {
         let startTime = Date()
         let timeoutSeconds = securityPolicy.maxExecutionTime
 
+        // Execute with timeout using Task and withTimeout pattern
         return try await withThrowingTaskGroup(of: CommandResult.self) { group in
+            // Main execution task
             group.addTask {
-                let process = Process()
-                process.executableURL = URL(fileURLWithPath: shell.rawValue)
-                process.arguments = ["-c", command]
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<CommandResult, Error>) in
+                    let process = Process()
+                    process.executableURL = URL(fileURLWithPath: shell.rawValue)
+                    process.arguments = ["-c", command]
 
-                if let dir = workingDirectory {
-                    process.currentDirectoryURL = dir
-                }
-
-                if let env = environment {
-                    var processEnv = ProcessInfo.processInfo.environment
-                    for (key, value) in env {
-                        processEnv[key] = value
+                    if let dir = workingDirectory {
+                        process.currentDirectoryURL = dir
                     }
-                    process.environment = processEnv
+
+                    if let env = environment {
+                        var processEnv = ProcessInfo.processInfo.environment
+                        for (key, value) in env {
+                            processEnv[key] = value
+                        }
+                        process.environment = processEnv
+                    }
+
+                    let outputPipe = Pipe()
+                    let errorPipe = Pipe()
+                    process.standardOutput = outputPipe
+                    process.standardError = errorPipe
+
+                    process.terminationHandler = { terminatedProcess in
+                        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+                        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+
+                        let output = String(data: outputData, encoding: .utf8) ?? ""
+                        let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
+                        let duration = Date().timeIntervalSince(startTime)
+
+                        continuation.resume(returning: CommandResult(
+                            output: output,
+                            errorOutput: errorOutput,
+                            exitCode: terminatedProcess.terminationStatus,
+                            command: command,
+                            duration: duration
+                        ))
+                    }
+
+                    do {
+                        try process.run()
+                    } catch {
+                        continuation.resume(throwing: ExecutorError.processError(error.localizedDescription))
+                    }
                 }
-
-                let outputPipe = Pipe()
-                let errorPipe = Pipe()
-                process.standardOutput = outputPipe
-                process.standardError = errorPipe
-
-                try process.run()
-                process.waitUntilExit()
-
-                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-                let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-
-                let output = String(data: outputData, encoding: .utf8) ?? ""
-                let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
-                let duration = Date().timeIntervalSince(startTime)
-
-                return CommandResult(
-                    output: output,
-                    errorOutput: errorOutput,
-                    exitCode: process.terminationStatus,
-                    command: command,
-                    duration: duration
-                )
             }
 
-            // Timeout task - capture timeout value to avoid self capture
+            // Timeout task
             group.addTask {
                 try await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
                 throw ExecutorError.timeout

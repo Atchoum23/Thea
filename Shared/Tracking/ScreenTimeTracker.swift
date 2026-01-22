@@ -42,7 +42,8 @@ final class ScreenTimeTracker {
 
         // Start periodic tracking
         timer = Timer.scheduledTimer(withTimeInterval: config.screenTimeCheckInterval, repeats: true) { [weak self] _ in
-            Task { @MainActor in
+            guard let self else { return }
+            Task { @MainActor [weak self] in
                 await self?.trackActiveApp()
             }
         }
