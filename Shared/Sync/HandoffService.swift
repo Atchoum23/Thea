@@ -203,21 +203,8 @@ public final class HandoffService {
         }
     }
 
-    private func convertToSendableDict(_ dict: [AnyHashable: Any]) -> [String: any Sendable] {
-        var result: [String: any Sendable] = [:]
-        for (key, value) in dict {
-            guard let stringKey = key as? String else { continue }
-            // Convert known types to Sendable
-            switch value {
-            case let str as String: result[stringKey] = str
-            case let num as Int: result[stringKey] = num
-            case let num as Double: result[stringKey] = num
-            case let bool as Bool: result[stringKey] = bool
-            case let date as Date: result[stringKey] = date
-            default: break
-            }
-        }
-        return result
+    private func convertToSendableDict(_ dict: [AnyHashable: Any]) -> [String: SendableValue] {
+        dict.toSendableDict()
     }
 
     // MARK: - Configuration
@@ -240,18 +227,31 @@ public struct HandoffContext: Sendable {
     public let type: HandoffType
     public let id: String
     public let title: String
-    public let metadata: [String: any Sendable]
+    public let metadata: [String: SendableValue]
 
     public init(
         type: HandoffType,
         id: String,
         title: String,
-        metadata: [String: any Sendable]
+        metadata: [String: SendableValue]
     ) {
         self.type = type
         self.id = id
         self.title = title
         self.metadata = metadata
+    }
+
+    /// Convenience initializer accepting [String: Any]
+    public init(
+        type: HandoffType,
+        id: String,
+        title: String,
+        rawMetadata: [String: Any]
+    ) {
+        self.type = type
+        self.id = id
+        self.title = title
+        self.metadata = Dictionary(fromAny: rawMetadata)
     }
 }
 

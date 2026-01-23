@@ -237,7 +237,7 @@ public struct TheaNotification: Sendable, Identifiable {
     public var badge: Int?
     public var threadIdentifier: String?
     public var trigger: NotificationTrigger
-    public var userInfo: [String: any Sendable]
+    public var userInfo: [String: SendableValue]
 
     public init(
         id: UUID = UUID(),
@@ -249,7 +249,7 @@ public struct TheaNotification: Sendable, Identifiable {
         badge: Int? = nil,
         threadIdentifier: String? = nil,
         trigger: NotificationTrigger = .immediate,
-        userInfo: [String: any Sendable] = [:]
+        userInfo: [String: SendableValue] = [:]
     ) {
         self.id = id
         self.title = title
@@ -261,6 +261,31 @@ public struct TheaNotification: Sendable, Identifiable {
         self.threadIdentifier = threadIdentifier
         self.trigger = trigger
         self.userInfo = userInfo
+    }
+
+    /// Convenience initializer accepting [String: Any]
+    public init(
+        id: UUID = UUID(),
+        title: String,
+        body: String,
+        subtitle: String? = nil,
+        category: NotificationCategory = .general,
+        sound: NotificationSound = .default,
+        badge: Int? = nil,
+        threadIdentifier: String? = nil,
+        trigger: NotificationTrigger = .immediate,
+        rawUserInfo: [String: Any]
+    ) {
+        self.id = id
+        self.title = title
+        self.body = body
+        self.subtitle = subtitle
+        self.category = category
+        self.sound = sound
+        self.badge = badge
+        self.threadIdentifier = threadIdentifier
+        self.trigger = trigger
+        self.userInfo = Dictionary(fromAny: rawUserInfo)
     }
 }
 

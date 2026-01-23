@@ -117,7 +117,7 @@ public actor UniversalNotificationService {
         category: NotificationCategory = .general,
         sound: NotificationSound = .default,
         priority: TheaNotificationPriority = .normal,
-        userInfo: [String: any Sendable] = [:]
+        userInfo: [String: SendableValue] = [:]
     ) async throws {
         // Create CloudKit record for cross-device delivery
         let record = CKRecord(recordType: recordType)
@@ -130,7 +130,9 @@ public actor UniversalNotificationService {
         record["targetDevices"] = ["all"] as [String]
         record["createdAt"] = Date()
         record["originDevice"] = await MainActor.run { DeviceRegistry.shared.currentDevice.id }
-        record["userInfo"] = try? JSONSerialization.data(withJSONObject: userInfo.compactMapValues { $0 as? String })
+        // Convert SendableValue dict to string dict for JSON serialization
+        let stringDict = userInfo.compactMapValues { $0.stringValue }
+        record["userInfo"] = try? JSONSerialization.data(withJSONObject: stringDict)
         
         // Save to CloudKit - will trigger subscription on all devices
         _ = try await privateDatabase.save(record)

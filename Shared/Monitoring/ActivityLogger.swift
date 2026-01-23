@@ -64,23 +64,13 @@ public actor ActivityLogger {
         type: ActivityType,
         metadata: [String: Any] = [:]
     ) {
-        // Convert metadata to Sendable-compatible dictionary
-        var sendableMetadata: [String: any Sendable] = [:]
-        for (key, value) in metadata {
-            switch value {
-            case let str as String: sendableMetadata[key] = str
-            case let num as Int: sendableMetadata[key] = num
-            case let num as Double: sendableMetadata[key] = num
-            case let bool as Bool: sendableMetadata[key] = bool
-            case let date as Date: sendableMetadata[key] = date
-            default: break
-            }
-        }
+        // Convert metadata to ActivityAnyCodable dictionary
+        let codableMetadata = metadata.mapValues { ActivityAnyCodable($0) }
 
         let entry = ActivityLogEntry(
             type: type,
             timestamp: Date(),
-            metadata: sendableMetadata
+            metadata: codableMetadata
         )
         log(entry)
     }
@@ -303,20 +293,35 @@ public struct ActivityLogEntry: Codable, Sendable, Identifiable {
     public let type: ActivityType
     public let timestamp: Date
     public let duration: TimeInterval?
-    public let metadata: [String: AnyCodable]
+    public let metadata: [String: ActivityAnyCodable]
 
     public init(
         id: UUID = UUID(),
         type: ActivityType,
         timestamp: Date = Date(),
         duration: TimeInterval? = nil,
-        metadata: [String: any Sendable] = [:]
+        metadata: [String: ActivityAnyCodable] = [:]
     ) {
         self.id = id
         self.type = type
         self.timestamp = timestamp
         self.duration = duration
-        self.metadata = metadata.compactMapValues { AnyCodable($0) }
+        self.metadata = metadata
+    }
+
+    /// Convenience initializer accepting Any values
+    public init(
+        id: UUID = UUID(),
+        type: ActivityType,
+        timestamp: Date = Date(),
+        duration: TimeInterval? = nil,
+        rawMetadata: [String: Any]
+    ) {
+        self.id = id
+        self.type = type
+        self.timestamp = timestamp
+        self.duration = duration
+        self.metadata = rawMetadata.mapValues { ActivityAnyCodable($0) }
     }
 }
 
@@ -378,44 +383,84 @@ public struct DailyActivityStats: Sendable {
     }
 }
 
-// MARK: - AnyCodable Helper
+// MARK: - ActivityAnyCodable Helper
 
-public struct AnyCodable: Codable, Sendable {
-    public let value: any Sendable
+/// A Sendable-compatible wrapper for codable primitive values
+/// Uses an enum to avoid `any Sendable` existential type issues
+public enum ActivityAnyCodable: Codable, Sendable, Equatable {
+    case string(String)
+    case int(Int)
+    case double(Double)
+    case bool(Bool)
+    case date(Date)
+    case null
 
-    public init(_ value: any Sendable) {
-        self.value = value
+    /// The underlying value
+    public var value: Any {
+        switch self {
+        case .string(let v): return v
+        case .int(let v): return v
+        case .double(let v): return v
+        case .bool(let v): return v
+        case .date(let v): return v
+        case .null: return NSNull()
+        }
+    }
+
+    /// Initialize from any value, converting to appropriate case
+    public init(_ value: Any) {
+        switch value {
+        case let str as String:
+            self = .string(str)
+        case let num as Int:
+            self = .int(num)
+        case let num as Double:
+            self = .double(num)
+        case let bool as Bool:
+            self = .bool(bool)
+        case let date as Date:
+            self = .date(date)
+        default:
+            self = .string(String(describing: value))
+        }
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         if let intValue = try? container.decode(Int.self) {
-            value = intValue
+            self = .int(intValue)
         } else if let doubleValue = try? container.decode(Double.self) {
-            value = doubleValue
+            self = .double(doubleValue)
         } else if let stringValue = try? container.decode(String.self) {
-            value = stringValue
+            self = .string(stringValue)
         } else if let boolValue = try? container.decode(Bool.self) {
-            value = boolValue
+            self = .bool(boolValue)
+        } else if let dateValue = try? container.decode(Date.self) {
+            self = .date(dateValue)
+        } else if container.decodeNil() {
+            self = .null
         } else {
-            value = ""
+            self = .null
         }
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
-        if let intValue = value as? Int {
-            try container.encode(intValue)
-        } else if let doubleValue = value as? Double {
-            try container.encode(doubleValue)
-        } else if let stringValue = value as? String {
-            try container.encode(stringValue)
-        } else if let boolValue = value as? Bool {
-            try container.encode(boolValue)
-        } else {
-            try container.encode(String(describing: value))
+        switch self {
+        case .string(let v):
+            try container.encode(v)
+        case .int(let v):
+            try container.encode(v)
+        case .double(let v):
+            try container.encode(v)
+        case .bool(let v):
+            try container.encode(v)
+        case .date(let v):
+            try container.encode(v)
+        case .null:
+            try container.encodeNil()
         }
     }
 }
