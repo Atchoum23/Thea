@@ -82,10 +82,13 @@ final class FinancialIntegration {
 
         let updatedAccounts = try await provider.fetchAccounts()
 
-        if let updated = updatedAccounts.first(where: { $0.id == account.id }) {
-            account.balance = updated.balance
-            account.currency = updated.currency
-            account.lastUpdated = Date()
+        if let updated = updatedAccounts.first(where: { $0.id == account.id }),
+           let index = accounts.firstIndex(where: { $0.id == account.id }) {
+            var refreshed = accounts[index]
+            refreshed.balance = updated.balance
+            refreshed.currency = updated.currency
+            refreshed.lastUpdated = Date()
+            accounts[index] = refreshed
         }
     }
 
@@ -99,12 +102,11 @@ final class FinancialIntegration {
         // Remove old transactions for this account
         transactions.removeAll { $0.accountId == account.id }
 
-        // Add new transactions
-        transactions.append(contentsOf: newTransactions)
-
-        // Categorize transactions
+        // Add new transactions with AI categorization
         for transaction in newTransactions {
-            transaction.category = await categorizeTransaction(transaction)
+            var categorized = transaction
+            categorized.category = await categorizeTransaction(transaction)
+            transactions.append(categorized)
         }
 
         saveTransactions()
@@ -402,7 +404,9 @@ protocol FinancialProvider: Sendable {
 
 // MARK: - Models
 
-class ProviderAccount: Identifiable, Codable, @unchecked Sendable {
+/// A financial account from a provider
+/// Note: Uses @unchecked Sendable because mutations only occur within @MainActor-isolated FinancialAIService
+struct ProviderAccount: Identifiable, Codable, Sendable {
     let id: UUID
     let provider: String
     let accountType: ProviderProviderAccountType
@@ -422,7 +426,9 @@ class ProviderAccount: Identifiable, Codable, @unchecked Sendable {
     }
 }
 
-class Transaction: Identifiable, Codable, @unchecked Sendable {
+/// A financial transaction
+/// Note: Uses @unchecked Sendable because mutations only occur within @MainActor-isolated FinancialAIService
+struct Transaction: Identifiable, Codable, Sendable {
     let id: UUID
     let accountId: UUID
     let amount: Double
