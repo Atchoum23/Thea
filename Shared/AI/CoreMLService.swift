@@ -215,7 +215,8 @@ public class CoreMLService: ObservableObject {
                 let entity = ExtractedEntity(
                     text: String(text[range]),
                     type: EntityType(from: tag),
-                    range: range
+                    range: range,
+                    in: text
                 )
                 entities.append(entity)
             }
@@ -290,7 +291,8 @@ public class CoreMLService: ObservableObject {
                 tags.append(PartOfSpeechTag(
                     word: String(text[range]),
                     tag: tag,
-                    range: range
+                    range: range,
+                    in: text
                 ))
             }
             return true
@@ -387,10 +389,18 @@ public struct SentimentResult: Sendable {
     public let confidence: Double
 }
 
-public struct ExtractedEntity: Sendable {
+public struct ExtractedEntity: @unchecked Sendable {
     public let text: String
     public let type: EntityType
-    public let range: Range<String.Index>
+    public let startOffset: Int
+    public let endOffset: Int
+
+    init(text: String, type: EntityType, range: Range<String.Index>, in string: String) {
+        self.text = text
+        self.type = type
+        self.startOffset = string.distance(from: string.startIndex, to: range.lowerBound)
+        self.endOffset = string.distance(from: string.startIndex, to: range.upperBound)
+    }
 }
 
 public enum EntityType: String, Sendable {
@@ -415,10 +425,18 @@ public struct LanguageDetectionResult: Sendable {
     public let alternatives: [(NLLanguage, Double)]
 }
 
-public struct PartOfSpeechTag: Sendable {
+public struct PartOfSpeechTag: @unchecked Sendable {
     public let word: String
     public let tag: NLTag
-    public let range: Range<String.Index>
+    public let startOffset: Int
+    public let endOffset: Int
+
+    init(word: String, tag: NLTag, range: Range<String.Index>, in string: String) {
+        self.word = word
+        self.tag = tag
+        self.startOffset = string.distance(from: string.startIndex, to: range.lowerBound)
+        self.endOffset = string.distance(from: string.startIndex, to: range.upperBound)
+    }
 }
 
 public enum UserIntent: String, Sendable {

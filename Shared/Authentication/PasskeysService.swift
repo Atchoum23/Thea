@@ -15,6 +15,9 @@ import UIKit
 #if canImport(AppKit)
 import AppKit
 #endif
+#if canImport(LocalAuthentication)
+import LocalAuthentication
+#endif
 
 // MARK: - Passkeys Service
 
@@ -164,8 +167,6 @@ public class PasskeysService: NSObject, ObservableObject {
     /// Authenticate using biometrics (Face ID / Touch ID)
     public func authenticateWithBiometrics(reason: String) async throws -> Bool {
         #if canImport(LocalAuthentication)
-        import LocalAuthentication
-
         let context = LAContext()
         var authError: NSError?
 
@@ -276,10 +277,10 @@ extension PasskeysService: ASAuthorizationControllerDelegate {
                 case .matchedExcludedCredential:
                     passkeyError = .credentialAlreadyExists
                 @unknown default:
-                    passkeyError = .unknown(error)
+                    passkeyError = .from(error)
                 }
             } else {
-                passkeyError = .unknown(error)
+                passkeyError = .from(error)
             }
 
             self.error = passkeyError
@@ -335,7 +336,7 @@ public struct PasskeyUser: Identifiable, Sendable {
     public let fullName: String?
 }
 
-public enum PasskeyError: Error, LocalizedError, Sendable {
+public enum PasskeyError: Error, LocalizedError, @unchecked Sendable {
     case userCancelled
     case invalidResponse
     case notHandled
@@ -343,7 +344,7 @@ public enum PasskeyError: Error, LocalizedError, Sendable {
     case notInteractive
     case credentialAlreadyExists
     case biometricsUnavailable
-    case unknown(Error)
+    case unknown(String)
 
     public var errorDescription: String? {
         switch self {
@@ -361,9 +362,13 @@ public enum PasskeyError: Error, LocalizedError, Sendable {
             return "This passkey already exists"
         case .biometricsUnavailable:
             return "Biometric authentication unavailable"
-        case .unknown(let error):
-            return "Authentication error: \(error.localizedDescription)"
+        case .unknown(let message):
+            return "Authentication error: \(message)"
         }
+    }
+
+    public static func from(_ error: Error) -> PasskeyError {
+        return .unknown(error.localizedDescription)
     }
 }
 
@@ -500,9 +505,4 @@ struct SignInWithAppleButtonRepresentable: NSViewRepresentable {
         }
     }
 }
-#endif
-
-// Fix LocalAuthentication import
-#if canImport(LocalAuthentication)
-import LocalAuthentication
 #endif
