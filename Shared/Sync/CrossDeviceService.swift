@@ -309,7 +309,7 @@ public struct SyncChange: Sendable {
     public let recordType: String
     public let recordId: String
     public let timestamp: Date
-    public let data: [String: any Sendable]
+    public let data: [String: SendableValue]
 
     public init(
         id: UUID = UUID(),
@@ -317,7 +317,7 @@ public struct SyncChange: Sendable {
         recordType: String,
         recordId: String,
         timestamp: Date = Date(),
-        data: [String: any Sendable] = [:]
+        data: [String: SendableValue] = [:]
     ) {
         self.id = id
         self.type = type
@@ -327,19 +327,36 @@ public struct SyncChange: Sendable {
         self.data = data
     }
 
+    /// Convenience initializer accepting [String: Any]
+    public init(
+        id: UUID = UUID(),
+        type: SyncChangeType,
+        recordType: String,
+        recordId: String,
+        timestamp: Date = Date(),
+        rawData: [String: Any]
+    ) {
+        self.id = id
+        self.type = type
+        self.recordType = recordType
+        self.recordId = recordId
+        self.timestamp = timestamp
+        self.data = Dictionary(fromAny: rawData)
+    }
+
     func toCKRecord() -> CKRecord {
         let recordId = CKRecord.ID(recordName: self.recordId)
         let record = CKRecord(recordType: recordType, recordID: recordId)
 
         for (key, value) in data {
-            if let stringValue = value as? String {
-                record[key] = stringValue
-            } else if let intValue = value as? Int {
-                record[key] = intValue
-            } else if let doubleValue = value as? Double {
-                record[key] = doubleValue
-            } else if let dateValue = value as? Date {
-                record[key] = dateValue
+            switch value {
+            case .string(let v): record[key] = v
+            case .int(let v): record[key] = v
+            case .double(let v): record[key] = v
+            case .date(let v): record[key] = v
+            case .bool(let v): record[key] = v ? 1 : 0
+            case .data(let v): record[key] = v
+            default: break
             }
         }
 
