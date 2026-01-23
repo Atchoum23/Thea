@@ -296,11 +296,15 @@ public struct TransferableAIResponse: Codable, Transferable, Sendable {
 
 // MARK: - Image with AI Analysis Transferable
 
-public struct TransferableAnalyzedImage: Transferable, Sendable {
+public struct TransferableAnalyzedImage: Transferable, @unchecked Sendable {
     public let imageData: Data
     public let analysis: String
     public let tags: [String]
-    public let contentType: UTType
+    public let contentTypeIdentifier: String
+
+    public var contentType: UTType {
+        UTType(contentTypeIdentifier) ?? .png
+    }
 
     public init(
         imageData: Data,
@@ -311,7 +315,7 @@ public struct TransferableAnalyzedImage: Transferable, Sendable {
         self.imageData = imageData
         self.analysis = analysis
         self.tags = tags
-        self.contentType = contentType
+        self.contentTypeIdentifier = contentType.identifier
     }
 
     public static var transferRepresentation: some TransferRepresentation {

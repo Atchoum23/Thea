@@ -9,6 +9,12 @@ import Foundation
 import AppIntents
 import Intents
 
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
+
 // MARK: - Extended App Intents
 
 // MARK: Ask with Context Intent
@@ -449,10 +455,3 @@ struct TheaExtendedShortcuts: AppShortcutsProvider {
     }
 }
 
-// MARK: - Platform-specific imports
-
-#if os(iOS)
-import UIKit
-#elseif os(macOS)
-import AppKit
-#endif

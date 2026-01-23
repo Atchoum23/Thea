@@ -155,7 +155,7 @@ struct SharePlayTip: Tip {
     }
 
     var options: [TipOption] {
-        Tips.MaxDisplayCount(3)
+        [Tips.MaxDisplayCount(3)]
     }
 }
 
@@ -254,7 +254,7 @@ struct LocalModelTip: Tip {
     }
 
     var options: [TipOption] {
-        Tips.MaxDisplayCount(2)
+        [Tips.MaxDisplayCount(2)]
     }
 }
 
