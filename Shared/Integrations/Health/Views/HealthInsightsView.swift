@@ -746,7 +746,7 @@ final class HealthInsightsViewModel {
 
     private func generateMockTrendData(days: Int, baseValue: Double, variance: Double) -> [TrendDataPoint] {
         (0..<days).map { day in
-            let date = Calendar.current.date(byAdding: .day, value: -days + day, to: Date())!
+            let date = Calendar.current.date(byAdding: .day, value: -days + day, to: Date()) ?? Date().addingTimeInterval(Double(-days + day) * 86400)
             let randomVariance = Double.random(in: -variance...variance)
             return TrendDataPoint(date: date, value: baseValue + randomVariance)
         }

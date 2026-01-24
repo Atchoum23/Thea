@@ -139,7 +139,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
 
     public func fetchCareerReflection(for date: Date) async throws -> CareerReflection? {
         let startOfDay = Calendar.current.startOfDay(for: date)
-        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
 
         return reflections.values.first { reflection in
             reflection.date >= startOfDay && reflection.date < endOfDay
@@ -154,7 +154,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
 
     public func analyzeMoodTrends(days: Int) async throws -> MoodTrend {
         let endDate = Date()
-        let startDate = Calendar.current.date(byAdding: .day, value: -days, to: endDate)!
+        let startDate = Calendar.current.date(byAdding: .day, value: -days, to: endDate) ?? endDate.addingTimeInterval(Double(-days) * 86400)
 
         let periodCareerReflections = try await fetchCareerReflections(from: startDate, to: endDate)
 

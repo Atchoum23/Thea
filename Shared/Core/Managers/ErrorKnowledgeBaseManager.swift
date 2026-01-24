@@ -249,7 +249,7 @@ public final class ErrorKnowledgeBaseManager {
     public func deleteOldErrors(olderThan days: Int) async {
         guard let context = modelContext else { return }
 
-        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date().addingTimeInterval(Double(-days) * 86400)
 
         // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<CodeErrorRecord>()

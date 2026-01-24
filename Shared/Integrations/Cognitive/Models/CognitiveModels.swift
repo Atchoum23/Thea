@@ -318,7 +318,7 @@ public struct FocusForest: Sendable, Codable {
 
             if hasTreeToday {
                 streak += 1
-                currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+                currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate) ?? currentDate.addingTimeInterval(-86400)
             } else {
                 break
             }

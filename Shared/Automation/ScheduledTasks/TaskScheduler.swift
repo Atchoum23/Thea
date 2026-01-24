@@ -408,7 +408,7 @@ public final class TaskScheduler: ObservableObject {
         guard var date = calendar.date(from: components) else { return nil }
 
         if date <= Date() {
-            date = calendar.date(byAdding: .day, value: 1, to: date)!
+            date = calendar.date(byAdding: .day, value: 1, to: date) ?? date.addingTimeInterval(86400)
         }
 
         return date

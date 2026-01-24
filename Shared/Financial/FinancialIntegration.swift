@@ -180,7 +180,9 @@ final class FinancialIntegration {
     private func calculateMonthlySpending() -> Double {
         let now = Date()
         let calendar = Calendar.current
-        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) else {
+            return 0
+        }
 
         return transactions
             .filter { $0.date >= startOfMonth && $0.amount < 0 }
@@ -312,16 +314,17 @@ final class FinancialIntegration {
 
     private func calculateEndDate(_ period: Budget.BudgetPeriod) -> Date {
         let calendar = Calendar.current
+        let now = Date()
 
         switch period {
         case .daily:
-            return calendar.date(byAdding: .day, value: 1, to: Date())!
+            return calendar.date(byAdding: .day, value: 1, to: now) ?? now.addingTimeInterval(86400)
         case .weekly:
-            return calendar.date(byAdding: .day, value: 7, to: Date())!
+            return calendar.date(byAdding: .day, value: 7, to: now) ?? now.addingTimeInterval(604800)
         case .monthly:
-            return calendar.date(byAdding: .month, value: 1, to: Date())!
+            return calendar.date(byAdding: .month, value: 1, to: now) ?? now.addingTimeInterval(2592000)
         case .yearly:
-            return calendar.date(byAdding: .year, value: 1, to: Date())!
+            return calendar.date(byAdding: .year, value: 1, to: now) ?? now.addingTimeInterval(31536000)
         }
     }
 

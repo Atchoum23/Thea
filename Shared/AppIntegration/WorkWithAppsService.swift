@@ -696,6 +696,7 @@ public class WorkWithAppsService: ObservableObject {
             
             if let window = windowRef {
                 var titleRef: CFTypeRef?
+                // swiftlint:disable:next force_cast
                 AXUIElementCopyAttributeValue(window as! AXUIElement, kAXTitleAttribute as CFString, &titleRef)
                 
                 if let title = titleRef as? String {

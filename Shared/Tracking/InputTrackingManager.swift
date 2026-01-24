@@ -144,6 +144,7 @@ final class InputTrackingManager {
 
         // Check if it's a secure text field by role
         var roleValue: CFTypeRef?
+        // swiftlint:disable:next force_cast
         let roleResult = AXUIElementCopyAttributeValue(element as! AXUIElement, kAXRoleAttribute as CFString, &roleValue)
         if roleResult == .success, let role = roleValue as? String {
             // AXSecureTextField is the role for password fields
@@ -154,6 +155,7 @@ final class InputTrackingManager {
 
         // Also check subrole as a fallback
         var subroleValue: CFTypeRef?
+        // swiftlint:disable:next force_cast
         let subroleResult = AXUIElementCopyAttributeValue(element as! AXUIElement, kAXSubroleAttribute as CFString, &subroleValue)
         if subroleResult == .success, let subrole = subroleValue as? String {
             if subrole == "AXSecureTextField" {

@@ -648,8 +648,8 @@ final class SleepQualityViewModel {
         // Simulate loading
         try? await Task.sleep(for: .milliseconds(300))
 
-        let bedtime = Calendar.current.date(bySettingHour: 22, minute: 30, second: 0, of: date.addingTimeInterval(-86_400))!
-        let wakeTime = Calendar.current.date(bySettingHour: 6, minute: 45, second: 0, of: date)!
+        let bedtime = Calendar.current.date(bySettingHour: 22, minute: 30, second: 0, of: date.addingTimeInterval(-86_400)) ?? date.addingTimeInterval(-86_400 + 22.5 * 3600)
+        let wakeTime = Calendar.current.date(bySettingHour: 6, minute: 45, second: 0, of: date) ?? date.addingTimeInterval(6.75 * 3600)
 
         let totalMinutes = 450 // 7h 30m
 
@@ -706,7 +706,7 @@ final class SleepQualityViewModel {
 
         // Generate weekly data
         weeklyData = (0..<7).compactMap { dayOffset in
-            let weekDate = Calendar.current.date(byAdding: .day, value: -dayOffset, to: date)!
+            let weekDate = Calendar.current.date(byAdding: .day, value: -dayOffset, to: date) ?? date.addingTimeInterval(Double(-dayOffset) * 86400)
             let randomQuality = Double.random(in: 65...90)
             let randomMinutes = Int.random(in: 360...480)
 

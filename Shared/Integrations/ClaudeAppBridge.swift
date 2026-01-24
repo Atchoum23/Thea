@@ -183,6 +183,7 @@ public class ClaudeAppBridge: ObservableObject {
         }
         
         // Extract conversation content (simplified - real implementation would traverse UI hierarchy)
+        // swiftlint:disable:next force_cast
         let messages = try extractMessages(from: window as! AXUIElement)
         
         return ClaudeConversation(

@@ -168,26 +168,26 @@ public final class CognitiveDashboardViewModel {
         timelineEvents = [
             TimelineEvent(
                 title: "Morning Focus",
-                startTime: calendar.date(byAdding: .hour, value: 9, to: today)!,
-                endTime: calendar.date(byAdding: .hour, value: 11, to: today)!,
+                startTime: calendar.date(byAdding: .hour, value: 9, to: today) ?? today.addingTimeInterval(9 * 3600),
+                endTime: calendar.date(byAdding: .hour, value: 11, to: today) ?? today.addingTimeInterval(11 * 3600),
                 category: .focus
             ),
             TimelineEvent(
                 title: "Team Meeting",
-                startTime: calendar.date(byAdding: .hour, value: 11, to: today)!,
-                endTime: calendar.date(byAdding: .hour, value: 12, to: today)!,
+                startTime: calendar.date(byAdding: .hour, value: 11, to: today) ?? today.addingTimeInterval(11 * 3600),
+                endTime: calendar.date(byAdding: .hour, value: 12, to: today) ?? today.addingTimeInterval(12 * 3600),
                 category: .meeting
             ),
             TimelineEvent(
                 title: "Lunch Break",
-                startTime: calendar.date(byAdding: .hour, value: 12, to: today)!,
-                endTime: calendar.date(byAdding: .hour, value: 13, to: today)!,
+                startTime: calendar.date(byAdding: .hour, value: 12, to: today) ?? today.addingTimeInterval(12 * 3600),
+                endTime: calendar.date(byAdding: .hour, value: 13, to: today) ?? today.addingTimeInterval(13 * 3600),
                 category: .breakTime
             ),
             TimelineEvent(
                 title: "Deep Work",
-                startTime: calendar.date(byAdding: .hour, value: 14, to: today)!,
-                endTime: calendar.date(byAdding: .hour, value: 17, to: today)!,
+                startTime: calendar.date(byAdding: .hour, value: 14, to: today) ?? today.addingTimeInterval(14 * 3600),
+                endTime: calendar.date(byAdding: .hour, value: 17, to: today) ?? today.addingTimeInterval(17 * 3600),
                 category: .work
             )
         ]

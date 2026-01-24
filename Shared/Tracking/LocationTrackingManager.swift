@@ -138,7 +138,7 @@ final class LocationTrackingManager: NSObject, CLLocationManagerDelegate {
 
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
 
         // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<LocationVisitRecord>()
