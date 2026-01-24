@@ -4,6 +4,9 @@ options:
   deploymentTarget:
     macOS: "14.0"
     iOS: "17.0"
+    watchOS: "10.0"
+    tvOS: "17.0"
+    visionOS: "1.0"
   xcodeVersion: "15.0"
   generateEmptyDirectories: true
   groupSortPosition: top
@@ -14,8 +17,8 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "1.4.1"
-    CURRENT_PROJECT_VERSION: "1.4.1"
+    MARKETING_VERSION: "1.5.0"
+    CURRENT_PROJECT_VERSION: "1.5.0"
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
     ENABLE_USER_SCRIPT_SANDBOXING: false
@@ -177,6 +180,109 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
 
+  # ============ watchOS App ============
+  Thea-watchOS:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: Shared/Core
+        excludes:
+          - "**/*macOS*"
+          - "**/*iOS*"
+          - "**/*tvOS*"
+          - "**/*.md"
+      - path: Shared/AI
+        excludes:
+          - "**/*macOS*"
+          - "**/*iOS*"
+          - "**/*tvOS*"
+      - path: watchOS
+      - path: Shared/Resources/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.watchos
+        PRODUCT_NAME: "Thea Watch"
+        PRODUCT_MODULE_NAME: TheaWatch
+        INFOPLIST_FILE: watchOS/Info.plist
+        WATCHOS_DEPLOYMENT_TARGET: "10.0"
+        TARGETED_DEVICE_FAMILY: 4
+        SKIP_INSTALL: NO
+    dependencies:
+      - package: KeychainAccess
+    info:
+      path: watchOS/Info.plist
+      properties:
+        CFBundleDisplayName: "Thea Watch"
+        CFBundleName: "Thea Watch"
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleInfoDictionaryVersion: "6.0"
+        CFBundlePackageType: APPL
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        WKApplication: true
+        WKRunsIndependentlyOfCompanionApp: true
+
+  # ============ tvOS App ============
+  Thea-tvOS:
+    type: application
+    platform: tvOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Shared
+        excludes:
+          - "**/*macOS*"
+          - "**/*iOS*"
+          - "**/*watchOS*"
+          - "**/*.md"
+          - "**/Terminal/**"
+          - "**/ScreenCapture.swift"
+          - "**/InputTrackingManager.swift"
+          - "**/*AutomationEngine.swift"
+          - "**/AppIntegration/**"
+          - "**/TerminalService.swift"
+          - "**/TerminalIntegration.swift"
+          - "**/DisplayProfileManager.swift"
+          - "**/DisplayService.swift"
+          - "**/DisplayModels.swift"
+          - "**/MLXModelManager.swift"
+          - "**/ScreenshotPreview.swift"
+          - "**/HandoffManager.swift"
+          - "**/LocalModelsView.swift"
+          - "**/LocalModelsSettingsView.swift"
+          - "**/FolderAccessManager.swift"
+          - "**/RemoteScreenService.swift"
+          - "**/RemoteInputService.swift"
+          - "**/RemoteSystemService.swift"
+      - path: tvOS
+      - path: Shared/Resources/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.tvos
+        PRODUCT_NAME: "Thea TV"
+        PRODUCT_MODULE_NAME: TheaTV
+        INFOPLIST_FILE: tvOS/Info.plist
+        TVOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: 3
+    dependencies:
+      - package: OpenAI
+      - package: KeychainAccess
+      - package: MarkdownUI
+    info:
+      path: tvOS/Info.plist
+      properties:
+        CFBundleDisplayName: "Thea TV"
+        CFBundleName: "Thea TV"
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleInfoDictionaryVersion: "6.0"
+        CFBundlePackageType: APPL
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIUserInterfaceStyle: Automatic
+
   # ============ Tests ============
   TheaTests:
     type: bundle.unit-test
@@ -220,6 +326,35 @@ schemes:
     build:
       targets:
         Thea-iOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  Thea-watchOS:
+    build:
+      targets:
+        Thea-watchOS: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  Thea-tvOS:
+    build:
+      targets:
+        Thea-tvOS: all
     run:
       config: Debug
     test:
