@@ -41,12 +41,17 @@ public class ArtifactManager: ObservableObject {
     // MARK: - Initialization
     
     private init() {
-        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            // Fallback to temporary directory
+            artifactsDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("Artifacts")
+            loadArtifacts()
+            return
+        }
         artifactsDirectory = documentsPath.appendingPathComponent("Artifacts", isDirectory: true)
-        
+
         // Create directory if needed
         try? FileManager.default.createDirectory(at: artifactsDirectory, withIntermediateDirectories: true)
-        
+
         loadArtifacts()
     }
     

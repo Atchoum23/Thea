@@ -36,11 +36,12 @@ public class CustomAgentBuilder: ObservableObject {
     // MARK: - Initialization
     
     private init() {
-        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
         agentsDirectory = documentsPath.appendingPathComponent("CustomAgents", isDirectory: true)
-        
+
         try? FileManager.default.createDirectory(at: agentsDirectory, withIntermediateDirectories: true)
-        
+
         loadAgents()
         createDefaultAgents()
     }

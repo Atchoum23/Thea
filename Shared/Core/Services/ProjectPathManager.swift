@@ -164,7 +164,21 @@ public final class ProjectPathManager {
 extension ProjectPathManager {
     /// SECURITY: Validate that a resolved path stays within the allowed base directory
     /// Prevents path traversal attacks using ../ or symlinks
+    /// SECURITY FIX (FINDING-007): Uses component-wise validation instead of string prefix
     public func validatePath(_ relativePath: String, basePath: String) throws -> String {
+        // SECURITY: Reject paths with null bytes (path injection attack) FIRST
+        guard !relativePath.contains("\0") else {
+            throw PathSecurityError.nullByteInjection(path: relativePath)
+        }
+
+        // SECURITY: Reject paths with suspicious patterns BEFORE any processing
+        let suspiciousPatterns = ["...", "//", "\\\\", "\n", "\r", "%00", "%2e%2e", "%2f", "%5c"]
+        for pattern in suspiciousPatterns {
+            if relativePath.lowercased().contains(pattern) {
+                throw PathSecurityError.suspiciousPattern(path: relativePath, pattern: pattern)
+            }
+        }
+
         // Remove any leading slash to ensure it's treated as relative
         let cleanRelative = relativePath.hasPrefix("/") ? String(relativePath.dropFirst()) : relativePath
 
@@ -177,8 +191,13 @@ extension ProjectPathManager {
         // Normalize the base path too
         let resolvedBase = (basePath as NSString).standardizingPath
 
-        // SECURITY: Verify the resolved path starts with the base path
-        guard resolvedPath.hasPrefix(resolvedBase) else {
+        // SECURITY FIX (FINDING-007): Use component-wise validation instead of hasPrefix
+        // The hasPrefix check is vulnerable: "/allowed/path_evil" matches "/allowed/path"
+        let resolvedComponents = (resolvedPath as NSString).pathComponents
+        let baseComponents = (resolvedBase as NSString).pathComponents
+
+        // Verify the resolved path contains at least as many components as base
+        guard resolvedComponents.count >= baseComponents.count else {
             throw PathSecurityError.pathTraversalAttempt(
                 requested: relativePath,
                 resolved: resolvedPath,
@@ -186,16 +205,14 @@ extension ProjectPathManager {
             )
         }
 
-        // SECURITY: Reject paths with null bytes (path injection attack)
-        guard !relativePath.contains("\0") else {
-            throw PathSecurityError.nullByteInjection(path: relativePath)
-        }
-
-        // SECURITY: Reject paths with suspicious patterns
-        let suspiciousPatterns = ["...", "//", "\\\\", "\n", "\r", "%00", "%2e%2e"]
-        for pattern in suspiciousPatterns {
-            if relativePath.lowercased().contains(pattern) {
-                throw PathSecurityError.suspiciousPattern(path: relativePath, pattern: pattern)
+        // Verify each base component matches exactly
+        for (index, baseComponent) in baseComponents.enumerated() {
+            guard resolvedComponents[index] == baseComponent else {
+                throw PathSecurityError.pathTraversalAttempt(
+                    requested: relativePath,
+                    resolved: resolvedPath,
+                    allowed: resolvedBase
+                )
             }
         }
 

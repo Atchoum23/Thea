@@ -29,7 +29,10 @@ public actor ActivityLogger {
     // MARK: - Paths
 
     private var logsDirectory: URL {
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        guard let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            // Fallback to temporary directory if app support not available
+            return FileManager.default.temporaryDirectory.appendingPathComponent("Thea/ActivityLogs")
+        }
         return appSupport.appendingPathComponent("Thea/ActivityLogs", isDirectory: true)
     }
 

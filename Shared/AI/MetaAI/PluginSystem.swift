@@ -320,7 +320,10 @@ final class PluginSystem {
 
     private func cleanupPluginData(_ pluginId: UUID) throws {
         // Remove plugin data directory
-        let dataPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return // Cannot clean up if app support directory unavailable
+        }
+        let dataPath = appSupport
             .appendingPathComponent("Plugins")
             .appendingPathComponent(pluginId.uuidString)
 

@@ -129,7 +129,8 @@ final class KnowledgeGraph {
             if let currentNode = nodeIndex[currentId.uuidString] {
                 for edgeId in currentNode.outgoingEdges {
                     if let edge = edges.first(where: { $0.id == edgeId }) {
-                        if edgeTypes == nil || edgeTypes!.contains(edge.type) {
+                        // SAFETY: Use optional chaining instead of force unwrap
+                        if edgeTypes?.contains(edge.type) ?? true {
                             queue.append((edge.targetId, currentDepth + 1))
                         }
                     }

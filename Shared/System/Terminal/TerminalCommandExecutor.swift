@@ -178,7 +178,8 @@ final class TerminalCommandExecutor: @unchecked Sendable {
             break
         }
 
-        let escapedCommand = command.replacingOccurrences(of: "\"", with: "\\\"")
+        // SECURITY FIX (FINDING-004): Use proper escaping
+        let escapedCommand = escapeForAppleScript(command)
         let script = """
         tell application "Terminal"
             activate
@@ -201,7 +202,8 @@ final class TerminalCommandExecutor: @unchecked Sendable {
             break
         }
 
-        let escapedCommand = command.replacingOccurrences(of: "\"", with: "\\\"")
+        // SECURITY FIX (FINDING-004): Use proper escaping
+        let escapedCommand = escapeForAppleScript(command)
         let script = """
         tell application "Terminal"
             activate
@@ -224,7 +226,8 @@ final class TerminalCommandExecutor: @unchecked Sendable {
             break
         }
 
-        let escapedCommand = command.replacingOccurrences(of: "\"", with: "\\\"")
+        // SECURITY FIX (FINDING-004): Use proper escaping
+        let escapedCommand = escapeForAppleScript(command)
         let script = """
         tell application "Terminal"
             activate
@@ -249,7 +252,8 @@ final class TerminalCommandExecutor: @unchecked Sendable {
         """
 
         if let cmd = command {
-            let escapedCommand = cmd.replacingOccurrences(of: "\"", with: "\\\"")
+            // SECURITY FIX (FINDING-004): Use proper escaping
+            let escapedCommand = escapeForAppleScript(cmd)
             script += """
                 do script "\(escapedCommand)"
             """
@@ -270,7 +274,8 @@ final class TerminalCommandExecutor: @unchecked Sendable {
     func openNewTab(withCommand command: String? = nil) async throws {
         let script: String
         if let cmd = command {
-            let escapedCommand = cmd.replacingOccurrences(of: "\"", with: "\\\"")
+            // SECURITY FIX (FINDING-004): Use proper escaping
+            let escapedCommand = escapeForAppleScript(cmd)
             script = """
             tell application "Terminal"
                 activate
@@ -310,6 +315,34 @@ final class TerminalCommandExecutor: @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    // SECURITY FIX (FINDING-004): Proper AppleScript string escaping
+    // Escapes all characters that could break out of AppleScript strings or enable injection
+    private func escapeForAppleScript(_ input: String) -> String {
+        var result = ""
+        for scalar in input.unicodeScalars {
+            switch scalar {
+            case "\\":
+                result += "\\\\"
+            case "\"":
+                result += "\\\""
+            case "\n":
+                result += "\\n"
+            case "\r":
+                result += "\\r"
+            case "\t":
+                result += "\\t"
+            default:
+                // Escape control characters and high unicode
+                if scalar.value < 32 || scalar.value == 127 {
+                    result += String(format: "\\u%04X", scalar.value)
+                } else {
+                    result += String(scalar)
+                }
+            }
+        }
+        return result
+    }
 
     @discardableResult
     private func runAppleScript(_ source: String) async throws -> Any? {

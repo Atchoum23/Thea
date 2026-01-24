@@ -224,6 +224,9 @@ enum ToolError: LocalizedError {
     case invalidParameters
     case executionFailed
     case notImplemented
+    case commandBlocked(String)  // SECURITY FIX (FINDING-003): Added for command validation
+    case pathBlocked(String)     // SECURITY FIX (FINDING-007): Added for path validation
+    case urlBlocked(String)      // SECURITY FIX (SSRF): Added for URL validation
 
     var errorDescription: String? {
         switch self {
@@ -235,6 +238,12 @@ enum ToolError: LocalizedError {
             return "Tool execution failed"
         case .notImplemented:
             return "Tool handler not implemented"
+        case .commandBlocked(let reason):
+            return "SECURITY: Command blocked - \(reason)"
+        case .pathBlocked(let reason):
+            return "SECURITY: Path access blocked - \(reason)"
+        case .urlBlocked(let reason):
+            return "SECURITY: URL access blocked - \(reason)"
         }
     }
 }

@@ -1,0 +1,89 @@
+{
+  "version": "1.0.0",
+  "name": "Thea AgentSec Strict Mode Policy",
+  "description": "Security policy for AI agent operations in Thea",
+  "network": {
+    "blockedHosts": [
+      "localhost",
+      "127.0.0.1",
+      "::1",
+      "0.0.0.0",
+      "169.254.169.254",
+      "metadata.google.internal",
+      "metadata.internal"
+    ],
+    "blockedIPRanges": [
+      "10.0.0.0/8",
+      "172.16.0.0/12",
+      "192.168.0.0/16"
+    ],
+    "allowedProtocols": ["https"],
+    "requireTLS": true
+  },
+  "filesystem": {
+    "blockedPaths": [
+      "/System",
+      "/Library",
+      "/private",
+      "/var",
+      "/etc",
+      "/bin",
+      "/sbin",
+      "/usr",
+      ".ssh",
+      ".gnupg",
+      ".aws",
+      ".kube",
+      "Keychain",
+      ".env",
+      ".credentials"
+    ],
+    "allowedWorkspaceOnly": true,
+    "blockHiddenFiles": true
+  },
+  "terminal": {
+    "blockedPatterns": [
+      "rm -rf /",
+      "rm -rf /*",
+      ":(){ :|:& };:",
+      "dd if=/dev/zero",
+      "> /dev/sda",
+      "mkfs",
+      "curl.*\\|.*sh",
+      "curl.*\\|.*bash",
+      "wget.*\\|.*sh",
+      "wget.*\\|.*bash"
+    ],
+    "blockedCommands": [
+      "sudo",
+      "su",
+      "passwd",
+      "visudo",
+      "chmod 777",
+      "chown root"
+    ],
+    "requireApproval": true,
+    "sandboxEnabled": true
+  },
+  "approval": {
+    "requiredForTypes": [
+      "fileWrite",
+      "terminalExec",
+      "networkRequest",
+      "systemConfig"
+    ],
+    "autoApproveLowRisk": false,
+    "timeout": 300
+  },
+  "killSwitch": {
+    "enabled": true,
+    "triggerOnCritical": true,
+    "notifyUser": true,
+    "logToAudit": true
+  },
+  "audit": {
+    "enabled": true,
+    "logAllOperations": true,
+    "retentionDays": 90
+  }
+}

@@ -146,8 +146,9 @@ public actor IncomeAnalytics {
         guard streams.count >= 2 else { return 0.0 }
 
         let sorted = streams.sorted { $0.startDate < $1.startDate }
-        let first = sorted.first!.monthlyAmount
-        let last = sorted.last!.monthlyAmount
+        guard let firstStream = sorted.first, let lastStream = sorted.last else { return 0.0 }
+        let first = firstStream.monthlyAmount
+        let last = lastStream.monthlyAmount
 
         guard first > 0 else { return 0.0 }
 

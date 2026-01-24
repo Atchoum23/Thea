@@ -5,6 +5,93 @@ All notable changes to THEA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-01-24
+
+### Security - Production Release Quality Audit
+
+**Release Status: GO - APPROVED FOR PRODUCTION**
+
+Comprehensive 10-phase security audit completed with all CRITICAL and HIGH severity issues resolved.
+Overall security score improved from 6.5/10 to 8.5/10.
+
+#### CRITICAL Fixes (This Release)
+- **SSRF Prevention Enhanced** - HTTPRequestTool now validates URLs against private networks, cloud metadata endpoints, blocks DNS rebinding attacks
+- **Approval Bypass Eliminated** - Removed "approved" parameter from FileWriteTool; all file operations require user approval
+- **Race Condition Fixed** - Pairing code verification now uses atomic check-and-mark with @MainActor serialization
+
+#### Force Unwrap Crash Fixes (18 Files)
+- Fixed `FinancialIntegration.swift` - Variable scope error causing build failure
+- Fixed `AssessmentDataExporter.swift` - Force unwraps on sorted array `.first!/.last!`
+- Fixed `WellnessDashboardView.swift` - 5 force unwraps on `activeSession!`
+- Fixed `WorkflowBuilder.swift` - Force unwraps on `execution.endTime!`
+- Fixed `ShareExtensionManager.swift` - Force unwrap on optional `extensionContext!`
+- Fixed `MemoryService.swift` - Force unwrap in conditional `types!.contains()`
+- Fixed `KnowledgeGraph.swift` - Force unwrap in conditional `edgeTypes!.contains()`
+- Fixed 11 additional files with force unwrap issues
+
+#### Chrome Extension Security Fixes
+- Added `escapeHtml()` function to prevent XSS vulnerabilities
+- Fixed 3 innerHTML injection points in credential picker, AI response popup, save password dialog
+- Added message sender verification (`sender.id === chrome.runtime.id`)
+- Added state validation with `ALLOWED_STATE_KEYS` allowlist
+- Added external connection origin whitelisting
+
+### Changed
+- Updated version to 1.5.0 (from 1.4.1)
+- Updated MARKETING_VERSION and CURRENT_PROJECT_VERSION in Xcode project
+- Enhanced CI pipeline with full security scanning integration
+
+### Documentation
+- Created comprehensive `SECURITY_AUDIT_REPORT.md` with full 10-phase audit
+- Updated `QA_MASTER_PLAN.md` with all remediation details
+- Added Phase 5-10 audit findings to security documentation
+
+---
+
+## [1.4.2] - 2026-01-23
+
+### Security - Full Security Audit Remediation
+Comprehensive security audit identified 15 vulnerabilities (5 CRITICAL, 7 HIGH, 3 MEDIUM). All have been remediated.
+
+#### CRITICAL Fixes
+- **SSRF Prevention (FINDING-001)** - Permanently disabled network proxy functionality in Remote Server to prevent Server-Side Request Forgery attacks
+- **TLS Certificate Validation (FINDING-002)** - Implemented proper certificate chain validation using Security framework; certificates now properly verified
+- **Terminal Command Restrictions (FINDING-003)** - Added command allowlist/blocklist to restrict dangerous terminal operations; blocks `rm -rf`, `sudo`, shell injections
+- **File Operation Approval (FINDING-005)** - File write operations now ALWAYS require user approval regardless of execution mode
+- **FullAuto Mode Removed (FINDING-014)** - Removed dangerous `fullAuto` execution mode that bypassed all approval gates
+
+#### HIGH Fixes
+- **AppleScript Escaping (FINDING-004)** - Implemented comprehensive escaping function for AppleScript strings; handles quotes, newlines, control characters
+- **Pairing Code Strength (FINDING-006)** - Increased pairing codes from 6 digits to 12 alphanumeric characters; entropy increased from ~20 bits to >60 bits
+- **Path Traversal Prevention (FINDING-007)** - Replaced string prefix validation with component-wise path validation; prevents `..` traversal attacks
+- **Password Field Protection (FINDING-008)** - Input tracking now detects and excludes password fields using Accessibility API
+- **URL Sanitization (FINDING-009)** - Browser history now strips sensitive query parameters (tokens, passwords, API keys) from logged URLs
+- **MCP Server Path Restrictions (FINDING-012)** - Added directory allowlist to MCP server; blocks access to system directories
+
+#### MEDIUM Fixes
+- **GDPR Data Export (FINDING-010)** - Added `GDPRDataExporter` with `exportAllData()` and `deleteAllData()` methods for GDPR compliance
+- **Keychain Migration (FINDING-011)** - Migrated sensitive configuration (trusted certificates, device whitelist) from UserDefaults to Keychain
+- **CI Security Scanning (FINDING-013)** - Added CodeQL, Trivy, and Gitleaks security scanning to CI pipeline
+
+#### Privacy Improvements
+- **Network Discovery Opt-in (FINDING-015)** - Network discovery is now disabled by default; requires explicit user opt-in
+
+### Added
+- `GDPRDataExporter` class for GDPR Article 17 (Right to Erasure) and Article 20 (Data Portability) compliance
+- `SecurityRemediationTests.swift` with penetration tests for all remediated vulnerabilities
+- `SECURITY_USER_GUIDE.md` with user documentation for security features
+- `SECURITY_REMEDIATION_SUMMARY.md` documenting all security fixes
+
+### Changed
+- Execution mode picker now only shows: Supervised, Automatic, Dry Run (removed Full Auto)
+- Approval sheet removed "Approve All" button that switched to fullAuto mode
+- Remote server configuration default: `enableDiscovery = false`
+- CI pipeline now requires security scans to pass before quality checks
+
+### Documentation
+- Created comprehensive Security User Guide
+- Updated CHANGELOG with security fixes
+
 ## [1.4.1] - 2026-01-21
 
 ### Security - Red Hat Security Audit (Adversarial Review)

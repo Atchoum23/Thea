@@ -315,50 +315,36 @@ public class TheaRemoteServer: ObservableObject {
     }
 
     // MARK: - Network Proxy
+    // SECURITY: Network proxy functionality has been removed to prevent SSRF attacks (FINDING-001)
+    // The proxy allowed arbitrary HTTP/TCP requests which could be used for:
+    // - Internal network scanning
+    // - Lateral movement
+    // - Data exfiltration
+    // - Accessing internal services (127.0.0.1, 169.254.x.x, 10.x.x.x, etc.)
 
     private func handleNetworkRequest(_ request: NetworkProxyRequest) async throws -> NetworkProxyResponse {
-        guard configuration.enableNetworkProxy else {
-            throw RemoteServerError.featureDisabled("Network proxy is disabled")
-        }
-
-        switch request {
-        case .httpRequest(let url, let method, let headers, let body):
-            return try await performHTTPRequest(url: url, method: method, headers: headers, body: body)
-
-        case .tcpConnect(let host, let port):
-            return try await establishTCPProxy(host: host, port: port)
-
-        case .localNetworkScan:
-            return try await scanLocalNetwork()
-        }
+        // SECURITY FIX (FINDING-001): Network proxy is permanently disabled
+        // This feature was identified as a critical security vulnerability
+        logSecurityEvent(.commandBlocked, details: "Network proxy request blocked - feature disabled for security")
+        throw RemoteServerError.featureDisabled("Network proxy has been permanently disabled for security reasons (SSRF prevention)")
     }
 
+    // SECURITY: These methods are kept as stubs but will never be called
+    // They remain for API compatibility but throw immediately
+
     private func performHTTPRequest(url: URL, method: String, headers: [String: String], body: Data?) async throws -> NetworkProxyResponse {
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.httpBody = body
-        headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw RemoteServerError.networkError("Invalid response")
-        }
-
-        return .httpResponse(statusCode: httpResponse.statusCode, headers: httpResponse.allHeaderFields as? [String: String] ?? [:], body: data)
+        // SECURITY FIX (FINDING-001): HTTP proxy disabled
+        throw RemoteServerError.featureDisabled("HTTP proxy disabled for security")
     }
 
     private func establishTCPProxy(host: String, port: Int) async throws -> NetworkProxyResponse {
-        // Create TCP connection to target
-        let endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: UInt16(port))!)
-        let connection = NWConnection(to: endpoint, using: .tcp)
-
-        return .tcpEstablished(connectionId: UUID().uuidString)
+        // SECURITY FIX (FINDING-001): TCP proxy disabled
+        throw RemoteServerError.featureDisabled("TCP proxy disabled for security")
     }
 
     private func scanLocalNetwork() async throws -> NetworkProxyResponse {
-        let devices = await networkDiscovery.discoverDevices()
-        return .networkDevices(devices)
+        // SECURITY FIX (FINDING-001): Network scanning disabled
+        throw RemoteServerError.featureDisabled("Network scanning disabled for security")
     }
 
     // MARK: - Utilities
@@ -425,6 +411,8 @@ public struct RemoteServerConfiguration: Codable, Sendable {
     public var allowedPaths: [String]
     public var blockedPaths: [String]
 
+    // SECURITY FIX (FINDING-015): Network discovery is now opt-in (disabled by default)
+    // This prevents automatic network presence exposure and requires explicit user consent
     public init(
         serverName: String = "Thea Remote",
         port: UInt16 = 9847,
@@ -432,7 +420,7 @@ public struct RemoteServerConfiguration: Codable, Sendable {
         authMethod: AuthenticationMethod = .pairingCode,
         authTimeout: TimeInterval = 30,
         requireConfirmation: Bool = true,
-        enableDiscovery: Bool = true,
+        enableDiscovery: Bool = false,  // SECURITY: Disabled by default - requires explicit opt-in
         enableScreenSharing: Bool = true,
         enableInputControl: Bool = true,
         enableFileAccess: Bool = true,

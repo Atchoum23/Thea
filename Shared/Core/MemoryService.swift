@@ -228,7 +228,8 @@ public actor MemoryService {
         var scoredMemories: [(TheaMemory, Double)] = []
         
         for memory in memories {
-            guard types == nil || types!.contains(memory.type) else { continue }
+            // SAFETY: Use optional chaining instead of force unwrap
+            guard types?.contains(memory.type) ?? true else { continue }
             guard memory.confidence >= minConfidence else { continue }
             
             let score = calculateRelevanceScore(memory: memory, queryKeywords: queryKeywords)

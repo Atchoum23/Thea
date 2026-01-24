@@ -83,12 +83,12 @@ final class FinancialIntegration {
         let updatedAccounts = try await provider.fetchAccounts()
 
         if let updated = updatedAccounts.first(where: { $0.id == account.id }),
-           let index = accounts.firstIndex(where: { $0.id == account.id }) {
-            var refreshed = accounts[index]
+           let index = connectedAccounts.firstIndex(where: { $0.id == account.id }) {
+            var refreshed = connectedAccounts[index]
             refreshed.balance = updated.balance
             refreshed.currency = updated.currency
             refreshed.lastUpdated = Date()
-            accounts[index] = refreshed
+            connectedAccounts[index] = refreshed
         }
     }
 

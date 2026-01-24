@@ -65,7 +65,8 @@ final class TerminalIntegrationManager: ObservableObject {
         self.executor = TerminalCommandExecutor(securityPolicy: .default)
 
         // Setup history storage
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
         let theaFolder = appSupport.appendingPathComponent("Thea", isDirectory: true)
         try? FileManager.default.createDirectory(at: theaFolder, withIntermediateDirectories: true)
         self.commandHistoryURL = theaFolder.appendingPathComponent("terminal_history.json")

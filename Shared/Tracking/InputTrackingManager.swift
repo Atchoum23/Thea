@@ -106,7 +106,11 @@ final class InputTrackingManager {
             mouseClicks += 1
 
         case .keyDown:
-            keystrokes += 1
+            // SECURITY FIX (FINDING-008): Skip keystroke counting when in password fields
+            // This prevents tracking credentials entered in secure text fields
+            if !isInSecureTextField() {
+                keystrokes += 1
+            }
 
         case .mouseMoved:
             if let lastPos = lastMousePosition {
@@ -121,6 +125,43 @@ final class InputTrackingManager {
         }
 
         updateDailyStats()
+    }
+
+    // SECURITY FIX (FINDING-008): Detect if user is typing in a password/secure field
+    private func isInSecureTextField() -> Bool {
+        // Use Accessibility API to check if focused element is a secure text field
+        guard let focusedApp = NSWorkspace.shared.frontmostApplication else {
+            return false
+        }
+
+        let appRef = AXUIElementCreateApplication(focusedApp.processIdentifier)
+        var focusedElement: CFTypeRef?
+
+        let result = AXUIElementCopyAttributeValue(appRef, kAXFocusedUIElementAttribute as CFString, &focusedElement)
+        guard result == .success, let element = focusedElement else {
+            return false
+        }
+
+        // Check if it's a secure text field by role
+        var roleValue: CFTypeRef?
+        let roleResult = AXUIElementCopyAttributeValue(element as! AXUIElement, kAXRoleAttribute as CFString, &roleValue)
+        if roleResult == .success, let role = roleValue as? String {
+            // AXSecureTextField is the role for password fields
+            if role == "AXSecureTextField" {
+                return true
+            }
+        }
+
+        // Also check subrole as a fallback
+        var subroleValue: CFTypeRef?
+        let subroleResult = AXUIElementCopyAttributeValue(element as! AXUIElement, kAXSubroleAttribute as CFString, &subroleValue)
+        if subroleResult == .success, let subrole = subroleValue as? String {
+            if subrole == "AXSecureTextField" {
+                return true
+            }
+        }
+
+        return false
     }
 
     // MARK: - Statistics
