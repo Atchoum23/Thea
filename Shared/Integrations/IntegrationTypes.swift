@@ -115,7 +115,7 @@ extension Date {
 
     /// End of the current day
     public var endOfDay: Date {
-        Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        (Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400))
             .addingTimeInterval(-1)
     }
 
@@ -123,24 +123,24 @@ extension Date {
     public var startOfWeek: Date {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self)
-        return calendar.date(from: components)!
+        return calendar.date(from: components) ?? calendar.startOfDay(for: self)
     }
 
     /// Start of the current month
     public var startOfMonth: Date {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month], from: self)
-        return calendar.date(from: components)!
+        return calendar.date(from: components) ?? calendar.startOfDay(for: self)
     }
 
     /// Get a date N days ago
     public func daysAgo(_ days: Int) -> Date {
-        Calendar.current.date(byAdding: .day, value: -days, to: self)!
+        Calendar.current.date(byAdding: .day, value: -days, to: self) ?? self.addingTimeInterval(Double(-days) * 86400)
     }
 
     /// Get a date N days from now
     public func daysFromNow(_ days: Int) -> Date {
-        Calendar.current.date(byAdding: .day, value: days, to: self)!
+        Calendar.current.date(byAdding: .day, value: days, to: self) ?? self.addingTimeInterval(Double(days) * 86400)
     }
 
     /// Check if date is today
@@ -183,7 +183,7 @@ extension DateInterval {
     public static var thisWeek: DateInterval {
         let now = Date()
         let start = now.startOfWeek
-        let end = Calendar.current.date(byAdding: .day, value: 7, to: start)!
+        let end = Calendar.current.date(byAdding: .day, value: 7, to: start) ?? start.addingTimeInterval(7 * 86400)
         return DateInterval(start: start, end: end)
     }
 
@@ -191,7 +191,7 @@ extension DateInterval {
     public static var thisMonth: DateInterval {
         let now = Date()
         let start = now.startOfMonth
-        let end = Calendar.current.date(byAdding: .month, value: 1, to: start)!
+        let end = Calendar.current.date(byAdding: .month, value: 1, to: start) ?? start.addingTimeInterval(30 * 86400)
         return DateInterval(start: start, end: end)
     }
 

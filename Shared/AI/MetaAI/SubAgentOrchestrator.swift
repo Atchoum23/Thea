@@ -1,6 +1,24 @@
 import Foundation
 import Observation
 
+/// Errors that can occur in sub-agent orchestration
+enum SubAgentOrchestratorError: Error, LocalizedError {
+    case noProviderAvailable
+    case taskFailed(String)
+    case agentNotFound
+
+    var errorDescription: String? {
+        switch self {
+        case .noProviderAvailable:
+            return "No AI provider available for orchestration"
+        case .taskFailed(let reason):
+            return "Task failed: \(reason)"
+        case .agentNotFound:
+            return "Sub-agent not found"
+        }
+    }
+}
+
 /// The core orchestration system for managing multiple AI sub-agents
 @MainActor
 @Observable
@@ -247,8 +265,10 @@ final class SubAgentOrchestrator {
         Format as JSON.
         """
 
-        let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                      ProviderRegistry.shared.getProvider(id: "openai")!
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw SubAgentOrchestratorError.noProviderAvailable
+        }
 
         let planText = try await streamProviderResponse(provider: provider, prompt: prompt, model: config.plannerModel)
 
@@ -345,8 +365,10 @@ final class SubAgentOrchestrator {
         let agent = assignment.agent
         let subTask = assignment.subTask
 
-        let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                      ProviderRegistry.shared.getProvider(id: "openai")!
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw SubAgentOrchestratorError.noProviderAvailable
+        }
 
         let prompt = """
         \(agent.type.systemPrompt)
@@ -409,8 +431,10 @@ final class SubAgentOrchestrator {
             // }
 
             // 2. Generate code
-            let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                          ProviderRegistry.shared.getProvider(id: "openai")!
+            guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                                  ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw SubAgentOrchestratorError.noProviderAvailable
+        }
 
             let prompt = """
             \(assignment.agent.type.systemPrompt)
@@ -510,8 +534,10 @@ final class SubAgentOrchestrator {
 
         let allOutputs = results.map { "[\($0.agent.type.rawValue)]: \($0.output)" }.joined(separator: "\n\n")
 
-        let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                      ProviderRegistry.shared.getProvider(id: "openai")!
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw SubAgentOrchestratorError.noProviderAvailable
+        }
 
         let prompt = """
         \(integrator.type.systemPrompt)
@@ -531,8 +557,10 @@ final class SubAgentOrchestrator {
     private func validateResult(_ result: String) async throws -> String {
         let validator = getAgent(type: .validator)
 
-        let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                      ProviderRegistry.shared.getProvider(id: "openai")!
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw SubAgentOrchestratorError.noProviderAvailable
+        }
 
         let prompt = """
         \(validator.type.systemPrompt)
@@ -552,8 +580,10 @@ final class SubAgentOrchestrator {
     private func optimizeResult(_ result: String) async throws -> String {
         let optimizer = getAgent(type: .optimizer)
 
-        let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                      ProviderRegistry.shared.getProvider(id: "openai")!
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw SubAgentOrchestratorError.noProviderAvailable
+        }
 
         let prompt = """
         \(optimizer.type.systemPrompt)

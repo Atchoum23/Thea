@@ -2,6 +2,24 @@ import Foundation
 import Observation
 @preconcurrency import SwiftData
 
+/// Errors that can occur in knowledge graph operations
+enum KnowledgeGraphError: Error, LocalizedError {
+    case noProviderAvailable
+    case embeddingFailed
+    case nodeNotFound
+
+    var errorDescription: String? {
+        switch self {
+        case .noProviderAvailable:
+            return "No AI provider available for knowledge graph operations"
+        case .embeddingFailed:
+            return "Failed to generate embedding for content"
+        case .nodeNotFound:
+            return "Knowledge node not found"
+        }
+    }
+}
+
 /// Advanced knowledge graph for semantic relationships and deep understanding
 @MainActor
 @Observable
@@ -174,8 +192,10 @@ final class KnowledgeGraph {
         from source: KnowledgeNode,
         to target: KnowledgeNode
     ) async throws -> EdgeType {
-        let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                      ProviderRegistry.shared.getProvider(id: "openai")!
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw KnowledgeGraphError.noProviderAvailable
+        }
 
         let prompt = """
         Determine the relationship between these concepts:
@@ -244,8 +264,10 @@ final class KnowledgeGraph {
         to target: KnowledgeNode
     ) async throws -> Bool {
         // Use AI to determine if implicit connection exists
-        let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                      ProviderRegistry.shared.getProvider(id: "openai")!
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw KnowledgeGraphError.noProviderAvailable
+        }
 
         let prompt = """
         Is there an implicit logical connection between:
@@ -330,8 +352,10 @@ final class KnowledgeGraph {
             let clusterNodes = clusters[i].nodeIds.compactMap { nodeIndex[$0.uuidString] }
             let contents = clusterNodes.map { $0.content }.joined(separator: "\n")
 
-            let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                          ProviderRegistry.shared.getProvider(id: "openai")!
+            guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                                  ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw KnowledgeGraphError.noProviderAvailable
+        }
 
             let prompt = """
             Give a short name (2-4 words) for this cluster of related concepts:
@@ -380,8 +404,10 @@ final class KnowledgeGraph {
     }
 
     private func reasonWithKnowledge(query: String, knowledge: String) async throws -> String {
-        let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                      ProviderRegistry.shared.getProvider(id: "openai")!
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            throw KnowledgeGraphError.noProviderAvailable
+        }
 
         let prompt = """
         Using this knowledge from the knowledge graph, answer the query:

@@ -682,7 +682,7 @@ final class ActivityActivityTrendsViewModel {
 
         // Generate chart data
         chartData = (0..<timeRange.days).map { dayOffset in
-            let date = Calendar.current.date(byAdding: .day, value: -timeRange.days + dayOffset, to: Date())!
+            let date = Calendar.current.date(byAdding: .day, value: -timeRange.days + dayOffset, to: Date()) ?? Date().addingTimeInterval(Double(-timeRange.days + dayOffset) * 86400)
             let baseValue: Double
             switch metric {
             case .steps: baseValue = 8_500

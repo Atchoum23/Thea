@@ -250,7 +250,7 @@ public actor HealthKitService: HealthDataProvider {
         }
 
         let startOfDay = Calendar.current.startOfDay(for: date)
-        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
 
         async let steps = fetchQuantitySum(
             identifier: .stepCount,

@@ -15,8 +15,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Select Xcode 15.2
-        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+      - name: Select Xcode 16.2
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
       - name: Extract Version
         id: version
@@ -26,14 +26,12 @@ jobs:
           echo "Building version: $VERSION"
 
       - name: Build Release with SPM
-        run: |
-          cd Development
-          swift build -c release -v
+        run: swift build -c release -v
 
       - name: Create Release Directory
         run: |
           mkdir -p release
-          cp -R Development/.build/release/Thea release/
+          cp -R .build/release/Thea release/ || cp -R .build/release/TheaPackage release/Thea
 
       - name: Create Release Archive
         run: |
@@ -106,8 +104,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Select Xcode 15.2
-        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+      - name: Select Xcode 16.2
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
       - name: Extract Version
         id: version
@@ -116,14 +114,12 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build Release
-        run: |
-          cd Development
-          swift build -c release
+        run: swift build -c release
 
       - name: Create DMG
         run: |
           mkdir -p dmg-staging
-          cp -R Development/.build/release/Thea dmg-staging/
+          cp -R .build/release/Thea dmg-staging/ || cp -R .build/release/TheaPackage dmg-staging/Thea
 
           hdiutil create -volname "Thea ${{ steps.version.outputs.version }}" \
                          -srcfolder dmg-staging \

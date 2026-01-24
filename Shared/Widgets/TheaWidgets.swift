@@ -94,7 +94,7 @@ struct TheaWidgetProvider: TimelineProvider {
         )
 
         // Refresh every 15 minutes
-        let refreshDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        let refreshDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date().addingTimeInterval(900)
         let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
         completion(timeline)
     }

@@ -72,7 +72,7 @@ public actor CalendarIntegration: AppIntegrationModule {
     /// Get today's events
     public func getTodayEvents() async throws -> [CalendarEvent] {
         let startOfDay = Calendar.current.startOfDay(for: Date())
-        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
         return try await getEvents(from: startOfDay, to: endOfDay)
     }
 

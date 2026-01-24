@@ -435,6 +435,7 @@ public final class NotificationManager: ObservableObject {
 
         case Action.snooze.rawValue:
             // Reschedule notification for 15 minutes later
+            // swiftlint:disable:next force_cast
             let content = notification.request.content.mutableCopy() as! UNMutableNotificationContent
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 900, repeats: false)
             let request = UNNotificationRequest(

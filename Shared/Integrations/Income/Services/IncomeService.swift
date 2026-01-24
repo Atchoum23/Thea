@@ -102,8 +102,10 @@ public actor IncomeService: IncomeServiceProtocol {
     // MARK: - Tax Estimation
 
     public func calculateTaxEstimate(for year: Int) async throws -> TaxEstimate {
-        let yearStart = Calendar.current.date(from: DateComponents(year: year, month: 1, day: 1))!
-        let yearEnd = Calendar.current.date(from: DateComponents(year: year, month: 12, day: 31))!
+        guard let yearStart = Calendar.current.date(from: DateComponents(year: year, month: 1, day: 1)),
+              let yearEnd = Calendar.current.date(from: DateComponents(year: year, month: 12, day: 31)) else {
+            return TaxEstimate.calculate(grossIncome: 0, year: year)
+        }
         let yearRange = DateInterval(start: yearStart, end: yearEnd)
 
         let yearEntries = try await fetchEntries(for: yearRange)

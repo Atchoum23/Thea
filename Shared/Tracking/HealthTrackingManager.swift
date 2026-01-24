@@ -77,7 +77,7 @@ final class HealthTrackingManager {
     func fetchDailySnapshot(for date: Date) async -> HealthSnapshot {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
 
         async let steps = fetchSteps(from: startOfDay, to: endOfDay)
         async let calories = fetchActiveCalories(from: startOfDay, to: endOfDay)

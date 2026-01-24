@@ -175,7 +175,7 @@ public final class SmartTriggerEngine: ObservableObject {
         guard var date = calendar.date(from: components) else { return nil }
 
         if date <= Date() {
-            date = calendar.date(byAdding: .day, value: 1, to: date)!
+            date = calendar.date(byAdding: .day, value: 1, to: date) ?? date.addingTimeInterval(86400)
         }
 
         return date
@@ -190,7 +190,7 @@ public final class SmartTriggerEngine: ObservableObject {
             let targetWeekday = (currentWeekday + dayOffset - 1) % 7 + 1
             if days.contains(targetWeekday) {
                 var components = calendar.dateComponents([.year, .month, .day], from: now)
-                components.day! += dayOffset
+                components.day = (components.day ?? 1) + dayOffset
                 components.hour = time.hour
                 components.minute = time.minute
 

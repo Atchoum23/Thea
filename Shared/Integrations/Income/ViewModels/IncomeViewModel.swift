@@ -42,14 +42,14 @@ public final class IncomeViewModel {
 
             // Load monthly report
             let now = Date()
-            let monthStart = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: now))!
-            let monthEnd = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart)!
+            let monthStart = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: now)) ?? Calendar.current.startOfDay(for: now)
+            let monthEnd = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: monthStart) ?? monthStart.addingTimeInterval(30 * 86400)
             let monthRange = DateInterval(start: monthStart, end: monthEnd)
 
             monthlyReport = try await incomeService.generateReport(for: monthRange)
 
             // Load recent entries (last 30 days)
-            let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: now)!
+            let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: now) ?? now.addingTimeInterval(-30 * 86400)
             let recentRange = DateInterval(start: thirtyDaysAgo, end: now)
             recentEntries = try await incomeService.fetchEntries(for: recentRange)
 
