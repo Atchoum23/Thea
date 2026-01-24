@@ -197,7 +197,7 @@ public actor NotificationService {
             body: taskName,
             category: .aiTask,
             sound: success ? .default : .error,
-            userInfo: ["taskName": taskName, "success": success]
+            userInfo: ["taskName": .string(taskName), "success": .bool(success)]
         )
         try await send(notification)
     }
