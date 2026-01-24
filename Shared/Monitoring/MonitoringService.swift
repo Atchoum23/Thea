@@ -392,7 +392,7 @@ public actor AppSwitchMonitor: ActivityMonitor {
             type: .appUsage,
             timestamp: startTime,
             duration: endTime.timeIntervalSince(startTime),
-            metadata: ["app": app]
+            metadata: ["app": .string(app)]
         )
         await logger.log(entry)
     }
@@ -445,7 +445,7 @@ public actor IdleTimeMonitor: ActivityMonitor {
             let entry = ActivityLogEntry(
                 type: .idleStart,
                 timestamp: Date(),
-                metadata: ["idleSeconds": Int(idleTime)]
+                metadata: ["idleSeconds": .int(Int(idleTime))]
             )
             await logger.log(entry)
         } else if idleTime < 10 && isCurrentlyIdle {
@@ -454,7 +454,7 @@ public actor IdleTimeMonitor: ActivityMonitor {
             let entry = ActivityLogEntry(
                 type: .idleEnd,
                 timestamp: Date(),
-                metadata: ["idleSeconds": Int(idleTime)]
+                metadata: ["idleSeconds": .int(Int(idleTime))]
             )
             await logger.log(entry)
             lastActiveTime = Date()
@@ -566,8 +566,8 @@ public actor InputActivityMonitor: ActivityMonitor {
             type: .inputSample,
             timestamp: Date(),
             metadata: [
-                "keyboardIdleSeconds": Int(keyboardIdle),
-                "mouseIdleSeconds": Int(mouseIdle)
+                "keyboardIdleSeconds": .int(Int(keyboardIdle)),
+                "mouseIdleSeconds": .int(Int(mouseIdle))
             ]
         )
         await logger.log(entry)
