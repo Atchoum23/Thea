@@ -33,17 +33,12 @@ struct SelfExecutionView: View {
         .task {
             await checkReadiness()
         }
+        // SECURITY FIX (FINDING-014): Removed fullAuto auto-approval - all operations require user approval
         .onReceive(NotificationCenter.default.publisher(for: .approvalRequested)) { notification in
             if let request = notification.userInfo?["request"] as? ApprovalGate.ApprovalRequest {
-                // In fullAuto mode, auto-approve everything
-                if executionMode == .fullAuto {
-                    Task {
-                        await ApprovalGate.shared.approve()
-                    }
-                } else {
-                    pendingApproval = request
-                    showApprovalSheet = true
-                }
+                // All modes now require approval - show the approval sheet
+                pendingApproval = request
+                showApprovalSheet = true
             }
         }
         .sheet(isPresented: $showApprovalSheet) {
@@ -139,13 +134,13 @@ struct SelfExecutionView: View {
     }
 
     // MARK: - Execution Mode Section
+    // SECURITY FIX (FINDING-014): Removed fullAuto mode - it bypassed all approval gates
 
     private var executionModeSection: some View {
         Section("Execution Mode") {
             Picker("Mode", selection: $executionMode) {
                 Text("Supervised").tag(SelfExecutionService.ExecutionMode.supervised)
                 Text("Automatic").tag(SelfExecutionService.ExecutionMode.automatic)
-                Text("Full Auto").tag(SelfExecutionService.ExecutionMode.fullAuto)
                 Text("Dry Run").tag(SelfExecutionService.ExecutionMode.dryRun)
             }
             .pickerStyle(.segmented)
@@ -154,28 +149,15 @@ struct SelfExecutionView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
-
-            if executionMode == .fullAuto {
-                HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                    Text("Full Auto mode will execute without any approval prompts. Use with caution!")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                }
-                .padding(.top, 4)
-            }
         }
     }
 
     private var modeDescription: String {
         switch executionMode {
         case .supervised:
-            return "Approval required before each major step"
+            return "Approval required before each major step (recommended)"
         case .automatic:
-            return "Minimal interruptions, approval only for phase start/end"
-        case .fullAuto:
-            return "No interruptions - all approvals auto-granted"
+            return "Minimal interruptions, approval only for destructive operations"
         case .dryRun:
             return "Simulate execution without making changes"
         }
@@ -303,6 +285,7 @@ struct SelfExecutionView: View {
                     .background(Color(.textBackgroundColor))
                     .cornerRadius(8)
 
+                // SECURITY FIX (FINDING-014): Removed "Approve All" button that switched to fullAuto mode
                 HStack(spacing: 20) {
                     Button("Reject") {
                         Task {
@@ -319,16 +302,6 @@ struct SelfExecutionView: View {
                         }
                     }
                     .buttonStyle(.borderedProminent)
-
-                    Button("Approve All") {
-                        Task {
-                            executionMode = .fullAuto
-                            await ApprovalGate.shared.approve()
-                            showApprovalSheet = false
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.orange)
                 }
             }
         }
@@ -376,7 +349,7 @@ struct SelfExecutionView: View {
     private func executeAllPhasesSequentially() async {
         isExecuting = true
         progress = "🚀 Starting execution of all phases (6-15)...\n"
-        progress += "Mode: \(executionMode == .fullAuto ? "Full Auto (no interruptions)" : executionMode.rawValue)\n\n"
+        progress += "Mode: \(executionMode.rawValue)\n\n"
 
         var totalFilesCreated = 0
         var totalErrorsFixed = 0

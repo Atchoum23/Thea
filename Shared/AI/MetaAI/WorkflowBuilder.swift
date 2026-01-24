@@ -347,11 +347,15 @@ final class WorkflowBuilder {
                 currentNodeId: nil
             ))
 
+            // SAFETY: Calculate duration safely with nil-coalescing
+            let endTime = execution.endTime ?? Date()
+            let duration = endTime.timeIntervalSince(execution.startTime)
+
             return WorkflowExecutionResult(
                 executionId: execution.id,
                 success: true,
                 outputs: nodeOutputs,
-                duration: execution.endTime!.timeIntervalSince(execution.startTime),
+                duration: duration,
                 errors: []
             )
         } catch {
@@ -359,11 +363,15 @@ final class WorkflowBuilder {
             execution.endTime = Date()
             execution.errors.append(error.localizedDescription)
 
+            // SAFETY: Calculate duration safely with nil-coalescing
+            let endTime = execution.endTime ?? Date()
+            let duration = endTime.timeIntervalSince(execution.startTime)
+
             return WorkflowExecutionResult(
                 executionId: execution.id,
                 success: false,
                 outputs: [:],
-                duration: execution.endTime!.timeIntervalSince(execution.startTime),
+                duration: duration,
                 errors: [error.localizedDescription]
             )
         }

@@ -116,9 +116,13 @@ final class BrowserHistoryTracker {
 
         let sessionID = currentSession?.id ?? UUID()
 
+        // SECURITY FIX (FINDING-009): Sanitize URL before storing
+        // Remove query parameters that may contain sensitive data (tokens, auth, etc.)
+        let sanitizedURL = sanitizeURL(visit.url)
+
         let record = BrowsingRecord(
             sessionID: sessionID,
-            url: visit.url.absoluteString,
+            url: sanitizedURL,
             title: visit.title,
             timestamp: visit.timestamp,
             duration: visit.duration,
@@ -128,6 +132,43 @@ final class BrowserHistoryTracker {
 
         context.insert(record)
         try? context.save()
+    }
+
+    // SECURITY FIX (FINDING-009): Remove sensitive query parameters from URLs
+    private func sanitizeURL(_ url: URL) -> String {
+        // List of query parameter names that often contain sensitive data
+        let sensitiveParams = [
+            "token", "access_token", "refresh_token", "auth", "auth_token",
+            "api_key", "apikey", "key", "secret", "password", "pwd",
+            "session", "sessionid", "sid", "code", "state", "nonce",
+            "oauth", "bearer", "jwt", "credential", "credentials",
+            "client_secret", "private_key"
+        ]
+
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            // If we can't parse, return just scheme + host + path (no query)
+            if let host = url.host {
+                return "\(url.scheme ?? "https")://\(host)\(url.path)"
+            }
+            return url.path
+        }
+
+        // Filter out sensitive query parameters
+        if let queryItems = components.queryItems {
+            let filteredItems = queryItems.filter { item in
+                let lowercaseName = item.name.lowercased()
+                // Remove if parameter name contains any sensitive keyword
+                return !sensitiveParams.contains { lowercaseName.contains($0) }
+            }
+
+            // If all parameters were filtered, remove query string entirely
+            components.queryItems = filteredItems.isEmpty ? nil : filteredItems
+        }
+
+        // Also remove fragments which may contain tokens (e.g., OAuth implicit flow)
+        components.fragment = nil
+
+        return components.string ?? url.absoluteString
     }
 
     private func saveSession(_ session: BrowsingSession) async {

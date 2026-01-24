@@ -31,6 +31,50 @@ const DEFAULT_TIMEOUT_MS = 120000; // 2 minutes
 const MAX_TIMEOUT_MS = 600000; // 10 minutes
 const MAX_OUTPUT_LENGTH = 100000; // 100KB max output
 const DEFAULT_SHELL = process.env.SHELL || "/bin/zsh";
+// SECURITY FIX (FINDING-012): Allowed directories for file operations
+// Only these directories (and their subdirectories) can be accessed
+const ALLOWED_DIRECTORIES = [
+    os.homedir(), // User's home directory
+    "/tmp", // Temporary files
+    "/var/tmp", // Persistent temporary files
+    process.cwd(), // Current working directory
+];
+// SECURITY FIX (FINDING-012): Blocked paths that should never be accessed
+const BLOCKED_PATHS = [
+    "/System",
+    "/Library",
+    "/private",
+    "/var",
+    "/etc",
+    "/bin",
+    "/sbin",
+    "/usr",
+    ".ssh",
+    ".gnupg",
+    ".aws",
+    ".kube",
+    "Keychain",
+];
+/**
+ * SECURITY FIX (FINDING-012): Validate that a path is within allowed directories
+ */
+function isPathAllowed(targetPath) {
+    const resolvedPath = path.resolve(targetPath.replace(/^~/, os.homedir()));
+    // Check for blocked paths first
+    for (const blocked of BLOCKED_PATHS) {
+        if (resolvedPath.includes(blocked)) {
+            return { allowed: false, reason: `Path contains blocked pattern: ${blocked}` };
+        }
+    }
+    // Check if path is within any allowed directory
+    for (const allowedDir of ALLOWED_DIRECTORIES) {
+        const resolvedAllowed = path.resolve(allowedDir);
+        if (resolvedPath.startsWith(resolvedAllowed + path.sep) || resolvedPath === resolvedAllowed) {
+            return { allowed: true };
+        }
+    }
+    return { allowed: false, reason: `Path is not within allowed directories` };
+}
 // Commands that require explicit confirmation (destructive operations)
 const DANGEROUS_PATTERNS = [
     /rm\s+(-rf?|--recursive).*\//i, // rm -rf with path
@@ -481,6 +525,20 @@ Returns:
     try {
         const expandedPath = params.path.replace(/^~/, os.homedir());
         const resolvedPath = path.resolve(expandedPath);
+        // SECURITY FIX (FINDING-012): Validate path is allowed
+        const pathCheck = isPathAllowed(resolvedPath);
+        if (!pathCheck.allowed) {
+            return {
+                content: [{
+                        type: "text",
+                        text: JSON.stringify({
+                            success: false,
+                            path: resolvedPath,
+                            error: `SECURITY: ${pathCheck.reason}`,
+                        }, null, 2),
+                    }],
+            };
+        }
         // Check file exists
         if (!fs.existsSync(resolvedPath)) {
             return {
@@ -570,6 +628,20 @@ Returns:
     try {
         const expandedPath = params.path.replace(/^~/, os.homedir());
         const resolvedPath = path.resolve(expandedPath);
+        // SECURITY FIX (FINDING-012): Validate path is allowed
+        const pathCheck = isPathAllowed(resolvedPath);
+        if (!pathCheck.allowed) {
+            return {
+                content: [{
+                        type: "text",
+                        text: JSON.stringify({
+                            success: false,
+                            path: resolvedPath,
+                            error: `SECURITY: ${pathCheck.reason}`,
+                        }, null, 2),
+                    }],
+            };
+        }
         // Create directories if requested
         if (params.createDirectories) {
             const dir = path.dirname(resolvedPath);
@@ -642,6 +714,20 @@ Returns:
     try {
         const expandedPath = params.path.replace(/^~/, os.homedir());
         const resolvedPath = path.resolve(expandedPath);
+        // SECURITY FIX (FINDING-012): Validate path is allowed
+        const pathCheck = isPathAllowed(resolvedPath);
+        if (!pathCheck.allowed) {
+            return {
+                content: [{
+                        type: "text",
+                        text: JSON.stringify({
+                            success: false,
+                            path: resolvedPath,
+                            error: `SECURITY: ${pathCheck.reason}`,
+                        }, null, 2),
+                    }],
+            };
+        }
         if (!fs.existsSync(resolvedPath)) {
             return {
                 content: [{

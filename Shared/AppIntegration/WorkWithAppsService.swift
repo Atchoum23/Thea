@@ -18,13 +18,18 @@ import ApplicationServices
 @MainActor
 public class WorkWithAppsService: ObservableObject {
     public static let shared = WorkWithAppsService()
-    
+
     // MARK: - Published State
-    
+
     @Published public private(set) var connectedApps: [ConnectedApp] = []
     @Published public private(set) var activeApp: ConnectedApp?
     @Published public private(set) var recentActions: [AppAction] = []
     @Published public private(set) var isAccessibilityEnabled = false
+
+    // MARK: - Observer Storage (Memory Leak Prevention)
+
+    /// Stores notification observers for proper cleanup
+    private var notificationObservers: [NSObjectProtocol] = []
     
     // MARK: - Supported Apps
     
@@ -174,24 +179,27 @@ public class WorkWithAppsService: ObservableObject {
     
     private func setupAppMonitoring() {
         let workspace = NSWorkspace.shared
-        
-        workspace.notificationCenter.addObserver(
+
+        // MEMORY SAFETY: Store observer references for proper cleanup
+        let launchObserver = workspace.notificationCenter.addObserver(
             forName: NSWorkspace.didLaunchApplicationNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             self?.discoverConnectedApps()
         }
-        
-        workspace.notificationCenter.addObserver(
+        notificationObservers.append(launchObserver)
+
+        let terminateObserver = workspace.notificationCenter.addObserver(
             forName: NSWorkspace.didTerminateApplicationNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             self?.discoverConnectedApps()
         }
-        
-        workspace.notificationCenter.addObserver(
+        notificationObservers.append(terminateObserver)
+
+        let activateObserver = workspace.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification,
             object: nil,
             queue: .main
@@ -199,6 +207,27 @@ public class WorkWithAppsService: ObservableObject {
             guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
                   let bundleId = app.bundleIdentifier else { return }
             self?.activeApp = self?.connectedApps.first { $0.definition.bundleId == bundleId }
+        }
+        notificationObservers.append(activateObserver)
+    }
+
+    /// Cleanup method to remove all notification observers
+    /// Called when the service is being deallocated
+    public func cleanup() {
+        let workspace = NSWorkspace.shared
+        for observer in notificationObservers {
+            workspace.notificationCenter.removeObserver(observer)
+        }
+        notificationObservers.removeAll()
+    }
+
+    deinit {
+        // Note: Since this is a singleton and @MainActor, deinit is rarely called
+        // but we include it for completeness. Use cleanup() for explicit teardown.
+        let observers = notificationObservers
+        let workspace = NSWorkspace.shared
+        for observer in observers {
+            workspace.notificationCenter.removeObserver(observer)
         }
     }
     

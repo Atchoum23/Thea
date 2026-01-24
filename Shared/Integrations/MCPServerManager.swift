@@ -39,15 +39,16 @@ public class MCPServerManager: ObservableObject {
     
     private init() {
         let home = FileManager.default.homeDirectoryForCurrentUser
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+
         claudeConfigPath = home.appendingPathComponent("Library/Application Support/Claude/claude_desktop_config.json")
         theaConfigPath = appSupport.appendingPathComponent("Thea/mcp_servers.json")
         serverCachePath = appSupport.appendingPathComponent("Thea/mcp_registry_cache.json")
-        
+
         // Create directories
         try? FileManager.default.createDirectory(at: theaConfigPath.deletingLastPathComponent(), withIntermediateDirectories: true)
-        
+
         // Load servers
         Task {
             await loadServers()

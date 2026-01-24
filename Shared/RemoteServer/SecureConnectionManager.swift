@@ -81,10 +81,31 @@ public class SecureConnectionManager: ObservableObject {
             sec_protocol_options_set_local_identity(tlsOptions.securityProtocolOptions, identity)
         }
 
-        // Set verification handler for client certificates
-        sec_protocol_options_set_verify_block(tlsOptions.securityProtocolOptions, { _, trust, completion in
-            // Accept connections (we'll do app-level authentication)
-            completion(true)
+        // SECURITY FIX (FINDING-002): Properly validate TLS certificates
+        // Previous implementation blindly accepted all certificates, enabling MITM attacks
+        sec_protocol_options_set_verify_block(tlsOptions.securityProtocolOptions, { securityProtocolMetadata, secTrust, completion in
+            // Perform proper certificate validation
+            guard let trust = sec_trust_copy_ref(secTrust).takeRetainedValue() as SecTrust? else {
+                completion(false)
+                return
+            }
+
+            // Set standard SSL policy for certificate validation
+            let policy = SecPolicyCreateSSL(true, nil)
+            SecTrustSetPolicies(trust, policy)
+
+            // Evaluate the trust chain
+            var error: CFError?
+            let isValid = SecTrustEvaluateWithError(trust, &error)
+
+            if !isValid {
+                // Log the validation failure for debugging
+                if let error = error {
+                    print("SECURITY: TLS certificate validation failed: \(error)")
+                }
+            }
+
+            completion(isValid)
         }, .global(qos: .userInteractive))
 
         let parameters = NWParameters(tls: tlsOptions)
@@ -156,15 +177,34 @@ public class SecureConnectionManager: ObservableObject {
     // MARK: - Pairing Code Authentication
 
     /// Generate a new pairing code for client connection
+    /// SECURITY FIX (FINDING-006): Increased from 6 digits to cryptographically strong 12-character alphanumeric
     public func generatePairingCode(validFor duration: TimeInterval = 300) -> String {
-        // Generate 6-digit code
-        let code = String(format: "%06d", Int.random(in: 0...999999))
+        // SECURITY FIX: Generate cryptographically strong 12-character code
+        // Uses alphanumeric characters (removed ambiguous ones: 0, O, l, 1, I)
+        let characters = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz"
+        var codeData = Data(count: 12)
+        let result = codeData.withUnsafeMutableBytes {
+            SecRandomCopyBytes(kSecRandomDefault, 12, $0.baseAddress!)
+        }
+
+        let code: String
+        if result == errSecSuccess {
+            code = codeData.map { characters[characters.index(characters.startIndex, offsetBy: Int($0) % characters.count)] }
+                .map { String($0) }
+                .joined()
+        } else {
+            // Fallback (still better than 6 digits)
+            code = (0..<12).map { _ in
+                String(characters.randomElement()!)
+            }.joined()
+        }
 
         let session = PairingSession(
             code: code,
             createdAt: Date(),
             expiresAt: Date().addingTimeInterval(duration),
-            isUsed: false
+            isUsed: false,
+            failedAttempts: 0  // SECURITY: Track failed attempts
         )
 
         pairingCodes[code] = session
@@ -184,27 +224,55 @@ public class SecureConnectionManager: ObservableObject {
         return code
     }
 
+    // SECURITY FIX (FINDING-006): Maximum failed attempts before lockout
+    private let maxFailedAttempts = 3
+
+    // SECURITY FIX (Race Condition): Use actor isolation to ensure atomic check-and-mark
+    // The @MainActor annotation on the class ensures serialized access to pairingCodes
     private func verifyPairingCode(response: AuthResponse) async -> Bool {
-        guard let code = response.pairingCode,
-              let session = pairingCodes[code] else {
+        guard let code = response.pairingCode else {
+            logEvent(.authenticationFailed, "No pairing code provided")
+            // SECURITY: Add delay to prevent timing attacks
+            try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
+            return false
+        }
+
+        // SECURITY FIX (Race Condition): Perform atomic check-and-mark in single operation
+        // First, get the session and verify it exists
+        guard let session = pairingCodes[code] else {
             logEvent(.authenticationFailed, "Invalid pairing code")
+            try? await Task.sleep(nanoseconds: 500_000_000) // 500ms delay for timing attacks
             return false
         }
 
+        // SECURITY FIX (FINDING-006): Check for lockout due to failed attempts
+        guard session.failedAttempts < maxFailedAttempts else {
+            logEvent(.authenticationFailed, "Pairing code locked due to too many failed attempts")
+            pairingCodes.removeValue(forKey: code)
+            activePairingCode = nil
+            return false
+        }
+
+        // SECURITY FIX (Race Condition): Check isUsed AND mark as used atomically
+        // Since we're on @MainActor, no other code can interleave between check and mark
         guard !session.isUsed else {
-            logEvent(.authenticationFailed, "Pairing code already used")
+            logEvent(.authenticationFailed, "Pairing code already used (possible replay attack)")
             return false
         }
 
+        // Immediately mark as used before any async operation can interleave
+        // This is the atomic operation - must happen synchronously
+        pairingCodes[code]?.isUsed = true
+
+        // Now perform remaining validations (even if expired, code is burned)
         guard Date() < session.expiresAt else {
             logEvent(.authenticationFailed, "Pairing code expired")
+            pairingCodes.removeValue(forKey: code)
+            activePairingCode = nil
             return false
         }
 
-        // Mark as used
-        pairingCodes[code]?.isUsed = true
         activePairingCode = nil
-
         logEvent(.clientConnected, "Client authenticated via pairing code")
         return true
     }
@@ -274,17 +342,19 @@ public class SecureConnectionManager: ObservableObject {
         saveTrustedCertificates(certs)
     }
 
+    // SECURITY FIX (FINDING-011): Store trusted certificates in Keychain instead of UserDefaults
     private func loadTrustedCertificates() -> [Data]? {
-        guard let data = UserDefaults.standard.data(forKey: "thea.remote.trustedcerts"),
+        guard let data = loadKeyFromKeychain(identifier: "thea.remote.trustedcerts"),
               let certs = try? JSONDecoder().decode([Data].self, from: data) else {
             return nil
         }
         return certs
     }
 
+    // SECURITY FIX (FINDING-011): Store trusted certificates in Keychain instead of UserDefaults
     private func saveTrustedCertificates(_ certs: [Data]) {
         if let data = try? JSONEncoder().encode(certs) {
-            UserDefaults.standard.set(data, forKey: "thea.remote.trustedcerts")
+            saveKeyToKeychain(data, identifier: "thea.remote.trustedcerts")
         }
     }
 
@@ -337,14 +407,19 @@ public class SecureConnectionManager: ObservableObject {
         saveWhitelist()
     }
 
+    // SECURITY FIX (FINDING-011): Store whitelist in Keychain instead of UserDefaults
     private func loadWhitelist() {
-        if let list = UserDefaults.standard.stringArray(forKey: "thea.remote.whitelist") {
-            whitelist = Set(list)
+        if let data = loadKeyFromKeychain(identifier: "thea.remote.whitelist"),
+           let jsonArray = try? JSONDecoder().decode([String].self, from: data) {
+            whitelist = Set(jsonArray)
         }
     }
 
+    // SECURITY FIX (FINDING-011): Store whitelist in Keychain instead of UserDefaults
     private func saveWhitelist() {
-        UserDefaults.standard.set(Array(whitelist), forKey: "thea.remote.whitelist")
+        if let data = try? JSONEncoder().encode(Array(whitelist)) {
+            saveKeyToKeychain(data, identifier: "thea.remote.whitelist")
+        }
     }
 
     // MARK: - Rate Limiting
@@ -481,6 +556,7 @@ private struct PairingSession {
     let createdAt: Date
     let expiresAt: Date
     var isUsed: Bool
+    var failedAttempts: Int  // SECURITY FIX (FINDING-006): Track failed attempts for lockout
 }
 
 // MARK: - Connection Security Error

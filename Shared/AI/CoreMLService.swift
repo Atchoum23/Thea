@@ -39,7 +39,13 @@ public class CoreMLService: ObservableObject {
     // MARK: - Initialization
 
     private init() {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            // Fallback to temporary directory
+            modelDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("Thea/Models")
+            try? FileManager.default.createDirectory(at: modelDirectory, withIntermediateDirectories: true)
+            Task { await discoverModels() }
+            return
+        }
         modelDirectory = appSupport.appendingPathComponent("Thea/Models")
 
         try? FileManager.default.createDirectory(at: modelDirectory, withIntermediateDirectories: true)

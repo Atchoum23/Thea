@@ -140,52 +140,56 @@ public struct WellnessDashboardView: View {
 
     // MARK: - Active Session Card
 
+    @ViewBuilder
     private var activeSessionCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: viewModel.activeSession!.mode.icon)
-                    .foregroundColor(Color(hex: viewModel.activeSession!.mode.color))
-
-                Text(viewModel.activeSession!.mode.displayName)
-                    .font(.headline)
-
-                Spacer()
-
-                Button(action: {
-                    Task {
-                        await viewModel.endFocusSession(completed: true)
-                    }
-                }) {
-                    Text("End Session")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
-            }
-
-            // Progress bar
-            VStack(alignment: .leading, spacing: 8) {
+        // SAFETY: Safely unwrap activeSession to avoid force unwrap crashes
+        if let session = viewModel.activeSession {
+            VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text(viewModel.sessionElapsedTime)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .monospacedDigit()
+                    Image(systemName: session.mode.icon)
+                        .foregroundColor(Color(hex: session.mode.color))
+
+                    Text(session.mode.displayName)
+                        .font(.headline)
 
                     Spacer()
 
-                    Text(viewModel.sessionTimeRemaining)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Button(action: {
+                        Task {
+                            await viewModel.endFocusSession(completed: true)
+                        }
+                    }) {
+                        Text("End Session")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
                 }
 
-                ProgressView(value: viewModel.sessionProgress, total: 100)
-                    .tint(Color(hex: viewModel.activeSession!.mode.color))
+                // Progress bar
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(viewModel.sessionElapsedTime)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .monospacedDigit()
+
+                        Spacer()
+
+                        Text(viewModel.sessionTimeRemaining)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    ProgressView(value: viewModel.sessionProgress, total: 100)
+                        .tint(Color(hex: session.mode.color))
+                }
             }
+            .padding()
+            .background(Color(hex: session.mode.color).opacity(0.1))
+            .cornerRadius(16)
         }
-        .padding()
-        .background(Color(hex: viewModel.activeSession!.mode.color).opacity(0.1))
-        .cornerRadius(16)
     }
 
     // MARK: - Start Session Section

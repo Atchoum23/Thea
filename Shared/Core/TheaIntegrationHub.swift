@@ -16,35 +16,126 @@ import Combine
 @MainActor
 public class TheaIntegrationHub: ObservableObject {
     public static let shared = TheaIntegrationHub()
-    
-    // MARK: - Services
-    
+
+    // MARK: - Core Services
+
     /// Cross-device notification service
     public let notifications = UniversalNotificationService.shared
-    
+
     /// iCloud sync service
     public let sync = CrossDeviceService.shared
-    
+
     /// Memory service (Claude Memory equivalent)
     public let memory = MemoryService.shared
-    
+
     /// Artifact manager (Claude Artifacts equivalent)
     public let artifacts = ArtifactManager.shared
-    
+
     /// MCP server manager
     public let mcp = MCPServerManager.shared
-    
+
     /// Custom agent builder (GPT equivalent)
     public let agents = CustomAgentBuilder.shared
-    
+
+    // MARK: - AI Intelligence Services
+
+    /// AI Vision capabilities (OCR, object detection, etc.)
+    public let vision = VisionIntelligence.shared
+
+    /// AI Speech capabilities (recognition, synthesis)
+    public let speech = SpeechIntelligence.shared
+
+    /// Document intelligence (PDF, text analysis)
+    public let documents = DocumentIntelligence.shared
+
+    // MARK: - Automation Services
+
+    /// Smart trigger engine for context-aware automation
+    public let triggers = SmartTriggerEngine.shared
+
+    /// Task scheduler for background jobs
+    public let scheduler = TaskScheduler.shared
+
+    // MARK: - Platform Services
+
+    /// Platform-specific features hub
+    public let platform = PlatformFeaturesHub.shared
+
+    /// Spotlight search integration
+    public let spotlight = SpotlightIntegration.shared
+
+    /// Handoff for cross-device continuity
+    public let handoff = HandoffManager.shared
+
+    /// Universal clipboard
+    public let clipboard = UniversalClipboardManager.shared
+
+    /// Live Activities (iOS Dynamic Island)
+    public let liveActivities = TheaLiveActivityManager.shared
+
+    // MARK: - Security Services
+
+    /// AgentSec runtime enforcer
+    public let security = AgentSecEnforcer.shared
+
+    /// AgentSec policy configuration
+    public let securityPolicy = AgentSecPolicy.shared
+
+    /// Emergency kill switch
+    public let killSwitch = AgentSecKillSwitch.shared
+
+    // MARK: - Configuration
+
+    /// Feature flags for gradual rollout
+    public let features = FeatureFlags.shared
+
     #if os(macOS)
     /// Claude.app bridge
     public let claudeApp = ClaudeAppBridge.shared
-    
+
     /// Work with Apps service
     public let workWithApps = WorkWithAppsService.shared
+
+    /// Menu bar status item
+    public let menuBar = MenuBarManager.shared
+
+    /// Global keyboard shortcuts
+    public let hotkeys = GlobalHotkeyManager.shared
+
+    /// Finder integration
+    public let finder = FinderIntegration.shared
     #endif
-    
+
+    #if os(iOS)
+    /// Siri Shortcuts integration
+    public let siriShortcuts = SiriShortcutsManager.shared
+
+    /// Home screen quick actions
+    public let homeScreenActions = HomeScreenActionsManager.shared
+
+    /// Haptic feedback
+    public let haptics = HapticFeedbackManager.shared
+
+    /// Share extension handler
+    public let shareExtension = ShareExtensionHandler.shared
+    #endif
+
+    #if os(watchOS)
+    /// Watch session manager
+    public let watchSession = WatchSessionManager.shared
+
+    /// Complication manager
+    public let complications = ComplicationManager.shared
+    #endif
+
+    #if os(visionOS)
+    /// Spatial computing manager
+    public let spatialComputing = SpatialComputingManager.shared
+
+    /// Spatial UI manager
+    public let spatialUI = SpatialUIManager.shared
+    #endif
+
     // MARK: - Published State
     
     @Published public private(set) var isInitialized = false
@@ -103,9 +194,15 @@ public class TheaIntegrationHub: ObservableObject {
         
         // Get initial sync status
         syncStatus = await sync.getStatus()
-        
+
+        // Initialize platform features
+        await platform.initialize()
+
+        // Index content in Spotlight
+        await spotlight.indexQuickActions()
+
         isInitialized = true
-        
+
         // Start background tasks
         startBackgroundTasks()
     }

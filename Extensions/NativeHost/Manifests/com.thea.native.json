@@ -1,0 +1,9 @@
+{
+  "name": "com.thea.native",
+  "description": "Thea Native Messaging Host - iCloud Passwords & Hide My Email integration",
+  "path": "/Applications/Thea.app/Contents/Helpers/TheaNativeMessagingHost",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://THEA_EXTENSION_ID_PLACEHOLDER/"
+  ]
+}

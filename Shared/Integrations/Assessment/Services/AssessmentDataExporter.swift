@@ -369,6 +369,12 @@ public actor AssessmentComparison {
         }
 
         let sorted = assessments.sorted { $0.completedDate < $1.completedDate }
+
+        // SAFETY: Use guard to safely unwrap first and last elements
+        guard let firstAssessment = sorted.first, let lastAssessment = sorted.last else {
+            throw AssessmentDataExporter.ExportError.noData
+        }
+
         let scores = sorted.map { $0.score.overall }
 
         let firstScore = scores.first ?? 0
@@ -381,7 +387,7 @@ public actor AssessmentComparison {
 
         return TrendReport(
             assessmentCount: assessments.count,
-            dateRange: (sorted.first!.completedDate, sorted.last!.completedDate),
+            dateRange: (firstAssessment.completedDate, lastAssessment.completedDate),
             initialScore: firstScore,
             currentScore: lastScore,
             totalChange: change,

@@ -10,11 +10,13 @@ public actor SelfExecutionService {
 
     private let logger = Logger(subsystem: "com.thea.app", category: "SelfExecution")
 
+    // SECURITY FIX (FINDING-014): Removed fullAuto mode which bypassed all approval gates
+    // The "fullAuto" mode was a security risk as it allowed execution without any user oversight
     public enum ExecutionMode: String, Sendable {
-        case automatic   // Execute with minimal approval gates
-        case supervised  // Approval required at each step
-        case fullAuto    // No interruptions - all approvals auto-granted
+        case automatic   // Execute with minimal approval gates (still requires approval for destructive ops)
+        case supervised  // Approval required at each step (default, recommended)
         case dryRun      // Simulate without making changes
+        // NOTE: fullAuto mode has been removed for security reasons - all operations now require appropriate approvals
     }
 
     public struct ExecutionRequest: Sendable {
