@@ -88,6 +88,11 @@ jobs:
           echo "app_path=$APP_PATH" >> $GITHUB_OUTPUT
           echo "Build successful: $APP_PATH"
 
+          # Debug: Verify Info.plist has valid versions
+          echo "Checking Info.plist versions..."
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PATH/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PATH/Info.plist"
+
       - name: Package Simulator App
         run: |
           APP_PATH="${{ steps.verify.outputs.app_path }}"
@@ -130,6 +135,15 @@ jobs:
 
       - name: Unzip App
         run: unzip -o Thea-Simulator.zip -d app
+
+      - name: Verify App Bundle
+        run: |
+          echo "Checking app bundle..."
+          ls -la app/Thea.app/
+          echo ""
+          echo "Info.plist contents (version keys):"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" app/Thea.app/Info.plist || echo "CFBundleShortVersionString not found"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" app/Thea.app/Info.plist || echo "CFBundleVersion not found"
 
       - name: Select Xcode ${{ env.XCODE_VERSION }}
         run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
