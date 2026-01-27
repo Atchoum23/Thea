@@ -155,42 +155,94 @@ jobs:
           if-no-files-found: ignore
 
   # ============================================
-  # BUILD iOS (DISABLED - macOS-first development)
+  # BUILD iOS
   # ============================================
-  # build-xcode-ios:
-  #   name: Build iOS App
-  #   runs-on: macos-14
-  #   needs: swiftlint
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Select Xcode 15.2
-  #       run: sudo xcode-select -s /Applications/Xcode_16.2.app
-  #
-  #     - name: Install XcodeGen
-  #       run: brew install xcodegen
-  #
-  #     - name: Generate Xcode Project
-  #       run: xcodegen generate
-  #
-  #     - name: Build Thea-iOS
-  #       run: |
-  #         xcodebuild build \
-  #           -scheme Thea-iOS \
-  #           -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.2' \
-  #           -configuration Release \
-  #           -resultBundlePath build/results-ios.xcresult \
-  #           CODE_SIGN_IDENTITY="" \
-  #           CODE_SIGNING_REQUIRED=NO \
-  #           CODE_SIGNING_ALLOWED=NO
-  #
-  #     - name: Upload Build Results
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: build-results-ios
-  #         path: build/results-ios.xcresult
-  #         if-no-files-found: ignore
+  build-xcode-ios:
+    name: Build iOS App
+    runs-on: macos-14
+    needs: swiftlint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build Thea-iOS
+        run: |
+          xcodebuild build \
+            -scheme Thea-iOS \
+            -destination 'generic/platform=iOS' \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+  # ============================================
+  # BUILD watchOS
+  # ============================================
+  build-xcode-watchos:
+    name: Build watchOS App
+    runs-on: macos-14
+    needs: swiftlint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build Thea-watchOS
+        run: |
+          xcodebuild build \
+            -scheme Thea-watchOS \
+            -destination 'generic/platform=watchOS' \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+  # ============================================
+  # BUILD tvOS
+  # ============================================
+  build-xcode-tvos:
+    name: Build tvOS App
+    runs-on: macos-14
+    needs: swiftlint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build Thea-tvOS
+        run: |
+          xcodebuild build \
+            -scheme Thea-tvOS \
+            -destination 'generic/platform=tvOS' \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
   # ============================================
   # TESTS WITH COVERAGE
