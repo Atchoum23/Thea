@@ -22,7 +22,7 @@ public final class KeyboardShortcutsSystem: ObservableObject {
     // MARK: - Published State
 
     @Published public private(set) var shortcuts: [KeyboardShortcut] = []
-    @Published public private(set) var categories: [ShortcutCategory] = []
+    @Published public private(set) var categories: [KeyboardShortcutCategory] = []
     @Published public private(set) var conflicts: [ShortcutConflict] = []
     @Published public var isListening = false
     @Published public var recordedShortcut: RecordedShortcut?
@@ -43,12 +43,12 @@ public final class KeyboardShortcutsSystem: ObservableObject {
 
     private func registerDefaultShortcuts() {
         categories = [
-            ShortcutCategory(id: "navigation", name: "Navigation", icon: "arrow.left.arrow.right"),
-            ShortcutCategory(id: "conversations", name: "Conversations", icon: "bubble.left.and.bubble.right"),
-            ShortcutCategory(id: "editing", name: "Editing", icon: "pencil"),
-            ShortcutCategory(id: "ai", name: "AI Actions", icon: "sparkles"),
-            ShortcutCategory(id: "window", name: "Window", icon: "macwindow"),
-            ShortcutCategory(id: "tools", name: "Tools", icon: "wrench.and.screwdriver")
+            KeyboardShortcutCategory(id: "navigation", name: "Navigation", icon: "arrow.left.arrow.right"),
+            KeyboardShortcutCategory(id: "conversations", name: "Conversations", icon: "bubble.left.and.bubble.right"),
+            KeyboardShortcutCategory(id: "editing", name: "Editing", icon: "pencil"),
+            KeyboardShortcutCategory(id: "ai", name: "AI Actions", icon: "sparkles"),
+            KeyboardShortcutCategory(id: "window", name: "Window", icon: "macwindow"),
+            KeyboardShortcutCategory(id: "tools", name: "Tools", icon: "wrench.and.screwdriver")
         ]
 
         shortcuts = [
@@ -589,7 +589,7 @@ public enum KeyModifier: Int, Codable, Hashable {
     case shift = 4
 }
 
-public struct ShortcutCategory: Identifiable {
+public struct KeyboardShortcutCategory: Identifiable {
     public let id: String
     public let name: String
     public let icon: String

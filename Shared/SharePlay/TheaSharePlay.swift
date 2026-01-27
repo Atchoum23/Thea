@@ -146,7 +146,7 @@ public class TheaSharePlayManager: ObservableObject {
 
     @Published public private(set) var isSessionActive = false
     @Published public private(set) var isHost = false
-    @Published public private(set) var participants: [Participant] = []
+    @Published public private(set) var participants: [SharePlayParticipant] = []
     @Published public private(set) var sharedMessages: [SharePlayMessage.ChatContent] = []
     @Published public private(set) var sharedAIResponses: [SharePlayMessage.AIResponseContent] = []
     @Published public private(set) var typingParticipants: Set<String> = []
@@ -308,7 +308,7 @@ public class TheaSharePlayManager: ObservableObject {
 
     private func updateParticipants(_ activeParticipants: Set<GroupActivities.Participant>) {
         participants = activeParticipants.map { participant in
-            Participant(
+            SharePlayParticipant(
                 id: participant.id.hashValue.description,
                 isLocal: participant == groupSession?.localParticipant
             )
@@ -443,7 +443,7 @@ public class TheaSharePlayManager: ObservableObject {
 
 // MARK: - Participant
 
-public struct Participant: Identifiable, Sendable {
+public struct SharePlayParticipant: Identifiable, Sendable {
     public let id: String
     public let isLocal: Bool
 

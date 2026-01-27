@@ -28,18 +28,15 @@ public actor CalendarContextProvider: ContextProvider {
                 if #available(iOS 17.0, watchOS 10.0, *) {
                     return status == .fullAccess
                 } else {
-                    // swiftlint:disable:next deprecated_enum_case
                     return status == .authorized
                 }
             #elseif os(macOS)
                 if #available(macOS 14.0, *) {
                     return status == .fullAccess
                 } else {
-                    // swiftlint:disable:next deprecated_enum_case
                     return status == .authorized
                 }
             #else
-                // swiftlint:disable:next deprecated_enum_case
                 return status == .authorized
             #endif
         }

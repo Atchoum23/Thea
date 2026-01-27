@@ -9,6 +9,18 @@
 import Foundation
 import os.log
 
+#if canImport(UIKit)
+    import UIKit
+#endif
+
+#if canImport(WatchKit)
+    import WatchKit
+#endif
+
+#if os(macOS)
+    import IOKit.ps
+#endif
+
 // MARK: - Device Capability Router
 
 /// Routes tasks to the most suitable device based on capabilities
@@ -284,16 +296,19 @@ public struct RoutingDecision: Sendable {
     public let score: Double // 0-1 confidence score
     public let reasoning: String
     public let timestamp: Date
+    public let localDeviceId: String
 
+    @MainActor
     public init(targetDevice: DeviceInfo, score: Double, reasoning: String) {
         self.targetDevice = targetDevice
         self.score = score
         self.reasoning = reasoning
         timestamp = Date()
+        localDeviceId = DeviceRegistry.shared.currentDevice.id
     }
 
     public var isLocalExecution: Bool {
-        targetDevice.id == DeviceRegistry.shared.currentDevice.id
+        targetDevice.id == localDeviceId
     }
 
     public var confidenceLevel: ConfidenceLevel {
@@ -313,7 +328,7 @@ public struct RoutingDecision: Sendable {
 
 // MARK: - Device Capabilities Extension
 
-public struct DeviceCapabilities: Codable, Sendable {
+public struct RouterDeviceCapabilities: Codable, Sendable {
     public var hasNeuralEngine: Bool
     public var hasGPU: Bool
     public var hasCellular: Bool
@@ -344,14 +359,13 @@ public struct DeviceCapabilities: Codable, Sendable {
     }
 
     /// Get current device capabilities
-    public static var current: DeviceCapabilities {
+    @MainActor
+    public static var current: RouterDeviceCapabilities {
         #if os(iOS)
-            import UIKit
-
             let device = UIDevice.current
             device.isBatteryMonitoringEnabled = true
 
-            return DeviceCapabilities(
+            return RouterDeviceCapabilities(
                 hasNeuralEngine: true, // All modern iOS devices have Neural Engine
                 hasGPU: true,
                 hasCellular: true, // Most iPhones/iPads have cellular option
@@ -362,9 +376,7 @@ public struct DeviceCapabilities: Codable, Sendable {
                 ramSize: Int64(ProcessInfo.processInfo.physicalMemory)
             )
         #elseif os(macOS)
-            import IOKit.ps
-
-            return DeviceCapabilities(
+            return RouterDeviceCapabilities(
                 hasNeuralEngine: ProcessInfo.processInfo.isiOSAppOnMac || isAppleSilicon(),
                 hasGPU: true,
                 hasCellular: false,
@@ -375,9 +387,7 @@ public struct DeviceCapabilities: Codable, Sendable {
                 ramSize: Int64(ProcessInfo.processInfo.physicalMemory)
             )
         #elseif os(watchOS)
-            import WatchKit
-
-            return DeviceCapabilities(
+            return RouterDeviceCapabilities(
                 hasNeuralEngine: true,
                 hasGPU: true,
                 hasCellular: WKInterfaceDevice.current().wristLocation != .none,
@@ -388,7 +398,7 @@ public struct DeviceCapabilities: Codable, Sendable {
                 ramSize: 0
             )
         #else
-            return DeviceCapabilities(
+            return RouterDeviceCapabilities(
                 hasNeuralEngine: true,
                 hasGPU: true,
                 hasCellular: false,

@@ -13,6 +13,14 @@ import os.log
     import AppIntents
 #endif
 
+#if canImport(UIKit)
+    import UIKit
+#endif
+
+#if canImport(AppKit)
+    import AppKit
+#endif
+
 // MARK: - Shortcuts Orchestrator
 
 /// Orchestrates Shortcuts discovery, execution, and multi-step automation chains
@@ -24,8 +32,8 @@ public final class ShortcutsOrchestrator: ObservableObject {
 
     // MARK: - State
 
-    @Published public private(set) var availableShortcuts: [ShortcutInfo] = []
-    @Published public private(set) var recentShortcuts: [ShortcutInfo] = []
+    @Published public private(set) var availableShortcuts: [OrchestratorShortcutInfo] = []
+    @Published public private(set) var recentShortcuts: [OrchestratorShortcutInfo] = []
     @Published public private(set) var runningShortcuts: [String: ShortcutExecution] = [:]
     @Published public private(set) var isDiscovering = false
 
@@ -36,9 +44,9 @@ public final class ShortcutsOrchestrator: ObservableObject {
 
     // MARK: - Callbacks
 
-    public var onShortcutStarted: ((ShortcutInfo) -> Void)?
-    public var onShortcutCompleted: ((ShortcutInfo, ShortcutResult) -> Void)?
-    public var onShortcutFailed: ((ShortcutInfo, Error) -> Void)?
+    public var onShortcutStarted: ((OrchestratorShortcutInfo) -> Void)?
+    public var onShortcutCompleted: ((OrchestratorShortcutInfo, ShortcutResult) -> Void)?
+    public var onShortcutFailed: ((OrchestratorShortcutInfo, Error) -> Void)?
 
     private init() {
         loadRecentShortcuts()
@@ -59,11 +67,11 @@ public final class ShortcutsOrchestrator: ObservableObject {
         // 2. Shortcuts that have been run before
         // 3. System shortcuts (if available)
 
-        var discovered: [ShortcutInfo] = []
+        var discovered: [OrchestratorShortcutInfo] = []
 
         // Load from user defaults (shortcuts the user has configured)
         if let data = UserDefaults.standard.data(forKey: "thea.shortcuts.available"),
-           let shortcuts = try? JSONDecoder().decode([ShortcutInfo].self, from: data)
+           let shortcuts = try? JSONDecoder().decode([OrchestratorShortcutInfo].self, from: data)
         {
             discovered.append(contentsOf: shortcuts)
         }
@@ -75,17 +83,17 @@ public final class ShortcutsOrchestrator: ObservableObject {
         logger.info("Discovered \(discovered.count) shortcuts")
     }
 
-    private func suggestedShortcuts() -> [ShortcutInfo] {
+    private func suggestedShortcuts() -> [OrchestratorShortcutInfo] {
         // Common shortcuts that users might have
         [
-            ShortcutInfo(name: "Do Not Disturb", category: .focus, description: "Toggle Do Not Disturb"),
-            ShortcutInfo(name: "Get Current Weather", category: .utility, description: "Get weather for current location"),
-            ShortcutInfo(name: "Start Timer", category: .productivity, description: "Start a timer"),
-            ShortcutInfo(name: "Send Message", category: .communication, description: "Send a message to a contact"),
-            ShortcutInfo(name: "Play Playlist", category: .media, description: "Play a music playlist"),
-            ShortcutInfo(name: "Home Automation", category: .home, description: "Control HomeKit devices"),
-            ShortcutInfo(name: "Daily Briefing", category: .productivity, description: "Get your daily summary"),
-            ShortcutInfo(name: "Log Health", category: .health, description: "Log health data")
+            OrchestratorShortcutInfo(name: "Do Not Disturb", category: ShortcutCategory.focus, description: "Toggle Do Not Disturb"),
+            OrchestratorShortcutInfo(name: "Get Current Weather", category: ShortcutCategory.utility, description: "Get weather for current location"),
+            OrchestratorShortcutInfo(name: "Start Timer", category: ShortcutCategory.productivity, description: "Start a timer"),
+            OrchestratorShortcutInfo(name: "Send Message", category: ShortcutCategory.communication, description: "Send a message to a contact"),
+            OrchestratorShortcutInfo(name: "Play Playlist", category: ShortcutCategory.media, description: "Play a music playlist"),
+            OrchestratorShortcutInfo(name: "Home Automation", category: ShortcutCategory.home, description: "Control HomeKit devices"),
+            OrchestratorShortcutInfo(name: "Daily Briefing", category: ShortcutCategory.productivity, description: "Get your daily summary"),
+            OrchestratorShortcutInfo(name: "Log Health", category: ShortcutCategory.health, description: "Log health data")
         ]
     }
 
@@ -98,13 +106,13 @@ public final class ShortcutsOrchestrator: ObservableObject {
         }
 
         let shortcut = availableShortcuts.first { $0.name == name } ??
-            ShortcutInfo(name: name, category: .custom, description: "")
+            OrchestratorShortcutInfo(name: name, category: ShortcutCategory.custom, description: "")
 
         return try await executeShortcut(shortcut, input: input)
     }
 
     /// Run a shortcut
-    public func runShortcut(_ shortcut: ShortcutInfo, input: ShortcutInput? = nil) async throws -> ShortcutResult {
+    public func runShortcut(_ shortcut: OrchestratorShortcutInfo, input: ShortcutInput? = nil) async throws -> ShortcutResult {
         guard runningShortcuts.count < maxConcurrentShortcuts else {
             throw ShortcutOrchestratorError.tooManyRunning
         }
@@ -112,7 +120,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
         return try await executeShortcut(shortcut, input: input)
     }
 
-    private func executeShortcut(_ shortcut: ShortcutInfo, input: ShortcutInput?) async throws -> ShortcutResult {
+    private func executeShortcut(_ shortcut: OrchestratorShortcutInfo, input: ShortcutInput?) async throws -> ShortcutResult {
         let executionId = UUID().uuidString
         let execution = ShortcutExecution(id: executionId, shortcut: shortcut, startedAt: Date())
         runningShortcuts[executionId] = execution
@@ -142,7 +150,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
     }
 
     /// Run shortcut via URL scheme
-    private func runViaURLScheme(shortcut: ShortcutInfo, input: ShortcutInput?) async throws -> ShortcutResult {
+    private func runViaURLScheme(shortcut: OrchestratorShortcutInfo, input: ShortcutInput?) async throws -> ShortcutResult {
         // Build shortcuts:// URL
         let encodedName = shortcut.name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? shortcut.name
         var urlString = "shortcuts://run-shortcut?name=\(encodedName)"
@@ -174,7 +182,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
     // MARK: - Automation Chains
 
     /// Run multiple shortcuts in sequence
-    public func runChain(_ shortcuts: [ShortcutInfo], passOutput: Bool = true) async throws -> [ShortcutResult] {
+    public func runChain(_ shortcuts: [OrchestratorShortcutInfo], passOutput: Bool = true) async throws -> [ShortcutResult] {
         var results: [ShortcutResult] = []
         var lastOutput: String?
 
@@ -194,7 +202,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
     }
 
     /// Run shortcuts in parallel
-    public func runParallel(_ shortcuts: [ShortcutInfo]) async throws -> [ShortcutResult] {
+    public func runParallel(_ shortcuts: [OrchestratorShortcutInfo]) async throws -> [ShortcutResult] {
         try await withThrowingTaskGroup(of: ShortcutResult.self) { group in
             for shortcut in shortcuts {
                 group.addTask {
@@ -213,34 +221,34 @@ public final class ShortcutsOrchestrator: ObservableObject {
     // MARK: - Context-Aware Suggestions
 
     /// Get suggested shortcuts based on context
-    public func getSuggestions(for context: ShortcutContext) -> [ShortcutInfo] {
-        var suggestions: [ShortcutInfo] = []
+    public func getSuggestions(for context: ShortcutContext) -> [OrchestratorShortcutInfo] {
+        var suggestions: [OrchestratorShortcutInfo] = []
 
         // Filter by category based on context
         switch context.situationType {
         case .morning:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == .productivity || $0.category == .health
+                $0.category == ShortcutCategory.productivity || $0.category == ShortcutCategory.health
             })
 
         case .commute:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == .media || $0.category == .communication
+                $0.category == ShortcutCategory.media || $0.category == ShortcutCategory.communication
             })
 
         case .work:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == .productivity || $0.category == .focus
+                $0.category == ShortcutCategory.productivity || $0.category == ShortcutCategory.focus
             })
 
         case .home:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == .home || $0.category == .media
+                $0.category == ShortcutCategory.home || $0.category == ShortcutCategory.media
             })
 
         case .bedtime:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == .focus || $0.category == .health
+                $0.category == ShortcutCategory.focus || $0.category == ShortcutCategory.health
             })
 
         case .custom:
@@ -256,7 +264,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
 
     // MARK: - Recent Shortcuts
 
-    private func recordShortcutRun(_ shortcut: ShortcutInfo) {
+    private func recordShortcutRun(_ shortcut: OrchestratorShortcutInfo) {
         // Remove if already in recents
         recentShortcuts.removeAll { $0.name == shortcut.name }
 
@@ -273,7 +281,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
 
     private func loadRecentShortcuts() {
         if let data = UserDefaults.standard.data(forKey: "thea.shortcuts.recent"),
-           let shortcuts = try? JSONDecoder().decode([ShortcutInfo].self, from: data)
+           let shortcuts = try? JSONDecoder().decode([OrchestratorShortcutInfo].self, from: data)
         {
             recentShortcuts = shortcuts
         }
@@ -288,7 +296,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
     // MARK: - User Configuration
 
     /// Add a custom shortcut
-    public func addShortcut(_ shortcut: ShortcutInfo) {
+    public func addShortcut(_ shortcut: OrchestratorShortcutInfo) {
         if !availableShortcuts.contains(where: { $0.name == shortcut.name }) {
             availableShortcuts.append(shortcut)
             saveAvailableShortcuts()
@@ -310,7 +318,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
 
 // MARK: - Models
 
-public struct ShortcutInfo: Identifiable, Codable, Sendable {
+public struct OrchestratorShortcutInfo: Identifiable, Codable, Sendable {
     public var id: String { name }
     public let name: String
     public let category: ShortcutCategory
@@ -413,7 +421,7 @@ public struct ShortcutResult: Sendable {
 
 public struct ShortcutExecution: Sendable {
     public let id: String
-    public let shortcut: ShortcutInfo
+    public let shortcut: OrchestratorShortcutInfo
     public let startedAt: Date
 }
 

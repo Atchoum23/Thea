@@ -27,7 +27,16 @@ public actor UnifiedContextSync {
 
     // MARK: - Change Tracking
 
-    private var serverChangeToken: CKServerChangeToken?
+    private var serverChangeToken: CKServerChangeToken? = {
+        let tokenKey = "ContextSync.serverChangeToken"
+        guard let data = UserDefaults.standard.data(forKey: tokenKey) else {
+            return nil
+        }
+        return try? NSKeyedUnarchiver.unarchivedObject(
+            ofClass: CKServerChangeToken.self,
+            from: data
+        )
+    }()
     private var pendingChanges: [ContextChange] = []
     private let tokenKey = "ContextSync.serverChangeToken"
 
@@ -48,8 +57,6 @@ public actor UnifiedContextSync {
         container = CKContainer(identifier: "iCloud.app.thea")
         database = container.privateCloudDatabase
         zoneID = CKRecordZone.ID(zoneName: "TheaContext", ownerName: CKCurrentUserDefaultName)
-
-        loadServerChangeToken()
     }
 
     // MARK: - Setup
@@ -254,16 +261,17 @@ public actor UnifiedContextSync {
 
     // MARK: - Token Management
 
-    private func loadServerChangeToken() {
-        if let data = UserDefaults.standard.data(forKey: tokenKey) {
-            do {
-                serverChangeToken = try NSKeyedUnarchiver.unarchivedObject(
-                    ofClass: CKServerChangeToken.self,
-                    from: data
-                )
-            } catch {
-                logger.error("Failed to load server change token: \(error)")
-            }
+    nonisolated private func loadServerChangeToken() -> CKServerChangeToken? {
+        guard let data = UserDefaults.standard.data(forKey: tokenKey) else {
+            return nil
+        }
+        do {
+            return try NSKeyedUnarchiver.unarchivedObject(
+                ofClass: CKServerChangeToken.self,
+                from: data
+            )
+        } catch {
+            return nil
         }
     }
 

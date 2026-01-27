@@ -17,7 +17,7 @@ public actor PermissionManager {
     // MARK: - Permission Requests
 
     /// Request permission for an automation action
-    public func requestPermission(for action: AutomationAction) async throws -> PermissionDecision {
+    public func requestPermission(for action: PermissionAutomationAction) async throws -> PermissionDecision {
         let actionKey = action.identifier
 
         // Check cache first
@@ -66,7 +66,7 @@ public actor PermissionManager {
     }
 
     /// Classify the consequence level of an action
-    public func classifyConsequence(_ action: AutomationAction) -> ConsequenceLevel {
+    public func classifyConsequence(_ action: PermissionAutomationAction) -> ConsequenceLevel {
         switch action {
         // Safe operations (read-only)
         case .screenshot, .readText, .getTitle, .getCurrentURL, .extractLinks, .extractText:
@@ -127,12 +127,12 @@ public actor PermissionManager {
     // MARK: - Permission Management
 
     /// Grant permission for a specific action
-    public func grantPermission(for action: AutomationAction) {
+    public func grantPermission(for action: PermissionAutomationAction) {
         permissionCache[action.identifier] = .allowed(reason: "User granted permission")
     }
 
     /// Deny permission for a specific action
-    public func denyPermission(for action: AutomationAction) {
+    public func denyPermission(for action: PermissionAutomationAction) {
         permissionCache[action.identifier] = .denied(reason: "User denied permission")
     }
 
@@ -159,7 +159,7 @@ public actor PermissionManager {
 // MARK: - Supporting Types
 
 /// Automation action types
-public enum AutomationAction: Sendable {
+public enum PermissionAutomationAction: Sendable {
     // Navigation
     case navigate(url: String)
     case screenshot
@@ -271,7 +271,7 @@ public enum ConsequenceLevel: Int, Sendable, Comparable {
 public enum PermissionDecision: Sendable {
     case allowed(reason: String)
     case denied(reason: String)
-    case requiresConfirmation(action: AutomationAction, consequence: ConsequenceLevel, reason: String)
+    case requiresConfirmation(action: PermissionAutomationAction, consequence: ConsequenceLevel, reason: String)
 
     public var isAllowed: Bool {
         if case .allowed = self {

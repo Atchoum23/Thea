@@ -500,7 +500,7 @@ public class SecureConnectionManager: ObservableObject {
         let sessionKey = sharedSecret.hkdfDerivedSymmetricKey(
             using: SHA256.self,
             salt: Data(),
-            sharedInfo: "thea.remote.session".data(using: .utf8)!,
+            sharedInfo: Data("thea.remote.session".utf8),
             outputByteCount: 32
         )
 

@@ -41,6 +41,9 @@ public struct ContextSnapshot: Codable, Sendable, Identifiable {
     // Environment Context
     public var environment: EnvironmentContext?
 
+    // Arbitrary metadata for extension
+    public var metadata: [String: String]
+
     public init(
         id: UUID = UUID(),
         timestamp: Date = Date(),
@@ -53,7 +56,8 @@ public struct ContextSnapshot: Codable, Sendable, Identifiable {
         focus: FocusContext? = nil,
         deviceState: DeviceStateContext? = nil,
         media: MediaContext? = nil,
-        environment: EnvironmentContext? = nil
+        environment: EnvironmentContext? = nil,
+        metadata: [String: String] = [:]
     ) {
         self.id = id
         self.timestamp = timestamp
@@ -67,6 +71,7 @@ public struct ContextSnapshot: Codable, Sendable, Identifiable {
         self.deviceState = deviceState
         self.media = media
         self.environment = environment
+        self.metadata = metadata
     }
 
     /// Creates a summary suitable for AI context injection

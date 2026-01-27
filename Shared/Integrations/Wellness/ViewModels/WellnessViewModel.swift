@@ -56,7 +56,7 @@ public final class WellnessViewModel {
     // MARK: - Focus Session Methods
 
     /// Start a focus session
-    public func startFocusSession(mode: FocusMode, duration: Int? = nil) async {
+    public func startFocusSession(mode: WellnessFocusMode, duration: Int? = nil) async {
         errorMessage = nil
 
         do {

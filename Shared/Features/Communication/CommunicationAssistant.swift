@@ -74,7 +74,14 @@ public final class CommunicationAssistant: ObservableObject {
         }
 
         // Store in recent drafts
-        recentDrafts.insert(draft, at: 0)
+        let communicationDraft = CommunicationDraft(
+            id: draft.id,
+            type: .email,
+            content: draft.body,
+            tone: draft.tone,
+            createdAt: draft.createdAt
+        )
+        recentDrafts.insert(communicationDraft, at: 0)
         if recentDrafts.count > 20 {
             recentDrafts = Array(recentDrafts.prefix(20))
         }

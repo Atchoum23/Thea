@@ -117,7 +117,7 @@
     }
 
     /// Result of a command execution
-    struct CommandResult: Sendable {
+    struct ShellCommandResult: Sendable {
         let output: String
         let errorOutput: String
         let exitCode: Int32

@@ -15,8 +15,8 @@ import WidgetKit
 /// Intent for toggling focus mode from widget
 @available(iOS 17.0, macOS 14.0, *)
 public struct ToggleFocusIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Toggle Focus"
-    public static var description = IntentDescription("Toggle Thea focus mode")
+    public static let title: LocalizedStringResource = "Toggle Focus"
+    public static let description = IntentDescription("Toggle Thea focus mode")
 
     public init() {}
 
@@ -36,8 +36,8 @@ public struct ToggleFocusIntent: AppIntent {
 /// Intent for quick actions from widget
 @available(iOS 17.0, macOS 14.0, *)
 public struct QuickActionIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Quick Action"
-    public static var description = IntentDescription("Perform a quick Thea action")
+    public static let title: LocalizedStringResource = "Quick Action"
+    public static let description = IntentDescription("Perform a quick Thea action")
 
     @Parameter(title: "Action")
     public var actionName: String
@@ -60,8 +60,8 @@ public struct QuickActionIntent: AppIntent {
 
 @available(iOS 17.0, macOS 14.0, *)
 public struct OpenTheaWithActionIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Open Thea"
-    public static var openAppWhenRun: Bool = true
+    public static let title: LocalizedStringResource = "Open Thea"
+    public static let openAppWhenRun: Bool = true
 
     @Parameter(title: "Action")
     public var action: String
@@ -88,8 +88,8 @@ public struct OpenTheaWithActionIntent: AppIntent {
 /// Intent for sending a quick message from widget
 @available(iOS 17.0, macOS 14.0, *)
 public struct SendQuickMessageIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Send Quick Message"
-    public static var description = IntentDescription("Send a quick message to Thea")
+    public static let title: LocalizedStringResource = "Send Quick Message"
+    public static let description = IntentDescription("Send a quick message to Thea")
 
     @Parameter(title: "Message")
     public var message: String?
@@ -104,8 +104,8 @@ public struct SendQuickMessageIntent: AppIntent {
 
 @available(iOS 17.0, macOS 14.0, *)
 public struct OpenTheaWithMessageIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Open Thea with Message"
-    public static var openAppWhenRun: Bool = true
+    public static let title: LocalizedStringResource = "Open Thea with Message"
+    public static let openAppWhenRun: Bool = true
 
     @Parameter(title: "Message")
     public var message: String
@@ -165,7 +165,7 @@ struct StandByWidgetProvider: TimelineProvider {
     func placeholder(in context: Context) -> StandByWidgetEntry {
         StandByWidgetEntry(
             date: Date(),
-            isStandBy: context.isLuminanceReduced,
+            isStandBy: false /* iOS 17.4+ */,
             status: .ready,
             recentActivity: nil,
             suggestedAction: nil
@@ -175,7 +175,7 @@ struct StandByWidgetProvider: TimelineProvider {
     func getSnapshot(in context: Context, completion: @escaping (StandByWidgetEntry) -> Void) {
         let entry = StandByWidgetEntry(
             date: Date(),
-            isStandBy: context.isLuminanceReduced,
+            isStandBy: false /* iOS 17.4+ */,
             status: .ready,
             recentActivity: "Last: Summarized document",
             suggestedAction: "Ask Thea"
@@ -196,7 +196,7 @@ struct StandByWidgetProvider: TimelineProvider {
 
         let entry = StandByWidgetEntry(
             date: Date(),
-            isStandBy: context.isLuminanceReduced,
+            isStandBy: false, // false /* iOS 17.4+ */ is iOS 17.4+
             status: status,
             recentActivity: defaults?.string(forKey: "widget.lastActivity"),
             suggestedAction: defaults?.string(forKey: "widget.suggestedAction")
@@ -229,7 +229,7 @@ struct StandByWidgetView: View {
     }
 
     @ViewBuilder
-    private var standByView: View {
+    private var standByView: some View {
         VStack(spacing: 16) {
             // Large status icon
             Image(systemName: entry.status.icon)
@@ -250,7 +250,7 @@ struct StandByWidgetView: View {
     }
 
     @ViewBuilder
-    private var normalView: View {
+    private var normalView: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
             HStack {

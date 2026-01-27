@@ -364,7 +364,7 @@ struct iOSMigrationView: View {
 }
 
 // Migration source enumeration
-enum iOSMigrationSourceType: String, CaseIterable {
+enum iOSMigrationSourceType: String, CaseIterable { // swiftlint:disable:this type_name
     case chatGPT
     case claude
     case cursor

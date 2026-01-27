@@ -10,6 +10,10 @@ import CoreML
 import Foundation
 import os.log
 
+#if canImport(AppKit)
+    import AppKit
+#endif
+
 // MARK: - Predictive Engine
 
 /// Anticipates user needs by analyzing patterns and current context
@@ -140,7 +144,7 @@ public final class PredictiveEngine: ObservableObject {
 
         predictions = Array(newPredictions.prefix(maxPredictions))
 
-        logger.debug("Generated \(predictions.count) predictions")
+        logger.debug("Generated \(self.predictions.count) predictions")
     }
 
     // MARK: - Prediction Models

@@ -200,7 +200,7 @@ public struct WellnessDashboardView: View {
                 .font(.headline)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                ForEach(FocusMode.allCases, id: \.self) { mode in
+                ForEach(WellnessFocusMode.allCases, id: \.self) { mode in
                     FocusModeButton(mode: mode) {
                         Task {
                             await viewModel.startFocusSession(mode: mode)
@@ -359,7 +359,7 @@ public struct WellnessDashboardView: View {
 // MARK: - Focus Mode Button
 
 private struct FocusModeButton: View {
-    let mode: FocusMode
+    let mode: WellnessFocusMode
     let action: () -> Void
 
     var body: some View {

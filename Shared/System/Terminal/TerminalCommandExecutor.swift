@@ -41,7 +41,7 @@
             workingDirectory: URL? = nil,
             environment: [String: String]? = nil,
             shell: TerminalSession.ShellType = .zsh
-        ) async throws -> CommandResult {
+        ) async throws -> ShellCommandResult {
             // Validate command against security policy
             let validation = securityPolicy.isAllowed(command)
             switch validation {
@@ -62,10 +62,10 @@
             let timeoutSeconds = securityPolicy.maxExecutionTime
 
             // Execute with timeout using Task and withTimeout pattern
-            return try await withThrowingTaskGroup(of: CommandResult.self) { group in
+            return try await withThrowingTaskGroup(of: ShellCommandResult.self) { group in
                 // Main execution task
                 group.addTask {
-                    try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<CommandResult, Error>) in
+                    try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<ShellCommandResult, Error>) in
                         let process = Process()
                         process.executableURL = URL(fileURLWithPath: shell.rawValue)
                         process.arguments = ["-c", command]
@@ -95,7 +95,7 @@
                             let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
                             let duration = Date().timeIntervalSince(startTime)
 
-                            continuation.resume(returning: CommandResult(
+                            continuation.resume(returning: ShellCommandResult(
                                 output: output,
                                 errorOutput: errorOutput,
                                 exitCode: terminatedProcess.terminationStatus,
@@ -130,8 +130,8 @@
             _ commands: [String],
             workingDirectory: URL? = nil,
             stopOnError: Bool = true
-        ) async throws -> [CommandResult] {
-            var results: [CommandResult] = []
+        ) async throws -> [ShellCommandResult] {
+            var results: [ShellCommandResult] = []
             var currentDir = workingDirectory
 
             for command in commands {

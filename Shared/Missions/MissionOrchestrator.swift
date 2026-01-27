@@ -160,7 +160,7 @@ public final class MissionOrchestrator: ObservableObject {
 
     private func estimateComplexity(components: [GoalComponent], capabilities: [RequiredCapability]) -> MissionComplexity {
         let componentScore = components.count * 10
-        let capabilityScore = capabilities.count { $0.importance == .critical }* 15
+        let capabilityScore = capabilities.count { $0.importance == .critical } * 15
 
         let totalScore = componentScore + capabilityScore
 
@@ -664,7 +664,7 @@ public final class MissionOrchestrator: ObservableObject {
     private func updateProgress(mission: Mission, phaseIndex: Int) {
         let totalSteps = mission.phases.reduce(0) { $0 + $1.steps.count }
         let completedSteps = mission.phases.prefix(phaseIndex).reduce(0) { $0 + $1.steps.count { $0.status == .completed }}
-        let currentPhaseCompleted = currentPhase?.steps.count { $0.status == .completed }?? 0
+        let currentPhaseCompleted = currentPhase?.steps.count { $0.status == .completed } ?? 0
 
         overallProgress = Double(completedSteps + currentPhaseCompleted) / Double(totalSteps)
     }

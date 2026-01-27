@@ -13,7 +13,7 @@
     /// Unified system observer for iOS
     /// Coordinates all iOS-specific observers and provides a single entry point
     @MainActor
-    public final class iOSSystemObserver: ObservableObject {
+    public final class iOSSystemObserver: ObservableObject { // swiftlint:disable:this type_name
         public static let shared = iOSSystemObserver()
 
         private let logger = Logger(subsystem: "app.thea.system", category: "iOSSystemObserver")
@@ -331,7 +331,7 @@
 
     // MARK: - Data Models
 
-    public struct iOSSystemSnapshot: Equatable, Sendable {
+    public struct iOSSystemSnapshot: Equatable, Sendable { // swiftlint:disable:this type_name
         // Motion
         public let activity: MotionActivity
         public let todaySteps: Int

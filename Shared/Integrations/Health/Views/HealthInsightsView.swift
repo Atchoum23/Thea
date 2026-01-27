@@ -545,7 +545,7 @@ public enum TimeRange: String, CaseIterable, Sendable {
 
 public struct HealthInsightDisplay: Identifiable, Sendable {
     public let id = UUID()
-    public var category: InsightCategory
+    public var category: HealthInsightCategory
     public var title: String
     public var message: String
     public var icon: String
@@ -553,7 +553,7 @@ public struct HealthInsightDisplay: Identifiable, Sendable {
     public var recommendations: [String]
 
     public init(
-        category: InsightCategory,
+        category: HealthInsightCategory,
         title: String,
         message: String,
         icon: String,
@@ -569,7 +569,7 @@ public struct HealthInsightDisplay: Identifiable, Sendable {
     }
 }
 
-public enum InsightCategory: String, Sendable {
+public enum HealthInsightCategory: String, Sendable {
     case sleep
     case activity
     case heart
