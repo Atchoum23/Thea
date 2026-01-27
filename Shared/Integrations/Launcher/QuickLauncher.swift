@@ -540,7 +540,7 @@ public final class QuickLauncher: ObservableObject {
 
 // MARK: - Launcher Types
 
-public struct LauncherCommand: Identifiable, Equatable {
+public struct LauncherCommand: Identifiable, Equatable, Sendable {
     public let id: String
     public let title: String
     public let subtitle: String?
@@ -578,7 +578,7 @@ public enum LauncherAction {
     case aiPrompt(String)
 }
 
-public enum LauncherResult: Identifiable {
+public enum LauncherResult: Identifiable, Sendable {
     case command(LauncherCommand)
     case file(URL)
     case url(URL)
@@ -603,7 +603,7 @@ public protocol LauncherExtension: Sendable {
     func search(query: String) async -> [LauncherResult]?
 }
 
-public struct ExtensionResult {
+public struct ExtensionResult: Sendable {
     public let id: String
     public let title: String
     public let subtitle: String?
