@@ -76,9 +76,21 @@ jobs:
             MARKETING_VERSION="1.5.0" \
             CURRENT_PROJECT_VERSION="15" \
             SWIFT_STRICT_CONCURRENCY=minimal \
-            GENERATE_INFOPLIST_FILE=NO \
-            INFOPLIST_FILE=iOS/Info.plist \
             2>&1 | tee build-simulator.log
+
+      - name: Inject Info.plist Versions
+        run: |
+          APP_PATH=$(find build -name "Thea.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            # Copy source Info.plist if the built one is missing version keys
+            if ! /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PATH/Info.plist" 2>/dev/null; then
+              echo "Copying Info.plist with version keys..."
+              cp iOS/Info.plist "$APP_PATH/Info.plist"
+            fi
+            # Verify the fix worked
+            echo "CFBundleVersion: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_PATH/Info.plist")"
+            echo "CFBundleShortVersionString: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PATH/Info.plist")"
+          fi
 
       - name: Verify Build Output
         id: verify
