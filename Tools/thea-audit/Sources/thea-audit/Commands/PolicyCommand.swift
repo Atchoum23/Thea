@@ -92,25 +92,6 @@ struct ValidatePolicy: ParsableCommand {
     }
 }
 
-// MARK: - Policy Template
-
-enum PolicyTemplate: String, ExpressibleByArgument, CaseIterable {
-    case strict
-    case standard
-    case permissive
-
-    var description: String {
-        switch self {
-        case .strict:
-            "Maximum security - all protections enabled"
-        case .standard:
-            "Balanced security for normal development"
-        case .permissive:
-            "Minimal restrictions for trusted environments"
-        }
-    }
-}
-
 // MARK: - Policy Errors
 
 enum PolicyError: Error, CustomStringConvertible {
