@@ -130,9 +130,12 @@ public actor UnifiedContextSync {
             previousServerChangeToken: serverChangeToken
         )
 
-        // These are captured by CloudKit operation callbacks which run on background threads
-        nonisolated(unsafe) var fetchedChanges: [ContextChange] = []
-        nonisolated(unsafe) var newToken: CKServerChangeToken?
+        // Use a class wrapper to safely capture mutable state across callback boundaries
+        final class FetchState: @unchecked Sendable {
+            var fetchedChanges: [ContextChange] = []
+            var newToken: CKServerChangeToken?
+        }
+        let state = FetchState()
 
         return try await withCheckedThrowingContinuation { continuation in
             let operation = CKFetchRecordZoneChangesOperation(
@@ -143,7 +146,7 @@ public actor UnifiedContextSync {
             operation.recordWasChangedBlock = { _, result in
                 if case let .success(record) = result {
                     let change = ContextChange(from: record)
-                    fetchedChanges.append(change)
+                    state.fetchedChanges.append(change)
                 }
             }
 
@@ -154,24 +157,24 @@ public actor UnifiedContextSync {
                     contextType: recordType,
                     data: [:]
                 )
-                fetchedChanges.append(change)
+                state.fetchedChanges.append(change)
             }
 
             operation.recordZoneChangeTokensUpdatedBlock = { _, token, _ in
-                newToken = token
+                state.newToken = token
             }
 
             operation.recordZoneFetchResultBlock = { _, result in
                 switch result {
                 case let .success((token, _, _)):
-                    newToken = token
+                    state.newToken = token
                 case let .failure(error):
                     self.logger.error("Zone fetch failed: \(error.localizedDescription)")
                 }
             }
 
             operation.fetchRecordZoneChangesResultBlock = { result in
-                if let token = newToken {
+                if let token = state.newToken {
                     Task {
                         await self.saveServerChangeToken(token)
                     }
@@ -179,7 +182,7 @@ public actor UnifiedContextSync {
 
                 switch result {
                 case .success:
-                    continuation.resume(returning: fetchedChanges)
+                    continuation.resume(returning: state.fetchedChanges)
                 case let .failure(error):
                     continuation.resume(throwing: error)
                 }
@@ -276,7 +279,7 @@ public actor UnifiedContextSync {
         }
     }
 
-    private func saveServerChangeToken(_ token: CKServerChangeToken) {
+    private func saveServerChangeToken(_ token: CKServerChangeToken) async {
         serverChangeToken = token
         do {
             let data = try NSKeyedArchiver.archivedData(
