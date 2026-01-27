@@ -223,7 +223,7 @@ public final class ShareExtensionManager: ObservableObject {
     // MARK: - Extension Communication
 
     /// Called by Share Extension to add content
-    public static func addSharedContent(_ content: SharedContent) {
+    nonisolated public static func addSharedContent(_ content: SharedContent) {
         guard let containerURL = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: "group.com.thea.app"
         ) else {
