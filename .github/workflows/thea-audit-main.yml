@@ -1,12 +1,12 @@
-# thea-audit-main.yml
-# Full security audit workflow for main branch
+# Thea Security Audit Workflow (Full)
+# Version: 2.0.0 - Full security audit for main branch with strict enforcement
+# Last Updated: January 27, 2026
 
 name: Security Audit (Full)
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   schedule:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -17,11 +17,7 @@ on:
         required: false
         default: 'low'
         type: choice
-        options:
-          - critical
-          - high
-          - medium
-          - low
+        options: [critical, high, medium, low]
       verbose:
         description: 'Enable verbose output'
         required: false
@@ -36,6 +32,7 @@ jobs:
   security-audit:
     name: Full Security Audit
     runs-on: macos-14
+    timeout-minutes: 30
     permissions:
       contents: read
       issues: write
@@ -52,13 +49,13 @@ jobs:
         with:
           swift-version: "6.0"
 
-      - name: Cache Swift packages
+      - name: Cache thea-audit Build
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
         with:
           path: Tools/thea-audit/.build
-          key: ${{ runner.os }}-spm-thea-audit-${{ hashFiles('Tools/thea-audit/Package.resolved') }}
+          key: ${{ runner.os }}-thea-audit-${{ hashFiles('Tools/thea-audit/Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-spm-thea-audit-
+            ${{ runner.os }}-thea-audit-
 
       - name: Build thea-audit
         working-directory: Tools/thea-audit
@@ -66,44 +63,37 @@ jobs:
           swift build -c release
           echo "THEA_AUDIT=$(pwd)/.build/release/thea-audit" >> $GITHUB_ENV
 
-      - name: Run full security audit
+      - name: Run Full Security Audit
         id: audit
         run: |
-          set +e
-
           SEVERITY="${{ github.event.inputs.severity || 'low' }}"
           VERBOSE_FLAG=""
           if [ "${{ github.event.inputs.verbose }}" == "true" ]; then
             VERBOSE_FLAG="--verbose"
           fi
 
-          # Run full audit with YAML output
+          # Run full audit with multiple output formats
           $THEA_AUDIT audit \
             --path . \
             --format yaml \
             --output audit-results.yaml \
             --severity "$SEVERITY" \
             --policy thea-policy.json \
-            $VERBOSE_FLAG
+            $VERBOSE_FLAG || true
 
-          AUDIT_EXIT_CODE=$?
-          echo "exit_code=$AUDIT_EXIT_CODE" >> $GITHUB_OUTPUT
-
-          # Run full audit with JSON output for processing
           $THEA_AUDIT audit \
             --path . \
             --format json \
             --output audit-results.json \
             --severity "$SEVERITY" \
-            --policy thea-policy.json
+            --policy thea-policy.json || true
 
-          # Generate markdown report
           $THEA_AUDIT audit \
             --path . \
             --format markdown \
             --output audit-report.md \
             --severity "$SEVERITY" \
-            --policy thea-policy.json
+            --policy thea-policy.json || true
 
           # Count findings by severity
           CRITICAL_COUNT=$(grep -c '"severity": "critical"' audit-results.json 2>/dev/null || echo 0)
@@ -116,12 +106,9 @@ jobs:
           echo "medium_count=$MEDIUM_COUNT" >> $GITHUB_OUTPUT
           echo "low_count=$LOW_COUNT" >> $GITHUB_OUTPUT
 
-          exit 0
-
-      - name: Generate SARIF output
+      - name: Generate SARIF Output
         if: always()
         run: |
-          # Convert audit results to SARIF format for GitHub Security tab
           $THEA_AUDIT audit \
             --path . \
             --format sarif \
@@ -135,7 +122,7 @@ jobs:
           sarif_file: audit-results.sarif
           category: thea-audit
 
-      - name: Upload audit artifacts
+      - name: Upload Audit Artifacts
         if: always()
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
@@ -147,7 +134,7 @@ jobs:
             audit-results.sarif
           retention-days: 90
 
-      - name: Create issue on critical findings
+      - name: Create Issue on Critical Findings
         if: steps.audit.outputs.critical_count > 0
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
@@ -157,21 +144,20 @@ jobs:
             const criticalCount = ${{ steps.audit.outputs.critical_count }};
             const highCount = ${{ steps.audit.outputs.high_count }};
 
-            // Read the report
             let reportContent = '';
             if (fs.existsSync('audit-report.md')) {
               reportContent = fs.readFileSync('audit-report.md', 'utf8');
             }
 
-            const title = `🚨 Security Audit: ${criticalCount} Critical Finding(s) Detected`;
+            const title = `Security Audit: ${criticalCount} Critical Finding(s) Detected`;
 
             const body = `## Security Audit Alert
 
             A full security audit has detected critical security issues that require immediate attention.
 
             ### Summary
-            - 🔴 **Critical**: ${criticalCount}
-            - 🟠 **High**: ${highCount}
+            - **Critical**: ${criticalCount}
+            - **High**: ${highCount}
 
             ### Commit
             - SHA: \`${{ github.sha }}\`
@@ -184,7 +170,7 @@ jobs:
 
             **Action Required**: Please review and address these findings immediately.
 
-            *This issue was automatically created by the [thea-audit](Tools/thea-audit) security scanner.*
+            *This issue was automatically created by thea-audit security scanner.*
             `;
 
             // Check for existing open issue
@@ -201,7 +187,6 @@ jobs:
             );
 
             if (existingIssue) {
-              // Update existing issue
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -209,7 +194,6 @@ jobs:
                 body: `## Updated Audit Results\n\nCommit: \`${{ github.sha }}\`\n\n${reportContent}`
               });
             } else {
-              // Create new issue
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -219,17 +203,17 @@ jobs:
               });
             }
 
-      - name: Update job summary
+      - name: Update Job Summary
         if: always()
         run: |
-          echo "## 🔒 Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔴 Critical | ${{ steps.audit.outputs.critical_count }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🟠 High | ${{ steps.audit.outputs.high_count }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🟡 Medium | ${{ steps.audit.outputs.medium_count }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔵 Low | ${{ steps.audit.outputs.low_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | ${{ steps.audit.outputs.critical_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| High | ${{ steps.audit.outputs.high_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Medium | ${{ steps.audit.outputs.medium_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Low | ${{ steps.audit.outputs.low_count }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ -f "audit-report.md" ]; then
@@ -237,7 +221,7 @@ jobs:
             cat audit-report.md >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Check audit status
+      - name: Check Audit Status
         run: |
           CRITICAL=${{ steps.audit.outputs.critical_count }}
           HIGH=${{ steps.audit.outputs.high_count }}
@@ -248,7 +232,8 @@ jobs:
           fi
 
           if [ "$HIGH" -gt 0 ]; then
-            echo "::warning::Security audit found $HIGH high severity issue(s)"
+            echo "::error::Security audit found $HIGH high severity issue(s)"
+            exit 1
           fi
 
-          echo "✅ Security audit completed"
+          echo "Security audit completed successfully"
