@@ -135,10 +135,10 @@ jobs:
       - name: Boot Simulator
         id: simulator
         run: |
-          # Get available iPhone 16 simulator
-          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+          # Get available iPhone 16 simulator - extract UUID from format: "iPhone 16 (UUID) (State)"
+          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16" | head -1 | grep -oE '[A-F0-9-]{36}')
           if [ -z "$DEVICE_ID" ]; then
-            DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+            DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
           fi
 
           if [ -z "$DEVICE_ID" ]; then
