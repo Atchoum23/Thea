@@ -85,21 +85,23 @@ jobs:
             PLIST="$APP_PATH/Info.plist"
             echo "Checking Info.plist at: $PLIST"
 
-            # Add CFBundleVersion if missing
-            if ! /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null; then
-              echo "Adding CFBundleVersion..."
-              /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string 15" "$PLIST"
-            fi
+            # If Info.plist doesn't exist or is missing CFBundleIdentifier, copy from source
+            if [ ! -f "$PLIST" ] || ! /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$PLIST" 2>/dev/null; then
+              echo "Info.plist missing or incomplete, copying from iOS/Info.plist..."
+              cp iOS/Info.plist "$PLIST"
 
-            # Add CFBundleShortVersionString if missing
-            if ! /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST" 2>/dev/null; then
-              echo "Adding CFBundleShortVersionString..."
-              /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string 1.5.0" "$PLIST"
+              # Now fix the build variables that won't be expanded
+              /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Thea" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier app.thea.ios" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Set :CFBundleName Thea" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Set :CFBundleDevelopmentRegion en" "$PLIST"
             fi
 
             # Verify the fix worked
             echo "CFBundleVersion: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
             echo "CFBundleShortVersionString: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
+            echo "CFBundleIdentifier: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST")"
+            echo "CFBundleExecutable: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$PLIST")"
           fi
 
       - name: Verify Build Output
