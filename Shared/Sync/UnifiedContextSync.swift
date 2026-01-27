@@ -130,8 +130,9 @@ public actor UnifiedContextSync {
             previousServerChangeToken: serverChangeToken
         )
 
-        var fetchedChanges: [ContextChange] = []
-        var newToken: CKServerChangeToken?
+        // These are captured by CloudKit operation callbacks which run on background threads
+        nonisolated(unsafe) var fetchedChanges: [ContextChange] = []
+        nonisolated(unsafe) var newToken: CKServerChangeToken?
 
         return try await withCheckedThrowingContinuation { continuation in
             let operation = CKFetchRecordZoneChangesOperation(
