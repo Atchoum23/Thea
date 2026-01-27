@@ -46,14 +46,14 @@ Autonomously build, test, audit, and verify ALL Xcode schemes (iOS/iPadOS, macOS
 | **2** | Debug Builds (CLI + GUI) | REQUIRED | All 4 platforms, both methods |
 | **3** | Release Builds (CLI + GUI) | REQUIRED | All 4 platforms, both methods |
 | **4** | Swift 6 Concurrency Fixes | REQUIRED | Fix all strict concurrency warnings |
-| **5** | Unit & Integration Testing | CONDITIONAL | XCTest - skip if no test targets |
+| **5** | Unit & Integration Testing | REQUIRED | XCTest - create tests if none exist |
 | **6** | Comprehensive Functional Testing | REQUIRED | All buttons, views, features across ALL platforms |
-| **7** | Security Audit | OPTIONAL | MobSF, Snyk, gitleaks, codesign |
-| **8** | Performance & Memory | OPTIONAL | App size, memory analysis |
-| **9** | Accessibility Audit | OPTIONAL | VoiceOver, accessibility labels |
+| **7** | Security Audit | REQUIRED | MobSF, Snyk, gitleaks, codesign |
+| **8** | Performance & Memory | REQUIRED | App size, memory analysis |
+| **9** | Accessibility Audit | REQUIRED | VoiceOver, accessibility labels |
 | **10** | CI/CD & Final Verification | REQUIRED | Commit, push, verify GitHub Actions |
 
-**CRITICAL**: Execute phases in order. Each phase must pass before proceeding.
+**CRITICAL**: Execute ALL phases in order. Each phase must pass before proceeding. NO phases are optional.
 
 ---
 
@@ -358,12 +358,15 @@ final class MyClass: @unchecked Sendable { }
 
 ---
 
-## Phase 5: Unit & Integration Testing (CONDITIONAL)
+## Phase 5: Unit & Integration Testing (REQUIRED)
 
 ### 5.1 Check for Test Targets
 ```bash
 TEST_TARGETS=$(xcodebuild -project Thea.xcodeproj -list 2>/dev/null | grep -i "test" || echo "")
-[ -z "$TEST_TARGETS" ] && { echo "SKIP: No test targets"; exit 0; }
+if [ -z "$TEST_TARGETS" ]; then
+  echo "⚠ No test targets found - CREATE test targets before proceeding"
+  echo "Required: TheaTests (unit tests), TheaUITests (UI tests)"
+fi
 ```
 
 ### 5.2 Run XCTest
@@ -390,8 +393,9 @@ fi
 ```
 
 ### Success Criteria
-- [ ] All unit tests pass OR no test targets exist
-- [ ] Coverage report generated
+- [ ] Test targets exist (create if missing)
+- [ ] All unit tests pass
+- [ ] Coverage report generated (minimum 60% coverage)
 
 ---
 
@@ -832,34 +836,38 @@ echo "✓ Created ui_inventory.md"
 
 ---
 
-## Phase 7: Security Audit (OPTIONAL)
+## Phase 7: Security Audit (REQUIRED)
 
 ### 7.1 Secrets Detection
 ```bash
-if command -v gitleaks &>/dev/null; then
-  gitleaks detect --source . --verbose 2>&1 | tee security_secrets.log
-  grep -q "leaks found" security_secrets.log && echo "⚠ SECRETS FOUND" || echo "✓ No secrets"
+# Install gitleaks if not present
+command -v gitleaks &>/dev/null || brew install gitleaks
+
+gitleaks detect --source . --verbose 2>&1 | tee security_secrets.log
+if grep -q "leaks found" security_secrets.log; then
+  echo "⚠ SECRETS FOUND - MUST FIX before proceeding"
+  exit 1
 else
-  echo "SKIP: gitleaks not installed"
+  echo "✓ No secrets"
 fi
 ```
 
 ### 7.2 Dependency Vulnerabilities
 ```bash
-if command -v osv-scanner &>/dev/null; then
-  osv-scanner --lockfile Package.resolved 2>&1 | tee security_deps.log
-else
-  echo "SKIP: osv-scanner not installed"
-fi
+# Install osv-scanner if not present
+command -v osv-scanner &>/dev/null || brew install osv-scanner
+
+osv-scanner --lockfile Package.resolved 2>&1 | tee security_deps.log
+echo "✓ Dependency scan complete - review security_deps.log for vulnerabilities"
 ```
 
 ### 7.3 MobSF Source Scan
 ```bash
-if command -v mobsfscan &>/dev/null; then
-  mobsfscan --json -o mobsf_source_scan.json . 2>&1 | tee mobsf_scan.log
-else
-  echo "SKIP: mobsfscan not installed (pip install mobsfscan)"
-fi
+# Install mobsfscan if not present
+command -v mobsfscan &>/dev/null || pip3 install mobsfscan
+
+mobsfscan --json -o mobsf_source_scan.json . 2>&1 | tee mobsf_scan.log
+echo "✓ MobSF scan complete - review mobsf_source_scan.json"
 ```
 
 ### 7.4 macOS Code Signing Verification
@@ -882,45 +890,123 @@ fi
 
 ### 7.5 Snyk Scan
 ```bash
-if command -v snyk &>/dev/null && [ -n "$SNYK_TOKEN" ]; then
+# Install snyk if not present
+command -v snyk &>/dev/null || brew install snyk
+
+if [ -n "$SNYK_TOKEN" ]; then
   snyk auth $SNYK_TOKEN
-  snyk test --all-projects 2>&1 | tee snyk_report.log
-else
-  echo "SKIP: Snyk not configured"
 fi
+snyk test --all-projects 2>&1 | tee snyk_report.log || echo "Snyk scan complete (review warnings)"
 ```
 
 ### Success Criteria
-- [ ] No secrets in code
-- [ ] No critical vulnerabilities
-- [ ] Code signing verified
+- [ ] gitleaks: No secrets in code
+- [ ] osv-scanner: No critical vulnerabilities
+- [ ] MobSF: Security scan complete
+- [ ] Snyk: Dependency scan complete
+- [ ] macOS code signing verified
 - [ ] Hardened runtime enabled
 
 ---
 
-## Phase 8: Performance & Memory (OPTIONAL)
+## Phase 8: Performance & Memory (REQUIRED)
 
 ### 8.1 App Size Analysis
 ```bash
 echo "=== App Sizes ==="
-find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products -name "*.app" -exec du -sh {} \; 2>/dev/null
+find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products -name "*.app" -exec du -sh {} \; 2>/dev/null | tee app_sizes.log
+
+# Check for bloated apps
+while IFS= read -r line; do
+  SIZE=$(echo "$line" | awk '{print $1}')
+  APP=$(echo "$line" | awk '{print $2}')
+  if [[ "$SIZE" == *"G"* ]]; then
+    echo "⚠ WARNING: $APP is over 1GB - investigate"
+  fi
+done < app_sizes.log
+```
+
+### 8.2 Binary Analysis
+```bash
+# Check for debug symbols in release builds (should be stripped)
+RELEASE_APP=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Release -name "Thea.app" | head -1)
+if [ -n "$RELEASE_APP" ]; then
+  echo "=== Binary Size ==="
+  ls -lh "$RELEASE_APP/Contents/MacOS/Thea" 2>/dev/null || ls -lh "$RELEASE_APP/Thea" 2>/dev/null
+fi
+```
+
+### 8.3 Memory Baseline
+```bash
+# Log memory usage baseline (for future comparison)
+echo "=== Memory Baseline ==="
+echo "Note: Run Instruments for detailed memory profiling"
+echo "Xcode → Product → Profile → Allocations"
 ```
 
 ### Success Criteria
-- [ ] App sizes reasonable (< 100MB each)
+- [ ] App sizes analyzed and logged
+- [ ] No app exceeds 500MB (warn if > 100MB)
+- [ ] Release builds have symbols stripped
+- [ ] Memory baseline documented
 
 ---
 
-## Phase 9: Accessibility Audit (OPTIONAL)
+## Phase 9: Accessibility Audit (REQUIRED)
 
-### 9.1 Accessibility Check
+### 9.1 Accessibility Audit via XCUITest
 ```bash
-# Requires UI test target with accessibility audit
-echo "Add performAccessibilityAudit() to XCUITests for comprehensive audit"
+# Verify accessibility audit is in UI tests
+if grep -r "performAccessibilityAudit" Tests/ 2>/dev/null; then
+  echo "✓ Accessibility audit found in tests"
+else
+  echo "⚠ Add performAccessibilityAudit() to XCUITests"
+  echo "Example:"
+  echo "  try app.performAccessibilityAudit()"
+fi
+
+# Run accessibility-focused UI tests
+xcodebuild test -project Thea.xcodeproj -scheme "Thea-iOS" \
+  -destination "platform=iOS Simulator,id=$IPHONE_SIM" \
+  -only-testing:TheaUITests/AccessibilityTests 2>&1 | tee accessibility_ios.log || true
+```
+
+### 9.2 VoiceOver Labels Check
+```bash
+# Search for missing accessibility labels in SwiftUI views
+echo "=== Checking for accessibility labels ==="
+grep -r "\.accessibilityLabel\|\.accessibilityHint\|\.accessibilityValue" Shared/ iOS/ macOS/ | wc -l | xargs echo "Accessibility modifiers found:"
+
+# Check for images without accessibility
+echo ""
+echo "=== Images potentially missing accessibility ==="
+grep -rn "Image(" Shared/ iOS/ macOS/ | grep -v "accessibilityLabel" | head -20
+```
+
+### 9.3 Dynamic Type Support
+```bash
+# Check for fixed font sizes (should use dynamic type)
+echo "=== Checking for fixed font sizes ==="
+grep -rn "\.font(.system(size:" Shared/ iOS/ | head -20
+echo ""
+echo "Prefer: .font(.body), .font(.headline), etc. for dynamic type support"
+```
+
+### 9.4 Color Contrast Check
+```bash
+# Check for potential color contrast issues
+echo "=== Color usage in views ==="
+grep -rn "\.foregroundColor\|\.background" Shared/ iOS/ | grep -v "Color.primary\|Color.secondary" | head -20
+echo ""
+echo "Ensure sufficient contrast for accessibility"
 ```
 
 ### Success Criteria
-- [ ] Accessibility audit integrated into UI tests
+- [ ] performAccessibilityAudit() in UI tests
+- [ ] All interactive elements have accessibility labels
+- [ ] Images have accessibility descriptions
+- [ ] Dynamic Type supported (no fixed font sizes)
+- [ ] Color contrast verified
 
 ---
 
@@ -1008,28 +1094,53 @@ EOF
 cat QA_SUMMARY.md
 ```
 
-### 10.4 Final Checklist
+### 10.4 Final Checklist (ALL REQUIRED)
 
-#### REQUIRED (Must all pass)
+#### Phase 0-1: Setup & Linting
+- [ ] All tools installed and verified
+- [ ] GitHub SSH configured
+- [ ] No duplicate files
+- [ ] SwiftFormat applied
+- [ ] SwiftLint: 0 errors
+
+#### Phase 2-4: Builds & Concurrency
 - [ ] All 4 Debug CLI: BUILD SUCCEEDED, 0 warnings
 - [ ] All 4 Release CLI: BUILD SUCCEEDED, 0 warnings
 - [ ] All 4 Debug GUI: 0 warnings (xcactivitylog)
 - [ ] All 4 Release GUI: 0 warnings (xcactivitylog)
-- [ ] SwiftLint: 0 errors
-- [ ] SwiftFormat: Applied
 - [ ] All Swift 6 concurrency issues fixed
+
+#### Phase 5-6: Testing
+- [ ] Unit tests exist and pass
+- [ ] Code coverage ≥ 60%
 - [ ] iOS functional tests pass (XCUITest + Maestro)
 - [ ] macOS functional tests pass (buttons, menus, shortcuts)
 - [ ] watchOS launches and basic nav works
 - [ ] tvOS launches and focus nav works
+
+#### Phase 7: Security
+- [ ] gitleaks: No secrets found
+- [ ] osv-scanner: Dependency scan complete
+- [ ] MobSF: Source scan complete
+- [ ] Snyk: Vulnerability scan complete
+- [ ] macOS code signing verified
+- [ ] Hardened runtime enabled
+
+#### Phase 8: Performance
+- [ ] App sizes analyzed (< 500MB each)
+- [ ] Binary analysis complete
+- [ ] Memory baseline documented
+
+#### Phase 9: Accessibility
+- [ ] performAccessibilityAudit() in UI tests
+- [ ] Accessibility labels on interactive elements
+- [ ] Dynamic Type supported
+- [ ] Color contrast verified
+
+#### Phase 10: CI/CD
 - [ ] All changes committed and pushed
 - [ ] GitHub Actions CI passing
-
-#### OPTIONAL (Recommended)
-- [ ] Security scans complete
-- [ ] No critical vulnerabilities
-- [ ] Code coverage generated
-- [ ] Accessibility audit passed
+- [ ] QA_SUMMARY.md generated
 
 ---
 
@@ -1053,12 +1164,18 @@ cat QA_SUMMARY.md
 - Functional test fails → Fix UI issue, retest
 
 ### Completion Criteria
-Mission ONLY complete when:
-- [ ] All 16 builds pass (4 platforms × 2 configs × 2 methods)
-- [ ] All functional tests pass (Phase 6)
-- [ ] SwiftLint: 0 errors
-- [ ] All changes pushed to GitHub
-- [ ] GitHub Actions CI passing
+Mission ONLY complete when ALL phases pass:
+- [ ] Phase 0: Pre-flight checks pass
+- [ ] Phase 1: SwiftLint 0 errors, SwiftFormat applied
+- [ ] Phase 2: All 8 Debug builds pass (4 CLI + 4 GUI), 0 warnings
+- [ ] Phase 3: All 8 Release builds pass (4 CLI + 4 GUI), 0 warnings
+- [ ] Phase 4: All Swift 6 concurrency issues fixed
+- [ ] Phase 5: Unit tests pass, coverage ≥ 60%
+- [ ] Phase 6: All functional tests pass (iOS, macOS, watchOS, tvOS)
+- [ ] Phase 7: Security scans complete, no secrets, no critical vulns
+- [ ] Phase 8: Performance analysis complete
+- [ ] Phase 9: Accessibility audit complete
+- [ ] Phase 10: All changes pushed, GitHub Actions CI passing
 
 ---
 
