@@ -282,20 +282,20 @@ public class NotificationService: ObservableObject {
 
     // MARK: - Notification Management
 
-    public func updatePendingNotifications() async {
-        // UNNotificationRequest is not Sendable, so we need to copy in nonisolated context
-        let requests = await { @Sendable in
-            await UNUserNotificationCenter.current().pendingNotificationRequests()
-        }()
-        pendingNotifications = requests
+    nonisolated public func updatePendingNotifications() async {
+        // Fetch in nonisolated context, then hop to MainActor for assignment
+        let requests = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        await MainActor.run {
+            self.pendingNotifications = requests
+        }
     }
 
-    public func updateDeliveredNotifications() async {
-        // UNNotification is not Sendable, so we need to copy in nonisolated context
-        let notifications = await { @Sendable in
-            await UNUserNotificationCenter.current().deliveredNotifications()
-        }()
-        deliveredNotifications = notifications
+    nonisolated public func updateDeliveredNotifications() async {
+        // Fetch in nonisolated context, then hop to MainActor for assignment
+        let notifications = await UNUserNotificationCenter.current().deliveredNotifications()
+        await MainActor.run {
+            self.deliveredNotifications = notifications
+        }
     }
 
     public func cancelNotification(identifier: String) {

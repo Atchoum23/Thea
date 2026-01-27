@@ -88,7 +88,7 @@ public final class NotificationManager: ObservableObject {
     public func checkAuthorizationStatus() async {
         // Extract values in nonisolated context to avoid Sendable issues
         let status = await { @Sendable in
-            await center.notificationSettings().authorizationStatus
+            await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
         }()
         authorizationStatus = status
         isAuthorized = status == .authorized || status == .provisional
@@ -387,8 +387,8 @@ public final class NotificationManager: ObservableObject {
     public func cancelNotifications(forThread threadId: String) {
         Task {
             // Extract identifiers in nonisolated context to avoid Sendable issues
-            let toRemove = await { @Sendable [center] in
-                let delivered = await center.deliveredNotifications()
+            let toRemove = await { @Sendable in
+                let delivered = await UNUserNotificationCenter.current().deliveredNotifications()
                 return delivered
                     .filter { $0.request.content.threadIdentifier == threadId }
                     .map(\.request.identifier)
