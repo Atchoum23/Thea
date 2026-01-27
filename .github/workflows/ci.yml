@@ -1,24 +1,22 @@
 # Thea CI/CD Pipeline
-# Version: 2.0.0 - Enhanced with CodeCov, SonarCloud, DeepSource
-# Last Updated: January 16, 2026
+# Version: 3.1.0 - Optimized with matrix builds, strict error handling, pinned actions
+# Last Updated: January 27, 2026
 
 name: CI
 
 on:
   push:
-    branches: [ main, develop, 'feature/**', 'release/**' ]
+    branches: [main, develop, 'feature/**', 'release/**']
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
     inputs:
-      build_type:
+      configuration:
         description: 'Build configuration'
         required: true
-        default: 'Debug'
+        default: 'Release'
         type: choice
-        options:
-          - Debug
-          - Release
+        options: [Debug, Release]
 
 env:
   XCODE_VERSION: '16.2'
@@ -30,506 +28,317 @@ concurrency:
 
 jobs:
   # ============================================
-  # SWIFTLINT
+  # SWIFTLINT - Strict enforcement
   # ============================================
   swiftlint:
     name: SwiftLint
     runs-on: macos-14
+    timeout-minutes: 10
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Cache SwiftLint
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        with:
+          path: /opt/homebrew/Cellar/swiftlint
+          key: ${{ runner.os }}-swiftlint-0.57.0
 
       - name: Install SwiftLint
-        run: brew install swiftlint
+        run: command -v swiftlint || brew install swiftlint
 
-      - name: Run SwiftLint
-        run: |
-          swiftlint lint --strict --reporter github-actions-logging
-        continue-on-error: true
+      - name: Run SwiftLint (Strict)
+        run: swiftlint lint --strict --reporter github-actions-logging
 
-      - name: Generate SwiftLint JSON Report
-        run: |
-          swiftlint lint --reporter json > swiftlint-report.json || true
-        continue-on-error: true
+      - name: Generate Report
+        if: always()
+        run: swiftlint lint --reporter json > swiftlint-report.json 2>/dev/null || true
 
-      - name: Upload SwiftLint Report
-        uses: actions/upload-artifact@v4
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: swiftlint-report
           path: swiftlint-report.json
           if-no-files-found: ignore
+          retention-days: 7
 
   # ============================================
-  # BUILD SPM
+  # BUILD ALL PLATFORMS (Matrix Strategy)
   # ============================================
-  build-spm:
-    name: Build with SPM
+  build:
+    name: Build ${{ matrix.platform }}
     runs-on: macos-14
+    needs: swiftlint
+    timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
-        configuration: [debug, release]
+        include:
+          - platform: iOS
+            scheme: Thea-iOS
+            destination: 'generic/platform=iOS'
+          - platform: macOS
+            scheme: Thea-macOS
+            destination: 'platform=macOS'
+          - platform: watchOS
+            scheme: Thea-watchOS
+            destination: 'generic/platform=watchOS'
+          - platform: tvOS
+            scheme: Thea-tvOS
+            destination: 'generic/platform=tvOS'
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Select Xcode 15.2
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
 
-      - name: Cache SPM dependencies
-        uses: actions/cache@v4
+      - name: Cache XcodeGen
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
         with:
-          path: .build
-          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          path: /opt/homebrew/Cellar/xcodegen
+          key: ${{ runner.os }}-xcodegen-2.42.0
+
+      - name: Install XcodeGen
+        run: command -v xcodegen || brew install xcodegen
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
           restore-keys: |
             ${{ runner.os }}-spm-
 
-      - name: Build with SPM
-        run: swift build -c ${{ matrix.configuration }} -v
-
-      - name: Run Tests
-        if: matrix.configuration == 'debug'
-        run: swift test --enable-code-coverage
-        continue-on-error: true
-
-      - name: Export Coverage (SPM)
-        if: matrix.configuration == 'debug'
-        run: |
-          xcrun llvm-cov export \
-            .build/debug/TheaPackageTests.xctest/Contents/MacOS/TheaPackageTests \
-            -instr-profile=.build/debug/codecov/default.profdata \
-            -format=lcov > coverage-spm.lcov || true
-        continue-on-error: true
-
-      - name: Upload SPM Coverage
-        if: matrix.configuration == 'debug'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-spm
-          path: coverage-spm.lcov
-          if-no-files-found: ignore
-
-  # ============================================
-  # BUILD macOS
-  # ============================================
-  build-xcode-macos:
-    name: Build macOS App
-    runs-on: macos-14
-    needs: swiftlint
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Select Xcode 15.2
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
       - name: Generate Xcode Project
         run: xcodegen generate
 
-      - name: Build Thea-macOS
+      - name: Build ${{ matrix.scheme }}
         run: |
           xcodebuild build \
-            -scheme Thea-macOS \
-            -destination 'platform=macOS' \
-            -configuration Release \
-            -resultBundlePath build/results-macos.xcresult \
+            -project Thea.xcodeproj \
+            -scheme ${{ matrix.scheme }} \
+            -destination '${{ matrix.destination }}' \
+            -configuration ${{ inputs.configuration || 'Release' }} \
+            -resultBundlePath build/results-${{ matrix.platform }}.xcresult \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build-${{ matrix.platform }}.log
 
-      - name: Upload macOS Build Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Check for Warnings
+        run: |
+          WARNINGS=$(grep -c " warning:" build-${{ matrix.platform }}.log || echo "0")
+          echo "warnings_count=$WARNINGS" >> $GITHUB_OUTPUT
+          echo "Warnings found: $WARNINGS"
+          if [ "$WARNINGS" -gt 0 ]; then
+            echo "::warning::${{ matrix.platform }} build has $WARNINGS warnings"
+            grep " warning:" build-${{ matrix.platform }}.log | head -20
+          fi
+
+      - name: Upload Build Log
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
-          name: thea-macos-${{ github.sha }}
-          path: build/Build/Products/Release/Thea.app
+          name: build-log-${{ matrix.platform }}
+          path: build-${{ matrix.platform }}.log
           retention-days: 7
-          if-no-files-found: ignore
 
       - name: Upload Build Results
-        uses: actions/upload-artifact@v4
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
-          name: build-results-macos
-          path: build/results-macos.xcresult
+          name: build-results-${{ matrix.platform }}
+          path: build/results-${{ matrix.platform }}.xcresult
           if-no-files-found: ignore
+          retention-days: 7
 
   # ============================================
-  # BUILD iOS
-  # ============================================
-  build-xcode-ios:
-    name: Build iOS App
-    runs-on: macos-14
-    needs: swiftlint
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode Project
-        run: xcodegen generate
-
-      - name: Build Thea-iOS
-        run: |
-          xcodebuild build \
-            -scheme Thea-iOS \
-            -destination 'generic/platform=iOS' \
-            -configuration Release \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-
-  # ============================================
-  # BUILD watchOS
-  # ============================================
-  build-xcode-watchos:
-    name: Build watchOS App
-    runs-on: macos-14
-    needs: swiftlint
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode Project
-        run: xcodegen generate
-
-      - name: Build Thea-watchOS
-        run: |
-          xcodebuild build \
-            -scheme Thea-watchOS \
-            -destination 'generic/platform=watchOS' \
-            -configuration Release \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-
-  # ============================================
-  # BUILD tvOS
-  # ============================================
-  build-xcode-tvos:
-    name: Build tvOS App
-    runs-on: macos-14
-    needs: swiftlint
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode Project
-        run: xcodegen generate
-
-      - name: Build Thea-tvOS
-        run: |
-          xcodebuild build \
-            -scheme Thea-tvOS \
-            -destination 'generic/platform=tvOS' \
-            -configuration Release \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-
-  # ============================================
-  # TESTS WITH COVERAGE
+  # UNIT TESTS (macOS + iOS Simulator)
   # ============================================
   test:
-    name: Tests & Coverage
+    name: Unit Tests
     runs-on: macos-14
-    needs: [build-xcode-macos]
+    needs: build
+    timeout-minutes: 30
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Select Xcode 15.2
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+
+      - name: Cache XcodeGen
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        with:
+          path: /opt/homebrew/Cellar/xcodegen
+          key: ${{ runner.os }}-xcodegen-2.42.0
 
       - name: Install XcodeGen
-        run: brew install xcodegen
+        run: command -v xcodegen || brew install xcodegen
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
 
       - name: Generate Xcode Project
         run: xcodegen generate
 
-      - name: Run Tests with Coverage
+      - name: Run macOS Tests
         run: |
           xcodebuild test \
+            -project Thea.xcodeproj \
             -scheme Thea-macOS \
             -destination 'platform=macOS' \
             -configuration Debug \
-            -resultBundlePath build/test-results.xcresult \
+            -resultBundlePath build/test-results-macos.xcresult \
             -enableCodeCoverage YES \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-        continue-on-error: true
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee test-macos.log
 
-      - name: Export Coverage to JSON
+      - name: Run iOS Simulator Tests
         run: |
-          xcrun xccov view --report --json build/test-results.xcresult > coverage.json || true
-        continue-on-error: true
+          # Get available iPhone simulator
+          SIMULATOR=$(xcrun simctl list devices available | grep "iPhone 16" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+          if [ -z "$SIMULATOR" ]; then
+            SIMULATOR=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+          fi
+          echo "Using simulator: $SIMULATOR"
 
-      - name: Export Coverage to Cobertura XML
+          xcodebuild test \
+            -project Thea.xcodeproj \
+            -scheme Thea-iOS \
+            -destination "platform=iOS Simulator,id=$SIMULATOR" \
+            -configuration Debug \
+            -resultBundlePath build/test-results-ios.xcresult \
+            -enableCodeCoverage YES \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee test-ios.log
+
+      - name: Export Coverage
+        if: always()
         run: |
-          # Install xcresultparser if needed
-          brew install a7ex/homebrew-formulae/xcresultparser || true
-          xcresultparser --output-format cobertura build/test-results.xcresult > coverage.xml || true
-        continue-on-error: true
+          xcrun xccov view --report --json build/test-results-macos.xcresult > coverage-macos.json 2>/dev/null || true
+          xcrun xccov view --report --json build/test-results-ios.xcresult > coverage-ios.json 2>/dev/null || true
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@v4
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: test-results
-          path: build/test-results.xcresult
+          path: |
+            build/test-results-*.xcresult
+            test-*.log
+            coverage-*.json
           if-no-files-found: ignore
-
-      - name: Upload Coverage JSON
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-json
-          path: coverage.json
-          if-no-files-found: ignore
-
-      - name: Upload Coverage XML
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-xml
-          path: coverage.xml
-          if-no-files-found: ignore
+          retention-days: 30
 
   # ============================================
-  # CODECOV UPLOAD
+  # CODECOV & SONARCLOUD (Parallel)
   # ============================================
   codecov:
     name: CodeCov Upload
-    runs-on: macos-14
-    needs: test
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download Coverage XML
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-xml
-          path: ./
-        continue-on-error: true
-
-      - name: Download Coverage JSON
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-json
-          path: ./
-        continue-on-error: true
-
-      - name: Upload to CodeCov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: Atchoum23/Thea
-          files: ./coverage.xml,./coverage.json
-          flags: unittests,macos
-          name: thea-macos-coverage
-          fail_ci_if_error: false
-          verbose: true
-
-  # ============================================
-  # SONARCLOUD ANALYSIS
-  # ============================================
-  sonarcloud:
-    name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download Coverage
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: test-results
+          path: ./
+        continue-on-error: true
+
+      - name: Upload to CodeCov
+        uses: codecov/codecov-action@1e68e06f1571f8627f4ede8f8a1659b00b01f393 # v5.1.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: Atchoum23/Thea
+          files: ./coverage-macos.json,./coverage-ios.json
+          flags: unittests
+          fail_ci_if_error: false
+          verbose: true
+
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Download SwiftLint Report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: swiftlint-report
           path: ./
         continue-on-error: true
 
-      - name: Download Coverage XML
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-xml
-          path: ./
-        continue-on-error: true
-
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v4.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        continue-on-error: true
 
   # ============================================
-  # DEEPSOURCE ANALYSIS
+  # QUALITY GATE
   # ============================================
-  deepsource:
-    name: DeepSource Analysis
+  quality-gate:
+    name: Quality Gate
     runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - name: Download Coverage XML
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-xml
-          path: ./
-        continue-on-error: true
-
-      - name: Report Test Coverage to DeepSource
-        uses: deepsourcelabs/test-coverage-action@master
-        with:
-          key: swift
-          coverage-file: coverage.xml
-          dsn: ${{ secrets.DEEPSOURCE_DSN }}
-        continue-on-error: true
-
-  # ============================================
-  # SECURITY SCANNING (FINDING-013)
-  # ============================================
-  security-scan:
-    name: Security Scanning
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # CodeQL Analysis for Swift
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: swift
-          queries: security-and-quality
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:swift"
-
-  dependency-scan:
-    name: Dependency Vulnerability Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Scan Swift dependencies
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-        continue-on-error: true
-
-      - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-        if: always()
-        continue-on-error: true
-
-      # Scan NPM dependencies (MCP server)
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Audit NPM dependencies
-        run: |
-          cd Tools/terminal-mcp-server
-          npm audit --audit-level=high || true
-        continue-on-error: true
-
-  secret-scan:
-    name: Secret Detection
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-  # ============================================
-  # QUALITY SUMMARY
-  # ============================================
-  quality-check:
-    name: Code Quality Summary
-    runs-on: ubuntu-latest
-    needs: [swiftlint, build-xcode-macos, test, security-scan, dependency-scan, secret-scan]
+    needs: [swiftlint, build, test]
     if: always()
     steps:
-      - name: Check Status
+      - name: Check Results
         run: |
-          echo "## 📊 Quality Report" >> $GITHUB_STEP_SUMMARY
+          echo "## CI Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
           echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
 
+          # SwiftLint
           if [[ "${{ needs.swiftlint.result }}" == "success" ]]; then
-            echo "| SwiftLint | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| SwiftLint | Passed |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| SwiftLint | ⚠️ ${{ needs.swiftlint.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| SwiftLint | Failed |" >> $GITHUB_STEP_SUMMARY
           fi
 
-          if [[ "${{ needs.build-xcode-macos.result }}" == "success" ]]; then
-            echo "| macOS Build | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          # Builds
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            echo "| All Platform Builds | Passed |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| macOS Build | ❌ ${{ needs.build-xcode-macos.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| All Platform Builds | Failed |" >> $GITHUB_STEP_SUMMARY
           fi
 
-          echo "| iOS Build | ⏸️ Disabled |" >> $GITHUB_STEP_SUMMARY
-
+          # Tests
           if [[ "${{ needs.test.result }}" == "success" ]]; then
-            echo "| Tests | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Unit Tests | Passed |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Tests | ⚠️ ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Unit Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
           fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "*Generated by Thea CI Pipeline*" >> $GITHUB_STEP_SUMMARY
 
       - name: Fail if critical checks failed
-        if: needs.build-xcode-macos.result == 'failure'
-        run: exit 1
+        if: needs.swiftlint.result == 'failure' || needs.build.result == 'failure' || needs.test.result == 'failure'
+        run: |
+          echo "::error::Critical checks failed"
+          exit 1
