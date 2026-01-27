@@ -6,7 +6,7 @@
     <true/>
     <key>com.apple.security.application-groups</key>
     <array>
-        <string>group.app.thea</string>
+        <string>group.app.theathe</string>
     </array>
 </dict>
 </plist>

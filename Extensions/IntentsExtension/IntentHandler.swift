@@ -12,7 +12,7 @@ import os.log
 /// Handles Siri and Shortcuts integrations
 class IntentHandler: INExtension {
     private let logger = Logger(subsystem: "app.thea.intents", category: "IntentHandler")
-    private let appGroupID = "group.app.thea"
+    private let appGroupID = "group.app.theathe"
 
     override func handler(for intent: INIntent) -> Any {
         logger.info("Handling intent: \(type(of: intent))")
@@ -35,7 +35,7 @@ class IntentHandler: INExtension {
 
 class SendMessageIntentHandler: NSObject, INSendMessageIntentHandling {
     private let logger = Logger(subsystem: "app.thea.intents", category: "SendMessage")
-    private let appGroupID = "group.app.thea"
+    private let appGroupID = "group.app.theathe"
 
     func handle(intent: INSendMessageIntent, completion: @escaping (INSendMessageIntentResponse) -> Void) {
         logger.info("Handling send message intent")
@@ -142,7 +142,7 @@ class SendMessageIntentHandler: NSObject, INSendMessageIntentHandling {
 
 class SearchMessagesIntentHandler: NSObject, INSearchForMessagesIntentHandling {
     private let logger = Logger(subsystem: "app.thea.intents", category: "SearchMessages")
-    private let appGroupID = "group.app.thea"
+    private let appGroupID = "group.app.theathe"
 
     func handle(intent: INSearchForMessagesIntent, completion: @escaping (INSearchForMessagesIntentResponse) -> Void) {
         logger.info("Handling search messages intent")
@@ -212,7 +212,7 @@ class SearchMessagesIntentHandler: NSObject, INSearchForMessagesIntentHandling {
 
 class SearchNotebookIntentHandler: NSObject, INSearchForNotebookItemsIntentHandling {
     private let logger = Logger(subsystem: "app.thea.intents", category: "SearchNotebook")
-    private let appGroupID = "group.app.thea"
+    private let appGroupID = "group.app.theathe"
 
     func handle(intent: INSearchForNotebookItemsIntent, completion: @escaping (INSearchForNotebookItemsIntentResponse) -> Void) {
         logger.info("Handling search notebook intent")

@@ -91,7 +91,7 @@ public final class FocusOrchestrator: ObservableObject {
             logger.info("Triggering focus mode shortcut for: \(mode.name)")
 
             // Use Shortcuts to change focus
-            try await ShortcutsOrchestrator.shared.runShortcut(named: "Set Focus to \(mode.name)")
+            _ = try await ShortcutsOrchestrator.shared.runShortcut(named: "Set Focus to \(mode.name)")
         #elseif os(macOS)
             // On macOS, use Focus status center or AppleScript
             // Note: Direct API access is limited, may need Shortcuts
@@ -102,7 +102,7 @@ public final class FocusOrchestrator: ObservableObject {
     private func clearFocus() async throws {
         #if os(iOS)
             logger.info("Clearing iOS focus")
-            try await ShortcutsOrchestrator.shared.runShortcut(named: "Turn Off Focus")
+            _ = try await ShortcutsOrchestrator.shared.runShortcut(named: "Turn Off Focus")
         #endif
     }
 
@@ -282,7 +282,7 @@ public final class FocusOrchestrator: ObservableObject {
 
         let relevantTransitions = transitionHistory.filter { $0.timestamp >= cutoff }
 
-        var timeInFocus: [String: TimeInterval] = [:]
+        let timeInFocus: [String: TimeInterval] = [:]
         // Calculate time spent in each focus mode
 
         return FocusStatistics(

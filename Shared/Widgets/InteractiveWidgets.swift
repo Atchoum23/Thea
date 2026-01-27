@@ -22,7 +22,7 @@ public struct ToggleFocusIntent: AppIntent {
 
     public func perform() async throws -> some IntentResult {
         // Toggle focus state in shared container
-        let defaults = UserDefaults(suiteName: "group.app.thea")
+        let defaults = UserDefaults(suiteName: "group.app.theathe")
         let currentState = defaults?.bool(forKey: "widget.focusActive") ?? false
         defaults?.set(!currentState, forKey: "widget.focusActive")
 
@@ -184,7 +184,7 @@ struct StandByWidgetProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<StandByWidgetEntry>) -> Void) {
-        let defaults = UserDefaults(suiteName: "group.app.thea")
+        let defaults = UserDefaults(suiteName: "group.app.theathe")
 
         let status: StandByStatus = if defaults?.bool(forKey: "widget.hasNotification") == true {
             .hasNotification

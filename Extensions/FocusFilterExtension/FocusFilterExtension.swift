@@ -68,7 +68,7 @@ struct TheaFocusFilter: SetFocusFilterIntent {
 
     private func saveFocusSettings(_ settings: FocusFilterSettings) {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return }
 
         let settingsPath = containerURL.appendingPathComponent("focus_settings.json")

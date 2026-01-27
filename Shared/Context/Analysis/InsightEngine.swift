@@ -158,18 +158,18 @@ public final class InsightEngine: ObservableObject {
         case let .openApp(bundleId):
             #if os(macOS)
                 if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
-                    try? await NSWorkspace.shared.openApplication(at: url, configuration: .init())
+                    _ = try? await NSWorkspace.shared.openApplication(at: url, configuration: .init())
                 }
             #elseif os(iOS)
                 // Use URL schemes or shortcuts
                 break
             #endif
 
-        case let .runShortcut(name):
+        case .runShortcut:
             // Execute via ShortcutsOrchestrator
             break
 
-        case let .setFocus(mode):
+        case .setFocus:
             // Use FocusOrchestrator
             break
 
@@ -308,7 +308,8 @@ public struct ProductivityInsightGenerator: InsightGenerator {
         var insights: [Insight] = []
 
         // Check for long work sessions without breaks
-        if let workDuration = context.metadata["workSessionDuration"] as? TimeInterval,
+        if let workDurationStr = context.metadata["workSessionDuration"],
+           let workDuration = TimeInterval(workDurationStr),
            workDuration > 7200
         { // 2 hours
             insights.append(Insight(
@@ -325,7 +326,8 @@ public struct ProductivityInsightGenerator: InsightGenerator {
         }
 
         // Check for context switching
-        if let appSwitches = context.metadata["recentAppSwitches"] as? Int,
+        if let appSwitchesStr = context.metadata["recentAppSwitches"],
+           let appSwitches = Int(appSwitchesStr),
            appSwitches > 20
         {
             insights.append(Insight(
@@ -352,7 +354,8 @@ public struct HealthInsightGenerator: InsightGenerator {
         var insights: [Insight] = []
 
         // Check screen time
-        if let screenTime = context.metadata["todayScreenTime"] as? TimeInterval,
+        if let screenTimeStr = context.metadata["todayScreenTime"],
+           let screenTime = TimeInterval(screenTimeStr),
            screenTime > 28800
         { // 8 hours
             insights.append(Insight(
@@ -391,8 +394,9 @@ public struct ScheduleInsightGenerator: InsightGenerator {
         var insights: [Insight] = []
 
         // Check upcoming events
-        if let nextEvent = context.metadata["nextCalendarEvent"] as? String,
-           let minutesUntil = context.metadata["minutesUntilNextEvent"] as? Int,
+        if let nextEvent = context.metadata["nextCalendarEvent"],
+           let minutesUntilStr = context.metadata["minutesUntilNextEvent"],
+           let minutesUntil = Int(minutesUntilStr),
            minutesUntil <= 15, minutesUntil > 0
         {
             insights.append(Insight(
@@ -416,12 +420,12 @@ public struct FocusInsightGenerator: InsightGenerator {
         var insights: [Insight] = []
 
         // Suggest focus mode based on activity
-        if let currentApp = context.metadata["focusedApp"] as? String {
+        if let currentApp = context.metadata["focusedApp"] {
             let workApps = ["Xcode", "Visual Studio Code", "Slack", "Microsoft Teams"]
             let creativeApps = ["Figma", "Sketch", "Adobe Photoshop", "Logic Pro"]
 
             if workApps.contains(currentApp) {
-                if context.metadata["currentFocusMode"] as? String != "Work" {
+                if context.metadata["currentFocusMode"] != "Work" {
                     insights.append(Insight(
                         title: "Enable Work Focus?",
                         description: "You're using \(currentApp). Work Focus can reduce distractions.",
@@ -460,25 +464,27 @@ public struct WorkflowInsightGenerator: InsightGenerator {
         var insights: [Insight] = []
 
         // Detect common workflows and suggest automation
-        if let recentActions = context.metadata["recentActions"] as? [String],
-           recentActions.count >= 3
-        {
-            // Check for repetitive patterns
-            let actionCounts = Dictionary(grouping: recentActions) { $0 }
-                .mapValues { $0.count }
+        // Parse comma-separated actions from metadata string
+        if let actionsStr = context.metadata["recentActions"] {
+            let recentActions = actionsStr.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            if recentActions.count >= 3 {
+                // Check for repetitive patterns
+                let actionCounts = Dictionary(grouping: recentActions) { $0 }
+                    .mapValues { $0.count }
 
-            for (action, count) in actionCounts where count >= 3 {
-                insights.append(Insight(
-                    title: "Repetitive Action Detected",
-                    description: "You've done '\(action)' \(count) times. Want to automate it?",
-                    category: .workflow,
-                    priority: .low,
-                    confidence: 0.6,
-                    suggestedAction: InsightAction(
-                        label: "Create Shortcut",
-                        type: .openApp(bundleId: "com.apple.shortcuts")
-                    )
-                ))
+                for (action, count) in actionCounts where count >= 3 {
+                    insights.append(Insight(
+                        title: "Repetitive Action Detected",
+                        description: "You've done '\(action)' \(count) times. Want to automate it?",
+                        category: .workflow,
+                        priority: .low,
+                        confidence: 0.6,
+                        suggestedAction: InsightAction(
+                            label: "Create Shortcut",
+                            type: .openApp(bundleId: "com.apple.shortcuts")
+                        )
+                    ))
+                }
             }
         }
 
@@ -493,10 +499,10 @@ public struct LocationInsightGenerator: InsightGenerator {
         var insights: [Insight] = []
 
         // Location-based insights
-        if let location = context.metadata["currentLocation"] as? String {
+        if let location = context.metadata["currentLocation"] {
             switch location.lowercased() {
             case let l where l.contains("office") || l.contains("work"):
-                if context.metadata["currentFocusMode"] as? String != "Work" {
+                if context.metadata["currentFocusMode"] != "Work" {
                     insights.append(Insight(
                         title: "At Work",
                         description: "Enable Work Focus to stay productive?",
@@ -542,7 +548,8 @@ public struct CommunicationInsightGenerator: InsightGenerator {
         var insights: [Insight] = []
 
         // Check for unread messages
-        if let unreadCount = context.metadata["unreadMessages"] as? Int,
+        if let unreadCountStr = context.metadata["unreadMessages"],
+           let unreadCount = Int(unreadCountStr),
            unreadCount > 10
         {
             insights.append(Insight(
@@ -559,7 +566,8 @@ public struct CommunicationInsightGenerator: InsightGenerator {
         }
 
         // Check for missed calls
-        if let missedCalls = context.metadata["missedCalls"] as? Int,
+        if let missedCallsStr = context.metadata["missedCalls"],
+           let missedCalls = Int(missedCallsStr),
            missedCalls > 0
         {
             insights.append(Insight(

@@ -117,7 +117,7 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
 
     private func loadBlockedNumbers() -> [CXCallDirectoryPhoneNumber] {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return [] }
 
         let dataURL = containerURL.appendingPathComponent("blocked_numbers.json")
@@ -133,7 +133,7 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
 
     private func loadBlockingChanges() -> (added: [CXCallDirectoryPhoneNumber], removed: [CXCallDirectoryPhoneNumber]) {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return ([], []) }
 
         let addedURL = containerURL.appendingPathComponent("blocked_numbers_added.json")
@@ -147,7 +147,7 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
 
     private func clearBlockingChanges() {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return }
 
         let addedURL = containerURL.appendingPathComponent("blocked_numbers_added.json")
@@ -159,7 +159,7 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
 
     private func loadCallerIDEntries() -> [CallerIDEntry] {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return [] }
 
         let dataURL = containerURL.appendingPathComponent("caller_id_entries.json")
@@ -175,7 +175,7 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
 
     private func loadIdentificationChanges() -> (added: [CallerIDEntry], removed: [CXCallDirectoryPhoneNumber]) {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return ([], []) }
 
         let addedURL = containerURL.appendingPathComponent("caller_id_added.json")
@@ -189,7 +189,7 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
 
     private func clearIdentificationChanges() {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return }
 
         let addedURL = containerURL.appendingPathComponent("caller_id_added.json")

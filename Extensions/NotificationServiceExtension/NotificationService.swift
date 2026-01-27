@@ -16,7 +16,7 @@ class NotificationService: UNNotificationServiceExtension {
     private var bestAttemptContent: UNMutableNotificationContent?
 
     // App Group for shared data
-    private let appGroupID = "group.app.thea"
+    private let appGroupID = "group.app.theathe"
 
     // MARK: - Service Extension Methods
 

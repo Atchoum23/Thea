@@ -189,7 +189,7 @@ public class NotificationService: ObservableObject {
             trigger: nil // Immediate
         )
 
-        try await UNUserNotificationCenter.current().add(request)
+        try await Self.addNotificationRequest(request)
     }
 
     /// Schedule a reminder notification
@@ -212,7 +212,7 @@ public class NotificationService: ObservableObject {
         let identifier = UUID().uuidString
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
-        try await UNUserNotificationCenter.current().add(request)
+        try await Self.addNotificationRequest(request)
         return identifier
     }
 
@@ -230,7 +230,7 @@ public class NotificationService: ObservableObject {
         let identifier = UUID().uuidString
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
-        try await UNUserNotificationCenter.current().add(request)
+        try await Self.addNotificationRequest(request)
         return identifier
     }
 
@@ -259,7 +259,7 @@ public class NotificationService: ObservableObject {
             trigger: nil
         )
 
-        try await UNUserNotificationCenter.current().add(request)
+        try await Self.addNotificationRequest(request)
     }
 
     /// Send a sync complete notification
@@ -277,7 +277,7 @@ public class NotificationService: ObservableObject {
             trigger: nil
         )
 
-        try await UNUserNotificationCenter.current().add(request)
+        try await Self.addNotificationRequest(request)
     }
 
     // MARK: - Notification Management
@@ -341,16 +341,22 @@ public class NotificationService: ObservableObject {
             return .dismissed
 
         case .snooze:
-            // Reschedule for 15 minutes
-            // swiftlint:disable:next force_cast
-            let content = notification.request.content.mutableCopy() as! UNMutableNotificationContent
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 15 * 60, repeats: false)
-            let request = UNNotificationRequest(
-                identifier: UUID().uuidString,
-                content: content,
-                trigger: trigger
+            // Reschedule for 15 minutes - extract Sendable data first
+            let originalContent = notification.request.content
+            // Extract only string key-value pairs for Sendable compliance
+            var userInfoStrings: [String: String] = [:]
+            for (key, value) in originalContent.userInfo {
+                if let stringKey = key as? String, let stringValue = value as? String {
+                    userInfoStrings[stringKey] = stringValue
+                }
+            }
+            await Self.snoozeNotification(
+                title: originalContent.title,
+                body: originalContent.body,
+                categoryIdentifier: originalContent.categoryIdentifier,
+                threadIdentifier: originalContent.threadIdentifier,
+                userInfoStrings: userInfoStrings
             )
-            try? await UNUserNotificationCenter.current().add(request)
             return .snoozed(minutes: 15)
 
         case .copy:
@@ -375,6 +381,35 @@ public class NotificationService: ObservableObject {
     }
 
     // MARK: - Helper Methods
+
+    /// Helper to add notification request without crossing actor boundaries
+    nonisolated private static func addNotificationRequest(_ request: UNNotificationRequest) async throws {
+        try await UNUserNotificationCenter.current().add(request)
+    }
+
+    /// Helper to snooze a notification without crossing actor boundaries
+    nonisolated private static func snoozeNotification(
+        title: String,
+        body: String,
+        categoryIdentifier: String,
+        threadIdentifier: String,
+        userInfoStrings: [String: String]
+    ) async {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.categoryIdentifier = categoryIdentifier
+        content.threadIdentifier = threadIdentifier
+        content.userInfo = userInfoStrings
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 15 * 60, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: trigger
+        )
+        try? await UNUserNotificationCenter.current().add(request)
+    }
 
     private func createNotificationImage() -> URL? {
         // Create a temporary image for notification attachment

@@ -12,7 +12,7 @@ import SafariServices
 /// Bridges JavaScript messages to native code for enhanced web intelligence
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     private let logger = Logger(subsystem: "app.thea.safari", category: "ExtensionHandler")
-    private let appGroupID = "group.app.thea"
+    private let appGroupID = "group.app.theathe"
 
     func beginRequest(with context: NSExtensionContext) {
         let request = context.inputItems.first as? NSExtensionItem

@@ -64,7 +64,7 @@ struct ConversationProvider: TimelineProvider {
 
     private func loadConversations() -> [ConversationSummary] {
         // Load from App Group shared storage
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.thea") else {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") else {
             return []
         }
 
@@ -259,7 +259,7 @@ struct MemoryProvider: TimelineProvider {
     }
 
     private func loadMemories() -> [MemorySummary] {
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.thea") else {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") else {
             return []
         }
 
@@ -354,7 +354,7 @@ struct ContextProvider: TimelineProvider {
     }
 
     private func loadContextSummary() -> String {
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.thea") else {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") else {
             return "Tap to open Thea"
         }
 

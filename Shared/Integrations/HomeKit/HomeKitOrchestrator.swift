@@ -61,7 +61,8 @@ public final class HomeKitOrchestrator: NSObject, ObservableObject {
         // Wait for homes to be loaded
         try? await Task.sleep(nanoseconds: 1_000_000_000)
 
-        if let primary = homeManager.primaryHome {
+        // Use first available home as primary (primaryHome deprecated in iOS 16.1)
+        if let primary = homeManager.homes.first {
             primaryHome = primary
             await refreshDeviceStates()
         }
@@ -356,7 +357,7 @@ public final class HomeKitOrchestrator: NSObject, ObservableObject {
         guard energyOptimizationEnabled else { return }
 
         // Find devices that have been on for too long
-        for (serviceId, state) in deviceStates {
+        for (_, state) in deviceStates {
             guard let isOn = state.characteristics[HMCharacteristicTypePowerState] as? Bool,
                   isOn else { continue }
 
@@ -448,7 +449,8 @@ extension HomeKitOrchestrator: HMHomeManagerDelegate {
     nonisolated public func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
         Task { @MainActor in
             homes = manager.homes
-            primaryHome = manager.primaryHome
+            // Use first home as primary (primaryHome deprecated in iOS 16.1)
+            primaryHome = manager.homes.first
             await refreshDeviceStates()
             logger.info("Homes updated: \(self.homes.count)")
         }
@@ -456,7 +458,8 @@ extension HomeKitOrchestrator: HMHomeManagerDelegate {
 
     nonisolated public func homeManagerDidUpdatePrimaryHome(_ manager: HMHomeManager) {
         Task { @MainActor in
-            primaryHome = manager.primaryHome
+            // Use first home as primary (primaryHome deprecated in iOS 16.1)
+            primaryHome = manager.homes.first
             await refreshDeviceStates()
         }
     }

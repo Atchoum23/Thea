@@ -29,7 +29,7 @@ class ShareViewController: SLComposeServiceViewController {
     }
 
     // App Group for shared data
-    private let appGroupID = "group.app.thea"
+    private let appGroupID = "group.app.theathe"
 
     // MARK: - Lifecycle
 

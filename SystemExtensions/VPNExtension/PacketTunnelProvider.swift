@@ -230,7 +230,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
     private func saveStatistics() {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return }
 
         let stats = VPNStatistics(
