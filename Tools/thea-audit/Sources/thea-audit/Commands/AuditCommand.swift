@@ -70,7 +70,7 @@ struct AuditCommand: ParsableCommand {
         // Evaluate against policy if provided
         var policyResult: PolicyEvaluationResult?
         if let policyPath = policy {
-            let evaluator = PolicyEvaluator(policyPath: policyPath)
+            let evaluator = try PolicyEvaluator(policyPath: policyPath)
             policyResult = try evaluator.evaluate(findings: findings)
         }
 
@@ -100,8 +100,8 @@ struct AuditCommand: ParsableCommand {
 
         // Strict mode: exit with error if high/critical findings
         if strict {
-            let criticalCount = findings.count(where: { $0.severity == .critical })
-            let highCount = findings.count(where: { $0.severity == .high })
+            let criticalCount = findings.count { $0.severity == .critical }
+            let highCount = findings.count { $0.severity == .high }
 
             if criticalCount > 0 || highCount > 0 {
                 throw AuditError.strictModeViolation(
@@ -119,10 +119,10 @@ struct AuditCommand: ParsableCommand {
         print("Duration: \(String(format: "%.2f", duration))s")
         print("")
 
-        let criticalCount = findings.count(where: { $0.severity == .critical })
-        let highCount = findings.count(where: { $0.severity == .high })
-        let mediumCount = findings.count(where: { $0.severity == .medium })
-        let lowCount = findings.count(where: { $0.severity == .low })
+        let criticalCount = findings.count { $0.severity == .critical }
+        let highCount = findings.count { $0.severity == .high }
+        let mediumCount = findings.count { $0.severity == .medium }
+        let lowCount = findings.count { $0.severity == .low }
 
         print("Findings:")
         print("  Critical: \(criticalCount)")

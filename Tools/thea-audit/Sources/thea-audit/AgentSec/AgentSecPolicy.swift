@@ -1,13 +1,25 @@
 // AgentSecPolicy.swift
 // AgentSec Strict Mode policy model
 
+import ArgumentParser
 import Foundation
 
 /// Policy templates
-enum PolicyTemplate: String, Codable, CaseIterable {
+enum PolicyTemplate: String, Codable, CaseIterable, ExpressibleByArgument {
     case strict
     case standard
     case permissive
+
+    var description: String {
+        switch self {
+        case .strict:
+            "Maximum security - all protections enabled"
+        case .standard:
+            "Balanced security for normal development"
+        case .permissive:
+            "Minimal restrictions for trusted environments"
+        }
+    }
 }
 
 /// AgentSec Strict Mode policy configuration
