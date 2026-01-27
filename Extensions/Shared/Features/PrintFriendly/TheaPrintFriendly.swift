@@ -5,10 +5,10 @@
 import Foundation
 import OSLog
 #if canImport(WebKit)
-import WebKit
+    import WebKit
 #endif
 #if canImport(PDFKit)
-import PDFKit
+    import PDFKit
 #endif
 
 // MARK: - Print Friendly Manager
@@ -38,7 +38,8 @@ public final class TheaPrintFriendlyManager: ObservableObject {
 
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "printFriendly.settings"),
-           let loaded = try? JSONDecoder().decode(PrintFriendlySettings.self, from: data) {
+           let loaded = try? JSONDecoder().decode(PrintFriendlySettings.self, from: data)
+        {
             settings = loaded
         }
     }
@@ -154,25 +155,25 @@ public final class TheaPrintFriendlyManager: ObservableObject {
         var content = page.content
 
         switch edit {
-        case .deleteElement(let selector):
+        case let .deleteElement(selector):
             content = removeElement(selector, from: content)
 
-        case .deleteText(let range):
+        case let .deleteText(range):
             content = removeTextRange(range, from: content)
 
-        case .changeFontSize(let delta):
+        case let .changeFontSize(delta):
             content = adjustFontSize(by: delta, in: content)
 
-        case .removeImage(let url):
+        case let .removeImage(url):
             content = removeImageWithUrl(url, from: content)
 
         case .removeAllImages:
             content = removeAllImages(from: content)
 
-        case .highlight(let text, let color):
+        case let .highlight(text, color):
             content = highlightText(text, with: color, in: content)
 
-        case .addNote(let text, let position):
+        case let .addNote(text, position):
             content = addNote(text, at: position, in: content)
         }
 
@@ -216,75 +217,75 @@ public final class TheaPrintFriendlyManager: ObservableObject {
         let opts = options ?? PDFExportOptions()
 
         #if canImport(PDFKit) && os(macOS)
-        return try await generatePDF(from: page, options: opts)
+            return try await generatePDF(from: page, options: opts)
         #else
-        // Use alternative PDF generation for iOS
-        return try await generatePDFUsingWebKit(from: page, options: opts)
+            // Use alternative PDF generation for iOS
+            return try await generatePDFUsingWebKit(from: page, options: opts)
         #endif
     }
 
     #if os(macOS)
-    private func generatePDF(from page: CleanedPage, options: PDFExportOptions) async throws -> Data {
-        // Create print info
-        let printInfo = NSPrintInfo()
-        printInfo.paperSize = options.pageSize.nsSize
-        printInfo.topMargin = CGFloat(options.margins.top)
-        printInfo.bottomMargin = CGFloat(options.margins.bottom)
-        printInfo.leftMargin = CGFloat(options.margins.left)
-        printInfo.rightMargin = CGFloat(options.margins.right)
-        printInfo.horizontalPagination = .automatic
-        printInfo.verticalPagination = .automatic
+        private func generatePDF(from page: CleanedPage, options: PDFExportOptions) async throws -> Data {
+            // Create print info
+            let printInfo = NSPrintInfo()
+            printInfo.paperSize = options.pageSize.nsSize
+            printInfo.topMargin = CGFloat(options.margins.top)
+            printInfo.bottomMargin = CGFloat(options.margins.bottom)
+            printInfo.leftMargin = CGFloat(options.margins.left)
+            printInfo.rightMargin = CGFloat(options.margins.right)
+            printInfo.horizontalPagination = .automatic
+            printInfo.verticalPagination = .automatic
 
-        // Create HTML with styling
-        let styledHTML = wrapInPrintStyles(page.content, title: page.title, options: options)
+            // Create HTML with styling
+            let styledHTML = wrapInPrintStyles(page.content, title: page.title, options: options)
 
-        // Render to PDF using WebKit
-        return try await withCheckedThrowingContinuation { continuation in
-            Task { @MainActor in
-                let webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 800, height: 600))
-                webView.loadHTMLString(styledHTML, baseURL: nil)
+            // Render to PDF using WebKit
+            return try await withCheckedThrowingContinuation { continuation in
+                Task { @MainActor in
+                    let webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 800, height: 600))
+                    webView.loadHTMLString(styledHTML, baseURL: nil)
 
-                // Wait for load and create PDF
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    webView.createPDF { result in
-                        switch result {
-                        case .success(let data):
-                            continuation.resume(returning: data)
-                        case .failure(let error):
-                            continuation.resume(throwing: PrintFriendlyError.pdfGenerationFailed(error.localizedDescription))
+                    // Wait for load and create PDF
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        webView.createPDF { result in
+                            switch result {
+                            case let .success(data):
+                                continuation.resume(returning: data)
+                            case let .failure(error):
+                                continuation.resume(throwing: PrintFriendlyError.pdfGenerationFailed(error.localizedDescription))
+                            }
                         }
                     }
                 }
             }
         }
-    }
     #endif
 
     private func generatePDFUsingWebKit(from page: CleanedPage, options: PDFExportOptions) async throws -> Data {
         let styledHTML = wrapInPrintStyles(page.content, title: page.title, options: options)
 
         #if canImport(WebKit)
-        return try await withCheckedThrowingContinuation { continuation in
-            Task { @MainActor in
-                let configuration = WKWebViewConfiguration()
-                let webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 800, height: 600), configuration: configuration)
+            return try await withCheckedThrowingContinuation { continuation in
+                Task { @MainActor in
+                    let configuration = WKWebViewConfiguration()
+                    let webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 800, height: 600), configuration: configuration)
 
-                webView.loadHTMLString(styledHTML, baseURL: nil)
+                    webView.loadHTMLString(styledHTML, baseURL: nil)
 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    webView.createPDF { result in
-                        switch result {
-                        case .success(let data):
-                            continuation.resume(returning: data)
-                        case .failure(let error):
-                            continuation.resume(throwing: PrintFriendlyError.pdfGenerationFailed(error.localizedDescription))
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        webView.createPDF { result in
+                            switch result {
+                            case let .success(data):
+                                continuation.resume(returning: data)
+                            case let .failure(error):
+                                continuation.resume(throwing: PrintFriendlyError.pdfGenerationFailed(error.localizedDescription))
+                            }
                         }
                     }
                 }
             }
-        }
         #else
-        throw PrintFriendlyError.pdfGenerationFailed("WebKit not available")
+            throw PrintFriendlyError.pdfGenerationFailed("WebKit not available")
         #endif
     }
 
@@ -295,49 +296,50 @@ public final class TheaPrintFriendlyManager: ObservableObject {
         }
 
         #if canImport(WebKit)
-        return try await withCheckedThrowingContinuation { continuation in
-            Task { @MainActor in
-                let webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 1200, height: 800))
-                webView.loadHTMLString(page.content, baseURL: nil)
+            return try await withCheckedThrowingContinuation { continuation in
+                Task { @MainActor in
+                    let webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 1200, height: 800))
+                    webView.loadHTMLString(page.content, baseURL: nil)
 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    let config = WKSnapshotConfiguration()
-                    if !options.fullPage {
-                        config.rect = webView.bounds
-                    }
-
-                    webView.takeSnapshot(with: config) { image, error in
-                        if let error = error {
-                            continuation.resume(throwing: PrintFriendlyError.screenshotFailed(error.localizedDescription))
-                            return
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        let config = WKSnapshotConfiguration()
+                        if !options.fullPage {
+                            config.rect = webView.bounds
                         }
 
-                        guard let image = image else {
-                            continuation.resume(throwing: PrintFriendlyError.screenshotFailed("No image captured"))
-                            return
-                        }
+                        webView.takeSnapshot(with: config) { image, error in
+                            if let error {
+                                continuation.resume(throwing: PrintFriendlyError.screenshotFailed(error.localizedDescription))
+                                return
+                            }
 
-                        #if os(macOS)
-                        guard let tiffData = image.tiffRepresentation,
-                              let bitmap = NSBitmapImageRep(data: tiffData),
-                              let pngData = bitmap.representation(using: .png, properties: [:]) else {
-                            continuation.resume(throwing: PrintFriendlyError.screenshotFailed("Failed to convert image"))
-                            return
+                            guard let image else {
+                                continuation.resume(throwing: PrintFriendlyError.screenshotFailed("No image captured"))
+                                return
+                            }
+
+                            #if os(macOS)
+                                guard let tiffData = image.tiffRepresentation,
+                                      let bitmap = NSBitmapImageRep(data: tiffData),
+                                      let pngData = bitmap.representation(using: .png, properties: [:])
+                                else {
+                                    continuation.resume(throwing: PrintFriendlyError.screenshotFailed("Failed to convert image"))
+                                    return
+                                }
+                                continuation.resume(returning: pngData)
+                            #else
+                                guard let pngData = image.pngData() else {
+                                    continuation.resume(throwing: PrintFriendlyError.screenshotFailed("Failed to convert image"))
+                                    return
+                                }
+                                continuation.resume(returning: pngData)
+                            #endif
                         }
-                        continuation.resume(returning: pngData)
-                        #else
-                        guard let pngData = image.pngData() else {
-                            continuation.resume(throwing: PrintFriendlyError.screenshotFailed("Failed to convert image"))
-                            return
-                        }
-                        continuation.resume(returning: pngData)
-                        #endif
                     }
                 }
             }
-        }
         #else
-        throw PrintFriendlyError.screenshotFailed("WebKit not available")
+            throw PrintFriendlyError.screenshotFailed("WebKit not available")
         #endif
     }
 
@@ -359,10 +361,10 @@ public final class TheaPrintFriendlyManager: ObservableObject {
 
     private func parseHTML(_ html: String) throws -> HTMLDocument {
         // Simple HTML parsing - in production would use a proper parser
-        return HTMLDocument(html: html)
+        HTMLDocument(html: html)
     }
 
-    private func extractMainContent(from document: HTMLDocument, url: URL) async throws -> String {
+    private func extractMainContent(from document: HTMLDocument, url _: URL) async throws -> String {
         // Use multiple strategies to find main content:
 
         // 1. Check for article element
@@ -484,7 +486,7 @@ public final class TheaPrintFriendlyManager: ObservableObject {
         }
 
         // Remove by tag
-        if !selector.hasPrefix(".") && !selector.hasPrefix("#") && !selector.hasPrefix("[") {
+        if !selector.hasPrefix("."), !selector.hasPrefix("#"), !selector.hasPrefix("[") {
             let pattern = "<\(selector)[^>]*>.*?</\(selector)>"
             if let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators, .caseInsensitive]) {
                 content = regex.stringByReplacingMatches(in: content, options: [], range: NSRange(content.startIndex..., in: content), withTemplate: "")
@@ -494,7 +496,7 @@ public final class TheaPrintFriendlyManager: ObservableObject {
         return content
     }
 
-    private func cleanFormatting(_ html: String, options: PrintCleanOptions) -> String {
+    private func cleanFormatting(_ html: String, options _: PrintCleanOptions) -> String {
         var content = html
 
         // Remove inline styles that might affect printing
@@ -534,7 +536,8 @@ public final class TheaPrintFriendlyManager: ObservableObject {
                 let altPattern = "alt=[\"']([^\"']*)[\"']"
                 if let altRegex = try? NSRegularExpression(pattern: altPattern, options: .caseInsensitive),
                    let altMatch = altRegex.firstMatch(in: html, options: [], range: match.range),
-                   let altRange = Range(altMatch.range(at: 1), in: html) {
+                   let altRange = Range(altMatch.range(at: 1), in: html)
+                {
                     alt = String(html[altRange])
                 }
 
@@ -580,7 +583,7 @@ public final class TheaPrintFriendlyManager: ObservableObject {
     }
 
     private func removeElement(_ selector: String, from html: String) -> String {
-        return removeElements(matching: selector, from: html)
+        removeElements(matching: selector, from: html)
     }
 
     private func removeTextRange(_ range: Range<String.Index>, from html: String) -> String {
@@ -611,7 +614,7 @@ public final class TheaPrintFriendlyManager: ObservableObject {
     }
 
     private func highlightText(_ text: String, with color: String, in html: String) -> String {
-        return html.replacingOccurrences(
+        html.replacingOccurrences(
             of: text,
             with: "<mark style=\"background-color: \(color);\">\(text)</mark>"
         )
@@ -625,7 +628,7 @@ public final class TheaPrintFriendlyManager: ObservableObject {
     }
 
     private func wrapInPrintStyles(_ content: String, title: String, options: PDFExportOptions) -> String {
-        return """
+        """
         <!DOCTYPE html>
         <html>
         <head>
@@ -734,7 +737,7 @@ public struct PrintFriendlySettings: Codable {
 
 public struct PDFExportOptions: Codable {
     public var pageSize: PageSize = .a4
-    public var margins: Margins = Margins()
+    public var margins: Margins = .init()
     public var fontSize: Int = 12
     public var includeHeader: Bool = true
     public var includeFooter: Bool = true
@@ -754,10 +757,10 @@ public struct PDFExportOptions: Codable {
         }
 
         #if os(macOS)
-        public var nsSize: NSSize {
-            // Convert mm to points (1mm = 2.834645669 points)
-            NSSize(width: width * 2.834645669, height: height * 2.834645669)
-        }
+            public var nsSize: NSSize {
+                // Convert mm to points (1mm = 2.834645669 points)
+                NSSize(width: width * 2.834645669, height: height * 2.834645669)
+            }
         #endif
     }
 
@@ -788,16 +791,16 @@ public enum PrintFriendlyError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .cleaningFailed(let reason):
-            return "Failed to clean page: \(reason)"
+        case let .cleaningFailed(reason):
+            "Failed to clean page: \(reason)"
         case .noPageLoaded:
-            return "No page is currently loaded"
-        case .pdfGenerationFailed(let reason):
-            return "Failed to generate PDF: \(reason)"
-        case .screenshotFailed(let reason):
-            return "Failed to capture screenshot: \(reason)"
+            "No page is currently loaded"
+        case let .pdfGenerationFailed(reason):
+            "Failed to generate PDF: \(reason)"
+        case let .screenshotFailed(reason):
+            "Failed to capture screenshot: \(reason)"
         case .nothingToUndo:
-            return "Nothing to undo"
+            "Nothing to undo"
         }
     }
 }
@@ -818,7 +821,8 @@ struct HTMLDocument {
             let pattern = "<[^>]+id=[\"']\(idName)[\"'][^>]*>(.*?)</[^>]+>"
             if let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators, .caseInsensitive]),
                let match = regex.firstMatch(in: html, options: [], range: NSRange(html.startIndex..., in: html)),
-               let range = Range(match.range, in: html) {
+               let range = Range(match.range, in: html)
+            {
                 return String(html[range])
             }
         }
@@ -828,7 +832,8 @@ struct HTMLDocument {
             let pattern = "<[^>]+class=[\"'][^\"']*\(className)[^\"']*[\"'][^>]*>(.*?)</[^>]+>"
             if let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators, .caseInsensitive]),
                let match = regex.firstMatch(in: html, options: [], range: NSRange(html.startIndex..., in: html)),
-               let range = Range(match.range, in: html) {
+               let range = Range(match.range, in: html)
+            {
                 return String(html[range])
             }
         }
@@ -837,7 +842,8 @@ struct HTMLDocument {
         let pattern = "<\(selector)[^>]*>(.*?)</\(selector)>"
         if let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators, .caseInsensitive]),
            let match = regex.firstMatch(in: html, options: [], range: NSRange(html.startIndex..., in: html)),
-           let range = Range(match.range, in: html) {
+           let range = Range(match.range, in: html)
+        {
             return String(html[range])
         }
 

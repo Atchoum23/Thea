@@ -144,7 +144,7 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
 
     // MARK: - API Methods
 
-    public func searchUSDA(query: String, pageSize: Int = 20) async throws -> [FoodItem] {
+    public func searchUSDA(query _: String, pageSize _: Int = 20) async throws -> [FoodItem] {
         // In production, would make actual API call
         // For now, return mock data
         [
@@ -163,12 +163,12 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
         ]
     }
 
-    public func fetchFoodDetails(fdcID: String) async throws -> FoodItem {
+    public func fetchFoodDetails(fdcID _: String) async throws -> FoodItem {
         // Would make API call: GET /v1/food/{fdcID}
         throw NutritionError.foodNotFound
     }
 
-    public func fetchBrandedFood(barcode: String) async throws -> FoodItem? {
+    public func fetchBrandedFood(barcode _: String) async throws -> FoodItem? {
         // Would query: GET /v1/foods/search?query=gtinUpc:{barcode}
         nil
     }
@@ -178,7 +178,7 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
     /// Make a secure API request with API key in header (not URL parameters)
     /// Security: API keys in URL parameters are logged in server access logs and browser history
     private func makeRequest(endpoint: String, parameters: [String: String] = [:]) async throws -> Data {
-        guard let apiKey = apiKey else {
+        guard let apiKey else {
             throw NutritionError.usdaAPIError("API key not configured")
         }
 
@@ -198,7 +198,8 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
+              (200 ... 299).contains(httpResponse.statusCode)
+        else {
             throw NutritionError.usdaAPIError("HTTP error")
         }
 
@@ -275,7 +276,7 @@ public actor NutritionAnalysisEngine: NutritionAnalysisProtocol {
         }
 
         // Perfect day
-        if abs(calorieDeficit) < 100 && dailySummary.macroBalance.isBalanced {
+        if abs(calorieDeficit) < 100, dailySummary.macroBalance.isBalanced {
             insights.append(NutritionInsight(
                 type: .excellentDay,
                 title: "Excellent Nutrition!",

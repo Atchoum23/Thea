@@ -208,21 +208,21 @@ private struct SyncStatusRow: View {
 
     private var statusIcon: String {
         if status.isReady {
-            return "checkmark.circle.fill"
+            "checkmark.circle.fill"
         } else if status.isEnabled {
-            return "exclamationmark.circle.fill"
+            "exclamationmark.circle.fill"
         } else {
-            return "xmark.circle.fill"
+            "xmark.circle.fill"
         }
     }
 
     private var statusColor: Color {
         if status.isReady {
-            return .green
+            .green
         } else if status.isEnabled {
-            return .orange
+            .orange
         } else {
-            return .red
+            .red
         }
     }
 }
@@ -231,7 +231,7 @@ private struct SyncStatusRow: View {
 
 private struct SyncSettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var config = SyncConfiguration()
+    @State private var config = CrossDeviceSyncConfiguration()
     @State private var handoffConfig = HandoffConfiguration()
 
     var body: some View {

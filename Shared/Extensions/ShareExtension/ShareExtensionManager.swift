@@ -1,11 +1,11 @@
 // ShareExtensionManager.swift
 // Share Extension support for receiving content from other apps
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Share Extension Manager
@@ -36,12 +36,12 @@ public final class ShareExtensionManager: ObservableObject {
     private func setupObservers() {
         // Listen for app becoming active to check for new shared content
         #if os(iOS)
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appDidBecomeActive),
-            name: UIApplication.didBecomeActiveNotification,
-            object: nil
-        )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(appDidBecomeActive),
+                name: UIApplication.didBecomeActiveNotification,
+                object: nil
+            )
         #endif
     }
 
@@ -119,7 +119,8 @@ public final class ShareExtensionManager: ObservableObject {
 
     private func processURL(_ content: SharedContent) async -> SharedContentResult {
         guard let urlString = content.url,
-              let url = URL(string: urlString) else {
+              let url = URL(string: urlString)
+        else {
             return SharedContentResult(success: false, error: "Invalid URL")
         }
 
@@ -141,7 +142,7 @@ public final class ShareExtensionManager: ObservableObject {
         // Analyze image with Vision
         do {
             let analysis = try await VisionIntelligence.shared.analyzeForAI(imageData: imageData)
-            let message = "Shared image analysis:\n\n\(analysis.description)"
+            let message = "Shared image analysis:\n\n\(analysis.summary)"
 
             return SharedContentResult(
                 success: true,
@@ -176,7 +177,7 @@ public final class ShareExtensionManager: ObservableObject {
         // Analyze PDF with Document Intelligence
         do {
             let analysis = try await DocumentIntelligence.shared.analyze(documentData: pdfData, type: .pdf)
-            let message = "Shared PDF:\n\nTitle: \(analysis.title ?? "Unknown")\n\nSummary: \(analysis.summary)"
+            let message = "Shared PDF:\n\nTitle: \(analysis.metadata.title ?? "Unknown")\n\nSummary: \(analysis.summary)"
 
             return SharedContentResult(
                 success: true,
@@ -236,7 +237,8 @@ public final class ShareExtensionManager: ObservableObject {
         // Load existing content
         if FileManager.default.fileExists(atPath: sharedDataURL.path),
            let data = try? Data(contentsOf: sharedDataURL),
-           let decoded = try? JSONDecoder().decode([SharedContent].self, from: data) {
+           let decoded = try? JSONDecoder().decode([SharedContent].self, from: data)
+        {
             existing = decoded
         }
 
@@ -417,124 +419,125 @@ public extension Notification.Name {
 // MARK: - Share Extension View Controller Base
 
 #if canImport(UIKit)
-import Social
+    import Social
 
-/// Base class for Share Extension view controller
-@available(iOS 13.0, *)
-open class TheaShareExtensionViewController: SLComposeServiceViewController {
-
-    override open func isContentValid() -> Bool {
-        // SAFETY: Validate content without force unwrapping extensionContext
-        guard let context = extensionContext else { return contentText != nil }
-        return contentText != nil || !context.inputItems.isEmpty
-    }
-
-    override open func didSelectPost() {
-        // Process the shared content
-        Task {
-            await processSharedContent()
-            extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
-        }
-    }
-
-    private func processSharedContent() async {
-        guard let extensionItem = extensionContext?.inputItems.first as? NSExtensionItem,
-              let itemProviders = extensionItem.attachments else {
-            return
+    /// Base class for Share Extension view controller
+    @available(iOS 13.0, *)
+    open class TheaShareExtensionViewController: SLComposeServiceViewController {
+        override open func isContentValid() -> Bool {
+            // SAFETY: Validate content without force unwrapping extensionContext
+            guard let context = extensionContext else { return contentText != nil }
+            return contentText != nil || !context.inputItems.isEmpty
         }
 
-        for provider in itemProviders {
-            if provider.hasItemConformingToTypeIdentifier("public.plain-text") {
-                await handleTextItem(provider)
-            } else if provider.hasItemConformingToTypeIdentifier("public.url") {
-                await handleURLItem(provider)
-            } else if provider.hasItemConformingToTypeIdentifier("public.image") {
-                await handleImageItem(provider)
-            } else if provider.hasItemConformingToTypeIdentifier("com.adobe.pdf") {
-                await handlePDFItem(provider)
-            } else if provider.hasItemConformingToTypeIdentifier("public.data") {
-                await handleFileItem(provider)
+        override open func didSelectPost() {
+            // Process the shared content
+            Task {
+                await processSharedContent()
+                extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
             }
         }
-    }
 
-    private func handleTextItem(_ provider: NSItemProvider) async {
-        do {
-            let text = try await provider.loadItem(forTypeIdentifier: "public.plain-text") as? String
-            let content = SharedContent(type: .text, text: text)
-            ShareExtensionManager.addSharedContent(content)
-        } catch {
-            print("Failed to load text: \(error)")
+        private func processSharedContent() async {
+            guard let extensionItem = extensionContext?.inputItems.first as? NSExtensionItem,
+                  let itemProviders = extensionItem.attachments
+            else {
+                return
+            }
+
+            for provider in itemProviders {
+                if provider.hasItemConformingToTypeIdentifier("public.plain-text") {
+                    await handleTextItem(provider)
+                } else if provider.hasItemConformingToTypeIdentifier("public.url") {
+                    await handleURLItem(provider)
+                } else if provider.hasItemConformingToTypeIdentifier("public.image") {
+                    await handleImageItem(provider)
+                } else if provider.hasItemConformingToTypeIdentifier("com.adobe.pdf") {
+                    await handlePDFItem(provider)
+                } else if provider.hasItemConformingToTypeIdentifier("public.data") {
+                    await handleFileItem(provider)
+                }
+            }
         }
-    }
 
-    private func handleURLItem(_ provider: NSItemProvider) async {
-        do {
-            let url = try await provider.loadItem(forTypeIdentifier: "public.url") as? URL
-            let content = SharedContent(type: .url, url: url?.absoluteString)
-            ShareExtensionManager.addSharedContent(content)
-        } catch {
-            print("Failed to load URL: \(error)")
-        }
-    }
-
-    private func handleImageItem(_ provider: NSItemProvider) async {
-        do {
-            if let image = try await provider.loadItem(forTypeIdentifier: "public.image") as? UIImage,
-               let data = image.jpegData(compressionQuality: 0.8) {
-                let content = SharedContent(type: .image, data: data)
+        private func handleTextItem(_ provider: NSItemProvider) async {
+            do {
+                let text = try await provider.loadItem(forTypeIdentifier: "public.plain-text") as? String
+                let content = SharedContent(type: .text, text: text)
                 ShareExtensionManager.addSharedContent(content)
+            } catch {
+                print("Failed to load text: \(error)")
             }
-        } catch {
-            print("Failed to load image: \(error)")
         }
-    }
 
-    private func handlePDFItem(_ provider: NSItemProvider) async {
-        do {
-            if let url = try await provider.loadItem(forTypeIdentifier: "com.adobe.pdf") as? URL {
-                let data = try Data(contentsOf: url)
-                let content = SharedContent(type: .pdf, data: data, fileName: url.lastPathComponent)
+        private func handleURLItem(_ provider: NSItemProvider) async {
+            do {
+                let url = try await provider.loadItem(forTypeIdentifier: "public.url") as? URL
+                let content = SharedContent(type: .url, url: url?.absoluteString)
                 ShareExtensionManager.addSharedContent(content)
+            } catch {
+                print("Failed to load URL: \(error)")
             }
-        } catch {
-            print("Failed to load PDF: \(error)")
+        }
+
+        private func handleImageItem(_ provider: NSItemProvider) async {
+            do {
+                if let image = try await provider.loadItem(forTypeIdentifier: "public.image") as? UIImage,
+                   let data = image.jpegData(compressionQuality: 0.8)
+                {
+                    let content = SharedContent(type: .image, data: data)
+                    ShareExtensionManager.addSharedContent(content)
+                }
+            } catch {
+                print("Failed to load image: \(error)")
+            }
+        }
+
+        private func handlePDFItem(_ provider: NSItemProvider) async {
+            do {
+                if let url = try await provider.loadItem(forTypeIdentifier: "com.adobe.pdf") as? URL {
+                    let data = try Data(contentsOf: url)
+                    let content = SharedContent(type: .pdf, data: data, fileName: url.lastPathComponent)
+                    ShareExtensionManager.addSharedContent(content)
+                }
+            } catch {
+                print("Failed to load PDF: \(error)")
+            }
+        }
+
+        private func handleFileItem(_ provider: NSItemProvider) async {
+            do {
+                if let url = try await provider.loadItem(forTypeIdentifier: "public.data") as? URL {
+                    let data = try Data(contentsOf: url)
+                    let content = SharedContent(
+                        type: .file,
+                        data: data,
+                        fileURL: url,
+                        fileName: url.lastPathComponent
+                    )
+                    ShareExtensionManager.addSharedContent(content)
+                }
+            } catch {
+                print("Failed to load file: \(error)")
+            }
+        }
+
+        override open func configurationItems() -> [Any] {
+            // SAFETY: Return non-optional array (override removes IUO)
+            []
         }
     }
-
-    private func handleFileItem(_ provider: NSItemProvider) async {
-        do {
-            if let url = try await provider.loadItem(forTypeIdentifier: "public.data") as? URL {
-                let data = try Data(contentsOf: url)
-                let content = SharedContent(
-                    type: .file,
-                    data: data,
-                    fileURL: url,
-                    fileName: url.lastPathComponent
-                )
-                ShareExtensionManager.addSharedContent(content)
-            }
-        } catch {
-            print("Failed to load file: \(error)")
-        }
-    }
-
-    override open func configurationItems() -> [Any] {
-        // SAFETY: Return non-optional array (override removes IUO)
-        return []
-    }
-}
 #endif
 
 // MARK: - Action Extension Support
 
 /// Handles action extension items
 public class ActionExtensionHandler {
-
     /// Process action extension input
     public static func processInput(from extensionContext: NSExtensionContext?) async -> SharedContent? {
         guard let extensionItem = extensionContext?.inputItems.first as? NSExtensionItem,
-              let provider = extensionItem.attachments?.first else {
+              let provider = extensionItem.attachments?.first
+        else {
             return nil
         }
 

@@ -17,7 +17,7 @@ struct TheamacOSApp: App {
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,
-                cloudKitDatabase: .none  // Disable CloudKit to avoid sync requirements
+                cloudKitDatabase: .none // Disable CloudKit to avoid sync requirements
             )
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
             _modelContainer = State(initialValue: container)
@@ -90,10 +90,10 @@ struct TheamacOSApp: App {
             if let container = modelContainer {
                 Text("Life Tracking (Coming Soon)")
                     .modelContainer(container)
-                    .frame(minWidth: 1_000, minHeight: 700)
+                    .frame(minWidth: 1000, minHeight: 700)
             }
         }
-        .defaultSize(width: 1_200, height: 800)
+        .defaultSize(width: 1200, height: 800)
 
         // SETTINGS (SINGLE INSTANCE)
         Settings {
@@ -138,7 +138,7 @@ struct TheamacOSApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    func applicationDidFinishLaunching(_: Notification) {
         // Enable voice activation if configured
         if VoiceActivationManager.shared.isEnabled {
             Task {
@@ -148,11 +148,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
         true
     }
 
-    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+    func applicationSupportsSecureRestorableState(_: NSApplication) -> Bool {
         true
     }
 }

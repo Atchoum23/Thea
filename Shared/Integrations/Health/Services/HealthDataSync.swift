@@ -1,10 +1,10 @@
 import Combine
 import Foundation
 #if canImport(HealthKit)
-import HealthKit
+    import HealthKit
 #endif
 #if os(iOS)
-import UIKit
+    import UIKit
 #endif
 
 /// Health data synchronization service for cross-device sync and cloud backup
@@ -13,7 +13,7 @@ public actor HealthDataSync {
 
     private var syncTasks: [UUID: Task<Void, Never>] = [:]
     private var lastSyncDate: Date?
-    private let syncInterval: TimeInterval = 3_600 // 1 hour
+    private let syncInterval: TimeInterval = 3600 // 1 hour
 
     public enum SyncError: Error, Sendable, LocalizedError {
         case healthKitUnavailable
@@ -25,15 +25,15 @@ public actor HealthDataSync {
         public var errorDescription: String? {
             switch self {
             case .healthKitUnavailable:
-                return "HealthKit is not available on this device"
+                "HealthKit is not available on this device"
             case .noDataToSync:
-                return "No health data available to synchronize"
+                "No health data available to synchronize"
             case .syncInProgress:
-                return "A sync operation is already in progress"
+                "A sync operation is already in progress"
             case .cloudStorageUnavailable:
-                return "Cloud storage is not available"
+                "Cloud storage is not available"
             case .authorizationDenied:
-                return "HealthKit authorization was denied"
+                "HealthKit authorization was denied"
             }
         }
     }
@@ -57,45 +57,45 @@ public actor HealthDataSync {
     /// Syncs health data to cloud storage
     public func syncToCloud() async throws {
         #if canImport(HealthKit)
-        guard HKHealthStore.isHealthDataAvailable() else {
-            throw SyncError.healthKitUnavailable
-        }
-
-        // Check if sync is already in progress
-        guard syncTasks.isEmpty else {
-            throw SyncError.syncInProgress
-        }
-
-        let syncTask = Task {
-            do {
-                try await performCloudSync()
-                lastSyncDate = Date()
-            } catch {
-                print("Cloud sync failed: \(error.localizedDescription)")
+            guard HKHealthStore.isHealthDataAvailable() else {
+                throw SyncError.healthKitUnavailable
             }
-        }
 
-        let taskID = UUID()
-        syncTasks[taskID] = syncTask
+            // Check if sync is already in progress
+            guard syncTasks.isEmpty else {
+                throw SyncError.syncInProgress
+            }
 
-        await syncTask.value
+            let syncTask = Task {
+                do {
+                    try await performCloudSync()
+                    lastSyncDate = Date()
+                } catch {
+                    print("Cloud sync failed: \(error.localizedDescription)")
+                }
+            }
 
-        syncTasks.removeValue(forKey: taskID)
+            let taskID = UUID()
+            syncTasks[taskID] = syncTask
+
+            await syncTask.value
+
+            syncTasks.removeValue(forKey: taskID)
         #else
-        throw SyncError.healthKitUnavailable
+            throw SyncError.healthKitUnavailable
         #endif
     }
 
     /// Syncs health data from cloud storage
     public func syncFromCloud() async throws {
         #if canImport(HealthKit)
-        guard HKHealthStore.isHealthDataAvailable() else {
-            throw SyncError.healthKitUnavailable
-        }
+            guard HKHealthStore.isHealthDataAvailable() else {
+                throw SyncError.healthKitUnavailable
+            }
 
-        try await performCloudFetch()
+            try await performCloudFetch()
         #else
-        throw SyncError.healthKitUnavailable
+            throw SyncError.healthKitUnavailable
         #endif
     }
 
@@ -122,98 +122,99 @@ public actor HealthDataSync {
 
     private func performCloudSync() async throws {
         #if canImport(HealthKit)
-        // 1. Fetch recent health data
-        let healthData = try await fetchRecentHealthData()
+            // 1. Fetch recent health data
+            let healthData = try await fetchRecentHealthData()
 
-        guard !healthData.isEmpty else {
-            throw SyncError.noDataToSync
-        }
+            guard !healthData.isEmpty else {
+                throw SyncError.noDataToSync
+            }
 
-        // 2. Prepare data for upload
-        let syncPackage = try prepareSyncPackage(healthData)
+            // 2. Prepare data for upload
+            let syncPackage = try prepareSyncPackage(healthData)
 
-        // 3. Upload to cloud storage
-        try await uploadToCloud(syncPackage)
+            // 3. Upload to cloud storage
+            try await uploadToCloud(syncPackage)
 
-        // 4. Verify upload
-        try await verifyCloudData()
+            // 4. Verify upload
+            try await verifyCloudData()
         #endif
     }
 
     private func performCloudFetch() async throws {
         #if canImport(HealthKit)
-        // 1. Fetch data from cloud
-        let cloudData = try await fetchFromCloud()
+            // 1. Fetch data from cloud
+            let cloudData = try await fetchFromCloud()
 
-        // 2. Validate data
-        guard validateCloudData(cloudData) else {
-            throw SyncError.noDataToSync
-        }
+            // 2. Validate data
+            guard validateCloudData(cloudData) else {
+                throw SyncError.noDataToSync
+            }
 
-        // 3. Import to HealthKit
-        try await importToHealthKit(cloudData)
+            // 3. Import to HealthKit
+            try await importToHealthKit(cloudData)
         #endif
     }
 
     #if canImport(HealthKit)
-    private func fetchRecentHealthData() async throws -> [HealthDataRecord] {
-        let healthStore = HKHealthStore()
+        private func fetchRecentHealthData() async throws -> [HealthDataRecord] {
+            let healthStore = HKHealthStore()
 
-        // Fetch data from last sync or last 24 hours
-        let startDate = lastSyncDate ?? Date().daysAgo(1)
-        let endDate = Date()
+            // Fetch data from last sync or last 24 hours
+            let startDate = lastSyncDate ?? Date().daysAgo(1)
+            let endDate = Date()
 
-        var records: [HealthDataRecord] = []
+            var records: [HealthDataRecord] = []
 
-        // Fetch sleep data
-        if let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) {
-            let sleepData = try await fetchQuantityData(healthStore, type: sleepType, start: startDate, end: endDate)
-            records.append(contentsOf: sleepData)
+            // Fetch sleep data
+            if let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) {
+                let sleepData = try await fetchQuantityData(healthStore, type: sleepType, start: startDate, end: endDate)
+                records.append(contentsOf: sleepData)
+            }
+
+            // Fetch heart rate data
+            if let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate) {
+                let heartRateData = try await fetchQuantityData(healthStore, type: heartRateType, start: startDate, end: endDate)
+                records.append(contentsOf: heartRateData)
+            }
+
+            // Fetch step count data
+            if let stepsType = HKObjectType.quantityType(forIdentifier: .stepCount) {
+                let stepsData = try await fetchQuantityData(healthStore, type: stepsType, start: startDate, end: endDate)
+                records.append(contentsOf: stepsData)
+            }
+
+            // Fetch blood pressure data
+            if let systolicType = HKObjectType.quantityType(forIdentifier: .bloodPressureSystolic),
+               let diastolicType = HKObjectType.quantityType(forIdentifier: .bloodPressureDiastolic)
+            {
+                let bpData = try await fetchBloodPressureData(healthStore, systolic: systolicType, diastolic: diastolicType, start: startDate, end: endDate)
+                records.append(contentsOf: bpData)
+            }
+
+            return records
         }
 
-        // Fetch heart rate data
-        if let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate) {
-            let heartRateData = try await fetchQuantityData(healthStore, type: heartRateType, start: startDate, end: endDate)
-            records.append(contentsOf: heartRateData)
+        private func fetchQuantityData(
+            _: HKHealthStore,
+            type _: HKObjectType,
+            start _: Date,
+            end _: Date
+        ) async throws -> [HealthDataRecord] {
+            // Would implement actual HealthKit query
+            // Mock implementation for now
+            []
         }
 
-        // Fetch step count data
-        if let stepsType = HKObjectType.quantityType(forIdentifier: .stepCount) {
-            let stepsData = try await fetchQuantityData(healthStore, type: stepsType, start: startDate, end: endDate)
-            records.append(contentsOf: stepsData)
+        private func fetchBloodPressureData(
+            _: HKHealthStore,
+            systolic _: HKQuantityType,
+            diastolic _: HKQuantityType,
+            start _: Date,
+            end _: Date
+        ) async throws -> [HealthDataRecord] {
+            // Would implement actual HealthKit correlation query
+            []
         }
-
-        // Fetch blood pressure data
-        if let systolicType = HKObjectType.quantityType(forIdentifier: .bloodPressureSystolic),
-           let diastolicType = HKObjectType.quantityType(forIdentifier: .bloodPressureDiastolic) {
-            let bpData = try await fetchBloodPressureData(healthStore, systolic: systolicType, diastolic: diastolicType, start: startDate, end: endDate)
-            records.append(contentsOf: bpData)
-        }
-
-        return records
-    }
-
-    private func fetchQuantityData(
-        _ healthStore: HKHealthStore,
-        type: HKObjectType,
-        start: Date,
-        end: Date
-    ) async throws -> [HealthDataRecord] {
-        // Would implement actual HealthKit query
-        // Mock implementation for now
-        []
-    }
-
-    private func fetchBloodPressureData(
-        _ healthStore: HKHealthStore,
-        systolic: HKQuantityType,
-        diastolic: HKQuantityType,
-        start: Date,
-        end: Date
-    ) async throws -> [HealthDataRecord] {
-        // Would implement actual HealthKit correlation query
-        []
-    }
     #endif
 
     private func prepareSyncPackage(_ data: [HealthDataRecord]) throws -> SyncPackage {
@@ -225,7 +226,7 @@ public actor HealthDataSync {
         )
     }
 
-    private func uploadToCloud(_ package: SyncPackage) async throws {
+    private func uploadToCloud(_: SyncPackage) async throws {
         // Would implement actual cloud upload (iCloud, CloudKit, etc.)
         // Mock implementation
         try await Task.sleep(for: .milliseconds(500))
@@ -254,38 +255,38 @@ public actor HealthDataSync {
     }
 
     #if canImport(HealthKit)
-    private func importToHealthKit(_ package: SyncPackage) async throws {
-        let healthStore = HKHealthStore()
+        private func importToHealthKit(_ package: SyncPackage) async throws {
+            let healthStore = HKHealthStore()
 
-        for record in package.records {
-            try await saveRecordToHealthKit(healthStore, record: record)
+            for record in package.records {
+                try await saveRecordToHealthKit(healthStore, record: record)
+            }
         }
-    }
 
-    private func saveRecordToHealthKit(_ healthStore: HKHealthStore, record: HealthDataRecord) async throws {
-        // Would implement actual HealthKit save
-        // Mock implementation
-        try await Task.sleep(for: .milliseconds(50))
-    }
+        private func saveRecordToHealthKit(_: HKHealthStore, record _: HealthDataRecord) async throws {
+            // Would implement actual HealthKit save
+            // Mock implementation
+            try await Task.sleep(for: .milliseconds(50))
+        }
     #endif
 
     private func getDeviceIdentifier() -> String {
         #if os(iOS)
-        // UIDevice.current is MainActor-isolated, so we need to access it on MainActor
-        return MainActor.assumeIsolated {
-            UIDevice.current.identifierForVendor?.uuidString ?? "unknown-ios"
-        }
+            // UIDevice.current is MainActor-isolated, so we need to access it on MainActor
+            return MainActor.assumeIsolated {
+                UIDevice.current.identifierForVendor?.uuidString ?? "unknown-ios"
+            }
         #elseif os(macOS)
-        // macOS device identifier
-        var size = 0
-        sysctlbyname("kern.uuid", nil, &size, nil, 0)
-        var uuid = [UInt8](repeating: 0, count: size)
-        sysctlbyname("kern.uuid", &uuid, &size, nil, 0)
-        // Truncate null termination and decode as UTF-8
-        let truncatedUUID = uuid.prefix { $0 != 0 }
-        return String(decoding: truncatedUUID, as: UTF8.self)
+            // macOS device identifier
+            var size = 0
+            sysctlbyname("kern.uuid", nil, &size, nil, 0)
+            var uuid = [UInt8](repeating: 0, count: size)
+            sysctlbyname("kern.uuid", &uuid, &size, nil, 0)
+            // Truncate null termination and decode as UTF-8
+            let truncatedUUID = uuid.prefix { $0 != 0 }
+            return String(decoding: truncatedUUID, as: UTF8.self)
         #else
-        return "unknown-device"
+            return "unknown-device"
         #endif
     }
 }

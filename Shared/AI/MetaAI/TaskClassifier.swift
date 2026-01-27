@@ -241,7 +241,7 @@ public final class TaskClassifier {
 
     // MARK: - AI-Based Classification
 
-    private func classifyWithAI(_ query: String, fallback: TaskClassification) async throws -> TaskClassification {
+    private func classifyWithAI(_: String, fallback: TaskClassification) async throws -> TaskClassification {
         // TODO: Implement AI-based classification using a fast model
         // For now, return the keyword-based fallback
         // Future implementation:

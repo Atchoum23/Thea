@@ -8,31 +8,31 @@
 
 @preconcurrency import Foundation
 #if os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Observer Storage (MainActor isolated)
 
 #if os(macOS)
-/// MainActor-isolated storage for notification observers
-@MainActor
-final class ObserverStorage {
-    static let shared = ObserverStorage()
-    private var observers: [NSObjectProtocol] = []
+    /// MainActor-isolated storage for notification observers
+    @MainActor
+    final class ObserverStorage {
+        static let shared = ObserverStorage()
+        private var observers: [NSObjectProtocol] = []
 
-    private init() {}
+        private init() {}
 
-    func add(_ observer: NSObjectProtocol) {
-        observers.append(observer)
-    }
-
-    func removeAll() {
-        for observer in observers {
-            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        func add(_ observer: NSObjectProtocol) {
+            observers.append(observer)
         }
-        observers.removeAll()
+
+        func removeAll() {
+            for observer in observers {
+                NSWorkspace.shared.notificationCenter.removeObserver(observer)
+            }
+            observers.removeAll()
+        }
     }
-}
 #endif
 
 // MARK: - App State Monitor
@@ -67,7 +67,7 @@ public actor AppStateMonitor {
         isMonitoring = true
 
         #if os(macOS)
-        await setupMacOSMonitoring()
+            await setupMacOSMonitoring()
         #endif
 
         // Initialize current app states
@@ -79,7 +79,7 @@ public actor AppStateMonitor {
         isMonitoring = false
 
         #if os(macOS)
-        await ObserverStorage.shared.removeAll()
+            await ObserverStorage.shared.removeAll()
         #endif
     }
 
@@ -95,7 +95,8 @@ public actor AppStateMonitor {
     /// Extract Sendable data from notification
     private static func extractAppData(from notification: Notification) -> AppNotificationData? {
         guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-              let bundleId = app.bundleIdentifier else {
+              let bundleId = app.bundleIdentifier
+        else {
             return nil
         }
         return AppNotificationData(
@@ -108,188 +109,188 @@ public actor AppStateMonitor {
     }
 
     #if os(macOS)
-    private func setupMacOSMonitoring() async {
-        let notificationCenter = NSWorkspace.shared.notificationCenter
+        private func setupMacOSMonitoring() async {
+            let notificationCenter = NSWorkspace.shared.notificationCenter
 
-        // App launched
-        await MainActor.run {
-            let observer = notificationCenter.addObserver(
-                forName: NSWorkspace.didLaunchApplicationNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] notification in
-                guard let appData = Self.extractAppData(from: notification) else { return }
-                Task { [weak self] in
-                    await self?.handleAppLaunched(appData: appData)
+            // App launched
+            await MainActor.run {
+                let observer = notificationCenter.addObserver(
+                    forName: NSWorkspace.didLaunchApplicationNotification,
+                    object: nil,
+                    queue: .main
+                ) { [weak self] notification in
+                    guard let appData = Self.extractAppData(from: notification) else { return }
+                    Task { [weak self] in
+                        await self?.handleAppLaunched(appData: appData)
+                    }
                 }
+                ObserverStorage.shared.add(observer)
             }
-            ObserverStorage.shared.add(observer)
-        }
 
-        // App terminated
-        await MainActor.run {
-            let observer = notificationCenter.addObserver(
-                forName: NSWorkspace.didTerminateApplicationNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] notification in
-                guard let appData = Self.extractAppData(from: notification) else { return }
-                Task { [weak self] in
-                    await self?.handleAppTerminated(bundleId: appData.bundleIdentifier)
+            // App terminated
+            await MainActor.run {
+                let observer = notificationCenter.addObserver(
+                    forName: NSWorkspace.didTerminateApplicationNotification,
+                    object: nil,
+                    queue: .main
+                ) { [weak self] notification in
+                    guard let appData = Self.extractAppData(from: notification) else { return }
+                    Task { [weak self] in
+                        await self?.handleAppTerminated(bundleId: appData.bundleIdentifier)
+                    }
                 }
+                ObserverStorage.shared.add(observer)
             }
-            ObserverStorage.shared.add(observer)
-        }
 
-        // App activated
-        await MainActor.run {
-            let observer = notificationCenter.addObserver(
-                forName: NSWorkspace.didActivateApplicationNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] notification in
-                guard let appData = Self.extractAppData(from: notification) else { return }
-                Task { [weak self] in
-                    await self?.handleAppActivated(appData: appData)
+            // App activated
+            await MainActor.run {
+                let observer = notificationCenter.addObserver(
+                    forName: NSWorkspace.didActivateApplicationNotification,
+                    object: nil,
+                    queue: .main
+                ) { [weak self] notification in
+                    guard let appData = Self.extractAppData(from: notification) else { return }
+                    Task { [weak self] in
+                        await self?.handleAppActivated(appData: appData)
+                    }
                 }
+                ObserverStorage.shared.add(observer)
             }
-            ObserverStorage.shared.add(observer)
-        }
 
-        // App deactivated
-        await MainActor.run {
-            let observer = notificationCenter.addObserver(
-                forName: NSWorkspace.didDeactivateApplicationNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] notification in
-                guard let appData = Self.extractAppData(from: notification) else { return }
-                Task { [weak self] in
-                    await self?.handleAppDeactivated(bundleId: appData.bundleIdentifier)
+            // App deactivated
+            await MainActor.run {
+                let observer = notificationCenter.addObserver(
+                    forName: NSWorkspace.didDeactivateApplicationNotification,
+                    object: nil,
+                    queue: .main
+                ) { [weak self] notification in
+                    guard let appData = Self.extractAppData(from: notification) else { return }
+                    Task { [weak self] in
+                        await self?.handleAppDeactivated(bundleId: appData.bundleIdentifier)
+                    }
                 }
+                ObserverStorage.shared.add(observer)
             }
-            ObserverStorage.shared.add(observer)
-        }
 
-        // App hidden
-        await MainActor.run {
-            let observer = notificationCenter.addObserver(
-                forName: NSWorkspace.didHideApplicationNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] notification in
-                guard let appData = Self.extractAppData(from: notification) else { return }
-                Task { [weak self] in
-                    await self?.handleAppHidden(bundleId: appData.bundleIdentifier)
+            // App hidden
+            await MainActor.run {
+                let observer = notificationCenter.addObserver(
+                    forName: NSWorkspace.didHideApplicationNotification,
+                    object: nil,
+                    queue: .main
+                ) { [weak self] notification in
+                    guard let appData = Self.extractAppData(from: notification) else { return }
+                    Task { [weak self] in
+                        await self?.handleAppHidden(bundleId: appData.bundleIdentifier)
+                    }
                 }
+                ObserverStorage.shared.add(observer)
             }
-            ObserverStorage.shared.add(observer)
-        }
 
-        // App unhidden
-        await MainActor.run {
-            let observer = notificationCenter.addObserver(
-                forName: NSWorkspace.didUnhideApplicationNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] notification in
-                guard let appData = Self.extractAppData(from: notification) else { return }
-                Task { [weak self] in
-                    await self?.handleAppUnhidden(bundleId: appData.bundleIdentifier)
+            // App unhidden
+            await MainActor.run {
+                let observer = notificationCenter.addObserver(
+                    forName: NSWorkspace.didUnhideApplicationNotification,
+                    object: nil,
+                    queue: .main
+                ) { [weak self] notification in
+                    guard let appData = Self.extractAppData(from: notification) else { return }
+                    Task { [weak self] in
+                        await self?.handleAppUnhidden(bundleId: appData.bundleIdentifier)
+                    }
                 }
+                ObserverStorage.shared.add(observer)
             }
-            ObserverStorage.shared.add(observer)
-        }
-    }
-
-    private func handleAppLaunched(appData: AppNotificationData) async {
-        let info = AppInfo(
-            bundleIdentifier: appData.bundleIdentifier,
-            name: appData.name,
-            isActive: appData.isActive,
-            isHidden: appData.isHidden,
-            processIdentifier: appData.processIdentifier
-        )
-
-        appStates[appData.bundleIdentifier] = AppState(
-            bundleIdentifier: appData.bundleIdentifier,
-            isRunning: true,
-            isActive: appData.isActive,
-            isHidden: appData.isHidden,
-            launchTime: Date()
-        )
-
-        onAppLaunched?(info)
-    }
-
-    private func handleAppTerminated(bundleId: String) async {
-        appStates.removeValue(forKey: bundleId)
-        onAppTerminated?(bundleId)
-    }
-
-    private func handleAppActivated(appData: AppNotificationData) async {
-        if var state = appStates[appData.bundleIdentifier] {
-            state.isActive = true
-            state.lastActivatedTime = Date()
-            appStates[appData.bundleIdentifier] = state
         }
 
-        let info = AppInfo(
-            bundleIdentifier: appData.bundleIdentifier,
-            name: appData.name,
-            isActive: true,
-            isHidden: appData.isHidden,
-            processIdentifier: appData.processIdentifier
-        )
+        private func handleAppLaunched(appData: AppNotificationData) async {
+            let info = AppInfo(
+                bundleIdentifier: appData.bundleIdentifier,
+                name: appData.name,
+                isActive: appData.isActive,
+                isHidden: appData.isHidden,
+                processIdentifier: appData.processIdentifier
+            )
 
-        onAppActivated?(info)
-    }
+            appStates[appData.bundleIdentifier] = AppState(
+                bundleIdentifier: appData.bundleIdentifier,
+                isRunning: true,
+                isActive: appData.isActive,
+                isHidden: appData.isHidden,
+                launchTime: Date()
+            )
 
-    private func handleAppDeactivated(bundleId: String) async {
-        if var state = appStates[bundleId] {
-            state.isActive = false
-            appStates[bundleId] = state
+            onAppLaunched?(info)
         }
 
-        onAppDeactivated?(bundleId)
-    }
-
-    private func handleAppHidden(bundleId: String) async {
-        if var state = appStates[bundleId] {
-            state.isHidden = true
-            appStates[bundleId] = state
+        private func handleAppTerminated(bundleId: String) async {
+            appStates.removeValue(forKey: bundleId)
+            onAppTerminated?(bundleId)
         }
 
-        onAppHidden?(bundleId)
-    }
+        private func handleAppActivated(appData: AppNotificationData) async {
+            if var state = appStates[appData.bundleIdentifier] {
+                state.isActive = true
+                state.lastActivatedTime = Date()
+                appStates[appData.bundleIdentifier] = state
+            }
 
-    private func handleAppUnhidden(bundleId: String) async {
-        if var state = appStates[bundleId] {
-            state.isHidden = false
-            appStates[bundleId] = state
+            let info = AppInfo(
+                bundleIdentifier: appData.bundleIdentifier,
+                name: appData.name,
+                isActive: true,
+                isHidden: appData.isHidden,
+                processIdentifier: appData.processIdentifier
+            )
+
+            onAppActivated?(info)
         }
 
-        onAppUnhidden?(bundleId)
-    }
+        private func handleAppDeactivated(bundleId: String) async {
+            if var state = appStates[bundleId] {
+                state.isActive = false
+                appStates[bundleId] = state
+            }
+
+            onAppDeactivated?(bundleId)
+        }
+
+        private func handleAppHidden(bundleId: String) async {
+            if var state = appStates[bundleId] {
+                state.isHidden = true
+                appStates[bundleId] = state
+            }
+
+            onAppHidden?(bundleId)
+        }
+
+        private func handleAppUnhidden(bundleId: String) async {
+            if var state = appStates[bundleId] {
+                state.isHidden = false
+                appStates[bundleId] = state
+            }
+
+            onAppUnhidden?(bundleId)
+        }
     #endif
 
     private func initializeAppStates() async {
         #if os(macOS)
-        let apps = await MainActor.run {
-            NSWorkspace.shared.runningApplications
-        }
+            let apps = await MainActor.run {
+                NSWorkspace.shared.runningApplications
+            }
 
-        for app in apps {
-            guard let bundleId = app.bundleIdentifier else { continue }
+            for app in apps {
+                guard let bundleId = app.bundleIdentifier else { continue }
 
-            appStates[bundleId] = AppState(
-                bundleIdentifier: bundleId,
-                isRunning: true,
-                isActive: app.isActive,
-                isHidden: app.isHidden,
-                launchTime: nil
-            )
-        }
+                appStates[bundleId] = AppState(
+                    bundleIdentifier: bundleId,
+                    isRunning: true,
+                    isActive: app.isActive,
+                    isHidden: app.isHidden,
+                    launchTime: nil
+                )
+            }
         #endif
     }
 
@@ -363,29 +364,29 @@ public actor VisualAnalysisService {
     /// Capture the entire screen
     public func captureScreen() async throws -> CGImage? {
         #if os(macOS)
-        guard CGPreflightScreenCaptureAccess() else {
-            CGRequestScreenCaptureAccess()
-            throw IntegrationError.accessibilityNotGranted
-        }
+            guard CGPreflightScreenCaptureAccess() else {
+                CGRequestScreenCaptureAccess()
+                throw IntegrationError.accessibilityNotGranted
+            }
 
-        let displayId = CGMainDisplayID()
-        return CGDisplayCreateImage(displayId)
+            let displayId = CGMainDisplayID()
+            return CGDisplayCreateImage(displayId)
         #else
-        throw IntegrationError.notSupported
+            throw IntegrationError.notSupported
         #endif
     }
 
     /// Capture a specific region
     public func captureRegion(_ rect: CGRect) async throws -> CGImage? {
         #if os(macOS)
-        guard CGPreflightScreenCaptureAccess() else {
-            throw IntegrationError.accessibilityNotGranted
-        }
+            guard CGPreflightScreenCaptureAccess() else {
+                throw IntegrationError.accessibilityNotGranted
+            }
 
-        let displayId = CGMainDisplayID()
-        return CGDisplayCreateImage(displayId, rect: rect)
+            let displayId = CGMainDisplayID()
+            return CGDisplayCreateImage(displayId, rect: rect)
         #else
-        throw IntegrationError.notSupported
+            throw IntegrationError.notSupported
         #endif
     }
 
@@ -393,34 +394,34 @@ public actor VisualAnalysisService {
     @available(macOS, deprecated: 14.0, message: "Use ScreenCaptureKit for macOS 14+")
     public func captureWindow(windowId: CGWindowID) async throws -> CGImage? {
         #if os(macOS)
-        guard CGPreflightScreenCaptureAccess() else {
-            throw IntegrationError.accessibilityNotGranted
-        }
+            guard CGPreflightScreenCaptureAccess() else {
+                throw IntegrationError.accessibilityNotGranted
+            }
 
-        // Note: CGWindowListCreateImage is deprecated in macOS 14.0
-        // TODO: Migrate to ScreenCaptureKit for macOS 14+
-        return CGWindowListCreateImage(
-            .null,
-            .optionIncludingWindow,
-            windowId,
-            [.boundsIgnoreFraming]
-        )
+            // Note: CGWindowListCreateImage is deprecated in macOS 14.0
+            // TODO: Migrate to ScreenCaptureKit for macOS 14+
+            return CGWindowListCreateImage(
+                .null,
+                .optionIncludingWindow,
+                windowId,
+                [.boundsIgnoreFraming]
+            )
         #else
-        throw IntegrationError.notSupported
+            throw IntegrationError.notSupported
         #endif
     }
 
     // MARK: - Element Detection
 
     /// Find UI elements in an image using visual analysis
-    public func detectElements(in image: CGImage) async throws -> [DetectedElement] {
+    public func detectElements(in _: CGImage) async throws -> [DetectedElement] {
         // This would use Vision framework for element detection
         // Simplified implementation
         []
     }
 
     /// Find text in an image using OCR
-    public func detectText(in image: CGImage) async throws -> [DetectedText] {
+    public func detectText(in _: CGImage) async throws -> [DetectedText] {
         // This would use Vision framework for OCR
         // Simplified implementation
         []

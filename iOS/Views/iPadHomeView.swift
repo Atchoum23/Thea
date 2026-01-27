@@ -32,21 +32,21 @@ struct IPadHomeView: View {
 
         var icon: String {
             switch self {
-            case .chat: return "message.fill"
-            case .projects: return "folder.fill"
-            case .knowledge: return "brain.head.profile"
-            case .financial: return "dollarsign.circle.fill"
-            case .settings: return "gear"
+            case .chat: "message.fill"
+            case .projects: "folder.fill"
+            case .knowledge: "brain.head.profile"
+            case .financial: "dollarsign.circle.fill"
+            case .settings: "gear"
             }
         }
 
         var accentColor: Color {
             switch self {
-            case .chat: return .theaPrimary
-            case .projects: return .blue
-            case .knowledge: return .purple
-            case .financial: return .green
-            case .settings: return .gray
+            case .chat: Color.theaPrimaryDefault
+            case .projects: .blue
+            case .knowledge: .purple
+            case .financial: .green
+            case .settings: .gray
             }
         }
     }
@@ -387,7 +387,7 @@ private struct IPadConversationRow: View {
             }
 
             if let lastMessage = conversation.messages.last {
-                Text(lastMessage.content)
+                Text(lastMessage.content.textValue)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
@@ -529,7 +529,7 @@ struct IPadChatDetailView: View {
                             .id(message.id)
                     }
 
-                    if chatManager.isStreaming && !chatManager.streamingText.isEmpty {
+                    if chatManager.isStreaming, !chatManager.streamingText.isEmpty {
                         HStack {
                             Text(chatManager.streamingText)
                                 .padding(16)
@@ -595,12 +595,12 @@ struct IPadChatDetailView: View {
                 .padding(.vertical, 14)
                 .background(Color(uiColor: .secondarySystemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 24))
-                .lineLimit(1...8)
+                .lineLimit(1 ... 8)
                 .focused($isInputFocused)
                 .disabled(chatManager.isStreaming)
                 .submitLabel(.send)
                 .onSubmit {
-                    if !messageText.isEmpty && !chatManager.isStreaming {
+                    if !messageText.isEmpty, !chatManager.isStreaming {
                         sendMessage()
                     }
                 }

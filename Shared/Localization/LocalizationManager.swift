@@ -1,9 +1,9 @@
 // LocalizationManager.swift
 // Comprehensive internationalization and localization system
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Localization Manager
 
@@ -41,18 +41,18 @@ public final class LocalizationManager: ObservableObject {
     // MARK: - Initialization
 
     private init() {
-        self.currentLocale = Locale.current
-        self.currentLanguage = Language(code: Locale.current.language.languageCode?.identifier ?? "en")
+        currentLocale = Locale.current
+        currentLanguage = Language(code: Locale.current.language.languageCode?.identifier ?? "en")
 
         // Initialize formatters
-        self.dateFormatter = DateFormatter()
-        self.timeFormatter = DateFormatter()
-        self.numberFormatter = NumberFormatter()
-        self.currencyFormatter = NumberFormatter()
-        self.percentFormatter = NumberFormatter()
-        self.measurementFormatter = MeasurementFormatter()
-        self.listFormatter = ListFormatter()
-        self.relativeFormatter = RelativeDateTimeFormatter()
+        dateFormatter = DateFormatter()
+        timeFormatter = DateFormatter()
+        numberFormatter = NumberFormatter()
+        currencyFormatter = NumberFormatter()
+        percentFormatter = NumberFormatter()
+        measurementFormatter = MeasurementFormatter()
+        listFormatter = ListFormatter()
+        relativeFormatter = RelativeDateTimeFormatter()
 
         setupFormatters()
         loadSupportedLanguages()
@@ -123,7 +123,8 @@ public final class LocalizationManager: ObservableObject {
     }
 
     private func detectLayoutDirection() {
-        isRTL = Locale.characterDirection(forLanguage: currentLanguage.code) == .rightToLeft
+        let language = Locale.Language(identifier: currentLanguage.code)
+        isRTL = language.characterDirection == .rightToLeft
     }
 
     // MARK: - Language Switching
@@ -170,14 +171,16 @@ public final class LocalizationManager: ObservableObject {
     private func loadStringTable(for languageCode: String) {
         // Load from bundle
         if let path = Bundle.main.path(forResource: languageCode, ofType: "lproj"),
-           let bundle = Bundle(path: path) {
+           let bundle = Bundle(path: path)
+        {
             loadedBundles[languageCode] = bundle
         }
 
         // Also load from JSON files for dynamic content
         if let url = Bundle.main.url(forResource: "Strings_\(languageCode)", withExtension: "json"),
            let data = try? Data(contentsOf: url),
-           let strings = try? JSONDecoder().decode([String: String].self, from: data) {
+           let strings = try? JSONDecoder().decode([String: String].self, from: data)
+        {
             stringTables[languageCode] = strings
         }
     }
@@ -185,10 +188,11 @@ public final class LocalizationManager: ObservableObject {
     // MARK: - String Localization
 
     /// Get localized string
-    public func localize(_ key: String, table: String? = nil, comment: String = "") -> String {
+    public func localize(_ key: String, table: String? = nil, comment _: String = "") -> String {
         // Try loaded string tables first
         if let strings = stringTables[currentLanguage.code],
-           let value = strings[key] {
+           let value = strings[key]
+        {
             return value
         }
 
@@ -205,14 +209,14 @@ public final class LocalizationManager: ObservableObject {
     }
 
     /// Get localized string with arguments
-    public func localize(_ key: String, arguments: CVarArg...) -> String {
+    public func localizeFormatted(_ key: String, arguments: CVarArg...) -> String {
         let format = localize(key)
         return String(format: format, arguments: arguments)
     }
 
     /// Get localized string with named parameters
     public func localize(_ key: String, parameters: [String: String]) -> String {
-        var result = localize(key)
+        var result = localize(key, table: nil)
         for (param, value) in parameters {
             result = result.replacingOccurrences(of: "{\(param)}", with: value)
         }
@@ -225,7 +229,7 @@ public final class LocalizationManager: ObservableObject {
     public func pluralize(_ key: String, count: Int) -> String {
         let pluralKey = getPluralKey(for: count)
         let fullKey = "\(key).\(pluralKey)"
-        return localize(fullKey, arguments: count)
+        return localizeFormatted(fullKey, arguments: count)
     }
 
     private func getPluralKey(for count: Int) -> String {
@@ -238,8 +242,8 @@ public final class LocalizationManager: ObservableObject {
             if count == 0 { return "zero" }
             if count == 1 { return "one" }
             if count == 2 { return "two" }
-            if (3...10).contains(count % 100) { return "few" }
-            if (11...99).contains(count % 100) { return "many" }
+            if (3 ... 10).contains(count % 100) { return "few" }
+            if (11 ... 99).contains(count % 100) { return "many" }
             return "other"
 
         case "ru", "uk", "pl":
@@ -247,8 +251,8 @@ public final class LocalizationManager: ObservableObject {
             let mod10 = count % 10
             let mod100 = count % 100
 
-            if mod10 == 1 && mod100 != 11 { return "one" }
-            if (2...4).contains(mod10) && !(12...14).contains(mod100) { return "few" }
+            if mod10 == 1, mod100 != 11 { return "one" }
+            if (2 ... 4).contains(mod10), !(12 ... 14).contains(mod100) { return "few" }
             return "many"
 
         case "ja", "ko", "zh-Hans", "zh-Hant", "vi", "th":
@@ -287,12 +291,12 @@ public final class LocalizationManager: ObservableObject {
 
     /// Format relative time
     public func formatRelativeTime(_ date: Date) -> String {
-        return relativeFormatter.localizedString(for: date, relativeTo: Date())
+        relativeFormatter.localizedString(for: date, relativeTo: Date())
     }
 
     /// Format number
     public func formatNumber(_ number: NSNumber) -> String {
-        return numberFormatter.string(from: number) ?? "\(number)"
+        numberFormatter.string(from: number) ?? "\(number)"
     }
 
     /// Format number with decimal places
@@ -312,17 +316,17 @@ public final class LocalizationManager: ObservableObject {
 
     /// Format percentage
     public func formatPercent(_ value: Double) -> String {
-        return percentFormatter.string(from: NSNumber(value: value)) ?? "\(value * 100)%"
+        percentFormatter.string(from: NSNumber(value: value)) ?? "\(value * 100)%"
     }
 
     /// Format measurement
-    public func formatMeasurement<UnitType: Unit>(_ measurement: Measurement<UnitType>) -> String {
-        return measurementFormatter.string(from: measurement)
+    public func formatMeasurement(_ measurement: Measurement<some Unit>) -> String {
+        measurementFormatter.string(from: measurement)
     }
 
     /// Format list
     public func formatList(_ items: [String]) -> String {
-        return listFormatter.string(from: items) ?? items.joined(separator: ", ")
+        listFormatter.string(from: items) ?? items.joined(separator: ", ")
     }
 
     /// Format file size
@@ -400,7 +404,7 @@ public struct Language: Identifiable, Equatable, Codable {
     public let isRTL: Bool
 
     public init(code: String, name: String = "", nativeName: String = "", isRTL: Bool = false) {
-        self.id = code
+        id = code
         self.code = code
         self.name = name.isEmpty ? code : name
         self.nativeName = nativeName.isEmpty ? name : nativeName
@@ -425,6 +429,7 @@ public extension Notification.Name {
 
 // MARK: - String Extension
 
+@MainActor
 public extension String {
     /// Localize this string
     var localized: String {
@@ -433,7 +438,7 @@ public extension String {
 
     /// Localize with arguments
     func localized(_ arguments: CVarArg...) -> String {
-        String(format: localized, arguments: arguments)
+        LocalizationManager.shared.localizeFormatted(self, arguments: arguments)
     }
 
     /// Localize with parameters
@@ -472,6 +477,6 @@ public struct LocalizedText: View {
 public extension View {
     /// Apply RTL layout if needed
     func respectsLayoutDirection() -> some View {
-        self.environment(\.layoutDirection, LocalizationManager.shared.isRTL ? .rightToLeft : .leftToRight)
+        environment(\.layoutDirection, LocalizationManager.shared.isRTL ? .rightToLeft : .leftToRight)
     }
 }

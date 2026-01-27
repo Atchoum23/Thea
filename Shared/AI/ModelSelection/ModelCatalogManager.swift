@@ -2,6 +2,7 @@ import Foundation
 import Observation
 
 // MARK: - Model Catalog Manager
+
 // Fetches and caches available models from OpenRouter API
 
 @MainActor
@@ -15,7 +16,7 @@ final class ModelCatalogManager {
     private(set) var fetchError: Error?
 
     private let cacheKey = "ModelCatalogManager.cachedModels"
-    private let cacheExpirationSeconds: TimeInterval = 3_600 // 1 hour
+    private let cacheExpirationSeconds: TimeInterval = 3600 // 1 hour
 
     private init() {
         loadCachedModels()
@@ -97,7 +98,8 @@ final class ModelCatalogManager {
 
     private func loadCachedModels() {
         guard let data = UserDefaults.standard.data(forKey: cacheKey),
-              let cached = try? JSONDecoder().decode(CachedModels.self, from: data) else {
+              let cached = try? JSONDecoder().decode(CachedModels.self, from: data)
+        else {
             return
         }
 
@@ -151,11 +153,11 @@ struct OpenRouterModel: Codable, Identifiable, Sendable {
 
     var formattedContextLength: String {
         if contextLength >= 1_000_000 {
-            return "\(contextLength / 1_000_000)M tokens"
-        } else if contextLength >= 1_000 {
-            return "\(contextLength / 1_000)K tokens"
+            "\(contextLength / 1_000_000)M tokens"
+        } else if contextLength >= 1000 {
+            "\(contextLength / 1000)K tokens"
         } else {
-            return "\(contextLength) tokens"
+            "\(contextLength) tokens"
         }
     }
 }
@@ -210,13 +212,13 @@ enum CatalogError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid API URL"
+            "Invalid API URL"
         case .invalidResponse:
-            return "Invalid response from server"
-        case .httpError(let code):
-            return "HTTP error: \(code)"
+            "Invalid response from server"
+        case let .httpError(code):
+            "HTTP error: \(code)"
         case .decodingError:
-            return "Failed to decode response"
+            "Failed to decode response"
         }
     }
 }

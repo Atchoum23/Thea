@@ -263,7 +263,7 @@ public struct WellnessDashboardView: View {
                                 await viewModel.updateAudioVolume(newValue)
                             }
                         }
-                    ), in: 0...1)
+                    ), in: 0 ... 1)
                 }
             } else {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {

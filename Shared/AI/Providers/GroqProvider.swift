@@ -14,8 +14,8 @@ final class GroqProvider: AIProvider, Sendable {
         supportsVision: false,
         supportsFunctionCalling: true,
         supportsWebSearch: false,
-        maxContextTokens: 32_768,
-        maxOutputTokens: 8_192,
+        maxContextTokens: 32768,
+        maxOutputTokens: 8192,
         supportedModalities: [.text]
     )
 
@@ -30,10 +30,10 @@ final class GroqProvider: AIProvider, Sendable {
         self.apiKey = apiKey
         // Capture configuration from AppConfiguration at init time for Sendable compliance
         let config = AppConfiguration.shared.providerConfig
-        self.baseURL = config.groqBaseURL
-        self.maxTokens = config.defaultMaxTokens
-        self.temperature = config.defaultTemperature
-        self.requestTimeout = config.requestTimeoutSeconds
+        baseURL = config.groqBaseURL
+        maxTokens = config.defaultMaxTokens
+        temperature = config.defaultTemperature
+        requestTimeout = config.requestTimeoutSeconds
     }
 
     // MARK: - Validation
@@ -103,7 +103,8 @@ final class GroqProvider: AIProvider, Sendable {
                         let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
 
                         guard let httpResponse = response as? HTTPURLResponse,
-                              httpResponse.statusCode == 200 else {
+                              httpResponse.statusCode == 200
+                        else {
                             throw GroqError.invalidResponse
                         }
 
@@ -130,7 +131,8 @@ final class GroqProvider: AIProvider, Sendable {
                                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                       let choices = json["choices"] as? [[String: Any]],
                                       let delta = choices.first?["delta"] as? [String: Any],
-                                      let content = delta["content"] as? String else {
+                                      let content = delta["content"] as? String
+                                else {
                                     continue
                                 }
 
@@ -151,14 +153,16 @@ final class GroqProvider: AIProvider, Sendable {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
+                  httpResponse.statusCode == 200
+            else {
                 throw GroqError.invalidResponse
             }
 
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let choices = json["choices"] as? [[String: Any]],
                   let message = choices.first?["message"] as? [String: Any],
-                  let content = message["content"] as? String else {
+                  let content = message["content"] as? String
+            else {
                 throw GroqError.noResponse
             }
 
@@ -186,8 +190,8 @@ final class GroqProvider: AIProvider, Sendable {
                 id: "llama-3.3-70b-versatile",
                 name: "Llama 3.3 70B",
                 description: "Most capable Llama model on Groq",
-                contextWindow: 32_768,
-                maxOutputTokens: 8_192,
+                contextWindow: 32768,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 0.59,
                 outputPricePerMillion: 0.79,
                 supportsVision: false,
@@ -197,8 +201,8 @@ final class GroqProvider: AIProvider, Sendable {
                 id: "llama-3.1-8b-instant",
                 name: "Llama 3.1 8B",
                 description: "Ultra-fast Llama model",
-                contextWindow: 32_768,
-                maxOutputTokens: 8_192,
+                contextWindow: 32768,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 0.05,
                 outputPricePerMillion: 0.08,
                 supportsVision: false,
@@ -208,8 +212,8 @@ final class GroqProvider: AIProvider, Sendable {
                 id: "mixtral-8x7b-32768",
                 name: "Mixtral 8x7B",
                 description: "Fast mixture of experts model",
-                contextWindow: 32_768,
-                maxOutputTokens: 8_192,
+                contextWindow: 32768,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 0.24,
                 outputPricePerMillion: 0.24,
                 supportsVision: false,
@@ -222,9 +226,9 @@ final class GroqProvider: AIProvider, Sendable {
 
     private func convertRole(_ role: MessageRole) -> String {
         switch role {
-        case .user: return "user"
-        case .assistant: return "assistant"
-        case .system: return "system"
+        case .user: "user"
+        case .assistant: "assistant"
+        case .system: "system"
         }
     }
 }
@@ -238,9 +242,9 @@ enum GroqError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Invalid response from Groq"
+            "Invalid response from Groq"
         case .noResponse:
-            return "No response from Groq"
+            "No response from Groq"
         }
     }
 }

@@ -577,7 +577,6 @@ public struct SleepStageData: Identifiable, Sendable {
     }
 }
 
-
 public struct SleepTimelineSegment: Identifiable, Sendable {
     public let id = UUID()
     public var stage: SleepStage
@@ -613,17 +612,17 @@ public enum FactorImpact: Sendable {
 
     var displayName: String {
         switch self {
-        case .positive: return "Positive"
-        case .neutral: return "Neutral"
-        case .negative: return "Negative"
+        case .positive: "Positive"
+        case .neutral: "Neutral"
+        case .negative: "Negative"
         }
     }
 
     var color: Color {
         switch self {
-        case .positive: return .green
-        case .neutral: return .blue
-        case .negative: return .red
+        case .positive: .green
+        case .neutral: .blue
+        case .negative: .red
         }
     }
 }
@@ -648,7 +647,7 @@ final class SleepQualityViewModel {
         // Simulate loading
         try? await Task.sleep(for: .milliseconds(300))
 
-        let bedtime = Calendar.current.date(bySettingHour: 22, minute: 30, second: 0, of: date.addingTimeInterval(-86_400)) ?? date.addingTimeInterval(-86_400 + 22.5 * 3600)
+        let bedtime = Calendar.current.date(bySettingHour: 22, minute: 30, second: 0, of: date.addingTimeInterval(-86400)) ?? date.addingTimeInterval(-86400 + 22.5 * 3600)
         let wakeTime = Calendar.current.date(bySettingHour: 6, minute: 45, second: 0, of: date) ?? date.addingTimeInterval(6.75 * 3600)
 
         let totalMinutes = 450 // 7h 30m
@@ -705,10 +704,10 @@ final class SleepQualityViewModel {
         )
 
         // Generate weekly data
-        weeklyData = (0..<7).compactMap { dayOffset in
+        weeklyData = (0 ..< 7).compactMap { dayOffset in
             let weekDate = Calendar.current.date(byAdding: .day, value: -dayOffset, to: date) ?? date.addingTimeInterval(Double(-dayOffset) * 86400)
-            let randomQuality = Double.random(in: 65...90)
-            let randomMinutes = Int.random(in: 360...480)
+            let randomQuality = Double.random(in: 65 ... 90)
+            let randomMinutes = Int.random(in: 360 ... 480)
 
             return SleepData(
                 date: weekDate,
@@ -727,7 +726,7 @@ final class SleepQualityViewModel {
         }.reversed()
     }
 
-    private func generateMockTimeline(from bedtime: Date, totalMinutes: Int) -> [SleepTimelineSegment] {
+    private func generateMockTimeline(from bedtime: Date, totalMinutes _: Int) -> [SleepTimelineSegment] {
         var segments: [SleepTimelineSegment] = []
         var currentTime = bedtime
 

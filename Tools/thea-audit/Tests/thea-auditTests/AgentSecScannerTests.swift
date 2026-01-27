@@ -1,11 +1,10 @@
 // AgentSecScannerTests.swift
 // Tests for AgentSec Strict Mode scanner and invariant rules
 
-import XCTest
 @testable import thea_audit
+import XCTest
 
 final class AgentSecScannerTests: XCTestCase {
-
     // MARK: - Network Blocklist Tests
 
     func testNetworkBlocklistRule_MissingLocalhost() {

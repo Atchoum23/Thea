@@ -4,7 +4,7 @@ import SwiftUI
 struct IOSCompactModelSelectorView: View {
     @Binding var selectedModel: String
     let availableModels: [String]
-    
+
     var body: some View {
         Menu {
             ForEach(availableModels, id: \.self) { model in
@@ -32,11 +32,11 @@ struct IOSCompactModelSelectorView: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             #if os(iOS)
-            .background(Color(uiColor: .systemGray6))
+                .background(Color(uiColor: .systemGray6))
             #else
-            .background(Color(nsColor: .controlBackgroundColor))
+                .background(Color(nsColor: .controlBackgroundColor))
             #endif
-            .clipShape(Capsule())
+                .clipShape(Capsule())
         }
     }
 }

@@ -1,9 +1,9 @@
 // OnboardingManager.swift
 // Comprehensive onboarding and first-time user experience
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 import SwiftUI
 
 // MARK: - Onboarding Manager
@@ -36,7 +36,7 @@ public final class OnboardingManager: ObservableObject {
     // MARK: - Initialization
 
     private init() {
-        self.flow = OnboardingFlow.default
+        flow = OnboardingFlow.default
         loadState()
         checkOnboardingStatus()
     }
@@ -45,17 +45,20 @@ public final class OnboardingManager: ObservableObject {
         isOnboardingComplete = UserDefaults.standard.bool(forKey: "onboarding.complete")
 
         if let completedData = UserDefaults.standard.data(forKey: "onboarding.completedSteps"),
-           let completed = try? JSONDecoder().decode(Set<String>.self, from: completedData) {
+           let completed = try? JSONDecoder().decode(Set<String>.self, from: completedData)
+        {
             completedSteps = completed
         }
 
         if let skippedData = UserDefaults.standard.data(forKey: "onboarding.skippedSteps"),
-           let skipped = try? JSONDecoder().decode(Set<String>.self, from: skippedData) {
+           let skipped = try? JSONDecoder().decode(Set<String>.self, from: skippedData)
+        {
             skippedSteps = skipped
         }
 
         if let discoveredData = UserDefaults.standard.data(forKey: "onboarding.discoveredFeatures"),
-           let discovered = try? JSONDecoder().decode(Set<String>.self, from: discoveredData) {
+           let discovered = try? JSONDecoder().decode(Set<String>.self, from: discoveredData)
+        {
             discoveredFeatures = discovered
         }
 
@@ -108,7 +111,8 @@ public final class OnboardingManager: ObservableObject {
     /// Move to next step
     public func nextStep() {
         guard let current = currentStep,
-              let currentIndex = flow.steps.firstIndex(where: { $0.id == current.id }) else {
+              let currentIndex = flow.steps.firstIndex(where: { $0.id == current.id })
+        else {
             return
         }
 
@@ -130,7 +134,8 @@ public final class OnboardingManager: ObservableObject {
     public func previousStep() {
         guard let current = currentStep,
               let currentIndex = flow.steps.firstIndex(where: { $0.id == current.id }),
-              currentIndex > 0 else {
+              currentIndex > 0
+        else {
             return
         }
 
@@ -250,7 +255,7 @@ public final class OnboardingManager: ObservableObject {
     public func getNextTip() -> FeatureTip? {
         pendingTips.first { tip in
             tip.prerequisites.isSubset(of: discoveredFeatures) &&
-            !discoveredFeatures.contains(tip.featureId)
+                !discoveredFeatures.contains(tip.featureId)
         }
     }
 
@@ -277,7 +282,7 @@ public final class OnboardingManager: ObservableObject {
 
 // MARK: - Onboarding Flow
 
-public struct OnboardingFlow: Identifiable {
+public struct OnboardingFlow: Identifiable, Sendable {
     public let id: String
     public let name: String
     public let steps: [OnboardingStep]
@@ -411,7 +416,7 @@ public struct OnboardingFlow: Identifiable {
 
 // MARK: - Onboarding Step
 
-public struct OnboardingStep: Identifiable {
+public struct OnboardingStep: Identifiable, Sendable {
     public let id: String
     public let type: StepType
     public let title: String
@@ -426,7 +431,7 @@ public struct OnboardingStep: Identifiable {
     public var features: [FeatureHighlight]?
     public var tutorials: [TutorialItem]?
 
-    public enum StepType {
+    public enum StepType: Sendable {
         case welcome
         case selection
         case permissions
@@ -437,20 +442,20 @@ public struct OnboardingStep: Identifiable {
     }
 }
 
-public struct OnboardingOption: Identifiable {
+public struct OnboardingOption: Identifiable, Sendable {
     public let id: String
     public let title: String
     public let description: String
     public let icon: String
 }
 
-public struct PermissionRequest: Identifiable {
+public struct PermissionRequest: Identifiable, Sendable {
     public let id = UUID()
     public let type: PermissionType
     public let title: String
     public let description: String
 
-    public enum PermissionType {
+    public enum PermissionType: Sendable {
         case notifications
         case microphone
         case speechRecognition
@@ -462,14 +467,14 @@ public struct PermissionRequest: Identifiable {
     }
 }
 
-public struct FeatureHighlight: Identifiable {
+public struct FeatureHighlight: Identifiable, Sendable {
     public let id: String
     public let title: String
     public let description: String
     public let icon: String
 }
 
-public struct TutorialItem: Identifiable {
+public struct TutorialItem: Identifiable, Sendable {
     public let id = UUID()
     public let title: String
     public let shortcut: String
@@ -478,7 +483,7 @@ public struct TutorialItem: Identifiable {
 
 // MARK: - Feature Tips
 
-public struct FeatureTip: Identifiable {
+public struct FeatureTip: Identifiable, Sendable {
     public let id: String
     public let featureId: String
     public let title: String
@@ -529,13 +534,13 @@ public struct FeatureTip: Identifiable {
 
 // MARK: - Contextual Help
 
-public struct ContextualHelp: Identifiable {
+public struct ContextualHelp: Identifiable, Sendable {
     public let id: String
     public let screenId: String
     public let title: String
     public let items: [HelpItem]
 
-    public struct HelpItem: Identifiable {
+    public struct HelpItem: Identifiable, Sendable {
         public let id = UUID()
         public let question: String
         public let answer: String
@@ -573,7 +578,7 @@ public extension Notification.Name {
 
 // MARK: - SwiftUI Views
 
-public struct OnboardingView: View {
+public struct SharedOnboardingView: View {
     @ObservedObject var manager = OnboardingManager.shared
 
     public init() {}

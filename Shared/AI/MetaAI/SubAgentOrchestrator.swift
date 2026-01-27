@@ -10,11 +10,11 @@ enum SubAgentOrchestratorError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noProviderAvailable:
-            return "No AI provider available for orchestration"
-        case .taskFailed(let reason):
-            return "Task failed: \(reason)"
+            "No AI provider available for orchestration"
+        case let .taskFailed(reason):
+            "Task failed: \(reason)"
         case .agentNotFound:
-            return "Sub-agent not found"
+            "Sub-agent not found"
         }
     }
 }
@@ -119,25 +119,25 @@ final class SubAgentOrchestrator {
         var capabilities: [String] {
             switch self {
             case .researcher:
-                return ["web_search", "document_analysis", "source_verification"]
+                ["web_search", "document_analysis", "source_verification"]
             case .coder:
-                return ["code_generation", "code_review", "debugging", "testing"]
+                ["code_generation", "code_review", "debugging", "testing"]
             case .analyst:
-                return ["data_analysis", "pattern_recognition", "reporting"]
+                ["data_analysis", "pattern_recognition", "reporting"]
             case .writer:
-                return ["content_creation", "editing", "summarization"]
+                ["content_creation", "editing", "summarization"]
             case .planner:
-                return ["task_breakdown", "dependency_mapping", "timeline_creation"]
+                ["task_breakdown", "dependency_mapping", "timeline_creation"]
             case .critic:
-                return ["review", "evaluation", "feedback"]
+                ["review", "evaluation", "feedback"]
             case .executor:
-                return ["task_execution", "tool_use", "file_operations"]
+                ["task_execution", "tool_use", "file_operations"]
             case .validator:
-                return ["verification", "testing", "quality_assurance"]
+                ["verification", "testing", "quality_assurance"]
             case .integrator:
-                return ["synthesis", "merging", "coordination"]
+                ["synthesis", "merging", "coordination"]
             case .optimizer:
-                return ["improvement", "refactoring", "performance_tuning"]
+                ["improvement", "refactoring", "performance_tuning"]
             }
         }
     }
@@ -148,7 +148,7 @@ final class SubAgentOrchestrator {
         for agentType in AgentType.allCases {
             agentPool[agentType] = []
             // Pre-create 2 agents of each type
-            for i in 0..<2 {
+            for i in 0 ..< 2 {
                 let agent = SubAgent(
                     id: UUID(),
                     type: agentType,
@@ -238,7 +238,7 @@ final class SubAgentOrchestrator {
             plan: plan,
             subTaskResults: results,
             finalResult: optimized,
-            agentsUsed: assignments.map { $0.agent.type },
+            agentsUsed: assignments.map(\.agent.type),
             executionTime: Date().timeIntervalSince(Date())
         )
     }
@@ -266,7 +266,8 @@ final class SubAgentOrchestrator {
         """
 
         guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            ProviderRegistry.shared.getProvider(id: "openai")
+        else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
 
@@ -366,7 +367,8 @@ final class SubAgentOrchestrator {
         let subTask = assignment.subTask
 
         guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            ProviderRegistry.shared.getProvider(id: "openai")
+        else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
 
@@ -432,9 +434,10 @@ final class SubAgentOrchestrator {
 
             // 2. Generate code
             guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                                  ProviderRegistry.shared.getProvider(id: "openai") else {
-            throw SubAgentOrchestratorError.noProviderAvailable
-        }
+                ProviderRegistry.shared.getProvider(id: "openai")
+            else {
+                throw SubAgentOrchestratorError.noProviderAvailable
+            }
 
             let prompt = """
             \(assignment.agent.type.systemPrompt)
@@ -535,7 +538,8 @@ final class SubAgentOrchestrator {
         let allOutputs = results.map { "[\($0.agent.type.rawValue)]: \($0.output)" }.joined(separator: "\n\n")
 
         guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            ProviderRegistry.shared.getProvider(id: "openai")
+        else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
 
@@ -558,7 +562,8 @@ final class SubAgentOrchestrator {
         let validator = getAgent(type: .validator)
 
         guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            ProviderRegistry.shared.getProvider(id: "openai")
+        else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
 
@@ -581,7 +586,8 @@ final class SubAgentOrchestrator {
         let optimizer = getAgent(type: .optimizer)
 
         guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            ProviderRegistry.shared.getProvider(id: "openai")
+        else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
 
@@ -602,7 +608,7 @@ final class SubAgentOrchestrator {
         // Simple batching - in production would respect dependencies
         let batchSize = 3
         return stride(from: 0, to: assignments.count, by: batchSize).map {
-            Array(assignments[$0..<min($0 + batchSize, assignments.count)])
+            Array(assignments[$0 ..< min($0 + batchSize, assignments.count)])
         }
     }
 
@@ -613,7 +619,7 @@ final class SubAgentOrchestrator {
             .map { String($0) }
     }
 
-    private func extractCriteria(from planText: String) -> [String] {
+    private func extractCriteria(from _: String) -> [String] {
         ["Output is complete", "Output is accurate", "Output meets requirements"]
     }
 
@@ -637,11 +643,11 @@ final class SubAgentOrchestrator {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 result += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }

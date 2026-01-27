@@ -8,7 +8,7 @@
 
 import Foundation
 #if os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Music Integration
@@ -28,9 +28,9 @@ public actor MusicIntegration: AppIntegrationModule {
 
     public func connect() async throws {
         #if os(macOS)
-        isConnected = true
+            isConnected = true
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -38,118 +38,118 @@ public actor MusicIntegration: AppIntegrationModule {
 
     public func isAvailable() async -> Bool {
         #if os(macOS)
-        return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) != nil
+            return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) != nil
         #else
-        return false
+            return false
         #endif
     }
 
     /// Play/pause
     public func playPause() async throws {
         #if os(macOS)
-        let script = "tell application \"Music\" to playpause"
-        _ = try await executeAppleScript(script)
+            let script = "tell application \"Music\" to playpause"
+            _ = try await executeAppleScript(script)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Next track
     public func nextTrack() async throws {
         #if os(macOS)
-        let script = "tell application \"Music\" to next track"
-        _ = try await executeAppleScript(script)
+            let script = "tell application \"Music\" to next track"
+            _ = try await executeAppleScript(script)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Previous track
     public func previousTrack() async throws {
         #if os(macOS)
-        let script = "tell application \"Music\" to previous track"
-        _ = try await executeAppleScript(script)
+            let script = "tell application \"Music\" to previous track"
+            _ = try await executeAppleScript(script)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Get current track info
     public func getCurrentTrack() async throws -> MusicTrackInfo? {
         #if os(macOS)
-        let script = """
-        tell application "Music"
-            if player state is playing then
-                set trackName to name of current track
-                set trackArtist to artist of current track
-                set trackAlbum to album of current track
-                set trackDuration to duration of current track
-                return trackName & "|||" & trackArtist & "|||" & trackAlbum & "|||" & trackDuration
-            end if
-        end tell
-        """
-        guard let result = try await executeAppleScript(script) else { return nil }
-        let parts = result.components(separatedBy: "|||")
-        guard parts.count >= 4 else { return nil }
+            let script = """
+            tell application "Music"
+                if player state is playing then
+                    set trackName to name of current track
+                    set trackArtist to artist of current track
+                    set trackAlbum to album of current track
+                    set trackDuration to duration of current track
+                    return trackName & "|||" & trackArtist & "|||" & trackAlbum & "|||" & trackDuration
+                end if
+            end tell
+            """
+            guard let result = try await executeAppleScript(script) else { return nil }
+            let parts = result.components(separatedBy: "|||")
+            guard parts.count >= 4 else { return nil }
 
-        return MusicTrackInfo(
-            name: parts[0],
-            artist: parts[1],
-            album: parts[2],
-            duration: Double(parts[3]) ?? 0
-        )
+            return MusicTrackInfo(
+                name: parts[0],
+                artist: parts[1],
+                album: parts[2],
+                duration: Double(parts[3]) ?? 0
+            )
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Set volume (0-100)
     public func setVolume(_ volume: Int) async throws {
         #if os(macOS)
-        let clampedVolume = max(0, min(100, volume))
-        let script = "tell application \"Music\" to set sound volume to \(clampedVolume)"
-        _ = try await executeAppleScript(script)
+            let clampedVolume = max(0, min(100, volume))
+            let script = "tell application \"Music\" to set sound volume to \(clampedVolume)"
+            _ = try await executeAppleScript(script)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Search and play
     public func searchAndPlay(_ query: String) async throws {
         #if os(macOS)
-        let script = """
-        tell application "Music"
-            activate
-            set results to search playlist "Library" for "\(query)"
-            if (count of results) > 0 then
-                play item 1 of results
-            end if
-        end tell
-        """
-        _ = try await executeAppleScript(script)
+            let script = """
+            tell application "Music"
+                activate
+                set results to search playlist "Library" for "\(query)"
+                if (count of results) > 0 then
+                    play item 1 of results
+                end if
+            end tell
+            """
+            _ = try await executeAppleScript(script)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     #if os(macOS)
-    private func executeAppleScript(_ source: String) async throws -> String? {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                var error: NSDictionary?
-                if let script = NSAppleScript(source: source) {
-                    let result = script.executeAndReturnError(&error)
-                    if let error = error {
-                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
+        private func executeAppleScript(_ source: String) async throws -> String? {
+            try await withCheckedThrowingContinuation { continuation in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    var error: NSDictionary?
+                    if let script = NSAppleScript(source: source) {
+                        let result = script.executeAndReturnError(&error)
+                        if let error {
+                            continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
+                        } else {
+                            continuation.resume(returning: result.stringValue)
+                        }
                     } else {
-                        continuation.resume(returning: result.stringValue)
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                     }
-                } else {
-                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }
-    }
     #endif
 }
 

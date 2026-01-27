@@ -11,20 +11,20 @@ public final class ExecutionPipeline {
     public static let shared = ExecutionPipeline()
 
     private let logger = Logger(subsystem: "com.thea.metaai", category: "ExecutionPipeline")
-    
+
     /// Currently running pipelines
     public private(set) var activePipelines: [PipelineExecution] = []
-    
+
     /// Completed pipeline history (limited to last 50)
     public private(set) var pipelineHistory: [PipelineExecution] = []
-    
+
     /// Configuration for pipeline behavior
     public var config = PipelineConfig()
 
     private init() {}
-    
+
     // MARK: - Pipeline Execution
-    
+
     /// Execute a pipeline with the given stages
     public func execute(
         _ pipeline: Pipeline,
@@ -32,7 +32,7 @@ public final class ExecutionPipeline {
         progressHandler: @escaping @Sendable (PipelineProgress) -> Void
     ) async throws -> PipelineResult {
         logger.info("Starting pipeline: \(pipeline.name) with \(pipeline.stages.count) stages")
-        
+
         let execution = PipelineExecution(
             id: UUID(),
             pipelineId: pipeline.id,
@@ -44,21 +44,21 @@ public final class ExecutionPipeline {
             stageResults: [:],
             errors: []
         )
-        
+
         activePipelines.append(execution)
-        
+
         defer {
             execution.endTime = Date()
             activePipelines.removeAll { $0.id == execution.id }
             addToHistory(execution)
         }
-        
+
         var context = PipelineContext(input: input)
-        
+
         do {
             for (index, stage) in pipeline.stages.enumerated() {
                 execution.currentStage = stage.id
-                
+
                 let progress = PipelineProgress(
                     pipelineId: pipeline.id,
                     currentStageIndex: index,
@@ -69,7 +69,7 @@ public final class ExecutionPipeline {
                     message: "Executing: \(stage.name)"
                 )
                 progressHandler(progress)
-                
+
                 // Execute stage with retry logic
                 let stageResult = try await executeStageWithRetry(
                     stage,
@@ -81,21 +81,21 @@ public final class ExecutionPipeline {
                     updatedProgress.message = "Stage \(stage.name): \(Int(stageProgress * 100))%"
                     progressHandler(updatedProgress)
                 }
-                
+
                 // Store result and update context
                 execution.stageResults[stage.id] = stageResult
                 execution.completedStages.append(stage.id)
                 context = context.with(stageResult: stageResult, forStage: stage.name)
-                
+
                 // Check for early termination conditions
                 if stageResult.shouldTerminate {
                     logger.info("Pipeline terminated early at stage: \(stage.name)")
                     break
                 }
             }
-            
+
             execution.status = .completed
-            
+
             let finalProgress = PipelineProgress(
                 pipelineId: pipeline.id,
                 currentStageIndex: pipeline.stages.count,
@@ -106,7 +106,7 @@ public final class ExecutionPipeline {
                 message: "Pipeline completed successfully"
             )
             progressHandler(finalProgress)
-            
+
             return PipelineResult(
                 executionId: execution.id,
                 success: true,
@@ -115,7 +115,7 @@ public final class ExecutionPipeline {
                 duration: Date().timeIntervalSince(execution.startTime),
                 errors: []
             )
-            
+
         } catch {
             execution.status = .failed
             execution.errors.append(PipelineError(
@@ -124,22 +124,22 @@ public final class ExecutionPipeline {
                 timestamp: Date(),
                 recoverable: false
             ))
-            
+
             logger.error("Pipeline failed: \(error.localizedDescription)")
-            
+
             return PipelineResult(
                 executionId: execution.id,
                 success: false,
                 finalOutput: context.output,
                 stageResults: execution.stageResults,
                 duration: Date().timeIntervalSince(execution.startTime),
-                errors: execution.errors.map { $0.error }
+                errors: execution.errors.map(\.error)
             )
         }
     }
-    
+
     // MARK: - Stage Execution
-    
+
     private func executeStageWithRetry(
         _ stage: PipelineStage,
         context: PipelineContext,
@@ -148,75 +148,73 @@ public final class ExecutionPipeline {
     ) async throws -> StageResult {
         var lastError: Error?
         let maxRetries = stage.retryPolicy?.maxRetries ?? config.defaultMaxRetries
-        
-        for attempt in 0...maxRetries {
+
+        for attempt in 0 ... maxRetries {
             do {
                 if attempt > 0 {
                     let delay = calculateBackoffDelay(attempt: attempt, policy: stage.retryPolicy)
                     logger.info("Retrying stage \(stage.name) after \(delay)s (attempt \(attempt + 1)/\(maxRetries + 1))")
                     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                 }
-                
+
                 return try await executeStage(stage, context: context, progressHandler: progressHandler)
-                
+
             } catch {
                 lastError = error
-                
+
                 execution.errors.append(PipelineError(
                     stageId: stage.id,
                     error: error.localizedDescription,
                     timestamp: Date(),
                     recoverable: attempt < maxRetries
                 ))
-                
+
                 // Check if error is retryable
                 if !isRetryableError(error) {
                     throw error
                 }
             }
         }
-        
+
         throw lastError ?? PipelineExecutionError.stageExecutionFailed("Unknown error")
     }
-    
+
     private func executeStage(
         _ stage: PipelineStage,
         context: PipelineContext,
         progressHandler: @escaping (Float) -> Void
     ) async throws -> StageResult {
         logger.info("Executing stage: \(stage.name)")
-        
+
         let startTime = Date()
         progressHandler(0.1)
-        
+
         // Execute based on stage type
-        let output: [String: Any]
-        
-        switch stage.type {
+        let output: [String: Any] = switch stage.type {
         case .aiInference:
-            output = try await executeAIInferenceStage(stage, context: context)
-            
+            try await executeAIInferenceStage(stage, context: context)
+
         case .toolExecution:
-            output = try await executeToolStage(stage, context: context)
-            
+            try await executeToolStage(stage, context: context)
+
         case .dataTransformation:
-            output = executeTransformationStage(stage, context: context)
-            
+            executeTransformationStage(stage, context: context)
+
         case .conditional:
-            output = executeConditionalStage(stage, context: context)
-            
+            executeConditionalStage(stage, context: context)
+
         case .aggregation:
-            output = await executeAggregationStage(stage, context: context)
-            
+            await executeAggregationStage(stage, context: context)
+
         case .validation:
-            output = try executeValidationStage(stage, context: context)
-            
+            try executeValidationStage(stage, context: context)
+
         case .custom:
-            output = try await executeCustomStage(stage, context: context)
+            try await executeCustomStage(stage, context: context)
         }
-        
+
         progressHandler(1.0)
-        
+
         return StageResult(
             stageId: stage.id,
             stageName: stage.name,
@@ -226,26 +224,26 @@ public final class ExecutionPipeline {
             shouldTerminate: output["_terminate"] as? Bool ?? false
         )
     }
-    
+
     // MARK: - Stage Type Implementations
-    
+
     private func executeAIInferenceStage(_ stage: PipelineStage, context: PipelineContext) async throws -> [String: Any] {
         guard let prompt = stage.config["prompt"] as? String else {
             throw PipelineExecutionError.invalidStageConfig("AI inference stage requires 'prompt' config")
         }
-        
+
         // Substitute context variables in prompt
         let resolvedPrompt = resolveTemplate(prompt, with: context)
-        
+
         // Get provider and model from config
-        let defaultProviderId = await SettingsManager.shared.defaultProvider
+        let defaultProviderId = SettingsManager.shared.defaultProvider
         let providerId = stage.config["provider"] as? String ?? defaultProviderId
         let model = stage.config["model"] as? String ?? "gpt-4o"
-        
-        guard let provider = await ProviderRegistry.shared.getProvider(id: providerId) else {
+
+        guard let provider = ProviderRegistry.shared.getProvider(id: providerId) else {
             throw PipelineExecutionError.providerNotAvailable(providerId)
         }
-        
+
         let message = AIMessage(
             id: UUID(),
             conversationID: UUID(),
@@ -254,34 +252,34 @@ public final class ExecutionPipeline {
             timestamp: Date(),
             model: model
         )
-        
+
         var result = ""
         let stream = try await provider.chat(messages: [message], model: model, stream: true)
-        
+
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 result += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
-        
+
         return ["output": result, "model": model, "provider": providerId]
     }
-    
+
     private func executeToolStage(_ stage: PipelineStage, context: PipelineContext) async throws -> [String: Any] {
         guard let toolName = stage.config["tool"] as? String else {
             throw PipelineExecutionError.invalidStageConfig("Tool stage requires 'tool' config")
         }
-        
-        let toolFramework = await ToolFramework.shared
-        guard let tool = await toolFramework.registeredTools.first(where: { $0.name == toolName }) else {
+
+        let toolFramework = ToolFramework.shared
+        guard let tool = toolFramework.registeredTools.first(where: { $0.name == toolName }) else {
             throw PipelineExecutionError.toolNotFound(toolName)
         }
-        
+
         // Merge stage config with context for tool parameters
         var parameters = stage.config["parameters"] as? [String: Any] ?? [:]
         for (key, value) in context.output {
@@ -289,41 +287,43 @@ public final class ExecutionPipeline {
                 parameters[key] = value
             }
         }
-        
+
         let result = try await toolFramework.executeTool(tool, parameters: parameters)
-        
+
         return [
             "output": result.output ?? "",
             "success": result.success,
             "tool": toolName
         ]
     }
-    
+
     private func executeTransformationStage(_ stage: PipelineStage, context: PipelineContext) -> [String: Any] {
         guard let transformType = stage.config["transform"] as? String else {
             return context.output
         }
-        
+
         var output = context.output
-        
+
         switch transformType {
         case "map":
             if let key = stage.config["key"] as? String,
                let array = output[key] as? [Any],
-               let expression = stage.config["expression"] as? String {
+               let expression = stage.config["expression"] as? String
+            {
                 output[key] = array.map { item in
                     // Simple expression evaluation
                     "\(item)" + (expression.contains("uppercase") ? String(describing: item).uppercased() : "")
                 }
             }
-            
+
         case "filter":
             if let key = stage.config["key"] as? String,
                let array = output[key] as? [String],
-               let predicate = stage.config["predicate"] as? String {
+               let predicate = stage.config["predicate"] as? String
+            {
                 output[key] = array.filter { $0.contains(predicate) }
             }
-            
+
         case "merge":
             if let keys = stage.config["keys"] as? [String] {
                 var merged: [Any] = []
@@ -334,40 +334,41 @@ public final class ExecutionPipeline {
                 }
                 output["merged"] = merged
             }
-            
+
         case "extract":
             if let sourceKey = stage.config["source"] as? String,
                let targetKey = stage.config["target"] as? String,
                let source = output[sourceKey] as? [String: Any],
-               let path = stage.config["path"] as? String {
+               let path = stage.config["path"] as? String
+            {
                 output[targetKey] = source[path]
             }
-            
+
         default:
             break
         }
-        
+
         return output
     }
-    
+
     private func executeConditionalStage(_ stage: PipelineStage, context: PipelineContext) -> [String: Any] {
         guard let condition = stage.config["condition"] as? String else {
             return ["result": false, "branch": "false"]
         }
-        
+
         let result = evaluateCondition(condition, context: context)
-        
+
         return [
             "result": result,
             "branch": result ? "true" : "false",
             "_terminate": stage.config["terminateOnFalse"] as? Bool == true && !result
         ]
     }
-    
+
     private func executeAggregationStage(_ stage: PipelineStage, context: PipelineContext) async -> [String: Any] {
         // Collect results to aggregate
         var results: [AggregatorInput] = []
-        
+
         if let sourceKeys = stage.config["sources"] as? [String] {
             for key in sourceKeys {
                 if let content = context.output[key] as? String {
@@ -379,9 +380,9 @@ public final class ExecutionPipeline {
                 }
             }
         }
-        
+
         let aggregated = await ResultAggregator.shared.aggregate(results)
-        
+
         return [
             "output": aggregated.content,
             "confidence": aggregated.confidence,
@@ -389,10 +390,10 @@ public final class ExecutionPipeline {
             "conflictCount": aggregated.conflicts.count
         ]
     }
-    
+
     private func executeValidationStage(_ stage: PipelineStage, context: PipelineContext) throws -> [String: Any] {
         var validationErrors: [String] = []
-        
+
         // Required fields validation
         if let requiredFields = stage.config["required"] as? [String] {
             for field in requiredFields {
@@ -401,7 +402,7 @@ public final class ExecutionPipeline {
                 }
             }
         }
-        
+
         // Type validation
         if let typeChecks = stage.config["types"] as? [String: String] {
             for (field, expectedType) in typeChecks {
@@ -413,42 +414,42 @@ public final class ExecutionPipeline {
                 }
             }
         }
-        
+
         let isValid = validationErrors.isEmpty
-        
-        if !isValid && stage.config["failOnInvalid"] as? Bool == true {
+
+        if !isValid, stage.config["failOnInvalid"] as? Bool == true {
             throw PipelineExecutionError.validationFailed(validationErrors.joined(separator: "; "))
         }
-        
+
         return [
             "valid": isValid,
             "errors": validationErrors,
             "_terminate": !isValid && stage.config["terminateOnInvalid"] as? Bool == true
         ]
     }
-    
+
     private func executeCustomStage(_ stage: PipelineStage, context: PipelineContext) async throws -> [String: Any] {
         // Custom stages can be implemented via registered handlers
         logger.warning("Custom stage execution not fully implemented: \(stage.name)")
         return context.output
     }
-    
+
     // MARK: - Helper Methods
-    
+
     private func resolveTemplate(_ template: String, with context: PipelineContext) -> String {
         var resolved = template
-        
+
         for (key, value) in context.output {
             resolved = resolved.replacingOccurrences(of: "{{\(key)}}", with: "\(value)")
         }
-        
+
         for (key, value) in context.input {
             resolved = resolved.replacingOccurrences(of: "{{input.\(key)}}", with: "\(value)")
         }
-        
+
         return resolved
     }
-    
+
     private func evaluateCondition(_ condition: String, context: PipelineContext) -> Bool {
         // Simple condition evaluation
         if condition.contains("==") {
@@ -457,27 +458,28 @@ public final class ExecutionPipeline {
                 let lhsKey = parts[0].replacingOccurrences(of: "=", with: "")
                 let rhs = parts[1].replacingOccurrences(of: "=", with: "")
                 if let lhs = context.output[lhsKey] {
-                    return "\(lhs)" == rhs
+                    return rhs == "\(lhs)"
                 }
             }
         }
-        
+
         if condition.contains(">") {
             let parts = condition.split(separator: ">").map { $0.trimmingCharacters(in: .whitespaces) }
             if parts.count == 2,
                let lhsValue = context.output[parts[0]] as? Int,
-               let rhsValue = Int(parts[1]) {
+               let rhsValue = Int(parts[1])
+            {
                 return lhsValue > rhsValue
             }
         }
-        
+
         return false
     }
-    
+
     private func calculateBackoffDelay(attempt: Int, policy: RetryPolicy?) -> Double {
         let baseDelay = policy?.baseDelay ?? config.defaultRetryDelay
         let maxDelay = policy?.maxDelay ?? 60.0
-        
+
         switch policy?.backoffStrategy ?? .exponential {
         case .fixed:
             return baseDelay
@@ -487,25 +489,25 @@ public final class ExecutionPipeline {
             return min(baseDelay * pow(2, Double(attempt)), maxDelay)
         }
     }
-    
+
     private func isRetryableError(_ error: Error) -> Bool {
         // Network errors, timeouts, and rate limits are typically retryable
         let errorString = error.localizedDescription.lowercased()
         return errorString.contains("timeout") ||
-               errorString.contains("network") ||
-               errorString.contains("rate limit") ||
-               errorString.contains("temporarily unavailable")
+            errorString.contains("network") ||
+            errorString.contains("rate limit") ||
+            errorString.contains("temporarily unavailable")
     }
-    
+
     private func addToHistory(_ execution: PipelineExecution) {
         pipelineHistory.insert(execution, at: 0)
         if pipelineHistory.count > 50 {
             pipelineHistory.removeLast()
         }
     }
-    
+
     // MARK: - Pipeline Management
-    
+
     /// Cancel a running pipeline
     public func cancel(executionId: UUID) {
         if let execution = activePipelines.first(where: { $0.id == executionId }) {
@@ -513,11 +515,11 @@ public final class ExecutionPipeline {
             logger.info("Pipeline cancelled: \(executionId)")
         }
     }
-    
+
     /// Get status of a pipeline execution
     public func getStatus(executionId: UUID) -> PipelineExecution? {
         activePipelines.first { $0.id == executionId } ??
-        pipelineHistory.first { $0.id == executionId }
+            pipelineHistory.first { $0.id == executionId }
     }
 }
 
@@ -530,7 +532,7 @@ public struct Pipeline: Identifiable, Sendable {
     public let description: String
     public let stages: [PipelineStage]
     public let metadata: [String: String]
-    
+
     public init(id: UUID = UUID(), name: String, description: String = "", stages: [PipelineStage], metadata: [String: String] = [:]) {
         self.id = id
         self.name = name
@@ -548,7 +550,7 @@ public struct PipelineStage: Identifiable, @unchecked Sendable {
     public let config: [String: Any]
     public let retryPolicy: RetryPolicy?
     public let timeout: TimeInterval?
-    
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -564,7 +566,7 @@ public struct PipelineStage: Identifiable, @unchecked Sendable {
         self.retryPolicy = retryPolicy
         self.timeout = timeout
     }
-    
+
     public enum StageType: Sendable {
         case aiInference
         case toolExecution
@@ -582,14 +584,14 @@ public struct RetryPolicy: Sendable {
     public let baseDelay: Double
     public let maxDelay: Double
     public let backoffStrategy: BackoffStrategy
-    
+
     public init(maxRetries: Int = 3, baseDelay: Double = 1.0, maxDelay: Double = 60.0, backoffStrategy: BackoffStrategy = .exponential) {
         self.maxRetries = maxRetries
         self.baseDelay = baseDelay
         self.maxDelay = maxDelay
         self.backoffStrategy = backoffStrategy
     }
-    
+
     public enum BackoffStrategy: Sendable {
         case fixed
         case linear
@@ -609,7 +611,7 @@ public class PipelineExecution: Identifiable, @unchecked Sendable {
     public var completedStages: [UUID]
     public var stageResults: [UUID: StageResult]
     public var errors: [PipelineError]
-    
+
     public enum ExecutionStatus {
         case pending
         case running
@@ -617,7 +619,7 @@ public class PipelineExecution: Identifiable, @unchecked Sendable {
         case failed
         case cancelled
     }
-    
+
     init(id: UUID, pipelineId: UUID, pipelineName: String, startTime: Date, status: ExecutionStatus, currentStage: UUID?, completedStages: [UUID], stageResults: [UUID: StageResult], errors: [PipelineError]) {
         self.id = id
         self.pipelineId = pipelineId
@@ -675,22 +677,22 @@ public struct PipelineContext: @unchecked Sendable {
     public let input: [String: Any]
     public var output: [String: Any]
     public var stageHistory: [String: [String: Any]]
-    
+
     public init(input: [String: Any]) {
         self.input = input
-        self.output = input
-        self.stageHistory = [:]
+        output = input
+        stageHistory = [:]
     }
-    
+
     public func with(stageResult: StageResult, forStage stageName: String) -> PipelineContext {
         var updated = self
         updated.stageHistory[stageName] = stageResult.output
-        
+
         // Merge stage output into context output
         for (key, value) in stageResult.output where !key.hasPrefix("_") {
             updated.output[key] = value
         }
-        
+
         return updated
     }
 }
@@ -712,16 +714,16 @@ public enum PipelineExecutionError: LocalizedError {
     case validationFailed(String)
     case timeout(String)
     case cancelled
-    
+
     public var errorDescription: String? {
         switch self {
-        case .invalidStageConfig(let msg): return "Invalid stage configuration: \(msg)"
-        case .stageExecutionFailed(let msg): return "Stage execution failed: \(msg)"
-        case .providerNotAvailable(let id): return "AI provider not available: \(id)"
-        case .toolNotFound(let name): return "Tool not found: \(name)"
-        case .validationFailed(let msg): return "Validation failed: \(msg)"
-        case .timeout(let stage): return "Stage timed out: \(stage)"
-        case .cancelled: return "Pipeline was cancelled"
+        case let .invalidStageConfig(msg): "Invalid stage configuration: \(msg)"
+        case let .stageExecutionFailed(msg): "Stage execution failed: \(msg)"
+        case let .providerNotAvailable(id): "AI provider not available: \(id)"
+        case let .toolNotFound(name): "Tool not found: \(name)"
+        case let .validationFailed(msg): "Validation failed: \(msg)"
+        case let .timeout(stage): "Stage timed out: \(stage)"
+        case .cancelled: "Pipeline was cancelled"
         }
     }
 }

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- ================================ -->
+	<!-- App Groups                       -->
+	<!-- ================================ -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.app.theathe</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Push Notifications               -->
+	<!-- ================================ -->
+	<key>aps-environment</key>
+	<string>development</string>
+
+	<!-- ================================ -->
+	<!-- iCloud Services                  -->
+	<!-- ================================ -->
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>iCloud.app.theathe</string>
+	</array>
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudKit</string>
+	</array>
+	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
+	<string>$(TeamIdentifierPrefix)app.theathe</string>
+
+	<!-- ================================ -->
+	<!-- HomeKit                          -->
+	<!-- ================================ -->
+	<key>com.apple.developer.homekit</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Siri & Shortcuts                 -->
+	<!-- ================================ -->
+	<key>com.apple.developer.siri</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Group Activities (SharePlay)     -->
+	<!-- ================================ -->
+	<key>com.apple.developer.group-session</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Keychain Sharing                 -->
+	<!-- ================================ -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)app.thea.tvos</string>
+		<string>$(AppIdentifierPrefix)group.app.theathe</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Default Data Protection          -->
+	<!-- ================================ -->
+	<key>com.apple.developer.default-data-protection</key>
+	<string>NSFileProtectionComplete</string>
+</dict>
+</plist>

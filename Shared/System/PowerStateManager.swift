@@ -6,15 +6,15 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 #if os(macOS)
-import AppKit
-import IOKit
-import IOKit.ps
-import IOKit.pwr_mgt
+    import AppKit
+    import IOKit
+    import IOKit.ps
+    import IOKit.pwr_mgt
 #else
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Power State Manager
@@ -80,9 +80,9 @@ public final class PowerStateManager {
 
     private func setupMonitoring() {
         #if os(macOS)
-        setupMacOSMonitoring()
+            setupMacOSMonitoring()
         #else
-        setupIOSMonitoring()
+            setupIOSMonitoring()
         #endif
 
         // Monitor thermal state
@@ -90,103 +90,103 @@ public final class PowerStateManager {
     }
 
     #if os(macOS)
-    private func setupMacOSMonitoring() {
-        // Monitor power source changes
-        let runLoopSource = IOPSNotificationCreateRunLoopSource(
-            { _ in
-                Task { @MainActor in
-                    PowerStateManager.shared.updatePowerState()
+        private func setupMacOSMonitoring() {
+            // Monitor power source changes
+            let runLoopSource = IOPSNotificationCreateRunLoopSource(
+                { _ in
+                    Task { @MainActor in
+                        PowerStateManager.shared.updatePowerState()
+                    }
+                },
+                nil
+            ).takeRetainedValue()
+
+            CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
+
+            // Monitor sleep/wake notifications
+            let notificationCenter = NSWorkspace.shared.notificationCenter
+
+            notificationCenter.addObserver(
+                forName: NSWorkspace.willSleepNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard self != nil else { return }
+                Task { @MainActor [weak self] in
+                    self?.handleWillSleep()
                 }
-            },
-            nil
-        ).takeRetainedValue()
+            }
 
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .defaultMode)
+            notificationCenter.addObserver(
+                forName: NSWorkspace.didWakeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard self != nil else { return }
+                Task { @MainActor [weak self] in
+                    self?.handleDidWake()
+                }
+            }
 
-        // Monitor sleep/wake notifications
-        let notificationCenter = NSWorkspace.shared.notificationCenter
+            notificationCenter.addObserver(
+                forName: NSWorkspace.screensDidSleepNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard self != nil else { return }
+                Task { @MainActor [weak self] in
+                    self?.handleScreensDidSleep()
+                }
+            }
 
-        notificationCenter.addObserver(
-            forName: NSWorkspace.willSleepNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard self != nil else { return }
-            Task { @MainActor [weak self] in
-                self?.handleWillSleep()
+            notificationCenter.addObserver(
+                forName: NSWorkspace.screensDidWakeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard self != nil else { return }
+                Task { @MainActor [weak self] in
+                    self?.handleScreensDidWake()
+                }
             }
         }
-
-        notificationCenter.addObserver(
-            forName: NSWorkspace.didWakeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard self != nil else { return }
-            Task { @MainActor [weak self] in
-                self?.handleDidWake()
-            }
-        }
-
-        notificationCenter.addObserver(
-            forName: NSWorkspace.screensDidSleepNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard self != nil else { return }
-            Task { @MainActor [weak self] in
-                self?.handleScreensDidSleep()
-            }
-        }
-
-        notificationCenter.addObserver(
-            forName: NSWorkspace.screensDidWakeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard self != nil else { return }
-            Task { @MainActor [weak self] in
-                self?.handleScreensDidWake()
-            }
-        }
-    }
     #else
-    private func setupIOSMonitoring() {
-        UIDevice.current.isBatteryMonitoringEnabled = true
+        private func setupIOSMonitoring() {
+            UIDevice.current.isBatteryMonitoringEnabled = true
 
-        NotificationCenter.default.addObserver(
-            forName: UIDevice.batteryStateDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard self != nil else { return }
-            Task { @MainActor [weak self] in
-                self?.updatePowerState()
+            NotificationCenter.default.addObserver(
+                forName: UIDevice.batteryStateDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard self != nil else { return }
+                Task { @MainActor [weak self] in
+                    self?.updatePowerState()
+                }
+            }
+
+            NotificationCenter.default.addObserver(
+                forName: UIDevice.batteryLevelDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard self != nil else { return }
+                Task { @MainActor [weak self] in
+                    self?.updatePowerState()
+                }
+            }
+
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name.NSProcessInfoPowerStateDidChange,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard self != nil else { return }
+                Task { @MainActor [weak self] in
+                    self?.updatePowerState()
+                }
             }
         }
-
-        NotificationCenter.default.addObserver(
-            forName: UIDevice.batteryLevelDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard self != nil else { return }
-            Task { @MainActor [weak self] in
-                self?.updatePowerState()
-            }
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: NSNotification.Name.NSProcessInfoPowerStateDidChange,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard self != nil else { return }
-            Task { @MainActor [weak self] in
-                self?.updatePowerState()
-            }
-        }
-    }
     #endif
 
     private func setupThermalMonitoring() {
@@ -206,99 +206,100 @@ public final class PowerStateManager {
 
     private func updatePowerState() {
         #if os(macOS)
-        updateMacOSPowerState()
+            updateMacOSPowerState()
         #else
-        updateIOSPowerState()
+            updateIOSPowerState()
         #endif
     }
 
     #if os(macOS)
-    private func updateMacOSPowerState() {
-        guard let powerSourceInfo = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
-              let powerSources = IOPSCopyPowerSourcesList(powerSourceInfo)?.takeRetainedValue() as? [CFTypeRef],
-              !powerSources.isEmpty,
-              let source = powerSources.first,
-              let description = IOPSGetPowerSourceDescription(powerSourceInfo, source)?.takeUnretainedValue() as? [String: Any] else {
-            powerSource = .ac
-            batteryLevel = nil
-            isCharging = false
-            timeRemainingMinutes = nil
-            return
-        }
+        private func updateMacOSPowerState() {
+            guard let powerSourceInfo = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+                  let powerSources = IOPSCopyPowerSourcesList(powerSourceInfo)?.takeRetainedValue() as? [CFTypeRef],
+                  !powerSources.isEmpty,
+                  let source = powerSources.first,
+                  let description = IOPSGetPowerSourceDescription(powerSourceInfo, source)?.takeUnretainedValue() as? [String: Any]
+            else {
+                powerSource = .ac
+                batteryLevel = nil
+                isCharging = false
+                timeRemainingMinutes = nil
+                return
+            }
 
-        // Determine power source
-        if let powerSourceState = description[kIOPSPowerSourceStateKey] as? String {
-            switch powerSourceState {
-            case kIOPSACPowerValue:
+            // Determine power source
+            if let powerSourceState = description[kIOPSPowerSourceStateKey] as? String {
+                switch powerSourceState {
+                case kIOPSACPowerValue:
+                    powerSource = .ac
+                    isCharging = true
+                case kIOPSBatteryPowerValue:
+                    powerSource = .battery
+                    isCharging = false
+                default:
+                    powerSource = .unknown
+                }
+            }
+
+            // Get battery level
+            if let currentCapacity = description[kIOPSCurrentCapacityKey] as? Int {
+                let previousLevel = batteryLevel
+                batteryLevel = currentCapacity
+
+                if let previous = previousLevel, abs(previous - currentCapacity) >= 5 {
+                    onBatteryLevelChanged?(currentCapacity)
+                }
+            }
+
+            // Get time remaining
+            if let timeRemaining = description[kIOPSTimeToEmptyKey] as? Int, timeRemaining > 0 {
+                timeRemainingMinutes = timeRemaining
+            } else {
+                timeRemainingMinutes = nil
+            }
+
+            // Check charging state
+            if let isChargingValue = description[kIOPSIsChargingKey] as? Bool {
+                isCharging = isChargingValue
+            }
+        }
+    #else
+        private func updateIOSPowerState() {
+            let device = UIDevice.current
+
+            // Determine power source and charging state
+            switch device.batteryState {
+            case .charging:
                 powerSource = .ac
                 isCharging = true
-            case kIOPSBatteryPowerValue:
+            case .full:
+                powerSource = .ac
+                isCharging = false
+            case .unplugged:
                 powerSource = .battery
                 isCharging = false
-            default:
+            case .unknown:
                 powerSource = .unknown
+                isCharging = false
+            @unknown default:
+                powerSource = .unknown
+                isCharging = false
             }
-        }
 
-        // Get battery level
-        if let currentCapacity = description[kIOPSCurrentCapacityKey] as? Int {
-            let previousLevel = batteryLevel
-            batteryLevel = currentCapacity
+            // Get battery level
+            let level = Int(device.batteryLevel * 100)
+            if level >= 0 {
+                let previousLevel = batteryLevel
+                batteryLevel = level
 
-            if let previous = previousLevel, abs(previous - currentCapacity) >= 5 {
-                onBatteryLevelChanged?(currentCapacity)
+                if let previous = previousLevel, abs(previous - level) >= 5 {
+                    onBatteryLevelChanged?(level)
+                }
             }
+
+            // Check low power mode
+            isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
         }
-
-        // Get time remaining
-        if let timeRemaining = description[kIOPSTimeToEmptyKey] as? Int, timeRemaining > 0 {
-            timeRemainingMinutes = timeRemaining
-        } else {
-            timeRemainingMinutes = nil
-        }
-
-        // Check charging state
-        if let isChargingValue = description[kIOPSIsChargingKey] as? Bool {
-            isCharging = isChargingValue
-        }
-    }
-    #else
-    private func updateIOSPowerState() {
-        let device = UIDevice.current
-
-        // Determine power source and charging state
-        switch device.batteryState {
-        case .charging:
-            powerSource = .ac
-            isCharging = true
-        case .full:
-            powerSource = .ac
-            isCharging = false
-        case .unplugged:
-            powerSource = .battery
-            isCharging = false
-        case .unknown:
-            powerSource = .unknown
-            isCharging = false
-        @unknown default:
-            powerSource = .unknown
-            isCharging = false
-        }
-
-        // Get battery level
-        let level = Int(device.batteryLevel * 100)
-        if level >= 0 {
-            let previousLevel = batteryLevel
-            batteryLevel = level
-
-            if let previous = previousLevel, abs(previous - level) >= 5 {
-                onBatteryLevelChanged?(level)
-            }
-        }
-
-        // Check low power mode
-        isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
-    }
     #endif
 
     private func updateThermalState() {
@@ -372,11 +373,11 @@ public final class PowerStateManager {
     /// Get recommended polling interval based on power state
     public var recommendedPollingInterval: TimeInterval {
         if shouldConservePower {
-            return 60.0 // 1 minute
+            60.0 // 1 minute
         } else if powerSource == .battery {
-            return 30.0 // 30 seconds
+            30.0 // 30 seconds
         } else {
-            return 10.0 // 10 seconds
+            10.0 // 10 seconds
         }
     }
 
@@ -404,19 +405,19 @@ public enum PowerSource: String, Codable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .ac: return "Power Adapter"
-        case .battery: return "Battery"
-        case .ups: return "UPS"
-        case .unknown: return "Unknown"
+        case .ac: "Power Adapter"
+        case .battery: "Battery"
+        case .ups: "UPS"
+        case .unknown: "Unknown"
         }
     }
 
     public var icon: String {
         switch self {
-        case .ac: return "powerplug"
-        case .battery: return "battery.100"
-        case .ups: return "battery.100.bolt"
-        case .unknown: return "bolt.slash"
+        case .ac: "powerplug"
+        case .battery: "battery.100"
+        case .ups: "battery.100.bolt"
+        case .unknown: "bolt.slash"
         }
     }
 }
@@ -432,21 +433,21 @@ public enum ThermalState: String, Codable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .nominal: return "Normal"
-        case .fair: return "Elevated"
-        case .serious: return "High"
-        case .critical: return "Critical"
-        case .unknown: return "Unknown"
+        case .nominal: "Normal"
+        case .fair: "Elevated"
+        case .serious: "High"
+        case .critical: "Critical"
+        case .unknown: "Unknown"
         }
     }
 
     public var icon: String {
         switch self {
-        case .nominal: return "thermometer.medium"
-        case .fair: return "thermometer.medium"
-        case .serious: return "thermometer.high"
-        case .critical: return "thermometer.sun"
-        case .unknown: return "thermometer"
+        case .nominal: "thermometer.medium"
+        case .fair: "thermometer.medium"
+        case .serious: "thermometer.high"
+        case .critical: "thermometer.sun"
+        case .unknown: "thermometer"
         }
     }
 
@@ -476,10 +477,10 @@ public struct PowerStatus: Sendable {
         }
 
         switch level {
-        case 0..<10: return "battery.0"
-        case 10..<25: return "battery.25"
-        case 25..<50: return "battery.50"
-        case 50..<75: return "battery.75"
+        case 0 ..< 10: return "battery.0"
+        case 10 ..< 25: return "battery.25"
+        case 25 ..< 50: return "battery.50"
+        case 50 ..< 75: return "battery.75"
         default: return "battery.100"
         }
     }

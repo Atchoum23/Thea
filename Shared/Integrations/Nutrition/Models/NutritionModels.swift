@@ -241,22 +241,22 @@ public struct FoodItemEntry: Sendable, Codable, Identifiable {
 
 /// Daily nutrition goals
 public struct NutritionGoals: Sendable, Codable {
-    public var dailyCalories: Double = 2_000.0
+    public var dailyCalories: Double = 2000.0
     public var proteinGrams: Double = 50.0
     public var carbsGrams: Double = 300.0
     public var fatGrams: Double = 65.0
     public var fiberGrams: Double = 25.0
     public var sugarGrams: Double = 50.0
-    public var sodiumMg: Double = 2_300.0
+    public var sodiumMg: Double = 2300.0
 
     public init(
-        dailyCalories: Double = 2_000.0,
+        dailyCalories: Double = 2000.0,
         proteinGrams: Double = 50.0,
         carbsGrams: Double = 300.0,
         fatGrams: Double = 65.0,
         fiberGrams: Double = 25.0,
         sugarGrams: Double = 50.0,
-        sodiumMg: Double = 2_300.0
+        sodiumMg: Double = 2300.0
     ) {
         self.dailyCalories = dailyCalories
         self.proteinGrams = proteinGrams
@@ -277,21 +277,19 @@ public struct NutritionGoals: Sendable, Codable {
         goal: NutritionGoal
     ) -> NutritionGoals {
         // Mifflin-St Jeor BMR calculation
-        let bmr: Double
-        if biologicalSex == .male {
-            bmr = 10 * weightKg + 6.25 * heightCm - 5 * Double(age) + 5
+        let bmr: Double = if biologicalSex == .male {
+            10 * weightKg + 6.25 * heightCm - 5 * Double(age) + 5
         } else {
-            bmr = 10 * weightKg + 6.25 * heightCm - 5 * Double(age) - 161
+            10 * weightKg + 6.25 * heightCm - 5 * Double(age) - 161
         }
 
         let tdee = bmr * activityLevel.multiplier
 
         // Adjust for goal
-        let targetCalories: Double
-        switch goal {
-        case .lose: targetCalories = tdee - 500
-        case .maintain: targetCalories = tdee
-        case .gain: targetCalories = tdee + 500
+        let targetCalories: Double = switch goal {
+        case .lose: tdee - 500
+        case .maintain: tdee
+        case .gain: tdee + 500
         }
 
         // Macros (40/30/30 split for protein/carbs/fat)
@@ -306,7 +304,7 @@ public struct NutritionGoals: Sendable, Codable {
             fatGrams: fatGrams,
             fiberGrams: 25.0,
             sugarGrams: 50.0,
-            sodiumMg: 2_300.0
+            sodiumMg: 2300.0
         )
     }
 }
@@ -321,10 +319,10 @@ public enum MealType: String, Sendable, Codable, CaseIterable {
 
     public var icon: String {
         switch self {
-        case .breakfast: return "sunrise.fill"
-        case .lunch: return "sun.max.fill"
-        case .dinner: return "moon.stars.fill"
-        case .snack: return "leaf.fill"
+        case .breakfast: "sunrise.fill"
+        case .lunch: "sun.max.fill"
+        case .dinner: "moon.stars.fill"
+        case .snack: "leaf.fill"
         }
     }
 }
@@ -336,11 +334,11 @@ public enum ServingUnit: String, Sendable, Codable {
     case liter = "L"
     case ounce = "oz"
     case pound = "lb"
-    case cup = "cup"
+    case cup
     case tablespoon = "tbsp"
     case teaspoon = "tsp"
-    case piece = "piece"
-    case serving = "serving"
+    case piece
+    case serving
 }
 
 public enum FoodDataSource: String, Sendable, Codable {
@@ -365,11 +363,11 @@ public enum ActivityLevel: String, Sendable, Codable {
 
     public var multiplier: Double {
         switch self {
-        case .sedentary: return 1.2
-        case .lightlyActive: return 1.375
-        case .moderatelyActive: return 1.55
-        case .veryActive: return 1.725
-        case .extremelyActive: return 1.9
+        case .sedentary: 1.2
+        case .lightlyActive: 1.375
+        case .moderatelyActive: 1.55
+        case .veryActive: 1.725
+        case .extremelyActive: 1.9
         }
     }
 }
@@ -391,13 +389,13 @@ public enum NutritionError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .foodNotFound:
-            return "Food item not found"
+            "Food item not found"
         case .invalidBarcode:
-            return "Invalid barcode format"
-        case .usdaAPIError(let message):
-            return "USDA API error: \(message)"
+            "Invalid barcode format"
+        case let .usdaAPIError(message):
+            "USDA API error: \(message)"
         case .invalidServingSize:
-            return "Invalid serving size"
+            "Invalid serving size"
         }
     }
 }

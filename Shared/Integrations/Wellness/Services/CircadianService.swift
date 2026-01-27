@@ -6,7 +6,7 @@ public actor CircadianService: CircadianServiceProtocol {
     private var observers: [WeakObserver] = []
 
     public init() {
-        self.currentPhase = CircadianPhase.current()
+        currentPhase = CircadianPhase.current()
     }
 
     // MARK: - Public Methods

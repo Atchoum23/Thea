@@ -28,56 +28,56 @@ public enum NotificationCategory: String, Codable, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .general: return "General"
-        case .aiTask: return "AI Tasks"
-        case .aiResponse: return "AI Responses"
-        case .reminder: return "Reminders"
-        case .sync: return "Sync"
-        case .health: return "Health"
-        case .financial: return "Financial"
-        case .system: return "System"
-        case .error: return "Errors"
-        case .achievement: return "Achievements"
+        case .general: "General"
+        case .aiTask: "AI Tasks"
+        case .aiResponse: "AI Responses"
+        case .reminder: "Reminders"
+        case .sync: "Sync"
+        case .health: "Health"
+        case .financial: "Financial"
+        case .system: "System"
+        case .error: "Errors"
+        case .achievement: "Achievements"
         }
     }
 
     public var description: String {
         switch self {
         case .general:
-            return "General notifications from Thea"
+            "General notifications from Thea"
         case .aiTask:
-            return "Updates about AI task progress and completion"
+            "Updates about AI task progress and completion"
         case .aiResponse:
-            return "New AI responses in conversations"
+            "New AI responses in conversations"
         case .reminder:
-            return "Scheduled reminders and alerts"
+            "Scheduled reminders and alerts"
         case .sync:
-            return "Sync status across devices"
+            "Sync status across devices"
         case .health:
-            return "Health tracking insights and alerts"
+            "Health tracking insights and alerts"
         case .financial:
-            return "Financial updates and alerts"
+            "Financial updates and alerts"
         case .system:
-            return "System status and updates"
+            "System status and updates"
         case .error:
-            return "Error notifications requiring attention"
+            "Error notifications requiring attention"
         case .achievement:
-            return "Achievement unlocks and milestones"
+            "Achievement unlocks and milestones"
         }
     }
 
     public var icon: String {
         switch self {
-        case .general: return "bell"
-        case .aiTask: return "cpu"
-        case .aiResponse: return "bubble.left.and.bubble.right"
-        case .reminder: return "clock"
-        case .sync: return "arrow.triangle.2.circlepath"
-        case .health: return "heart"
-        case .financial: return "dollarsign.circle"
-        case .system: return "gear"
-        case .error: return "exclamationmark.triangle"
-        case .achievement: return "star"
+        case .general: "bell"
+        case .aiTask: "cpu"
+        case .aiResponse: "bubble.left.and.bubble.right"
+        case .reminder: "clock"
+        case .sync: "arrow.triangle.2.circlepath"
+        case .health: "heart"
+        case .financial: "dollarsign.circle"
+        case .system: "gear"
+        case .error: "exclamationmark.triangle"
+        case .achievement: "star"
         }
     }
 
@@ -85,27 +85,27 @@ public enum NotificationCategory: String, Codable, Sendable, CaseIterable {
     public var actions: [UNNotificationAction] {
         switch self {
         case .general:
-            return [
+            [
                 NotificationAction.open.unAction,
                 NotificationAction.dismiss.unAction
             ]
 
         case .aiTask:
-            return [
+            [
                 NotificationAction.viewDetails.unAction,
                 NotificationAction.retry.unAction,
                 NotificationAction.dismiss.unAction
             ]
 
         case .aiResponse:
-            return [
+            [
                 NotificationAction.reply.unAction,
                 NotificationAction.viewConversation.unAction,
                 NotificationAction.dismiss.unAction
             ]
 
         case .reminder:
-            return [
+            [
                 NotificationAction.markComplete.unAction,
                 NotificationAction.snooze15.unAction,
                 NotificationAction.snooze1Hour.unAction,
@@ -113,40 +113,40 @@ public enum NotificationCategory: String, Codable, Sendable, CaseIterable {
             ]
 
         case .sync:
-            return [
+            [
                 NotificationAction.viewDetails.unAction,
                 NotificationAction.dismiss.unAction
             ]
 
         case .health:
-            return [
+            [
                 NotificationAction.viewDetails.unAction,
                 NotificationAction.logEntry.unAction,
                 NotificationAction.dismiss.unAction
             ]
 
         case .financial:
-            return [
+            [
                 NotificationAction.viewDetails.unAction,
                 NotificationAction.categorize.unAction,
                 NotificationAction.dismiss.unAction
             ]
 
         case .system:
-            return [
+            [
                 NotificationAction.viewDetails.unAction,
                 NotificationAction.dismiss.unAction
             ]
 
         case .error:
-            return [
+            [
                 NotificationAction.viewDetails.unAction,
                 NotificationAction.retry.unAction,
                 NotificationAction.dismiss.unAction
             ]
 
         case .achievement:
-            return [
+            [
                 NotificationAction.share.unAction,
                 NotificationAction.viewDetails.unAction,
                 NotificationAction.dismiss.unAction
@@ -168,9 +168,9 @@ public enum NotificationCategory: String, Codable, Sendable, CaseIterable {
         switch self {
         case .aiResponse:
             #if os(iOS)
-            return [.allowInCarPlay, .customDismissAction]
+                return [.allowInCarPlay, .customDismissAction]
             #else
-            return [.customDismissAction]
+                return [.customDismissAction]
             #endif
         case .reminder:
             return [.customDismissAction, .hiddenPreviewsShowTitle]
@@ -211,38 +211,38 @@ public enum NotificationAction: String, Sendable {
 
     public var title: String {
         switch self {
-        case .open: return "Open"
-        case .dismiss: return "Dismiss"
-        case .reply: return "Reply"
-        case .viewDetails: return "View Details"
-        case .viewConversation: return "View Conversation"
-        case .retry: return "Retry"
-        case .markComplete: return "Mark Complete"
-        case .snooze15: return "Snooze 15 min"
-        case .snooze1Hour: return "Snooze 1 hour"
-        case .logEntry: return "Log Entry"
-        case .categorize: return "Categorize"
-        case .share: return "Share"
+        case .open: "Open"
+        case .dismiss: "Dismiss"
+        case .reply: "Reply"
+        case .viewDetails: "View Details"
+        case .viewConversation: "View Conversation"
+        case .retry: "Retry"
+        case .markComplete: "Mark Complete"
+        case .snooze15: "Snooze 15 min"
+        case .snooze1Hour: "Snooze 1 hour"
+        case .logEntry: "Log Entry"
+        case .categorize: "Categorize"
+        case .share: "Share"
         }
     }
 
     public var options: UNNotificationActionOptions {
         switch self {
         case .open, .viewDetails, .viewConversation:
-            return [.foreground]
+            [.foreground]
         case .dismiss:
-            return [.destructive]
+            [.destructive]
         case .markComplete:
-            return [.authenticationRequired]
+            [.authenticationRequired]
         default:
-            return []
+            []
         }
     }
 
     public var unAction: UNNotificationAction {
         switch self {
         case .reply:
-            return UNTextInputNotificationAction(
+            UNTextInputNotificationAction(
                 identifier: identifier,
                 title: title,
                 options: options,
@@ -250,7 +250,7 @@ public enum NotificationAction: String, Sendable {
                 textInputPlaceholder: "Type your reply..."
             )
         default:
-            return UNNotificationAction(
+            UNNotificationAction(
                 identifier: identifier,
                 title: title,
                 options: options

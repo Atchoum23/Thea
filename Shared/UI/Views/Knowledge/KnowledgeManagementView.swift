@@ -88,7 +88,7 @@ struct KnowledgeManagementView: View {
                 }
                 .padding()
 
-                if searchResults.isEmpty && !searchQuery.isEmpty {
+                if searchResults.isEmpty, !searchQuery.isEmpty {
                     ContentUnavailableView(
                         "No Results",
                         systemImage: "magnifyingglass",
@@ -112,7 +112,7 @@ struct KnowledgeManagementView: View {
             allowedContentTypes: [.folder],
             allowsMultipleSelection: false
         ) { result in
-            if case .success(let urls) = result, let url = urls.first {
+            if case let .success(urls) = result, let url = urls.first {
                 scanner.configureScanPaths(scanner.scanPaths + [url])
             }
         }
@@ -162,21 +162,21 @@ private struct KnowledgeSearchResultRow: View {
 
     private func iconForFileType(_ type: FileType) -> String {
         switch type {
-        case .code: return "chevron.left.forwardslash.chevron.right"
-        case .markdown: return "doc.text"
-        case .pdf: return "doc.fill"
-        case .data: return "tablecells"
-        case .text: return "doc.plaintext"
+        case .code: "chevron.left.forwardslash.chevron.right"
+        case .markdown: "doc.text"
+        case .pdf: "doc.fill"
+        case .data: "tablecells"
+        case .text: "doc.plaintext"
         }
     }
 
     private func colorForFileType(_ type: FileType) -> Color {
         switch type {
-        case .code: return .blue
-        case .markdown: return .green
-        case .pdf: return .red
-        case .data: return .orange
-        case .text: return .secondary
+        case .code: .blue
+        case .markdown: .green
+        case .pdf: .red
+        case .data: .orange
+        case .text: .secondary
         }
     }
 }

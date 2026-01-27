@@ -27,7 +27,8 @@ struct FileCollector: Sendable {
 
         while let url = enumerator.nextObject() as? URL {
             guard let resourceValues = try? url.resourceValues(forKeys: [.isRegularFileKey]),
-                  resourceValues.isRegularFile == true else {
+                  resourceValues.isRegularFile == true
+            else {
                 continue
             }
 
@@ -131,10 +132,10 @@ enum FileCollectorError: Error, CustomStringConvertible {
 
     var description: String {
         switch self {
-        case .directoryNotFound(let path):
-            return "Directory not found: \(path)"
-        case .accessDenied(let path):
-            return "Access denied: \(path)"
+        case let .directoryNotFound(path):
+            "Directory not found: \(path)"
+        case let .accessDenied(path):
+            "Access denied: \(path)"
         }
     }
 }

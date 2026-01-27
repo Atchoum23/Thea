@@ -8,11 +8,11 @@ public actor ApprovalGate {
     private let logger = Logger(subsystem: "com.thea.app", category: "ApprovalGate")
 
     public enum ApprovalLevel: String, Sendable {
-        case phaseStart      // Before starting a phase
-        case fileCreation    // Before creating each file (verbose mode)
-        case buildFix        // Before applying AI-generated fixes
-        case phaseComplete   // Before marking phase complete
-        case dmgCreation     // Before creating DMG
+        case phaseStart // Before starting a phase
+        case fileCreation // Before creating each file (verbose mode)
+        case buildFix // Before applying AI-generated fixes
+        case phaseComplete // Before marking phase complete
+        case dmgCreation // Before creating DMG
     }
 
     public struct ApprovalRequest: Sendable {
@@ -126,7 +126,7 @@ public actor ApprovalGate {
 
 // MARK: - Notification Names
 
-extension Notification.Name {
-    public static let approvalRequested = Notification.Name("com.thea.approvalRequested")
-    public static let phaseProgressUpdated = Notification.Name("com.thea.phaseProgressUpdated")
+public extension Notification.Name {
+    static let approvalRequested = Notification.Name("com.thea.approvalRequested")
+    static let phaseProgressUpdated = Notification.Name("com.thea.phaseProgressUpdated")
 }

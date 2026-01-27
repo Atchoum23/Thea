@@ -2,9 +2,9 @@
 // Email alias and tracker protection (replaces iCloud Hide My Email)
 // Features: alias generation, tracker removal, link protection, privacy reports
 
+import CryptoKit
 import Foundation
 import OSLog
-import CryptoKit
 
 // MARK: - Email Protection Manager
 
@@ -35,13 +35,15 @@ public final class TheaEmailProtectionManager: ObservableObject {
     private func loadData() {
         // Load aliases
         if let data = UserDefaults.standard.data(forKey: aliasStorageKey),
-           let loaded = try? JSONDecoder().decode([EmailAlias].self, from: data) {
+           let loaded = try? JSONDecoder().decode([EmailAlias].self, from: data)
+        {
             aliases = loaded
         }
 
         // Load stats
         if let data = UserDefaults.standard.data(forKey: statsStorageKey),
-           let loaded = try? JSONDecoder().decode(EmailProtectionStats.self, from: data) {
+           let loaded = try? JSONDecoder().decode(EmailProtectionStats.self, from: data)
+        {
             stats = loaded
         }
     }
@@ -70,7 +72,7 @@ public final class TheaEmailProtectionManager: ObservableObject {
         defer { isLoading = false }
 
         // Check alias limit
-        let activeAliases = aliases.filter { $0.isEnabled }
+        let activeAliases = aliases.filter(\.isEnabled)
         guard activeAliases.count < settings.maxActiveAliases else {
             throw EmailProtectionError.aliasLimitReached
         }
@@ -120,15 +122,15 @@ public final class TheaEmailProtectionManager: ObservableObject {
     public func listAliases(filter: AliasFilter? = nil) -> [EmailAlias] {
         var result = aliases
 
-        if let filter = filter {
+        if let filter {
             switch filter {
             case .active:
-                result = result.filter { $0.isEnabled }
+                result = result.filter(\.isEnabled)
             case .inactive:
                 result = result.filter { !$0.isEnabled }
-            case .domain(let domain):
+            case let .domain(domain):
                 result = result.filter { $0.domain.contains(domain) }
-            case .recent(let days):
+            case let .recent(days):
                 let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
                 result = result.filter { $0.createdAt > cutoff }
             }
@@ -145,7 +147,7 @@ public final class TheaEmailProtectionManager: ObservableObject {
 
         // Check if enabling would exceed limit
         if enabled {
-            let activeCount = aliases.filter { $0.isEnabled && $0.id != aliasId }.count
+            let activeCount = aliases.count(where: { $0.isEnabled && $0.id != aliasId })
             guard activeCount < settings.maxActiveAliases else {
                 throw EmailProtectionError.aliasLimitReached
             }
@@ -260,7 +262,7 @@ public final class TheaEmailProtectionManager: ObservableObject {
         case .random:
             // Generate random string like "abc123def456"
             let chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-            localPart = String((0..<12).map { _ in chars.randomElement()! })
+            localPart = String((0 ..< 12).map { _ in chars.randomElement()! })
 
         case .wordBased:
             // Generate word-based alias like "brave-sunset-42"
@@ -268,17 +270,17 @@ public final class TheaEmailProtectionManager: ObservableObject {
             let nouns = ["cloud", "dawn", "echo", "flame", "grove", "hill", "isle", "lake", "moon", "peak"]
             let adj = adjectives.randomElement()!
             let noun = nouns.randomElement()!
-            let num = Int.random(in: 10...99)
+            let num = Int.random(in: 10 ... 99)
             localPart = "\(adj)-\(noun)-\(num)"
 
         case .domainBased:
             // Generate alias based on the target domain
             let sanitized = domain.replacingOccurrences(of: ".", with: "-")
-            let random = String((0..<4).map { _ in "0123456789".randomElement()! })
+            let random = String((0 ..< 4).map { _ in "0123456789".randomElement()! })
             localPart = "\(sanitized)-\(random)"
 
-        case .custom(let prefix):
-            let random = String((0..<6).map { _ in "abcdefghijklmnopqrstuvwxyz0123456789".randomElement()! })
+        case let .custom(prefix):
+            let random = String((0 ..< 6).map { _ in "abcdefghijklmnopqrstuvwxyz0123456789".randomElement()! })
             localPart = "\(prefix)-\(random)"
         }
 
@@ -329,7 +331,8 @@ public final class TheaEmailProtectionManager: ObservableObject {
 
         for match in matches {
             if let urlRange = Range(match.range(at: 1), in: html),
-               let hrefRange = Range(match.range, in: html) {
+               let hrefRange = Range(match.range, in: html)
+            {
                 let urlString = String(html[urlRange])
                 let href = String(html[hrefRange])
 
@@ -370,7 +373,8 @@ public final class TheaEmailProtectionManager: ObservableObject {
 
         // Check query parameters
         if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-           let queryItems = components.queryItems {
+           let queryItems = components.queryItems
+        {
             for item in queryItems {
                 if trackingParams.contains(item.name) {
                     return true
@@ -424,7 +428,8 @@ public final class TheaEmailProtectionManager: ObservableObject {
             for item in queryItems {
                 if let value = item.value,
                    value.hasPrefix("http"),
-                   let redirectUrl = URL(string: value) {
+                   let redirectUrl = URL(string: value)
+                {
                     // Return the actual destination URL
                     return cleanTrackingUrl(redirectUrl)
                 }
@@ -472,10 +477,10 @@ public struct EmailProtectionStats: Codable {
 }
 
 public enum AliasFormat {
-    case random           // abc123def456
-    case wordBased        // brave-sunset-42
-    case domainBased      // example-com-1234
-    case custom(String)   // prefix-abc123
+    case random // abc123def456
+    case wordBased // brave-sunset-42
+    case domainBased // example-com-1234
+    case custom(String) // prefix-abc123
 }
 
 public enum AliasFilter {
@@ -533,13 +538,13 @@ public enum EmailProtectionError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .aliasNotFound:
-            return "Email alias not found"
+            "Email alias not found"
         case .aliasLimitReached:
-            return "Maximum number of active aliases reached"
+            "Maximum number of active aliases reached"
         case .invalidEmail:
-            return "Invalid email address"
-        case .processingFailed(let reason):
-            return "Email processing failed: \(reason)"
+            "Invalid email address"
+        case let .processingFailed(reason):
+            "Email processing failed: \(reason)"
         }
     }
 }
@@ -547,7 +552,6 @@ public enum EmailProtectionError: Error, LocalizedError {
 // MARK: - Form Detection
 
 extension TheaEmailProtectionManager {
-
     /// Detect email input fields on a page
     public func detectEmailFields(in html: String) -> [EmailFieldInfo] {
         var fields: [EmailFieldInfo] = []
@@ -582,19 +586,22 @@ extension TheaEmailProtectionManager {
 
         // Extract id
         if let idMatch = html.range(of: "id=[\"']([^\"']+)[\"']", options: .regularExpression),
-           let valueRange = html.range(of: "(?<=id=[\"'])[^\"']+", options: .regularExpression, range: idMatch) {
+           let valueRange = html.range(of: "(?<=id=[\"'])[^\"']+", options: .regularExpression, range: idMatch)
+        {
             info.id = String(html[valueRange])
         }
 
         // Extract name
         if let nameMatch = html.range(of: "name=[\"']([^\"']+)[\"']", options: .regularExpression),
-           let valueRange = html.range(of: "(?<=name=[\"'])[^\"']+", options: .regularExpression, range: nameMatch) {
+           let valueRange = html.range(of: "(?<=name=[\"'])[^\"']+", options: .regularExpression, range: nameMatch)
+        {
             info.name = String(html[valueRange])
         }
 
         // Extract placeholder
         if let placeholderMatch = html.range(of: "placeholder=[\"']([^\"']+)[\"']", options: .regularExpression),
-           let valueRange = html.range(of: "(?<=placeholder=[\"'])[^\"']+", options: .regularExpression, range: placeholderMatch) {
+           let valueRange = html.range(of: "(?<=placeholder=[\"'])[^\"']+", options: .regularExpression, range: placeholderMatch)
+        {
             info.placeholder = String(html[valueRange])
         }
 

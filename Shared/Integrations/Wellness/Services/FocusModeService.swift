@@ -69,7 +69,7 @@ public actor FocusModeService: FocusModeServiceProtocol {
 
     // MARK: - Ambient Audio
 
-    public func playAmbientAudio(_ audio: AmbientAudio, volume: Double) async throws {
+    public func playAmbientAudio(_ audio: AmbientAudio, volume _: Double) async throws {
         await stopAmbientAudio()
 
         // Note: In a real implementation, we would load audio files from bundle

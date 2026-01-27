@@ -85,7 +85,7 @@ public actor IncomeService: IncomeServiceProtocol {
         let averageMonthly = totalIncome / Double(monthCount)
 
         // Active streams count
-        let activeStreams = streams.values.filter { $0.isActive }.count
+        let activeStreams = streams.values.count { $0.isActive }
 
         return IncomeReport(
             period: period,
@@ -103,7 +103,8 @@ public actor IncomeService: IncomeServiceProtocol {
 
     public func calculateTaxEstimate(for year: Int) async throws -> TaxEstimate {
         guard let yearStart = Calendar.current.date(from: DateComponents(year: year, month: 1, day: 1)),
-              let yearEnd = Calendar.current.date(from: DateComponents(year: year, month: 12, day: 31)) else {
+              let yearEnd = Calendar.current.date(from: DateComponents(year: year, month: 12, day: 31))
+        else {
             return TaxEstimate.calculate(grossIncome: 0, year: year)
         }
         let yearRange = DateInterval(start: yearStart, end: yearEnd)
@@ -117,11 +118,11 @@ public actor IncomeService: IncomeServiceProtocol {
     // MARK: - Analytics
 
     public func getActiveStreamsCount() async -> Int {
-        streams.values.filter { $0.isActive }.count
+        streams.values.count { $0.isActive }
     }
 
     public func getTotalMonthlyProjection() async -> Double {
-        streams.values.filter { $0.isActive }.reduce(0.0) { $0 + $1.monthlyAmount }
+        streams.values.filter(\.isActive).reduce(0.0) { $0 + $1.monthlyAmount }
     }
 
     public func getTopCategory() async -> IncomeCategory? {
@@ -189,25 +190,25 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
 
     // MARK: - Platform-Specific Sync
 
-    private func syncUpwork(apiKey: String) async throws -> [IncomeEntry] {
+    private func syncUpwork(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call Upwork API
         // GET /api/profiles/v2/search/jobs.json
         []
     }
 
-    private func syncFiverr(apiKey: String) async throws -> [IncomeEntry] {
+    private func syncFiverr(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call Fiverr API
         // GET /sellers/{username}/gigs
         []
     }
 
-    private func syncUber(apiKey: String) async throws -> [IncomeEntry] {
+    private func syncUber(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call Uber Driver API
         // GET /v1/partners/trips
         []
     }
 
-    private func syncDoorDash(apiKey: String) async throws -> [IncomeEntry] {
+    private func syncDoorDash(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call DoorDash API
         // GET /drive/v2/deliveries
         []

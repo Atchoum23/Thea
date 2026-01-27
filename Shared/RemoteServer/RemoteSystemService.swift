@@ -8,11 +8,11 @@
 
 import Foundation
 #if os(macOS)
-import AppKit
-import IOKit
-import IOKit.pwr_mgt
+    import AppKit
+    import IOKit
+    import IOKit.pwr_mgt
 #else
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Remote System Service
@@ -20,7 +20,6 @@ import UIKit
 /// System control service for remote operations including reboot, shutdown, etc.
 @MainActor
 public class RemoteSystemService: ObservableObject {
-
     // MARK: - Published State
 
     @Published public private(set) var pendingConfirmations: [PendingConfirmation] = []
@@ -44,14 +43,14 @@ public class RemoteSystemService: ObservableObject {
         case .getProcesses:
             return try await getProcessList()
 
-        case .killProcess(let pid):
+        case let .killProcess(pid):
             if requireConfirmation {
                 let confirmed = await requestConfirmation(action: "Kill process \(pid)")
                 guard confirmed else { return .error("Action cancelled") }
             }
             return try await killProcess(pid: pid)
 
-        case .executeCommand(let command, let workingDirectory, let timeout):
+        case let .executeCommand(command, workingDirectory, timeout):
             // Commands always need validation
             guard validateCommand(command) else {
                 return .error("Command blocked for security reasons")
@@ -62,7 +61,7 @@ public class RemoteSystemService: ObservableObject {
             }
             return try await executeCommand(command, workingDirectory: workingDirectory, timeout: timeout ?? 60)
 
-        case .launchApp(let bundleId, let arguments):
+        case let .launchApp(bundleId, arguments):
             if requireConfirmation {
                 let confirmed = await requestConfirmation(action: "Launch app: \(bundleId)")
                 guard confirmed else { return .error("Action cancelled") }
@@ -93,16 +92,16 @@ public class RemoteSystemService: ObservableObject {
             guard confirmed else { return .error("Logout cancelled") }
             return try await performLogout()
 
-        case .setVolume(let level):
+        case let .setVolume(level):
             return try await setVolume(level: level)
 
-        case .setBrightness(let level):
+        case let .setBrightness(level):
             return try await setBrightness(level: level)
 
         case .getNotifications:
             return try await getNotifications()
 
-        case .dismissNotification(let id):
+        case let .dismissNotification(id):
             return try await dismissNotification(id: id)
         }
     }
@@ -111,80 +110,80 @@ public class RemoteSystemService: ObservableObject {
 
     private func getSystemInfo() async throws -> SystemResponse {
         #if os(macOS)
-        let processInfo = ProcessInfo.processInfo
+            let processInfo = ProcessInfo.processInfo
 
-        // Get disk space
-        let fileManager = FileManager.default
-        var totalDisk: UInt64 = 0
-        var freeDisk: UInt64 = 0
+            // Get disk space
+            let fileManager = FileManager.default
+            var totalDisk: UInt64 = 0
+            var freeDisk: UInt64 = 0
 
-        if let attrs = try? fileManager.attributesOfFileSystem(forPath: "/") {
-            totalDisk = attrs[.systemSize] as? UInt64 ?? 0
-            freeDisk = attrs[.systemFreeSize] as? UInt64 ?? 0
-        }
+            if let attrs = try? fileManager.attributesOfFileSystem(forPath: "/") {
+                totalDisk = attrs[.systemSize] as? UInt64 ?? 0
+                freeDisk = attrs[.systemFreeSize] as? UInt64 ?? 0
+            }
 
-        // Get battery info
-        let batteryInfo = getBatteryInfo()
+            // Get battery info
+            let batteryInfo = getBatteryInfo()
 
-        let info = SystemInfo(
-            hostname: processInfo.hostName,
-            osVersion: processInfo.operatingSystemVersionString,
-            osName: "macOS",
-            architecture: getArchitecture(),
-            cpuCount: processInfo.processorCount,
-            totalMemory: processInfo.physicalMemory,
-            availableMemory: getAvailableMemory(),
-            totalDiskSpace: totalDisk,
-            availableDiskSpace: freeDisk,
-            uptime: processInfo.systemUptime,
-            batteryLevel: batteryInfo.level,
-            isCharging: batteryInfo.isCharging,
-            currentUser: NSUserName()
-        )
+            let info = RemoteSystemInfo(
+                hostname: processInfo.hostName,
+                osVersion: processInfo.operatingSystemVersionString,
+                osName: "macOS",
+                architecture: getArchitecture(),
+                cpuCount: processInfo.processorCount,
+                totalMemory: processInfo.physicalMemory,
+                availableMemory: getAvailableMemory(),
+                totalDiskSpace: totalDisk,
+                availableDiskSpace: freeDisk,
+                uptime: processInfo.systemUptime,
+                batteryLevel: batteryInfo.level,
+                isCharging: batteryInfo.isCharging,
+                currentUser: NSUserName()
+            )
 
-        return .info(info)
+            return .info(info)
         #else
-        let device = UIDevice.current
-        let processInfo = ProcessInfo.processInfo
+            let device = UIDevice.current
+            let processInfo = ProcessInfo.processInfo
 
-        let fileManager = FileManager.default
-        var totalDisk: UInt64 = 0
-        var freeDisk: UInt64 = 0
+            let fileManager = FileManager.default
+            var totalDisk: UInt64 = 0
+            var freeDisk: UInt64 = 0
 
-        if let attrs = try? fileManager.attributesOfFileSystem(forPath: NSHomeDirectory()) {
-            totalDisk = attrs[.systemSize] as? UInt64 ?? 0
-            freeDisk = attrs[.systemFreeSize] as? UInt64 ?? 0
-        }
+            if let attrs = try? fileManager.attributesOfFileSystem(forPath: NSHomeDirectory()) {
+                totalDisk = attrs[.systemSize] as? UInt64 ?? 0
+                freeDisk = attrs[.systemFreeSize] as? UInt64 ?? 0
+            }
 
-        device.isBatteryMonitoringEnabled = true
+            device.isBatteryMonitoringEnabled = true
 
-        let info = SystemInfo(
-            hostname: device.name,
-            osVersion: device.systemVersion,
-            osName: device.systemName,
-            architecture: getArchitecture(),
-            cpuCount: processInfo.processorCount,
-            totalMemory: processInfo.physicalMemory,
-            availableMemory: getAvailableMemory(),
-            totalDiskSpace: totalDisk,
-            availableDiskSpace: freeDisk,
-            uptime: processInfo.systemUptime,
-            batteryLevel: device.batteryLevel,
-            isCharging: device.batteryState == .charging || device.batteryState == .full,
-            currentUser: "mobile"
-        )
+            let info = RemoteSystemInfo(
+                hostname: device.name,
+                osVersion: device.systemVersion,
+                osName: device.systemName,
+                architecture: getArchitecture(),
+                cpuCount: processInfo.processorCount,
+                totalMemory: processInfo.physicalMemory,
+                availableMemory: getAvailableMemory(),
+                totalDiskSpace: totalDisk,
+                availableDiskSpace: freeDisk,
+                uptime: processInfo.systemUptime,
+                batteryLevel: device.batteryLevel,
+                isCharging: device.batteryState == .charging || device.batteryState == .full,
+                currentUser: "mobile"
+            )
 
-        return .info(info)
+            return .info(info)
         #endif
     }
 
     private func getArchitecture() -> String {
         #if arch(arm64)
-        return "arm64"
+            return "arm64"
         #elseif arch(x86_64)
-        return "x86_64"
+            return "x86_64"
         #else
-        return "unknown"
+            return "unknown"
         #endif
     }
 
@@ -201,72 +200,79 @@ public class RemoteSystemService: ObservableObject {
 
         guard result == KERN_SUCCESS else { return 0 }
 
-        let pageSize = UInt64(vm_page_size)
+        // vm_page_size is a C global - access safely
+        let pageSize: UInt64
+        #if os(macOS) || os(iOS)
+            pageSize = UInt64(getpagesize())
+        #else
+            pageSize = 4096
+        #endif
         return UInt64(vmStats.free_count) * pageSize
     }
 
     #if os(macOS)
-    private func getBatteryInfo() -> (level: Float?, isCharging: Bool?) {
-        guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
-              let sources = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef],
-              let source = sources.first,
-              let desc = IOPSGetPowerSourceDescription(snapshot, source)?.takeUnretainedValue() as? [String: Any] else {
-            return (nil, nil)
+        private func getBatteryInfo() -> (level: Float?, isCharging: Bool?) {
+            guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+                  let sources = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef],
+                  let source = sources.first,
+                  let desc = IOPSGetPowerSourceDescription(snapshot, source)?.takeUnretainedValue() as? [String: Any]
+            else {
+                return (nil, nil)
+            }
+
+            let currentCapacity = desc[kIOPSCurrentCapacityKey] as? Int ?? 0
+            let maxCapacity = desc[kIOPSMaxCapacityKey] as? Int ?? 100
+            let isCharging = desc[kIOPSIsChargingKey] as? Bool ?? false
+
+            return (Float(currentCapacity) / Float(maxCapacity), isCharging)
         }
-
-        let currentCapacity = desc[kIOPSCurrentCapacityKey] as? Int ?? 0
-        let maxCapacity = desc[kIOPSMaxCapacityKey] as? Int ?? 100
-        let isCharging = desc[kIOPSIsChargingKey] as? Bool ?? false
-
-        return (Float(currentCapacity) / Float(maxCapacity), isCharging)
-    }
     #endif
 
     // MARK: - Process List
 
     private func getProcessList() async throws -> SystemResponse {
         #if os(macOS)
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/ps")
-        task.arguments = ["-axo", "pid,pcpu,rss,user,comm"]
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/bin/ps")
+            task.arguments = ["-axo", "pid,pcpu,rss,user,comm"]
 
-        let pipe = Pipe()
-        task.standardOutput = pipe
+            let pipe = Pipe()
+            task.standardOutput = pipe
 
-        try task.run()
-        task.waitUntilExit()
+            try task.run()
+            task.waitUntilExit()
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: data, encoding: .utf8) ?? ""
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
 
-        var processes: [ProcessInfo] = []
-        let lines = output.components(separatedBy: "\n").dropFirst() // Skip header
+            var processes: [RemoteProcessInfo] = []
+            let lines = output.components(separatedBy: "\n").dropFirst() // Skip header
 
-        for line in lines {
-            let components = line.split(separator: " ", omittingEmptySubsequences: true)
-            guard components.count >= 5 else { continue }
+            for line in lines {
+                let components = line.split(separator: " ", omittingEmptySubsequences: true)
+                guard components.count >= 5 else { continue }
 
-            let pid = Int32(components[0]) ?? 0
-            let cpu = Double(components[1]) ?? 0
-            let memory = UInt64(components[2]) ?? 0
-            let user = String(components[3])
-            let name = components[4...].joined(separator: " ")
+                let pid = Int32(components[0]) ?? 0
+                let cpu = Double(components[1]) ?? 0
+                let memory = UInt64(components[2]) ?? 0
+                let user = String(components[3])
+                let name = components[4...].joined(separator: " ")
 
-            processes.append(ProcessInfo(
-                id: pid,
-                name: String(name),
-                path: nil,
-                user: user,
-                cpuUsage: cpu,
-                memoryUsage: memory * 1024, // RSS is in KB
-                startTime: nil,
-                parentPID: 0
-            ))
-        }
+                processes.append(RemoteProcessInfo(
+                    id: pid,
+                    name: String(name),
+                    path: nil,
+                    user: user,
+                    cpuUsage: cpu,
+                    memoryUsage: memory * 1024, // RSS is in KB
+                    startTime: nil,
+                    parentPID: 0
+                ))
+            }
 
-        return .processes(processes)
+            return .processes(processes)
         #else
-        return .error("Process listing not available on iOS")
+            return .error("Process listing not available on iOS")
         #endif
     }
 
@@ -274,20 +280,20 @@ public class RemoteSystemService: ObservableObject {
 
     private func killProcess(pid: Int32) async throws -> SystemResponse {
         #if os(macOS)
-        let result = kill(pid, SIGTERM)
-        if result == 0 {
-            lastActionTime = Date()
-            return .actionPerformed("Process \(pid) terminated")
-        } else {
-            // Try SIGKILL
-            if kill(pid, SIGKILL) == 0 {
+            let result = kill(pid, SIGTERM)
+            if result == 0 {
                 lastActionTime = Date()
-                return .actionPerformed("Process \(pid) killed")
+                return .actionPerformed("Process \(pid) terminated")
+            } else {
+                // Try SIGKILL
+                if kill(pid, SIGKILL) == 0 {
+                    lastActionTime = Date()
+                    return .actionPerformed("Process \(pid) killed")
+                }
+                return .error("Failed to kill process \(pid)")
             }
-            return .error("Failed to kill process \(pid)")
-        }
         #else
-        return .error("Cannot kill processes on iOS")
+            return .error("Cannot kill processes on iOS")
         #endif
     }
 
@@ -322,43 +328,43 @@ public class RemoteSystemService: ObservableObject {
 
     private func executeCommand(_ command: String, workingDirectory: String?, timeout: TimeInterval) async throws -> SystemResponse {
         #if os(macOS)
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/sh")
-        task.arguments = ["-c", command]
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/bin/sh")
+            task.arguments = ["-c", command]
 
-        if let wd = workingDirectory {
-            task.currentDirectoryURL = URL(fileURLWithPath: wd)
-        }
-
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
-        task.standardOutput = stdoutPipe
-        task.standardError = stderrPipe
-
-        // Run with timeout
-        try task.run()
-
-        let timeoutTask = Task {
-            try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
-            if task.isRunning {
-                task.terminate()
+            if let wd = workingDirectory {
+                task.currentDirectoryURL = URL(fileURLWithPath: wd)
             }
-        }
 
-        task.waitUntilExit()
-        timeoutTask.cancel()
+            let stdoutPipe = Pipe()
+            let stderrPipe = Pipe()
+            task.standardOutput = stdoutPipe
+            task.standardError = stderrPipe
 
-        let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
-        let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+            // Run with timeout
+            try task.run()
 
-        let stdout = String(data: stdoutData, encoding: .utf8) ?? ""
-        let stderr = String(data: stderrData, encoding: .utf8) ?? ""
+            let timeoutTask = Task {
+                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                if task.isRunning {
+                    task.terminate()
+                }
+            }
 
-        lastActionTime = Date()
+            task.waitUntilExit()
+            timeoutTask.cancel()
 
-        return .commandOutput(exitCode: task.terminationStatus, stdout: stdout, stderr: stderr)
+            let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+            let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+
+            let stdout = String(data: stdoutData, encoding: .utf8) ?? ""
+            let stderr = String(data: stderrData, encoding: .utf8) ?? ""
+
+            lastActionTime = Date()
+
+            return .commandOutput(exitCode: task.terminationStatus, stdout: stdout, stderr: stderr)
         #else
-        return .error("Command execution not available on iOS")
+            return .error("Command execution not available on iOS")
         #endif
     }
 
@@ -366,25 +372,25 @@ public class RemoteSystemService: ObservableObject {
 
     private func launchApp(bundleId: String, arguments: [String]?) async throws -> SystemResponse {
         #if os(macOS)
-        let config = NSWorkspace.OpenConfiguration()
-        if let args = arguments {
-            config.arguments = args
-        }
+            let config = NSWorkspace.OpenConfiguration()
+            if let args = arguments {
+                config.arguments = args
+            }
 
-        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) else {
-            return .error("Application not found: \(bundleId)")
-        }
+            guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) else {
+                return .error("Application not found: \(bundleId)")
+            }
 
-        let app = try await NSWorkspace.shared.openApplication(at: url, configuration: config)
+            let app = try await NSWorkspace.shared.openApplication(at: url, configuration: config)
 
-        lastActionTime = Date()
-        return .appLaunched(pid: app.processIdentifier)
+            lastActionTime = Date()
+            return .appLaunched(pid: app.processIdentifier)
         #else
-        guard let url = URL(string: "\(bundleId)://") else {
-            return .error("Invalid bundle ID")
-        }
-        await UIApplication.shared.open(url)
-        return .appLaunched(pid: 0)
+            guard let url = URL(string: "\(bundleId)://") else {
+                return .error("Invalid bundle ID")
+            }
+            await UIApplication.shared.open(url)
+            return .appLaunched(pid: 0)
         #endif
     }
 
@@ -392,59 +398,59 @@ public class RemoteSystemService: ObservableObject {
 
     private func performReboot() async throws -> SystemResponse {
         #if os(macOS)
-        let script = "tell application \"System Events\" to restart"
-        try await runAppleScript(script)
-        lastActionTime = Date()
-        return .actionPerformed("Reboot initiated")
+            let script = "tell application \"System Events\" to restart"
+            try await runAppleScript(script)
+            lastActionTime = Date()
+            return .actionPerformed("Reboot initiated")
         #else
-        return .error("Reboot not available on iOS")
+            return .error("Reboot not available on iOS")
         #endif
     }
 
     private func performShutdown() async throws -> SystemResponse {
         #if os(macOS)
-        let script = "tell application \"System Events\" to shut down"
-        try await runAppleScript(script)
-        lastActionTime = Date()
-        return .actionPerformed("Shutdown initiated")
+            let script = "tell application \"System Events\" to shut down"
+            try await runAppleScript(script)
+            lastActionTime = Date()
+            return .actionPerformed("Shutdown initiated")
         #else
-        return .error("Shutdown not available on iOS")
+            return .error("Shutdown not available on iOS")
         #endif
     }
 
     private func performSleep() async throws -> SystemResponse {
         #if os(macOS)
-        let script = "tell application \"System Events\" to sleep"
-        try await runAppleScript(script)
-        lastActionTime = Date()
-        return .actionPerformed("Sleep initiated")
+            let script = "tell application \"System Events\" to sleep"
+            try await runAppleScript(script)
+            lastActionTime = Date()
+            return .actionPerformed("Sleep initiated")
         #else
-        return .error("Sleep not available on iOS")
+            return .error("Sleep not available on iOS")
         #endif
     }
 
     private func performLock() async throws -> SystemResponse {
         #if os(macOS)
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession")
-        task.arguments = ["-suspend"]
-        try task.run()
-        task.waitUntilExit()
-        lastActionTime = Date()
-        return .actionPerformed("Screen locked")
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession")
+            task.arguments = ["-suspend"]
+            try task.run()
+            task.waitUntilExit()
+            lastActionTime = Date()
+            return .actionPerformed("Screen locked")
         #else
-        return .error("Lock not available on iOS")
+            return .error("Lock not available on iOS")
         #endif
     }
 
     private func performLogout() async throws -> SystemResponse {
         #if os(macOS)
-        let script = "tell application \"System Events\" to log out"
-        try await runAppleScript(script)
-        lastActionTime = Date()
-        return .actionPerformed("Logout initiated")
+            let script = "tell application \"System Events\" to log out"
+            try await runAppleScript(script)
+            lastActionTime = Date()
+            return .actionPerformed("Logout initiated")
         #else
-        return .error("Logout not available on iOS")
+            return .error("Logout not available on iOS")
         #endif
     }
 
@@ -452,30 +458,30 @@ public class RemoteSystemService: ObservableObject {
 
     private func setVolume(level: Float) async throws -> SystemResponse {
         #if os(macOS)
-        let clampedLevel = max(0, min(100, level))
-        let script = "set volume output volume \(Int(clampedLevel))"
-        try await runAppleScript(script)
-        return .actionPerformed("Volume set to \(Int(clampedLevel))%")
+            let clampedLevel = max(0, min(100, level))
+            let script = "set volume output volume \(Int(clampedLevel))"
+            try await runAppleScript(script)
+            return .actionPerformed("Volume set to \(Int(clampedLevel))%")
         #else
-        return .error("Volume control not available on iOS")
+            return .error("Volume control not available on iOS")
         #endif
     }
 
     private func setBrightness(level: Float) async throws -> SystemResponse {
         #if os(macOS)
-        let clampedLevel = max(0, min(1, level))
-        let script = """
-        tell application "System Events"
-            tell appearance preferences
-                set dark mode to false
+            _ = max(0, min(1, level))
+            _ = """
+            tell application "System Events"
+                tell appearance preferences
+                    set dark mode to false
+                end tell
             end tell
-        end tell
-        """
-        // Note: Direct brightness control requires private APIs or IOKit
-        return .error("Direct brightness control requires elevated permissions")
+            """
+            // Note: Direct brightness control requires private APIs or IOKit
+            return .error("Direct brightness control requires elevated permissions")
         #else
-        UIScreen.main.brightness = CGFloat(max(0, min(1, level)))
-        return .actionPerformed("Brightness set to \(Int(level * 100))%")
+            UIScreen.main.brightness = CGFloat(max(0, min(1, level)))
+            return .actionPerformed("Brightness set to \(Int(level * 100))%")
         #endif
     }
 
@@ -483,28 +489,28 @@ public class RemoteSystemService: ObservableObject {
 
     private func getNotifications() async throws -> SystemResponse {
         // This would require notification center access
-        return .notifications([])
+        .notifications([])
     }
 
-    private func dismissNotification(id: String) async throws -> SystemResponse {
-        return .error("Notification dismissal requires system-level access")
+    private func dismissNotification(id _: String) async throws -> SystemResponse {
+        .error("Notification dismissal requires system-level access")
     }
 
     // MARK: - AppleScript
 
     #if os(macOS)
-    private func runAppleScript(_ script: String) async throws {
-        guard let appleScript = NSAppleScript(source: script) else {
-            throw SystemServiceError.scriptFailed
-        }
+        private func runAppleScript(_ script: String) async throws {
+            guard let appleScript = NSAppleScript(source: script) else {
+                throw SystemServiceError.scriptFailed
+            }
 
-        var error: NSDictionary?
-        appleScript.executeAndReturnError(&error)
+            var error: NSDictionary?
+            appleScript.executeAndReturnError(&error)
 
-        if let error = error {
-            throw SystemServiceError.scriptError(error.description)
+            if let error {
+                throw SystemServiceError.scriptError(error.description)
+            }
         }
-    }
     #endif
 
     // MARK: - Confirmation
@@ -528,7 +534,7 @@ public class RemoteSystemService: ObservableObject {
     }
 
     /// Confirm a pending action
-    public func confirm(id: String, approved: Bool) {
+    public func confirm(id: String, approved _: Bool) {
         // This should trigger the awaiting confirmation handler
         pendingConfirmations.removeAll { $0.id == id }
     }
@@ -552,10 +558,10 @@ public enum SystemServiceError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .notSupported: return "Operation not supported on this platform"
-        case .scriptFailed: return "Failed to create script"
-        case .scriptError(let msg): return "Script error: \(msg)"
-        case .permissionDenied: return "Permission denied"
+        case .notSupported: "Operation not supported on this platform"
+        case .scriptFailed: "Failed to create script"
+        case let .scriptError(msg): "Script error: \(msg)"
+        case .permissionDenied: "Permission denied"
         }
     }
 }

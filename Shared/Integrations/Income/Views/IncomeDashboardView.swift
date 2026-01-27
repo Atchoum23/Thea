@@ -114,14 +114,14 @@ public struct IncomeDashboardView: View {
                 .font(.headline)
                 .padding(.horizontal)
 
-            if viewModel.streams.filter({ $0.isActive }).isEmpty {
+            if viewModel.streams.filter(\.isActive).isEmpty {
                 Text("No active streams")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding()
             } else {
-                ForEach(viewModel.streams.filter { $0.isActive }) { stream in
+                ForEach(viewModel.streams.filter(\.isActive)) { stream in
                     StreamCard(stream: stream)
                 }
             }
@@ -333,9 +333,9 @@ private struct StreamCard: View {
 
     private func typeColor(_ type: IncomeType) -> Color {
         switch type {
-        case .passive: return .green
-        case .active: return .blue
-        case .portfolio: return .purple
+        case .passive: .green
+        case .active: .blue
+        case .portfolio: .purple
         }
     }
 }
@@ -415,7 +415,7 @@ private struct StreamEditorView: View {
 
                 Section("Notes") {
                     TextField("Optional notes...", text: $notes, axis: .vertical)
-                        .lineLimit(3...6)
+                        .lineLimit(3 ... 6)
                 }
             }
             .navigationTitle("New Income Stream")
@@ -467,7 +467,7 @@ private struct EntryLoggerView: View {
                 Section("Income Details") {
                     Picker("Stream", selection: $selectedStream) {
                         Text("Select stream...").tag(nil as IncomeStream?)
-                        ForEach(viewModel.streams.filter { $0.isActive }) { stream in
+                        ForEach(viewModel.streams.filter(\.isActive)) { stream in
                             Text(stream.name).tag(stream as IncomeStream?)
                         }
                     }

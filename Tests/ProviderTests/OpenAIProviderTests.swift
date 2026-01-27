@@ -27,7 +27,7 @@ final class OpenAIProviderTests: XCTestCase {
         XCTAssertTrue(capabilities.supportsFunctionCalling)
         XCTAssertFalse(capabilities.supportsWebSearch)
         XCTAssertEqual(capabilities.maxContextTokens, 128_000)
-        XCTAssertEqual(capabilities.maxOutputTokens, 16_384)
+        XCTAssertEqual(capabilities.maxOutputTokens, 16384)
     }
 
     func testListModels() async throws {

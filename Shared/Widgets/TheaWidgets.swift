@@ -6,9 +6,9 @@
 //  iOS, iPadOS, macOS, watchOS, tvOS
 //
 
+import AppIntents
 import SwiftUI
 import WidgetKit
-import AppIntents
 
 // MARK: - Widget Entry
 
@@ -40,17 +40,17 @@ struct WidgetData {
 
         var icon: String {
             switch self {
-            case .ready: return "checkmark.circle.fill"
-            case .processing: return "arrow.clockwise"
-            case .offline: return "wifi.slash"
+            case .ready: "checkmark.circle.fill"
+            case .processing: "arrow.clockwise"
+            case .offline: "wifi.slash"
             }
         }
 
         var color: Color {
             switch self {
-            case .ready: return .green
-            case .processing: return .blue
-            case .offline: return .gray
+            case .ready: .green
+            case .processing: .blue
+            case .offline: .gray
             }
         }
     }
@@ -59,7 +59,7 @@ struct WidgetData {
 // MARK: - Timeline Provider
 
 struct TheaWidgetProvider: TimelineProvider {
-    func placeholder(in context: Context) -> TheaWidgetEntry {
+    func placeholder(in _: Context) -> TheaWidgetEntry {
         TheaWidgetEntry(
             date: Date(),
             configuration: TheaWidgetConfiguration(),
@@ -67,7 +67,7 @@ struct TheaWidgetProvider: TimelineProvider {
         )
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (TheaWidgetEntry) -> Void) {
+    func getSnapshot(in _: Context, completion: @escaping (TheaWidgetEntry) -> Void) {
         let entry = TheaWidgetEntry(
             date: Date(),
             configuration: TheaWidgetConfiguration(),
@@ -84,7 +84,7 @@ struct TheaWidgetProvider: TimelineProvider {
         completion(entry)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<TheaWidgetEntry>) -> Void) {
+    func getTimeline(in _: Context, completion: @escaping (Timeline<TheaWidgetEntry>) -> Void) {
         // Fetch actual data from shared container
         let data = loadWidgetData()
         let entry = TheaWidgetEntry(
@@ -128,19 +128,19 @@ struct TheaWidget: Widget {
         .description("Quick access to Thea AI assistant")
         .supportedFamilies(supportedFamilies)
         #if os(watchOS)
-        .supplementalActivityFamilies([.small, .medium])
+            .supplementalActivityFamilies([.small, .medium])
         #endif
     }
 
     private var supportedFamilies: [WidgetFamily] {
         #if os(watchOS)
-        return [.accessoryCircular, .accessoryRectangular, .accessoryInline, .accessoryCorner]
+            return [.accessoryCircular, .accessoryRectangular, .accessoryInline, .accessoryCorner]
         #elseif os(iOS)
-        return [.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge, .accessoryCircular, .accessoryRectangular, .accessoryInline]
+            return [.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge, .accessoryCircular, .accessoryRectangular, .accessoryInline]
         #elseif os(macOS)
-        return [.systemSmall, .systemMedium, .systemLarge]
+            return [.systemSmall, .systemMedium, .systemLarge]
         #else
-        return [.systemSmall, .systemMedium]
+            return [.systemSmall, .systemMedium]
         #endif
     }
 }
@@ -168,8 +168,8 @@ struct TheaWidgetView: View {
         case .accessoryInline:
             InlineAccessoryView(entry: entry)
         #if os(watchOS)
-        case .accessoryCorner:
-            CornerAccessoryView(entry: entry)
+            case .accessoryCorner:
+                CornerAccessoryView(entry: entry)
         #endif
         default:
             SmallWidgetView(entry: entry)
@@ -448,21 +448,21 @@ struct InlineAccessoryView: View {
 }
 
 #if os(watchOS)
-struct CornerAccessoryView: View {
-    let entry: TheaWidgetEntry
+    struct CornerAccessoryView: View {
+        let entry: TheaWidgetEntry
 
-    var body: some View {
-        ZStack {
-            AccessoryWidgetBackground()
+        var body: some View {
+            ZStack {
+                AccessoryWidgetBackground()
 
-            Image(systemName: "brain")
-                .font(.title3)
-        }
-        .widgetLabel {
-            Text("\(entry.data.unreadMessages)")
+                Image(systemName: "brain")
+                    .font(.title3)
+            }
+            .widgetLabel {
+                Text("\(entry.data.unreadMessages)")
+            }
         }
     }
-}
 #endif
 
 // MARK: - Helper Views
@@ -534,21 +534,22 @@ struct QuickActionButton: View {
 
 // MARK: - Widget Bundle
 
-@main
+// Only use @main for standalone widget extension targets
+// The main app should use its own @main entry point
+#if WIDGET_EXTENSION
+    @main
+#endif
 struct TheaWidgetBundle: WidgetBundle {
     var body: some Widget {
         TheaWidget()
 
         #if os(iOS)
-        if #available(iOS 16.1, *) {
-            TheaLiveActivityWidget()
-        }
+            if #available(iOS 16.1, *) {
+                TheaLiveActivityWidget()
+            }
         #endif
 
-        #if os(iOS) && swift(>=5.9)
-        if #available(iOS 18.0, *) {
-            TheaControlWidgetBundle()
-        }
-        #endif
+        // Note: ControlWidgets are registered separately via TheaControlWidgetBundle
+        // They cannot be included in a WidgetBundle - they must use ControlWidgetBundle
     }
 }

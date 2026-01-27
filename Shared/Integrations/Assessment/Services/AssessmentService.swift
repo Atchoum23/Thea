@@ -11,7 +11,7 @@ public actor AssessmentService: AssessmentServiceProtocol {
     // MARK: - Initialization
 
     public init() {
-        self.scoringEngine = AssessmentScoringEngine()
+        scoringEngine = AssessmentScoringEngine()
     }
 
     // MARK: - Assessment Management
@@ -88,13 +88,13 @@ public actor AssessmentService: AssessmentServiceProtocol {
     public func getQuestions(for type: AssessmentType) async throws -> [AssessmentQuestion] {
         switch type {
         case .emotionalIntelligence:
-            return AssessmentTemplate.emotionalIntelligence.questions
+            AssessmentTemplate.emotionalIntelligence.questions
         case .highSensitivity:
-            return AssessmentTemplate.highSensitivity.questions
+            AssessmentTemplate.highSensitivity.questions
         case .cognitiveBenchmark:
-            return AssessmentTemplate.cognitiveBenchmark.questions
+            AssessmentTemplate.cognitiveBenchmark.questions
         case .personalityBigFive:
-            return AssessmentTemplate.personalityBigFive.questions
+            AssessmentTemplate.personalityBigFive.questions
         }
     }
 }
@@ -163,13 +163,13 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
     ) async throws -> [String] {
         switch type {
         case .emotionalIntelligence:
-            return recommendationsForEQ(score: score)
+            recommendationsForEQ(score: score)
         case .highSensitivity:
-            return recommendationsForHSP(score: score)
+            recommendationsForHSP(score: score)
         case .cognitiveBenchmark:
-            return recommendationsForCognitive(score: score)
+            recommendationsForCognitive(score: score)
         case .personalityBigFive:
-            return recommendationsForBigFive(score: score)
+            recommendationsForBigFive(score: score)
         }
     }
 
@@ -183,10 +183,10 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
         return AssessmentScore(
             overall: overall,
             subscores: [
-                "Self-Expression": Double.random(in: 60...80),
-                "Empathy": Double.random(in: 60...80),
-                "Self-Motivation": Double.random(in: 60...80),
-                "Optimism": Double.random(in: 60...80)
+                "Self-Expression": Double.random(in: 60 ... 80),
+                "Empathy": Double.random(in: 60 ... 80),
+                "Self-Motivation": Double.random(in: 60 ... 80),
+                "Optimism": Double.random(in: 60 ... 80)
             ],
             percentile: overall
         )
@@ -200,10 +200,10 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
         return AssessmentScore(
             overall: overall,
             subscores: [
-                "Sensory Sensitivity": Double.random(in: 60...80),
-                "Awareness": Double.random(in: 60...80),
-                "Empathy": Double.random(in: 60...80),
-                "Overwhelm": Double.random(in: 60...80)
+                "Sensory Sensitivity": Double.random(in: 60 ... 80),
+                "Awareness": Double.random(in: 60 ... 80),
+                "Empathy": Double.random(in: 60 ... 80),
+                "Overwhelm": Double.random(in: 60 ... 80)
             ],
             percentile: overall
         )
@@ -217,10 +217,10 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
         return AssessmentScore(
             overall: overall,
             subscores: [
-                "Problem Solving": Double.random(in: 60...80),
-                "Memory": Double.random(in: 60...80),
-                "Attention": Double.random(in: 60...80),
-                "Processing Speed": Double.random(in: 60...80)
+                "Problem Solving": Double.random(in: 60 ... 80),
+                "Memory": Double.random(in: 60 ... 80),
+                "Attention": Double.random(in: 60 ... 80),
+                "Processing Speed": Double.random(in: 60 ... 80)
             ],
             percentile: overall
         )
@@ -234,11 +234,11 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
         return AssessmentScore(
             overall: overall,
             subscores: [
-                "Openness": Double.random(in: 40...90),
-                "Conscientiousness": Double.random(in: 40...90),
-                "Extraversion": Double.random(in: 40...90),
-                "Agreeableness": Double.random(in: 40...90),
-                "Neuroticism": Double.random(in: 40...90)
+                "Openness": Double.random(in: 40 ... 90),
+                "Conscientiousness": Double.random(in: 40 ... 90),
+                "Extraversion": Double.random(in: 40 ... 90),
+                "Agreeableness": Double.random(in: 40 ... 90),
+                "Neuroticism": Double.random(in: 40 ... 90)
             ],
             percentile: overall
         )
@@ -248,29 +248,29 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
 
     private func interpretEQ(score: AssessmentScore) -> String {
         if score.overall >= 70 {
-            return "You demonstrate strong emotional intelligence with excellent ability to understand and manage emotions."
+            "You demonstrate strong emotional intelligence with excellent ability to understand and manage emotions."
         } else if score.overall >= 50 {
-            return "You have moderate emotional intelligence with room for growth in emotional awareness and regulation."
+            "You have moderate emotional intelligence with room for growth in emotional awareness and regulation."
         } else {
-            return "Developing emotional intelligence could significantly benefit your relationships and well-being."
+            "Developing emotional intelligence could significantly benefit your relationships and well-being."
         }
     }
 
     private func interpretHSP(score: AssessmentScore) -> String {
         if score.overall >= 70 {
-            return "You are highly sensitive, experiencing the world with greater depth and richness. This is a natural trait present in 15-20% of the population."
+            "You are highly sensitive, experiencing the world with greater depth and richness. This is a natural trait present in 15-20% of the population."
         } else if score.overall >= 50 {
-            return "You show moderate sensitivity with awareness of environmental subtleties."
+            "You show moderate sensitivity with awareness of environmental subtleties."
         } else {
-            return "You have lower sensory processing sensitivity, which can be advantageous in high-stimulation environments."
+            "You have lower sensory processing sensitivity, which can be advantageous in high-stimulation environments."
         }
     }
 
     private func interpretCognitive(score: AssessmentScore) -> String {
         if score.overall >= 70 {
-            return "Your cognitive abilities are above average across problem-solving, memory, and processing speed."
+            "Your cognitive abilities are above average across problem-solving, memory, and processing speed."
         } else {
-            return "Your cognitive profile shows areas for potential development through targeted practice."
+            "Your cognitive profile shows areas for potential development through targeted practice."
         }
     }
 
@@ -281,7 +281,7 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
 
     // MARK: - Recommendation Helpers
 
-    private func recommendationsForEQ(score: AssessmentScore) -> [String] {
+    private func recommendationsForEQ(score _: AssessmentScore) -> [String] {
         [
             "Practice emotional labeling: Name your emotions as they arise",
             "Keep an emotion journal to track patterns",
@@ -292,21 +292,21 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
 
     private func recommendationsForHSP(score: AssessmentScore) -> [String] {
         if score.overall >= 70 {
-            return [
+            [
                 "Create quiet spaces for regular downtime and recovery",
                 "Use noise-canceling headphones in overstimulating environments",
                 "Schedule breaks between social activities",
                 "Communicate your needs to friends and family"
             ]
         } else {
-            return [
+            [
                 "Practice mindfulness to increase sensory awareness",
                 "Explore different environments to understand your preferences"
             ]
         }
     }
 
-    private func recommendationsForCognitive(score: AssessmentScore) -> [String] {
+    private func recommendationsForCognitive(score _: AssessmentScore) -> [String] {
         [
             "Engage in brain training exercises daily",
             "Practice problem-solving through puzzles and games",

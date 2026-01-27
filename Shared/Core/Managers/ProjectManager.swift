@@ -16,7 +16,7 @@ final class ProjectManager: ObservableObject {
     // MARK: - Setup
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
         loadProjects()
     }
 
@@ -37,11 +37,11 @@ final class ProjectManager: ObservableObject {
     }
 
     func updateProject(_ project: Project, title: String? = nil, customInstructions: String? = nil) {
-        if let title = title {
+        if let title {
             project.title = title
         }
 
-        if let customInstructions = customInstructions {
+        if let customInstructions {
             project.customInstructions = customInstructions
         }
 

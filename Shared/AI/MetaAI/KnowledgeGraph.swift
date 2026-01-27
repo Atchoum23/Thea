@@ -11,11 +11,11 @@ enum KnowledgeGraphError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noProviderAvailable:
-            return "No AI provider available for knowledge graph operations"
+            "No AI provider available for knowledge graph operations"
         case .embeddingFailed:
-            return "Failed to generate embedding for content"
+            "Failed to generate embedding for content"
         case .nodeNotFound:
-            return "Knowledge node not found"
+            "Knowledge node not found"
         }
     }
 }
@@ -85,7 +85,7 @@ final class KnowledgeGraph {
         .sorted { $0.1 > $1.1 }
         .prefix(limit)
 
-        return scored.map { $0.0 }
+        return scored.map(\.0)
     }
 
     // MARK: - Edge Operations
@@ -98,7 +98,8 @@ final class KnowledgeGraph {
         strength: Float = 1.0
     ) {
         guard let source = nodeIndex[sourceId.uuidString],
-              let target = nodeIndex[targetId.uuidString] else {
+              let target = nodeIndex[targetId.uuidString]
+        else {
             return
         }
 
@@ -193,7 +194,8 @@ final class KnowledgeGraph {
         to target: KnowledgeNode
     ) async throws -> EdgeType {
         guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            ProviderRegistry.shared.getProvider(id: "openai")
+        else {
             throw KnowledgeGraphError.noProviderAvailable
         }
 
@@ -265,7 +267,8 @@ final class KnowledgeGraph {
     ) async throws -> Bool {
         // Use AI to determine if implicit connection exists
         guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            ProviderRegistry.shared.getProvider(id: "openai")
+        else {
             throw KnowledgeGraphError.noProviderAvailable
         }
 
@@ -293,14 +296,14 @@ final class KnowledgeGraph {
         var assignments: [UUID: Int] = [:]
 
         // Initialize random centroids
-        for _ in 0..<k {
+        for _ in 0 ..< k {
             if let randomNode = nodes.randomElement() {
                 centroids.append(randomNode.embedding)
             }
         }
 
         // Iterate until convergence
-        for _ in 0..<10 {
+        for _ in 0 ..< 10 {
             // Assign nodes to nearest centroid
             for node in nodes {
                 var minDistance = Float.infinity
@@ -318,24 +321,24 @@ final class KnowledgeGraph {
             }
 
             // Recalculate centroids
-            for i in 0..<k {
+            for i in 0 ..< k {
                 let clusterNodes = nodes.filter { assignments[$0.id] == i }
                 if !clusterNodes.isEmpty {
-                    centroids[i] = averageEmbedding(clusterNodes.map { $0.embedding })
+                    centroids[i] = averageEmbedding(clusterNodes.map(\.embedding))
                 }
             }
         }
 
         // Create cluster objects
         clusters = []
-        for i in 0..<k {
+        for i in 0 ..< k {
             let clusterNodes = nodes.filter { assignments[$0.id] == i }
 
             if !clusterNodes.isEmpty {
                 let cluster = KnowledgeCluster(
                     id: UUID(),
                     name: "Cluster \(i + 1)",
-                    nodeIds: clusterNodes.map { $0.id },
+                    nodeIds: clusterNodes.map(\.id),
                     centroid: centroids[i],
                     coherence: calculateCoherence(clusterNodes)
                 )
@@ -348,14 +351,15 @@ final class KnowledgeGraph {
     }
 
     private func nameClusters() async throws {
-        for i in 0..<clusters.count {
+        for i in 0 ..< clusters.count {
             let clusterNodes = clusters[i].nodeIds.compactMap { nodeIndex[$0.uuidString] }
-            let contents = clusterNodes.map { $0.content }.joined(separator: "\n")
+            let contents = clusterNodes.map(\.content).joined(separator: "\n")
 
             guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                                  ProviderRegistry.shared.getProvider(id: "openai") else {
-            throw KnowledgeGraphError.noProviderAvailable
-        }
+                ProviderRegistry.shared.getProvider(id: "openai")
+            else {
+                throw KnowledgeGraphError.noProviderAvailable
+            }
 
             let prompt = """
             Give a short name (2-4 words) for this cluster of related concepts:
@@ -389,7 +393,7 @@ final class KnowledgeGraph {
         let knowledge = Array(expanded)
             .sorted { $0.importance > $1.importance }
             .prefix(10)
-            .map { $0.content }
+            .map(\.content)
             .joined(separator: "\n\n")
 
         // Reason over knowledge
@@ -405,7 +409,8 @@ final class KnowledgeGraph {
 
     private func reasonWithKnowledge(query: String, knowledge: String) async throws -> String {
         guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                              ProviderRegistry.shared.getProvider(id: "openai") else {
+            ProviderRegistry.shared.getProvider(id: "openai")
+        else {
             throw KnowledgeGraphError.noProviderAvailable
         }
 
@@ -434,7 +439,7 @@ final class KnowledgeGraph {
         // Generate using OpenAI embeddings API
         // Simplified - should use actual embedding API
         let hash = text.hashValue
-        let embedding = (0..<1_536).map { i in
+        let embedding = (0 ..< 1536).map { i in
             Float(sin(Double(hash + i))) * 0.1
         }
 
@@ -458,7 +463,7 @@ final class KnowledgeGraph {
     private func averageEmbedding(_ embeddings: [[Float]]) -> [Float] {
         guard !embeddings.isEmpty else { return [] }
         let count = Float(embeddings.count)
-        return (0..<embeddings[0].count).map { i in
+        return (0 ..< embeddings[0].count).map { i in
             embeddings.map { $0[i] }.reduce(0, +) / count
         }
     }
@@ -467,7 +472,7 @@ final class KnowledgeGraph {
         var importance: Float = 0.5
 
         // Longer content tends to be more important
-        importance += Float(min(content.count, 1_000)) / 2_000
+        importance += Float(min(content.count, 1000)) / 2000
 
         // Type-based importance
         switch type {
@@ -490,8 +495,8 @@ final class KnowledgeGraph {
         var totalSimilarity: Float = 0
         var pairCount = 0
 
-        for i in 0..<nodes.count {
-            for j in (i + 1)..<nodes.count {
+        for i in 0 ..< nodes.count {
+            for j in (i + 1) ..< nodes.count {
                 totalSimilarity += cosineSimilarity(nodes[i].embedding, nodes[j].embedding)
                 pairCount += 1
             }
@@ -516,11 +521,11 @@ final class KnowledgeGraph {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 result += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -580,9 +585,9 @@ enum EdgeType: String {
     var isBidirectional: Bool {
         switch self {
         case .relatedTo, .similarTo, .contradicts:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }

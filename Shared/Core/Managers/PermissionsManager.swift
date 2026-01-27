@@ -7,10 +7,10 @@ import Speech
 @preconcurrency import UserNotifications
 
 #if os(macOS)
-import AppKit
+    import AppKit
 #else
-import AVFoundation
-import UIKit
+    import AVFoundation
+    import UIKit
 #endif
 
 @MainActor
@@ -57,7 +57,7 @@ final class PermissionsManager {
         await requestLocation()
 
         #if os(macOS)
-        await requestFullDiskAccess()
+            await requestFullDiskAccess()
         #endif
 
         hasCompletedOnboarding = true
@@ -78,15 +78,11 @@ final class PermissionsManager {
 
     func requestMicrophone() async {
         #if !os(macOS)
-        let granted = await withCheckedContinuation { continuation in
-            AVAudioSession.sharedInstance().requestRecordPermission { granted in
-                continuation.resume(returning: granted)
-            }
-        }
-        microphoneStatus = granted ? .authorized : .denied
+            let granted = await AVAudioApplication.requestRecordPermission()
+            microphoneStatus = granted ? .authorized : .denied
         #else
-        // macOS handles microphone permissions differently
-        microphoneStatus = .authorized
+            // macOS handles microphone permissions differently
+            microphoneStatus = .authorized
         #endif
     }
 
@@ -103,13 +99,13 @@ final class PermissionsManager {
 
     func requestContacts() async {
         #if os(iOS) || os(macOS)
-        let store = CNContactStore()
-        do {
-            let granted = try await store.requestAccess(for: .contacts)
-            contactsStatus = granted ? .authorized : .denied
-        } catch {
-            contactsStatus = .denied
-        }
+            let store = CNContactStore()
+            do {
+                let granted = try await store.requestAccess(for: .contacts)
+                contactsStatus = granted ? .authorized : .denied
+            } catch {
+                contactsStatus = .denied
+            }
         #endif
     }
 
@@ -125,24 +121,24 @@ final class PermissionsManager {
 
     func requestPhotos() async {
         #if os(iOS) || os(macOS)
-        let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-        photosStatus = convertPhotoStatus(status)
+            let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+            photosStatus = convertPhotoStatus(status)
         #endif
     }
 
     func requestLocation() async {
         #if os(iOS)
-        let manager = CLLocationManager()
-        manager.requestWhenInUseAuthorization()
-        // Status will be updated via delegate
+            let manager = CLLocationManager()
+            manager.requestWhenInUseAuthorization()
+            // Status will be updated via delegate
         #endif
     }
 
     func requestFullDiskAccess() async {
         #if os(macOS)
-        // Full Disk Access can't be programmatically requested
-        // User must grant it in System Settings
-        fullDiskAccessStatus = checkFullDiskAccess()
+            // Full Disk Access can't be programmatically requested
+            // User must grant it in System Settings
+            fullDiskAccessStatus = checkFullDiskAccess()
         #endif
     }
 
@@ -158,7 +154,7 @@ final class PermissionsManager {
         checkLocation()
 
         #if os(macOS)
-        fullDiskAccessStatus = checkFullDiskAccess()
+            fullDiskAccessStatus = checkFullDiskAccess()
         #endif
     }
 
@@ -169,18 +165,18 @@ final class PermissionsManager {
 
     private func checkMicrophone() {
         #if !os(macOS)
-        switch AVAudioSession.sharedInstance().recordPermission {
-        case .granted:
-            microphoneStatus = .authorized
-        case .denied:
-            microphoneStatus = .denied
-        case .undetermined:
-            microphoneStatus = .notDetermined
-        @unknown default:
-            microphoneStatus = .notDetermined
-        }
+            switch AVAudioApplication.shared.recordPermission {
+            case .granted:
+                microphoneStatus = .authorized
+            case .denied:
+                microphoneStatus = .denied
+            case .undetermined:
+                microphoneStatus = .notDetermined
+            @unknown default:
+                microphoneStatus = .notDetermined
+            }
         #else
-        microphoneStatus = .authorized
+            microphoneStatus = .authorized
         #endif
     }
 
@@ -206,20 +202,20 @@ final class PermissionsManager {
 
     private func checkContacts() {
         #if os(iOS) || os(macOS)
-        switch CNContactStore.authorizationStatus(for: .contacts) {
-        case .authorized:
-            contactsStatus = .authorized
-        case .denied:
-            contactsStatus = .denied
-        case .notDetermined:
-            contactsStatus = .notDetermined
-        case .restricted:
-            contactsStatus = .restricted
-        case .limited:
-            contactsStatus = .authorized
-@unknown default:
-            contactsStatus = .notDetermined
-        }
+            switch CNContactStore.authorizationStatus(for: .contacts) {
+            case .authorized:
+                contactsStatus = .authorized
+            case .denied:
+                contactsStatus = .denied
+            case .notDetermined:
+                contactsStatus = .notDetermined
+            case .restricted:
+                contactsStatus = .restricted
+            case .limited:
+                contactsStatus = .authorized
+            @unknown default:
+                contactsStatus = .notDetermined
+            }
         #endif
     }
 
@@ -242,39 +238,39 @@ final class PermissionsManager {
 
     private func checkPhotos() {
         #if os(iOS) || os(macOS)
-        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-        photosStatus = convertPhotoStatus(status)
+            let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+            photosStatus = convertPhotoStatus(status)
         #endif
     }
 
     private func checkLocation() {
         #if os(iOS)
-        let manager = CLLocationManager()
-        switch manager.authorizationStatus {
-        case .authorizedAlways, .authorizedWhenInUse:
-            locationStatus = .authorized
-        case .denied:
-            locationStatus = .denied
-        case .notDetermined:
-            locationStatus = .notDetermined
-        case .restricted:
-            locationStatus = .restricted
-        @unknown default:
-            locationStatus = .notDetermined
-        }
+            let manager = CLLocationManager()
+            switch manager.authorizationStatus {
+            case .authorizedAlways, .authorizedWhenInUse:
+                locationStatus = .authorized
+            case .denied:
+                locationStatus = .denied
+            case .notDetermined:
+                locationStatus = .notDetermined
+            case .restricted:
+                locationStatus = .restricted
+            @unknown default:
+                locationStatus = .notDetermined
+            }
         #endif
     }
 
     private func checkFullDiskAccess() -> PermissionStatus {
         #if os(macOS)
-        // Check if we can access a protected directory
-        let testPath = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Mail")
+            // Check if we can access a protected directory
+            let testPath = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Library/Mail")
 
-        let canAccess = FileManager.default.isReadableFile(atPath: testPath.path)
-        return canAccess ? .authorized : .denied
+            let canAccess = FileManager.default.isReadableFile(atPath: testPath.path)
+            return canAccess ? .authorized : .denied
         #else
-        return .authorized
+            return .authorized
         #endif
     }
 
@@ -282,13 +278,13 @@ final class PermissionsManager {
 
     func openSystemSettings() {
         #if os(iOS)
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
-        }
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
         #elseif os(macOS)
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy") {
-            NSWorkspace.shared.open(url)
-        }
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy") {
+                NSWorkspace.shared.open(url)
+            }
         #endif
     }
 
@@ -328,8 +324,8 @@ final class PermissionsManager {
 
     var allPermissionsGranted: Bool {
         speechRecognitionStatus == .authorized &&
-               microphoneStatus == .authorized &&
-               notificationsStatus == .authorized
+            microphoneStatus == .authorized &&
+            notificationsStatus == .authorized
         // Don't require optional permissions
     }
 

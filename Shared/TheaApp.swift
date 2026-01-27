@@ -4,7 +4,7 @@ import SwiftUI
 // Note: @main is defined in platform-specific app files
 // This file contains shared app configuration
 
-struct TheaAppConfiguration {
+enum TheaAppConfiguration {
     static let appName = "Thea"
     static let appVersion = "1.0.0"
 

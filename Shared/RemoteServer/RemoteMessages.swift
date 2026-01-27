@@ -6,8 +6,8 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
 import CoreGraphics
+import Foundation
 
 // MARK: - Remote Message Protocol
 
@@ -48,23 +48,23 @@ public enum RemoteMessage: Codable, Sendable {
     // Required permission for this message type
     public var requiredPermission: RemotePermission {
         switch self {
-        case .screenRequest: return .viewScreen
-        case .inputRequest: return .controlScreen
-        case .fileRequest(let req):
+        case .screenRequest: .viewScreen
+        case .inputRequest: .controlScreen
+        case let .fileRequest(req):
             switch req {
-            case .list, .info: return .viewFiles
-            case .read, .download: return .readFiles
-            case .write, .upload, .createDirectory, .move, .copy: return .writeFiles
-            case .delete: return .deleteFiles
+            case .list, .info: .viewFiles
+            case .read, .download: .readFiles
+            case .write, .upload, .createDirectory, .move, .copy: .writeFiles
+            case .delete: .deleteFiles
             }
-        case .systemRequest(let req):
+        case let .systemRequest(req):
             switch req {
-            case .getInfo, .getProcesses: return .viewScreen
-            case .executeCommand: return .executeCommands
-            default: return .systemControl
+            case .getInfo, .getProcesses: .viewScreen
+            case .executeCommand: .executeCommands
+            default: .systemControl
             }
-        case .networkRequest: return .networkAccess
-        default: return .viewScreen
+        case .networkRequest: .networkAccess
+        default: .viewScreen
         }
     }
 }
@@ -131,7 +131,7 @@ public enum ScreenRequest: Codable, Sendable {
 public enum ScreenResponse: Codable, Sendable {
     case frame(ScreenFrame)
     case displayInfo(DisplayInfo)
-    case windowList([WindowInfo])
+    case windowList([RemoteWindowInfo])
     case streamStarted(streamId: String)
     case streamStopped
     case error(String)
@@ -181,7 +181,7 @@ public struct DisplayInfo: Codable, Sendable {
     }
 }
 
-public struct WindowInfo: Codable, Sendable {
+public struct RemoteWindowInfo: Codable, Sendable {
     public let id: Int
     public let title: String
     public let ownerName: String
@@ -189,6 +189,16 @@ public struct WindowInfo: Codable, Sendable {
     public let frame: CGRect
     public let isOnScreen: Bool
     public let layer: Int
+
+    public init(id: Int, title: String, ownerName: String, ownerPID: Int, frame: CGRect, isOnScreen: Bool, layer: Int) {
+        self.id = id
+        self.title = title
+        self.ownerName = ownerName
+        self.ownerPID = ownerPID
+        self.frame = frame
+        self.isOnScreen = isOnScreen
+        self.layer = layer
+    }
 }
 
 // MARK: - Input Messages
@@ -203,9 +213,9 @@ public enum InputRequest: Codable, Sendable {
     case scroll(x: Int, y: Int, deltaX: Int, deltaY: Int)
 
     // Keyboard
-    case keyPress(keyCode: UInt16, modifiers: KeyModifiers)
-    case keyDown(keyCode: UInt16, modifiers: KeyModifiers)
-    case keyUp(keyCode: UInt16, modifiers: KeyModifiers)
+    case keyPress(keyCode: UInt16, modifiers: RemoteKeyModifiers)
+    case keyDown(keyCode: UInt16, modifiers: RemoteKeyModifiers)
+    case keyUp(keyCode: UInt16, modifiers: RemoteKeyModifiers)
     case typeText(String)
 
     // Clipboard
@@ -219,19 +229,19 @@ public enum InputRequest: Codable, Sendable {
     }
 }
 
-public struct KeyModifiers: OptionSet, Codable, Sendable {
+public struct RemoteKeyModifiers: OptionSet, Codable, Sendable {
     public let rawValue: UInt
 
     public init(rawValue: UInt) {
         self.rawValue = rawValue
     }
 
-    public static let shift = KeyModifiers(rawValue: 1 << 0)
-    public static let control = KeyModifiers(rawValue: 1 << 1)
-    public static let option = KeyModifiers(rawValue: 1 << 2)
-    public static let command = KeyModifiers(rawValue: 1 << 3)
-    public static let function = KeyModifiers(rawValue: 1 << 4)
-    public static let capsLock = KeyModifiers(rawValue: 1 << 5)
+    public static let shift = RemoteKeyModifiers(rawValue: 1 << 0)
+    public static let control = RemoteKeyModifiers(rawValue: 1 << 1)
+    public static let option = RemoteKeyModifiers(rawValue: 1 << 2)
+    public static let command = RemoteKeyModifiers(rawValue: 1 << 3)
+    public static let function = RemoteKeyModifiers(rawValue: 1 << 4)
+    public static let capsLock = RemoteKeyModifiers(rawValue: 1 << 5)
 }
 
 // MARK: - File Messages
@@ -283,7 +293,7 @@ public struct FileItem: Codable, Sendable, Identifiable {
         isSymlink: Bool = false,
         symlinkTarget: String? = nil
     ) {
-        self.id = path
+        id = path
         self.name = name
         self.path = path
         self.isDirectory = isDirectory
@@ -318,8 +328,8 @@ public enum SystemRequest: Codable, Sendable {
 }
 
 public enum SystemResponse: Codable, Sendable {
-    case info(SystemInfo)
-    case processes([ProcessInfo])
+    case info(RemoteSystemInfo)
+    case processes([RemoteProcessInfo])
     case commandOutput(exitCode: Int32, stdout: String, stderr: String)
     case appLaunched(pid: Int32)
     case confirmationRequired(action: String, confirmationId: String)
@@ -328,7 +338,7 @@ public enum SystemResponse: Codable, Sendable {
     case error(String)
 }
 
-public struct SystemInfo: Codable, Sendable {
+public struct RemoteSystemInfo: Codable, Sendable {
     public let hostname: String
     public let osVersion: String
     public let osName: String
@@ -342,9 +352,25 @@ public struct SystemInfo: Codable, Sendable {
     public let batteryLevel: Float?
     public let isCharging: Bool?
     public let currentUser: String
+
+    public init(hostname: String, osVersion: String, osName: String, architecture: String, cpuCount: Int, totalMemory: UInt64, availableMemory: UInt64, totalDiskSpace: UInt64, availableDiskSpace: UInt64, uptime: TimeInterval, batteryLevel: Float?, isCharging: Bool?, currentUser: String) {
+        self.hostname = hostname
+        self.osVersion = osVersion
+        self.osName = osName
+        self.architecture = architecture
+        self.cpuCount = cpuCount
+        self.totalMemory = totalMemory
+        self.availableMemory = availableMemory
+        self.totalDiskSpace = totalDiskSpace
+        self.availableDiskSpace = availableDiskSpace
+        self.uptime = uptime
+        self.batteryLevel = batteryLevel
+        self.isCharging = isCharging
+        self.currentUser = currentUser
+    }
 }
 
-public struct ProcessInfo: Codable, Sendable, Identifiable {
+public struct RemoteProcessInfo: Codable, Sendable, Identifiable {
     public let id: Int32
     public let name: String
     public let path: String?
@@ -353,6 +379,17 @@ public struct ProcessInfo: Codable, Sendable, Identifiable {
     public let memoryUsage: UInt64
     public let startTime: Date?
     public let parentPID: Int32
+
+    public init(id: Int32, name: String, path: String?, user: String, cpuUsage: Double, memoryUsage: UInt64, startTime: Date?, parentPID: Int32) {
+        self.id = id
+        self.name = name
+        self.path = path
+        self.user = user
+        self.cpuUsage = cpuUsage
+        self.memoryUsage = memoryUsage
+        self.startTime = startTime
+        self.parentPID = parentPID
+    }
 }
 
 public struct NotificationInfo: Codable, Sendable, Identifiable {

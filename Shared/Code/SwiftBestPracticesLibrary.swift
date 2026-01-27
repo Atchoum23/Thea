@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Swift Best Practices Library
+
 // Curated library of Swift 6.0 best practices for code generation
 
 final class SwiftBestPracticesLibrary: @unchecked Sendable {
@@ -9,7 +10,7 @@ final class SwiftBestPracticesLibrary: @unchecked Sendable {
     private let practices: [SwiftBestPractice]
 
     private init() {
-        self.practices = Self.createBestPractices()
+        practices = Self.createBestPractices()
     }
 
     // MARK: - Practice Retrieval
@@ -19,7 +20,8 @@ final class SwiftBestPracticesLibrary: @unchecked Sendable {
 
         // Concurrency practices
         if code.contains("Task {") || code.contains("async") || code.contains("await") ||
-           code.contains("@MainActor") || code.contains("actor") {
+            code.contains("@MainActor") || code.contains("actor")
+        {
             relevant.append(contentsOf: getPracticesByCategory(.concurrency))
         }
 
@@ -74,7 +76,7 @@ final class SwiftBestPracticesLibrary: @unchecked Sendable {
 
         return practices.filter {
             $0.pattern.lowercased().contains(lowercased) ||
-            $0.explanation.lowercased().contains(lowercased)
+                $0.explanation.lowercased().contains(lowercased)
         }
     }
 

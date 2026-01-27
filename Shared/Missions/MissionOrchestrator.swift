@@ -1,9 +1,9 @@
 // MissionOrchestrator.swift
 // Autonomous multi-phase mission execution engine
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Mission Orchestrator
 
@@ -160,7 +160,7 @@ public final class MissionOrchestrator: ObservableObject {
 
     private func estimateComplexity(components: [GoalComponent], capabilities: [RequiredCapability]) -> MissionComplexity {
         let componentScore = components.count * 10
-        let capabilityScore = capabilities.filter { $0.importance == .critical }.count * 15
+        let capabilityScore = capabilities.count { $0.importance == .critical }* 15
 
         let totalScore = componentScore + capabilityScore
 
@@ -219,7 +219,7 @@ public final class MissionOrchestrator: ObservableObject {
     }
 
     private func getAvailableCapabilities() -> Set<String> {
-        return [
+        [
             "code_generation",
             "file_system",
             "ai_analysis",
@@ -233,12 +233,11 @@ public final class MissionOrchestrator: ObservableObject {
     }
 
     private func estimateDuration(complexity: MissionComplexity, phases: Int) -> TimeInterval {
-        let baseTime: TimeInterval
-        switch complexity {
-        case .simple: baseTime = 60
-        case .moderate: baseTime = 300
-        case .complex: baseTime = 900
-        case .epic: baseTime = 3600
+        let baseTime: TimeInterval = switch complexity {
+        case .simple: 60
+        case .moderate: 300
+        case .complex: 900
+        case .epic: 3600
         }
 
         return baseTime * Double(max(phases, 1))
@@ -399,7 +398,7 @@ public final class MissionOrchestrator: ObservableObject {
                     let retryKey = "\(phase.id)-\(step.id)"
                     let currentRetries = retryCount[retryKey, default: 0]
 
-                    if currentRetries < maxRetries && step.type != .checkpoint {
+                    if currentRetries < maxRetries, step.type != .checkpoint {
                         retryCount[retryKey] = currentRetries + 1
                         log(.warning, "Retrying step (attempt \(currentRetries + 1)/\(maxRetries))")
                         try await executeStep(step, in: phase, mission: mission)
@@ -435,7 +434,7 @@ public final class MissionOrchestrator: ObservableObject {
         NotificationCenter.default.post(name: .missionCompleted, object: mission)
     }
 
-    private func executeStep(_ step: MissionStep, in phase: MissionPhase, mission: Mission) async throws {
+    private func executeStep(_ step: MissionStep, in _: MissionPhase, mission: Mission) async throws {
         step.status = .running
         step.startedAt = Date()
 
@@ -481,7 +480,7 @@ public final class MissionOrchestrator: ObservableObject {
 
     // MARK: - Step Implementations
 
-    private func performValidation(_ step: MissionStep, mission: Mission) async throws {
+    private func performValidation(_: MissionStep, mission: Mission) async throws {
         // Validate mission requirements
         log(.info, "Validating requirements...")
 
@@ -490,7 +489,7 @@ public final class MissionOrchestrator: ObservableObject {
         }
     }
 
-    private func gatherResources(_ step: MissionStep, mission: Mission) async throws {
+    private func gatherResources(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Gathering resources...")
         // Gather any required resources
     }
@@ -509,64 +508,64 @@ public final class MissionOrchestrator: ObservableObject {
         }
     }
 
-    private func performPlanning(_ step: MissionStep, mission: Mission) async throws {
+    private func performPlanning(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Planning execution...")
         // AI-assisted planning
     }
 
-    private func generateCode(_ step: MissionStep, mission: Mission) async throws {
+    private func generateCode(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Generating code...")
         // Use AI to generate code
     }
 
-    private func modifyCode(_ step: MissionStep, mission: Mission) async throws {
+    private func modifyCode(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Modifying code...")
         // Use AI to modify existing code
     }
 
-    private func performFileOperation(_ step: MissionStep, mission: Mission) async throws {
+    private func performFileOperation(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Performing file operations...")
         // Create/modify/delete files
     }
 
-    private func collectData(_ step: MissionStep, mission: Mission) async throws {
+    private func collectData(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Collecting data...")
         // Gather required data
     }
 
-    private func processData(_ step: MissionStep, mission: Mission) async throws {
+    private func processData(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Processing data...")
         // Process collected data
     }
 
-    private func performAIAnalysis(_ step: MissionStep, mission: Mission) async throws {
+    private func performAIAnalysis(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Performing AI analysis...")
         // AI-powered analysis
     }
 
-    private func performBuild(_ step: MissionStep, mission: Mission) async throws {
+    private func performBuild(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Building project...")
         // Trigger build system
     }
 
-    private func runTests(_ step: MissionStep, mission: Mission) async throws {
+    private func runTests(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Running tests...")
         // Execute test suite
     }
 
-    private func deploy(_ step: MissionStep, mission: Mission) async throws {
+    private func deploy(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Deploying...")
         // Deploy artifacts
     }
 
-    private func generateReport(_ step: MissionStep, mission: Mission) async throws {
+    private func generateReport(_: MissionStep, mission: Mission) async throws {
         log(.info, "Generating report...")
 
         let report = MissionReport(
             missionId: mission.id,
             goal: mission.goal,
             status: mission.status,
-            phasesCompleted: mission.phases.filter { $0.status == .completed }.count,
+            phasesCompleted: mission.phases.count { $0.status == .completed },
             totalPhases: mission.phases.count,
             duration: mission.startedAt.map { Date().timeIntervalSince($0) },
             logs: logs,
@@ -576,14 +575,14 @@ public final class MissionOrchestrator: ObservableObject {
         mission.report = report
     }
 
-    private func cleanup(_ step: MissionStep, mission: Mission) async throws {
+    private func cleanup(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Cleaning up...")
         // Clean up temporary resources
         checkpointData.removeAll()
         retryCount.removeAll()
     }
 
-    private func executeGeneric(_ step: MissionStep, mission: Mission) async throws {
+    private func executeGeneric(_: MissionStep, mission _: Mission) async throws {
         log(.info, "Executing generic task...")
         // Generic execution
     }
@@ -618,7 +617,8 @@ public final class MissionOrchestrator: ObservableObject {
     /// Restore from checkpoint
     public func restoreFromCheckpoint(missionId: UUID) async throws -> Mission? {
         guard let data = UserDefaults.standard.data(forKey: "mission.checkpoint.\(missionId)"),
-              let checkpoint = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+              let checkpoint = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else {
             return nil
         }
 
@@ -663,8 +663,8 @@ public final class MissionOrchestrator: ObservableObject {
 
     private func updateProgress(mission: Mission, phaseIndex: Int) {
         let totalSteps = mission.phases.reduce(0) { $0 + $1.steps.count }
-        let completedSteps = mission.phases.prefix(phaseIndex).reduce(0) { $0 + $1.steps.filter { $0.status == .completed }.count }
-        let currentPhaseCompleted = currentPhase?.steps.filter { $0.status == .completed }.count ?? 0
+        let completedSteps = mission.phases.prefix(phaseIndex).reduce(0) { $0 + $1.steps.count { $0.status == .completed }}
+        let currentPhaseCompleted = currentPhase?.steps.count { $0.status == .completed }?? 0
 
         overallProgress = Double(completedSteps + currentPhaseCompleted) / Double(totalSteps)
     }
@@ -694,7 +694,8 @@ public final class MissionOrchestrator: ObservableObject {
 
     private func loadMissionHistory() {
         if let data = UserDefaults.standard.data(forKey: "mission.history"),
-           let history = try? JSONDecoder().decode([Mission].self, from: data) {
+           let history = try? JSONDecoder().decode([Mission].self, from: data)
+        {
             missionHistory = history
         }
     }
@@ -736,6 +737,36 @@ public class Mission: Identifiable, ObservableObject, Codable {
         self.status = status
         self.createdAt = createdAt
     }
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        goal = try container.decode(String.self, forKey: .goal)
+        context = try container.decode(MissionContext.self, forKey: .context)
+        analysis = try container.decode(MissionAnalysis.self, forKey: .analysis)
+        phases = try container.decode([MissionPhase].self, forKey: .phases)
+        status = try container.decode(MissionStatus.self, forKey: .status)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        startedAt = try container.decodeIfPresent(Date.self, forKey: .startedAt)
+        completedAt = try container.decodeIfPresent(Date.self, forKey: .completedAt)
+        error = try container.decodeIfPresent(String.self, forKey: .error)
+        report = try container.decodeIfPresent(MissionReport.self, forKey: .report)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(goal, forKey: .goal)
+        try container.encode(context, forKey: .context)
+        try container.encode(analysis, forKey: .analysis)
+        try container.encode(phases, forKey: .phases)
+        try container.encode(status, forKey: .status)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(startedAt, forKey: .startedAt)
+        try container.encodeIfPresent(completedAt, forKey: .completedAt)
+        try container.encodeIfPresent(error, forKey: .error)
+        try container.encodeIfPresent(report, forKey: .report)
+    }
 }
 
 public struct MissionContext: Codable {
@@ -765,7 +796,7 @@ public struct MissionAnalysis: Codable {
 }
 
 public struct GoalComponent: Identifiable, Codable {
-    public let id = UUID()
+    public var id = UUID()
     public let action: String
     public let target: String
     public let details: String?
@@ -823,6 +854,30 @@ public class MissionPhase: Identifiable, ObservableObject, Codable {
         self.steps = steps
         self.status = status
     }
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        description = try container.decode(String.self, forKey: .description)
+        order = try container.decode(Int.self, forKey: .order)
+        steps = try container.decode([MissionStep].self, forKey: .steps)
+        status = try container.decode(PhaseStatus.self, forKey: .status)
+        startedAt = try container.decodeIfPresent(Date.self, forKey: .startedAt)
+        completedAt = try container.decodeIfPresent(Date.self, forKey: .completedAt)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(description, forKey: .description)
+        try container.encode(order, forKey: .order)
+        try container.encode(steps, forKey: .steps)
+        try container.encode(status, forKey: .status)
+        try container.encodeIfPresent(startedAt, forKey: .startedAt)
+        try container.encodeIfPresent(completedAt, forKey: .completedAt)
+    }
 }
 
 public enum PhaseStatus: String, Codable {
@@ -850,6 +905,30 @@ public class MissionStep: Identifiable, ObservableObject, Codable {
         self.order = order
     }
 
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        type = try container.decode(StepType.self, forKey: .type)
+        order = try container.decode(Int.self, forKey: .order)
+        status = try container.decode(StepStatus.self, forKey: .status)
+        startedAt = try container.decodeIfPresent(Date.self, forKey: .startedAt)
+        completedAt = try container.decodeIfPresent(Date.self, forKey: .completedAt)
+        error = try container.decodeIfPresent(String.self, forKey: .error)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(type, forKey: .type)
+        try container.encode(order, forKey: .order)
+        try container.encode(status, forKey: .status)
+        try container.encodeIfPresent(startedAt, forKey: .startedAt)
+        try container.encodeIfPresent(completedAt, forKey: .completedAt)
+        try container.encodeIfPresent(error, forKey: .error)
+    }
+
     public enum StepType: String, Codable {
         case validation, resourceGathering, checkpoint, planning
         case codeGeneration, codeModification, fileOperation
@@ -864,7 +943,7 @@ public enum StepStatus: String, Codable {
 }
 
 public struct MissionLog: Identifiable, Codable {
-    public let id = UUID()
+    public var id = UUID()
     public let timestamp: Date
     public let level: LogLevel
     public let message: String
@@ -896,11 +975,11 @@ public enum MissionError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .missionAlreadyActive: return "A mission is already active"
-        case .validationFailed(let reason): return "Validation failed: \(reason)"
-        case .phaseExecutionFailed(let reason): return "Phase execution failed: \(reason)"
-        case .stepExecutionFailed(let reason): return "Step execution failed: \(reason)"
-        case .checkpointRestoreFailed: return "Failed to restore from checkpoint"
+        case .missionAlreadyActive: "A mission is already active"
+        case let .validationFailed(reason): "Validation failed: \(reason)"
+        case let .phaseExecutionFailed(reason): "Phase execution failed: \(reason)"
+        case let .stepExecutionFailed(reason): "Step execution failed: \(reason)"
+        case .checkpointRestoreFailed: "Failed to restore from checkpoint"
         }
     }
 }

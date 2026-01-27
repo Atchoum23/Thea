@@ -12,19 +12,19 @@ public enum SleepStage: String, Sendable, Codable {
 
     public var displayName: String {
         switch self {
-        case .awake: return "Awake"
-        case .light: return "Light Sleep"
-        case .deep: return "Deep Sleep"
-        case .rem: return "REM Sleep"
+        case .awake: "Awake"
+        case .light: "Light Sleep"
+        case .deep: "Deep Sleep"
+        case .rem: "REM Sleep"
         }
     }
 
     public var color: Color {
         switch self {
-        case .awake: return .red
-        case .light: return Color(red: 0.38, green: 0.65, blue: 0.98)  // Light blue #60A5FA
-        case .deep: return Color(red: 0.23, green: 0.51, blue: 0.96)   // Blue #3B82F6
-        case .rem: return Color(red: 0.55, green: 0.36, blue: 0.96)    // Purple #8B5CF6
+        case .awake: .red
+        case .light: Color(red: 0.38, green: 0.65, blue: 0.98) // Light blue #60A5FA
+        case .deep: Color(red: 0.23, green: 0.51, blue: 0.96) // Blue #3B82F6
+        case .rem: Color(red: 0.55, green: 0.36, blue: 0.96) // Purple #8B5CF6
         }
     }
 }
@@ -38,28 +38,28 @@ public enum SleepQuality: String, Sendable, Codable {
 
     public var displayName: String {
         switch self {
-        case .poor: return "Poor"
-        case .fair: return "Fair"
-        case .good: return "Good"
-        case .excellent: return "Excellent"
+        case .poor: "Poor"
+        case .fair: "Fair"
+        case .good: "Good"
+        case .excellent: "Excellent"
         }
     }
 
     public var score: Int {
         switch self {
-        case .poor: return 25
-        case .fair: return 50
-        case .good: return 75
-        case .excellent: return 100
+        case .poor: 25
+        case .fair: 50
+        case .good: 75
+        case .excellent: 100
         }
     }
 
     public var color: String {
         switch self {
-        case .poor: return "#EF4444"      // Red
-        case .fair: return "#F59E0B"      // Amber
-        case .good: return "#10B981"      // Green
-        case .excellent: return "#059669" // Dark green
+        case .poor: "#EF4444" // Red
+        case .fair: "#F59E0B" // Amber
+        case .good: "#10B981" // Green
+        case .excellent: "#059669" // Dark green
         }
     }
 
@@ -75,17 +75,17 @@ public enum SleepQuality: String, Sendable, Codable {
         let awakePercent = Double(awakeMinutes) / Double(totalMinutes) * 100
 
         // Excellent: >20% deep, >20% REM, <5% awake, total >420 min (7h)
-        if deepPercent > 20 && remPercent > 20 && awakePercent < 5 && totalMinutes > 420 {
+        if deepPercent > 20, remPercent > 20, awakePercent < 5, totalMinutes > 420 {
             return .excellent
         }
 
         // Good: >15% deep, >15% REM, <10% awake, total >360 min (6h)
-        if deepPercent > 15 && remPercent > 15 && awakePercent < 10 && totalMinutes > 360 {
+        if deepPercent > 15, remPercent > 15, awakePercent < 10, totalMinutes > 360 {
             return .good
         }
 
         // Fair: >10% deep, >10% REM, <15% awake
-        if deepPercent > 10 && remPercent > 10 && awakePercent < 15 {
+        if deepPercent > 10, remPercent > 10, awakePercent < 15 {
             return .fair
         }
 
@@ -190,11 +190,11 @@ public enum HeartRateContext: String, Sendable, Codable {
 
     public var displayName: String {
         switch self {
-        case .resting: return "Resting"
-        case .active: return "Active"
-        case .workout: return "Workout"
-        case .sleep: return "Sleep"
-        case .recovery: return "Recovery"
+        case .resting: "Resting"
+        case .active: "Active"
+        case .workout: "Workout"
+        case .sleep: "Sleep"
+        case .recovery: "Recovery"
         }
     }
 }
@@ -225,15 +225,15 @@ public struct HeartRateRecord: Sendable, Codable, Identifiable {
     public var isNormal: Bool {
         switch context {
         case .resting:
-            return beatsPerMinute >= 60 && beatsPerMinute <= 100
+            beatsPerMinute >= 60 && beatsPerMinute <= 100
         case .active:
-            return beatsPerMinute >= 100 && beatsPerMinute <= 150
+            beatsPerMinute >= 100 && beatsPerMinute <= 150
         case .workout:
-            return beatsPerMinute >= 120 && beatsPerMinute <= 180
+            beatsPerMinute >= 120 && beatsPerMinute <= 180
         case .sleep:
-            return beatsPerMinute >= 40 && beatsPerMinute <= 60
+            beatsPerMinute >= 40 && beatsPerMinute <= 60
         case .recovery:
-            return beatsPerMinute >= 80 && beatsPerMinute <= 120
+            beatsPerMinute >= 80 && beatsPerMinute <= 120
         }
     }
 }
@@ -264,15 +264,15 @@ public struct CardiacAnomaly: Sendable, Codable, Identifiable {
     }
 
     public enum AnomalyType: String, Sendable, Codable {
-        case tachycardia  // High heart rate
-        case bradycardia  // Low heart rate
-        case irregular    // Irregular rhythm
+        case tachycardia // High heart rate
+        case bradycardia // Low heart rate
+        case irregular // Irregular rhythm
 
         public var displayName: String {
             switch self {
-            case .tachycardia: return "Tachycardia"
-            case .bradycardia: return "Bradycardia"
-            case .irregular: return "Irregular Rhythm"
+            case .tachycardia: "Tachycardia"
+            case .bradycardia: "Bradycardia"
+            case .irregular: "Irregular Rhythm"
             }
         }
     }
@@ -284,9 +284,9 @@ public struct CardiacAnomaly: Sendable, Codable, Identifiable {
 
         public var color: String {
             switch self {
-            case .mild: return "#F59E0B"      // Amber
-            case .moderate: return "#F97316"  // Orange
-            case .severe: return "#EF4444"    // Red
+            case .mild: "#F59E0B" // Amber
+            case .moderate: "#F97316" // Orange
+            case .severe: "#EF4444" // Red
             }
         }
     }
@@ -301,7 +301,7 @@ public struct ActivitySummary: Sendable, Codable, Identifiable {
     public let steps: Int
     public let activeCalories: Int
     public let totalCalories: Int
-    public let distance: Double  // meters
+    public let distance: Double // meters
     public let activeMinutes: Int
     public let flightsClimbed: Int
     public let source: DataSource
@@ -330,16 +330,16 @@ public struct ActivitySummary: Sendable, Codable, Identifiable {
 
     /// Distance in kilometers
     public var distanceKm: Double {
-        distance / 1_000
+        distance / 1000
     }
 
     /// Distance in miles
     public var distanceMiles: Double {
-        distance / 1_609.34
+        distance / 1609.34
     }
 
     /// Check if daily step goal is met (default 10,000 steps)
-    public func meetsStepGoal(_ goal: Int = 10_000) -> Bool {
+    public func meetsStepGoal(_ goal: Int = 10000) -> Bool {
         steps >= goal
     }
 
@@ -353,7 +353,7 @@ public struct ActivitySummary: Sendable, Codable, Identifiable {
         var score = 0
 
         // Steps contribution (max 40 points)
-        score += min(40, (steps * 40) / 10_000)
+        score += min(40, (steps * 40) / 10000)
 
         // Active minutes contribution (max 30 points)
         score += min(30, (activeMinutes * 30) / 30)
@@ -398,15 +398,15 @@ public struct BloodPressureReading: Sendable, Codable, Identifiable {
     /// Blood pressure category
     public var category: Category {
         if systolic < 120 && diastolic < 80 {
-            return .normal
+            .normal
         } else if systolic < 130 && diastolic < 80 {
-            return .elevated
+            .elevated
         } else if systolic < 140 || diastolic < 90 {
-            return .stage1Hypertension
+            .stage1Hypertension
         } else if systolic < 180 || diastolic < 120 {
-            return .stage2Hypertension
+            .stage2Hypertension
         } else {
-            return .hypertensiveCrisis
+            .hypertensiveCrisis
         }
     }
 
@@ -419,21 +419,21 @@ public struct BloodPressureReading: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .normal: return "Normal"
-            case .elevated: return "Elevated"
-            case .stage1Hypertension: return "Stage 1 Hypertension"
-            case .stage2Hypertension: return "Stage 2 Hypertension"
-            case .hypertensiveCrisis: return "Hypertensive Crisis"
+            case .normal: "Normal"
+            case .elevated: "Elevated"
+            case .stage1Hypertension: "Stage 1 Hypertension"
+            case .stage2Hypertension: "Stage 2 Hypertension"
+            case .hypertensiveCrisis: "Hypertensive Crisis"
             }
         }
 
         public var color: String {
             switch self {
-            case .normal: return "#10B981"            // Green
-            case .elevated: return "#F59E0B"          // Amber
-            case .stage1Hypertension: return "#F97316" // Orange
-            case .stage2Hypertension: return "#EF4444" // Red
-            case .hypertensiveCrisis: return "#DC2626" // Dark red
+            case .normal: "#10B981" // Green
+            case .elevated: "#F59E0B" // Amber
+            case .stage1Hypertension: "#F97316" // Orange
+            case .stage2Hypertension: "#EF4444" // Red
+            case .hypertensiveCrisis: "#DC2626" // Dark red
             }
         }
     }
@@ -452,15 +452,15 @@ public enum HealthError: Error, Sendable, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .authorizationDenied:
-            return "HealthKit authorization was denied. Please enable access in Settings."
+            "HealthKit authorization was denied. Please enable access in Settings."
         case .healthKitUnavailable:
-            return "HealthKit is not available on this device."
+            "HealthKit is not available on this device."
         case .dataNotAvailable:
-            return "Health data is not available for the requested period."
+            "Health data is not available for the requested period."
         case .invalidDateRange:
-            return "The specified date range is invalid."
-        case .fetchFailed(let reason):
-            return "Failed to fetch health data: \(reason)"
+            "The specified date range is invalid."
+        case let .fetchFailed(reason):
+            "Failed to fetch health data: \(reason)"
         }
     }
 }

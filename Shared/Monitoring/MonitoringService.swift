@@ -8,7 +8,7 @@
 
 @preconcurrency import Foundation
 #if os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Monitoring Service
@@ -31,7 +31,7 @@ public actor MonitoringService {
     // MARK: - Initialization
 
     private init() {
-        self.configuration = MonitoringConfiguration.load()
+        configuration = MonitoringConfiguration.load()
     }
 
     // MARK: - Start/Stop
@@ -91,15 +91,15 @@ public actor MonitoringService {
     private func createMonitor(for type: MonitorType) -> any ActivityMonitor {
         switch type {
         case .appSwitch:
-            return AppSwitchMonitor(logger: activityLogger)
+            AppSwitchMonitor(logger: activityLogger)
         case .idleTime:
-            return IdleTimeMonitor(logger: activityLogger)
+            IdleTimeMonitor(logger: activityLogger)
         case .focusMode:
-            return FocusModeMonitor(logger: activityLogger)
+            FocusModeMonitor(logger: activityLogger)
         case .screenTime:
-            return ScreenTimeMonitor(logger: activityLogger)
+            ScreenTimeMonitor(logger: activityLogger)
         case .inputActivity:
-            return InputActivityMonitor(logger: activityLogger)
+            InputActivityMonitor(logger: activityLogger)
         }
     }
 
@@ -115,8 +115,9 @@ public actor MonitoringService {
         if isMonitoring {
             // Stop disabled monitors
             for type in MonitorType.allCases {
-                if previousConfig.enabledMonitors.contains(type) &&
-                   !config.enabledMonitors.contains(type) {
+                if previousConfig.enabledMonitors.contains(type),
+                   !config.enabledMonitors.contains(type)
+                {
                     await stopMonitor(type)
                 }
             }
@@ -172,47 +173,47 @@ public enum MonitorType: String, Codable, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .appSwitch: return "App Switching"
-        case .idleTime: return "Idle Time"
-        case .focusMode: return "Focus Mode"
-        case .screenTime: return "Screen Time"
-        case .inputActivity: return "Input Activity"
+        case .appSwitch: "App Switching"
+        case .idleTime: "Idle Time"
+        case .focusMode: "Focus Mode"
+        case .screenTime: "Screen Time"
+        case .inputActivity: "Input Activity"
         }
     }
 
     public var description: String {
         switch self {
         case .appSwitch:
-            return "Track which apps you use and for how long"
+            "Track which apps you use and for how long"
         case .idleTime:
-            return "Detect when you're away from your computer"
+            "Detect when you're away from your computer"
         case .focusMode:
-            return "Monitor focus mode changes"
+            "Monitor focus mode changes"
         case .screenTime:
-            return "Track total screen time"
+            "Track total screen time"
         case .inputActivity:
-            return "Track keyboard and mouse usage patterns"
+            "Track keyboard and mouse usage patterns"
         }
     }
 
     public var icon: String {
         switch self {
-        case .appSwitch: return "square.on.square"
-        case .idleTime: return "moon.zzz"
-        case .focusMode: return "moon"
-        case .screenTime: return "desktopcomputer"
-        case .inputActivity: return "keyboard"
+        case .appSwitch: "square.on.square"
+        case .idleTime: "moon.zzz"
+        case .focusMode: "moon"
+        case .screenTime: "desktopcomputer"
+        case .inputActivity: "keyboard"
         }
     }
 
     public var requiredPermission: PrivacyPermission {
         switch self {
         case .appSwitch, .screenTime:
-            return .accessibility
+            .accessibility
         case .idleTime, .inputActivity:
-            return .inputMonitoring
+            .inputMonitoring
         case .focusMode:
-            return .notifications
+            .notifications
         }
     }
 }
@@ -247,7 +248,8 @@ public struct MonitoringConfiguration: Codable, Sendable, Equatable {
 
     public static func load() -> MonitoringConfiguration {
         if let data = UserDefaults.standard.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(MonitoringConfiguration.self, from: data) {
+           let config = try? JSONDecoder().decode(MonitoringConfiguration.self, from: data)
+        {
             return config
         }
         return MonitoringConfiguration()
@@ -279,13 +281,13 @@ public enum MonitoringError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            return "Required permissions not granted"
+            "Required permissions not granted"
         case .notMonitoring:
-            return "Monitoring is not active"
-        case .monitorFailed(let type, let reason):
-            return "\(type.displayName) monitor failed: \(reason)"
+            "Monitoring is not active"
+        case let .monitorFailed(type, reason):
+            "\(type.displayName) monitor failed: \(reason)"
         case .alreadyMonitoring:
-            return "Monitoring is already active"
+            "Monitoring is already active"
         }
     }
 }
@@ -293,37 +295,37 @@ public enum MonitoringError: Error, LocalizedError, Sendable {
 // MARK: - Individual Monitors
 
 #if os(macOS)
-/// MainActor-isolated helper for app switch monitoring
-@MainActor
-final class AppSwitchObserverHelper {
-    static let shared = AppSwitchObserverHelper()
-    private var observer: NSObjectProtocol?
+    /// MainActor-isolated helper for app switch monitoring
+    @MainActor
+    final class AppSwitchObserverHelper {
+        static let shared = AppSwitchObserverHelper()
+        private var observer: NSObjectProtocol?
 
-    private init() {}
+        private init() {}
 
-    func setup(handler: @escaping @Sendable (String?) -> Void) -> String? {
-        let currentApp = NSWorkspace.shared.frontmostApplication?.localizedName
+        func setup(handler: @escaping @Sendable (String?) -> Void) -> String? {
+            let currentApp = NSWorkspace.shared.frontmostApplication?.localizedName
 
-        observer = NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didActivateApplicationNotification,
-            object: nil,
-            queue: .main
-        ) { notification in
-            // Extract app name on MainActor, pass only Sendable String
-            let appName = (notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.localizedName
-            handler(appName)
+            observer = NSWorkspace.shared.notificationCenter.addObserver(
+                forName: NSWorkspace.didActivateApplicationNotification,
+                object: nil,
+                queue: .main
+            ) { notification in
+                // Extract app name on MainActor, pass only Sendable String
+                let appName = (notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.localizedName
+                handler(appName)
+            }
+
+            return currentApp
         }
 
-        return currentApp
-    }
-
-    func cleanup() {
-        if let observer = observer {
-            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        func cleanup() {
+            if let observer {
+                NSWorkspace.shared.notificationCenter.removeObserver(observer)
+            }
+            observer = nil
         }
-        observer = nil
     }
-}
 #endif
 
 /// Monitors app switching activity
@@ -344,14 +346,14 @@ public actor AppSwitchMonitor: ActivityMonitor {
         isActive = true
 
         #if os(macOS)
-        let initialApp = await AppSwitchObserverHelper.shared.setup { [weak self] appName in
-            guard self != nil else { return }
-            Task { [weak self] in
-                await self?.handleAppSwitch(appName: appName)
+            let initialApp = await AppSwitchObserverHelper.shared.setup { [weak self] appName in
+                guard self != nil else { return }
+                Task { [weak self] in
+                    await self?.handleAppSwitch(appName: appName)
+                }
             }
-        }
-        currentApp = initialApp
-        appStartTime = Date()
+            currentApp = initialApp
+            appStartTime = Date()
         #endif
     }
 
@@ -359,7 +361,7 @@ public actor AppSwitchMonitor: ActivityMonitor {
         isActive = false
 
         #if os(macOS)
-        await AppSwitchObserverHelper.shared.cleanup()
+            await AppSwitchObserverHelper.shared.cleanup()
         #endif
 
         // Log final session
@@ -369,22 +371,22 @@ public actor AppSwitchMonitor: ActivityMonitor {
     }
 
     #if os(macOS)
-    private func handleAppSwitch(appName: String?) async {
-        guard let app = appName else {
-            return
+        private func handleAppSwitch(appName: String?) async {
+            guard let app = appName else {
+                return
+            }
+
+            let now = Date()
+
+            // Log previous app session
+            if let previousApp = currentApp, let startTime = appStartTime {
+                await logAppSession(app: previousApp, startTime: startTime, endTime: now)
+            }
+
+            // Start tracking new app
+            currentApp = app
+            appStartTime = now
         }
-
-        let now = Date()
-
-        // Log previous app session
-        if let previousApp = currentApp, let startTime = appStartTime {
-            await logAppSession(app: previousApp, startTime: startTime, endTime: now)
-        }
-
-        // Start tracking new app
-        currentApp = app
-        appStartTime = now
-    }
     #endif
 
     private func logAppSession(app: String, startTime: Date, endTime: Date) async {
@@ -418,7 +420,7 @@ public actor IdleTimeMonitor: ActivityMonitor {
         lastActiveTime = Date()
 
         checkTask = Task {
-            while !Task.isCancelled && isActive {
+            while !Task.isCancelled, isActive {
                 await checkIdleState()
                 try? await Task.sleep(nanoseconds: 30_000_000_000) // 30 seconds
             }
@@ -433,32 +435,32 @@ public actor IdleTimeMonitor: ActivityMonitor {
 
     private func checkIdleState() async {
         #if os(macOS)
-        let idleTime = await MainActor.run {
-            CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .mouseMoved)
-        }
+            let idleTime = await MainActor.run {
+                CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .mouseMoved)
+            }
 
-        let idleThreshold: TimeInterval = 300 // 5 minutes
+            let idleThreshold: TimeInterval = 300 // 5 minutes
 
-        if idleTime > idleThreshold && !isCurrentlyIdle {
-            // Became idle
-            isCurrentlyIdle = true
-            let entry = ActivityLogEntry(
-                type: .idleStart,
-                timestamp: Date(),
-                metadata: ["idleSeconds": .int(Int(idleTime))]
-            )
-            await logger.log(entry)
-        } else if idleTime < 10 && isCurrentlyIdle {
-            // Became active
-            isCurrentlyIdle = false
-            let entry = ActivityLogEntry(
-                type: .idleEnd,
-                timestamp: Date(),
-                metadata: ["idleSeconds": .int(Int(idleTime))]
-            )
-            await logger.log(entry)
-            lastActiveTime = Date()
-        }
+            if idleTime > idleThreshold, !isCurrentlyIdle {
+                // Became idle
+                isCurrentlyIdle = true
+                let entry = ActivityLogEntry(
+                    type: .idleStart,
+                    timestamp: Date(),
+                    metadata: ["idleSeconds": .int(Int(idleTime))]
+                )
+                await logger.log(entry)
+            } else if idleTime < 10, isCurrentlyIdle {
+                // Became active
+                isCurrentlyIdle = false
+                let entry = ActivityLogEntry(
+                    type: .idleEnd,
+                    timestamp: Date(),
+                    metadata: ["idleSeconds": .int(Int(idleTime))]
+                )
+                await logger.log(entry)
+                lastActiveTime = Date()
+            }
         #endif
     }
 }
@@ -539,7 +541,7 @@ public actor InputActivityMonitor: ActivityMonitor {
         isActive = true
 
         checkTask = Task {
-            while !Task.isCancelled && isActive {
+            while !Task.isCancelled, isActive {
                 await sampleActivity()
                 try? await Task.sleep(nanoseconds: 60_000_000_000) // 1 minute
             }
@@ -554,23 +556,23 @@ public actor InputActivityMonitor: ActivityMonitor {
 
     private func sampleActivity() async {
         #if os(macOS)
-        // Sample recent input activity
-        let keyboardIdle = await MainActor.run {
-            CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .keyDown)
-        }
-        let mouseIdle = await MainActor.run {
-            CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .mouseMoved)
-        }
+            // Sample recent input activity
+            let keyboardIdle = await MainActor.run {
+                CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .keyDown)
+            }
+            let mouseIdle = await MainActor.run {
+                CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .mouseMoved)
+            }
 
-        let entry = ActivityLogEntry(
-            type: .inputSample,
-            timestamp: Date(),
-            metadata: [
-                "keyboardIdleSeconds": .int(Int(keyboardIdle)),
-                "mouseIdleSeconds": .int(Int(mouseIdle))
-            ]
-        )
-        await logger.log(entry)
+            let entry = ActivityLogEntry(
+                type: .inputSample,
+                timestamp: Date(),
+                metadata: [
+                    "keyboardIdleSeconds": .int(Int(keyboardIdle)),
+                    "mouseIdleSeconds": .int(Int(mouseIdle))
+                ]
+            )
+            await logger.log(entry)
         #endif
     }
 }

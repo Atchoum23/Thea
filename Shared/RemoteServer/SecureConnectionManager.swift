@@ -6,18 +6,17 @@
 //  Copyright © 2026. All rights reserved.
 //
 
+import Combine
+import CryptoKit
 import Foundation
 import Network
-import CryptoKit
 import Security
-import Combine
 
 // MARK: - Secure Connection Manager
 
 /// Manages TLS connections, authentication, and encryption for remote access
 @MainActor
 public class SecureConnectionManager: ObservableObject {
-
     // MARK: - Published State
 
     @Published public private(set) var isInitialized = false
@@ -83,7 +82,7 @@ public class SecureConnectionManager: ObservableObject {
 
         // SECURITY FIX (FINDING-002): Properly validate TLS certificates
         // Previous implementation blindly accepted all certificates, enabling MITM attacks
-        sec_protocol_options_set_verify_block(tlsOptions.securityProtocolOptions, { securityProtocolMetadata, secTrust, completion in
+        sec_protocol_options_set_verify_block(tlsOptions.securityProtocolOptions, { _, secTrust, completion in
             // Perform proper certificate validation
             guard let trust = sec_trust_copy_ref(secTrust).takeRetainedValue() as SecTrust? else {
                 completion(false)
@@ -100,7 +99,7 @@ public class SecureConnectionManager: ObservableObject {
 
             if !isValid {
                 // Log the validation failure for debugging
-                if let error = error {
+                if let error {
                     print("SECURITY: TLS certificate validation failed: \(error)")
                 }
             }
@@ -115,7 +114,7 @@ public class SecureConnectionManager: ObservableObject {
     private func createServerIdentity() -> sec_identity_t? {
         // In production, use a proper certificate
         // For now, we rely on app-level authentication
-        return nil
+        nil
     }
 
     // MARK: - Authentication
@@ -187,14 +186,13 @@ public class SecureConnectionManager: ObservableObject {
             SecRandomCopyBytes(kSecRandomDefault, 12, $0.baseAddress!)
         }
 
-        let code: String
-        if result == errSecSuccess {
-            code = codeData.map { characters[characters.index(characters.startIndex, offsetBy: Int($0) % characters.count)] }
+        let code: String = if result == errSecSuccess {
+            codeData.map { characters[characters.index(characters.startIndex, offsetBy: Int($0) % characters.count)] }
                 .map { String($0) }
                 .joined()
         } else {
             // Fallback (still better than 6 digits)
-            code = (0..<12).map { _ in
+            (0 ..< 12).map { _ in
                 String(characters.randomElement()!)
             }.joined()
         }
@@ -204,7 +202,7 @@ public class SecureConnectionManager: ObservableObject {
             createdAt: Date(),
             expiresAt: Date().addingTimeInterval(duration),
             isUsed: false,
-            failedAttempts: 0  // SECURITY: Track failed attempts
+            failedAttempts: 0 // SECURITY: Track failed attempts
         )
 
         pairingCodes[code] = session
@@ -280,8 +278,9 @@ public class SecureConnectionManager: ObservableObject {
     // MARK: - Shared Secret Authentication
 
     private func verifySharedSecret(challenge: AuthChallenge, response: AuthResponse) -> Bool {
-        guard let secret = response.sharedSecret,
-              let storedSecret = loadKeyFromKeychain(identifier: "thea.remote.sharedsecret") else {
+        guard let _ = response.sharedSecret,
+              let storedSecret = loadKeyFromKeychain(identifier: "thea.remote.sharedsecret")
+        else {
             logEvent(.authenticationFailed, "No shared secret configured")
             return false
         }
@@ -345,7 +344,8 @@ public class SecureConnectionManager: ObservableObject {
     // SECURITY FIX (FINDING-011): Store trusted certificates in Keychain instead of UserDefaults
     private func loadTrustedCertificates() -> [Data]? {
         guard let data = loadKeyFromKeychain(identifier: "thea.remote.trustedcerts"),
-              let certs = try? JSONDecoder().decode([Data].self, from: data) else {
+              let certs = try? JSONDecoder().decode([Data].self, from: data)
+        else {
             return nil
         }
         return certs
@@ -360,7 +360,7 @@ public class SecureConnectionManager: ObservableObject {
 
     // MARK: - iCloud Identity Authentication
 
-    private func verifyiCloudIdentity(response: AuthResponse) async -> Bool {
+    private func verifyiCloudIdentity(response _: AuthResponse) async -> Bool {
         // In a real implementation, this would verify the client's iCloud identity
         // matches one of the devices on the same iCloud account
         logEvent(.authenticationFailed, "iCloud identity verification not implemented")
@@ -371,12 +371,12 @@ public class SecureConnectionManager: ObservableObject {
 
     private func verifyBiometric() async -> Bool {
         #if os(macOS)
-        // This would show a local biometric prompt on the server
-        // and only allow connection if approved
-        logEvent(.authenticationFailed, "Biometric verification not implemented")
-        return false
+            // This would show a local biometric prompt on the server
+            // and only allow connection if approved
+            logEvent(.authenticationFailed, "Biometric verification not implemented")
+            return false
         #else
-        return false
+            return false
         #endif
     }
 
@@ -387,7 +387,7 @@ public class SecureConnectionManager: ObservableObject {
         guard !whitelist.isEmpty else { return true }
 
         switch endpoint {
-        case .hostPort(let host, _):
+        case let .hostPort(host, _):
             let hostString = "\(host)"
             return whitelist.contains(hostString)
         default:
@@ -410,7 +410,8 @@ public class SecureConnectionManager: ObservableObject {
     // SECURITY FIX (FINDING-011): Store whitelist in Keychain instead of UserDefaults
     private func loadWhitelist() {
         if let data = loadKeyFromKeychain(identifier: "thea.remote.whitelist"),
-           let jsonArray = try? JSONDecoder().decode([String].self, from: data) {
+           let jsonArray = try? JSONDecoder().decode([String].self, from: data)
+        {
             whitelist = Set(jsonArray)
         }
     }
@@ -428,7 +429,7 @@ public class SecureConnectionManager: ObservableObject {
     public func checkRateLimit(for endpoint: NWEndpoint) async -> Bool {
         let key: String
         switch endpoint {
-        case .hostPort(let host, _):
+        case let .hostPort(host, _):
             key = "\(host)"
         default:
             return true
@@ -556,7 +557,7 @@ private struct PairingSession {
     let createdAt: Date
     let expiresAt: Date
     var isUsed: Bool
-    var failedAttempts: Int  // SECURITY FIX (FINDING-006): Track failed attempts for lockout
+    var failedAttempts: Int // SECURITY FIX (FINDING-006): Track failed attempts for lockout
 }
 
 // MARK: - Connection Security Error
@@ -571,12 +572,12 @@ public enum ConnectionSecurityError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .keyNotInitialized: return "Security keys not initialized"
-        case .challengeGenerationFailed: return "Failed to generate authentication challenge"
-        case .encryptionFailed: return "Data encryption failed"
-        case .decryptionFailed: return "Data decryption failed"
-        case .noSessionKey: return "No session encryption key available"
-        case .invalidCertificate: return "Invalid certificate"
+        case .keyNotInitialized: "Security keys not initialized"
+        case .challengeGenerationFailed: "Failed to generate authentication challenge"
+        case .encryptionFailed: "Data encryption failed"
+        case .decryptionFailed: "Data decryption failed"
+        case .noSessionKey: "No session encryption key available"
+        case .invalidCertificate: "Invalid certificate"
         }
     }
 }

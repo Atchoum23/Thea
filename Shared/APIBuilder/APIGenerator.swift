@@ -246,7 +246,7 @@ public actor APIGenerator {
         """
     }
 
-    private func generateEndpoint(_ endpoint: APIEndpointSpec, apiName: String) -> String {
+    private func generateEndpoint(_ endpoint: APIEndpointSpec, apiName _: String) -> String {
         var code = """
 
             /// \(endpoint.description)
@@ -355,7 +355,8 @@ public actor APIGenerator {
                 if let methods = pathItem as? [String: Any] {
                     for (method, operation) in methods {
                         if let opDict = operation as? [String: Any],
-                           let endpoint = parseEndpoint(path: path, method: method, operation: opDict) {
+                           let endpoint = parseEndpoint(path: path, method: method, operation: opDict)
+                        {
                             spec.endpoints.append(endpoint)
                         }
                     }
@@ -365,10 +366,12 @@ public actor APIGenerator {
 
         // Parse components/schemas
         if let components = json["components"] as? [String: Any],
-           let schemas = components["schemas"] as? [String: Any] {
+           let schemas = components["schemas"] as? [String: Any]
+        {
             for (name, schema) in schemas {
                 if let schemaDict = schema as? [String: Any],
-                   let model = parseModel(name: name, schema: schemaDict) {
+                   let model = parseModel(name: name, schema: schemaDict)
+                {
                     spec.models.append(model)
                 }
             }
@@ -380,7 +383,8 @@ public actor APIGenerator {
     private func parseServers(_ servers: Any?) -> String {
         guard let serverList = servers as? [[String: Any]],
               let firstServer = serverList.first,
-              let url = firstServer["url"] as? String else {
+              let url = firstServer["url"] as? String
+        else {
             return "https://api.example.com"
         }
         return url
@@ -414,7 +418,8 @@ public actor APIGenerator {
         if let requestBody = operation["requestBody"] as? [String: Any],
            let content = requestBody["content"] as? [String: Any],
            let jsonContent = content["application/json"] as? [String: Any],
-           let schema = jsonContent["schema"] as? [String: Any] {
+           let schema = jsonContent["schema"] as? [String: Any]
+        {
             endpoint.requestBody = parseBodySpec(schema)
         }
 
@@ -423,7 +428,8 @@ public actor APIGenerator {
            let successResponse = responses["200"] as? [String: Any] ?? responses["201"] as? [String: Any],
            let content = successResponse["content"] as? [String: Any],
            let jsonContent = content["application/json"] as? [String: Any],
-           let schema = jsonContent["schema"] as? [String: Any] {
+           let schema = jsonContent["schema"] as? [String: Any]
+        {
             endpoint.responseType = parseTypeFromSchema(schema)
         }
 
@@ -508,12 +514,12 @@ public actor APIGenerator {
             defaultEndpoints: [
                 APIEndpointSpec(path: "/items", method: "GET", operationId: "listItems", description: "List all items"),
                 APIEndpointSpec(path: "/items/{id}", method: "GET", operationId: "getItem", description: "Get item by ID",
-                               pathParameters: [APIParameterSpec(name: "id", type: .string, description: "Item ID", isRequired: true)]),
+                                pathParameters: [APIParameterSpec(name: "id", type: .string, description: "Item ID", isRequired: true)]),
                 APIEndpointSpec(path: "/items", method: "POST", operationId: "createItem", description: "Create new item"),
                 APIEndpointSpec(path: "/items/{id}", method: "PUT", operationId: "updateItem", description: "Update item",
-                               pathParameters: [APIParameterSpec(name: "id", type: .string, description: "Item ID", isRequired: true)]),
+                                pathParameters: [APIParameterSpec(name: "id", type: .string, description: "Item ID", isRequired: true)]),
                 APIEndpointSpec(path: "/items/{id}", method: "DELETE", operationId: "deleteItem", description: "Delete item",
-                               pathParameters: [APIParameterSpec(name: "id", type: .string, description: "Item ID", isRequired: true)])
+                                pathParameters: [APIParameterSpec(name: "id", type: .string, description: "Item ID", isRequired: true)])
             ]
         )
 
@@ -690,12 +696,12 @@ public enum APIPropertyType: String, Codable, Sendable {
 
     public var swiftType: String {
         switch self {
-        case .string: return "String"
-        case .integer: return "Int"
-        case .number: return "Double"
-        case .boolean: return "Bool"
-        case .array: return "[Any]"
-        case .object: return "[String: Any]"
+        case .string: "String"
+        case .integer: "Int"
+        case .number: "Double"
+        case .boolean: "Bool"
+        case .array: "[Any]"
+        case .object: "[String: Any]"
         }
     }
 }
@@ -767,18 +773,18 @@ public enum GeneratedAPIError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .invalidURL(let path):
-            return "Invalid URL: \(path)"
+        case let .invalidURL(path):
+            "Invalid URL: \(path)"
         case .invalidResponse:
-            return "Invalid response from server"
-        case .httpError(let statusCode, _):
-            return "HTTP error: \(statusCode)"
-        case .decodingError(let error):
-            return "Decoding error: \(error.localizedDescription)"
-        case .encodingError(let error):
-            return "Encoding error: \(error.localizedDescription)"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+            "Invalid response from server"
+        case let .httpError(statusCode, _):
+            "HTTP error: \(statusCode)"
+        case let .decodingError(error):
+            "Decoding error: \(error.localizedDescription)"
+        case let .encodingError(error):
+            "Encoding error: \(error.localizedDescription)"
+        case let .networkError(error):
+            "Network error: \(error.localizedDescription)"
         }
     }
 }
@@ -793,14 +799,14 @@ public enum APIGeneratorError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .templateNotFound(let name):
-            return "Template not found: \(name)"
-        case .apiNotFound(let id):
-            return "Generated API not found: \(id)"
-        case .invalidOpenAPISpec(let reason):
-            return "Invalid OpenAPI specification: \(reason)"
-        case .generationFailed(let reason):
-            return "Code generation failed: \(reason)"
+        case let .templateNotFound(name):
+            "Template not found: \(name)"
+        case let .apiNotFound(id):
+            "Generated API not found: \(id)"
+        case let .invalidOpenAPISpec(reason):
+            "Invalid OpenAPI specification: \(reason)"
+        case let .generationFailed(reason):
+            "Code generation failed: \(reason)"
         }
     }
 }

@@ -3,6 +3,7 @@ import Observation
 @preconcurrency import SwiftData
 
 // MARK: - Prompt Template Library
+
 // Manages a curated library of prompt templates with versioning and success tracking
 
 @MainActor
@@ -21,7 +22,7 @@ final class PromptTemplateLibrary {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
         Task {
             await initializeDefaultTemplates()
         }
@@ -64,7 +65,7 @@ final class PromptTemplateLibrary {
 
         do {
             let allTemplates = try context.fetch(descriptor)
-            let templates = allTemplates.filter { $0.isActive }
+            let templates = allTemplates.filter(\.isActive)
 
             templatesCache.removeAll()
             for template in templates {

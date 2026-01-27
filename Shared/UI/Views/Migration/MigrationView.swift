@@ -181,7 +181,7 @@ struct MigrationProgressView: View {
             .padding()
             .navigationTitle("Migrating from \(source.sourceName)")
             #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
+                .navigationBarTitleDisplayMode(.inline)
             #endif
         }
     }

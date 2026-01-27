@@ -2,6 +2,7 @@ import Foundation
 @preconcurrency import SwiftData
 
 // MARK: - Migration Engine
+
 // Universal migration system for importing data from competitor apps
 
 @MainActor
@@ -20,7 +21,7 @@ final class MigrationEngine {
     }
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
 
     private func registerMigrationSources() {
@@ -290,11 +291,11 @@ struct ClaudeAppMigration: MigrationSource {
 
     private var claudeDataPath: URL {
         #if os(macOS)
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Application Support/Claude")
+            FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Library/Application Support/Claude")
         #else
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("Claude") ?? FileManager.default.temporaryDirectory
+            FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+                .appendingPathComponent("Claude") ?? FileManager.default.temporaryDirectory
         #endif
     }
 
@@ -401,7 +402,8 @@ struct ClaudeAppMigration: MigrationSource {
 
         let messages = messagesJSON.compactMap { msgJSON -> MigratedMessage? in
             guard let role = msgJSON["role"] as? String,
-                  let content = msgJSON["content"] as? String else {
+                  let content = msgJSON["content"] as? String
+            else {
                 return nil
             }
 
@@ -439,7 +441,7 @@ struct ChatGPTMigration: MigrationSource {
         throw MigrationError.manualExportRequired
     }
 
-    func migrate(options: MigrationOptions) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
+    func migrate(options _: MigrationOptions) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
         AsyncThrowingStream { continuation in
             continuation.finish(throwing: MigrationError.manualExportRequired)
         }
@@ -485,7 +487,8 @@ struct ChatGPTMigration: MigrationSource {
                let content = message["content"] as? [String: Any],
                let parts = content["parts"] as? [String],
                let role = message["author"] as? [String: String],
-               let roleValue = role["role"] {
+               let roleValue = role["role"]
+            {
                 let msgRole: MessageRole = roleValue == "user" ? .user : .assistant
                 let text = parts.joined(separator: "\n")
 
@@ -517,11 +520,11 @@ struct CursorMigration: MigrationSource {
 
     func detectInstallation() async -> Bool {
         #if os(macOS)
-        let cursorPath = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Application Support/Cursor")
+            let cursorPath = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Library/Application Support/Cursor")
         #else
-        let cursorPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("Cursor") ?? FileManager.default.temporaryDirectory
+            let cursorPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+                .appendingPathComponent("Cursor") ?? FileManager.default.temporaryDirectory
         #endif
 
         return FileManager.default.fileExists(atPath: cursorPath.path)
@@ -537,7 +540,7 @@ struct CursorMigration: MigrationSource {
         )
     }
 
-    func migrate(options: MigrationOptions) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
+    func migrate(options _: MigrationOptions) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
         AsyncThrowingStream { continuation in
             continuation.yield(MigrationProgress(
                 stage: .complete,
@@ -566,7 +569,7 @@ struct PerplexityMigration: MigrationSource {
         throw MigrationError.webBasedApp
     }
 
-    func migrate(options: MigrationOptions) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
+    func migrate(options _: MigrationOptions) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
         AsyncThrowingStream { continuation in
             continuation.finish(throwing: MigrationError.webBasedApp)
         }
@@ -594,7 +597,7 @@ struct ClaudeCodeCLIMigration: MigrationSource {
         )
     }
 
-    func migrate(options: MigrationOptions) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
+    func migrate(options _: MigrationOptions) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
         AsyncThrowingStream { continuation in
             continuation.finish(throwing: MigrationError.manualExportRequired)
         }
@@ -612,13 +615,13 @@ enum MigrationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .manualExportRequired:
-            return "This app requires manual export. Please export your data and import the file."
+            "This app requires manual export. Please export your data and import the file."
         case .webBasedApp:
-            return "This is a web-based app. Migration not supported."
+            "This is a web-based app. Migration not supported."
         case .notImplemented:
-            return "Migration for this app is not yet implemented"
+            "Migration for this app is not yet implemented"
         case .noModelContext:
-            return "Database context not available. Please restart Thea and try again."
+            "Database context not available. Please restart Thea and try again."
         }
     }
 }

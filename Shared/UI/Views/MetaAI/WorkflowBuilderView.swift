@@ -112,7 +112,7 @@ struct WorkflowCanvasView: View {
                             }
                     }
                 }
-                .frame(minWidth: 2_000, minHeight: 2_000)
+                .frame(minWidth: 2000, minHeight: 2000)
             }
 
             // Bottom toolbar
@@ -216,16 +216,16 @@ struct NodeView: View {
 
     private func iconForNodeType(_ type: WorkflowNodeType) -> String {
         switch type {
-        case .input: return "arrow.down.circle"
-        case .output: return "arrow.up.circle"
-        case .aiInference: return "brain"
-        case .toolExecution: return "wrench"
-        case .conditional: return "arrow.triangle.branch"
-        case .loop: return "arrow.clockwise"
-        case .variable: return "v.square"
-        case .transformation: return "wand.and.stars"
-        case .merge: return "arrow.triangle.merge"
-        case .split: return "arrow.triangle.split"
+        case .input: "arrow.down.circle"
+        case .output: "arrow.up.circle"
+        case .aiInference: "brain"
+        case .toolExecution: "wrench"
+        case .conditional: "arrow.triangle.branch"
+        case .loop: "arrow.clockwise"
+        case .variable: "v.square"
+        case .transformation: "wand.and.stars"
+        case .merge: "arrow.triangle.merge"
+        case .split: "arrow.triangle.split"
         }
     }
 }
@@ -236,7 +236,8 @@ struct EdgeView: View {
 
     var body: some View {
         if let sourceNode = workflow.nodes.first(where: { $0.id == edge.sourceNodeId }),
-           let targetNode = workflow.nodes.first(where: { $0.id == edge.targetNodeId }) {
+           let targetNode = workflow.nodes.first(where: { $0.id == edge.targetNodeId })
+        {
             Path { path in
                 path.move(to: sourceNode.position)
                 path.addLine(to: targetNode.position)
@@ -279,8 +280,8 @@ struct NodeLibrarySheet: View {
 
     private func addNode(_ template: NodeTemplate) {
         let position = CGPoint(
-            x: Double.random(in: 500...1_500),
-            y: Double.random(in: 500...1_500)
+            x: Double.random(in: 500 ... 1500),
+            y: Double.random(in: 500 ... 1500)
         )
 
         _ = try? WorkflowBuilder.shared.addNode(
@@ -349,7 +350,7 @@ struct NewWorkflowSheet: View {
                 Section("Details") {
                     TextField("Name", text: $name)
                     TextField("Description", text: $description, axis: .vertical)
-                        .lineLimit(3...5)
+                        .lineLimit(3 ... 5)
                 }
             }
             .formStyle(.grouped)

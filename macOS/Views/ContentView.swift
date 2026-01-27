@@ -24,12 +24,12 @@ struct ContentView: View {
 
         var icon: String {
             switch self {
-            case .chat: return "message.fill"
-            case .projects: return "folder.fill"
-            case .knowledge: return "brain.head.profile"
-            case .financial: return "dollarsign.circle.fill"
-            case .code: return "chevron.left.forwardslash.chevron.right"
-            case .migration: return "arrow.down.doc.fill"
+            case .chat: "message.fill"
+            case .projects: "folder.fill"
+            case .knowledge: "brain.head.profile"
+            case .financial: "dollarsign.circle.fill"
+            case .code: "chevron.left.forwardslash.chevron.right"
+            case .migration: "arrow.down.doc.fill"
             }
         }
     }
@@ -206,25 +206,25 @@ struct ContentView: View {
 
 struct macOSChatDetailView: View {
     let conversation: Conversation
-    
+
     @Environment(\.modelContext) private var modelContext
     @StateObject private var chatManager = ChatManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
-    
+
     // Use @Query to properly observe message changes
     @Query private var allMessages: [Message]
-    
+
     @State private var messageText = ""
     @State private var isListeningForVoice = false
     @FocusState private var isInputFocused: Bool
-    
+
     // Filter messages for this conversation
     private var messages: [Message] {
         allMessages
             .filter { $0.conversationID == conversation.id }
             .sorted { $0.timestamp < $1.timestamp }
     }
-    
+
     init(conversation: Conversation) {
         self.conversation = conversation
         // Initialize query - fetch all messages (we filter in computed property)
@@ -263,9 +263,9 @@ struct macOSChatDetailView: View {
                         MessageBubble(message: message)
                             .id(message.id)
                     }
-                    
+
                     // Show streaming text as it comes in
-                    if chatManager.isStreaming && !chatManager.streamingText.isEmpty {
+                    if chatManager.isStreaming, !chatManager.streamingText.isEmpty {
                         HStack {
                             Text(chatManager.streamingText)
                                 .padding(12)
@@ -286,7 +286,7 @@ struct macOSChatDetailView: View {
             }
         }
     }
-    
+
     private func scrollToBottom(proxy: ScrollViewProxy) {
         withAnimation(.easeOut(duration: 0.2)) {
             if chatManager.isStreaming {
@@ -305,11 +305,11 @@ struct macOSChatDetailView: View {
                 .padding(.vertical, 12)
                 .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 20))
-                .lineLimit(1...8)
+                .lineLimit(1 ... 8)
                 .focused($isInputFocused)
                 .disabled(chatManager.isStreaming)
                 .onSubmit {
-                    if !messageText.isEmpty && !chatManager.isStreaming {
+                    if !messageText.isEmpty, !chatManager.isStreaming {
                         sendMessage()
                     }
                 }
@@ -324,8 +324,8 @@ struct macOSChatDetailView: View {
                 Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
                     .font(.system(size: 28))
                     .foregroundStyle(
-                        messageText.isEmpty && !chatManager.isStreaming 
-                            ? Color.secondary 
+                        messageText.isEmpty && !chatManager.isStreaming
+                            ? Color.secondary
                             : Color.theaPrimary
                     )
             }
@@ -339,10 +339,10 @@ struct macOSChatDetailView: View {
 
     private func sendMessage() {
         guard !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        
+
         let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
         messageText = ""
-        
+
         Task {
             do {
                 try await chatManager.sendMessage(text, in: conversation)

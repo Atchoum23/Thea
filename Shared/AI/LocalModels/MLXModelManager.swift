@@ -1,10 +1,11 @@
 import Foundation
 import Observation
 #if os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - MLX Model Manager
+
 // Actor for managing MLX and GGUF model discovery, installation, and lifecycle
 // Coordinates with MLXModelScanner for directory scanning
 
@@ -57,7 +58,8 @@ final class MLXModelManager {
 
     private func loadModelDirectories() {
         if let data = defaults.data(forKey: "MLXModelManager.directories"),
-           let urls = try? JSONDecoder().decode([URL].self, from: data) {
+           let urls = try? JSONDecoder().decode([URL].self, from: data)
+        {
             modelDirectories = urls
         } else {
             // Default to SharedLLMs directory if it exists
@@ -141,7 +143,7 @@ final class MLXModelManager {
 
     func openModelLocation(_ model: ScannedModel) {
         #if os(macOS)
-        NSWorkspace.shared.selectFile(model.path.path, inFileViewerRootedAtPath: "")
+            NSWorkspace.shared.selectFile(model.path.path, inFileViewerRootedAtPath: "")
         #endif
     }
 
@@ -194,8 +196,8 @@ final class MLXModelManager {
     // MARK: - Statistics
 
     func getStatistics() -> ModelStatistics {
-        let mlxCount = scannedModels.filter { $0.format == .mlx }.count
-        let ggufCount = scannedModels.filter { $0.format == .gguf }.count
+        let mlxCount = scannedModels.count { $0.format == .mlx }
+        let ggufCount = scannedModels.count { $0.format == .gguf }
         let totalSize = getTotalModelsSize()
 
         return ModelStatistics(
@@ -238,11 +240,11 @@ enum ModelManagerError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .modelAlreadyExists:
-            return "A model with this name already exists"
+            "A model with this name already exists"
         case .importFailed:
-            return "Failed to import model"
+            "Failed to import model"
         case .invalidModelPath:
-            return "Invalid model path"
+            "Invalid model path"
         }
     }
 }

@@ -5,16 +5,16 @@
 //  App Intents for Siri, Shortcuts, Spotlight, and Control Center
 //
 
-import Foundation
 import AppIntents
+import Foundation
 
 // MARK: - Ask Thea Intent
 
 /// Ask Thea a question via Siri or Shortcuts
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct AskTheaIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Ask Thea"
-    public static var description = IntentDescription("Ask Thea's AI assistant a question")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Ask Thea"
+    nonisolated(unsafe) public static var description = IntentDescription("Ask Thea's AI assistant a question")
 
     @Parameter(title: "Question")
     var question: String
@@ -52,8 +52,8 @@ public struct AskTheaIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct QuickChatIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Quick Chat with Thea"
-    public static var description = IntentDescription("Start a quick chat session with Thea")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Quick Chat with Thea"
+    nonisolated(unsafe) public static var description = IntentDescription("Start a quick chat session with Thea")
 
     @Parameter(title: "Message")
     var message: String
@@ -73,8 +73,8 @@ public struct QuickChatIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct SummarizeTextIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Summarize Text"
-    public static var description = IntentDescription("Use Thea to summarize text")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Summarize Text"
+    nonisolated(unsafe) public static var description = IntentDescription("Use Thea to summarize text")
 
     @Parameter(title: "Text to Summarize")
     var text: String
@@ -95,8 +95,8 @@ public struct SummarizeTextIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct CreateProjectIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Create Project"
-    public static var description = IntentDescription("Create a new project in Thea")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Create Project"
+    nonisolated(unsafe) public static var description = IntentDescription("Create a new project in Thea")
 
     @Parameter(title: "Project Name")
     var name: String
@@ -108,7 +108,7 @@ public struct CreateProjectIntent: AppIntent {
 
     public func perform() async throws -> some IntentResult & ProvidesDialog {
         // Create project via ProjectManager
-        return .result(dialog: "Created project '\(name)' in Thea")
+        .result(dialog: "Created project '\(name)' in Thea")
     }
 }
 
@@ -116,8 +116,8 @@ public struct CreateProjectIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct StartFocusSessionIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Start Focus Session"
-    public static var description = IntentDescription("Start a focus session with Thea")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Start Focus Session"
+    nonisolated(unsafe) public static var description = IntentDescription("Start a focus session with Thea")
 
     @Parameter(title: "Duration (minutes)", default: 25)
     var duration: Int
@@ -128,7 +128,7 @@ public struct StartFocusSessionIntent: AppIntent {
     public init() {}
 
     public func perform() async throws -> some IntentResult & ProvidesDialog {
-        return .result(dialog: "Starting \(duration)-minute focus session\(task.map { " for '\($0)'" } ?? "")")
+        .result(dialog: "Starting \(duration)-minute focus session\(task.map { " for '\($0)'" } ?? "")")
     }
 }
 
@@ -136,8 +136,8 @@ public struct StartFocusSessionIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct LogHealthDataIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Log Health Data"
-    public static var description = IntentDescription("Log health data with Thea")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Log Health Data"
+    nonisolated(unsafe) public static var description = IntentDescription("Log health data with Thea")
 
     @Parameter(title: "Data Type", default: .mood)
     var dataType: HealthDataTypeEntity
@@ -151,7 +151,7 @@ public struct LogHealthDataIntent: AppIntent {
     public init() {}
 
     public func perform() async throws -> some IntentResult & ProvidesDialog {
-        return .result(dialog: "Logged \(dataType.localizedStringResource) with value '\(value)'")
+        .result(dialog: "Logged \(dataType.localizedStringResource) with value '\(value)'")
     }
 }
 
@@ -159,8 +159,8 @@ public struct LogHealthDataIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct ControlHomeDeviceIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Control Smart Home"
-    public static var description = IntentDescription("Control smart home devices through Thea")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Control Smart Home"
+    nonisolated(unsafe) public static var description = IntentDescription("Control smart home devices through Thea")
 
     @Parameter(title: "Command")
     var command: String
@@ -168,7 +168,7 @@ public struct ControlHomeDeviceIntent: AppIntent {
     public init() {}
 
     public func perform() async throws -> some IntentResult & ProvidesDialog {
-        return .result(dialog: "Sending command to smart home: \(command)")
+        .result(dialog: "Sending command to smart home: \(command)")
     }
 }
 
@@ -176,8 +176,8 @@ public struct ControlHomeDeviceIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct GetDailySummaryIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Get Daily Summary"
-    public static var description = IntentDescription("Get your daily summary from Thea")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Get Daily Summary"
+    nonisolated(unsafe) public static var description = IntentDescription("Get your daily summary from Thea")
 
     public init() {}
 
@@ -203,9 +203,9 @@ public struct TheaShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: AskTheaIntent(),
             phrases: [
-                "Ask \(.applicationName) about \(\.$question)",
-                "Hey \(.applicationName), \(\.$question)",
-                "Tell me \(\.$question) using \(.applicationName)"
+                "Ask \(.applicationName) a question",
+                "Hey \(.applicationName)",
+                "Ask \(.applicationName)"
             ],
             shortTitle: "Ask Thea",
             systemImageName: "bubble.left.fill"
@@ -237,7 +237,7 @@ public struct TheaShortcuts: AppShortcutsProvider {
             intent: SummarizeTextIntent(),
             phrases: [
                 "Summarize this with \(.applicationName)",
-                "\(.applicationName) summarize \(\.$text)"
+                "\(.applicationName) summarize"
             ],
             shortTitle: "Summarize",
             systemImageName: "doc.text"
@@ -248,10 +248,10 @@ public struct TheaShortcuts: AppShortcutsProvider {
 // MARK: - Entity Definitions
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
-public struct SummarizationStyleEntity: AppEnum {
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Summarization Style")
+public enum SummarizationStyleEntity: String, AppEnum {
+    nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Summarization Style")
 
-    public static var caseDisplayRepresentations: [SummarizationStyleEntity: DisplayRepresentation] = [
+    nonisolated(unsafe) public static var caseDisplayRepresentations: [SummarizationStyleEntity: DisplayRepresentation] = [
         .concise: "Concise",
         .detailed: "Detailed",
         .bullets: "Bullet Points",
@@ -265,19 +265,19 @@ public struct SummarizationStyleEntity: AppEnum {
 
     func toStyle() -> SummarizationStyle {
         switch self {
-        case .concise: return .concise
-        case .detailed: return .detailed
-        case .bullets: return .bullets
-        case .keyPoints: return .keyPoints
+        case .concise: .concise
+        case .detailed: .detailed
+        case .bullets: .bullets
+        case .keyPoints: .keyPoints
         }
     }
 }
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
-public struct HealthDataTypeEntity: AppEnum {
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Health Data Type")
+public enum HealthDataTypeEntity: String, AppEnum {
+    nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Health Data Type")
 
-    public static var caseDisplayRepresentations: [HealthDataTypeEntity: DisplayRepresentation] = [
+    nonisolated(unsafe) public static var caseDisplayRepresentations: [HealthDataTypeEntity: DisplayRepresentation] = [
         .mood: "Mood",
         .energy: "Energy Level",
         .sleep: "Sleep Quality",
@@ -298,6 +298,6 @@ public struct HealthDataTypeEntity: AppEnum {
 struct ConversationOptionsProvider: DynamicOptionsProvider {
     func results() async throws -> [String] {
         // Return list of conversation IDs
-        return ["default", "work", "personal"]
+        ["default", "work", "personal"]
     }
 }

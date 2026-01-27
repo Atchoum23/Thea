@@ -15,7 +15,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         supportsFunctionCalling: true,
         supportsWebSearch: false,
         maxContextTokens: 200_000,
-        maxOutputTokens: 8_192,
+        maxOutputTokens: 8192,
         supportedModalities: [.text, .image]
     )
 
@@ -32,10 +32,10 @@ final class AnthropicProvider: AIProvider, Sendable {
         self.apiKey = apiKey
         // Capture configuration values from AppConfiguration at init time for Sendable compliance
         let config = AppConfiguration.shared.providerConfig
-        self.baseURL = config.anthropicBaseURL
-        self.apiVersion = config.anthropicAPIVersion
-        self.maxTokens = config.defaultMaxTokens
-        self.requestTimeout = config.requestTimeoutSeconds
+        baseURL = config.anthropicBaseURL
+        apiVersion = config.anthropicAPIVersion
+        maxTokens = config.defaultMaxTokens
+        requestTimeout = config.requestTimeoutSeconds
     }
 
     // MARK: - Validation
@@ -119,7 +119,8 @@ final class AnthropicProvider: AIProvider, Sendable {
                         let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
 
                         guard let httpResponse = response as? HTTPURLResponse,
-                              httpResponse.statusCode == 200 else {
+                              httpResponse.statusCode == 200
+                        else {
                             throw AnthropicError.invalidResponse
                         }
 
@@ -129,14 +130,16 @@ final class AnthropicProvider: AIProvider, Sendable {
                             if line.hasPrefix("data: ") {
                                 let jsonString = String(line.dropFirst(6))
                                 guard let data = jsonString.data(using: .utf8),
-                                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+                                else {
                                     continue
                                 }
 
                                 if let type = json["type"] as? String {
                                     if type == "content_block_delta",
                                        let delta = json["delta"] as? [String: Any],
-                                       let text = delta["text"] as? String {
+                                       let text = delta["text"] as? String
+                                    {
                                         accumulatedText += text
                                         continuation.yield(.delta(text))
                                     } else if type == "message_stop" {
@@ -166,14 +169,16 @@ final class AnthropicProvider: AIProvider, Sendable {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
+                  httpResponse.statusCode == 200
+            else {
                 throw AnthropicError.invalidResponse
             }
 
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let content = json["content"] as? [[String: Any]],
                   let firstContent = content.first,
-                  let text = firstContent["text"] as? String else {
+                  let text = firstContent["text"] as? String
+            else {
                 throw AnthropicError.noResponse
             }
 
@@ -202,7 +207,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                 name: "Claude Opus 4",
                 description: "Most capable Claude model",
                 contextWindow: 200_000,
-                maxOutputTokens: 8_192,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 15.00,
                 outputPricePerMillion: 75.00,
                 supportsVision: true,
@@ -213,7 +218,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                 name: "Claude Sonnet 4",
                 description: "Balanced intelligence and speed",
                 contextWindow: 200_000,
-                maxOutputTokens: 8_192,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 3.00,
                 outputPricePerMillion: 15.00,
                 supportsVision: true,
@@ -224,7 +229,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                 name: "Claude 3.5 Sonnet",
                 description: "Previous generation balanced model",
                 contextWindow: 200_000,
-                maxOutputTokens: 8_192,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 3.00,
                 outputPricePerMillion: 15.00,
                 supportsVision: true,
@@ -235,7 +240,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                 name: "Claude 3.5 Haiku",
                 description: "Fast and cost-effective",
                 contextWindow: 200_000,
-                maxOutputTokens: 8_192,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 1.00,
                 outputPricePerMillion: 5.00,
                 supportsVision: true,
@@ -254,9 +259,9 @@ enum AnthropicError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Invalid response from Anthropic"
+            "Invalid response from Anthropic"
         case .noResponse:
-            return "No response from Anthropic"
+            "No response from Anthropic"
         }
     }
 }

@@ -3,10 +3,11 @@ import Foundation
 import OSLog
 
 #if os(macOS) || os(iOS)
-import Vision
+    import Vision
 #endif
 
 // MARK: - VisionOCR
+
 // Text recognition using Apple Vision framework
 
 public actor VisionOCR {
@@ -25,7 +26,7 @@ public actor VisionOCR {
         public let confidence: Float
 
         public init(text: String, boundingBox: CGRect, confidence: Float) {
-            self.id = UUID()
+            id = UUID()
             self.text = text
             self.boundingBox = boundingBox
             self.confidence = confidence
@@ -40,11 +41,11 @@ public actor VisionOCR {
         public var errorDescription: String? {
             switch self {
             case .notSupported:
-                return "OCR is not supported on this platform"
-            case .recognitionFailed(let message):
-                return "Text recognition failed: \(message)"
+                "OCR is not supported on this platform"
+            case let .recognitionFailed(message):
+                "Text recognition failed: \(message)"
             case .noTextFound:
-                return "No text found in image"
+                "No text found in image"
             }
         }
     }
@@ -53,54 +54,54 @@ public actor VisionOCR {
 
     public func recognizeText(in image: CGImage) async throws -> [OCRResult] {
         #if os(macOS) || os(iOS)
-        logger.info("Starting text recognition")
+            logger.info("Starting text recognition")
 
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = VNRecognizeTextRequest { request, error in
-                if let error = error {
-                    continuation.resume(throwing: OCRError.recognitionFailed(error.localizedDescription))
-                    return
-                }
-
-                guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                    continuation.resume(throwing: OCRError.noTextFound)
-                    return
-                }
-
-                let results = observations.compactMap { observation -> OCRResult? in
-                    guard let candidate = observation.topCandidates(1).first else {
-                        return nil
+            return try await withCheckedThrowingContinuation { continuation in
+                let request = VNRecognizeTextRequest { request, error in
+                    if let error {
+                        continuation.resume(throwing: OCRError.recognitionFailed(error.localizedDescription))
+                        return
                     }
 
-                    return OCRResult(
-                        text: candidate.string,
-                        boundingBox: observation.boundingBox,
-                        confidence: candidate.confidence
-                    )
+                    guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                        continuation.resume(throwing: OCRError.noTextFound)
+                        return
+                    }
+
+                    let results = observations.compactMap { observation -> OCRResult? in
+                        guard let candidate = observation.topCandidates(1).first else {
+                            return nil
+                        }
+
+                        return OCRResult(
+                            text: candidate.string,
+                            boundingBox: observation.boundingBox,
+                            confidence: candidate.confidence
+                        )
+                    }
+
+                    if results.isEmpty {
+                        continuation.resume(throwing: OCRError.noTextFound)
+                    } else {
+                        continuation.resume(returning: results)
+                    }
                 }
 
-                if results.isEmpty {
-                    continuation.resume(throwing: OCRError.noTextFound)
-                } else {
-                    continuation.resume(returning: results)
+                // Configure for accurate recognition
+                request.recognitionLevel = .accurate
+                request.usesLanguageCorrection = true
+
+                // Perform request
+                let handler = VNImageRequestHandler(cgImage: image, options: [:])
+
+                do {
+                    try handler.perform([request])
+                } catch {
+                    continuation.resume(throwing: OCRError.recognitionFailed(error.localizedDescription))
                 }
             }
-
-            // Configure for accurate recognition
-            request.recognitionLevel = .accurate
-            request.usesLanguageCorrection = true
-
-            // Perform request
-            let handler = VNImageRequestHandler(cgImage: image, options: [:])
-
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(throwing: OCRError.recognitionFailed(error.localizedDescription))
-            }
-        }
         #else
-        throw OCRError.notSupported
+            throw OCRError.notSupported
         #endif
     }
 
@@ -124,7 +125,7 @@ public actor VisionOCR {
 
         let allText = results
             .sorted { $0.boundingBox.minY > $1.boundingBox.minY } // Sort top to bottom
-            .map { $0.text }
+            .map(\.text)
             .joined(separator: "\n")
 
         logger.info("Extracted \(results.count) text blocks")
@@ -135,54 +136,54 @@ public actor VisionOCR {
 
     public func recognizeTextFast(in image: CGImage) async throws -> [OCRResult] {
         #if os(macOS) || os(iOS)
-        logger.info("Starting fast text recognition")
+            logger.info("Starting fast text recognition")
 
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = VNRecognizeTextRequest { request, error in
-                if let error = error {
-                    continuation.resume(throwing: OCRError.recognitionFailed(error.localizedDescription))
-                    return
-                }
-
-                guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                    continuation.resume(throwing: OCRError.noTextFound)
-                    return
-                }
-
-                let results = observations.compactMap { observation -> OCRResult? in
-                    guard let candidate = observation.topCandidates(1).first else {
-                        return nil
+            return try await withCheckedThrowingContinuation { continuation in
+                let request = VNRecognizeTextRequest { request, error in
+                    if let error {
+                        continuation.resume(throwing: OCRError.recognitionFailed(error.localizedDescription))
+                        return
                     }
 
-                    return OCRResult(
-                        text: candidate.string,
-                        boundingBox: observation.boundingBox,
-                        confidence: candidate.confidence
-                    )
+                    guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                        continuation.resume(throwing: OCRError.noTextFound)
+                        return
+                    }
+
+                    let results = observations.compactMap { observation -> OCRResult? in
+                        guard let candidate = observation.topCandidates(1).first else {
+                            return nil
+                        }
+
+                        return OCRResult(
+                            text: candidate.string,
+                            boundingBox: observation.boundingBox,
+                            confidence: candidate.confidence
+                        )
+                    }
+
+                    if results.isEmpty {
+                        continuation.resume(throwing: OCRError.noTextFound)
+                    } else {
+                        continuation.resume(returning: results)
+                    }
                 }
 
-                if results.isEmpty {
-                    continuation.resume(throwing: OCRError.noTextFound)
-                } else {
-                    continuation.resume(returning: results)
+                // Configure for fast recognition
+                request.recognitionLevel = .fast
+                request.usesLanguageCorrection = false
+
+                // Perform request
+                let handler = VNImageRequestHandler(cgImage: image, options: [:])
+
+                do {
+                    try handler.perform([request])
+                } catch {
+                    continuation.resume(throwing: OCRError.recognitionFailed(error.localizedDescription))
                 }
             }
-
-            // Configure for fast recognition
-            request.recognitionLevel = .fast
-            request.usesLanguageCorrection = false
-
-            // Perform request
-            let handler = VNImageRequestHandler(cgImage: image, options: [:])
-
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(throwing: OCRError.recognitionFailed(error.localizedDescription))
-            }
-        }
         #else
-        throw OCRError.notSupported
+            throw OCRError.notSupported
         #endif
     }
 }

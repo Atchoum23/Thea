@@ -1,9 +1,9 @@
 // TaskScheduler.swift
 // Advanced task scheduling with persistence, retry logic, and distributed execution
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Task Scheduler
 
@@ -18,7 +18,7 @@ public final class TaskScheduler: ObservableObject {
     private let executionsKey = "thea.task_executions"
 
     private var scheduledTimers: [UUID: Timer] = [:]
-    private var runningTasks: [UUID: Task<Void, Never>] = []
+    private var runningTasks: [UUID: Task<Void, Never>] = [:]
 
     // MARK: - Published State
 
@@ -111,7 +111,7 @@ public final class TaskScheduler: ObservableObject {
     }
 
     private func scheduleTask(_ task: ScheduledTask) {
-        guard task.isEnabled && task.status == .scheduled else { return }
+        guard task.isEnabled, task.status == .scheduled else { return }
 
         // Cancel any existing timer
         scheduledTimers[task.id]?.invalidate()
@@ -130,7 +130,8 @@ public final class TaskScheduler: ObservableObject {
 
     @objc private func taskTimerFired(_ timer: Timer) {
         guard let taskId = timer.userInfo as? UUID,
-              let task = tasks.first(where: { $0.id == taskId }) else {
+              let task = tasks.first(where: { $0.id == taskId })
+        else {
             return
         }
 
@@ -167,7 +168,7 @@ public final class TaskScheduler: ObservableObject {
         isProcessing = true
 
         let executionId = UUID()
-        var execution = TaskExecution(
+        let execution = TaskExecution(
             id: executionId,
             taskId: task.id,
             taskName: task.name,
@@ -235,44 +236,44 @@ public final class TaskScheduler: ObservableObject {
 
     private func performTaskAction(_ task: ScheduledTask) async throws {
         switch task.action {
-        case .aiPrompt(let prompt, let conversationId):
+        case let .aiPrompt(prompt, _):
             // Send prompt to AI
             logger.info("AI prompt task: \(prompt.prefix(50))...")
 
-        case .runShortcut(let name):
+        case let .runShortcut(name):
             // Run Shortcuts automation
             logger.info("Running shortcut: \(name)")
 
-        case .executeCommand(let command):
+        case let .executeCommand(command):
             // Execute shell command with AgentSec validation
             #if os(macOS)
-            let result = await AgentSecEnforcer.shared.validateTerminalCommand(command)
-            guard result.isAllowed else {
-                throw TaskExecutionError.securityBlocked(result.reason ?? "Command blocked")
-            }
-            // Execute command...
+                let result = AgentSecEnforcer.shared.validateTerminalCommand(command)
+                guard result.isAllowed else {
+                    throw TaskExecutionError.securityBlocked(result.reason ?? "Command blocked")
+                }
+                // Execute command...
             #endif
 
-        case .httpRequest(let config):
+        case let .httpRequest(config):
             try await performHTTPRequest(config)
 
-        case .dataSync(let sourceId, let destinationId):
+        case let .dataSync(sourceId, destinationId):
             logger.info("Syncing data from \(sourceId) to \(destinationId)")
 
-        case .backup(let paths, let destination):
+        case let .backup(paths, destination):
             logger.info("Backing up \(paths.count) paths to \(destination)")
 
-        case .cleanup(let config):
+        case let .cleanup(config):
             try await performCleanup(config)
 
-        case .notification(let title, let body, let sound):
+        case let .notification(title, _, _):
             // Send notification
             logger.info("Notification: \(title)")
 
-        case .script(let script, let language):
+        case let .script(script, language):
             try await executeScript(script, language: language)
 
-        case .chain(let actions):
+        case let .chain(actions):
             for action in actions {
                 var chainedTask = task
                 chainedTask.action = action
@@ -287,7 +288,7 @@ public final class TaskScheduler: ObservableObject {
         }
 
         // AgentSec validation
-        let result = await AgentSecEnforcer.shared.validateNetworkRequest(url: url, method: config.method)
+        let result = AgentSecEnforcer.shared.validateNetworkRequest(url: url, method: config.method)
         guard result.isAllowed else {
             throw TaskExecutionError.securityBlocked(result.reason ?? "Request blocked")
         }
@@ -304,7 +305,7 @@ public final class TaskScheduler: ObservableObject {
             request.httpBody = body.data(using: .utf8)
         }
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (_, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw TaskExecutionError.networkError("Invalid response")
@@ -326,7 +327,7 @@ public final class TaskScheduler: ObservableObject {
             guard fm.fileExists(atPath: path) else { continue }
 
             // AgentSec validation
-            let result = await AgentSecEnforcer.shared.validateFileWrite(path: path)
+            let result = AgentSecEnforcer.shared.validateFileWrite(path: path)
             guard result.isAllowed else {
                 logger.warning("Cleanup blocked for path: \(path)")
                 continue
@@ -348,22 +349,22 @@ public final class TaskScheduler: ObservableObject {
         }
     }
 
-    private func executeScript(_ script: String, language: ScriptLanguage) async throws {
+    private func executeScript(_: String, language: ScriptLanguage) async throws {
         #if os(macOS)
-        switch language {
-        case .shell:
-            // Execute shell script
-            break
-        case .applescript:
-            // Execute AppleScript
-            break
-        case .python:
-            // Execute Python script
-            break
-        case .javascript:
-            // Execute JavaScript
-            break
-        }
+            switch language {
+            case .shell:
+                // Execute shell script
+                break
+            case .applescript:
+                // Execute AppleScript
+                break
+            case .python:
+                // Execute Python script
+                break
+            case .javascript:
+                // Execute JavaScript
+                break
+            }
         #endif
     }
 
@@ -373,28 +374,28 @@ public final class TaskScheduler: ObservableObject {
         let now = Date()
 
         switch task.schedule {
-        case .once(let date):
+        case let .once(date):
             return date > now ? date : nil
 
-        case .interval(let seconds):
+        case let .interval(seconds):
             if let lastRun = task.lastRunAt {
                 return lastRun.addingTimeInterval(seconds)
             }
             return now.addingTimeInterval(seconds)
 
-        case .daily(let hour, let minute):
+        case let .daily(hour, minute):
             return nextDailyDate(hour: hour, minute: minute)
 
-        case .weekly(let weekday, let hour, let minute):
+        case let .weekly(weekday, hour, minute):
             return nextWeeklyDate(weekday: weekday, hour: hour, minute: minute)
 
-        case .monthly(let day, let hour, let minute):
+        case let .monthly(day, hour, minute):
             return nextMonthlyDate(day: day, hour: hour, minute: minute)
 
-        case .cron(let expression):
+        case let .cron(expression):
             return nextCronDate(expression)
 
-        case .custom(let dates):
+        case let .custom(dates):
             return dates.first { $0 > now }
         }
     }
@@ -434,16 +435,17 @@ public final class TaskScheduler: ObservableObject {
         return calendar.nextDate(after: Date(), matching: components, matchingPolicy: .nextTime)
     }
 
-    private func nextCronDate(_ expression: String) -> Date? {
+    private func nextCronDate(_: String) -> Date? {
         // Simplified cron parsing
-        return Date().addingTimeInterval(3600)
+        Date().addingTimeInterval(3600)
     }
 
     // MARK: - Persistence
 
     private func loadTasks() {
         guard let data = defaults.data(forKey: tasksKey),
-              let saved = try? JSONDecoder().decode([ScheduledTask].self, from: data) else {
+              let saved = try? JSONDecoder().decode([ScheduledTask].self, from: data)
+        else {
             return
         }
         tasks = saved
@@ -456,16 +458,17 @@ public final class TaskScheduler: ObservableObject {
 
     private func loadExecutions() {
         guard let data = defaults.data(forKey: executionsKey),
-              let saved = try? JSONDecoder().decode([TaskExecution].self, from: data) else {
+              let saved = try? JSONDecoder().decode([TaskExecution].self, from: data)
+        else {
             return
         }
         // Keep only recent executions
-        executions = saved.suffix(1000).map { $0 }
+        executions = saved.suffix(1000).map(\.self)
     }
 
     private func saveExecutions() {
         // Keep only recent executions
-        let recent = executions.suffix(1000).map { $0 }
+        let recent = executions.suffix(1000).map(\.self)
         guard let data = try? JSONEncoder().encode(Array(recent)) else { return }
         defaults.set(data, forKey: executionsKey)
     }
@@ -474,15 +477,15 @@ public final class TaskScheduler: ObservableObject {
 
     public func getStatistics() -> TaskStatistics {
         let totalTasks = tasks.count
-        let activeTasks = tasks.filter { $0.isEnabled && $0.status == .scheduled }.count
-        let runningTasks = tasks.filter { $0.status == .running }.count
-        let failedTasks = tasks.filter { $0.status == .failed }.count
+        let activeTasks = tasks.count { $0.isEnabled && $0.status == .scheduled }
+        let runningTasks = tasks.count { $0.status == .running }
+        let failedTasks = tasks.count { $0.status == .failed }
 
         let recentExecutions = executions.filter {
             $0.startedAt > Date().addingTimeInterval(-86400 * 7) // Last 7 days
         }
-        let successCount = recentExecutions.filter { $0.status == .completed }.count
-        let failureCount = recentExecutions.filter { $0.status == .failed }.count
+        let successCount = recentExecutions.count { $0.status == .completed }
+        _ = recentExecutions.count { $0.status == .failed }
         let successRate = recentExecutions.isEmpty ? 1.0 : Double(successCount) / Double(recentExecutions.count)
 
         return TaskStatistics(
@@ -505,7 +508,7 @@ public struct ScheduledTask: Identifiable, Codable, Sendable {
     public var isEnabled: Bool
     public var schedule: TaskSchedule
     public var action: TaskAction
-    public var status: TaskStatus
+    public var status: ScheduledTaskStatus
     public var priority: TaskPriority
     public var retryCount: Int?
     public var retryDelay: TimeInterval?
@@ -532,13 +535,13 @@ public struct ScheduledTask: Identifiable, Codable, Sendable {
         self.isEnabled = isEnabled
         self.schedule = schedule
         self.action = action
-        self.status = .scheduled
+        status = .scheduled
         self.priority = priority
         self.retryCount = retryCount
         self.retryDelay = retryDelay
         self.timeout = timeout
-        self.createdAt = Date()
-        self.consecutiveFailures = 0
+        createdAt = Date()
+        consecutiveFailures = 0
     }
 }
 
@@ -555,8 +558,8 @@ public enum TaskSchedule: Codable, Sendable {
 
     public var isRecurring: Bool {
         switch self {
-        case .once, .custom: return false
-        default: return true
+        case .once, .custom: false
+        default: true
         }
     }
 }
@@ -601,7 +604,7 @@ public enum ScriptLanguage: String, Codable, Sendable {
 
 // MARK: - Task Status
 
-public enum TaskStatus: String, Codable, Sendable {
+public enum ScheduledTaskStatus: String, Codable, Sendable {
     case scheduled
     case running
     case completed
@@ -629,7 +632,7 @@ public struct TaskExecution: Identifiable, Codable, Sendable {
     public let taskName: String
     public let startedAt: Date
     public var completedAt: Date?
-    public var status: ExecutionStatus
+    public var status: TaskExecutionStatus
     public var error: String?
     public var duration: TimeInterval? {
         guard let completed = completedAt else { return nil }
@@ -637,7 +640,7 @@ public struct TaskExecution: Identifiable, Codable, Sendable {
     }
 }
 
-public enum ExecutionStatus: String, Codable, Sendable {
+public enum TaskExecutionStatus: String, Codable, Sendable {
     case running
     case completed
     case failed
@@ -666,16 +669,16 @@ public enum TaskExecutionError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .securityBlocked(let reason):
-            return "Security blocked: \(reason)"
-        case .invalidConfiguration(let reason):
-            return "Invalid configuration: \(reason)"
-        case .networkError(let reason):
-            return "Network error: \(reason)"
+        case let .securityBlocked(reason):
+            "Security blocked: \(reason)"
+        case let .invalidConfiguration(reason):
+            "Invalid configuration: \(reason)"
+        case let .networkError(reason):
+            "Network error: \(reason)"
         case .timeout:
-            return "Task timed out"
+            "Task timed out"
         case .cancelled:
-            return "Task was cancelled"
+            "Task was cancelled"
         }
     }
 }

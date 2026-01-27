@@ -2,9 +2,9 @@
 // Shared core infrastructure for Thea browser extensions
 // Supports Safari, Chrome, and Brave across macOS, iOS, iPadOS
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Extension Communication Protocol
 
@@ -83,19 +83,19 @@ public struct AnyCodable: Codable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {
-            self.value = NSNull()
+            value = NSNull()
         } else if let bool = try? container.decode(Bool.self) {
-            self.value = bool
+            value = bool
         } else if let int = try? container.decode(Int.self) {
-            self.value = int
+            value = int
         } else if let double = try? container.decode(Double.self) {
-            self.value = double
+            value = double
         } else if let string = try? container.decode(String.self) {
-            self.value = string
+            value = string
         } else if let array = try? container.decode([AnyCodable].self) {
-            self.value = array.map { $0.value }
+            value = array.map(\.value)
         } else if let dictionary = try? container.decode([String: AnyCodable].self) {
-            self.value = dictionary.mapValues { $0.value }
+            value = dictionary.mapValues { $0.value }
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unable to decode value")
         }
@@ -525,7 +525,7 @@ public final class TheaExtensionBridge: ObservableObject {
     private func setupMessageHandlers() {
         // Register default handlers
         registerHandler(for: "getState") { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return ExtensionResponse(messageId: "", success: false, data: nil, error: ExtensionError(code: -1, message: "Bridge unavailable", details: nil))
             }
 

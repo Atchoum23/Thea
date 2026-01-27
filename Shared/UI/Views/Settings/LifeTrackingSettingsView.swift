@@ -15,37 +15,37 @@ struct LifeTrackingSettingsView: View {
             }
 
             #if os(iOS) || os(watchOS)
-            Section("Health & Fitness") {
-                Toggle("Health Tracking (HealthKit)", isOn: $config.healthTrackingEnabled)
-                    .onChange(of: config.healthTrackingEnabled) { _, enabled in
-                        if enabled {
-                            Task {
-                                try? await HealthTrackingManager.shared.requestAuthorization()
+                Section("Health & Fitness") {
+                    Toggle("Health Tracking (HealthKit)", isOn: $config.healthTrackingEnabled)
+                        .onChange(of: config.healthTrackingEnabled) { _, enabled in
+                            if enabled {
+                                Task {
+                                    try? await HealthTrackingManager.shared.requestAuthorization()
+                                }
                             }
                         }
-                    }
-            }
+                }
             #endif
 
             #if os(macOS)
-            Section("Digital Activity") {
-                Toggle("Screen Time Tracking", isOn: $config.screenTimeTrackingEnabled)
-                Toggle("Input Activity (Mouse/Keyboard)", isOn: $config.inputTrackingEnabled)
-                Toggle("Browsing History", isOn: $config.browserTrackingEnabled)
-            }
+                Section("Digital Activity") {
+                    Toggle("Screen Time Tracking", isOn: $config.screenTimeTrackingEnabled)
+                    Toggle("Input Activity (Mouse/Keyboard)", isOn: $config.inputTrackingEnabled)
+                    Toggle("Browsing History", isOn: $config.browserTrackingEnabled)
+                }
             #endif
 
             #if os(iOS)
-            Section("Location") {
-                Toggle("Location Tracking", isOn: $config.locationTrackingEnabled)
-                    .onChange(of: config.locationTrackingEnabled) { _, enabled in
-                        if enabled {
-                            Task {
-                                _ = await LocationTrackingManager.shared.requestPermission()
+                Section("Location") {
+                    Toggle("Location Tracking", isOn: $config.locationTrackingEnabled)
+                        .onChange(of: config.locationTrackingEnabled) { _, enabled in
+                            if enabled {
+                                Task {
+                                    _ = await LocationTrackingManager.shared.requestPermission()
+                                }
                             }
                         }
-                    }
-            }
+                }
             #endif
 
             Section("Data Retention") {

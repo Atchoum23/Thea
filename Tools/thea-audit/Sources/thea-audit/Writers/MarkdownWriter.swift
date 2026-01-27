@@ -4,7 +4,7 @@
 import Foundation
 
 /// Writes audit findings to Markdown format for PR summaries
-struct MarkdownWriter {
+enum MarkdownWriter {
     /// Write findings and optional policy result to a Markdown file
     static func write(findings: [Finding], policyResult: PolicyEvaluationResult?, to path: String) throws {
         var md = """
@@ -16,10 +16,10 @@ struct MarkdownWriter {
         """
 
         // Summary section
-        let criticalCount = findings.filter { $0.severity == .critical }.count
-        let highCount = findings.filter { $0.severity == .high }.count
-        let mediumCount = findings.filter { $0.severity == .medium }.count
-        let lowCount = findings.filter { $0.severity == .low }.count
+        let criticalCount = findings.count(where: { $0.severity == .critical })
+        let highCount = findings.count(where: { $0.severity == .high })
+        let mediumCount = findings.count(where: { $0.severity == .medium })
+        let lowCount = findings.count(where: { $0.severity == .low })
 
         md += """
         ## Summary

@@ -168,18 +168,16 @@ public final class QueryDecomposer {
         }
 
         // Determine execution plan
-        let executionPlan: SubQueryExecutionStrategy
-
-        switch decompositionResponse.executionPlan {
+        let executionPlan: SubQueryExecutionStrategy = switch decompositionResponse.executionPlan {
         case "sequential":
-            executionPlan = .sequential
+            .sequential
         case "parallel":
-            executionPlan = .parallel
+            .parallel
         case "mixed":
-            executionPlan = .mixed
+            .mixed
         default:
             // Default to sequential for safety
-            executionPlan = .sequential
+            .sequential
         }
 
         return QueryDecomposition(
@@ -193,14 +191,16 @@ public final class QueryDecomposer {
     private func extractJSON(from response: String) -> String {
         // Try to find JSON in markdown code blocks
         if let startIndex = response.range(of: "```json")?.upperBound,
-           let endIndex = response.range(of: "```", range: startIndex..<response.endIndex)?.lowerBound {
-            return String(response[startIndex..<endIndex]).trimmingCharacters(in: .whitespacesAndNewlines)
+           let endIndex = response.range(of: "```", range: startIndex ..< response.endIndex)?.lowerBound
+        {
+            return String(response[startIndex ..< endIndex]).trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
         // Try to find JSON object
         if let startIndex = response.range(of: "{")?.lowerBound,
-           let endIndex = response.range(of: "}", options: .backwards)?.upperBound {
-            return String(response[startIndex..<endIndex])
+           let endIndex = response.range(of: "}", options: .backwards)?.upperBound
+        {
+            return String(response[startIndex ..< endIndex])
         }
 
         // Return as-is and hope for the best
@@ -289,7 +289,7 @@ public struct QueryDecomposition: Sendable {
 
     /// Get sub-queries that can be executed in parallel (no dependencies)
     public var parallelizableQueries: [SubQuery] {
-        subQueries.filter { $0.dependencies.isEmpty }
+        subQueries.filter(\.dependencies.isEmpty)
     }
 
     /// Get sub-queries sorted by priority
@@ -367,13 +367,13 @@ public enum QueryDecompositionError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidDecompositionResponse:
-            return "Failed to parse decomposition response"
+            "Failed to parse decomposition response"
         case .noResultsToAggregate:
-            return "No results available for aggregation"
-        case .providerNotAvailable(let providerID):
-            return "Provider not available: \(providerID)"
-        case .decompositionFailed(let reason):
-            return "Decomposition failed: \(reason)"
+            "No results available for aggregation"
+        case let .providerNotAvailable(providerID):
+            "Provider not available: \(providerID)"
+        case let .decompositionFailed(reason):
+            "Decomposition failed: \(reason)"
         }
     }
 }

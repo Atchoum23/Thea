@@ -64,7 +64,7 @@ public actor ActivityLogger {
 
     /// Log a simple activity event
     public func logEvent(
-        type: ActivityType,
+        type: LoggingActivityType,
         metadata: [String: Any] = [:]
     ) {
         // Convert metadata to ActivityAnyCodable dictionary
@@ -203,7 +203,7 @@ public actor ActivityLogger {
     }
 
     /// Get entries by type
-    public func getEntries(ofType type: ActivityType, for date: Date) async -> [ActivityLogEntry] {
+    public func getEntries(ofType type: LoggingActivityType, for date: Date) async -> [ActivityLogEntry] {
         let entries = await getEntries(for: date)
         return entries.filter { $0.type == type }
     }
@@ -216,22 +216,23 @@ public actor ActivityLogger {
 
         var appUsage: [String: TimeInterval] = [:]
         var totalScreenTime: TimeInterval = 0
-        var idlePeriods: Int = 0
+        var idlePeriods = 0
 
         for entry in entries {
             switch entry.type {
-            case .appUsage:
+            case LoggingActivityType.appUsage:
                 if let appCodable = entry.metadata["app"],
                    let app = appCodable.value as? String,
-                   let duration = entry.duration {
+                   let duration = entry.duration
+                {
                     appUsage[app, default: 0] += duration
                     totalScreenTime += duration
                 }
-            case .screenTime:
+            case LoggingActivityType.screenTime:
                 if let duration = entry.duration {
                     totalScreenTime += duration
                 }
-            case .idleStart:
+            case LoggingActivityType.idleStart:
                 idlePeriods += 1
             default:
                 break
@@ -267,7 +268,8 @@ public actor ActivityLogger {
         for file in files where file.pathExtension == "json" {
             let filename = file.deletingPathExtension().lastPathComponent
             if let fileDate = dateFormatter.date(from: filename),
-               fileDate < cutoffDate {
+               fileDate < cutoffDate
+            {
                 try? fileManager.removeItem(at: file)
             }
         }
@@ -293,14 +295,14 @@ public actor ActivityLogger {
 
 public struct ActivityLogEntry: Codable, Sendable, Identifiable {
     public let id: UUID
-    public let type: ActivityType
+    public let type: LoggingActivityType
     public let timestamp: Date
     public let duration: TimeInterval?
     public let metadata: [String: ActivityAnyCodable]
 
     public init(
         id: UUID = UUID(),
-        type: ActivityType,
+        type: LoggingActivityType,
         timestamp: Date = Date(),
         duration: TimeInterval? = nil,
         metadata: [String: ActivityAnyCodable] = [:]
@@ -315,7 +317,7 @@ public struct ActivityLogEntry: Codable, Sendable, Identifiable {
     /// Convenience initializer accepting Any values
     public init(
         id: UUID = UUID(),
-        type: ActivityType,
+        type: LoggingActivityType,
         timestamp: Date = Date(),
         duration: TimeInterval? = nil,
         rawMetadata: [String: Any]
@@ -324,13 +326,13 @@ public struct ActivityLogEntry: Codable, Sendable, Identifiable {
         self.type = type
         self.timestamp = timestamp
         self.duration = duration
-        self.metadata = rawMetadata.mapValues { ActivityAnyCodable($0) }
+        metadata = rawMetadata.mapValues { ActivityAnyCodable($0) }
     }
 }
 
 // MARK: - Activity Type
 
-public enum ActivityType: String, Codable, Sendable, CaseIterable {
+public enum LoggingActivityType: String, Codable, Sendable, CaseIterable {
     case appUsage
     case appSwitch
     case idleStart
@@ -342,26 +344,26 @@ public enum ActivityType: String, Codable, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .appUsage: return "App Usage"
-        case .appSwitch: return "App Switch"
-        case .idleStart: return "Idle Started"
-        case .idleEnd: return "Idle Ended"
-        case .focusModeChange: return "Focus Mode"
-        case .screenTime: return "Screen Time"
-        case .inputSample: return "Input Activity"
-        case .systemEvent: return "System Event"
+        case .appUsage: "App Usage"
+        case .appSwitch: "App Switch"
+        case .idleStart: "Idle Started"
+        case .idleEnd: "Idle Ended"
+        case .focusModeChange: "Focus Mode"
+        case .screenTime: "Screen Time"
+        case .inputSample: "Input Activity"
+        case .systemEvent: "System Event"
         }
     }
 
     public var icon: String {
         switch self {
-        case .appUsage: return "app"
-        case .appSwitch: return "square.on.square"
-        case .idleStart, .idleEnd: return "moon.zzz"
-        case .focusModeChange: return "moon"
-        case .screenTime: return "desktopcomputer"
-        case .inputSample: return "keyboard"
-        case .systemEvent: return "gear"
+        case .appUsage: "app"
+        case .appSwitch: "square.on.square"
+        case .idleStart, .idleEnd: "moon.zzz"
+        case .focusModeChange: "moon"
+        case .screenTime: "desktopcomputer"
+        case .inputSample: "keyboard"
+        case .systemEvent: "gear"
         }
     }
 }
@@ -401,12 +403,12 @@ public enum ActivityAnyCodable: Codable, Sendable, Equatable {
     /// The underlying value
     public var value: Any {
         switch self {
-        case .string(let v): return v
-        case .int(let v): return v
-        case .double(let v): return v
-        case .bool(let v): return v
-        case .date(let v): return v
-        case .null: return NSNull()
+        case let .string(v): v
+        case let .int(v): v
+        case let .double(v): v
+        case let .bool(v): v
+        case let .date(v): v
+        case .null: NSNull()
         }
     }
 
@@ -452,15 +454,15 @@ public enum ActivityAnyCodable: Codable, Sendable, Equatable {
         var container = encoder.singleValueContainer()
 
         switch self {
-        case .string(let v):
+        case let .string(v):
             try container.encode(v)
-        case .int(let v):
+        case let .int(v):
             try container.encode(v)
-        case .double(let v):
+        case let .double(v):
             try container.encode(v)
-        case .bool(let v):
+        case let .bool(v):
             try container.encode(v)
-        case .date(let v):
+        case let .date(v):
             try container.encode(v)
         case .null:
             try container.encodeNil()

@@ -2,9 +2,9 @@
 // Comprehensive privacy protection
 // Features: tracker blocking, fingerprint protection, referrer control, GPC/DNT
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Privacy Protection Manager
 
@@ -17,7 +17,7 @@ public final class TheaPrivacyProtectionManager: ObservableObject {
     // MARK: - Published State
 
     @Published public var isEnabled = true
-    @Published public private(set) var trackerDatabase: TrackerDatabase = TrackerDatabase()
+    @Published public private(set) var trackerDatabase: TrackerDatabase = .init()
     @Published public private(set) var siteReports: [String: PrivacyReport] = [:]
     @Published public var settings = PrivacySettings()
 
@@ -30,7 +30,8 @@ public final class TheaPrivacyProtectionManager: ObservableObject {
 
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "privacy.settings"),
-           let loaded = try? JSONDecoder().decode(PrivacySettings.self, from: data) {
+           let loaded = try? JSONDecoder().decode(PrivacySettings.self, from: data)
+        {
             settings = loaded
             isEnabled = settings.enabled
         }
@@ -78,21 +79,19 @@ public final class TheaPrivacyProtectionManager: ObservableObject {
 
         // Check tracker database
         if let tracker = trackerDatabase.findTracker(host: host) {
-            let action: TrackingAction
-
-            switch tracker.category {
+            let action: TrackingAction = switch tracker.category {
             case .advertising:
-                action = settings.blockAds ? .block : .allow
+                settings.blockAds ? .block : .allow
             case .analytics:
-                action = settings.blockAnalytics ? .block : .allow
+                settings.blockAnalytics ? .block : .allow
             case .social:
-                action = settings.blockSocialTrackers ? .block : .allow
+                settings.blockSocialTrackers ? .block : .allow
             case .fingerprinting:
-                action = settings.blockFingerprinting ? .block : .allow
+                settings.blockFingerprinting ? .block : .allow
             case .cryptomining:
-                action = .block // Always block
+                .block // Always block
             case .other:
-                action = settings.strictMode ? .block : .allow
+                settings.strictMode ? .block : .allow
             }
 
             return TrackingAnalysis(
@@ -373,7 +372,7 @@ public final class TheaPrivacyProtectionManager: ObservableObject {
     private func generatePrivacyReport(for domain: String) -> PrivacyReport {
         // This would analyze the site for privacy issues
         // For now, return a default report
-        return PrivacyReport(
+        PrivacyReport(
             domain: domain,
             grade: "B",
             trackersFound: 0,
@@ -394,7 +393,7 @@ public final class TheaPrivacyProtectionManager: ObservableObject {
         var report = siteReports[normalized] ?? generatePrivacyReport(for: normalized)
 
         report.trackersFound = trackers.count
-        report.trackersBlocked = trackers.filter { $0.blocked }.count
+        report.trackersBlocked = trackers.count(where: { $0.blocked })
 
         // Calculate grade
         report.grade = calculateGrade(report)
@@ -422,11 +421,11 @@ public final class TheaPrivacyProtectionManager: ObservableObject {
         }
 
         switch score {
-        case 90...100: return "A+"
-        case 80..<90: return "A"
-        case 70..<80: return "B"
-        case 60..<70: return "C"
-        case 50..<60: return "D"
+        case 90 ... 100: return "A+"
+        case 80 ..< 90: return "A"
+        case 70 ..< 80: return "B"
+        case 60 ..< 70: return "C"
+        case 50 ..< 60: return "D"
         default: return "F"
         }
     }

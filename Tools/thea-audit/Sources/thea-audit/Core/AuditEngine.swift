@@ -25,7 +25,7 @@ final class AuditEngine: Sendable {
         self.baseBranch = baseBranch
         self.minimumSeverity = minimumSeverity
         self.verbose = verbose
-        self.scannerRegistry = ScannerRegistry()
+        scannerRegistry = ScannerRegistry()
     }
 
     /// Run the audit and return all findings
@@ -59,7 +59,7 @@ final class AuditEngine: Sendable {
                 }
             }
 
-            if verbose && !relevantFiles.isEmpty {
+            if verbose, !relevantFiles.isEmpty {
                 print("  Found \(relevantFiles.count) relevant files")
             }
 
@@ -75,7 +75,7 @@ final class AuditEngine: Sendable {
                     let filteredFindings = findings.filter { $0.severity >= minimumSeverity }
                     allFindings.append(contentsOf: filteredFindings)
 
-                    if verbose && !filteredFindings.isEmpty {
+                    if verbose, !filteredFindings.isEmpty {
                         print("  \(file): \(filteredFindings.count) findings")
                     }
                 } catch {
@@ -132,7 +132,8 @@ final class AuditEngine: Sendable {
         while let url = enumerator.nextObject() as? URL {
             // Skip directories
             guard let resourceValues = try? url.resourceValues(forKeys: [.isRegularFileKey]),
-                  resourceValues.isRegularFile == true else {
+                  resourceValues.isRegularFile == true
+            else {
                 continue
             }
 
@@ -141,9 +142,10 @@ final class AuditEngine: Sendable {
 
             // Skip build directories and dependencies
             if relativePath.hasPrefix(".build/") ||
-               relativePath.hasPrefix("node_modules/") ||
-               relativePath.hasPrefix("Pods/") ||
-               relativePath.hasPrefix(".git/") {
+                relativePath.hasPrefix("node_modules/") ||
+                relativePath.hasPrefix("Pods/") ||
+                relativePath.hasPrefix(".git/")
+            {
                 continue
             }
 

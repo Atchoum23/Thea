@@ -35,19 +35,19 @@ public struct TaskBreakdown: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .easy: return "Easy"
-            case .moderate: return "Moderate"
-            case .challenging: return "Challenging"
-            case .expert: return "Expert"
+            case .easy: "Easy"
+            case .moderate: "Moderate"
+            case .challenging: "Challenging"
+            case .expert: "Expert"
             }
         }
 
         public var color: String {
             switch self {
-            case .easy: return "#10B981"      // Green
-            case .moderate: return "#F59E0B"  // Amber
-            case .challenging: return "#F97316" // Orange
-            case .expert: return "#EF4444"    // Red
+            case .easy: "#10B981" // Green
+            case .moderate: "#F59E0B" // Amber
+            case .challenging: "#F97316" // Orange
+            case .expert: "#EF4444" // Red
             }
         }
     }
@@ -127,23 +127,23 @@ public struct TimelineEvent: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .work: return "Work"
-            case .personal: return "Personal"
-            case .breakTime: return "Break"
-            case .meeting: return "Meeting"
-            case .focus: return "Focus"
-            case .exercise: return "Exercise"
+            case .work: "Work"
+            case .personal: "Personal"
+            case .breakTime: "Break"
+            case .meeting: "Meeting"
+            case .focus: "Focus"
+            case .exercise: "Exercise"
             }
         }
 
         public var defaultColor: String {
             switch self {
-            case .work: return "#3B82F6"      // Blue
-            case .personal: return "#8B5CF6"  // Purple
-            case .breakTime: return "#10B981"     // Green
-            case .meeting: return "#F59E0B"   // Amber
-            case .focus: return "#EF4444"     // Red
-            case .exercise: return "#EC4899"  // Pink
+            case .work: "#3B82F6" // Blue
+            case .personal: "#8B5CF6" // Purple
+            case .breakTime: "#10B981" // Green
+            case .meeting: "#F59E0B" // Amber
+            case .focus: "#EF4444" // Red
+            case .exercise: "#EC4899" // Pink
             }
         }
     }
@@ -184,7 +184,7 @@ public struct PomodoroSession: Sendable, Codable, Identifiable {
     }
 
     public var actualMinutes: Int? {
-        guard let endTime = endTime else { return nil }
+        guard let endTime else { return nil }
         return Int(endTime.timeIntervalSince(startTime) / 60)
     }
 
@@ -195,25 +195,25 @@ public struct PomodoroSession: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .work: return "Work"
-            case .shortBreak: return "Short Break"
-            case .longBreak: return "Long Break"
+            case .work: "Work"
+            case .shortBreak: "Short Break"
+            case .longBreak: "Long Break"
             }
         }
 
         public var defaultDuration: Int {
             switch self {
-            case .work: return 25
-            case .shortBreak: return 5
-            case .longBreak: return 15
+            case .work: 25
+            case .shortBreak: 5
+            case .longBreak: 15
             }
         }
 
         public var color: String {
             switch self {
-            case .work: return "#EF4444"      // Red
-            case .shortBreak: return "#10B981" // Green
-            case .longBreak: return "#3B82F6"  // Blue
+            case .work: "#EF4444" // Red
+            case .shortBreak: "#10B981" // Green
+            case .longBreak: "#3B82F6" // Blue
             }
         }
     }
@@ -264,19 +264,19 @@ public struct FocusTree: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .oak: return "Oak"
-            case .pine: return "Pine"
-            case .cherry: return "Cherry Blossom"
-            case .maple: return "Maple"
+            case .oak: "Oak"
+            case .pine: "Pine"
+            case .cherry: "Cherry Blossom"
+            case .maple: "Maple"
             }
         }
 
         public var minutesToGrow: Int {
             switch self {
-            case .oak: return 30
-            case .pine: return 25
-            case .cherry: return 20
-            case .maple: return 35
+            case .oak: 30
+            case .pine: 25
+            case .cherry: 20
+            case .maple: 35
             }
         }
 
@@ -367,21 +367,21 @@ public struct CBTLesson: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .timeManagement: return "Time Management"
-            case .emotionalRegulation: return "Emotional Regulation"
-            case .prioritization: return "Prioritization"
-            case .distraction: return "Managing Distractions"
-            case .motivation: return "Motivation"
+            case .timeManagement: "Time Management"
+            case .emotionalRegulation: "Emotional Regulation"
+            case .prioritization: "Prioritization"
+            case .distraction: "Managing Distractions"
+            case .motivation: "Motivation"
             }
         }
 
         public var icon: String {
             switch self {
-            case .timeManagement: return "clock.fill"
-            case .emotionalRegulation: return "heart.fill"
-            case .prioritization: return "list.number"
-            case .distraction: return "eye.slash.fill"
-            case .motivation: return "bolt.fill"
+            case .timeManagement: "clock.fill"
+            case .emotionalRegulation: "heart.fill"
+            case .prioritization: "list.number"
+            case .distraction: "eye.slash.fill"
+            case .motivation: "bolt.fill"
             }
         }
     }
@@ -393,9 +393,9 @@ public struct CBTLesson: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .beginner: return "Beginner"
-            case .intermediate: return "Intermediate"
-            case .advanced: return "Advanced"
+            case .beginner: "Beginner"
+            case .intermediate: "Intermediate"
+            case .advanced: "Advanced"
             }
         }
     }
@@ -412,14 +412,14 @@ public enum CognitiveError: Error, Sendable, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .taskBreakdownFailed(let reason):
-            return "Failed to break down task: \(reason)"
+        case let .taskBreakdownFailed(reason):
+            "Failed to break down task: \(reason)"
         case .pomodoroSessionActive:
-            return "A Pomodoro session is already active. Complete or cancel it first."
+            "A Pomodoro session is already active. Complete or cancel it first."
         case .invalidDuration:
-            return "The duration must be greater than 0 minutes."
+            "The duration must be greater than 0 minutes."
         case .treeAlreadyPlanted:
-            return "A tree is already growing. Complete the current session first."
+            "A tree is already growing. Complete the current session first."
         }
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Model Selector View
+
 // Compact dropdown for selecting AI models with category filtering
 
 struct ModelSelectorView: View {
@@ -11,9 +12,9 @@ struct ModelSelectorView: View {
     @State private var showingCategoryPicker = false
 
     init(selectedModel: Binding<String>) {
-        self._selectedModel = selectedModel
+        _selectedModel = selectedModel
         let initialConfig = AppConfiguration.shared.modelSelectionConfig
-        self._selectedCategory = State(initialValue: initialConfig.preferredCategory)
+        _selectedCategory = State(initialValue: initialConfig.preferredCategory)
     }
 
     var body: some View {

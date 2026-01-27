@@ -491,37 +491,37 @@ public enum ActivityMetric: String, CaseIterable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .steps: return "Steps"
-        case .distance: return "Distance"
-        case .calories: return "Calories"
-        case .activeMinutes: return "Active Minutes"
+        case .steps: "Steps"
+        case .distance: "Distance"
+        case .calories: "Calories"
+        case .activeMinutes: "Active Minutes"
         }
     }
 
     public var icon: String {
         switch self {
-        case .steps: return "figure.walk"
-        case .distance: return "map"
-        case .calories: return "flame.fill"
-        case .activeMinutes: return "timer"
+        case .steps: "figure.walk"
+        case .distance: "map"
+        case .calories: "flame.fill"
+        case .activeMinutes: "timer"
         }
     }
 
     public var unit: String {
         switch self {
-        case .steps: return "steps"
-        case .distance: return "km"
-        case .calories: return "kcal"
-        case .activeMinutes: return "minutes"
+        case .steps: "steps"
+        case .distance: "km"
+        case .calories: "kcal"
+        case .activeMinutes: "minutes"
         }
     }
 
     public var color: Color {
         switch self {
-        case .steps: return .green
-        case .distance: return .blue
-        case .calories: return .orange
-        case .activeMinutes: return .purple
+        case .steps: .green
+        case .distance: .blue
+        case .calories: .orange
+        case .activeMinutes: .purple
         }
     }
 }
@@ -536,10 +536,10 @@ public enum ActivityTimeRange: String, CaseIterable, Sendable {
 
     public var days: Int {
         switch self {
-        case .week: return 7
-        case .month: return 30
-        case .quarter: return 90
-        case .year: return 365
+        case .week: 7
+        case .month: 30
+        case .quarter: 90
+        case .year: 365
         }
     }
 }
@@ -588,9 +588,9 @@ public enum ActivityInsightType: Sendable {
 
     var color: Color {
         switch self {
-        case .positive: return .green
-        case .neutral: return .blue
-        case .warning: return .orange
+        case .positive: .green
+        case .neutral: .blue
+        case .warning: .orange
         }
     }
 
@@ -662,7 +662,7 @@ final class ActivityActivityTrendsViewModel {
         case .steps:
             todayValue = "9,847"
             averageValue = "8,523"
-            goalValue = 10_000
+            goalValue = 10000
         case .distance:
             todayValue = "7.2"
             averageValue = "6.4"
@@ -681,31 +681,29 @@ final class ActivityActivityTrendsViewModel {
         trend = .improving
 
         // Generate chart data
-        chartData = (0..<timeRange.days).map { dayOffset in
+        chartData = (0 ..< timeRange.days).map { dayOffset in
             let date = Calendar.current.date(byAdding: .day, value: -timeRange.days + dayOffset, to: Date()) ?? Date().addingTimeInterval(Double(-timeRange.days + dayOffset) * 86400)
-            let baseValue: Double
-            switch metric {
-            case .steps: baseValue = 8_500
-            case .distance: baseValue = 6.5
-            case .calories: baseValue = 425
-            case .activeMinutes: baseValue = 50
+            let baseValue: Double = switch metric {
+            case .steps: 8500
+            case .distance: 6.5
+            case .calories: 425
+            case .activeMinutes: 50
             }
             let variance = baseValue * 0.3
-            let value = baseValue + Double.random(in: -variance...variance)
+            let value = baseValue + Double.random(in: -variance ... variance)
             return ActivityDataPoint(date: date, value: max(0, value))
         }
 
         // Generate hourly data
-        hourlyData = (0..<24).map { hour in
-            let baseValue: Double
-            switch metric {
-            case .steps: baseValue = hour >= 8 && hour <= 20 ? 600 : 50
-            case .distance: baseValue = hour >= 8 && hour <= 20 ? 0.5 : 0.05
-            case .calories: baseValue = hour >= 8 && hour <= 20 ? 35 : 5
-            case .activeMinutes: baseValue = hour >= 8 && hour <= 20 ? 4 : 0.5
+        hourlyData = (0 ..< 24).map { hour in
+            let baseValue: Double = switch metric {
+            case .steps: hour >= 8 && hour <= 20 ? 600 : 50
+            case .distance: hour >= 8 && hour <= 20 ? 0.5 : 0.05
+            case .calories: hour >= 8 && hour <= 20 ? 35 : 5
+            case .activeMinutes: hour >= 8 && hour <= 20 ? 4 : 0.5
             }
             let variance = baseValue * 0.4
-            let value = baseValue + Double.random(in: -variance...variance)
+            let value = baseValue + Double.random(in: -variance ... variance)
             return HourlyActivityData(hour: hour, value: max(0, value))
         }
 
@@ -727,9 +725,9 @@ final class ActivityActivityTrendsViewModel {
 
         // Generate goals
         goals = [
-            ActivityGoal(name: "Daily Steps", current: 9_847, target: 10_000, unit: "steps"),
+            ActivityGoal(name: "Daily Steps", current: 9847, target: 10000, unit: "steps"),
             ActivityGoal(name: "Weekly Distance", current: 45, target: 50, unit: "km"),
-            ActivityGoal(name: "Monthly Calories", current: 12_750, target: 15_000, unit: "kcal")
+            ActivityGoal(name: "Monthly Calories", current: 12750, target: 15000, unit: "kcal")
         ]
 
         // Generate streaks
@@ -749,25 +747,25 @@ enum ActivityTrend {
 
     var iconName: String {
         switch self {
-        case .improving: return "arrow.up.right.circle.fill"
-        case .stable: return "arrow.right.circle.fill"
-        case .declining: return "arrow.down.right.circle.fill"
+        case .improving: "arrow.up.right.circle.fill"
+        case .stable: "arrow.right.circle.fill"
+        case .declining: "arrow.down.right.circle.fill"
         }
     }
 
     var color: Color {
         switch self {
-        case .improving: return .green
-        case .stable: return .blue
-        case .declining: return .red
+        case .improving: .green
+        case .stable: .blue
+        case .declining: .red
         }
     }
 
     var displayName: String {
         switch self {
-        case .improving: return "Improving"
-        case .stable: return "Stable"
-        case .declining: return "Declining"
+        case .improving: "Improving"
+        case .stable: "Stable"
+        case .declining: "Declining"
         }
     }
 }

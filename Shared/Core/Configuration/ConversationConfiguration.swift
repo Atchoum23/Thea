@@ -50,13 +50,13 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
         public var description: String {
             switch self {
             case .unlimited:
-                return "Keep all messages, use provider's full context window"
+                "Keep all messages, use provider's full context window"
             case .sliding:
-                return "Keep most recent messages, drop oldest when limit reached"
+                "Keep most recent messages, drop oldest when limit reached"
             case .summarize:
-                return "Summarize old messages to preserve context efficiently"
+                "Summarize old messages to preserve context efficiently"
             case .hybrid:
-                return "Keep recent messages verbatim + summary of older context"
+                "Keep recent messages verbatim + summary of older context"
             }
         }
     }
@@ -72,7 +72,7 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
 
     /// Reserve context tokens for Meta-AI reasoning
     /// Meta-AI needs space for chain-of-thought, planning, etc.
-    public var metaAIReservedTokens: Int = 50_000
+    public var metaAIReservedTokens: Int = 50000
 
     /// Priority allocation for Meta-AI vs regular chat
     public var metaAIContextPriority: MetaAIPriority = .high
@@ -84,9 +84,9 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
 
         public var allocationPercentage: Double {
             switch self {
-            case .normal: return 0.5   // 50% for Meta-AI
-            case .high: return 0.7     // 70% for Meta-AI
-            case .maximum: return 0.9  // 90% for Meta-AI
+            case .normal: 0.5 // 50% for Meta-AI
+            case .high: 0.7 // 70% for Meta-AI
+            case .maximum: 0.9 // 90% for Meta-AI
             }
         }
     }
@@ -118,7 +118,8 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
 
     public static func load() -> ConversationConfiguration {
         guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let config = try? JSONDecoder().decode(ConversationConfiguration.self, from: data) else {
+              let config = try? JSONDecoder().decode(ConversationConfiguration.self, from: data)
+        else {
             return ConversationConfiguration()
         }
         return config
@@ -150,7 +151,7 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
     /// Check if context strategy allows unlimited history
     public var isUnlimited: Bool {
         contextStrategy == .unlimited &&
-               maxConversationLength == nil &&
-               maxContextTokens == nil
+            maxConversationLength == nil &&
+            maxContextTokens == nil
     }
 }

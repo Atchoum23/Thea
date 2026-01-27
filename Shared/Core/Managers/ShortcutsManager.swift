@@ -2,7 +2,7 @@ import Foundation
 import Intents
 
 #if os(iOS) || os(watchOS)
-import IntentsUI
+    import IntentsUI
 #endif
 
 @MainActor
@@ -20,7 +20,7 @@ final class ShortcutsManager {
 
         let interaction = INInteraction(intent: intent, response: nil)
         interaction.donate { error in
-            if let error = error {
+            if let error {
                 print("Failed to donate shortcut: \(error)")
             }
         }
@@ -33,7 +33,7 @@ final class ShortcutsManager {
 
         let interaction = INInteraction(intent: intent, response: nil)
         interaction.donate { error in
-            if let error = error {
+            if let error {
                 print("Failed to donate shortcut: \(error)")
             }
         }
@@ -45,7 +45,7 @@ final class ShortcutsManager {
 
         let interaction = INInteraction(intent: intent, response: nil)
         interaction.donate { error in
-            if let error = error {
+            if let error {
                 print("Failed to donate shortcut: \(error)")
             }
         }
@@ -59,7 +59,7 @@ final class ShortcutsManager {
 
         let interaction = INInteraction(intent: intent, response: nil)
         interaction.donate { error in
-            if let error = error {
+            if let error {
                 print("Failed to donate shortcut: \(error)")
             }
         }
@@ -87,7 +87,7 @@ final class ShortcutsManager {
         throw ShortcutError.unsupportedIntent
     }
 
-    private func handleStartConversation(_ intent: StartConversationIntent) async throws -> ShortcutAction {
+    private func handleStartConversation(_: StartConversationIntent) async throws -> ShortcutAction {
         let conversation = ChatManager.shared.createConversation(title: "Siri Conversation")
         return .openConversation(conversation.id)
     }
@@ -107,14 +107,15 @@ final class ShortcutsManager {
         return .openConversation(conversation.id)
     }
 
-    private func handleVoiceCommand(_ intent: VoiceCommandIntent) async throws -> ShortcutAction {
+    private func handleVoiceCommand(_: VoiceCommandIntent) async throws -> ShortcutAction {
         let conversation = ChatManager.shared.createConversation(title: "Voice Command")
         return .startVoiceInput(conversation.id)
     }
 
     private func handleOpenProject(_ intent: OpenProjectIntent) async throws -> ShortcutAction {
         guard let projectIDString = intent.projectID,
-              let projectID = UUID(uuidString: projectIDString) else {
+              let projectID = UUID(uuidString: projectIDString)
+        else {
             throw ShortcutError.invalidParameter
         }
 
@@ -173,11 +174,11 @@ enum ShortcutError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unsupportedIntent:
-            return "This shortcut is not supported"
+            "This shortcut is not supported"
         case .missingParameter:
-            return "Required parameter is missing"
+            "Required parameter is missing"
         case .invalidParameter:
-            return "Invalid parameter value"
+            "Invalid parameter value"
         }
     }
 }

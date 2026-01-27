@@ -7,7 +7,7 @@ public actor FocusForestService: FocusForestServiceProtocol {
     private var longestStreak: Int = 0
 
     public init() {
-        self.forest = FocusForest()
+        forest = FocusForest()
     }
 
     // MARK: - Tree Management
@@ -123,9 +123,9 @@ public actor FocusForestService: FocusForestServiceProtocol {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
-        return forest.trees.filter { tree in
+        return forest.trees.count { tree in
             guard let grownAt = tree.grownAt else { return false }
             return calendar.isDate(grownAt, inSameDayAs: today)
-        }.count
+        }
     }
 }

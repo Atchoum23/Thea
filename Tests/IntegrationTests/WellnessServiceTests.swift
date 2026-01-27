@@ -1,10 +1,9 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 /// Test suite for Wellness module services
 @MainActor
 final class WellnessServiceTests: XCTestCase {
-
     // MARK: - Circadian Phase Tests
 
     func testCircadianPhaseTransitions() {
@@ -25,14 +24,14 @@ final class WellnessServiceTests: XCTestCase {
         for (hour, expectedPhase) in phases {
             let detected = CircadianPhase.phaseForHour(hour)
             XCTAssertEqual(detected, expectedPhase,
-                          "Hour \(hour) should be \(expectedPhase.displayName), got \(detected.displayName)")
+                           "Hour \(hour) should be \(expectedPhase.displayName), got \(detected.displayName)")
         }
     }
 
     func testPhaseRecommendationCount() {
         for phase in CircadianPhase.allCases {
             XCTAssertGreaterThanOrEqual(phase.recommendations.count, 3,
-                                       "\(phase.displayName) should have at least 3 recommendations")
+                                        "\(phase.displayName) should have at least 3 recommendations")
         }
     }
 
@@ -47,17 +46,17 @@ final class WellnessServiceTests: XCTestCase {
         // Ensure time ranges are valid and non-overlapping
         let allPhases = CircadianPhase.allCases
 
-        for index in 0..<(allPhases.count - 1) {
+        for index in 0 ..< (allPhases.count - 1) {
             let currentPhase = allPhases[index]
             let nextPhase = allPhases[index + 1]
 
             // Skip deepNight wrap-around
-            if currentPhase == .lateNight && nextPhase == .deepNight {
+            if currentPhase == .lateNight, nextPhase == .deepNight {
                 continue
             }
 
             XCTAssertLessThanOrEqual(currentPhase.endHour, nextPhase.startHour,
-                                    "\(currentPhase.displayName) end should not overlap with \(nextPhase.displayName) start")
+                                     "\(currentPhase.displayName) end should not overlap with \(nextPhase.displayName) start")
         }
     }
 
@@ -102,9 +101,9 @@ final class WellnessServiceTests: XCTestCase {
     func testRecommendationUniqueness() {
         // Ensure recommendations have unique titles within each phase
         for phase in CircadianPhase.allCases {
-            let titles = Set(phase.recommendations.map { $0.title })
+            let titles = Set(phase.recommendations.map(\.title))
             XCTAssertEqual(titles.count, phase.recommendations.count,
-                          "\(phase.displayName) has duplicate recommendation titles")
+                           "\(phase.displayName) has duplicate recommendation titles")
         }
     }
 
@@ -117,7 +116,7 @@ final class WellnessServiceTests: XCTestCase {
         let endAngle = Double(morningPhase.endHour) * 15.0
 
         let expectedStart = 7.0 * 15.0 // 7 AM = 105 degrees
-        let expectedEnd = 10.0 * 15.0   // 10 AM = 150 degrees
+        let expectedEnd = 10.0 * 15.0 // 10 AM = 150 degrees
 
         XCTAssertEqual(startAngle, expectedStart, "Morning phase should start at 105 degrees")
         XCTAssertEqual(endAngle, expectedEnd, "Morning phase should end at 150 degrees")
@@ -130,11 +129,11 @@ final class WellnessServiceTests: XCTestCase {
         for phase in CircadianPhase.allCases {
             if phase == .deepNight {
                 // Deep night wraps around (0-5 AM)
-                for hour in 0..<phase.endHour {
+                for hour in 0 ..< phase.endHour {
                     coveredHours.insert(hour)
                 }
             } else {
-                for hour in phase.startHour..<phase.endHour {
+                for hour in phase.startHour ..< phase.endHour {
                     coveredHours.insert(hour)
                 }
             }
@@ -155,7 +154,7 @@ final class WellnessServiceTests: XCTestCase {
             // Background colors should be lighter versions of theme colors
             let backgroundColors = phase.backgroundColors
             XCTAssertEqual(backgroundColors.count, themeColors.count,
-                          "Background colors should match theme colors count")
+                           "Background colors should match theme colors count")
         }
     }
 
@@ -173,7 +172,7 @@ final class WellnessServiceTests: XCTestCase {
 
         for (phase, expectedIcon) in expectedIcons {
             XCTAssertEqual(phase.iconName, expectedIcon,
-                          "\(phase.displayName) should have icon \(expectedIcon)")
+                           "\(phase.displayName) should have icon \(expectedIcon)")
         }
     }
 
@@ -193,14 +192,14 @@ final class WellnessServiceTests: XCTestCase {
         let timeRange = deepNightPhase.timeRange
 
         XCTAssertEqual(timeRange, "12:00 AM - 5:00 AM",
-                      "Deep night should have special formatting for wrap-around")
+                       "Deep night should have special formatting for wrap-around")
     }
 
     // MARK: - Performance Tests
 
     func testPhaseDetectionPerformance() {
         measure {
-            for hour in 0..<24 {
+            for hour in 0 ..< 24 {
                 _ = CircadianPhase.phaseForHour(hour)
             }
         }
@@ -233,15 +232,15 @@ final class WellnessServiceTests: XCTestCase {
             for recommendation in recommendations {
                 // Each recommendation should have all required fields
                 XCTAssertFalse(recommendation.icon.isEmpty,
-                              "\(phase.displayName) recommendation missing icon")
+                               "\(phase.displayName) recommendation missing icon")
                 XCTAssertFalse(recommendation.title.isEmpty,
-                              "\(phase.displayName) recommendation missing title")
+                               "\(phase.displayName) recommendation missing title")
                 XCTAssertFalse(recommendation.description.isEmpty,
-                              "\(phase.displayName) recommendation missing description")
+                               "\(phase.displayName) recommendation missing description")
 
                 // Icon should be a valid SF Symbol name
                 XCTAssertTrue(recommendation.icon.contains(".") || recommendation.icon.count > 3,
-                             "Icon '\(recommendation.icon)' might not be a valid SF Symbol")
+                              "Icon '\(recommendation.icon)' might not be a valid SF Symbol")
             }
         }
     }

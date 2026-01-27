@@ -6,13 +6,13 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
 import CloudKit
+import Foundation
 @preconcurrency import UserNotifications
 #if os(macOS)
-import AppKit
+    import AppKit
 #else
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Universal Notification Service
@@ -21,62 +21,62 @@ import UIKit
 /// when AI responses complete or user input is required
 public actor UniversalNotificationService {
     public static let shared = UniversalNotificationService()
-    
+
     // MARK: - CloudKit
-    
+
     private let container = CKContainer(identifier: "iCloud.app.thea.notifications")
     private lazy var privateDatabase = container.privateCloudDatabase
-    
+
     // MARK: - State
-    
+
     private var isInitialized = false
     private var deviceToken: String?
     private var activeSubscriptions: Set<String> = []
-    
+
     // MARK: - Constants
-    
+
     private let recordType = "UniversalNotification"
     private let subscriptionID = "universal-notification-subscription"
-    
+
     // MARK: - Initialization
-    
+
     private init() {}
-    
+
     // MARK: - Setup
-    
+
     /// Initialize the universal notification service
     public func initialize() async throws {
         guard !isInitialized else { return }
-        
+
         // Check iCloud status
         let status = try await container.accountStatus()
         guard status == .available else {
             throw UniversalNotificationError.iCloudNotAvailable
         }
-        
+
         // Setup CloudKit subscription for receiving notifications
         try await setupCloudKitSubscription()
-        
+
         // Register current device
         try await registerCurrentDevice()
-        
+
         isInitialized = true
     }
-    
+
     /// Setup CloudKit subscription to receive notifications on all devices
     private func setupCloudKitSubscription() async throws {
         let deviceId = await MainActor.run { DeviceRegistry.shared.currentDevice.id }
         let predicate = NSPredicate(format: "targetDevices CONTAINS %@ OR targetDevices CONTAINS %@",
                                     deviceId,
                                     "all")
-        
+
         let subscription = CKQuerySubscription(
             recordType: recordType,
             predicate: predicate,
             subscriptionID: subscriptionID,
             options: [.firesOnRecordCreation]
         )
-        
+
         let notificationInfo = CKSubscription.NotificationInfo()
         notificationInfo.shouldSendContentAvailable = true
         notificationInfo.shouldBadge = true
@@ -84,7 +84,7 @@ public actor UniversalNotificationService {
         notificationInfo.titleLocalizationKey = "NOTIFICATION_TITLE"
         notificationInfo.desiredKeys = ["title", "body", "category", "sound", "priority"]
         subscription.notificationInfo = notificationInfo
-        
+
         do {
             _ = try await privateDatabase.save(subscription)
             activeSubscriptions.insert(subscriptionID)
@@ -92,11 +92,11 @@ public actor UniversalNotificationService {
             // Subscription already exists - that's fine
         }
     }
-    
+
     /// Register current device for receiving notifications
     private func registerCurrentDevice() async throws {
         let deviceInfo = await MainActor.run { DeviceRegistry.shared.currentDevice }
-        
+
         let record = CKRecord(recordType: "NotificationDevice")
         record["deviceId"] = deviceInfo.id
         record["deviceName"] = deviceInfo.name
@@ -104,12 +104,12 @@ public actor UniversalNotificationService {
         record["supportsNotifications"] = deviceInfo.capabilities.supportsNotifications
         record["lastSeen"] = Date()
         record["appVersion"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-        
+
         _ = try await privateDatabase.save(record)
     }
-    
+
     // MARK: - Send Notifications
-    
+
     /// Send a notification to ALL registered devices
     public func notifyAllDevices(
         title: String,
@@ -133,14 +133,14 @@ public actor UniversalNotificationService {
         // Convert SendableValue dict to string dict for JSON serialization
         let stringDict = userInfo.compactMapValues { $0.stringValue }
         record["userInfo"] = try? JSONSerialization.data(withJSONObject: stringDict)
-        
+
         // Save to CloudKit - will trigger subscription on all devices
         _ = try await privateDatabase.save(record)
-        
+
         // Also send locally immediately
-        try await NotificationService.shared.notify(title: title, body: body, category: category)
+        try await deliverLocalNotificationImmediate(title: title, body: body, category: category)
     }
-    
+
     /// Notify all devices when AI response is complete
     public func notifyAIResponseComplete(
         conversationTitle: String,
@@ -149,7 +149,7 @@ public actor UniversalNotificationService {
     ) async throws {
         let title = success ? "✅ Response Ready" : "⚠️ Response Issue"
         let body = "\(conversationTitle): \(responsePreview.prefix(100))..."
-        
+
         try await notifyAllDevices(
             title: title,
             body: body,
@@ -157,13 +157,13 @@ public actor UniversalNotificationService {
             sound: success ? .message : .warning,
             priority: .high,
             userInfo: [
-                "conversationTitle": conversationTitle,
-                "type": "ai_response",
-                "success": success
+                "conversationTitle": .string(conversationTitle),
+                "type": .string("ai_response"),
+                "success": .bool(success)
             ]
         )
     }
-    
+
     /// Notify all devices when user input is required
     public func notifyUserInputRequired(
         conversationTitle: String,
@@ -176,13 +176,13 @@ public actor UniversalNotificationService {
             sound: .reminder,
             priority: .urgent,
             userInfo: [
-                "conversationTitle": conversationTitle,
-                "type": "user_input_required",
-                "prompt": promptText
+                "conversationTitle": .string(conversationTitle),
+                "type": .string("user_input_required"),
+                "prompt": .string(promptText)
             ]
         )
     }
-    
+
     /// Notify all devices of task completion
     public func notifyTaskComplete(
         taskName: String,
@@ -190,13 +190,13 @@ public actor UniversalNotificationService {
         duration: TimeInterval? = nil
     ) async throws {
         var body = success ? "Completed successfully" : "Task failed"
-        if let duration = duration {
+        if let duration {
             let formatter = DateComponentsFormatter()
             formatter.allowedUnits = [.hour, .minute, .second]
             formatter.unitsStyle = .abbreviated
             body += " in \(formatter.string(from: duration) ?? "unknown time")"
         }
-        
+
         try await notifyAllDevices(
             title: success ? "✅ \(taskName)" : "❌ \(taskName)",
             body: body,
@@ -204,13 +204,13 @@ public actor UniversalNotificationService {
             sound: success ? .success : .error,
             priority: success ? .normal : .high,
             userInfo: [
-                "taskName": taskName,
-                "type": "task_complete",
-                "success": success
+                "taskName": .string(taskName),
+                "type": .string("task_complete"),
+                "success": .bool(success)
             ]
         )
     }
-    
+
     /// Notify specific devices only
     public func notifyDevices(
         deviceIds: [String],
@@ -229,20 +229,21 @@ public actor UniversalNotificationService {
         record["targetDevices"] = deviceIds
         record["createdAt"] = Date()
         record["originDevice"] = await MainActor.run { DeviceRegistry.shared.currentDevice.id }
-        
+
         _ = try await privateDatabase.save(record)
     }
-    
+
     // MARK: - Handle Incoming Notifications
-    
+
     /// Process incoming CloudKit notification
     public func processCloudKitNotification(_ userInfo: [AnyHashable: Any]) async {
         guard let ckNotification = CKNotification(fromRemoteNotificationDictionary: userInfo),
               let queryNotification = ckNotification as? CKQueryNotification,
-              let recordID = queryNotification.recordID else {
+              let recordID = queryNotification.recordID
+        else {
             return
         }
-        
+
         // Fetch the full record
         do {
             let record = try await privateDatabase.record(for: recordID)
@@ -251,48 +252,50 @@ public actor UniversalNotificationService {
             // Record may have been deleted or is inaccessible
         }
     }
-    
+
     /// Deliver a local notification from CloudKit record
     private func deliverLocalNotification(from record: CKRecord) async {
         guard let title = record["title"] as? String,
               let body = record["body"] as? String,
-              let originDevice = record["originDevice"] as? String else {
+              let originDevice = record["originDevice"] as? String
+        else {
             return
         }
-        
+
         // Don't notify on the device that created the notification
         let currentDeviceId = await MainActor.run { DeviceRegistry.shared.currentDevice.id }
         guard originDevice != currentDeviceId else {
             return
         }
-        
+
         let categoryId = record["category"] as? String ?? "general"
         let soundName = record["sound"] as? String ?? "default"
-        
-        let category = NotificationCategory(rawValue: categoryId) ?? .general
-        let sound = NotificationSound(rawValue: soundName) ?? .default
-        
-        try? await NotificationService.shared.notify(
+
+        _ = NotificationCategory(rawValue: categoryId) ?? .general
+        _ = NotificationSound(rawValue: soundName) ?? .default
+
+        try? await deliverLocalNotificationImmediate(
             title: title,
             body: body,
-            category: category
+            category: .general
         )
     }
-    
+
     // MARK: - Device Management
-    
+
     /// Get all registered devices
     public func getRegisteredDevices() async throws -> [NotificationDevice] {
         let query = CKQuery(recordType: "NotificationDevice", predicate: NSPredicate(value: true))
         let results = try await privateDatabase.records(matching: query)
-        
+
         return results.matchResults.compactMap { _, result -> NotificationDevice? in
-            guard case .success(let record) = result,
+            guard case let .success(record) = result,
                   let deviceId = record["deviceId"] as? String,
-                  let deviceName = record["deviceName"] as? String else {
+                  let deviceName = record["deviceName"] as? String
+            else {
                 return nil
             }
-            
+
             return NotificationDevice(
                 id: deviceId,
                 name: deviceName,
@@ -302,12 +305,12 @@ public actor UniversalNotificationService {
             )
         }
     }
-    
+
     /// Update device heartbeat
     public func updateDeviceHeartbeat() async throws {
         let deviceId = await MainActor.run { DeviceRegistry.shared.currentDevice.id }
         let recordID = CKRecord.ID(recordName: "device-\(deviceId)")
-        
+
         do {
             let record = try await privateDatabase.record(for: recordID)
             record["lastSeen"] = Date()
@@ -316,6 +319,29 @@ public actor UniversalNotificationService {
             // Device not registered, register now
             try await registerCurrentDevice()
         }
+    }
+
+    // MARK: - Local Notification Helper
+
+    /// Deliver a local notification immediately using UNUserNotificationCenter
+    private func deliverLocalNotificationImmediate(
+        title: String,
+        body: String,
+        category: NotificationCategory
+    ) async throws {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = category.identifier
+
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil
+        )
+
+        try await UNUserNotificationCenter.current().add(request)
     }
 }
 
@@ -328,6 +354,17 @@ public enum TheaNotificationPriority: String, Codable, Sendable {
     case urgent
 }
 
+// MARK: - Notification Sound
+
+public enum NotificationSound: String, Codable, Sendable {
+    case `default`
+    case message
+    case warning
+    case error
+    case success
+    case reminder
+}
+
 // MARK: - Notification Device
 
 public struct NotificationDevice: Identifiable, Sendable {
@@ -336,7 +373,7 @@ public struct NotificationDevice: Identifiable, Sendable {
     public let type: String
     public let supportsNotifications: Bool
     public let lastSeen: Date
-    
+
     public var isOnline: Bool {
         Date().timeIntervalSince(lastSeen) < 300 // 5 minutes
     }
@@ -348,15 +385,15 @@ public enum UniversalNotificationError: Error, LocalizedError, Sendable {
     case iCloudNotAvailable
     case deviceNotRegistered
     case notificationFailed(String)
-    
+
     public var errorDescription: String? {
         switch self {
         case .iCloudNotAvailable:
-            return "iCloud is not available for cross-device notifications"
+            "iCloud is not available for cross-device notifications"
         case .deviceNotRegistered:
-            return "This device is not registered for notifications"
-        case .notificationFailed(let reason):
-            return "Notification failed: \(reason)"
+            "This device is not registered for notifications"
+        case let .notificationFailed(reason):
+            "Notification failed: \(reason)"
         }
     }
 }

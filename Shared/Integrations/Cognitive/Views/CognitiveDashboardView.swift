@@ -68,7 +68,7 @@ public struct CognitiveDashboardView: View {
 
             TextField("Describe your task...", text: $viewModel.taskInput, axis: .vertical)
                 .textFieldStyle(.roundedBorder)
-                .lineLimit(3...6)
+                .lineLimit(3 ... 6)
 
             Button(action: {
                 Task {
@@ -133,14 +133,14 @@ public struct CognitiveDashboardView: View {
             ForEach(breakdown.subtasks) { subtask in
                 SubtaskRow(
                     subtask: subtask
-                )                    {
-                        Task {
-                            await viewModel.completeSubtask(
-                                breakdownId: breakdown.id,
-                                subtaskId: subtask.id
-                            )
-                        }
+                ) {
+                    Task {
+                        await viewModel.completeSubtask(
+                            breakdownId: breakdown.id,
+                            subtaskId: subtask.id
+                        )
                     }
+                }
             }
         }
         .padding()

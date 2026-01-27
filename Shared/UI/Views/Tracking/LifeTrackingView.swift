@@ -2,6 +2,7 @@
 import SwiftUI
 
 // MARK: - Life Tracking Dashboard (Simplified)
+
 // Placeholder view for life tracking features
 
 struct LifeTrackingView: View {
@@ -42,36 +43,36 @@ struct LifeTrackingView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 #if os(iOS) || os(watchOS)
-                if config.healthTrackingEnabled {
-                    StatusRow(title: "Health Tracking", isEnabled: true)
-                }
+                    if config.healthTrackingEnabled {
+                        TrackingStatusRow(title: "Health Tracking", isEnabled: true)
+                    }
 
-                if config.locationTrackingEnabled {
-                    StatusRow(title: "Location Tracking", isEnabled: true)
-                }
+                    if config.locationTrackingEnabled {
+                        TrackingStatusRow(title: "Location Tracking", isEnabled: true)
+                    }
                 #endif
 
                 #if os(macOS)
-                if config.screenTimeTrackingEnabled {
-                    StatusRow(title: "Screen Time", isEnabled: true)
-                }
+                    if config.screenTimeTrackingEnabled {
+                        TrackingStatusRow(title: "Screen Time", isEnabled: true)
+                    }
 
-                if config.inputTrackingEnabled {
-                    StatusRow(title: "Input Activity", isEnabled: true)
-                }
+                    if config.inputTrackingEnabled {
+                        TrackingStatusRow(title: "Input Activity", isEnabled: true)
+                    }
                 #endif
 
                 if config.browserTrackingEnabled {
-                    StatusRow(title: "Browsing History", isEnabled: true)
+                    TrackingStatusRow(title: "Browsing History", isEnabled: true)
                 }
             }
             .padding()
             #if os(macOS)
-            .background(Color(NSColor.controlBackgroundColor))
+                .background(Color(NSColor.controlBackgroundColor))
             #else
-            .background(Color(.secondarySystemBackground))
+                .background(Color(.secondarySystemBackground))
             #endif
-            .cornerRadius(12)
+                .cornerRadius(12)
         }
     }
 
@@ -100,7 +101,7 @@ struct LifeTrackingView: View {
 
 // MARK: - Supporting Views
 
-struct StatusRow: View {
+struct TrackingStatusRow: View {
     let title: String
     let isEnabled: Bool
 

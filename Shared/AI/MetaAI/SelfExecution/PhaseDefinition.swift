@@ -2,15 +2,15 @@
 import Foundation
 
 public struct PhaseDefinition: Sendable, Codable, Identifiable {
-    public let id: String                    // "phase5", "phase6", etc.
+    public let id: String // "phase5", "phase6", etc.
     public let number: Int
     public let title: String
     public let description: String
     public let estimatedHours: ClosedRange<Int>
-    public let deliverable: String?          // DMG name
+    public let deliverable: String? // DMG name
     public let files: [FileRequirement]
     public let verificationChecklist: [ChecklistItem]
-    public let dependencies: [String]        // IDs of prerequisite phases
+    public let dependencies: [String] // IDs of prerequisite phases
 
     public init(
         id: String,
@@ -37,10 +37,10 @@ public struct PhaseDefinition: Sendable, Codable, Identifiable {
 
 public struct FileRequirement: Sendable, Codable, Identifiable {
     public var id: String { path }
-    public let path: String                  // Relative to Development/
+    public let path: String // Relative to Development/
     public let status: FileStatus
     public let description: String
-    public let codeHints: [String]           // Implementation hints from spec
+    public let codeHints: [String] // Implementation hints from spec
     public let estimatedLines: Int?
 
     public enum FileStatus: String, Codable, Sendable {

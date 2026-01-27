@@ -2,6 +2,7 @@ import CryptoKit
 import Foundation
 
 // MARK: - Financial Integration System
+
 // Monitor bank accounts, crypto wallets, and provide financial insights
 
 @MainActor
@@ -83,7 +84,8 @@ final class FinancialIntegration {
         let updatedAccounts = try await provider.fetchAccounts()
 
         if let updated = updatedAccounts.first(where: { $0.id == account.id }),
-           let index = connectedAccounts.firstIndex(where: { $0.id == account.id }) {
+           let index = connectedAccounts.firstIndex(where: { $0.id == account.id })
+        {
             var refreshed = connectedAccounts[index]
             refreshed.balance = updated.balance
             refreshed.currency = updated.currency
@@ -208,7 +210,8 @@ final class FinancialIntegration {
 
         if let large = transactions
             .filter({ abs($0.amount) > averageTransaction * 3 })
-            .first {
+            .first
+        {
             return FinancialInsight(
                 id: UUID(),
                 type: .unusualSpending,
@@ -265,7 +268,7 @@ final class FinancialIntegration {
     func updateBudgetSpending() {
         let now = Date()
 
-        for i in 0..<budgets.count {
+        for i in 0 ..< budgets.count {
             let budget = budgets[i]
 
             // Calculate period start/end dates
@@ -320,11 +323,11 @@ final class FinancialIntegration {
         case .daily:
             return calendar.date(byAdding: .day, value: 1, to: now) ?? now.addingTimeInterval(86400)
         case .weekly:
-            return calendar.date(byAdding: .day, value: 7, to: now) ?? now.addingTimeInterval(604800)
+            return calendar.date(byAdding: .day, value: 7, to: now) ?? now.addingTimeInterval(604_800)
         case .monthly:
-            return calendar.date(byAdding: .month, value: 1, to: now) ?? now.addingTimeInterval(2592000)
+            return calendar.date(byAdding: .month, value: 1, to: now) ?? now.addingTimeInterval(2_592_000)
         case .yearly:
-            return calendar.date(byAdding: .year, value: 1, to: now) ?? now.addingTimeInterval(31536000)
+            return calendar.date(byAdding: .year, value: 1, to: now) ?? now.addingTimeInterval(31_536_000)
         }
     }
 
@@ -363,7 +366,8 @@ final class FinancialIntegration {
 
     private func loadAccounts() {
         if let data = UserDefaults.standard.data(forKey: "FinancialIntegration.accounts"),
-           let accounts = try? JSONDecoder().decode([ProviderAccount].self, from: data) {
+           let accounts = try? JSONDecoder().decode([ProviderAccount].self, from: data)
+        {
             connectedAccounts = accounts
         }
     }
@@ -417,16 +421,6 @@ struct ProviderAccount: Identifiable, Codable, Sendable {
     var balance: Double
     var currency: String
     var lastUpdated: Date
-
-    init(id: UUID, provider: String, accountType: ProviderProviderAccountType, name: String, balance: Double, currency: String, lastUpdated: Date) {
-        self.id = id
-        self.provider = provider
-        self.accountType = accountType
-        self.name = name
-        self.balance = balance
-        self.currency = currency
-        self.lastUpdated = lastUpdated
-    }
 }
 
 /// A financial transaction
@@ -523,7 +517,7 @@ struct RevolutProvider: FinancialProvider {
     let providerName = "Revolut"
     let providerType = FinancialProviderType.bank
 
-    func authenticate(credentials: FinancialCredentials) async throws {
+    func authenticate(credentials _: FinancialCredentials) async throws {
         // Revolut API authentication
     }
 
@@ -532,7 +526,7 @@ struct RevolutProvider: FinancialProvider {
         []
     }
 
-    func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction] {
+    func fetchTransactions(accountId _: UUID, days _: Int) async throws -> [Transaction] {
         []
     }
 }
@@ -541,7 +535,7 @@ struct BinanceProvider: FinancialProvider {
     let providerName = "Binance"
     let providerType = FinancialProviderType.crypto
 
-    func authenticate(credentials: FinancialCredentials) async throws {
+    func authenticate(credentials _: FinancialCredentials) async throws {
         // Binance API authentication
     }
 
@@ -549,7 +543,7 @@ struct BinanceProvider: FinancialProvider {
         []
     }
 
-    func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction] {
+    func fetchTransactions(accountId _: UUID, days _: Int) async throws -> [Transaction] {
         []
     }
 }
@@ -558,7 +552,7 @@ struct CoinbaseProvider: FinancialProvider {
     let providerName = "Coinbase"
     let providerType = FinancialProviderType.crypto
 
-    func authenticate(credentials: FinancialCredentials) async throws {
+    func authenticate(credentials _: FinancialCredentials) async throws {
         // Coinbase API authentication
     }
 
@@ -566,7 +560,7 @@ struct CoinbaseProvider: FinancialProvider {
         []
     }
 
-    func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction] {
+    func fetchTransactions(accountId _: UUID, days _: Int) async throws -> [Transaction] {
         []
     }
 }
@@ -575,7 +569,7 @@ struct PlaidProvider: FinancialProvider {
     let providerName = "Plaid"
     let providerType = FinancialProviderType.bank
 
-    func authenticate(credentials: FinancialCredentials) async throws {
+    func authenticate(credentials _: FinancialCredentials) async throws {
         // Plaid Link authentication
     }
 
@@ -583,7 +577,7 @@ struct PlaidProvider: FinancialProvider {
         []
     }
 
-    func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction] {
+    func fetchTransactions(accountId _: UUID, days _: Int) async throws -> [Transaction] {
         []
     }
 }
@@ -601,17 +595,17 @@ enum FinancialError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .providerNotFound:
-            return "Financial provider not found"
+            "Financial provider not found"
         case .noAccountsFound:
-            return "No accounts found"
+            "No accounts found"
         case .authenticationFailed:
-            return "Authentication failed"
-        case .invalidCredentials(let message):
-            return "Invalid credentials: \(message)"
-        case .connectionFailed(let message):
-            return "Connection failed: \(message)"
+            "Authentication failed"
+        case let .invalidCredentials(message):
+            "Invalid credentials: \(message)"
+        case let .connectionFailed(message):
+            "Connection failed: \(message)"
         case .unauthorized:
-            return "Unauthorized access"
+            "Unauthorized access"
         }
     }
 }

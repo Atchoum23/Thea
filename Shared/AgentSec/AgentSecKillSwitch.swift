@@ -112,7 +112,7 @@ public final class AgentSecKillSwitch: ObservableObject {
     }
 
     /// Force reset (for testing only)
-    internal func forceReset() {
+    func forceReset() {
         isTriggered = false
         triggerReason = nil
         triggerTimestamp = nil
@@ -135,15 +135,15 @@ public final class AgentSecKillSwitch: ObservableObject {
 
 // MARK: - Notification Names
 
-extension Notification.Name {
-    public static let agentSecKillSwitchTriggered = Notification.Name("com.thea.agentSecKillSwitchTriggered")
-    public static let agentSecKillSwitchReset = Notification.Name("com.thea.agentSecKillSwitchReset")
+public extension Notification.Name {
+    static let agentSecKillSwitchTriggered = Notification.Name("com.thea.agentSecKillSwitchTriggered")
+    static let agentSecKillSwitchReset = Notification.Name("com.thea.agentSecKillSwitchReset")
 }
 
 // MARK: - Operation Guard
 
 /// Convenience wrapper for guarding operations with kill switch
-public struct KillSwitchGuard {
+public enum KillSwitchGuard {
     /// Execute an operation only if kill switch is not triggered
     /// - Parameters:
     ///   - operation: The operation to execute
@@ -197,10 +197,10 @@ public enum KillSwitchError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .operationHalted(let reason):
-            return "Operation halted by kill switch: \(reason)"
+        case let .operationHalted(reason):
+            "Operation halted by kill switch: \(reason)"
         case .killSwitchActive:
-            return "Kill switch is active - all operations halted"
+            "Kill switch is active - all operations halted"
         }
     }
 }

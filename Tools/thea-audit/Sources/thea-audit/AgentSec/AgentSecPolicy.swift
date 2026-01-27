@@ -36,11 +36,11 @@ struct AgentSecPolicy: Codable, Sendable {
                     "127.0.0.1",
                     "::1",
                     "0.0.0.0",
-                    "169.254.169.254",           // AWS metadata
-                    "metadata.google.internal",   // GCP metadata
-                    "169.254.170.2",             // ECS metadata
-                    "10.*",                      // Private Class A
-                    "172.16.*",                  // Private Class B
+                    "169.254.169.254", // AWS metadata
+                    "metadata.google.internal", // GCP metadata
+                    "169.254.170.2", // ECS metadata
+                    "10.*", // Private Class A
+                    "172.16.*", // Private Class B
                     "172.17.*",
                     "172.18.*",
                     "172.19.*",
@@ -56,7 +56,7 @@ struct AgentSecPolicy: Codable, Sendable {
                     "172.29.*",
                     "172.30.*",
                     "172.31.*",
-                    "192.168.*"                  // Private Class C
+                    "192.168.*" // Private Class C
                 ],
                 allowExternalRequests: true,
                 maxRequestTimeout: 30
@@ -121,19 +121,19 @@ struct AgentSecPolicy: Codable, Sendable {
                     "rm -rf /",
                     "rm -rf /*",
                     "rm -rf ~",
-                    ":(){ :|:& };:",              // Fork bomb
+                    ":(){ :|:& };:", // Fork bomb
                     "dd if=/dev/zero of=/dev/",
                     "mkfs",
                     "> /dev/sda",
                     "chmod -R 777 /",
                     "chown -R nobody /",
-                    "curl.*\\|.*sh",              // Remote code execution
+                    "curl.*\\|.*sh", // Remote code execution
                     "wget.*\\|.*bash",
                     "curl.*\\|.*python",
                     "\\|\\s*base64\\s+-d\\s*\\|",
                     "eval\\s*\\(",
-                    "nc\\s+-e",                   // Netcat reverse shell
-                    "bash\\s+-i.*>&",             // Bash reverse shell
+                    "nc\\s+-e", // Netcat reverse shell
+                    "bash\\s+-i.*>&", // Bash reverse shell
                     "/dev/tcp/"
                 ],
                 requireApprovalPatterns: [

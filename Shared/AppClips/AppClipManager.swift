@@ -1,14 +1,21 @@
 // AppClipManager.swift
 // App Clip support for instant experiences
 
+import Combine
+import CoreLocation
 import Foundation
 import OSLog
-import Combine
 #if canImport(AppClip)
-import AppClip
+    import AppClip
 #endif
 #if canImport(StoreKit)
-import StoreKit
+    import StoreKit
+#endif
+#if canImport(UIKit)
+    import UIKit
+#endif
+#if os(macOS)
+    import AppKit
 #endif
 
 // MARK: - App Clip Manager
@@ -42,19 +49,22 @@ public final class AppClipManager: ObservableObject {
     private func detectEnvironment() {
         // Check if running as App Clip
         #if APPCLIP
-        isAppClip = true
-        logger.info("Running as App Clip")
+            isAppClip = true
+            logger.info("Running as App Clip")
         #else
-        isAppClip = false
+            isAppClip = false
         #endif
     }
 
     private func checkFullAppInstalled() {
         // Check if full app is installed
-        if let fullAppURL = URL(string: "thea://"),
-           UIApplication.shared.canOpenURL(fullAppURL) {
-            hasFullApp = true
-        }
+        #if canImport(UIKit) && !os(macOS)
+            if let fullAppURL = URL(string: "thea://"),
+               UIApplication.shared.canOpenURL(fullAppURL)
+            {
+                hasFullApp = true
+            }
+        #endif
     }
 
     // MARK: - Invocation Handling
@@ -164,62 +174,66 @@ public final class AppClipManager: ObservableObject {
     // MARK: - Location Verification
 
     #if canImport(AppClip)
-    /// Verify user location for physical App Clip codes
-    public func verifyLocation(for activity: NSUserActivity) async -> LocationVerificationResult {
-        guard let payload = activity.appClipActivationPayload else {
-            return LocationVerificationResult(verified: false, reason: "No activation payload")
-        }
-
-        // Define expected regions for your App Clip codes
-        let expectedRegions: [CLRegion] = [
-            // Add your expected regions here
-            // CLCircularRegion(center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), radius: 100, identifier: "SF-Office")
-        ]
-
-        for region in expectedRegions {
-            do {
-                try await payload.confirmAcquired(in: region)
-                logger.info("Location verified for region: \(region.identifier)")
-                return LocationVerificationResult(verified: true, region: region.identifier)
-            } catch {
-                logger.debug("Location not in region: \(region.identifier)")
+        /// Verify user location for physical App Clip codes
+        public func verifyLocation(for activity: NSUserActivity) async -> LocationVerificationResult {
+            guard let payload = activity.appClipActivationPayload else {
+                return LocationVerificationResult(verified: false, reason: "No activation payload")
             }
-        }
 
-        return LocationVerificationResult(verified: false, reason: "Location not in expected region")
-    }
+            // Define expected regions for your App Clip codes
+            let expectedRegions: [CLRegion] = [
+                // Add your expected regions here
+                // CLCircularRegion(center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), radius: 100, identifier: "SF-Office")
+            ]
+
+            for region in expectedRegions {
+                do {
+                    try await payload.confirmAcquired(in: region)
+                    logger.info("Location verified for region: \(region.identifier)")
+                    return LocationVerificationResult(verified: true, region: region.identifier)
+                } catch {
+                    logger.debug("Location not in region: \(region.identifier)")
+                }
+            }
+
+            return LocationVerificationResult(verified: false, reason: "Location not in expected region")
+        }
     #endif
 
     // MARK: - Full App Promotion
 
     /// Show overlay to promote full app download
-    #if canImport(StoreKit)
-    public func promoteFullApp() async {
-        guard isAppClip else { return }
+    #if canImport(StoreKit) && canImport(UIKit) && !os(macOS)
+        public func promoteFullApp() async {
+            guard isAppClip else { return }
 
-        // Use SKOverlay for smooth promotion
-        let configuration = SKOverlay.AppClipConfiguration(position: .bottom)
-        let overlay = SKOverlay(configuration: configuration)
+            // Use SKOverlay for smooth promotion
+            let configuration = SKOverlay.AppClipConfiguration(position: .bottom)
+            let overlay = SKOverlay(configuration: configuration)
 
-        if let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            overlay.present(in: windowScene)
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                overlay.present(in: windowScene)
 
-            AnalyticsManager.shared.track("app_clip_full_app_promotion_shown")
+                AnalyticsManager.shared.track("app_clip_full_app_promotion_shown")
+            }
         }
-    }
 
-    /// Dismiss full app promotion overlay
-    public func dismissPromotion() async {
-        if let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            SKOverlay.dismiss(in: windowScene)
+        /// Dismiss full app promotion overlay
+        public func dismissPromotion() {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                SKOverlay.dismiss(in: windowScene)
+            }
         }
-    }
     #endif
 
     /// Open full app in App Store
     public func openAppStore() {
         if let url = URL(string: "https://apps.apple.com/app/id\(appStoreId)") {
-            UIApplication.shared.open(url)
+            #if canImport(UIKit) && !os(macOS)
+                UIApplication.shared.open(url)
+            #elseif os(macOS)
+                NSWorkspace.shared.open(url)
+            #endif
 
             AnalyticsManager.shared.track("app_clip_open_app_store")
         }
@@ -434,7 +448,7 @@ public struct AppClipMainView: View {
                 VStack(spacing: 16) {
                     TextField("Ask anything...", text: $query, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
-                        .lineLimit(3...6)
+                        .lineLimit(3 ... 6)
 
                     Button(action: submitQuery) {
                         HStack {
@@ -476,7 +490,9 @@ public struct AppClipMainView: View {
                 }
                 .padding()
             }
+            #if !os(macOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
         }
     }
 
@@ -528,13 +544,13 @@ public struct AppClipLimitView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
 
-                #if canImport(StoreKit)
-                Button("Show in App Store") {
-                    Task {
-                        await manager.promoteFullApp()
+                #if canImport(StoreKit) && canImport(UIKit) && !os(macOS)
+                    Button("Show in App Store") {
+                        Task {
+                            await manager.promoteFullApp()
+                        }
                     }
-                }
-                .buttonStyle(.bordered)
+                    .buttonStyle(.bordered)
                 #endif
             }
             .padding()

@@ -2,6 +2,7 @@ import Foundation
 @preconcurrency import SwiftData
 
 // MARK: - Memory System
+
 // Advanced multi-tier memory architecture with consolidation, retrieval, and decay
 
 @MainActor
@@ -143,7 +144,7 @@ final class MemorySystem {
 
         // Sort and limit
         let sorted = scored.sorted { $0.1 > $1.1 }
-        let top = sorted.prefix(actualLimit).map { $0.0 }
+        let top = sorted.prefix(actualLimit).map(\.0)
 
         // Update access statistics
         for memory in top {
@@ -167,7 +168,7 @@ final class MemorySystem {
         }.filter { $0.1 >= actualThreshold }
 
         let sorted = scored.sorted { $0.1 > $1.1 }
-        let top = sorted.prefix(actualLimit).map { $0.0 }
+        let top = sorted.prefix(actualLimit).map(\.0)
 
         // Update access
         for memory in top {
@@ -190,7 +191,7 @@ final class MemorySystem {
         }.filter { $0.1 >= actualThreshold }
 
         let sorted = scored.sorted { $0.1 > $1.1 }
-        let top = sorted.prefix(actualLimit).map { $0.0 }
+        let top = sorted.prefix(actualLimit).map(\.0)
 
         // Update access
         for memory in top {
@@ -214,7 +215,7 @@ final class MemorySystem {
         }.filter { $0.1 >= actualThreshold }
 
         let sorted = scored.sorted { $0.1 > $1.1 }
-        let top = sorted.prefix(actualLimit).map { $0.0 }
+        let top = sorted.prefix(actualLimit).map(\.0)
 
         // Update access
         for memory in top {
@@ -265,8 +266,8 @@ final class MemorySystem {
         let now = Date()
 
         // Decay long-term memories based on last access
-        for i in 0..<longTermMemory.count {
-            let daysSinceAccess = now.timeIntervalSince(longTermMemory[i].lastAccessed) / 86_400
+        for i in 0 ..< longTermMemory.count {
+            let daysSinceAccess = now.timeIntervalSince(longTermMemory[i].lastAccessed) / 86400
             let decayFactor = pow(config.generalDecayRate, Float(daysSinceAccess))
 
             longTermMemory[i].importance *= decayFactor
@@ -278,8 +279,8 @@ final class MemorySystem {
         }
 
         // Decay episodic memories
-        for i in 0..<episodicMemory.count {
-            let daysSinceAccess = now.timeIntervalSince(episodicMemory[i].lastAccessed) / 86_400
+        for i in 0 ..< episodicMemory.count {
+            let daysSinceAccess = now.timeIntervalSince(episodicMemory[i].lastAccessed) / 86400
             let decayFactor = pow(config.generalDecayRate, Float(daysSinceAccess))
 
             episodicMemory[i].importance *= decayFactor
@@ -290,8 +291,8 @@ final class MemorySystem {
         }
 
         // Semantic memories decay more slowly
-        for i in 0..<semanticMemory.count {
-            let daysSinceAccess = now.timeIntervalSince(semanticMemory[i].lastAccessed) / 86_400
+        for i in 0 ..< semanticMemory.count {
+            let daysSinceAccess = now.timeIntervalSince(semanticMemory[i].lastAccessed) / 86400
             let decayFactor = pow(config.semanticDecayRate, Float(daysSinceAccess))
 
             semanticMemory[i].importance *= decayFactor
@@ -320,14 +321,14 @@ final class MemorySystem {
             return []
         }
 
-        let linkedIDs = memory.links.map { $0.targetID }
+        let linkedIDs = memory.links.map(\.targetID)
         return longTermMemory.filter { linkedIDs.contains($0.id) }
     }
 
     // MARK: - Memory Summarization
 
     func summarizeMemories(memories: [Memory]) async throws -> String {
-        let contents = memories.map { $0.content }.joined(separator: "\n")
+        let contents = memories.map(\.content).joined(separator: "\n")
 
         // Use AI to generate summary
         guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
@@ -358,11 +359,11 @@ final class MemorySystem {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 summary += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -376,10 +377,10 @@ final class MemorySystem {
         // Find similar memories and merge them
         var toRemove: Set<UUID> = []
 
-        for i in 0..<longTermMemory.count {
+        for i in 0 ..< longTermMemory.count {
             if toRemove.contains(longTermMemory[i].id) { continue }
 
-            for j in (i + 1)..<longTermMemory.count {
+            for j in (i + 1) ..< longTermMemory.count {
                 if toRemove.contains(longTermMemory[j].id) { continue }
 
                 let similarity = cosineSimilarity(longTermMemory[i].embedding, longTermMemory[j].embedding)
@@ -442,7 +443,7 @@ final class MemorySystem {
     }
 
     private func calculateRecencyBoost(_ lastAccessed: Date) -> Float {
-        let hoursSinceAccess = Date().timeIntervalSince(lastAccessed) / 3_600
+        let hoursSinceAccess = Date().timeIntervalSince(lastAccessed) / 3600
 
         // Exponential decay
         let boost = Float(exp(-hoursSinceAccess / 24))
@@ -626,11 +627,11 @@ enum MemoryError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .apiKeyMissing:
-            return "API key is missing for embedding generation"
+            "API key is missing for embedding generation"
         case .providerNotAvailable:
-            return "AI provider is not available"
+            "AI provider is not available"
         case .embeddingGenerationFailed:
-            return "Failed to generate embedding"
+            "Failed to generate embedding"
         }
     }
 }

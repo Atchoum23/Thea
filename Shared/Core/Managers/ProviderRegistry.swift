@@ -24,12 +24,12 @@ final class ProviderRegistry {
         let metadata: ProviderMetadata
 
         init(provider: AIProvider, isConfigured: Bool) {
-            self.id = provider.metadata.name
-            self.name = provider.metadata.name
-            self.displayName = provider.metadata.displayName
-            self.requiresAPIKey = true
+            id = provider.metadata.name
+            name = provider.metadata.name
+            displayName = provider.metadata.displayName
+            requiresAPIKey = true
             self.isConfigured = isConfigured
-            self.metadata = provider.metadata
+            metadata = provider.metadata
         }
     }
 
@@ -156,7 +156,8 @@ final class ProviderRegistry {
         providers.removeValue(forKey: id)
 
         if let index = availableProviders.firstIndex(where: { $0.id == id }),
-           let provider = createDummyProvider(id: id) {
+           let provider = createDummyProvider(id: id)
+        {
             availableProviders[index] = ProviderInfo(provider: provider, isConfigured: false)
         }
     }
@@ -166,19 +167,19 @@ final class ProviderRegistry {
     private func createDummyProvider(id: String) -> AIProvider? {
         switch id {
         case "openai":
-            return OpenAIProvider(apiKey: "")
+            OpenAIProvider(apiKey: "")
         case "anthropic":
-            return AnthropicProvider(apiKey: "")
+            AnthropicProvider(apiKey: "")
         case "google":
-            return GoogleProvider(apiKey: "")
+            GoogleProvider(apiKey: "")
         case "perplexity":
-            return PerplexityProvider(apiKey: "")
+            PerplexityProvider(apiKey: "")
         case "openrouter":
-            return OpenRouterProvider(apiKey: "")
+            OpenRouterProvider(apiKey: "")
         case "groq":
-            return GroqProvider(apiKey: "")
+            GroqProvider(apiKey: "")
         default:
-            return nil
+            nil
         }
     }
 }

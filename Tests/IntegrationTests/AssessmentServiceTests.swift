@@ -23,7 +23,7 @@ struct AssessmentServiceTests {
     func testSubmitResponse() async throws {
         let service = AssessmentService()
         let progress = try await service.startAssessment(.highSensitivity)
-        let assessmentID = progress.id  // Use the ID from the started assessment
+        let assessmentID = progress.id // Use the ID from the started assessment
 
         let response = QuestionResponse(questionID: UUID(), value: 4)
         try await service.submitResponse(assessmentID: assessmentID, response: response)
@@ -47,11 +47,11 @@ struct AssessmentServiceTests {
     // MARK: - Scoring Tests
 
     @Test("Calculate EQ score")
-    func testCalculateEQScore() async throws {
+    func calculateEQScore() async throws {
         let engine = AssessmentScoringEngine()
 
-        let responses = (0..<30).map { _ in
-            QuestionResponse(questionID: UUID(), value: Int.random(in: 1...5))
+        let responses = (0 ..< 30).map { _ in
+            QuestionResponse(questionID: UUID(), value: Int.random(in: 1 ... 5))
         }
 
         let score = try await engine.calculateScore(
@@ -64,11 +64,11 @@ struct AssessmentServiceTests {
     }
 
     @Test("Calculate HSP score")
-    func testCalculateHSPScore() async throws {
+    func calculateHSPScore() async throws {
         let engine = AssessmentScoringEngine()
 
-        let responses = (0..<27).map { _ in
-            QuestionResponse(questionID: UUID(), value: Int.random(in: 1...5))
+        let responses = (0 ..< 27).map { _ in
+            QuestionResponse(questionID: UUID(), value: Int.random(in: 1 ... 5))
         }
 
         let score = try await engine.calculateScore(
@@ -110,7 +110,7 @@ struct AssessmentServiceTests {
     // MARK: - Score Classification Tests
 
     @Test("Score classification ranges")
-    func testScoreClassification() {
+    func scoreClassification() {
         let veryLowScore = AssessmentScore(overall: 15.0)
         #expect(veryLowScore.classification == .veryLow)
 

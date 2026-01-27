@@ -16,7 +16,7 @@ final class FinancialManager {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
         loadData()
     }
 

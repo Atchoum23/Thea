@@ -13,7 +13,6 @@ import Foundation
 /// Secure file access service for remote operations
 @MainActor
 public class RemoteFileService: ObservableObject {
-
     // MARK: - Published State
 
     @Published public private(set) var isEnabled = true
@@ -39,35 +38,35 @@ public class RemoteFileService: ObservableObject {
 
     public func handleRequest(_ request: FileRequest) async throws -> FileResponse {
         switch request {
-        case .list(let path, let recursive, let showHidden):
-            return try await listDirectory(path: path, recursive: recursive, showHidden: showHidden)
+        case let .list(path, recursive, showHidden):
+            try await listDirectory(path: path, recursive: recursive, showHidden: showHidden)
 
-        case .info(let path):
-            return try await getFileInfo(path: path)
+        case let .info(path):
+            try await getFileInfo(path: path)
 
-        case .read(let path, let offset, let length):
-            return try await readFile(path: path, offset: offset, length: length)
+        case let .read(path, offset, length):
+            try await readFile(path: path, offset: offset, length: length)
 
-        case .write(let path, let data, let offset, let append):
-            return try await writeFile(path: path, data: data, offset: offset, append: append)
+        case let .write(path, data, offset, append):
+            try await writeFile(path: path, data: data, offset: offset, append: append)
 
-        case .delete(let path, let recursive):
-            return try await deleteFile(path: path, recursive: recursive)
+        case let .delete(path, recursive):
+            try await deleteFile(path: path, recursive: recursive)
 
-        case .move(let from, let to):
-            return try await moveFile(from: from, to: to)
+        case let .move(from, to):
+            try await moveFile(from: from, to: to)
 
-        case .copy(let from, let to):
-            return try await copyFile(from: from, to: to)
+        case let .copy(from, to):
+            try await copyFile(from: from, to: to)
 
-        case .createDirectory(let path, let intermediate):
-            return try await createDirectory(path: path, intermediate: intermediate)
+        case let .createDirectory(path, intermediate):
+            try await createDirectory(path: path, intermediate: intermediate)
 
-        case .download(let path):
-            return try await downloadFile(path: path)
+        case let .download(path):
+            try await downloadFile(path: path)
 
-        case .upload(let path, let data, let overwrite):
-            return try await uploadFile(path: path, data: data, overwrite: overwrite)
+        case let .upload(path, data, overwrite):
+            try await uploadFile(path: path, data: data, overwrite: overwrite)
         }
     }
 
@@ -85,7 +84,7 @@ public class RemoteFileService: ObservableObject {
                     let fullPath = (resolvedPath as NSString).appendingPathComponent(relativePath)
                     let name = (relativePath as NSString).lastPathComponent
 
-                    if !showHidden && name.hasPrefix(".") {
+                    if !showHidden, name.hasPrefix(".") {
                         continue
                     }
 
@@ -97,7 +96,7 @@ public class RemoteFileService: ObservableObject {
         } else {
             let contents = try fileManager.contentsOfDirectory(atPath: resolvedPath)
             for name in contents {
-                if !showHidden && name.hasPrefix(".") {
+                if !showHidden, name.hasPrefix(".") {
                     continue
                 }
 
@@ -201,10 +200,10 @@ public class RemoteFileService: ObservableObject {
             return .error("Path not found: \(path)")
         }
 
-        if isDirectory.boolValue && !recursive {
+        if isDirectory.boolValue, !recursive {
             // Check if directory is empty
             let contents = try? fileManager.contentsOfDirectory(atPath: resolvedPath)
-            if let contents = contents, !contents.isEmpty {
+            if let contents, !contents.isEmpty {
                 return .error("Directory is not empty. Use recursive delete.")
             }
         }
@@ -308,7 +307,7 @@ public class RemoteFileService: ObservableObject {
 
         let fileManager = FileManager.default
 
-        if fileManager.fileExists(atPath: resolvedPath) && !overwrite {
+        if fileManager.fileExists(atPath: resolvedPath), !overwrite {
             return .error("File already exists and overwrite is disabled")
         }
 
@@ -328,7 +327,7 @@ public class RemoteFileService: ObservableObject {
 
     // MARK: - Helpers
 
-    private func createFileItem(at path: String, relativePath: String) throws -> FileItem {
+    private func createFileItem(at path: String, relativePath _: String) throws -> FileItem {
         let fileManager = FileManager.default
         let attributes = try fileManager.attributesOfItem(atPath: path)
 
@@ -398,7 +397,6 @@ public struct TransferProgress: Sendable {
 // MARK: - File Security Manager
 
 private class FileSecurityManager {
-
     func validateAndResolvePath(_ path: String, allowedPaths: [String], blockedPaths: [String]) throws -> String {
         // Expand tilde
         let expandedPath = (path as NSString).expandingTildeInPath
@@ -452,9 +450,9 @@ public enum FileSecurityError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .pathTraversalAttempt: return "Path traversal attack detected"
-        case .invalidPath(let reason): return "Invalid path: \(reason)"
-        case .accessDenied(let reason): return "Access denied: \(reason)"
+        case .pathTraversalAttempt: "Path traversal attack detected"
+        case let .invalidPath(reason): "Invalid path: \(reason)"
+        case let .accessDenied(reason): "Access denied: \(reason)"
         }
     }
 }

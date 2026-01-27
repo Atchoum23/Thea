@@ -6,41 +6,111 @@ options:
     iOS: "17.0"
     watchOS: "10.0"
     tvOS: "17.0"
-    visionOS: "1.0"
-  xcodeVersion: "15.0"
+    visionOS: "2.0"
+  xcodeVersion: "16.0"
   generateEmptyDirectories: true
   groupSortPosition: top
   developmentLanguage: en
   indentWidth: 4
   tabWidth: 4
   usesTabs: false
+  defaultConfig: Release
+  createIntermediateGroups: true
+  transitivelyLinkDependencies: true
 
+# ============================================
+# Project-Level Build Settings
+# ============================================
 settings:
   base:
+    # Version Information
     MARKETING_VERSION: "1.5.0"
-    CURRENT_PROJECT_VERSION: "1.5.0"
+    CURRENT_PROJECT_VERSION: "15"
+
+    # Swift Configuration
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
-    ENABLE_USER_SCRIPT_SANDBOXING: false
-    CLANG_ENABLE_MODULES: true
-    # Disable module interface emission (not needed for app targets)
     SWIFT_EMIT_MODULE_INTERFACE: false
     BUILD_LIBRARY_FOR_DISTRIBUTION: false
-    # Signing - inherited by all targets
+
+    # Code Signing
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: 6B66PM4JLK
-    # Recommended settings from Xcode
+
+    # Build Options
     DEAD_CODE_STRIPPING: YES
-    SWIFT_EMIT_LOC_STRINGS: YES
-    # Enable String Catalog Symbol Generation (Xcode recommended)
+    ENABLE_USER_SCRIPT_SANDBOXING: false
+    CLANG_ENABLE_MODULES: true
+    ENABLE_STRICT_OBJC_MSGSEND: YES
+    GCC_NO_COMMON_BLOCKS: YES
+
+    # Swift Package Dependencies
+    SWIFT_INCLUDE_PATHS: "$(inherited)"
+
+    # Localization (Xcode recommended)
     LOCALIZATION_EXPORT_SUPPORTED: YES
-    # Enable String Catalog Symbol Generation (from Xcode recommended settings)
     SWIFT_EMIT_LOC_STRINGS: YES
-    # Enable String Catalog Symbol Generation for accessing manually-added strings
     STRINGS_CATALOG_GENERATE_SYMBOL: YES
-    # Enable Asset Catalog Compiler options
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+
+    # Asset Catalog
     ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
 
+    # Architectures
+    ONLY_ACTIVE_ARCH: NO
+
+    # Warnings
+    CLANG_ANALYZER_NONNULL: YES
+    CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION: YES_AGGRESSIVE
+    CLANG_WARN_DOCUMENTATION_COMMENTS: YES
+    CLANG_WARN_UNGUARDED_AVAILABILITY: YES_AGGRESSIVE
+    GCC_WARN_64_TO_32_BIT_CONVERSION: YES
+    GCC_WARN_ABOUT_RETURN_TYPE: YES_ERROR
+    GCC_WARN_UNDECLARED_SELECTOR: YES
+    GCC_WARN_UNINITIALIZED_AUTOS: YES_AGGRESSIVE
+    GCC_WARN_UNUSED_FUNCTION: YES
+    GCC_WARN_UNUSED_VARIABLE: YES
+
+    # Security
+    ENABLE_NS_ASSERTIONS: NO
+
+  debug:
+    ONLY_ACTIVE_ARCH: YES
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+    SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+    SWIFT_COMPILATION_MODE: singlefile
+    DEBUG_INFORMATION_FORMAT: dwarf
+    GCC_OPTIMIZATION_LEVEL: "0"
+    ENABLE_TESTABILITY: YES
+    ENABLE_NS_ASSERTIONS: YES
+    MTL_ENABLE_DEBUG_INFO: INCLUDE_SOURCE
+    COPY_PHASE_STRIP: NO
+    GCC_DYNAMIC_NO_PIC: NO
+    GCC_PREPROCESSOR_DEFINITIONS:
+      - "$(inherited)"
+      - "DEBUG=1"
+
+  release:
+    SWIFT_OPTIMIZATION_LEVEL: "-O"
+    SWIFT_COMPILATION_MODE: wholemodule
+    DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
+    COPY_PHASE_STRIP: NO
+    ENABLE_NS_ASSERTIONS: NO
+    MTL_FAST_MATH: YES
+    VALIDATE_PRODUCT: YES
+
+    # Link Time Optimization
+    LLVM_LTO: YES_THIN
+
+    # Strip Symbols
+    STRIP_INSTALLED_PRODUCT: YES
+    STRIP_STYLE: all
+    STRIP_SWIFT_SYMBOLS: YES
+    DEPLOYMENT_POSTPROCESSING: YES
+
+# ============================================
+# Package Dependencies
+# ============================================
 packages:
   OpenAI:
     url: https://github.com/MacPaw/OpenAI
@@ -55,6 +125,9 @@ packages:
     url: https://github.com/raspu/Highlightr
     from: 2.1.0
 
+# ============================================
+# Targets
+# ============================================
 targets:
   # ============ macOS App ============
   Thea-macOS:
@@ -80,34 +153,49 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         COMBINE_HIDPI_IMAGES: true
-        # Hardened runtime for macOS (recommended)
+
+        # Hardened Runtime (required for notarization)
         ENABLE_HARDENED_RUNTIME: YES
-        # Enable Register App Groups (Xcode recommended)
+
+        # App Sandbox
+        ENABLE_APP_SANDBOX: YES
+
+        # Network Connections (build setting migration)
+        ENABLE_INCOMING_NETWORK_CONNECTIONS: YES
+        ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+
+        # App Groups
         REGISTER_APP_GROUPS: YES
+
+        # Code Signing Identity
+        CODE_SIGN_IDENTITY: "Apple Development"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+
       debug:
-        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_IDENTITY: "Apple Development"
+
       release:
-        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+
     dependencies:
       - package: OpenAI
       - package: KeychainAccess
       - package: MarkdownUI
       - package: Highlightr
-    info:
-      path: Shared/Resources/Info.plist
-      properties:
-        CFBundleDisplayName: Thea
-        CFBundleName: Thea
-        CFBundleExecutable: $(EXECUTABLE_NAME)
-        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleInfoDictionaryVersion: "6.0"
-        CFBundlePackageType: APPL
-        CFBundleShortVersionString: $(MARKETING_VERSION)
-        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
-        NSHumanReadableCopyright: "Copyright © 2026 Thea. All rights reserved."
-        NSMainStoryboardFile: ""
-        NSPrincipalClass: NSApplication
+      - target: TheaFinderSyncExtension
+        embed: true
+        codeSign: true
+      - target: TheaQuickLookExtension
+        embed: true
+        codeSign: true
+      - target: TheaSafariExtensionMac
+        embed: true
+        codeSign: true
 
   # ============ iOS App ============
   Thea-iOS:
@@ -133,14 +221,13 @@ targets:
           - "**/DisplayModels.swift"
           - "**/MLXModelManager.swift"
           - "**/ScreenshotPreview.swift"
-          - "**/HandoffManager.swift"
           - "**/LocalModelsView.swift"
           - "**/LocalModelsSettingsView.swift"
           - "**/FolderAccessManager.swift"
-          # Remote server macOS-specific files excluded on iOS
           - "**/RemoteScreenService.swift"
           - "**/RemoteInputService.swift"
           - "**/RemoteSystemService.swift"
+          - "**/Resources/Info.plist"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
     settings:
@@ -148,37 +235,57 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios
         PRODUCT_NAME: Thea
         PRODUCT_MODULE_NAME: TheaCore
-        INFOPLIST_FILE: Shared/Resources/Info.plist
+        INFOPLIST_FILE: iOS/Info.plist
         CODE_SIGN_ENTITLEMENTS: iOS/Thea.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1,2"
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         SUPPORTS_MACCATALYST: false
+
+        # Code Signing Identity
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+
+      debug:
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+
     dependencies:
       - package: OpenAI
       - package: KeychainAccess
       - package: MarkdownUI
       - package: Highlightr
-    info:
-      path: Shared/Resources/Info.plist
-      properties:
-        CFBundleDisplayName: Thea
-        CFBundleName: Thea
-        CFBundleExecutable: $(EXECUTABLE_NAME)
-        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleInfoDictionaryVersion: "6.0"
-        CFBundlePackageType: APPL
-        CFBundleShortVersionString: $(MARKETING_VERSION)
-        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        UILaunchScreen: {}
-        UISupportedInterfaceOrientations:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
-        UISupportedInterfaceOrientations~ipad:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationPortraitUpsideDown
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
+      - target: TheaShareExtension
+        embed: true
+        codeSign: true
+      - target: TheaWidgetExtension
+        embed: true
+        codeSign: true
+      - target: TheaKeyboardExtension
+        embed: true
+        codeSign: true
+      - target: TheaNotificationServiceExtension
+        embed: true
+        codeSign: true
+      - target: TheaSafariExtension
+        embed: true
+        codeSign: true
+      - target: TheaFocusFilterExtension
+        embed: true
+        codeSign: true
+      - target: TheaCredentialsExtension
+        embed: true
+        codeSign: true
+      - target: TheaIntentsExtension
+        embed: true
+        codeSign: true
 
   # ============ watchOS App ============
   Thea-watchOS:
@@ -186,43 +293,36 @@ targets:
     platform: watchOS
     deploymentTarget: "10.0"
     sources:
-      - path: Shared/Core
-        excludes:
-          - "**/*macOS*"
-          - "**/*iOS*"
-          - "**/*tvOS*"
-          - "**/*.md"
-      - path: Shared/AI
-        excludes:
-          - "**/*macOS*"
-          - "**/*iOS*"
-          - "**/*tvOS*"
       - path: watchOS
-      - path: Shared/Resources/Assets.xcassets
+        excludes:
+          - "**/WatchFeatures/**"
+          - "**/Views/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.watchos
         PRODUCT_NAME: "Thea Watch"
         PRODUCT_MODULE_NAME: TheaWatch
         INFOPLIST_FILE: watchOS/Info.plist
+        CODE_SIGN_ENTITLEMENTS: watchOS/Thea.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
         WATCHOS_DEPLOYMENT_TARGET: "10.0"
         TARGETED_DEVICE_FAMILY: 4
         SKIP_INSTALL: NO
+
+        # Code Signing Identity
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+
     dependencies:
       - package: KeychainAccess
-    info:
-      path: watchOS/Info.plist
-      properties:
-        CFBundleDisplayName: "Thea Watch"
-        CFBundleName: "Thea Watch"
-        CFBundleExecutable: $(EXECUTABLE_NAME)
-        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleInfoDictionaryVersion: "6.0"
-        CFBundlePackageType: APPL
-        CFBundleShortVersionString: $(MARKETING_VERSION)
-        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        WKApplication: true
-        WKRunsIndependentlyOfCompanionApp: true
 
   # ============ tvOS App ============
   Thea-tvOS:
@@ -230,32 +330,9 @@ targets:
     platform: tvOS
     deploymentTarget: "17.0"
     sources:
-      - path: Shared
-        excludes:
-          - "**/*macOS*"
-          - "**/*iOS*"
-          - "**/*watchOS*"
-          - "**/*.md"
-          - "**/Terminal/**"
-          - "**/ScreenCapture.swift"
-          - "**/InputTrackingManager.swift"
-          - "**/*AutomationEngine.swift"
-          - "**/AppIntegration/**"
-          - "**/TerminalService.swift"
-          - "**/TerminalIntegration.swift"
-          - "**/DisplayProfileManager.swift"
-          - "**/DisplayService.swift"
-          - "**/DisplayModels.swift"
-          - "**/MLXModelManager.swift"
-          - "**/ScreenshotPreview.swift"
-          - "**/HandoffManager.swift"
-          - "**/LocalModelsView.swift"
-          - "**/LocalModelsSettingsView.swift"
-          - "**/FolderAccessManager.swift"
-          - "**/RemoteScreenService.swift"
-          - "**/RemoteInputService.swift"
-          - "**/RemoteSystemService.swift"
       - path: tvOS
+        excludes:
+          - "**/TVFeatures/**"
       - path: Shared/Resources/Assets.xcassets
     settings:
       base:
@@ -263,25 +340,257 @@ targets:
         PRODUCT_NAME: "Thea TV"
         PRODUCT_MODULE_NAME: TheaTV
         INFOPLIST_FILE: tvOS/Info.plist
+        CODE_SIGN_ENTITLEMENTS: tvOS/Thea.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
         TVOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: 3
+
+        # Code Signing Identity
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+
     dependencies:
       - package: OpenAI
       - package: KeychainAccess
       - package: MarkdownUI
-    info:
-      path: tvOS/Info.plist
-      properties:
-        CFBundleDisplayName: "Thea TV"
-        CFBundleName: "Thea TV"
-        CFBundleExecutable: $(EXECUTABLE_NAME)
-        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-        CFBundleInfoDictionaryVersion: "6.0"
-        CFBundlePackageType: APPL
-        CFBundleShortVersionString: $(MARKETING_VERSION)
-        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        UILaunchScreen: {}
-        UIUserInterfaceStyle: Automatic
+
+  # ============================================
+  # iOS Extensions
+  # ============================================
+
+  # ============ Share Extension (iOS) ============
+  TheaShareExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Extensions/ShareExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.share
+        PRODUCT_NAME: "Share to Thea"
+        INFOPLIST_FILE: Extensions/ShareExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/ShareExtension/ShareExtension.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+
+  # ============ Widget Extension (iOS) ============
+  TheaWidgetExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Extensions/WidgetExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.widgets
+        PRODUCT_NAME: "Thea Widgets"
+        INFOPLIST_FILE: Extensions/WidgetExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/WidgetExtension/WidgetExtension.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+
+  # ============ Keyboard Extension (iOS) ============
+  TheaKeyboardExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Extensions/KeyboardExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.keyboard
+        PRODUCT_NAME: "Thea Keyboard"
+        INFOPLIST_FILE: Extensions/KeyboardExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/KeyboardExtension/KeyboardExtension.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+
+  # ============ Notification Service Extension (iOS) ============
+  TheaNotificationServiceExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Extensions/NotificationServiceExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.notifications
+        PRODUCT_NAME: "Thea Notifications"
+        INFOPLIST_FILE: Extensions/NotificationServiceExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/NotificationServiceExtension/NotificationServiceExtension.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+
+  # ============================================
+  # macOS Extensions
+  # ============================================
+
+  # ============ Finder Sync Extension (macOS) ============
+  TheaFinderSyncExtension:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Extensions/FinderSyncExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.finder
+        PRODUCT_NAME: "Thea Finder"
+        INFOPLIST_FILE: Extensions/FinderSyncExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/FinderSyncExtension/FinderSyncExtension.entitlements
+        SKIP_INSTALL: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: YES
+        REGISTER_APP_GROUPS: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@executable_path/../../../../Frameworks"
+
+  # ============ Quick Look Extension (macOS) ============
+  TheaQuickLookExtension:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Extensions/QuickLookExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.quicklook
+        PRODUCT_NAME: "Thea Quick Look"
+        INFOPLIST_FILE: Extensions/QuickLookExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/QuickLookExtension/QuickLookExtension.entitlements
+        SKIP_INSTALL: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: YES
+        REGISTER_APP_GROUPS: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@executable_path/../../../../Frameworks"
+
+  # ============ Safari Extension (macOS) ============
+  TheaSafariExtensionMac:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Extensions/SafariExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.safari
+        PRODUCT_NAME: "Thea Safari"
+        INFOPLIST_FILE: Extensions/SafariExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/SafariExtension/SafariExtension.entitlements
+        SKIP_INSTALL: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: YES
+        REGISTER_APP_GROUPS: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@executable_path/../../../../Frameworks"
+
+  # ============================================
+  # Additional iOS Extensions
+  # ============================================
+
+  # ============ Safari Extension (iOS) ============
+  TheaSafariExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Extensions/SafariExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.safari
+        PRODUCT_NAME: "Thea Safari"
+        INFOPLIST_FILE: Extensions/SafariExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/SafariExtension/SafariExtension.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+
+  # ============ Focus Filter Extension (iOS) ============
+  TheaFocusFilterExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Extensions/FocusFilterExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.focusfilter
+        PRODUCT_NAME: "Thea Focus"
+        INFOPLIST_FILE: Extensions/FocusFilterExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/FocusFilterExtension/FocusFilterExtension.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+
+  # ============ Credentials Extension (iOS) ============
+  TheaCredentialsExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Extensions/CredentialsExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.credentials
+        PRODUCT_NAME: "Thea Credentials"
+        INFOPLIST_FILE: Extensions/CredentialsExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/CredentialsExtension/CredentialsExtension.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+
+  # ============ Intents Extension (iOS) ============
+  TheaIntentsExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Extensions/IntentsExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.intents
+        PRODUCT_NAME: "Thea Intents"
+        INFOPLIST_FILE: Extensions/IntentsExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/IntentsExtension/IntentsExtension.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
 
   # ============ Tests ============
   TheaTests:
@@ -296,16 +605,61 @@ targets:
         INFOPLIST_FILE: Tests/Info.plist
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Thea.app/Contents/MacOS/Thea"
         BUNDLE_LOADER: "$(TEST_HOST)"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        COMBINE_HIDPI_IMAGES: YES
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@loader_path/../Frameworks"
+
     dependencies:
       - target: Thea-macOS
       - package: OpenAI
       - package: KeychainAccess
 
+# ============================================
+# Schemes
+# ============================================
 schemes:
   Thea-macOS:
     build:
       targets:
         Thea-macOS: all
+      parallelizeBuild: true
+      buildImplicitDependencies: true
+    run:
+      config: Debug
+      commandLineArguments:
+        "-com.apple.CoreData.ConcurrencyDebug": true
+      environmentVariables:
+        - variable: SQLITE_ENABLE_THREAD_ASSERTIONS
+          value: "1"
+          isEnabled: true
+    test:
+      config: Debug
+      gatherCoverageData: true
+      coverageTargets:
+        - Thea-macOS
+      targets:
+        - name: TheaTests
+          parallelizable: true
+          randomExecutionOrder: true
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+      revealArchiveInOrganizer: true
+
+  Thea-iOS:
+    build:
+      targets:
+        Thea-iOS: all
+      parallelizeBuild: true
+      buildImplicitDependencies: true
     run:
       config: Debug
       commandLineArguments:
@@ -313,35 +667,22 @@ schemes:
     test:
       config: Debug
       gatherCoverageData: true
-      targets:
-        - TheaTests
+      coverageTargets:
+        - Thea-iOS
     profile:
       config: Release
     analyze:
       config: Debug
     archive:
       config: Release
-
-  Thea-iOS:
-    build:
-      targets:
-        Thea-iOS: all
-    run:
-      config: Debug
-    test:
-      config: Debug
-      gatherCoverageData: true
-    profile:
-      config: Release
-    analyze:
-      config: Debug
-    archive:
-      config: Release
+      revealArchiveInOrganizer: true
 
   Thea-watchOS:
     build:
       targets:
         Thea-watchOS: all
+      parallelizeBuild: true
+      buildImplicitDependencies: true
     run:
       config: Debug
     profile:
@@ -350,19 +691,25 @@ schemes:
       config: Debug
     archive:
       config: Release
+      revealArchiveInOrganizer: true
 
   Thea-tvOS:
     build:
       targets:
         Thea-tvOS: all
+      parallelizeBuild: true
+      buildImplicitDependencies: true
     run:
       config: Debug
     test:
       config: Debug
       gatherCoverageData: true
+      coverageTargets:
+        - Thea-tvOS
     profile:
       config: Release
     analyze:
       config: Debug
     archive:
       config: Release
+      revealArchiveInOrganizer: true

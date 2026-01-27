@@ -6,8 +6,8 @@
 //  Provides on-device AI capabilities using Apple's ~3B parameter model
 //
 
-import Foundation
 import Combine
+import Foundation
 
 // MARK: - On-Device AI Service
 
@@ -40,10 +40,10 @@ public class OnDeviceAIService: ObservableObject {
     /// Check if on-device AI is available
     public func checkAvailability() async {
         #if canImport(FoundationModels)
-        // Foundation Models framework available in iOS 18.4+ / macOS 15.4+
-        isAvailable = true
+            // Foundation Models framework available in iOS 18.4+ / macOS 15.4+
+            isAvailable = true
         #else
-        isAvailable = false
+            isAvailable = false
         #endif
     }
 
@@ -51,9 +51,9 @@ public class OnDeviceAIService: ObservableObject {
 
     /// Generate text using on-device AI
     public func generateText(
-        prompt: String,
-        systemPrompt: String? = nil,
-        streaming: Bool = false
+        prompt _: String,
+        systemPrompt _: String? = nil,
+        streaming _: Bool = false
     ) async throws -> String {
         guard isAvailable else {
             throw OnDeviceAIError.notAvailable
@@ -113,7 +113,7 @@ public class OnDeviceAIService: ObservableObject {
     // MARK: - Entity Extraction
 
     /// Extract entities from text
-    public func extractEntities(from text: String) async throws -> [ExtractedEntity] {
+    public func extractEntities(from text: String) async throws -> [OnDeviceExtractedEntity] {
         let prompt = """
         Extract all named entities (people, places, organizations, dates, etc.) from the following text.
         Return them in a structured format.
@@ -127,9 +127,9 @@ public class OnDeviceAIService: ObservableObject {
         return parseEntities(from: response)
     }
 
-    private func parseEntities(from response: String) -> [ExtractedEntity] {
+    private func parseEntities(from _: String) -> [OnDeviceExtractedEntity] {
         // Simplified entity parsing
-        return []
+        []
     }
 
     // MARK: - Text Refinement
@@ -192,10 +192,10 @@ public enum SummarizationStyle: String, Sendable {
 
     var description: String {
         switch self {
-        case .concise: return "concise and brief"
-        case .detailed: return "detailed and comprehensive"
-        case .bullets: return "bullet point format"
-        case .keyPoints: return "key points only"
+        case .concise: "concise and brief"
+        case .detailed: "detailed and comprehensive"
+        case .bullets: "bullet point format"
+        case .keyPoints: "key points only"
         }
     }
 }
@@ -210,23 +210,23 @@ public enum RefinementStyle: String, Sendable {
     var description: String { rawValue }
 }
 
-public struct ExtractedEntity: Identifiable, Sendable {
+public struct OnDeviceExtractedEntity: Identifiable, Sendable {
     public let id = UUID()
     public let text: String
-    public let type: EntityType
+    public let type: OnDeviceEntityType
     public let confidence: Double
+}
 
-    public enum EntityType: String, Sendable {
-        case person
-        case place
-        case organization
-        case date
-        case money
-        case email
-        case phone
-        case url
-        case other
-    }
+public enum OnDeviceEntityType: String, Sendable {
+    case person
+    case place
+    case organization
+    case date
+    case money
+    case email
+    case phone
+    case url
+    case other
 }
 
 // MARK: - Errors
@@ -241,15 +241,15 @@ public enum OnDeviceAIError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .notAvailable:
-            return "On-device AI is not available on this device. Requires iOS 18.4+ or macOS 15.4+"
-        case .processingFailed(let reason):
-            return "Processing failed: \(reason)"
+            "On-device AI is not available on this device. Requires iOS 18.4+ or macOS 15.4+"
+        case let .processingFailed(reason):
+            "Processing failed: \(reason)"
         case .quotaExceeded:
-            return "On-device AI quota exceeded. Please try again later."
+            "On-device AI quota exceeded. Please try again later."
         case .invalidInput:
-            return "Invalid input provided"
+            "Invalid input provided"
         case .modelNotLoaded:
-            return "AI model is not loaded"
+            "AI model is not loaded"
         }
     }
 }

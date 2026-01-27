@@ -85,9 +85,9 @@ public struct UnifiedDashboardView: View {
             NutritionDashboardView()
         case .display:
             #if os(macOS)
-            DisplayDashboardView()
+                DisplayDashboardView()
             #else
-            Text("Display module only available on macOS")
+                Text("Display module only available on macOS")
             #endif
         case .income:
             IncomeDashboardView()
@@ -126,31 +126,32 @@ private struct ModuleRow: View {
 private struct ModuleSettingsView: View {
     @Bindable var coordinator: IntegrationCoordinator
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var featureFlags = FeatureFlags.shared
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Health & Wellness") {
-                    Toggle("Health Tracking", isOn: $coordinator.featureFlags.healthEnabled)
-                    Toggle("Wellness & Circadian", isOn: $coordinator.featureFlags.wellnessEnabled)
-                    Toggle("Cognitive Support", isOn: $coordinator.featureFlags.cognitiveEnabled)
+                    Toggle("Health Tracking", isOn: $featureFlags.healthEnabled)
+                    Toggle("Wellness & Circadian", isOn: $featureFlags.wellnessEnabled)
+                    Toggle("Cognitive Support", isOn: $featureFlags.cognitiveEnabled)
                 }
 
                 Section("Professional") {
-                    Toggle("Financial Tracking", isOn: $coordinator.featureFlags.financialEnabled)
-                    Toggle("Career Development", isOn: $coordinator.featureFlags.careerEnabled)
-                    Toggle("Income Analytics", isOn: $coordinator.featureFlags.incomeEnabled)
+                    Toggle("Financial Tracking", isOn: $featureFlags.financialEnabled)
+                    Toggle("Career Development", isOn: $featureFlags.careerEnabled)
+                    Toggle("Income Analytics", isOn: $featureFlags.incomeEnabled)
                 }
 
                 Section("Assessment & Nutrition") {
-                    Toggle("Psychological Assessments", isOn: $coordinator.featureFlags.assessmentEnabled)
-                    Toggle("Nutrition Tracking", isOn: $coordinator.featureFlags.nutritionEnabled)
+                    Toggle("Psychological Assessments", isOn: $featureFlags.assessmentEnabled)
+                    Toggle("Nutrition Tracking", isOn: $featureFlags.nutritionEnabled)
                 }
 
                 #if os(macOS)
-                Section("Display (macOS)") {
-                    Toggle("Display Control", isOn: $coordinator.featureFlags.displayEnabled)
-                }
+                    Section("Display (macOS)") {
+                        Toggle("Display Control", isOn: $featureFlags.displayEnabled)
+                    }
                 #endif
             }
             .navigationTitle("Module Settings")

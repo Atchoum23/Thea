@@ -4,27 +4,27 @@ import Foundation
 @MainActor
 final class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
-    
+
     // AI Provider Settings
     @Published var defaultProvider: String {
         didSet { UserDefaults.standard.set(defaultProvider, forKey: "defaultProvider") }
     }
-    
+
     @Published var streamResponses: Bool {
         didSet { UserDefaults.standard.set(streamResponses, forKey: "streamResponses") }
     }
-    
+
     let availableProviders: [String] = ["openai", "anthropic", "google", "perplexity", "groq", "openrouter"]
-    
+
     // Appearance Settings
     @Published var theme: String {
         didSet { UserDefaults.standard.set(theme, forKey: "theme") }
     }
-    
+
     @Published var fontSize: String {
         didSet { UserDefaults.standard.set(fontSize, forKey: "fontSize") }
     }
-    
+
     // Privacy Settings
     @Published var iCloudSyncEnabled: Bool {
         didSet { UserDefaults.standard.set(iCloudSyncEnabled, forKey: "iCloudSyncEnabled") }
@@ -128,44 +128,44 @@ final class SettingsManager: ObservableObject {
     }
 
     private init() {
-        self.defaultProvider = UserDefaults.standard.string(forKey: "defaultProvider") ?? "openrouter"
-        self.streamResponses = UserDefaults.standard.bool(forKey: "streamResponses")
-        self.theme = UserDefaults.standard.string(forKey: "theme") ?? "system"
-        self.fontSize = UserDefaults.standard.string(forKey: "fontSize") ?? "medium"
-        self.iCloudSyncEnabled = UserDefaults.standard.bool(forKey: "iCloudSyncEnabled")
-        self.analyticsEnabled = UserDefaults.standard.bool(forKey: "analyticsEnabled")
-        self.handoffEnabled = UserDefaults.standard.bool(forKey: "handoffEnabled")
+        defaultProvider = UserDefaults.standard.string(forKey: "defaultProvider") ?? "openrouter"
+        streamResponses = UserDefaults.standard.bool(forKey: "streamResponses")
+        theme = UserDefaults.standard.string(forKey: "theme") ?? "system"
+        fontSize = UserDefaults.standard.string(forKey: "fontSize") ?? "medium"
+        iCloudSyncEnabled = UserDefaults.standard.bool(forKey: "iCloudSyncEnabled")
+        analyticsEnabled = UserDefaults.standard.bool(forKey: "analyticsEnabled")
+        handoffEnabled = UserDefaults.standard.bool(forKey: "handoffEnabled")
 
         // Behavior
-        self.launchAtLogin = UserDefaults.standard.bool(forKey: "launchAtLogin")
-        self.showInMenuBar = UserDefaults.standard.bool(forKey: "showInMenuBar")
-        self.notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+        launchAtLogin = UserDefaults.standard.bool(forKey: "launchAtLogin")
+        showInMenuBar = UserDefaults.standard.bool(forKey: "showInMenuBar")
+        notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
 
         // Voice
-        self.readResponsesAloud = UserDefaults.standard.bool(forKey: "readResponsesAloud")
-        self.selectedVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "default"
+        readResponsesAloud = UserDefaults.standard.bool(forKey: "readResponsesAloud")
+        selectedVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "default"
 
         // Advanced
-        self.debugMode = UserDefaults.standard.bool(forKey: "debugMode")
-        self.showPerformanceMetrics = UserDefaults.standard.bool(forKey: "showPerformanceMetrics")
-        self.betaFeaturesEnabled = UserDefaults.standard.bool(forKey: "betaFeaturesEnabled")
+        debugMode = UserDefaults.standard.bool(forKey: "debugMode")
+        showPerformanceMetrics = UserDefaults.standard.bool(forKey: "showPerformanceMetrics")
+        betaFeaturesEnabled = UserDefaults.standard.bool(forKey: "betaFeaturesEnabled")
 
         // Local Models
-        self.mlxModelsPath = UserDefaults.standard.string(forKey: "mlxModelsPath") ?? "~/.cache/huggingface/hub/"
-        self.ollamaEnabled = UserDefaults.standard.bool(forKey: "ollamaEnabled")
-        self.ollamaURL = UserDefaults.standard.string(forKey: "ollamaURL") ?? "http://localhost:11434"
+        mlxModelsPath = UserDefaults.standard.string(forKey: "mlxModelsPath") ?? "~/.cache/huggingface/hub/"
+        ollamaEnabled = UserDefaults.standard.bool(forKey: "ollamaEnabled")
+        ollamaURL = UserDefaults.standard.string(forKey: "ollamaURL") ?? "http://localhost:11434"
 
         // Self-Execution
-        self.executionMode = UserDefaults.standard.string(forKey: "executionMode") ?? "manual"
-        self.allowFileCreation = UserDefaults.standard.bool(forKey: "allowFileCreation")
-        self.allowFileEditing = UserDefaults.standard.bool(forKey: "allowFileEditing")
-        self.allowCodeExecution = UserDefaults.standard.bool(forKey: "allowCodeExecution")
-        self.allowExternalAPICalls = UserDefaults.standard.bool(forKey: "allowExternalAPICalls")
-        self.requireDestructiveApproval = UserDefaults.standard.bool(forKey: "requireDestructiveApproval")
-        self.enableRollback = UserDefaults.standard.bool(forKey: "enableRollback")
-        self.createBackups = UserDefaults.standard.bool(forKey: "createBackups")
-        self.preventSleepDuringExecution = UserDefaults.standard.bool(forKey: "preventSleepDuringExecution")
-        self.maxConcurrentTasks = UserDefaults.standard.integer(forKey: "maxConcurrentTasks") != 0 ? UserDefaults.standard.integer(forKey: "maxConcurrentTasks") : 3
+        executionMode = UserDefaults.standard.string(forKey: "executionMode") ?? "manual"
+        allowFileCreation = UserDefaults.standard.bool(forKey: "allowFileCreation")
+        allowFileEditing = UserDefaults.standard.bool(forKey: "allowFileEditing")
+        allowCodeExecution = UserDefaults.standard.bool(forKey: "allowCodeExecution")
+        allowExternalAPICalls = UserDefaults.standard.bool(forKey: "allowExternalAPICalls")
+        requireDestructiveApproval = UserDefaults.standard.bool(forKey: "requireDestructiveApproval")
+        enableRollback = UserDefaults.standard.bool(forKey: "enableRollback")
+        createBackups = UserDefaults.standard.bool(forKey: "createBackups")
+        preventSleepDuringExecution = UserDefaults.standard.bool(forKey: "preventSleepDuringExecution")
+        maxConcurrentTasks = UserDefaults.standard.integer(forKey: "maxConcurrentTasks") != 0 ? UserDefaults.standard.integer(forKey: "maxConcurrentTasks") : 3
     }
 
     // API Key Management - SECURITY: Uses Keychain via SecureStorage

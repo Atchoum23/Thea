@@ -10,19 +10,19 @@ final class AllowlistGapRule: ASTRule {
             id: "SWIFT-ALLOWLIST-001",
             name: "Security Allowlist/Blocklist Gap",
             description: """
-                Detects gaps in security allowlists and blocklists:
-                - Missing dangerous commands in blocklists
-                - Empty or permissive allowlists
-                - Missing sensitive path patterns
-                """,
+            Detects gaps in security allowlists and blocklists:
+            - Missing dangerous commands in blocklists
+            - Empty or permissive allowlists
+            - Missing sensitive path patterns
+            """,
             severity: .high,
             category: .accessControl,
             cweID: "CWE-183",
             recommendation: """
-                Review and update allowlists/blocklists to include all known dangerous patterns.
-                Use comprehensive blocklists from security best practices.
-                Prefer allowlists over blocklists where possible.
-                """
+            Review and update allowlists/blocklists to include all known dangerous patterns.
+            Use comprehensive blocklists from security best practices.
+            Prefer allowlists over blocklists where possible.
+            """
         )
     }
 
@@ -34,7 +34,7 @@ final class AllowlistGapRule: ASTRule {
         let requiredBlockedCommands = [
             "rm -rf /",
             "rm -rf /*",
-            ":(){ :|:& };:",  // Fork bomb
+            ":(){ :|:& };:", // Fork bomb
             "sudo",
             "curl.*\\|.*sh",
             "wget.*\\|.*bash"
@@ -67,7 +67,7 @@ final class AllowlistGapRule: ASTRule {
                 blocklistContent += line + "\n"
 
                 // Detect array end
-                if line.contains("]") && !line.contains("[") {
+                if line.contains("]"), !line.contains("[") {
                     // Check for missing patterns
                     if blocklistContent.contains("blockedCommands") || blocklistContent.contains("blockedPatterns") {
                         for required in requiredBlockedCommands {
@@ -76,8 +76,9 @@ final class AllowlistGapRule: ASTRule {
                                 .replacingOccurrences(of: ")", with: "\\)")
                                 .replacingOccurrences(of: "*", with: "\\*")
 
-                            if !blocklistContent.contains(searchPattern.replacingOccurrences(of: "\\", with: "")) &&
-                               !blocklistContent.contains(required) {
+                            if !blocklistContent.contains(searchPattern.replacingOccurrences(of: "\\", with: "")),
+                               !blocklistContent.contains(required)
+                            {
                                 findings.append(Finding(
                                     ruleID: id,
                                     severity: .high,
@@ -120,7 +121,7 @@ final class AllowlistGapRule: ASTRule {
 
         // Check for empty allowlists that should have restrictions
         for (lineIndex, line) in lines.enumerated() {
-            if line.contains("allowedCommands") && line.contains("[]") {
+            if line.contains("allowedCommands"), line.contains("[]") {
                 findings.append(Finding(
                     ruleID: id,
                     severity: .medium,

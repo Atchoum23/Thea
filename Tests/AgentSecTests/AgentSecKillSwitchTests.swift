@@ -1,12 +1,11 @@
 // AgentSecKillSwitchTests.swift
 // Tests for AgentSec kill switch
 
-import XCTest
 @testable import TheaCore
+import XCTest
 
 @MainActor
 final class AgentSecKillSwitchTests: XCTestCase {
-
     var killSwitch: AgentSecKillSwitch!
 
     override func setUp() async throws {
@@ -108,22 +107,22 @@ final class AgentSecKillSwitchTests: XCTestCase {
         killSwitch.trigger(reason: "Critical violation")
 
         var wasHalted = false
-        let result: String? = await KillSwitchGuard.execute({
-            return "Operation completed"
-        }, onHalted: { _ in
+        let result: String? = await KillSwitchGuard.execute {
+            "Operation completed"
+        } onHalted: { _ in
             wasHalted = true
-        })
+        }
 
         XCTAssertNil(result)
         XCTAssertTrue(wasHalted)
     }
 
     func testKillSwitchAllowsOperationsWhenNotTriggered() async throws {
-        let result: String? = await KillSwitchGuard.execute({
-            return "Operation completed"
-        }, onHalted: { _ in
+        let result: String? = await KillSwitchGuard.execute {
+            "Operation completed"
+        } onHalted: { _ in
             XCTFail("Should not halt")
-        })
+        }
 
         XCTAssertEqual(result, "Operation completed")
     }

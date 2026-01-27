@@ -8,7 +8,7 @@
 
 import Foundation
 #if os(macOS)
-import IOKit.pwr_mgt
+    import IOKit.pwr_mgt
 #endif
 
 // MARK: - Assertion Manager
@@ -20,7 +20,7 @@ public actor AssertionManager {
     // MARK: - State
 
     #if os(macOS)
-    private var assertions: [AssertionType: IOPMAssertionID] = [:]
+        private var assertions: [AssertionType: IOPMAssertionID] = [:]
     #endif
 
     private var activeAssertions: Set<AssertionType> = []
@@ -54,7 +54,7 @@ public actor AssertionManager {
         }
 
         #if os(macOS)
-        try createMacOSAssertion(type: type, reason: reason)
+            try createMacOSAssertion(type: type, reason: reason)
         #endif
 
         activeAssertions.insert(type)
@@ -70,7 +70,7 @@ public actor AssertionManager {
         guard activeAssertions.contains(type) else { return }
 
         #if os(macOS)
-        releaseMacOSAssertion(type: type)
+            releaseMacOSAssertion(type: type)
         #endif
 
         activeAssertions.remove(type)
@@ -91,29 +91,29 @@ public actor AssertionManager {
     // MARK: - macOS Implementation
 
     #if os(macOS)
-    private func createMacOSAssertion(type: AssertionType, reason: String) throws {
-        var assertionID: IOPMAssertionID = 0
+        private func createMacOSAssertion(type: AssertionType, reason: String) throws {
+            var assertionID: IOPMAssertionID = 0
 
-        let result = IOPMAssertionCreateWithName(
-            type.ioPMAssertionType as CFString,
-            IOPMAssertionLevel(kIOPMAssertionLevelOn),
-            reason as CFString,
-            &assertionID
-        )
+            let result = IOPMAssertionCreateWithName(
+                type.ioPMAssertionType as CFString,
+                IOPMAssertionLevel(kIOPMAssertionLevelOn),
+                reason as CFString,
+                &assertionID
+            )
 
-        guard result == kIOReturnSuccess else {
-            throw AssertionError.creationFailed(code: result)
+            guard result == kIOReturnSuccess else {
+                throw AssertionError.creationFailed(code: result)
+            }
+
+            assertions[type] = assertionID
         }
 
-        assertions[type] = assertionID
-    }
+        private func releaseMacOSAssertion(type: AssertionType) {
+            guard let assertionID = assertions[type] else { return }
 
-    private func releaseMacOSAssertion(type: AssertionType) {
-        guard let assertionID = assertions[type] else { return }
-
-        IOPMAssertionRelease(assertionID)
-        assertions.removeValue(forKey: type)
-    }
+            IOPMAssertionRelease(assertionID)
+            assertions.removeValue(forKey: type)
+        }
     #endif
 
     // MARK: - Auto-Release
@@ -153,13 +153,13 @@ public actor AssertionManager {
     /// Check if any assertion is preventing sleep
     public var isPreventingSleep: Bool {
         activeAssertions.contains(.preventUserIdleSystemSleep) ||
-        activeAssertions.contains(.preventSystemSleep)
+            activeAssertions.contains(.preventSystemSleep)
     }
 
     /// Check if any assertion is preventing display sleep
     public var isPreventingDisplaySleep: Bool {
         activeAssertions.contains(.preventUserIdleDisplaySleep) ||
-        activeAssertions.contains(.preventDisplaySleep)
+            activeAssertions.contains(.preventDisplaySleep)
     }
 }
 
@@ -176,71 +176,71 @@ public enum AssertionType: String, Codable, Sendable, CaseIterable {
     public var displayName: String {
         switch self {
         case .preventUserIdleSystemSleep:
-            return "Prevent Idle Sleep"
+            "Prevent Idle Sleep"
         case .preventUserIdleDisplaySleep:
-            return "Prevent Display Sleep"
+            "Prevent Display Sleep"
         case .preventSystemSleep:
-            return "Prevent System Sleep"
+            "Prevent System Sleep"
         case .preventDisplaySleep:
-            return "Keep Display On"
+            "Keep Display On"
         case .backgroundTask:
-            return "Background Task"
+            "Background Task"
         case .externalMedia:
-            return "External Media"
+            "External Media"
         }
     }
 
     public var description: String {
         switch self {
         case .preventUserIdleSystemSleep:
-            return "Prevents the system from sleeping due to user inactivity"
+            "Prevents the system from sleeping due to user inactivity"
         case .preventUserIdleDisplaySleep:
-            return "Prevents the display from sleeping due to user inactivity"
+            "Prevents the display from sleeping due to user inactivity"
         case .preventSystemSleep:
-            return "Prevents any system sleep"
+            "Prevents any system sleep"
         case .preventDisplaySleep:
-            return "Keeps the display on regardless of activity"
+            "Keeps the display on regardless of activity"
         case .backgroundTask:
-            return "Allows background processing to continue"
+            "Allows background processing to continue"
         case .externalMedia:
-            return "Prevents sleep while accessing external media"
+            "Prevents sleep while accessing external media"
         }
     }
 
     public var icon: String {
         switch self {
         case .preventUserIdleSystemSleep:
-            return "moon.zzz"
+            "moon.zzz"
         case .preventUserIdleDisplaySleep:
-            return "display"
+            "display"
         case .preventSystemSleep:
-            return "powersleep"
+            "powersleep"
         case .preventDisplaySleep:
-            return "sun.max"
+            "sun.max"
         case .backgroundTask:
-            return "arrow.triangle.2.circlepath"
+            "arrow.triangle.2.circlepath"
         case .externalMedia:
-            return "externaldrive"
+            "externaldrive"
         }
     }
 
     #if os(macOS)
-    var ioPMAssertionType: String {
-        switch self {
-        case .preventUserIdleSystemSleep:
-            return kIOPMAssertionTypePreventUserIdleSystemSleep as String
-        case .preventUserIdleDisplaySleep:
-            return kIOPMAssertionTypePreventUserIdleDisplaySleep as String
-        case .preventSystemSleep:
-            return kIOPMAssertionTypePreventSystemSleep as String
-        case .preventDisplaySleep:
-            return kIOPMAssertionTypePreventUserIdleDisplaySleep as String
-        case .backgroundTask:
-            return kIOPMAssertionTypePreventUserIdleSystemSleep as String
-        case .externalMedia:
-            return kIOPMAssertionTypePreventUserIdleSystemSleep as String
+        var ioPMAssertionType: String {
+            switch self {
+            case .preventUserIdleSystemSleep:
+                kIOPMAssertionTypePreventUserIdleSystemSleep as String
+            case .preventUserIdleDisplaySleep:
+                kIOPMAssertionTypePreventUserIdleDisplaySleep as String
+            case .preventSystemSleep:
+                kIOPMAssertionTypePreventSystemSleep as String
+            case .preventDisplaySleep:
+                kIOPMAssertionTypePreventUserIdleDisplaySleep as String
+            case .backgroundTask:
+                kIOPMAssertionTypePreventUserIdleSystemSleep as String
+            case .externalMedia:
+                kIOPMAssertionTypePreventUserIdleSystemSleep as String
+            }
         }
-    }
     #endif
 }
 
@@ -262,12 +262,12 @@ public enum AssertionError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .creationFailed(let code):
-            return "Failed to create power assertion (code: \(code))"
+        case let .creationFailed(code):
+            "Failed to create power assertion (code: \(code))"
         case .alreadyActive:
-            return "Assertion is already active"
+            "Assertion is already active"
         case .notActive:
-            return "Assertion is not active"
+            "Assertion is not active"
         }
     }
 }

@@ -1,16 +1,19 @@
 // FocusFilterManager.swift
 // Focus Filter support for iOS/macOS Focus modes
 
-import Foundation
 import AppIntents
+import Foundation
 import OSLog
+#if canImport(UIKit)
+    import UIKit
+#endif
 
 // MARK: - Focus Filter
 
 @available(iOS 16.0, macOS 13.0, *)
 public struct TheaFocusFilter: SetFocusFilterIntent {
-    public static var title: LocalizedStringResource = "Thea Focus Settings"
-    public static var description: IntentDescription? = IntentDescription("Configure Thea behavior during Focus mode")
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Thea Focus Settings"
+    nonisolated(unsafe) public static var description: IntentDescription? = IntentDescription("Configure Thea behavior during Focus mode")
 
     @Parameter(title: "Notification Mode", default: .smart)
     public var notificationMode: FocusNotificationMode
@@ -28,7 +31,7 @@ public struct TheaFocusFilter: SetFocusFilterIntent {
     public var allowedConversations: [String]?
 
     public init() {
-        self.allowedConversations = nil
+        allowedConversations = nil
     }
 
     public func perform() async throws -> some IntentResult {
@@ -61,9 +64,9 @@ public enum FocusNotificationMode: String, AppEnum {
     case important
     case none
 
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Notification Mode")
+    nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Notification Mode")
 
-    public static var caseDisplayRepresentations: [FocusNotificationMode: DisplayRepresentation] = [
+    nonisolated(unsafe) public static var caseDisplayRepresentations: [FocusNotificationMode: DisplayRepresentation] = [
         .all: DisplayRepresentation(title: "All Notifications", subtitle: "Receive all Thea notifications"),
         .smart: DisplayRepresentation(title: "Smart", subtitle: "AI determines importance"),
         .important: DisplayRepresentation(title: "Important Only", subtitle: "Only critical notifications"),
@@ -102,10 +105,10 @@ public final class FocusFilterManager: ObservableObject {
         quickPromptEnabled: Bool,
         allowedConversations: [String]?
     ) {
-        self.isFilterActive = true
-        self.currentNotificationMode = notificationMode
+        isFilterActive = true
+        currentNotificationMode = notificationMode
         self.urgentOnly = urgentOnly
-        self.agentsPaused = pauseAgents
+        agentsPaused = pauseAgents
         self.quickPromptEnabled = quickPromptEnabled
 
         if let allowed = allowedConversations {
@@ -209,21 +212,22 @@ public final class FocusFilterManager: ObservableObject {
 
     /// Check if a notification should be delivered
     public func shouldDeliverNotification(
-        type: String,
+        type _: String,
         priority: NotificationPriority,
         conversationId: String? = nil
     ) -> Bool {
         guard isFilterActive else { return true }
 
         // Check urgent only filter
-        if urgentOnly && priority != .critical && priority != .high {
+        if urgentOnly, priority != .critical, priority != .high {
             return false
         }
 
         // Check allowed conversations
         if let convId = conversationId,
            !allowedConversations.isEmpty,
-           !allowedConversations.contains(convId) {
+           !allowedConversations.contains(convId)
+        {
             return false
         }
 
@@ -280,12 +284,12 @@ public final class FocusStateObserver: ObservableObject {
     private func setupObserver() {
         // Observe focus state changes
         #if os(iOS)
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(focusDidChange),
-            name: UIApplication.didBecomeActiveNotification,
-            object: nil
-        )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(focusDidChange),
+                name: UIApplication.didBecomeActiveNotification,
+                object: nil
+            )
         #endif
     }
 

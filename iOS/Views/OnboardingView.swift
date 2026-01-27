@@ -42,7 +42,7 @@ struct OnboardingView: View {
     var body: some View {
         VStack(spacing: 0) {
             TabView(selection: $currentPage) {
-                ForEach(0..<pages.count, id: \.self) { index in
+                ForEach(0 ..< pages.count, id: \.self) { index in
                     OnboardingPageView(page: pages[index])
                         .tag(index)
                 }
@@ -105,7 +105,7 @@ struct OnboardingView: View {
 
     private var permissionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            PermissionRow(
+            OnboardingPermissionRow(
                 icon: "mic.fill",
                 title: "Speech Recognition",
                 description: "For voice commands",
@@ -113,7 +113,7 @@ struct OnboardingView: View {
                 isRequired: true
             )
 
-            PermissionRow(
+            OnboardingPermissionRow(
                 icon: "waveform",
                 title: "Microphone",
                 description: "To hear your voice",
@@ -121,7 +121,7 @@ struct OnboardingView: View {
                 isRequired: true
             )
 
-            PermissionRow(
+            OnboardingPermissionRow(
                 icon: "bell.fill",
                 title: "Notifications",
                 description: "For important updates",
@@ -129,7 +129,7 @@ struct OnboardingView: View {
                 isRequired: false
             )
 
-            PermissionRow(
+            OnboardingPermissionRow(
                 icon: "person.fill",
                 title: "Contacts",
                 description: "To assist with contact queries",
@@ -137,7 +137,7 @@ struct OnboardingView: View {
                 isRequired: false
             )
 
-            PermissionRow(
+            OnboardingPermissionRow(
                 icon: "calendar",
                 title: "Calendar",
                 description: "To help manage your schedule",
@@ -145,7 +145,7 @@ struct OnboardingView: View {
                 isRequired: false
             )
 
-            PermissionRow(
+            OnboardingPermissionRow(
                 icon: "photo.fill",
                 title: "Photos",
                 description: "To analyze images",
@@ -154,23 +154,23 @@ struct OnboardingView: View {
             )
 
             #if os(iOS)
-            PermissionRow(
-                icon: "location.fill",
-                title: "Location",
-                description: "For location-aware features",
-                status: permissionsManager.locationStatus,
-                isRequired: false
-            )
+                OnboardingPermissionRow(
+                    icon: "location.fill",
+                    title: "Location",
+                    description: "For location-aware features",
+                    status: permissionsManager.locationStatus,
+                    isRequired: false
+                )
             #endif
 
             #if os(macOS)
-            PermissionRow(
-                icon: "internaldrive.fill",
-                title: "Full Disk Access",
-                description: "To scan and index your files",
-                status: permissionsManager.fullDiskAccessStatus,
-                isRequired: false
-            )
+                OnboardingPermissionRow(
+                    icon: "internaldrive.fill",
+                    title: "Full Disk Access",
+                    description: "To scan and index your files",
+                    status: permissionsManager.fullDiskAccessStatus,
+                    isRequired: false
+                )
             #endif
         }
         .padding()
@@ -232,7 +232,7 @@ struct OnboardingPageView: View {
     }
 }
 
-struct PermissionRow: View {
+struct OnboardingPermissionRow: View {
     let icon: String
     let title: String
     let description: String
@@ -278,13 +278,13 @@ struct PermissionRow: View {
     private var statusColor: Color {
         switch status {
         case .authorized:
-            return .green
+            .green
         case .denied:
-            return .red
+            .red
         case .restricted:
-            return .orange
+            .orange
         case .notDetermined:
-            return .gray
+            .gray
         }
     }
 

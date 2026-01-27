@@ -5,11 +5,10 @@
 //  Created by Claude Code on 2026-01-20
 //
 
-import XCTest
 @testable import TheaCore
+import XCTest
 
 final class MonitoringServiceTests: XCTestCase {
-
     // MARK: - MonitorType Tests
 
     func testMonitorTypeIdentifiers() {

@@ -1,6 +1,7 @@
 import Foundation
 
 import Combine
+
 public actor AssessmentDataExporter {
     public static let shared = AssessmentDataExporter()
 
@@ -20,13 +21,13 @@ public actor AssessmentDataExporter {
         public var errorDescription: String? {
             switch self {
             case .noData:
-                return "No assessment data available to export"
+                "No assessment data available to export"
             case .encodingFailed:
-                return "Failed to encode assessment data"
+                "Failed to encode assessment data"
             case .fileCreationFailed:
-                return "Failed to create export file"
+                "Failed to create export file"
             case .unsupportedFormat:
-                return "Unsupported export format"
+                "Unsupported export format"
             }
         }
     }
@@ -39,13 +40,13 @@ public actor AssessmentDataExporter {
     public func exportAssessment(_ assessment: Assessment, format: ExportFormat) async throws -> String {
         switch format {
         case .pdf:
-            return try await generatePDFReport(assessment)
+            try await generatePDFReport(assessment)
         case .csv:
-            return try generateCSV([assessment])
+            try generateCSV([assessment])
         case .json:
-            return try generateJSON([assessment])
+            try generateJSON([assessment])
         case .text:
-            return generateTextReport(assessment)
+            generateTextReport(assessment)
         }
     }
 
@@ -94,7 +95,8 @@ public actor AssessmentDataExporter {
         encoder.dateEncodingStrategy = .iso8601
 
         guard let jsonData = try? encoder.encode(assessments),
-              let jsonString = String(data: jsonData, encoding: .utf8) else {
+              let jsonString = String(data: jsonData, encoding: .utf8)
+        else {
             throw ExportError.encodingFailed
         }
 
@@ -375,7 +377,7 @@ public actor AssessmentComparison {
             throw AssessmentDataExporter.ExportError.noData
         }
 
-        let scores = sorted.map { $0.score.overall }
+        let scores = sorted.map(\.score.overall)
 
         let firstScore = scores.first ?? 0
         let lastScore = scores.last ?? 0

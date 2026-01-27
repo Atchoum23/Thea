@@ -51,10 +51,11 @@ public final class ThrottlingEngine {
 
     private init() {
         if let data = defaults.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(ThrottlingConfiguration.self, from: data) {
-            self.configuration = config
+           let config = try? JSONDecoder().decode(ThrottlingConfiguration.self, from: data)
+        {
+            configuration = config
         } else {
-            self.configuration = ThrottlingConfiguration()
+            configuration = ThrottlingConfiguration()
         }
 
         setupObservers()
@@ -141,7 +142,7 @@ public final class ThrottlingEngine {
         }
 
         // Low power mode
-        if powerStatus.isLowPowerMode && configuration.respectLowPowerMode {
+        if powerStatus.isLowPowerMode, configuration.respectLowPowerMode {
             updateThrottleLevel(.moderate)
             return
         }
@@ -283,7 +284,7 @@ public final class ThrottlingEngine {
             return "Low Power Mode enabled"
         }
 
-        if powerStatus.powerSource == .battery && configuration.throttleOnBattery {
+        if powerStatus.powerSource == .battery, configuration.throttleOnBattery {
             return "Running on battery"
         }
 
@@ -306,43 +307,43 @@ public enum ThrottleLevel: Int, Codable, Sendable, CaseIterable, Comparable {
 
     public var displayName: String {
         switch self {
-        case .none: return "None"
-        case .light: return "Light"
-        case .moderate: return "Moderate"
-        case .heavy: return "Heavy"
-        case .critical: return "Critical"
+        case .none: "None"
+        case .light: "Light"
+        case .moderate: "Moderate"
+        case .heavy: "Heavy"
+        case .critical: "Critical"
         }
     }
 
     public var icon: String {
         switch self {
-        case .none: return "bolt.fill"
-        case .light: return "bolt"
-        case .moderate: return "bolt.slash"
-        case .heavy: return "tortoise"
-        case .critical: return "tortoise.fill"
+        case .none: "bolt.fill"
+        case .light: "bolt"
+        case .moderate: "bolt.slash"
+        case .heavy: "tortoise"
+        case .critical: "tortoise.fill"
         }
     }
 
     /// Delay multiplier for operations
     var delayMultiplier: Double {
         switch self {
-        case .none: return 0.0
-        case .light: return 0.5
-        case .moderate: return 1.0
-        case .heavy: return 2.0
-        case .critical: return 5.0
+        case .none: 0.0
+        case .light: 0.5
+        case .moderate: 1.0
+        case .heavy: 2.0
+        case .critical: 5.0
         }
     }
 
     /// Concurrency multiplier (lower = fewer concurrent operations)
     var concurrencyMultiplier: Double {
         switch self {
-        case .none: return 1.0
-        case .light: return 0.8
-        case .moderate: return 0.5
-        case .heavy: return 0.25
-        case .critical: return 0.1
+        case .none: 1.0
+        case .light: 0.8
+        case .moderate: 0.5
+        case .heavy: 0.25
+        case .critical: 0.1
         }
     }
 }
@@ -359,34 +360,34 @@ public enum OperationCategory: String, Codable, Sendable {
 
     public var priority: OperationPriority {
         switch self {
-        case .aiRequest: return .high
-        case .uiUpdate: return .high
-        case .fileOperation: return .normal
-        case .networkRequest: return .normal
-        case .backgroundSync: return .background
-        case .indexing: return .background
+        case .aiRequest: .high
+        case .uiUpdate: .high
+        case .fileOperation: .normal
+        case .networkRequest: .normal
+        case .backgroundSync: .background
+        case .indexing: .background
         }
     }
 
     var baseDelay: TimeInterval {
         switch self {
-        case .aiRequest: return 0.5
-        case .uiUpdate: return 0.1
-        case .fileOperation: return 0.2
-        case .networkRequest: return 0.3
-        case .backgroundSync: return 1.0
-        case .indexing: return 2.0
+        case .aiRequest: 0.5
+        case .uiUpdate: 0.1
+        case .fileOperation: 0.2
+        case .networkRequest: 0.3
+        case .backgroundSync: 1.0
+        case .indexing: 2.0
         }
     }
 
     var baseConcurrency: Int {
         switch self {
-        case .aiRequest: return 2
-        case .uiUpdate: return 10
-        case .fileOperation: return 4
-        case .networkRequest: return 6
-        case .backgroundSync: return 2
-        case .indexing: return 1
+        case .aiRequest: 2
+        case .uiUpdate: 10
+        case .fileOperation: 4
+        case .networkRequest: 6
+        case .backgroundSync: 2
+        case .indexing: 1
         }
     }
 }
@@ -450,9 +451,9 @@ public enum ThrottlingError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .operationDeferred:
-            return "Operation deferred due to throttling"
+            "Operation deferred due to throttling"
         case .throttlingDisabled:
-            return "Throttling is disabled"
+            "Throttling is disabled"
         }
     }
 }

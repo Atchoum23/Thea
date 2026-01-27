@@ -14,20 +14,20 @@ enum Severity: String, Codable, CaseIterable, Comparable, Sendable, ExpressibleB
     /// Numeric value for comparison (higher = more severe)
     var numericValue: Int {
         switch self {
-        case .critical: return 4
-        case .high: return 3
-        case .medium: return 2
-        case .low: return 1
+        case .critical: 4
+        case .high: 3
+        case .medium: 2
+        case .low: 1
         }
     }
 
     /// Display color for terminal output
     var color: String {
         switch self {
-        case .critical: return "\u{001B}[31m"  // Red
-        case .high: return "\u{001B}[33m"       // Yellow
-        case .medium: return "\u{001B}[34m"     // Blue
-        case .low: return "\u{001B}[32m"        // Green
+        case .critical: "\u{001B}[31m" // Red
+        case .high: "\u{001B}[33m" // Yellow
+        case .medium: "\u{001B}[34m" // Blue
+        case .low: "\u{001B}[32m" // Green
         }
     }
 
@@ -37,20 +37,20 @@ enum Severity: String, Codable, CaseIterable, Comparable, Sendable, ExpressibleB
     /// Emoji indicator
     var emoji: String {
         switch self {
-        case .critical: return "🔴"
-        case .high: return "🟠"
-        case .medium: return "🟡"
-        case .low: return "🟢"
+        case .critical: "🔴"
+        case .high: "🟠"
+        case .medium: "🟡"
+        case .low: "🟢"
         }
     }
 
     /// CVSS-like score range
     var cvssRange: String {
         switch self {
-        case .critical: return "9.0 - 10.0"
-        case .high: return "7.0 - 8.9"
-        case .medium: return "4.0 - 6.9"
-        case .low: return "0.1 - 3.9"
+        case .critical: "9.0 - 10.0"
+        case .high: "7.0 - 8.9"
+        case .medium: "4.0 - 6.9"
+        case .low: "0.1 - 3.9"
         }
     }
 
@@ -58,13 +58,13 @@ enum Severity: String, Codable, CaseIterable, Comparable, Sendable, ExpressibleB
     var severityDescription: String {
         switch self {
         case .critical:
-            return "Immediate action required. Vulnerability can be exploited trivially with severe impact."
+            "Immediate action required. Vulnerability can be exploited trivially with severe impact."
         case .high:
-            return "High priority fix required. Significant security risk that should be addressed promptly."
+            "High priority fix required. Significant security risk that should be addressed promptly."
         case .medium:
-            return "Should be fixed in normal development cycle. Moderate security concern."
+            "Should be fixed in normal development cycle. Moderate security concern."
         case .low:
-            return "Low priority. Minor security improvement or best practice recommendation."
+            "Low priority. Minor security improvement or best practice recommendation."
         }
     }
 
@@ -87,13 +87,13 @@ extension Severity {
     var markdownBadge: String {
         switch self {
         case .critical:
-            return "![Critical](https://img.shields.io/badge/severity-critical-red)"
+            "![Critical](https://img.shields.io/badge/severity-critical-red)"
         case .high:
-            return "![High](https://img.shields.io/badge/severity-high-orange)"
+            "![High](https://img.shields.io/badge/severity-high-orange)"
         case .medium:
-            return "![Medium](https://img.shields.io/badge/severity-medium-yellow)"
+            "![Medium](https://img.shields.io/badge/severity-medium-yellow)"
         case .low:
-            return "![Low](https://img.shields.io/badge/severity-low-green)"
+            "![Low](https://img.shields.io/badge/severity-low-green)"
         }
     }
 }

@@ -44,32 +44,32 @@ public enum AssessmentType: String, Sendable, Codable, CaseIterable {
 
     public var questionCount: Int {
         switch self {
-        case .emotionalIntelligence: return 30 // TEIQue Short Form
-        case .highSensitivity: return 27 // Aron HSP Scale
-        case .cognitiveBenchmark: return 20
-        case .personalityBigFive: return 50 // BFI-2
+        case .emotionalIntelligence: 30 // TEIQue Short Form
+        case .highSensitivity: 27 // Aron HSP Scale
+        case .cognitiveBenchmark: 20
+        case .personalityBigFive: 50 // BFI-2
         }
     }
 
     public var icon: String {
         switch self {
-        case .emotionalIntelligence: return "brain.head.profile"
-        case .highSensitivity: return "heart.text.square.fill"
-        case .cognitiveBenchmark: return "chart.line.uptrend.xyaxis"
-        case .personalityBigFive: return "person.crop.circle.fill"
+        case .emotionalIntelligence: "brain.head.profile"
+        case .highSensitivity: "heart.text.square.fill"
+        case .cognitiveBenchmark: "chart.line.uptrend.xyaxis"
+        case .personalityBigFive: "person.crop.circle.fill"
         }
     }
 
     public var description: String {
         switch self {
         case .emotionalIntelligence:
-            return "Measures ability to perceive, use, understand, and manage emotions"
+            "Measures ability to perceive, use, understand, and manage emotions"
         case .highSensitivity:
-            return "Evaluates sensory processing sensitivity and environmental awareness"
+            "Evaluates sensory processing sensitivity and environmental awareness"
         case .cognitiveBenchmark:
-            return "Assesses reasoning, problem-solving, and processing speed"
+            "Assesses reasoning, problem-solving, and processing speed"
         case .personalityBigFive:
-            return "Measures openness, conscientiousness, extraversion, agreeableness, neuroticism"
+            "Measures openness, conscientiousness, extraversion, agreeableness, neuroticism"
         }
     }
 }
@@ -106,13 +106,13 @@ public enum ScaleType: String, Sendable, Codable {
     public var options: [String] {
         switch self {
         case .likert5:
-            return ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
+            ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
         case .likert7:
-            return ["Strongly Disagree", "Disagree", "Slightly Disagree", "Neutral", "Slightly Agree", "Agree", "Strongly Agree"]
+            ["Strongly Disagree", "Disagree", "Slightly Disagree", "Neutral", "Slightly Agree", "Agree", "Strongly Agree"]
         case .yesNo:
-            return ["No", "Yes"]
+            ["No", "Yes"]
         case .frequency:
-            return ["Never", "Rarely", "Sometimes", "Often", "Always"]
+            ["Never", "Rarely", "Sometimes", "Often", "Always"]
         }
     }
 }
@@ -158,12 +158,12 @@ public struct AssessmentScore: Sendable, Codable {
     /// Classification based on score
     public var classification: ScoreClassification {
         switch overall {
-        case 0..<20: return .veryLow
-        case 20..<40: return .low
-        case 40..<60: return .average
-        case 60..<80: return .high
-        case 80...100: return .veryHigh
-        default: return .average
+        case 0 ..< 20: .veryLow
+        case 20 ..< 40: .low
+        case 40 ..< 60: .average
+        case 60 ..< 80: .high
+        case 80 ... 100: .veryHigh
+        default: .average
         }
     }
 }
@@ -177,11 +177,11 @@ public enum ScoreClassification: String, Sendable, Codable {
 
     public var color: String {
         switch self {
-        case .veryLow: return "red"
-        case .low: return "orange"
-        case .average: return "blue"
-        case .high: return "green"
-        case .veryHigh: return "purple"
+        case .veryLow: "red"
+        case .low: "orange"
+        case .average: "blue"
+        case .high: "green"
+        case .veryHigh: "purple"
         }
     }
 }
@@ -294,11 +294,11 @@ public enum AssessmentError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Invalid assessment response"
+            "Invalid assessment response"
         case .assessmentNotFound:
-            return "Assessment not found"
-        case .scoringFailed(let reason):
-            return "Failed to score assessment: \(reason)"
+            "Assessment not found"
+        case let .scoringFailed(reason):
+            "Failed to score assessment: \(reason)"
         }
     }
 }

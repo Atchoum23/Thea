@@ -6,17 +6,16 @@
 //  Copyright © 2026. All rights reserved.
 //
 
+import Combine
+import CryptoKit
 import Foundation
 import Network
-import CryptoKit
-import Combine
 
 // MARK: - Thea Remote Client
 
 /// Client for connecting to Thea remote servers on other devices
 @MainActor
 public class TheaRemoteClient: ObservableObject {
-
     // MARK: - Published State
 
     @Published public private(set) var connectionState: ClientConnectionState = .disconnected
@@ -154,7 +153,7 @@ public class TheaRemoteClient: ObservableObject {
                 case .ready:
                     timeoutTask.cancel()
                     continuation.resume()
-                case .failed(let error):
+                case let .failed(error):
                     timeoutTask.cancel()
                     continuation.resume(throwing: error)
                 case .cancelled:
@@ -179,7 +178,7 @@ public class TheaRemoteClient: ObservableObject {
             if connectionState != .connected {
                 connectionState = .authenticating
             }
-        case .failed(let error):
+        case let .failed(error):
             connectionState = .error(error.localizedDescription)
             onError?(error)
         case .cancelled:
@@ -197,7 +196,7 @@ public class TheaRemoteClient: ObservableObject {
         // Wait for challenge
         let challengeMessage = try await receiveWithTimeout(timeout: 30)
 
-        guard case .authChallenge(let challenge) = challengeMessage else {
+        guard case let .authChallenge(challenge) = challengeMessage else {
             throw ClientError.unexpectedMessage
         }
 
@@ -219,11 +218,11 @@ public class TheaRemoteClient: ObservableObject {
         let resultMessage = try await receiveWithTimeout(timeout: 30)
 
         switch resultMessage {
-        case .authSuccess(let permissions):
+        case let .authSuccess(permissions):
             grantedPermissions = permissions
             connectionState = .connected
 
-        case .authFailure(let reason):
+        case let .authFailure(reason):
             throw ClientError.authenticationFailed(reason)
 
         default:
@@ -233,12 +232,12 @@ public class TheaRemoteClient: ObservableObject {
 
     private func buildAuthResponse(
         challenge: AuthChallenge,
-        method: AuthenticationMethod,
+        method _: AuthenticationMethod,
         credentials: ClientCredentials
     ) throws -> AuthResponse {
         // Sign the challenge nonce
         let signature: Data
-        if let sessionKey = sessionKey {
+        if let sessionKey {
             let key = SymmetricKey(data: sessionKey)
             signature = Data(HMAC<SHA256>.authenticationCode(for: challenge.nonce, using: key))
         } else {
@@ -279,7 +278,7 @@ public class TheaRemoteClient: ObservableObject {
 
     private func startMessageHandling() {
         messageTask = Task {
-            while !Task.isCancelled && connectionState == .connected {
+            while !Task.isCancelled, connectionState == .connected {
                 do {
                     let message = try await receiveMessage()
                     await handleMessage(message)
@@ -298,8 +297,8 @@ public class TheaRemoteClient: ObservableObject {
 
     private func handleMessage(_ message: RemoteMessage) async {
         switch message {
-        case .screenResponse(let response):
-            if case .frame(let frame) = response {
+        case let .screenResponse(response):
+            if case let .frame(frame) = response {
                 lastScreenFrame = frame
                 onScreenFrame?(frame)
             }
@@ -308,7 +307,7 @@ public class TheaRemoteClient: ObservableObject {
             // Latency is measured in ping loop
             break
 
-        case .error(let errorMessage):
+        case let .error(errorMessage):
             onError?(ClientError.serverError(errorMessage))
 
         case .disconnect:
@@ -324,7 +323,7 @@ public class TheaRemoteClient: ObservableObject {
 
     private func startPingLoop() {
         pingTask = Task {
-            while !Task.isCancelled && connectionState == .connected {
+            while !Task.isCancelled, connectionState == .connected {
                 let pingTime = Date()
                 try? await send(message: .ping)
 
@@ -361,12 +360,12 @@ public class TheaRemoteClient: ObservableObject {
 
         let response = try await receiveWithTimeout(timeout: 30)
 
-        guard case .screenResponse(let screenResponse) = response else {
+        guard case let .screenResponse(screenResponse) = response else {
             throw ClientError.unexpectedMessage
         }
 
-        guard case .frame(let frame) = screenResponse else {
-            if case .error(let error) = screenResponse {
+        guard case let .frame(frame) = screenResponse else {
+            if case let .error(error) = screenResponse {
                 throw ClientError.serverError(error)
             }
             throw ClientError.unexpectedMessage
@@ -424,7 +423,7 @@ public class TheaRemoteClient: ObservableObject {
     }
 
     /// Press a key
-    public func pressKey(keyCode: UInt16, modifiers: KeyModifiers = []) async throws {
+    public func pressKey(keyCode: UInt16, modifiers: RemoteKeyModifiers = []) async throws {
         guard grantedPermissions.contains(.controlScreen) else {
             throw ClientError.permissionDenied
         }
@@ -453,12 +452,12 @@ public class TheaRemoteClient: ObservableObject {
 
         let response = try await receiveWithTimeout(timeout: 60)
 
-        guard case .fileResponse(let fileResponse) = response else {
+        guard case let .fileResponse(fileResponse) = response else {
             throw ClientError.unexpectedMessage
         }
 
-        guard case .listing(let items) = fileResponse else {
-            if case .error(let error) = fileResponse {
+        guard case let .listing(items) = fileResponse else {
+            if case let .error(error) = fileResponse {
                 throw ClientError.serverError(error)
             }
             throw ClientError.unexpectedMessage
@@ -477,12 +476,12 @@ public class TheaRemoteClient: ObservableObject {
 
         let response = try await receiveWithTimeout(timeout: 300) // 5 minute timeout for large files
 
-        guard case .fileResponse(let fileResponse) = response else {
+        guard case let .fileResponse(fileResponse) = response else {
             throw ClientError.unexpectedMessage
         }
 
-        guard case .data(let data, _) = fileResponse else {
-            if case .error(let error) = fileResponse {
+        guard case let .data(data, _) = fileResponse else {
+            if case let .error(error) = fileResponse {
                 throw ClientError.serverError(error)
             }
             throw ClientError.unexpectedMessage
@@ -501,11 +500,11 @@ public class TheaRemoteClient: ObservableObject {
 
         let response = try await receiveWithTimeout(timeout: 300)
 
-        guard case .fileResponse(let fileResponse) = response else {
+        guard case let .fileResponse(fileResponse) = response else {
             throw ClientError.unexpectedMessage
         }
 
-        if case .error(let error) = fileResponse {
+        if case let .error(error) = fileResponse {
             throw ClientError.serverError(error)
         }
     }
@@ -513,17 +512,17 @@ public class TheaRemoteClient: ObservableObject {
     // MARK: - System Operations
 
     /// Get system information
-    public func getSystemInfo() async throws -> SystemInfo {
+    public func getSystemInfo() async throws -> RemoteSystemInfo {
         try await send(message: .systemRequest(.getInfo))
 
         let response = try await receiveWithTimeout(timeout: 10)
 
-        guard case .systemResponse(let systemResponse) = response else {
+        guard case let .systemResponse(systemResponse) = response else {
             throw ClientError.unexpectedMessage
         }
 
-        guard case .info(let info) = systemResponse else {
-            if case .error(let error) = systemResponse {
+        guard case let .info(info) = systemResponse else {
+            if case let .error(error) = systemResponse {
                 throw ClientError.serverError(error)
             }
             throw ClientError.unexpectedMessage
@@ -542,16 +541,16 @@ public class TheaRemoteClient: ObservableObject {
 
         let response = try await receiveWithTimeout(timeout: timeout + 10)
 
-        guard case .systemResponse(let systemResponse) = response else {
+        guard case let .systemResponse(systemResponse) = response else {
             throw ClientError.unexpectedMessage
         }
 
         switch systemResponse {
-        case .commandOutput(let exitCode, let stdout, let stderr):
+        case let .commandOutput(exitCode, stdout, stderr):
             return (exitCode, stdout, stderr)
-        case .confirmationRequired(let action, let confirmationId):
+        case let .confirmationRequired(action, confirmationId):
             throw ClientError.confirmationRequired(action: action, confirmationId: confirmationId)
-        case .error(let error):
+        case let .error(error):
             throw ClientError.serverError(error)
         default:
             throw ClientError.unexpectedMessage
@@ -568,11 +567,11 @@ public class TheaRemoteClient: ObservableObject {
 
         let response = try await receiveWithTimeout(timeout: 60)
 
-        guard case .systemResponse(let systemResponse) = response else {
+        guard case let .systemResponse(systemResponse) = response else {
             throw ClientError.unexpectedMessage
         }
 
-        if case .error(let error) = systemResponse {
+        if case let .error(error) = systemResponse {
             throw ClientError.serverError(error)
         }
     }
@@ -580,7 +579,7 @@ public class TheaRemoteClient: ObservableObject {
     // MARK: - Network Send/Receive
 
     private func send(message: RemoteMessage) async throws {
-        guard let connection = connection else {
+        guard let connection else {
             throw ClientError.notConnected
         }
 
@@ -593,7 +592,7 @@ public class TheaRemoteClient: ObservableObject {
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             connection.send(content: framedData, completion: .contentProcessed { error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                 } else {
                     continuation.resume()
@@ -630,13 +629,13 @@ public class TheaRemoteClient: ObservableObject {
     }
 
     private func receiveData(length: Int) async throws -> Data {
-        guard let connection = connection else {
+        guard let connection else {
             throw ClientError.notConnected
         }
 
         return try await withCheckedThrowingContinuation { continuation in
             connection.receive(minimumIncompleteLength: length, maximumLength: length) { content, _, isComplete, error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                 } else if let data = content {
                     continuation.resume(returning: data)
@@ -701,19 +700,19 @@ public enum ClientError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .alreadyConnected: return "Already connected to a server"
-        case .notConnected: return "Not connected to a server"
-        case .connectionTimeout: return "Connection timed out"
-        case .connectionCancelled: return "Connection was cancelled"
-        case .connectionClosed: return "Connection was closed"
-        case .invalidAddress: return "Invalid server address"
-        case .keyNotInitialized: return "Client keys not initialized"
-        case .authenticationFailed(let reason): return "Authentication failed: \(reason)"
-        case .unexpectedMessage: return "Received unexpected message"
-        case .permissionDenied: return "Permission denied for this operation"
-        case .timeout: return "Operation timed out"
-        case .serverError(let error): return "Server error: \(error)"
-        case .confirmationRequired(let action, _): return "Confirmation required for: \(action)"
+        case .alreadyConnected: "Already connected to a server"
+        case .notConnected: "Not connected to a server"
+        case .connectionTimeout: "Connection timed out"
+        case .connectionCancelled: "Connection was cancelled"
+        case .connectionClosed: "Connection was closed"
+        case .invalidAddress: "Invalid server address"
+        case .keyNotInitialized: "Client keys not initialized"
+        case let .authenticationFailed(reason): "Authentication failed: \(reason)"
+        case .unexpectedMessage: "Received unexpected message"
+        case .permissionDenied: "Permission denied for this operation"
+        case .timeout: "Operation timed out"
+        case let .serverError(error): "Server error: \(error)"
+        case let .confirmationRequired(action, _): "Confirmation required for: \(action)"
         }
     }
 }

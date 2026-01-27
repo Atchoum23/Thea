@@ -6,8 +6,8 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 // MARK: - Thea Integration Hub
 
@@ -16,6 +16,11 @@ import Combine
 @MainActor
 public class TheaIntegrationHub: ObservableObject {
     public static let shared = TheaIntegrationHub()
+
+    // MARK: - Context Engine (Omniscience)
+
+    /// Unified context engine - aggregates all device/environment awareness
+    public let context = UnifiedContextEngine.shared
 
     // MARK: - Core Services
 
@@ -64,14 +69,16 @@ public class TheaIntegrationHub: ObservableObject {
     /// Spotlight search integration
     public let spotlight = SpotlightIntegration.shared
 
-    /// Handoff for cross-device continuity
-    public let handoff = HandoffManager.shared
+    #if os(macOS)
+        /// Handoff for cross-device continuity
+        public let handoff = HandoffManager.shared
 
-    /// Universal clipboard
-    public let clipboard = UniversalClipboardManager.shared
+        /// Universal clipboard
+        public let clipboard = UniversalClipboardManager.shared
+    #endif
 
     /// Live Activities (iOS Dynamic Island)
-    public let liveActivities = TheaLiveActivityManager.shared
+    public let liveActivities = LiveActivityManager.shared
 
     // MARK: - Security Services
 
@@ -90,68 +97,68 @@ public class TheaIntegrationHub: ObservableObject {
     public let features = FeatureFlags.shared
 
     #if os(macOS)
-    /// Claude.app bridge
-    public let claudeApp = ClaudeAppBridge.shared
+        /// Claude.app bridge
+        public let claudeApp = ClaudeAppBridge.shared
 
-    /// Work with Apps service
-    public let workWithApps = WorkWithAppsService.shared
+        /// Work with Apps service
+        public let workWithApps = WorkWithAppsService.shared
 
-    /// Menu bar status item
-    public let menuBar = MenuBarManager.shared
+        /// Menu bar status item
+        public let menuBar = MenuBarManager.shared
 
-    /// Global keyboard shortcuts
-    public let hotkeys = GlobalHotkeyManager.shared
+        /// Global keyboard shortcuts
+        public let hotkeys = GlobalHotkeyManager.shared
 
-    /// Finder integration
-    public let finder = FinderIntegration.shared
+        /// Finder integration
+        public let finder = FinderIntegration.shared
     #endif
 
     #if os(iOS)
-    /// Siri Shortcuts integration
-    public let siriShortcuts = SiriShortcutsManager.shared
+        /// Siri Shortcuts integration
+        public let siriShortcuts = SiriShortcutsManager.shared
 
-    /// Home screen quick actions
-    public let homeScreenActions = HomeScreenActionsManager.shared
+        /// Home screen quick actions
+        public let homeScreenActions = HomeScreenActionsManager.shared
 
-    /// Haptic feedback
-    public let haptics = HapticFeedbackManager.shared
+        /// Haptic feedback
+        public let haptics = HapticFeedbackManager.shared
 
-    /// Share extension handler
-    public let shareExtension = ShareExtensionHandler.shared
+        /// Share extension handler
+        public let shareExtension = ShareExtensionHandler.shared
     #endif
 
     #if os(watchOS)
-    /// Watch session manager
-    public let watchSession = WatchSessionManager.shared
+        /// Watch session manager
+        public let watchSession = WatchSessionManager.shared
 
-    /// Complication manager
-    public let complications = ComplicationManager.shared
+        /// Complication manager
+        public let complications = ComplicationManager.shared
     #endif
 
     #if os(visionOS)
-    /// Spatial computing manager
-    public let spatialComputing = SpatialComputingManager.shared
+        /// Spatial computing manager
+        public let spatialComputing = SpatialComputingManager.shared
 
-    /// Spatial UI manager
-    public let spatialUI = SpatialUIManager.shared
+        /// Spatial UI manager
+        public let spatialUI = SpatialUIManager.shared
     #endif
 
     // MARK: - Published State
-    
+
     @Published public private(set) var isInitialized = false
     @Published public private(set) var initializationErrors: [String] = []
     @Published public private(set) var syncStatus: SyncStatus?
-    
+
     // MARK: - Initialization
-    
+
     private init() {}
-    
+
     /// Initialize all services
     public func initialize() async {
         guard !isInitialized else { return }
-        
+
         initializationErrors.removeAll()
-        
+
         // Initialize services in parallel where possible
         let notificationService = notifications
         let syncService = sync
@@ -186,12 +193,12 @@ public class TheaIntegrationHub: ObservableObject {
             }
 
             for await (service, error) in group {
-                if let error = error {
+                if let error {
                     initializationErrors.append("\(service): \(error.localizedDescription)")
                 }
             }
         }
-        
+
         // Get initial sync status
         syncStatus = await sync.getStatus()
 
@@ -201,14 +208,42 @@ public class TheaIntegrationHub: ObservableObject {
         // Index content in Spotlight
         await spotlight.indexQuickActions()
 
+        // Start context engine (omniscience)
+        await context.start()
+
+        // Setup context callbacks
+        context.onUpdate { [weak self] snapshot in
+            Task { @MainActor in
+                // Store interesting context in memory for AI awareness
+                if let location = snapshot.location?.placeName {
+                    self?.lastKnownLocation = location
+                }
+            }
+        }
+
+        context.onInsight { [weak self] insight in
+            Task { @MainActor in
+                // Surface insights via notifications if high priority
+                if insight.priority == .high || insight.priority == .urgent {
+                    try? await self?.notifications.notifyAllDevices(
+                        title: insight.title,
+                        body: insight.message
+                    )
+                }
+            }
+        }
+
         isInitialized = true
 
         // Start background tasks
         startBackgroundTasks()
     }
-    
+
+    // Track last known location for context
+    private var lastKnownLocation: String?
+
     // MARK: - Background Tasks
-    
+
     private func startBackgroundTasks() {
         // Periodic sync status update
         Task {
@@ -217,7 +252,7 @@ public class TheaIntegrationHub: ObservableObject {
                 syncStatus = await sync.getStatus()
             }
         }
-        
+
         // Device heartbeat for presence tracking
         Task {
             while true {
@@ -226,9 +261,9 @@ public class TheaIntegrationHub: ObservableObject {
             }
         }
     }
-    
+
     // MARK: - Quick Actions
-    
+
     /// Notify all devices of AI response completion
     public func notifyAIComplete(
         conversation: String,
@@ -241,7 +276,7 @@ public class TheaIntegrationHub: ObservableObject {
             success: success
         )
     }
-    
+
     /// Notify all devices that user input is required
     public func notifyInputRequired(
         conversation: String,
@@ -252,17 +287,17 @@ public class TheaIntegrationHub: ObservableObject {
             promptText: prompt
         )
     }
-    
+
     /// Store a memory about the user
     public func remember(_ content: String, type: TheaMemoryType = .fact) async {
         _ = try? await memory.remember(content, type: type)
     }
-    
+
     /// Recall relevant memories for a query
     public func recall(_ query: String) async -> [TheaMemory] {
         await memory.recall(query: query)
     }
-    
+
     /// Create a code artifact
     public func createCodeArtifact(
         title: String,
@@ -271,17 +306,17 @@ public class TheaIntegrationHub: ObservableObject {
     ) async -> Artifact? {
         try? await artifacts.createCodeArtifact(title: title, language: language, code: code)
     }
-    
+
     /// Get the current custom agent's system prompt
     public func getCurrentAgentPrompt() -> String? {
         agents.getSystemPrompt()
     }
-    
+
     /// Get available MCP tools
     public func getAvailableTools() -> [MCPTool] {
         mcp.availableTools
     }
-    
+
     /// Execute an MCP tool
     public func executeTool(
         _ toolId: String,
@@ -289,51 +324,65 @@ public class TheaIntegrationHub: ObservableObject {
     ) async throws -> MCPServerToolResult {
         try await mcp.executeTool(toolId: toolId, arguments: arguments)
     }
-    
+
     #if os(macOS)
-    /// Send a prompt to Claude.app
-    public func sendToClaude(_ prompt: String) async throws -> String {
-        try await claudeApp.sendPrompt(prompt)
-    }
-    
-    /// Execute an action on a connected app
-    public func executeAppAction(
-        _ action: String,
-        app: ConnectedApp,
-        parameters: [String: Any] = [:]
-    ) async throws -> AppActionResult {
-        try await workWithApps.execute(action: action, on: app, parameters: parameters)
-    }
+        /// Send a prompt to Claude.app
+        public func sendToClaude(_ prompt: String) async throws -> String {
+            try await claudeApp.sendPrompt(prompt)
+        }
+
+        /// Execute an action on a connected app
+        public func executeAppAction(
+            _ action: String,
+            app: ConnectedApp,
+            parameters: [String: Any] = [:]
+        ) async throws -> AppActionResult {
+            try await workWithApps.execute(action: action, on: app, parameters: parameters)
+        }
     #endif
-    
+
     // MARK: - Sync Operations
-    
+
     /// Perform a full sync
     public func performSync() async throws {
         try await sync.performFullSync()
         syncStatus = await sync.getStatus()
     }
-    
+
     /// Get sync status
     public func getSyncStatus() async -> SyncStatus {
         await sync.getStatus()
     }
-    
+
     // MARK: - Session Context
-    
+
     /// Build complete context for AI conversation
-    /// Includes memories, current agent prompt, and available tools
+    /// Includes memories, current agent prompt, available tools, and live context
     public func buildConversationContext(forQuery query: String) async -> ConversationContext {
         let relevantMemories = await memory.getContextMemories(forQuery: query)
         let agentPrompt = agents.getSystemPrompt()
-        let tools = mcp.availableTools.map { $0.name }
-        
+        let tools = mcp.availableTools.map(\.name)
+
+        // Get current context snapshot for AI awareness
+        let contextSummary = context.getContextSummary(maxLength: 300)
+
         return ConversationContext(
             memories: relevantMemories,
             agentSystemPrompt: agentPrompt,
             availableTools: tools,
-            currentAgent: agents.currentAgent
+            currentAgent: agents.currentAgent,
+            liveContext: contextSummary
         )
+    }
+
+    /// Get current context summary for AI injection
+    public func getContextSummary() -> String {
+        context.getContextSummary()
+    }
+
+    /// Get full context snapshot
+    public func getContextSnapshot() -> ContextSnapshot {
+        context.getSnapshot()
     }
 }
 
@@ -344,26 +393,46 @@ public struct ConversationContext: Sendable {
     public let agentSystemPrompt: String?
     public let availableTools: [String]
     public let currentAgent: CustomAgent?
-    
+    public let liveContext: String?
+
+    public init(
+        memories: String,
+        agentSystemPrompt: String?,
+        availableTools: [String],
+        currentAgent: CustomAgent?,
+        liveContext: String? = nil
+    ) {
+        self.memories = memories
+        self.agentSystemPrompt = agentSystemPrompt
+        self.availableTools = availableTools
+        self.currentAgent = currentAgent
+        self.liveContext = liveContext
+    }
+
     /// Build full system prompt with all context
     public func buildSystemPrompt(basePrompt: String = "") -> String {
         var prompt = basePrompt
-        
+
         // Add agent system prompt if available
         if let agentPrompt = agentSystemPrompt {
             prompt = agentPrompt + "\n\n" + prompt
         }
-        
+
+        // Add live context awareness
+        if let liveContext, !liveContext.isEmpty {
+            prompt += "\n\n[Current Context: \(liveContext)]"
+        }
+
         // Add memories
         if !memories.isEmpty {
             prompt += "\n\n" + memories
         }
-        
+
         // Add available tools
         if !availableTools.isEmpty {
             prompt += "\n\nAvailable tools: \(availableTools.joined(separator: ", "))"
         }
-        
+
         return prompt
     }
 }
@@ -375,12 +444,12 @@ public extension TheaIntegrationHub {
     func notify(_ title: String, body: String) async {
         try? await notifications.notifyAllDevices(title: title, body: body)
     }
-    
+
     /// Quick memory storage
     func rememberFact(_ fact: String) async {
         _ = try? await memory.rememberFact(fact)
     }
-    
+
     /// Quick preference storage
     func rememberPreference(_ key: String, value: String) async {
         _ = try? await memory.rememberPreference(key: key, value: value)

@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - App Configuration
+
 // Centralized configuration for all hardcoded values
 // All settings are persisted via UserDefaults with sensible defaults
 
@@ -15,7 +16,7 @@ final class AppConfiguration {
 
     // MARK: - App Info
 
-    struct AppInfo {
+    enum AppInfo {
         static let version = "1.4.0"
         static let buildType = "Beta"
         static let domain = "theathe.app"
@@ -33,7 +34,8 @@ final class AppConfiguration {
     var providerConfig: ProviderConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.providerConfig"),
-               let config = try? JSONDecoder().decode(ProviderConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(ProviderConfiguration.self, from: data)
+            {
                 return config
             }
             return ProviderConfiguration()
@@ -50,7 +52,8 @@ final class AppConfiguration {
     var memoryConfig: MemoryConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.memoryConfig"),
-               let config = try? JSONDecoder().decode(MemoryConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(MemoryConfiguration.self, from: data)
+            {
                 return config
             }
             return MemoryConfiguration()
@@ -67,7 +70,8 @@ final class AppConfiguration {
     var agentConfig: AgentConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.agentConfig"),
-               let config = try? JSONDecoder().decode(AgentConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(AgentConfiguration.self, from: data)
+            {
                 return config
             }
             return AgentConfiguration()
@@ -84,7 +88,8 @@ final class AppConfiguration {
     var executionMode: ExecutionModeConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.executionMode"),
-               let config = try? JSONDecoder().decode(ExecutionModeConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(ExecutionModeConfiguration.self, from: data)
+            {
                 return config
             }
             return ExecutionModeConfiguration()
@@ -101,7 +106,8 @@ final class AppConfiguration {
     var localModelConfig: LocalModelConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.localModelConfig"),
-               let config = try? JSONDecoder().decode(LocalModelConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(LocalModelConfiguration.self, from: data)
+            {
                 return config
             }
             return LocalModelConfiguration()
@@ -118,7 +124,8 @@ final class AppConfiguration {
     var orchestratorConfig: OrchestratorConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.orchestratorConfig"),
-               let config = try? JSONDecoder().decode(OrchestratorConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(OrchestratorConfiguration.self, from: data)
+            {
                 return config
             }
             return OrchestratorConfiguration()
@@ -135,7 +142,8 @@ final class AppConfiguration {
     var themeConfig: ThemeConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.themeConfig"),
-               let config = try? JSONDecoder().decode(ThemeConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(ThemeConfiguration.self, from: data)
+            {
                 return config
             }
             return ThemeConfiguration()
@@ -152,7 +160,8 @@ final class AppConfiguration {
     var voiceConfig: VoiceConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.voiceConfig"),
-               let config = try? JSONDecoder().decode(VoiceConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(VoiceConfiguration.self, from: data)
+            {
                 return config
             }
             return VoiceConfiguration()
@@ -169,7 +178,8 @@ final class AppConfiguration {
     var knowledgeScannerConfig: KnowledgeScannerConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.knowledgeScannerConfig"),
-               let config = try? JSONDecoder().decode(KnowledgeScannerConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(KnowledgeScannerConfiguration.self, from: data)
+            {
                 return config
             }
             return KnowledgeScannerConfiguration()
@@ -186,7 +196,8 @@ final class AppConfiguration {
     var codeIntelligenceConfig: CodeIntelligenceConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.codeIntelligenceConfig"),
-               let config = try? JSONDecoder().decode(CodeIntelligenceConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(CodeIntelligenceConfiguration.self, from: data)
+            {
                 return config
             }
             return CodeIntelligenceConfiguration()
@@ -203,7 +214,8 @@ final class AppConfiguration {
     var apiValidationConfig: APIValidationConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.apiValidationConfig"),
-               let config = try? JSONDecoder().decode(APIValidationConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(APIValidationConfiguration.self, from: data)
+            {
                 return config
             }
             return APIValidationConfiguration()
@@ -220,7 +232,8 @@ final class AppConfiguration {
     var externalAPIsConfig: ExternalAPIsConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.externalAPIsConfig"),
-               let config = try? JSONDecoder().decode(ExternalAPIsConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(ExternalAPIsConfiguration.self, from: data)
+            {
                 return config
             }
             return ExternalAPIsConfiguration()
@@ -237,7 +250,8 @@ final class AppConfiguration {
     var metaAIConfig: MetaAIConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.metaAIConfig"),
-               let config = try? JSONDecoder().decode(MetaAIConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(MetaAIConfiguration.self, from: data)
+            {
                 return config
             }
             return MetaAIConfiguration()
@@ -254,7 +268,8 @@ final class AppConfiguration {
     var promptEngineeringConfig: PromptEngineeringConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.promptEngineeringConfig"),
-               let config = try? JSONDecoder().decode(PromptEngineeringConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(PromptEngineeringConfiguration.self, from: data)
+            {
                 return config
             }
             return PromptEngineeringConfiguration()
@@ -271,7 +286,8 @@ final class AppConfiguration {
     var lifeTrackingConfig: LifeTrackingConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.lifeTrackingConfig"),
-               let config = try? JSONDecoder().decode(LifeTrackingConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(LifeTrackingConfiguration.self, from: data)
+            {
                 return config
             }
             return LifeTrackingConfiguration()
@@ -288,7 +304,8 @@ final class AppConfiguration {
     var qaToolsConfig: QAToolsConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.qaToolsConfig"),
-               let config = try? JSONDecoder().decode(QAToolsConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(QAToolsConfiguration.self, from: data)
+            {
                 return config
             }
             return QAToolsConfiguration()
@@ -353,7 +370,7 @@ struct ProviderConfiguration: Codable, Sendable, Equatable {
     var openRouterBaseURL: String = "https://openrouter.ai/api/v1"
 
     // Generation Defaults
-    var defaultMaxTokens: Int = 8_192
+    var defaultMaxTokens: Int = 8192
     var defaultTemperature: Double = 1.0
     var defaultTopP: Double = 1.0
     var streamResponses: Bool = true
@@ -363,7 +380,7 @@ struct ProviderConfiguration: Codable, Sendable, Equatable {
     var defaultSummarizationModel: String = "gpt-4o-mini"
     var defaultReasoningModel: String = "gpt-4o"
     var defaultEmbeddingModel: String = "text-embedding-3-small"
-    var embeddingDimensions: Int = 1_536
+    var embeddingDimensions: Int = 1536
 
     // Request Settings
     var requestTimeoutSeconds: Double = 60.0
@@ -376,10 +393,10 @@ struct ProviderConfiguration: Codable, Sendable, Equatable {
 struct MemoryConfiguration: Codable, Sendable, Equatable {
     // Capacity
     var shortTermCapacity: Int = 20
-    var longTermMaxItems: Int = 10_000
-    var episodicMaxItems: Int = 5_000
-    var semanticMaxItems: Int = 5_000
-    var proceduralMaxItems: Int = 1_000
+    var longTermMaxItems: Int = 10000
+    var episodicMaxItems: Int = 5000
+    var semanticMaxItems: Int = 5000
+    var proceduralMaxItems: Int = 1000
 
     // Consolidation
     var consolidationThresholdSeconds: TimeInterval = 300 // 5 minutes
@@ -454,8 +471,8 @@ struct LocalModelConfiguration: Codable, Sendable, Equatable {
     var sharedLLMsDirectory: String = "Library/Application Support/SharedLLMs"
 
     // Defaults
-    var defaultContextTokens: Int = 4_096
-    var defaultMaxOutputTokens: Int = 2_048
+    var defaultContextTokens: Int = 4096
+    var defaultMaxOutputTokens: Int = 2048
     var defaultQuantization: String = "Q4_K_M"
     var defaultParameters: String = "7B"
 
@@ -509,7 +526,7 @@ struct VoiceConfiguration: Codable, Sendable, Equatable {
     // Speech Recognition
     var recognitionLanguage: String = "en-US"
     var requiresOnDeviceRecognition: Bool = true
-    var audioBufferSize: Int = 1_024
+    var audioBufferSize: Int = 1024
 
     // Speech Synthesis
     var speechLanguage: String = "en-US"
@@ -526,7 +543,7 @@ struct VoiceConfiguration: Codable, Sendable, Equatable {
 
     // Feedback
     var activationSoundEnabled: Bool = true
-    var activationSoundID: UInt32 = 1_054 // System tock sound
+    var activationSoundID: UInt32 = 1054 // System tock sound
 }
 
 // MARK: - Knowledge Scanner Configuration
@@ -660,7 +677,7 @@ struct PromptEngineeringConfiguration: Codable, Sendable, Equatable {
     var enableFewShotLearning: Bool = true
     var enableABTesting: Bool = true
     var maxFewShotExamples: Int = 3
-    var templateRefreshInterval: TimeInterval = 86_400 // 24 hours
+    var templateRefreshInterval: TimeInterval = 86400 // 24 hours
     var minTemplateSuccessRate: Float = 0.7
     var enableUserPreferenceLearning: Bool = true
     var enableTemplateVersioning: Bool = true
@@ -692,7 +709,7 @@ struct LifeTrackingConfiguration: Codable, Sendable, Equatable {
     var achievementNotificationsEnabled: Bool = true
 
     // Update Intervals
-    var healthSyncInterval: TimeInterval = 3_600
+    var healthSyncInterval: TimeInterval = 3600
     var screenTimeCheckInterval: TimeInterval = 60
     var inputActivityCheckInterval: TimeInterval = 300
     var locationUpdateInterval: TimeInterval = 600
@@ -714,26 +731,26 @@ public struct ExecutionModeConfiguration: Codable, Sendable {
 }
 
 public enum ExecutionMode: String, Codable, Sendable, CaseIterable {
-    case safe        // Ask for approval on every operation
-    case normal      // Ask for approval on destructive operations only
-    case aggressive  // Pre-approved, minimal interruptions
+    case safe // Ask for approval on every operation
+    case normal // Ask for approval on destructive operations only
+    case aggressive // Pre-approved, minimal interruptions
 
     public var displayName: String {
         switch self {
-        case .safe: return "Safe Mode (Manual Approval)"
-        case .normal: return "Normal Mode (Smart Approval)"
-        case .aggressive: return "Aggressive Mode (Autonomous)"
+        case .safe: "Safe Mode (Manual Approval)"
+        case .normal: "Normal Mode (Smart Approval)"
+        case .aggressive: "Aggressive Mode (Autonomous)"
         }
     }
 
     public var description: String {
         switch self {
         case .safe:
-            return "Every operation requires manual approval. Best for learning or sensitive work."
+            "Every operation requires manual approval. Best for learning or sensitive work."
         case .normal:
-            return "Approve plans upfront, allow safe operations automatically. Recommended for most users."
+            "Approve plans upfront, allow safe operations automatically. Recommended for most users."
         case .aggressive:
-            return "Pre-approve all operations. AI continues until mission complete. Use with caution."
+            "Pre-approve all operations. AI continues until mission complete. Use with caution."
         }
     }
 }
@@ -839,23 +856,23 @@ enum QATool: String, Codable, Sendable, CaseIterable {
 
     var icon: String {
         switch self {
-        case .swiftLint: return "swift"
-        case .codeCov: return "chart.pie"
-        case .sonarCloud: return "cloud"
-        case .deepSource: return "magnifyingglass.circle"
+        case .swiftLint: "swift"
+        case .codeCov: "chart.pie"
+        case .sonarCloud: "cloud"
+        case .deepSource: "magnifyingglass.circle"
         }
     }
 
     var description: String {
         switch self {
         case .swiftLint:
-            return "Static code analysis for Swift style and conventions"
+            "Static code analysis for Swift style and conventions"
         case .codeCov:
-            return "Code coverage reporting and tracking"
+            "Code coverage reporting and tracking"
         case .sonarCloud:
-            return "Continuous code quality and security analysis"
+            "Continuous code quality and security analysis"
         case .deepSource:
-            return "Automated code review and issue detection"
+            "Automated code review and issue detection"
         }
     }
 }
@@ -900,19 +917,19 @@ enum QAIssueSeverity: String, Codable, Sendable {
 
     var color: String {
         switch self {
-        case .error: return "red"
-        case .warning: return "orange"
-        case .info: return "blue"
-        case .hint: return "gray"
+        case .error: "red"
+        case .warning: "orange"
+        case .info: "blue"
+        case .hint: "gray"
         }
     }
 
     var icon: String {
         switch self {
-        case .error: return "xmark.circle.fill"
-        case .warning: return "exclamationmark.triangle.fill"
-        case .info: return "info.circle.fill"
-        case .hint: return "lightbulb.fill"
+        case .error: "xmark.circle.fill"
+        case .warning: "exclamationmark.triangle.fill"
+        case .info: "info.circle.fill"
+        case .hint: "lightbulb.fill"
         }
     }
 }

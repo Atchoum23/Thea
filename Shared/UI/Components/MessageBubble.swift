@@ -45,15 +45,15 @@ struct MessageBubble: View {
             return .theaPrimary
         case .assistant:
             #if os(macOS)
-            return Color(nsColor: .systemGray)
+                return Color(nsColor: .systemGray)
             #else
-            return Color(uiColor: .systemGray6)
+                return Color(uiColor: .systemGray6)
             #endif
         case .system:
             #if os(macOS)
-            return Color(nsColor: .systemGray)
+                return Color(nsColor: .systemGray)
             #else
-            return Color(uiColor: .systemGray5)
+                return Color(uiColor: .systemGray5)
             #endif
         }
     }
@@ -61,9 +61,9 @@ struct MessageBubble: View {
     private var foregroundColor: Color {
         switch message.messageRole {
         case .user:
-            return .white
+            .white
         case .assistant, .system:
-            return .primary
+            .primary
         }
     }
 }

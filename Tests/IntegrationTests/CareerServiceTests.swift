@@ -45,7 +45,7 @@ struct CareerServiceTests {
     }
 
     @Test("Filter goals by status")
-    func testFilterGoalsByStatus() async throws {
+    func filterGoalsByStatus() async throws {
         let service = CareerService()
 
         let goal1 = CareerGoal(
@@ -175,7 +175,7 @@ struct CareerServiceTests {
     }
 
     @Test("Filter skills by category")
-    func testFilterSkillsByCategory() async throws {
+    func filterSkillsByCategory() async throws {
         let service = CareerService()
 
         let skill1 = Skill(name: "SwiftUI", category: .technical)
@@ -236,7 +236,7 @@ struct CareerServiceTests {
         let service = CareerService()
 
         // Create reflections with different moods
-        for i in 0..<7 {
+        for i in 0 ..< 7 {
             let date = Calendar.current.date(byAdding: .day, value: -i, to: Date())!
             let mood: Mood = i < 3 ? .excited : .satisfied
 
@@ -259,7 +259,7 @@ struct CareerServiceTests {
     // MARK: - Recommendation Tests
 
     @Test("Generate skill gap recommendations")
-    func testGenerateSkillGapRecommendations() async throws {
+    func generateSkillGapRecommendations() async throws {
         let service = CareerService()
 
         // Create a stale skill (not practiced in 2+ weeks)
@@ -283,7 +283,7 @@ struct CareerServiceTests {
     }
 
     @Test("Generate goal alignment recommendations")
-    func testGenerateGoalAlignmentRecommendations() async throws {
+    func generateGoalAlignmentRecommendations() async throws {
         let service = CareerService()
 
         // Create a stagnant goal (in progress but low progress)
@@ -336,7 +336,7 @@ struct CareerServiceTests {
     // MARK: - Goal with Deadline Tests
 
     @Test("Goal with deadline")
-    func testGoalWithDeadline() {
+    func goalWithDeadline() {
         let deadline = Date().addingTimeInterval(60 * 60 * 24 * 30) // 30 days
 
         let goal = CareerGoal(

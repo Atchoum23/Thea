@@ -2,6 +2,7 @@ import Charts
 import SwiftUI
 
 // MARK: - Financial Dashboard View
+
 // Overview of connected accounts, transactions, and insights
 
 struct FinancialDashboardView: View {
@@ -299,17 +300,17 @@ struct AccountCard: View {
 
     private func iconForProvider(_ provider: String) -> String {
         switch provider.lowercased() {
-        case "revolut": return "creditcard"
-        case "binance", "coinbase": return "bitcoinsign.circle"
-        default: return "banknote"
+        case "revolut": "creditcard"
+        case "binance", "coinbase": "bitcoinsign.circle"
+        default: "banknote"
         }
     }
 
     private func formatBalance(_ amount: Double, currency: String) -> String {
         if currency == "USD" || currency == "EUR" {
-            return String(format: "$%.2f", amount)
+            String(format: "$%.2f", amount)
         } else {
-            return String(format: "%.4f %@", amount, currency)
+            String(format: "%.4f %@", amount, currency)
         }
     }
 }
@@ -393,19 +394,19 @@ struct InsightCard: View {
 
     private func iconForType(_ type: FinancialInsight.InsightType) -> String {
         switch type {
-        case .spendingTrend: return "chart.line.uptrend.xyaxis"
-        case .categoryAnalysis: return "chart.bar"
-        case .unusualSpending: return "exclamationmark.triangle"
-        case .budgetRecommendation: return "lightbulb"
+        case .spendingTrend: "chart.line.uptrend.xyaxis"
+        case .categoryAnalysis: "chart.bar"
+        case .unusualSpending: "exclamationmark.triangle"
+        case .budgetRecommendation: "lightbulb"
         }
     }
 
     private func colorForType(_ type: FinancialInsight.InsightType) -> Color {
         switch type {
-        case .spendingTrend: return .green
-        case .categoryAnalysis: return .orange
-        case .unusualSpending: return .red
-        case .budgetRecommendation: return .blue
+        case .spendingTrend: .green
+        case .categoryAnalysis: .orange
+        case .unusualSpending: .red
+        case .budgetRecommendation: .blue
         }
     }
 }
@@ -538,16 +539,14 @@ struct ConnectAccountSheet: View {
                 }
 
                 // Determine account type based on provider
-                let accountType: AccountType = {
-                    switch selectedProvider.lowercased() {
-                    case "binance", "coinbase":
-                        return .crypto
-                    case "plaid":
-                        return .checking
-                    default:
-                        return .checking
-                    }
-                }()
+                let accountType: AccountType = switch selectedProvider.lowercased() {
+                case "binance", "coinbase":
+                    .crypto
+                case "plaid":
+                    .checking
+                default:
+                    .checking
+                }
 
                 // Create account
                 let account = financialManager.addAccount(

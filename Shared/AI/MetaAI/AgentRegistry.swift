@@ -15,7 +15,7 @@ public final class AgentRegistry {
     private(set) var healthMonitor: AgentHealthMonitor
 
     private init() {
-        self.healthMonitor = AgentHealthMonitor()
+        healthMonitor = AgentHealthMonitor()
         setupDefaultAgents()
     }
 
@@ -78,7 +78,8 @@ public final class AgentRegistry {
         // Find first idle or available agent
         for agentID in pool {
             if let info = registeredAgents[agentID],
-               info.status == .idle || info.status == .available {
+               info.status == .idle || info.status == .available
+            {
                 return agentID
             }
         }
@@ -90,7 +91,7 @@ public final class AgentRegistry {
     public func findAgentsWithCapability(_ capability: AgentCapability) -> [UUID] {
         registeredAgents.values
             .filter { $0.capabilities.contains(capability) }
-            .map { $0.id }
+            .map(\.id)
     }
 
     /// Get all agents of a specific type
@@ -146,7 +147,7 @@ public final class AgentRegistry {
     public func getUnhealthyAgents() -> [UUID] {
         registeredAgents.values
             .filter { !isHealthy($0.id) }
-            .map { $0.id }
+            .map(\.id)
     }
 
     // MARK: - Capability Management
@@ -194,7 +195,7 @@ public final class AgentRegistry {
     public func cleanupFailedAgents() {
         let failedAgents = registeredAgents.values
             .filter { if case .failed = $0.status { return true }; return false }
-            .map { $0.id }
+            .map(\.id)
 
         for agentID in failedAgents {
             unregister(agentID)
@@ -266,7 +267,7 @@ public struct AgentInfo {
         self.status = status
         self.metadata = metadata
         self.createdAt = createdAt
-        self.lastUpdated = createdAt
+        lastUpdated = createdAt
     }
 }
 
@@ -314,10 +315,10 @@ public enum AgentStatus: Equatable {
 
     public var displayName: String {
         switch self {
-        case .idle: return "Idle"
-        case .available: return "Available"
-        case .busy: return "Busy"
-        case .failed(let reason): return "Failed: \(reason)"
+        case .idle: "Idle"
+        case .available: "Available"
+        case .busy: "Busy"
+        case let .failed(reason): "Failed: \(reason)"
         }
     }
 }
@@ -368,7 +369,8 @@ public class AgentHealthMonitor {
         }
 
         if let lastFailure = record.lastFailure,
-           Date().timeIntervalSince(lastFailure) < 300 { // 5 minutes
+           Date().timeIntervalSince(lastFailure) < 300
+        { // 5 minutes
             return false
         }
 

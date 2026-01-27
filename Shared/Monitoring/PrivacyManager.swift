@@ -8,8 +8,8 @@
 
 import Foundation
 #if os(macOS)
-import AppKit
-import ApplicationServices
+    import AppKit
+    import ApplicationServices
 #endif
 
 // MARK: - Privacy Manager
@@ -34,7 +34,8 @@ public actor PrivacyManager {
     private init() {
         // Load consent synchronously from UserDefaults
         if let data = defaults.data(forKey: consentKey),
-           let consent = try? JSONDecoder().decode(Set<String>.self, from: data) {
+           let consent = try? JSONDecoder().decode(Set<String>.self, from: data)
+        {
             consentGiven = Set(consent.compactMap { PrivacyPermission(rawValue: $0) })
         }
         isInitialized = true
@@ -42,7 +43,8 @@ public actor PrivacyManager {
 
     private func loadConsentStatus() {
         if let data = defaults.data(forKey: consentKey),
-           let consent = try? JSONDecoder().decode(Set<String>.self, from: data) {
+           let consent = try? JSONDecoder().decode(Set<String>.self, from: data)
+        {
             consentGiven = Set(consent.compactMap { PrivacyPermission(rawValue: $0) })
         }
     }
@@ -70,9 +72,9 @@ public actor PrivacyManager {
     /// Check a specific permission
     public func checkPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
         #if os(macOS)
-        let status = checkMacOSPermission(permission)
+            let status = checkMacOSPermission(permission)
         #else
-        let status: PermissionStatus = .unknown
+            let status: PermissionStatus = .unknown
         #endif
 
         permissionStatus[permission] = status
@@ -80,42 +82,42 @@ public actor PrivacyManager {
     }
 
     #if os(macOS)
-    private func checkMacOSPermission(_ permission: PrivacyPermission) -> PermissionStatus {
-        switch permission {
-        case .accessibility:
-            let trusted = AXIsProcessTrusted()
-            return trusted ? .granted : .denied
+        private func checkMacOSPermission(_ permission: PrivacyPermission) -> PermissionStatus {
+            switch permission {
+            case .accessibility:
+                let trusted = AXIsProcessTrusted()
+                return trusted ? .granted : .denied
 
-        case .inputMonitoring:
-            // Input monitoring is part of accessibility on macOS
-            let trusted = AXIsProcessTrusted()
-            return trusted ? .granted : .denied
+            case .inputMonitoring:
+                // Input monitoring is part of accessibility on macOS
+                let trusted = AXIsProcessTrusted()
+                return trusted ? .granted : .denied
 
-        case .screenRecording:
-            // Check screen recording permission
-            if CGPreflightScreenCaptureAccess() {
+            case .screenRecording:
+                // Check screen recording permission
+                if CGPreflightScreenCaptureAccess() {
+                    return .granted
+                }
+                return .denied
+
+            case .notifications:
+                // Notifications are typically always available
                 return .granted
+
+            case .location:
+                // Location services check
+                return .unknown
+
+            case .contacts:
+                return .unknown
+
+            case .calendar:
+                return .unknown
+
+            case .photos:
+                return .unknown
             }
-            return .denied
-
-        case .notifications:
-            // Notifications are typically always available
-            return .granted
-
-        case .location:
-            // Location services check
-            return .unknown
-
-        case .contacts:
-            return .unknown
-
-        case .calendar:
-            return .unknown
-
-        case .photos:
-            return .unknown
         }
-    }
     #endif
 
     // MARK: - Permission Requests
@@ -123,35 +125,35 @@ public actor PrivacyManager {
     /// Request a specific permission
     public func requestPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
         #if os(macOS)
-        await requestMacOSPermission(permission)
+            await requestMacOSPermission(permission)
         #else
-        return .unknown
+            return .unknown
         #endif
     }
 
     #if os(macOS)
-    // swiftlint:disable:next modifier_order
-    private nonisolated func requestMacOSPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
-        switch permission {
-        case .accessibility, .inputMonitoring:
-            // Open System Settings to Accessibility
-            // Use string constant directly to avoid concurrency issues with kAXTrustedCheckOptionPrompt
-            let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
-            let trusted = AXIsProcessTrustedWithOptions(options)
-            return trusted ? .granted : .denied
+        // swiftlint:disable:next modifier_order
+        private nonisolated func requestMacOSPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
+            switch permission {
+            case .accessibility, .inputMonitoring:
+                // Open System Settings to Accessibility
+                // Use string constant directly to avoid concurrency issues with kAXTrustedCheckOptionPrompt
+                let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
+                let trusted = AXIsProcessTrustedWithOptions(options)
+                return trusted ? .granted : .denied
 
-        case .screenRecording:
-            // Request screen capture access
-            CGRequestScreenCaptureAccess()
-            return CGPreflightScreenCaptureAccess() ? .granted : .denied
+            case .screenRecording:
+                // Request screen capture access
+                CGRequestScreenCaptureAccess()
+                return CGPreflightScreenCaptureAccess() ? .granted : .denied
 
-        case .notifications:
-            return .granted
+            case .notifications:
+                return .granted
 
-        default:
-            return .unknown
+            default:
+                return .unknown
+            }
         }
-    }
     #endif
 
     // MARK: - Consent Management
@@ -188,19 +190,18 @@ public actor PrivacyManager {
     @MainActor
     public func openPrivacySettings(_ permission: PrivacyPermission) {
         #if os(macOS)
-        let urlString: String
-        switch permission {
-        case .accessibility, .inputMonitoring:
-            urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
-        case .screenRecording:
-            urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
-        default:
-            urlString = "x-apple.systempreferences:com.apple.preference.security"
-        }
+            let urlString = switch permission {
+            case .accessibility, .inputMonitoring:
+                "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+            case .screenRecording:
+                "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
+            default:
+                "x-apple.systempreferences:com.apple.preference.security"
+            }
 
-        if let url = URL(string: urlString) {
-            NSWorkspace.shared.open(url)
-        }
+            if let url = URL(string: urlString) {
+                NSWorkspace.shared.open(url)
+            }
         #endif
     }
 
@@ -238,57 +239,57 @@ public enum PrivacyPermission: String, Codable, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .accessibility: return "Accessibility"
-        case .inputMonitoring: return "Input Monitoring"
-        case .screenRecording: return "Screen Recording"
-        case .notifications: return "Notifications"
-        case .location: return "Location"
-        case .contacts: return "Contacts"
-        case .calendar: return "Calendar"
-        case .photos: return "Photos"
+        case .accessibility: "Accessibility"
+        case .inputMonitoring: "Input Monitoring"
+        case .screenRecording: "Screen Recording"
+        case .notifications: "Notifications"
+        case .location: "Location"
+        case .contacts: "Contacts"
+        case .calendar: "Calendar"
+        case .photos: "Photos"
         }
     }
 
     public var description: String {
         switch self {
         case .accessibility:
-            return "Required to monitor app switching and UI interactions"
+            "Required to monitor app switching and UI interactions"
         case .inputMonitoring:
-            return "Required to detect keyboard and mouse activity"
+            "Required to detect keyboard and mouse activity"
         case .screenRecording:
-            return "Required for screen capture features"
+            "Required for screen capture features"
         case .notifications:
-            return "Required to send notifications"
+            "Required to send notifications"
         case .location:
-            return "Required for location-based features"
+            "Required for location-based features"
         case .contacts:
-            return "Required for contact integration"
+            "Required for contact integration"
         case .calendar:
-            return "Required for calendar integration"
+            "Required for calendar integration"
         case .photos:
-            return "Required for photo access"
+            "Required for photo access"
         }
     }
 
     public var icon: String {
         switch self {
-        case .accessibility: return "accessibility"
-        case .inputMonitoring: return "keyboard"
-        case .screenRecording: return "rectangle.dashed.badge.record"
-        case .notifications: return "bell"
-        case .location: return "location"
-        case .contacts: return "person.crop.circle"
-        case .calendar: return "calendar"
-        case .photos: return "photo"
+        case .accessibility: "accessibility"
+        case .inputMonitoring: "keyboard"
+        case .screenRecording: "rectangle.dashed.badge.record"
+        case .notifications: "bell"
+        case .location: "location"
+        case .contacts: "person.crop.circle"
+        case .calendar: "calendar"
+        case .photos: "photo"
         }
     }
 
     public var isRequired: Bool {
         switch self {
         case .accessibility, .inputMonitoring:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }
@@ -304,31 +305,31 @@ public enum PermissionStatus: String, Codable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .granted: return "Granted"
-        case .denied: return "Denied"
-        case .notDetermined: return "Not Requested"
-        case .restricted: return "Restricted"
-        case .unknown: return "Unknown"
+        case .granted: "Granted"
+        case .denied: "Denied"
+        case .notDetermined: "Not Requested"
+        case .restricted: "Restricted"
+        case .unknown: "Unknown"
         }
     }
 
     public var icon: String {
         switch self {
-        case .granted: return "checkmark.circle.fill"
-        case .denied: return "xmark.circle.fill"
-        case .notDetermined: return "questionmark.circle"
-        case .restricted: return "lock.circle"
-        case .unknown: return "circle"
+        case .granted: "checkmark.circle.fill"
+        case .denied: "xmark.circle.fill"
+        case .notDetermined: "questionmark.circle"
+        case .restricted: "lock.circle"
+        case .unknown: "circle"
         }
     }
 
     public var color: String {
         switch self {
-        case .granted: return "green"
-        case .denied: return "red"
-        case .notDetermined: return "orange"
-        case .restricted: return "gray"
-        case .unknown: return "gray"
+        case .granted: "green"
+        case .denied: "red"
+        case .notDetermined: "orange"
+        case .restricted: "gray"
+        case .unknown: "gray"
         }
     }
 }

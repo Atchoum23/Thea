@@ -79,13 +79,12 @@ public final class ModelRouter {
         }
 
         // Rough estimates (USD per 1M tokens)
-        let costPer1M: Decimal
-        if modelID.contains("gpt-4o-mini") || modelID.contains("gemini-flash") {
-            costPer1M = 0.15 // Cheap models
+        let costPer1M: Decimal = if modelID.contains("gpt-4o-mini") || modelID.contains("gemini-flash") {
+            0.15 // Cheap models
         } else if modelID.contains("opus") || modelID.contains("o1") {
-            costPer1M = 15.0 // Premium models
+            15.0 // Premium models
         } else {
-            costPer1M = 3.0 // Mid-tier models
+            3.0 // Mid-tier models
         }
 
         return costPer1M * Decimal(tokens) / 1_000_000
@@ -99,21 +98,19 @@ public final class ModelRouter {
 
     private func selectDefaultModel(for taskType: TaskType) async throws -> ModelSelection {
         // Fallback logic when no routing rule exists
-        let defaultModel: String
-
-        switch taskType {
+        let defaultModel = switch taskType {
         case .simpleQA, .factual, .summarization:
-            defaultModel = "openai/gpt-4o-mini"
+            "openai/gpt-4o-mini"
         case .codeGeneration, .debugging:
-            defaultModel = "anthropic/claude-sonnet-4"
+            "anthropic/claude-sonnet-4"
         case .complexReasoning, .analysis, .planning:
-            defaultModel = "anthropic/claude-opus-4"
+            "anthropic/claude-opus-4"
         case .creativeWriting:
-            defaultModel = "anthropic/claude-sonnet-4"
+            "anthropic/claude-sonnet-4"
         case .mathLogic:
-            defaultModel = "openai/o1"
+            "openai/o1"
         default:
-            defaultModel = "anthropic/claude-sonnet-4"
+            "anthropic/claude-sonnet-4"
         }
 
         // Check if default model is available
@@ -122,7 +119,7 @@ public final class ModelRouter {
                 modelID: defaultModel,
                 providerID: defaultModel.split(separator: "/").first.map(String.init) ?? "unknown",
                 isLocal: false,
-                estimatedCost: estimatedCost(for: defaultModel, tokens: 1_000),
+                estimatedCost: estimatedCost(for: defaultModel, tokens: 1000),
                 reasoning: "Default model for \(taskType.displayName)"
             )
         }
@@ -201,15 +198,13 @@ public final class ModelRouter {
 
     private func createSelection(for modelID: String, reasoning: String) -> ModelSelection {
         let isLocal = modelID.hasPrefix("local-")
-        let providerID: String
-
-        if isLocal {
-            providerID = "local"
+        let providerID: String = if isLocal {
+            "local"
         } else {
-            providerID = modelID.split(separator: "/").first.map(String.init) ?? "unknown"
+            modelID.split(separator: "/").first.map(String.init) ?? "unknown"
         }
 
-        let cost = estimatedCost(for: modelID, tokens: 1_000)
+        let cost = estimatedCost(for: modelID, tokens: 1000)
 
         return ModelSelection(
             modelID: modelID,
@@ -233,8 +228,8 @@ public final class ModelRouter {
 
         // Sort by estimated cost (local models first, then cloud by cost)
         let sorted = available.sorted { model1, model2 in
-            let cost1 = estimatedCost(for: model1, tokens: 1_000)
-            let cost2 = estimatedCost(for: model2, tokens: 1_000)
+            let cost1 = estimatedCost(for: model1, tokens: 1000)
+            let cost2 = estimatedCost(for: model2, tokens: 1000)
             return cost1 < cost2
         }
 
@@ -280,7 +275,7 @@ public struct ModelSelection: Sendable {
 
     /// Check if within cost budget
     public func isWithinBudget(_ budget: Decimal?) -> Bool {
-        guard let budget = budget else { return true }
+        guard let budget else { return true }
         return estimatedCost <= budget
     }
 }
@@ -294,14 +289,14 @@ public enum ModelRoutingError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .noModelsAvailable(let taskType):
-            return "No models available for task type: \(taskType.displayName)"
-        case .localModelRequired(let taskType):
-            return "Local model required for \(taskType.displayName) but none available"
-        case .exceedsCostBudget(let cost, let budget):
-            return "Estimated cost (\(cost)) exceeds budget (\(budget))"
-        case .modelNotFound(let modelID):
-            return "Model not found: \(modelID)"
+        case let .noModelsAvailable(taskType):
+            "No models available for task type: \(taskType.displayName)"
+        case let .localModelRequired(taskType):
+            "Local model required for \(taskType.displayName) but none available"
+        case let .exceedsCostBudget(cost, budget):
+            "Estimated cost (\(cost)) exceeds budget (\(budget))"
+        case let .modelNotFound(modelID):
+            "Model not found: \(modelID)"
         }
     }
 }

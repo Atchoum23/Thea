@@ -15,7 +15,7 @@ struct IncomeServiceTests {
             name: "Freelance Design",
             type: .active,
             category: .freelancing,
-            monthlyAmount: 2_000
+            monthlyAmount: 2000
         )
 
         try await service.addStream(stream)
@@ -33,25 +33,25 @@ struct IncomeServiceTests {
             name: "Consulting",
             type: .active,
             category: .consulting,
-            monthlyAmount: 3_000
+            monthlyAmount: 3000
         )
 
         try await service.addStream(stream)
 
-        stream.monthlyAmount = 3_500
+        stream.monthlyAmount = 3500
         try await service.updateStream(stream)
 
         let streams = try await service.fetchStreams()
-        #expect(streams.first?.monthlyAmount == 3_500)
+        #expect(streams.first?.monthlyAmount == 3500)
     }
 
     @Test("Fetch streams sorted by amount")
-    func testFetchStreamsSorted() async throws {
+    func fetchStreamsSorted() async throws {
         let service = IncomeService()
 
-        let stream1 = IncomeStream(name: "Stream 1", type: .active, category: .freelancing, monthlyAmount: 1_000)
-        let stream2 = IncomeStream(name: "Stream 2", type: .passive, category: .rental, monthlyAmount: 3_000)
-        let stream3 = IncomeStream(name: "Stream 3", type: .active, category: .consulting, monthlyAmount: 2_000)
+        let stream1 = IncomeStream(name: "Stream 1", type: .active, category: .freelancing, monthlyAmount: 1000)
+        let stream2 = IncomeStream(name: "Stream 2", type: .passive, category: .rental, monthlyAmount: 3000)
+        let stream3 = IncomeStream(name: "Stream 3", type: .active, category: .consulting, monthlyAmount: 2000)
 
         try await service.addStream(stream1)
         try await service.addStream(stream2)
@@ -70,7 +70,7 @@ struct IncomeServiceTests {
     func testAddEntry() async throws {
         let service = IncomeService()
 
-        let stream = IncomeStream(name: "Test Stream", type: .active, category: .freelancing, monthlyAmount: 1_000)
+        let stream = IncomeStream(name: "Test Stream", type: .active, category: .freelancing, monthlyAmount: 1000)
         try await service.addStream(stream)
 
         let entry = IncomeEntry(
@@ -89,7 +89,7 @@ struct IncomeServiceTests {
     }
 
     @Test("Reject negative amount entry")
-    func testRejectNegativeAmount() async throws {
+    func rejectNegativeAmount() async throws {
         let service = IncomeService()
 
         let entry = IncomeEntry(
@@ -104,7 +104,7 @@ struct IncomeServiceTests {
     }
 
     @Test("Fetch entries for date range")
-    func testFetchEntriesDateRange() async throws {
+    func fetchEntriesDateRange() async throws {
         let service = IncomeService()
 
         let streamID = UUID()
@@ -135,13 +135,13 @@ struct IncomeServiceTests {
             name: "Freelancing",
             type: .active,
             category: .freelancing,
-            monthlyAmount: 2_000
+            monthlyAmount: 2000
         )
         try await service.addStream(stream)
 
         // Add entries
         let now = Date()
-        for i in 0..<5 {
+        for i in 0 ..< 5 {
             let entry = IncomeEntry(
                 streamID: stream.id,
                 amount: Double(100 * (i + 1)),
@@ -169,12 +169,12 @@ struct IncomeServiceTests {
         let now = Date()
         let yearStart = Calendar.current.date(from: DateComponents(year: Calendar.current.component(.year, from: now), month: 1, day: 1))!
 
-        let stream = IncomeStream(name: "Test", type: .active, category: .freelancing, monthlyAmount: 5_000)
+        let stream = IncomeStream(name: "Test", type: .active, category: .freelancing, monthlyAmount: 5000)
         try await service.addStream(stream)
 
-        for month in 1...12 {
+        for month in 1 ... 12 {
             let monthDate = Calendar.current.date(byAdding: .month, value: month - 1, to: yearStart)!
-            let entry = IncomeEntry(streamID: stream.id, amount: 5_000, receivedDate: monthDate)
+            let entry = IncomeEntry(streamID: stream.id, amount: 5000, receivedDate: monthDate)
             try await service.addEntry(entry)
         }
 
@@ -188,12 +188,12 @@ struct IncomeServiceTests {
     }
 
     @Test("Tax calculation for different income levels")
-    func testTaxCalculationLevels() {
-        let lowIncome = TaxEstimate.calculate(grossIncome: 30_000)
+    func taxCalculationLevels() {
+        let lowIncome = TaxEstimate.calculate(grossIncome: 30000)
         // Self-employment tax (15.3%) + income tax means effective rate is ~22% at this level
         #expect(lowIncome.effectiveTaxRate < 25)
 
-        let mediumIncome = TaxEstimate.calculate(grossIncome: 80_000)
+        let mediumIncome = TaxEstimate.calculate(grossIncome: 80000)
         #expect(mediumIncome.effectiveTaxRate > lowIncome.effectiveTaxRate)
 
         let highIncome = TaxEstimate.calculate(grossIncome: 200_000)
@@ -206,9 +206,9 @@ struct IncomeServiceTests {
     func testGetActiveStreamsCount() async throws {
         let service = IncomeService()
 
-        let active1 = IncomeStream(name: "Active 1", type: .active, category: .freelancing, isActive: true, monthlyAmount: 1_000)
-        let active2 = IncomeStream(name: "Active 2", type: .passive, category: .rental, isActive: true, monthlyAmount: 2_000)
-        let inactive = IncomeStream(name: "Inactive", type: .active, category: .consulting, isActive: false, monthlyAmount: 1_500)
+        let active1 = IncomeStream(name: "Active 1", type: .active, category: .freelancing, isActive: true, monthlyAmount: 1000)
+        let active2 = IncomeStream(name: "Active 2", type: .passive, category: .rental, isActive: true, monthlyAmount: 2000)
+        let inactive = IncomeStream(name: "Inactive", type: .active, category: .consulting, isActive: false, monthlyAmount: 1500)
 
         try await service.addStream(active1)
         try await service.addStream(active2)
@@ -222,20 +222,20 @@ struct IncomeServiceTests {
     func testGetTotalMonthlyProjection() async throws {
         let service = IncomeService()
 
-        let stream1 = IncomeStream(name: "Stream 1", type: .active, category: .freelancing, isActive: true, monthlyAmount: 1_000)
-        let stream2 = IncomeStream(name: "Stream 2", type: .passive, category: .rental, isActive: true, monthlyAmount: 1_500)
+        let stream1 = IncomeStream(name: "Stream 1", type: .active, category: .freelancing, isActive: true, monthlyAmount: 1000)
+        let stream2 = IncomeStream(name: "Stream 2", type: .passive, category: .rental, isActive: true, monthlyAmount: 1500)
 
         try await service.addStream(stream1)
         try await service.addStream(stream2)
 
         let total = await service.getTotalMonthlyProjection()
-        #expect(total == 2_500)
+        #expect(total == 2500)
     }
 
     // MARK: - Platform Integration Tests
 
     @Test("Connect to gig platform")
-    func testConnectPlatform() async throws {
+    func connectPlatform() async throws {
         let integration = GigPlatformIntegration()
         let platform = GigPlatform.upwork
 
@@ -246,7 +246,7 @@ struct IncomeServiceTests {
     }
 
     @Test("Disconnect from platform")
-    func testDisconnectPlatform() async throws {
+    func disconnectPlatform() async throws {
         let integration = GigPlatformIntegration()
         var platform = GigPlatform.fiverr
 

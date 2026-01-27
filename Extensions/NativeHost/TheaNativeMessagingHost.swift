@@ -9,8 +9,8 @@
 // 2. Register native messaging manifest for Chrome/Brave
 // 3. The extension communicates via stdin/stdout
 
-import Foundation
 import AuthenticationServices
+import Foundation
 import LocalAuthentication
 
 // MARK: - Native Messaging Host
@@ -19,7 +19,6 @@ import LocalAuthentication
 /// Implements Chrome's Native Messaging protocol (JSON over stdio)
 @MainActor
 final class TheaNativeMessagingHost {
-
     // MARK: - Properties
 
     private let passwordsBridge = iCloudPasswordsBridge.shared
@@ -33,27 +32,27 @@ final class TheaNativeMessagingHost {
 
     enum MessageType: String, Codable {
         // Connection
-        case connect = "connect"
-        case disconnect = "disconnect"
-        case getStatus = "getStatus"
+        case connect
+        case disconnect
+        case getStatus
 
         // Passwords
-        case getCredentials = "getCredentials"
-        case saveCredential = "saveCredential"
-        case generatePassword = "generatePassword"
-        case deleteCredential = "deleteCredential"
+        case getCredentials
+        case saveCredential
+        case generatePassword
+        case deleteCredential
 
         // Hide My Email (creates @icloud.com aliases, NOT @privaterelay.appleid.com)
-        case createAlias = "createAlias"
-        case getAliases = "getAliases"
-        case deactivateAlias = "deactivateAlias"
-        case reactivateAlias = "reactivateAlias"
-        case deleteAlias = "deleteAlias"
-        case getAliasForDomain = "getAliasForDomain"
+        case createAlias
+        case getAliases
+        case deactivateAlias
+        case reactivateAlias
+        case deleteAlias
+        case getAliasForDomain
 
         // Autofill
-        case autofillCredential = "autofillCredential"
-        case autofillAlias = "autofillAlias"
+        case autofillCredential
+        case autofillAlias
     }
 
     struct IncomingMessage: Codable {
@@ -112,7 +111,7 @@ final class TheaNativeMessagingHost {
             buffer.load(as: UInt32.self)
         }
 
-        guard length > 0 && length < 1_048_576 else { // Max 1MB
+        guard length > 0, length < 1_048_576 else { // Max 1MB
             throw NativeHostError.invalidMessageLength
         }
 
@@ -153,7 +152,6 @@ final class TheaNativeMessagingHost {
                 return try await handleDisconnect(message)
             case .getStatus:
                 return try await handleGetStatus(message)
-
             // Passwords
             case .getCredentials:
                 return try await handleGetCredentials(message)
@@ -163,7 +161,6 @@ final class TheaNativeMessagingHost {
                 return try await handleGeneratePassword(message)
             case .deleteCredential:
                 return try await handleDeleteCredential(message)
-
             // Hide My Email
             case .createAlias:
                 return try await handleCreateAlias(message)
@@ -177,7 +174,6 @@ final class TheaNativeMessagingHost {
                 return try await handleDeleteAlias(message)
             case .getAliasForDomain:
                 return try await handleGetAliasForDomain(message)
-
             // Autofill helpers
             case .autofillCredential:
                 return try await handleAutofillCredential(message)
@@ -229,7 +225,7 @@ final class TheaNativeMessagingHost {
     }
 
     private func handleGetStatus(_ message: IncomingMessage) async throws -> OutgoingMessage {
-        return OutgoingMessage(
+        OutgoingMessage(
             type: message.type.rawValue,
             requestId: message.requestId,
             success: true,
@@ -277,7 +273,8 @@ final class TheaNativeMessagingHost {
     private func handleSaveCredential(_ message: IncomingMessage) async throws -> OutgoingMessage {
         guard let username = message.data?["username"]?.value as? String,
               let password = message.data?["password"]?.value as? String,
-              let domain = message.data?["domain"]?.value as? String else {
+              let domain = message.data?["domain"]?.value as? String
+        else {
             throw NativeHostError.missingParameter("username, password, or domain")
         }
 
@@ -313,7 +310,8 @@ final class TheaNativeMessagingHost {
 
     private func handleDeleteCredential(_ message: IncomingMessage) async throws -> OutgoingMessage {
         guard let domain = message.data?["domain"]?.value as? String,
-              let username = message.data?["username"]?.value as? String else {
+              let username = message.data?["username"]?.value as? String
+        else {
             throw NativeHostError.missingParameter("domain or username")
         }
 
@@ -538,13 +536,13 @@ enum NativeHostError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidMessageLength:
-            return "Invalid message length"
+            "Invalid message length"
         case .incompleteMessage:
-            return "Incomplete message received"
-        case .missingParameter(let param):
-            return "Missing required parameter: \(param)"
+            "Incomplete message received"
+        case let .missingParameter(param):
+            "Missing required parameter: \(param)"
         case .invalidData:
-            return "Invalid data format"
+            "Invalid data format"
         }
     }
 }
@@ -570,7 +568,7 @@ struct AnyCodable: Codable {
         } else if let string = try? container.decode(String.self) {
             value = string
         } else if let array = try? container.decode([AnyCodable].self) {
-            value = array.map { $0.value }
+            value = array.map(\.value)
         } else if let dict = try? container.decode([String: AnyCodable].self) {
             value = dict.mapValues { $0.value }
         } else {

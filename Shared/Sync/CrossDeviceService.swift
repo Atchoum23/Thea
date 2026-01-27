@@ -6,9 +6,9 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
 import CloudKit
 import Combine
+import Foundation
 
 // MARK: - Cross Device Service
 
@@ -30,7 +30,7 @@ public actor CrossDeviceService {
 
     // MARK: - Configuration
 
-    private var configuration: SyncConfiguration
+    private var configuration: CrossDeviceSyncConfiguration
 
     // MARK: - Subscriptions
 
@@ -39,10 +39,10 @@ public actor CrossDeviceService {
     // MARK: - Initialization
 
     private init() {
-        self.container = CKContainer.default()
-        self.privateDatabase = container.privateCloudDatabase
-        self.sharedDatabase = container.sharedCloudDatabase
-        self.configuration = SyncConfiguration.load()
+        container = CKContainer.default()
+        privateDatabase = container.privateCloudDatabase
+        sharedDatabase = container.sharedCloudDatabase
+        configuration = CrossDeviceSyncConfiguration.load()
     }
 
     // MARK: - Setup
@@ -116,7 +116,7 @@ public actor CrossDeviceService {
         // Process results
         for (_, result) in results.matchResults {
             switch result {
-            case .success(let record):
+            case let .success(record):
                 await processConversationRecord(record)
             case .failure:
                 continue
@@ -124,7 +124,7 @@ public actor CrossDeviceService {
         }
     }
 
-    private func processConversationRecord(_ record: CKRecord) async {
+    private func processConversationRecord(_: CKRecord) async {
         // Convert CKRecord to local model
         // This would integrate with the existing conversation storage
     }
@@ -183,20 +183,20 @@ public actor CrossDeviceService {
         }
     }
 
-    private func applyRemoteChange(_ change: SyncChange) async {
+    private func applyRemoteChange(_: SyncChange) async {
         // Apply the remote change to local storage
     }
 
     // MARK: - Configuration
 
     /// Update sync configuration
-    public func updateConfiguration(_ config: SyncConfiguration) {
+    public func updateConfiguration(_ config: CrossDeviceSyncConfiguration) {
         configuration = config
         config.save()
         syncEnabled = config.autoSyncEnabled
     }
 
-    public func getConfiguration() -> SyncConfiguration {
+    public func getConfiguration() -> CrossDeviceSyncConfiguration {
         configuration
     }
 
@@ -221,9 +221,9 @@ public actor CrossDeviceService {
     }
 }
 
-// MARK: - Sync Configuration
+// MARK: - Cross Device Sync Configuration
 
-public struct SyncConfiguration: Codable, Sendable {
+public struct CrossDeviceSyncConfiguration: Codable, Sendable {
     public var autoSyncEnabled: Bool
     public var syncConversations: Bool
     public var syncSettings: Bool
@@ -249,17 +249,18 @@ public struct SyncConfiguration: Codable, Sendable {
 
     private static let configKey = "CrossDeviceService.configuration"
 
-    public static func load() -> SyncConfiguration {
+    public static func load() -> CrossDeviceSyncConfiguration {
         if let data = UserDefaults.standard.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(SyncConfiguration.self, from: data) {
+           let config = try? JSONDecoder().decode(CrossDeviceSyncConfiguration.self, from: data)
+        {
             return config
         }
-        return SyncConfiguration()
+        return CrossDeviceSyncConfiguration()
     }
 
     public func save() {
         if let data = try? JSONEncoder().encode(self) {
-            UserDefaults.standard.set(data, forKey: SyncConfiguration.configKey)
+            UserDefaults.standard.set(data, forKey: CrossDeviceSyncConfiguration.configKey)
         }
     }
 }
@@ -341,7 +342,7 @@ public struct SyncChange: Sendable {
         self.recordType = recordType
         self.recordId = recordId
         self.timestamp = timestamp
-        self.data = Dictionary(fromAny: rawData)
+        data = Dictionary(fromAny: rawData)
     }
 
     func toCKRecord() -> CKRecord {
@@ -350,12 +351,12 @@ public struct SyncChange: Sendable {
 
         for (key, value) in data {
             switch value {
-            case .string(let v): record[key] = v
-            case .int(let v): record[key] = v
-            case .double(let v): record[key] = v
-            case .date(let v): record[key] = v
-            case .bool(let v): record[key] = v ? 1 : 0
-            case .data(let v): record[key] = v
+            case let .string(v): record[key] = v
+            case let .int(v): record[key] = v
+            case let .double(v): record[key] = v
+            case let .date(v): record[key] = v
+            case let .bool(v): record[key] = v ? 1 : 0
+            case let .data(v): record[key] = v
             default: break
             }
         }
@@ -382,15 +383,15 @@ public struct SyncConflict: Sendable {
     public init(localChange: SyncChange, remoteChange: SyncChange) {
         self.localChange = localChange
         self.remoteChange = remoteChange
-        self.detectedAt = Date()
+        detectedAt = Date()
     }
 
     func merge() throws -> SyncChange {
         // Simple merge - take the most recent
         if localChange.timestamp > remoteChange.timestamp {
-            return localChange
+            localChange
         } else {
-            return remoteChange
+            remoteChange
         }
     }
 }
@@ -411,10 +412,10 @@ public enum ConflictResolutionStrategy: String, Codable, Sendable, CaseIterable 
 
     public var displayName: String {
         switch self {
-        case .lastWriteWins: return "Most Recent Wins"
-        case .localWins: return "Local Always Wins"
-        case .remoteWins: return "Remote Always Wins"
-        case .askUser: return "Ask Me"
+        case .lastWriteWins: "Most Recent Wins"
+        case .localWins: "Local Always Wins"
+        case .remoteWins: "Remote Always Wins"
+        case .askUser: "Ask Me"
         }
     }
 }
@@ -431,15 +432,15 @@ public enum CrossDeviceSyncError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .iCloudNotAvailable:
-            return "iCloud is not available. Please sign in to iCloud."
+            "iCloud is not available. Please sign in to iCloud."
         case .syncDisabled:
-            return "Sync is currently disabled."
-        case .networkError(let message):
-            return "Network error: \(message)"
+            "Sync is currently disabled."
+        case let .networkError(message):
+            "Network error: \(message)"
         case .conflictDetected:
-            return "A sync conflict was detected."
+            "A sync conflict was detected."
         case .recordNotFound:
-            return "The requested record was not found."
+            "The requested record was not found."
         }
     }
 }

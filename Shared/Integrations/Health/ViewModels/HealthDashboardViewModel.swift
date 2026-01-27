@@ -26,13 +26,13 @@ public final class HealthDashboardViewModel {
     public var averageSleepQuality: SleepQuality {
         guard !sleepRecords.isEmpty else { return .poor }
 
-        let scores = sleepRecords.map { $0.quality.score }
+        let scores = sleepRecords.map(\.quality.score)
         let averageScore = scores.reduce(0, +) / scores.count
 
         return switch averageScore {
-        case 90...100: .excellent
-        case 70..<90: .good
-        case 50..<70: .fair
+        case 90 ... 100: .excellent
+        case 70 ..< 90: .good
+        case 50 ..< 70: .fair
         default: .poor
         }
     }
@@ -124,7 +124,7 @@ public final class HealthDashboardViewModel {
     public func loadActivityData() async throws {
         var summaries: [ActivitySummary] = []
 
-        for dayOffset in 0..<7 {
+        for dayOffset in 0 ..< 7 {
             let date = Date().daysAgo(dayOffset)
             let summary = try await healthService.fetchActivityData(for: date)
             summaries.append(summary)
@@ -158,10 +158,10 @@ public final class HealthDashboardViewModel {
         let recentRecords = Array(sleepRecords.prefix(3))
         let olderRecords = Array(sleepRecords.dropFirst(3).prefix(3))
 
-        guard !recentRecords.isEmpty && !olderRecords.isEmpty else { return .unknown }
+        guard !recentRecords.isEmpty, !olderRecords.isEmpty else { return .unknown }
 
-        let recentAverage = recentRecords.map { $0.quality.score }.reduce(0, +) / recentRecords.count
-        let olderAverage = olderRecords.map { $0.quality.score }.reduce(0, +) / olderRecords.count
+        let recentAverage = recentRecords.map(\.quality.score).reduce(0, +) / recentRecords.count
+        let olderAverage = olderRecords.map(\.quality.score).reduce(0, +) / olderRecords.count
 
         if recentAverage > olderAverage + 10 {
             return .improving
@@ -179,10 +179,10 @@ public final class HealthDashboardViewModel {
         let recentSummaries = Array(activitySummaries.prefix(3))
         let olderSummaries = Array(activitySummaries.dropFirst(3).prefix(3))
 
-        guard !recentSummaries.isEmpty && !olderSummaries.isEmpty else { return .unknown }
+        guard !recentSummaries.isEmpty, !olderSummaries.isEmpty else { return .unknown }
 
-        let recentAverage = recentSummaries.map { $0.activityScore }.reduce(0, +) / recentSummaries.count
-        let olderAverage = olderSummaries.map { $0.activityScore }.reduce(0, +) / olderSummaries.count
+        let recentAverage = recentSummaries.map(\.activityScore).reduce(0, +) / recentSummaries.count
+        let olderAverage = olderSummaries.map(\.activityScore).reduce(0, +) / olderSummaries.count
 
         if recentAverage > olderAverage + 10 {
             return .improving
@@ -208,10 +208,10 @@ public final class HealthDashboardViewModel {
     /// Format distance based on user preference
     public func formatDistance(_ meters: Double, useMetric: Bool = true) -> String {
         if useMetric {
-            let km = meters / 1_000
+            let km = meters / 1000
             return String(format: "%.2f km", km)
         } else {
-            let miles = meters / 1_609.34
+            let miles = meters / 1609.34
             return String(format: "%.2f mi", miles)
         }
     }

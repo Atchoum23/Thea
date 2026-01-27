@@ -33,7 +33,7 @@ struct GeneratePolicy: ParsableCommand {
         let fileManager = FileManager.default
 
         // Check if file exists
-        if fileManager.fileExists(atPath: output) && !force {
+        if fileManager.fileExists(atPath: output), !force {
             throw PolicyError.fileExists(output)
         }
 
@@ -102,11 +102,11 @@ enum PolicyTemplate: String, ExpressibleByArgument, CaseIterable {
     var description: String {
         switch self {
         case .strict:
-            return "Maximum security - all protections enabled"
+            "Maximum security - all protections enabled"
         case .standard:
-            return "Balanced security for normal development"
+            "Balanced security for normal development"
         case .permissive:
-            return "Minimal restrictions for trusted environments"
+            "Minimal restrictions for trusted environments"
         }
     }
 }
@@ -119,10 +119,10 @@ enum PolicyError: Error, CustomStringConvertible {
 
     var description: String {
         switch self {
-        case .fileExists(let path):
-            return "File already exists: \(path). Use --force to overwrite."
-        case .validationFailed(let issues):
-            return "Policy validation failed: \(issues.joined(separator: ", "))"
+        case let .fileExists(path):
+            "File already exists: \(path). Use --force to overwrite."
+        case let .validationFailed(issues):
+            "Policy validation failed: \(issues.joined(separator: ", "))"
         }
     }
 }

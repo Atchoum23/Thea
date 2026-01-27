@@ -5,18 +5,19 @@
 //  Passkeys authentication using AuthenticationServices
 //
 
-import Foundation
 import AuthenticationServices
 import Combine
+import Foundation
+import SwiftUI
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 #if canImport(LocalAuthentication)
-import LocalAuthentication
+    import LocalAuthentication
 #endif
 
 // MARK: - Passkeys Service
@@ -44,7 +45,7 @@ public class PasskeysService: NSObject, ObservableObject {
 
     // MARK: - Initialization
 
-    private override init() {
+    override private init() {
         super.init()
     }
 
@@ -100,7 +101,7 @@ public class PasskeysService: NSObject, ObservableObject {
 
         authorizationController = controller
 
-        return try await withCheckedThrowingContinuation { continuation in
+        return try await withCheckedThrowingContinuation { _ in
             // We'd use a different continuation for Apple ID
             controller.performRequests()
             // For simplicity, we'll handle this differently
@@ -140,46 +141,48 @@ public class PasskeysService: NSObject, ObservableObject {
     }
 
     /// Perform auto-fill assisted passkey authentication
-    public func performAutoFillAssistedAuthentication(challenge: Data) async throws -> PasskeyCredential {
-        isProcessing = true
-        defer { isProcessing = false }
+    #if os(iOS)
+        public func performAutoFillAssistedAuthentication(challenge: Data) async throws -> PasskeyCredential {
+            isProcessing = true
+            defer { isProcessing = false }
 
-        let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
-            relyingPartyIdentifier: relyingPartyIdentifier
-        )
+            let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
+                relyingPartyIdentifier: relyingPartyIdentifier
+            )
 
-        let assertionRequest = provider.createCredentialAssertionRequest(challenge: challenge)
+            let assertionRequest = provider.createCredentialAssertionRequest(challenge: challenge)
 
-        let controller = ASAuthorizationController(authorizationRequests: [assertionRequest])
-        controller.delegate = self
-        controller.presentationContextProvider = self
+            let controller = ASAuthorizationController(authorizationRequests: [assertionRequest])
+            controller.delegate = self
+            controller.presentationContextProvider = self
 
-        authorizationController = controller
+            authorizationController = controller
 
-        return try await withCheckedThrowingContinuation { continuation in
-            self.authenticationContinuation = continuation
-            controller.performAutoFillAssistedRequests()
+            return try await withCheckedThrowingContinuation { continuation in
+                self.authenticationContinuation = continuation
+                controller.performAutoFillAssistedRequests()
+            }
         }
-    }
+    #endif
 
     // MARK: - Biometric Authentication
 
     /// Authenticate using biometrics (Face ID / Touch ID)
     public func authenticateWithBiometrics(reason: String) async throws -> Bool {
         #if canImport(LocalAuthentication)
-        let context = LAContext()
-        var authError: NSError?
+            let context = LAContext()
+            var authError: NSError?
 
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError) else {
-            throw PasskeyError.biometricsUnavailable
-        }
+            guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError) else {
+                throw PasskeyError.biometricsUnavailable
+            }
 
-        return try await context.evaluatePolicy(
-            .deviceOwnerAuthenticationWithBiometrics,
-            localizedReason: reason
-        )
+            return try await context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: reason
+            )
         #else
-        throw PasskeyError.biometricsUnavailable
+            throw PasskeyError.biometricsUnavailable
         #endif
     }
 
@@ -195,15 +198,15 @@ public class PasskeysService: NSObject, ObservableObject {
     /// Validate and refresh authentication token
     public func validateSession() async -> Bool {
         // Validate current session with server
-        return isAuthenticated
+        isAuthenticated
     }
 }
 
 // MARK: - ASAuthorizationControllerDelegate
 
 extension PasskeysService: ASAuthorizationControllerDelegate {
-    public nonisolated func authorizationController(
-        controller: ASAuthorizationController,
+    nonisolated public func authorizationController(
+        controller _: ASAuthorizationController,
         didCompleteWithAuthorization authorization: ASAuthorization
     ) {
         Task { @MainActor in
@@ -255,32 +258,40 @@ extension PasskeysService: ASAuthorizationControllerDelegate {
         }
     }
 
-    public nonisolated func authorizationController(
-        controller: ASAuthorizationController,
+    nonisolated public func authorizationController(
+        controller _: ASAuthorizationController,
         didCompleteWithError error: Error
     ) {
         Task { @MainActor in
-            let passkeyError: PasskeyError
-
-            if let authError = error as? ASAuthorizationError {
+            let passkeyError: PasskeyError = if let authError = error as? ASAuthorizationError {
                 switch authError.code {
+                case .unknown:
+                    .from(error)
                 case .canceled:
-                    passkeyError = .userCancelled
+                    .userCancelled
                 case .invalidResponse:
-                    passkeyError = .invalidResponse
+                    .invalidResponse
                 case .notHandled:
-                    passkeyError = .notHandled
+                    .notHandled
                 case .failed:
-                    passkeyError = .authenticationFailed
+                    .authenticationFailed
                 case .notInteractive:
-                    passkeyError = .notInteractive
+                    .notInteractive
                 case .matchedExcludedCredential:
-                    passkeyError = .credentialAlreadyExists
+                    .credentialAlreadyExists
+                case .credentialImport:
+                    .from(error)
+                case .credentialExport:
+                    .from(error)
+                case .preferSignInWithApple:
+                    .from(error)
+                case .deviceNotConfiguredForPasskeyCreation:
+                    .from(error)
                 @unknown default:
-                    passkeyError = .from(error)
+                    .from(error)
                 }
             } else {
-                passkeyError = .from(error)
+                .from(error)
             }
 
             self.error = passkeyError
@@ -295,17 +306,20 @@ extension PasskeysService: ASAuthorizationControllerDelegate {
 // MARK: - ASAuthorizationControllerPresentationContextProviding
 
 extension PasskeysService: ASAuthorizationControllerPresentationContextProviding {
-    public nonisolated func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        #if os(iOS)
-        return UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap { $0.windows }
-            .first { $0.isKeyWindow } ?? UIWindow()
-        #elseif os(macOS)
-        return NSApplication.shared.keyWindow ?? NSWindow()
-        #else
-        fatalError("Unsupported platform")
-        #endif
+    nonisolated public func presentationAnchor(for _: ASAuthorizationController) -> ASPresentationAnchor {
+        // Use MainActor.assumeIsolated since this is called on the main thread
+        MainActor.assumeIsolated {
+            #if os(iOS)
+                return UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }
+                    .flatMap(\.windows)
+                    .first { $0.isKeyWindow } ?? UIWindow()
+            #elseif os(macOS)
+                return NSApplication.shared.keyWindow ?? NSWindow()
+            #else
+                fatalError("Unsupported platform")
+            #endif
+        }
     }
 }
 
@@ -349,26 +363,26 @@ public enum PasskeyError: Error, LocalizedError, @unchecked Sendable {
     public var errorDescription: String? {
         switch self {
         case .userCancelled:
-            return "Authentication was cancelled"
+            "Authentication was cancelled"
         case .invalidResponse:
-            return "Invalid authentication response"
+            "Invalid authentication response"
         case .notHandled:
-            return "Authentication request not handled"
+            "Authentication request not handled"
         case .authenticationFailed:
-            return "Authentication failed"
+            "Authentication failed"
         case .notInteractive:
-            return "Interactive authentication required"
+            "Interactive authentication required"
         case .credentialAlreadyExists:
-            return "This passkey already exists"
+            "This passkey already exists"
         case .biometricsUnavailable:
-            return "Biometric authentication unavailable"
-        case .unknown(let message):
-            return "Authentication error: \(message)"
+            "Biometric authentication unavailable"
+        case let .unknown(message):
+            "Authentication error: \(message)"
         }
     }
 
     public static func from(_ error: Error) -> PasskeyError {
-        return .unknown(error.localizedDescription)
+        .unknown(error.localizedDescription)
     }
 }
 
@@ -396,113 +410,114 @@ public struct SignInWithAppleButton: View {
 }
 
 #if os(iOS)
-struct SignInWithAppleButtonRepresentable: UIViewRepresentable {
-    let onRequest: (ASAuthorizationAppleIDRequest) -> Void
-    let onCompletion: (Result<ASAuthorization, Error>) -> Void
-
-    func makeUIView(context: Context) -> ASAuthorizationAppleIDButton {
-        let button = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
-        button.addTarget(context.coordinator, action: #selector(Coordinator.handlePress), for: .touchUpInside)
-        return button
-    }
-
-    func updateUIView(_ uiView: ASAuthorizationAppleIDButton, context: Context) {}
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onRequest: onRequest, onCompletion: onCompletion)
-    }
-
-    class Coordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    struct SignInWithAppleButtonRepresentable: UIViewRepresentable {
         let onRequest: (ASAuthorizationAppleIDRequest) -> Void
         let onCompletion: (Result<ASAuthorization, Error>) -> Void
 
-        init(
-            onRequest: @escaping (ASAuthorizationAppleIDRequest) -> Void,
-            onCompletion: @escaping (Result<ASAuthorization, Error>) -> Void
-        ) {
-            self.onRequest = onRequest
-            self.onCompletion = onCompletion
+        func makeUIView(context: Context) -> ASAuthorizationAppleIDButton {
+            let button = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
+            button.addTarget(context.coordinator, action: #selector(Coordinator.handlePress), for: .touchUpInside)
+            return button
         }
 
-        @objc func handlePress() {
-            let provider = ASAuthorizationAppleIDProvider()
-            let request = provider.createRequest()
-            onRequest(request)
+        func updateUIView(_: ASAuthorizationAppleIDButton, context _: Context) {}
 
-            let controller = ASAuthorizationController(authorizationRequests: [request])
-            controller.delegate = self
-            controller.presentationContextProvider = self
-            controller.performRequests()
+        func makeCoordinator() -> Coordinator {
+            Coordinator(onRequest: onRequest, onCompletion: onCompletion)
         }
 
-        func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-            UIApplication.shared.connectedScenes
-                .compactMap { $0 as? UIWindowScene }
-                .flatMap { $0.windows }
-                .first { $0.isKeyWindow } ?? UIWindow()
-        }
+        class Coordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+            let onRequest: (ASAuthorizationAppleIDRequest) -> Void
+            let onCompletion: (Result<ASAuthorization, Error>) -> Void
 
-        func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-            onCompletion(.success(authorization))
-        }
+            init(
+                onRequest: @escaping (ASAuthorizationAppleIDRequest) -> Void,
+                onCompletion: @escaping (Result<ASAuthorization, Error>) -> Void
+            ) {
+                self.onRequest = onRequest
+                self.onCompletion = onCompletion
+            }
 
-        func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-            onCompletion(.failure(error))
+            @objc func handlePress() {
+                let provider = ASAuthorizationAppleIDProvider()
+                let request = provider.createRequest()
+                onRequest(request)
+
+                let controller = ASAuthorizationController(authorizationRequests: [request])
+                controller.delegate = self
+                controller.presentationContextProvider = self
+                controller.performRequests()
+            }
+
+            func presentationAnchor(for _: ASAuthorizationController) -> ASPresentationAnchor {
+                UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }
+                    .flatMap(\.windows)
+                    .first { $0.isKeyWindow } ?? UIWindow()
+            }
+
+            func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+                onCompletion(.success(authorization))
+            }
+
+            func authorizationController(controller _: ASAuthorizationController, didCompleteWithError error: Error) {
+                onCompletion(.failure(error))
+            }
         }
     }
-}
+
 #elseif os(macOS)
-struct SignInWithAppleButtonRepresentable: NSViewRepresentable {
-    let onRequest: (ASAuthorizationAppleIDRequest) -> Void
-    let onCompletion: (Result<ASAuthorization, Error>) -> Void
-
-    func makeNSView(context: Context) -> ASAuthorizationAppleIDButton {
-        let button = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
-        button.target = context.coordinator
-        button.action = #selector(Coordinator.handlePress)
-        return button
-    }
-
-    func updateNSView(_ nsView: ASAuthorizationAppleIDButton, context: Context) {}
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onRequest: onRequest, onCompletion: onCompletion)
-    }
-
-    class Coordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    struct SignInWithAppleButtonRepresentable: NSViewRepresentable {
         let onRequest: (ASAuthorizationAppleIDRequest) -> Void
         let onCompletion: (Result<ASAuthorization, Error>) -> Void
 
-        init(
-            onRequest: @escaping (ASAuthorizationAppleIDRequest) -> Void,
-            onCompletion: @escaping (Result<ASAuthorization, Error>) -> Void
-        ) {
-            self.onRequest = onRequest
-            self.onCompletion = onCompletion
+        func makeNSView(context: Context) -> ASAuthorizationAppleIDButton {
+            let button = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
+            button.target = context.coordinator
+            button.action = #selector(Coordinator.handlePress)
+            return button
         }
 
-        @objc func handlePress() {
-            let provider = ASAuthorizationAppleIDProvider()
-            let request = provider.createRequest()
-            onRequest(request)
+        func updateNSView(_: ASAuthorizationAppleIDButton, context _: Context) {}
 
-            let controller = ASAuthorizationController(authorizationRequests: [request])
-            controller.delegate = self
-            controller.presentationContextProvider = self
-            controller.performRequests()
+        func makeCoordinator() -> Coordinator {
+            Coordinator(onRequest: onRequest, onCompletion: onCompletion)
         }
 
-        func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-            NSApplication.shared.keyWindow ?? NSWindow()
-        }
+        class Coordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+            let onRequest: (ASAuthorizationAppleIDRequest) -> Void
+            let onCompletion: (Result<ASAuthorization, Error>) -> Void
 
-        func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-            onCompletion(.success(authorization))
-        }
+            init(
+                onRequest: @escaping (ASAuthorizationAppleIDRequest) -> Void,
+                onCompletion: @escaping (Result<ASAuthorization, Error>) -> Void
+            ) {
+                self.onRequest = onRequest
+                self.onCompletion = onCompletion
+            }
 
-        func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-            onCompletion(.failure(error))
+            @objc func handlePress() {
+                let provider = ASAuthorizationAppleIDProvider()
+                let request = provider.createRequest()
+                onRequest(request)
+
+                let controller = ASAuthorizationController(authorizationRequests: [request])
+                controller.delegate = self
+                controller.presentationContextProvider = self
+                controller.performRequests()
+            }
+
+            func presentationAnchor(for _: ASAuthorizationController) -> ASPresentationAnchor {
+                NSApplication.shared.keyWindow ?? NSWindow()
+            }
+
+            func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+                onCompletion(.success(authorization))
+            }
+
+            func authorizationController(controller _: ASAuthorizationController, didCompleteWithError error: Error) {
+                onCompletion(.failure(error))
+            }
         }
     }
-}
 #endif

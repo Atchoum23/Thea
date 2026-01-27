@@ -1,10 +1,10 @@
 // NetworkManager.swift
 // Comprehensive networking layer with retry, caching, and monitoring
 
-import Foundation
-import OSLog
 import Combine
+import Foundation
 import Network
+import OSLog
 
 // MARK: - Network Manager
 
@@ -44,14 +44,14 @@ public final class NetworkManager: ObservableObject {
     // MARK: - Cache
 
     private let cache = URLCache(
-        memoryCapacity: 50 * 1024 * 1024,  // 50 MB
-        diskCapacity: 200 * 1024 * 1024,   // 200 MB
+        memoryCapacity: 50 * 1024 * 1024, // 50 MB
+        diskCapacity: 200 * 1024 * 1024, // 200 MB
         diskPath: "thea_network_cache"
     )
 
     // MARK: - Rate Limiting
 
-    private var rateLimiters: [String: RateLimiter] = [:]
+    private var rateLimiters: [String: NetworkRateLimiter] = [:]
     private var requestQueue: [QueuedRequest] = []
 
     // MARK: - Initialization
@@ -142,7 +142,7 @@ public final class NetworkManager: ObservableObject {
         _ url: URL,
         headers: [String: String]? = nil,
         cachePolicy: CachePolicy = .default,
-        retryPolicy: RetryPolicy = .default
+        retryPolicy: NetworkRetryPolicy = .default
     ) async throws -> T {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -152,11 +152,11 @@ public final class NetworkManager: ObservableObject {
     }
 
     /// Perform a POST request
-    public func post<T: Decodable, B: Encodable>(
+    public func post<T: Decodable>(
         _ url: URL,
-        body: B,
+        body: some Encodable,
         headers: [String: String]? = nil,
-        retryPolicy: RetryPolicy = .default
+        retryPolicy: NetworkRetryPolicy = .default
     ) async throws -> T {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -168,9 +168,9 @@ public final class NetworkManager: ObservableObject {
     }
 
     /// Perform a PUT request
-    public func put<T: Decodable, B: Encodable>(
+    public func put<T: Decodable>(
         _ url: URL,
-        body: B,
+        body: some Encodable,
         headers: [String: String]? = nil
     ) async throws -> T {
         var request = URLRequest(url: url)
@@ -195,9 +195,9 @@ public final class NetworkManager: ObservableObject {
     }
 
     /// Perform a PATCH request
-    public func patch<T: Decodable, B: Encodable>(
+    public func patch<T: Decodable>(
         _ url: URL,
-        body: B,
+        body: some Encodable,
         headers: [String: String]? = nil
     ) async throws -> T {
         var request = URLRequest(url: url)
@@ -214,7 +214,7 @@ public final class NetworkManager: ObservableObject {
         _ url: URL,
         fileURL: URL,
         headers: [String: String]? = nil,
-        progressHandler: ((Double) -> Void)? = nil
+        progressHandler _: ((Double) -> Void)? = nil
     ) async throws -> Data {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -231,7 +231,7 @@ public final class NetworkManager: ObservableObject {
             throw NetworkError.invalidResponse
         }
 
-        guard (200...299).contains(httpResponse.statusCode) else {
+        guard (200 ... 299).contains(httpResponse.statusCode) else {
             throw NetworkError.httpError(httpResponse.statusCode, data)
         }
 
@@ -243,7 +243,7 @@ public final class NetworkManager: ObservableObject {
         _ url: URL,
         to destinationURL: URL,
         headers: [String: String]? = nil,
-        progressHandler: ((Double) -> Void)? = nil
+        progressHandler _: ((Double) -> Void)? = nil
     ) async throws {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -260,7 +260,7 @@ public final class NetworkManager: ObservableObject {
             throw NetworkError.invalidResponse
         }
 
-        guard (200...299).contains(httpResponse.statusCode) else {
+        guard (200 ... 299).contains(httpResponse.statusCode) else {
             throw NetworkError.httpError(httpResponse.statusCode, nil)
         }
 
@@ -272,7 +272,7 @@ public final class NetworkManager: ObservableObject {
     private func performRequest<T: Decodable>(
         _ request: URLRequest,
         cachePolicy: CachePolicy,
-        retryPolicy: RetryPolicy
+        retryPolicy: NetworkRetryPolicy
     ) async throws -> T {
         var modifiedRequest = request
 
@@ -322,7 +322,7 @@ public final class NetworkManager: ObservableObject {
                 recordRequest(request: modifiedRequest, response: httpResponse, data: processedData)
 
                 // Handle response
-                guard (200...299).contains(httpResponse.statusCode) else {
+                guard (200 ... 299).contains(httpResponse.statusCode) else {
                     if httpResponse.statusCode == 429 {
                         // Rate limited - wait and retry
                         let retryAfter = httpResponse.value(forHTTPHeaderField: "Retry-After").flatMap { Double($0) } ?? 60
@@ -344,7 +344,7 @@ public final class NetworkManager: ObservableObject {
                 lastError = error
                 attempt += 1
 
-                if attempt <= retryPolicy.maxRetries && shouldRetry(error: error, policy: retryPolicy) {
+                if attempt <= retryPolicy.maxRetries, shouldRetry(error: error, policy: retryPolicy) {
                     let delay = retryPolicy.delay(for: attempt)
                     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                     logger.info("Retrying request (attempt \(attempt)/\(retryPolicy.maxRetries))")
@@ -385,15 +385,15 @@ public final class NetworkManager: ObservableObject {
 
     /// Configure rate limiting for a host
     public func setRateLimit(for host: String, requestsPerSecond: Double) {
-        rateLimiters[host] = RateLimiter(requestsPerSecond: requestsPerSecond)
+        rateLimiters[host] = NetworkRateLimiter(requestsPerSecond: requestsPerSecond)
     }
 
     // MARK: - Retry Logic
 
-    private func shouldRetry(error: Error, policy: RetryPolicy) -> Bool {
+    private func shouldRetry(error: Error, policy: NetworkRetryPolicy) -> Bool {
         if let networkError = error as? NetworkError {
             switch networkError {
-            case .httpError(let code, _):
+            case let .httpError(code, _):
                 return policy.retryableCodes.contains(code)
             case .timeout, .noConnection:
                 return true
@@ -442,7 +442,7 @@ public final class NetworkManager: ObservableObject {
             sessionDelegate.addStreamHandler(for: task) { data in
                 continuation.yield(data)
             } completion: { error in
-                if let error = error {
+                if let error {
                     continuation.finish(throwing: error)
                 } else {
                     continuation.finish()
@@ -469,7 +469,7 @@ public final class NetworkManager: ObservableObject {
 
     /// Update network configuration
     public func configure(_ config: NetworkConfiguration) {
-        self.configuration = config
+        configuration = config
 
         if let timeout = config.timeout {
             let newConfig = URLSessionConfiguration.default
@@ -481,34 +481,34 @@ public final class NetworkManager: ObservableObject {
 
 // MARK: - Session Delegate
 
-private class NetworkSessionDelegate: NSObject, URLSessionDelegate, URLSessionDataDelegate, URLSessionDownloadDelegate {
+private class NetworkSessionDelegate: NSObject, URLSessionDelegate, URLSessionDataDelegate, URLSessionDownloadDelegate, @unchecked Sendable {
     private var streamHandlers: [URLSessionTask: (onData: (Data) -> Void, onComplete: (Error?) -> Void)] = [:]
 
     func addStreamHandler(for task: URLSessionTask, onData: @escaping (Data) -> Void, completion: @escaping (Error?) -> Void) {
         streamHandlers[task] = (onData, completion)
     }
 
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    func urlSession(_: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         streamHandlers[dataTask]?.onData(data)
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+    func urlSession(_: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         streamHandlers[task]?.onComplete(error)
         streamHandlers.removeValue(forKey: task)
     }
 
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+    func urlSession(_: URLSession, downloadTask _: URLSessionDownloadTask, didFinishDownloadingTo _: URL) {
         // Handle download completion
     }
 
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+    func urlSession(_: URLSession, downloadTask _: URLSessionDownloadTask, didWriteData _: Int64, totalBytesWritten _: Int64, totalBytesExpectedToWrite _: Int64) {
         // Report progress
     }
 }
 
 // MARK: - WebSocket Connection
 
-public class WebSocketConnection: ObservableObject {
+public final class WebSocketConnection: ObservableObject, @unchecked Sendable {
     private let task: URLSessionWebSocketTask
     @Published public private(set) var isConnected = false
 
@@ -542,9 +542,9 @@ public class WebSocketConnection: ObservableObject {
                     do {
                         let message = try await task.receive()
                         switch message {
-                        case .string(let text):
+                        case let .string(text):
                             continuation.yield(.text(text))
-                        case .data(let data):
+                        case let .data(data):
                             continuation.yield(.data(data))
                         @unknown default:
                             break
@@ -560,7 +560,7 @@ public class WebSocketConnection: ObservableObject {
     }
 
     private func receiveMessage() {
-        task.receive { [weak self] result in
+        task.receive { [weak self] _ in
             guard self?.isConnected == true else { return }
             self?.receiveMessage()
         }
@@ -569,11 +569,11 @@ public class WebSocketConnection: ObservableObject {
 
 // MARK: - Interceptors
 
-public protocol RequestInterceptor {
+public protocol RequestInterceptor: Sendable {
     func intercept(_ request: URLRequest) async -> URLRequest
 }
 
-public protocol ResponseInterceptor {
+public protocol ResponseInterceptor: Sendable {
     func intercept(_ data: Data, response: URLResponse) async -> Data
 }
 
@@ -612,7 +612,7 @@ public struct ResponseLoggingInterceptor: ResponseInterceptor {
 
 // MARK: - Rate Limiter
 
-private actor RateLimiter {
+private actor NetworkRateLimiter {
     private let requestsPerSecond: Double
     private var lastRequestTime: Date?
 
@@ -649,14 +649,14 @@ public enum CachePolicy {
     case cacheOnly
 }
 
-public struct RetryPolicy {
+public struct NetworkRetryPolicy: Sendable {
     public let maxRetries: Int
     public let baseDelay: TimeInterval
     public let maxDelay: TimeInterval
     public let multiplier: Double
     public let retryableCodes: Set<Int>
 
-    public static let `default` = RetryPolicy(
+    public static let `default` = NetworkRetryPolicy(
         maxRetries: 3,
         baseDelay: 1.0,
         maxDelay: 30.0,
@@ -664,7 +664,7 @@ public struct RetryPolicy {
         retryableCodes: [408, 429, 500, 502, 503, 504]
     )
 
-    public static let none = RetryPolicy(
+    public static let none = NetworkRetryPolicy(
         maxRetries: 0,
         baseDelay: 0,
         maxDelay: 0,
@@ -716,12 +716,12 @@ public enum NetworkError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .noConnection: return "No network connection"
-        case .timeout: return "Request timed out"
-        case .invalidResponse: return "Invalid response"
-        case .httpError(let code, _): return "HTTP error: \(code)"
-        case .decodingError(let error): return "Decoding error: \(error.localizedDescription)"
-        case .unknown: return "Unknown error"
+        case .noConnection: "No network connection"
+        case .timeout: "Request timed out"
+        case .invalidResponse: "Invalid response"
+        case let .httpError(code, _): "HTTP error: \(code)"
+        case let .decodingError(error): "Decoding error: \(error.localizedDescription)"
+        case .unknown: "Unknown error"
         }
     }
 }

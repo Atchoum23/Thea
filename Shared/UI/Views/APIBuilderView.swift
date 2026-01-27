@@ -101,10 +101,10 @@ private enum BuilderItem: Hashable {
 
     func hash(into hasher: inout Hasher) {
         switch self {
-        case .mcp(let server):
+        case let .mcp(server):
             hasher.combine("mcp")
             hasher.combine(server.id)
-        case .api(let api):
+        case let .api(api):
             hasher.combine("api")
             hasher.combine(api.id)
         }
@@ -112,12 +112,12 @@ private enum BuilderItem: Hashable {
 
     static func == (lhs: BuilderItem, rhs: BuilderItem) -> Bool {
         switch (lhs, rhs) {
-        case (.mcp(let a), .mcp(let b)):
-            return a.id == b.id
-        case (.api(let a), .api(let b)):
-            return a.id == b.id
+        case let (.mcp(a), .mcp(b)):
+            a.id == b.id
+        case let (.api(a), .api(b)):
+            a.id == b.id
         default:
-            return false
+            false
         }
     }
 }
@@ -241,7 +241,8 @@ private struct NewMCPServerSheet: View {
             }
             .onChange(of: selectedTemplate) { _, newValue in
                 if let templateName = newValue,
-                   let template = templates.first(where: { $0.name == templateName }) {
+                   let template = templates.first(where: { $0.name == templateName })
+                {
                     tools = template.defaultTools
                 }
             }
@@ -460,7 +461,8 @@ private struct NewAPISheet: View {
             }
             .onChange(of: selectedTemplate) { _, newValue in
                 if let templateName = newValue,
-                   let template = templates.first(where: { $0.name == templateName }) {
+                   let template = templates.first(where: { $0.name == templateName })
+                {
                     endpoints = template.defaultEndpoints
                 }
             }

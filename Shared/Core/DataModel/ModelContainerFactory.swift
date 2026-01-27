@@ -55,7 +55,7 @@ final class ModelContainerFactory {
                 configurations: [configuration]
             )
             self.container = container
-            self.isInMemoryFallback = false
+            isInMemoryFallback = false
             return container
         } catch {
             // Log error for debugging
@@ -82,8 +82,8 @@ final class ModelContainerFactory {
                 configurations: [memoryConfig]
             )
 
-            self.container = fallbackContainer
-            self.isInMemoryFallback = true
+            container = fallbackContainer
+            isInMemoryFallback = true
 
             // Notify app that we're running in fallback mode
             NotificationCenter.default.post(
@@ -112,8 +112,8 @@ enum ModelContainerError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .initializationFailed(let persistentError, let fallbackError):
-            return """
+        case let .initializationFailed(persistentError, fallbackError):
+            """
             Failed to initialize data storage.
 
             Persistent storage error: \(persistentError.localizedDescription)

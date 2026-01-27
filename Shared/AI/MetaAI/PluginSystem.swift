@@ -2,6 +2,7 @@ import Foundation
 @preconcurrency import SwiftData
 
 // MARK: - Plugin System
+
 // Extensible plugin architecture with sandboxing and permissions
 
 @MainActor
@@ -99,7 +100,7 @@ final class PluginSystem {
     ) async throws -> PluginResult {
         let startTime = Date()
 
-        guard let plugin = await pluginIndex[pluginId.uuidString] else {
+        guard let plugin = pluginIndex[pluginId.uuidString] else {
             throw PluginError.pluginNotFound
         }
 
@@ -115,7 +116,7 @@ final class PluginSystem {
         let result = try await executeSandboxed(plugin: plugin, input: input, context: context)
 
         // Record execution
-        await recordExecution(PluginExecution(
+        recordExecution(PluginExecution(
             id: UUID(),
             pluginId: pluginId,
             input: input,
@@ -166,8 +167,9 @@ final class PluginSystem {
         to targetPluginId: UUID,
         message: PluginMessage
     ) async throws -> PluginMessage {
-        guard let sourcePlugin = await pluginIndex[sourcePluginId.uuidString],
-              let targetPlugin = await pluginIndex[targetPluginId.uuidString] else {
+        guard let sourcePlugin = pluginIndex[sourcePluginId.uuidString],
+              let targetPlugin = pluginIndex[targetPluginId.uuidString]
+        else {
             throw PluginError.pluginNotFound
         }
 
@@ -226,18 +228,18 @@ final class PluginSystem {
         permissions.filter { permission in
             switch permission {
             case .fileSystemRead, .networkAccess, .aiProviderAccess:
-                return true
+                true
             case .fileSystemWrite, .systemCommands:
-                return false // Require explicit user approval
+                false // Require explicit user approval
             case .interPluginCommunication, .dataStorage:
-                return true
+                true
             }
         }
     }
 
     private func validateExecutionPermissions(
         plugin: Plugin,
-        context: PluginContext
+        context _: PluginContext
     ) async throws {
         // Ensure plugin has required permissions for this context
         let requiredPermissions = plugin.manifest.permissions
@@ -272,8 +274,9 @@ final class PluginSystem {
         }
 
         // Check for dangerous permission combinations
-        if manifest.permissions.contains(.systemCommands) &&
-           manifest.permissions.contains(.networkAccess) {
+        if manifest.permissions.contains(.systemCommands),
+           manifest.permissions.contains(.networkAccess)
+        {
             throw PluginError.invalidManifest("Cannot combine systemCommands and networkAccess permissions")
         }
     }
@@ -342,8 +345,8 @@ final class PluginSystem {
         }
 
         // Keep only recent executions
-        if pluginExecutions.count > 1_000 {
-            pluginExecutions.removeFirst(pluginExecutions.count - 1_000)
+        if pluginExecutions.count > 1000 {
+            pluginExecutions.removeFirst(pluginExecutions.count - 1000)
         }
     }
 }
@@ -380,21 +383,21 @@ class PluginSandbox {
         return result
     }
 
-    private func executePluginCode(input: [String: Any], context: PluginContext) async throws -> Any {
+    private func executePluginCode(input _: [String: Any], context _: PluginContext) async throws -> Any {
         // In production, this would execute actual plugin code
         // For now, return mock result based on plugin type
 
         switch plugin.manifest.type {
         case .aiProvider:
-            return ["status": "success", "provider": plugin.manifest.name]
+            ["status": "success", "provider": plugin.manifest.name]
         case .tool:
-            return ["status": "success", "tool_output": "Tool executed successfully"]
+            ["status": "success", "tool_output": "Tool executed successfully"]
         case .uiComponent:
-            return ["status": "success", "component": "UI rendered"]
+            ["status": "success", "component": "UI rendered"]
         case .dataSource:
-            return ["status": "success", "data": ["item1", "item2", "item3"]]
+            ["status": "success", "data": ["item1", "item2", "item3"]]
         case .workflow:
-            return ["status": "success", "workflow_result": "Workflow completed"]
+            ["status": "success", "workflow_result": "Workflow completed"]
         }
     }
 
@@ -507,21 +510,21 @@ enum PluginError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .pluginNotFound:
-            return "Plugin not found"
+            "Plugin not found"
         case .pluginDisabled:
-            return "Plugin is disabled"
-        case .invalidManifest(let reason):
-            return "Invalid plugin manifest: \(reason)"
+            "Plugin is disabled"
+        case let .invalidManifest(reason):
+            "Invalid plugin manifest: \(reason)"
         case .permissionsDenied:
-            return "Required permissions not granted"
+            "Required permissions not granted"
         case .executionTimeout:
-            return "Plugin execution timed out"
+            "Plugin execution timed out"
         case .executionFailed:
-            return "Plugin execution failed"
+            "Plugin execution failed"
         case .messageNotAccepted:
-            return "Plugin does not accept messages"
+            "Plugin does not accept messages"
         case .messageDeliveryFailed:
-            return "Failed to deliver message to plugin"
+            "Failed to deliver message to plugin"
         }
     }
 }

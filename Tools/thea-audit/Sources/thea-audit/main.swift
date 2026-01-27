@@ -10,11 +10,11 @@ struct TheaAudit: ParsableCommand {
         commandName: "thea-audit",
         abstract: "Security scanner for Thea application",
         discussion: """
-            thea-audit scans Swift code, GitHub workflows, shell scripts, and MCP servers
-            for security vulnerabilities and policy violations.
+        thea-audit scans Swift code, GitHub workflows, shell scripts, and MCP servers
+        for security vulnerabilities and policy violations.
 
-            Part of the AgentSec Strict Mode implementation.
-            """,
+        Part of the AgentSec Strict Mode implementation.
+        """,
         version: "1.0.0",
         subcommands: [AuditCommand.self, PolicyCommand.self],
         defaultSubcommand: AuditCommand.self

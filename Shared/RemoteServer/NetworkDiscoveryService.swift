@@ -6,13 +6,13 @@
 //  Copyright © 2026. All rights reserved.
 //
 
+import Combine
 import Foundation
 import Network
-import Combine
 #if os(macOS)
-import IOKit
+    import IOKit
 #else
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Network Discovery Service
@@ -20,7 +20,6 @@ import UIKit
 /// Handles Bonjour/mDNS service discovery and advertising
 @MainActor
 public class NetworkDiscoveryService: ObservableObject {
-
     // MARK: - Constants
 
     public static let serviceType = "_thea-remote._tcp"
@@ -103,7 +102,7 @@ public class NetworkDiscoveryService: ObservableObject {
             }
         }
 
-        browser.browseResultsChangedHandler = { [weak self] results, changes in
+        browser.browseResultsChangedHandler = { [weak self] results, _ in
             Task { @MainActor in
                 await self?.handleBrowseResults(results)
             }
@@ -125,7 +124,7 @@ public class NetworkDiscoveryService: ObservableObject {
 
         for result in results {
             switch result.endpoint {
-            case .service(let name, let type, let domain, _):
+            case let .service(name, type, domain, _):
                 // Resolve the service to get address and port
                 if let device = await resolveService(name: name, type: type, domain: domain, metadata: result.metadata) {
                     devices.append(device)
@@ -144,14 +143,14 @@ public class NetworkDiscoveryService: ObservableObject {
         var platform = "unknown"
         var deviceId = ""
 
-        if case .bonjour(let txtRecord) = metadata {
-            if let versionData = txtRecord["version"], let v = String(data: versionData, encoding: .utf8) {
+        if case let .bonjour(txtRecord) = metadata {
+            if let v = txtRecord.dictionary["version"] {
                 version = v
             }
-            if let platformData = txtRecord["platform"], let p = String(data: platformData, encoding: .utf8) {
+            if let p = txtRecord.dictionary["platform"] {
                 platform = p
             }
-            if let idData = txtRecord["deviceId"], let id = String(data: idData, encoding: .utf8) {
+            if let id = txtRecord.dictionary["deviceId"] {
                 deviceId = id
             }
         }
@@ -189,7 +188,7 @@ public class NetworkDiscoveryService: ObservableObject {
         let portsToScan = [22, 80, 443, 445, 548, 3389, 5900, 8080, 9847]
 
         await withTaskGroup(of: NetworkDevice?.self) { group in
-            for host in 1...254 {
+            for host in 1 ... 254 {
                 let ip = "\(subnet).\(host)"
 
                 group.addTask {
@@ -198,7 +197,7 @@ public class NetworkDiscoveryService: ObservableObject {
             }
 
             for await device in group {
-                if let device = device {
+                if let device {
                     devices.append(device)
                 }
             }
@@ -273,7 +272,7 @@ public class NetworkDiscoveryService: ObservableObject {
                                   &hostname, socklen_t(hostname.count),
                                   nil, 0, NI_NAMEREQD) == 0
 
-        return success ? String(cString: hostname) : nil
+        return success ? String(decoding: hostname.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self) : nil
     }
 
     // MARK: - Helpers
@@ -292,12 +291,16 @@ public class NetworkDiscoveryService: ObservableObject {
             let addrFamily = interface.ifa_addr.pointee.sa_family
 
             if addrFamily == UInt8(AF_INET) {
-                let name = String(cString: interface.ifa_name)
+                let namePtr = interface.ifa_name!
+                let nameLength = Int(strlen(namePtr))
+                let nameData = Data(bytes: namePtr, count: nameLength)
+                let name = String(decoding: nameData, as: UTF8.self)
                 if name == "en0" || name == "en1" {
                     var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
                     getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len),
-                               &hostname, socklen_t(hostname.count), nil, 0, NI_NUMERICHOST)
-                    address = String(cString: hostname)
+                                &hostname, socklen_t(hostname.count), nil, 0, NI_NUMERICHOST)
+                    let hostnameData = hostname.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }
+                    address = String(decoding: hostnameData, as: UTF8.self)
                     break
                 }
             }
@@ -308,45 +311,45 @@ public class NetworkDiscoveryService: ObservableObject {
 
     private func getPlatform() -> String {
         #if os(macOS)
-        return "macOS"
+            return "macOS"
         #elseif os(iOS)
-        return "iOS"
+            return "iOS"
         #elseif os(tvOS)
-        return "tvOS"
+            return "tvOS"
         #elseif os(watchOS)
-        return "watchOS"
+            return "watchOS"
         #else
-        return "unknown"
+            return "unknown"
         #endif
     }
 
     private func getDeviceId() -> String {
         #if os(macOS)
-        // Use hardware UUID on macOS
-        let platformExpert = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
-        defer { IOObjectRelease(platformExpert) }
+            // Use hardware UUID on macOS
+            let platformExpert = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
+            defer { IOObjectRelease(platformExpert) }
 
-        if let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformUUIDKey as CFString, kCFAllocatorDefault, 0)?.takeUnretainedValue() as? String {
-            return serialNumberAsCFString
-        }
-        return UUID().uuidString
+            if let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformUUIDKey as CFString, kCFAllocatorDefault, 0)?.takeUnretainedValue() as? String {
+                return serialNumberAsCFString
+            }
+            return UUID().uuidString
         #else
-        return UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+            return UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
         #endif
     }
 
     private static func serviceNameForPort(_ port: Int) -> String {
         switch port {
-        case 22: return "SSH"
-        case 80: return "HTTP"
-        case 443: return "HTTPS"
-        case 445: return "SMB"
-        case 548: return "AFP"
-        case 3389: return "RDP"
-        case 5900: return "VNC"
-        case 8080: return "HTTP Proxy"
-        case 9847: return "Thea Remote"
-        default: return "Port \(port)"
+        case 22: "SSH"
+        case 80: "HTTP"
+        case 443: "HTTPS"
+        case 445: "SMB"
+        case 548: "AFP"
+        case 3389: "RDP"
+        case 5900: "VNC"
+        case 8080: "HTTP Proxy"
+        case 9847: "Thea Remote"
+        default: "Port \(port)"
         }
     }
 
@@ -394,11 +397,11 @@ private class NetServiceBrowserDelegateHandler: NSObject, NetServiceBrowserDeleg
     var didFindService: ((NetService) -> Void)?
     var didRemoveService: ((NetService) -> Void)?
 
-    func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
+    func netServiceBrowser(_: NetServiceBrowser, didFind service: NetService, moreComing _: Bool) {
         didFindService?(service)
     }
 
-    func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool) {
+    func netServiceBrowser(_: NetServiceBrowser, didRemove service: NetService, moreComing _: Bool) {
         didRemoveService?(service)
     }
 }

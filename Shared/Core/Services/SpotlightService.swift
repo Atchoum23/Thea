@@ -5,10 +5,12 @@
 //  Core Spotlight integration for indexing conversations and content
 //
 
-import Foundation
 import Combine
 import CoreSpotlight
-import MobileCoreServices
+import Foundation
+#if canImport(MobileCoreServices)
+    import MobileCoreServices
+#endif
 import UniformTypeIdentifiers
 
 // MARK: - Spotlight Service
@@ -59,10 +61,12 @@ public class SpotlightService: ObservableObject {
         attributeSet.relatedUniqueIdentifier = conversation.id.uuidString
 
         // Add custom attributes
-        attributeSet.customAttributes = [
-            CSCustomAttributeKey(keyName: "messageCount")!: conversation.messageCount as NSNumber,
-            CSCustomAttributeKey(keyName: "aiModel")!: conversation.aiModel as NSString
-        ]
+        if let messageCountKey = CSCustomAttributeKey(keyName: "messageCount") {
+            attributeSet.setValue(conversation.messageCount as NSNumber, forCustomKey: messageCountKey)
+        }
+        if let aiModelKey = CSCustomAttributeKey(keyName: "aiModel") {
+            attributeSet.setValue(conversation.aiModel as NSString, forCustomKey: aiModelKey)
+        }
 
         // Add thumbnail if available
         if let thumbnailData = conversation.thumbnailData {
@@ -96,10 +100,12 @@ public class SpotlightService: ObservableObject {
         attributeSet.path = project.path
 
         // Project-specific attributes
-        attributeSet.customAttributes = [
-            CSCustomAttributeKey(keyName: "fileCount")!: project.fileCount as NSNumber,
-            CSCustomAttributeKey(keyName: "language")!: project.primaryLanguage as NSString
-        ]
+        if let fileCountKey = CSCustomAttributeKey(keyName: "fileCount") {
+            attributeSet.setValue(project.fileCount as NSNumber, forCustomKey: fileCountKey)
+        }
+        if let languageKey = CSCustomAttributeKey(keyName: "language") {
+            attributeSet.setValue(project.primaryLanguage as NSString, forCustomKey: languageKey)
+        }
 
         let searchableItem = CSSearchableItem(
             uniqueIdentifier: "project-\(project.id.uuidString)",
@@ -123,10 +129,12 @@ public class SpotlightService: ObservableObject {
         attributeSet.contentCreationDate = item.createdAt
 
         // Knowledge-specific
-        attributeSet.customAttributes = [
-            CSCustomAttributeKey(keyName: "source")!: item.source as NSString,
-            CSCustomAttributeKey(keyName: "confidence")!: item.confidence as NSNumber
-        ]
+        if let sourceKey = CSCustomAttributeKey(keyName: "source") {
+            attributeSet.setValue(item.source as NSString, forCustomKey: sourceKey)
+        }
+        if let confidenceKey = CSCustomAttributeKey(keyName: "confidence") {
+            attributeSet.setValue(item.confidence as NSNumber, forCustomKey: confidenceKey)
+        }
 
         let searchableItem = CSSearchableItem(
             uniqueIdentifier: "knowledge-\(item.id.uuidString)",
@@ -178,8 +186,8 @@ public class SpotlightService: ObservableObject {
     public func batchIndex(
         conversations: [SpotlightConversation] = [],
         projects: [SpotlightProject] = [],
-        knowledge: [SpotlightKnowledgeItem] = [],
-        notes: [SpotlightNote] = []
+        knowledge _: [SpotlightKnowledgeItem] = [],
+        notes _: [SpotlightNote] = []
     ) async throws {
         isIndexing = true
         defer { isIndexing = false }
@@ -249,14 +257,16 @@ public class SpotlightService: ObservableObject {
 
     /// Search indexed items
     public func search(query: String) async throws -> [SpotlightSearchResult] {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             let queryString = "title == \"*\(query)*\"cd || contentDescription == \"*\(query)*\"cd || keywords == \"*\(query)*\"cd"
-            let searchQuery = CSSearchQuery(queryString: queryString, attributes: [
+            let queryContext = CSSearchQueryContext()
+            queryContext.fetchAttributes = [
                 "title",
                 "contentDescription",
                 "keywords",
                 "lastUsedDate"
-            ])
+            ]
+            let searchQuery = CSSearchQuery(queryString: queryString, queryContext: queryContext)
 
             var results: [SpotlightSearchResult] = []
 
@@ -273,7 +283,7 @@ public class SpotlightService: ObservableObject {
             }
 
             searchQuery.completionHandler = { error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                 } else {
                     continuation.resume(returning: results)
@@ -289,7 +299,8 @@ public class SpotlightService: ObservableObject {
     /// Handle Spotlight continuation activity
     public func handleActivity(_ activity: NSUserActivity) -> SpotlightActivityResult? {
         guard activity.activityType == CSSearchableItemActionType,
-              let identifier = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String else {
+              let identifier = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String
+        else {
             return nil
         }
 
@@ -438,7 +449,7 @@ public struct SpotlightSearchResult: Identifiable, Sendable {
     public let lastUsed: Date?
 
     public init(identifier: String, title: String, description: String, lastUsed: Date?) {
-        self.id = identifier
+        id = identifier
         self.identifier = identifier
         self.title = title
         self.description = description

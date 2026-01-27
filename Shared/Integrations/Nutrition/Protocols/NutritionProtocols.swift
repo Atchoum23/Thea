@@ -106,9 +106,9 @@ public struct MacroBalance: Sendable, Codable {
         let carbsTarget = 40.0
         let fatTarget = 30.0
 
-        self.isBalanced = abs(proteinPercent - proteinTarget) < 10 &&
-                         abs(carbsPercent - carbsTarget) < 10 &&
-                         abs(fatPercent - fatTarget) < 10
+        isBalanced = abs(proteinPercent - proteinTarget) < 10 &&
+            abs(carbsPercent - carbsTarget) < 10 &&
+            abs(fatPercent - fatTarget) < 10
     }
 }
 
@@ -152,9 +152,9 @@ public enum NutritionInsightSeverity: String, Sendable, Codable {
 
     public var color: String {
         switch self {
-        case .info: return "blue"
-        case .warning: return "orange"
-        case .critical: return "red"
+        case .info: "blue"
+        case .warning: "orange"
+        case .critical: "red"
         }
     }
 }

@@ -5,16 +5,16 @@ extension Font {
 
     private static func weight(from string: String) -> Font.Weight {
         switch string.lowercased() {
-        case "ultralight": return .ultraLight
-        case "thin": return .thin
-        case "light": return .light
-        case "regular": return .regular
-        case "medium": return .medium
-        case "semibold": return .semibold
-        case "bold": return .bold
-        case "heavy": return .heavy
-        case "black": return .black
-        default: return .regular
+        case "ultralight": .ultraLight
+        case "thin": .thin
+        case "light": .light
+        case "regular": .regular
+        case "medium": .medium
+        case "semibold": .semibold
+        case "bold": .bold
+        case "heavy": .heavy
+        case "black": .black
+        default: .regular
         }
     }
 

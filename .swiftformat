@@ -1,0 +1,12 @@
+# SwiftFormat configuration
+# Disable redundantSelf to preserve explicit self. required for Swift 6 strict concurrency
+--disable redundantSelf
+
+# Disable trailingCommas to match SwiftLint
+--commas inline
+
+# Swift version
+--swiftversion 6.0
+
+# Exclude directories
+--exclude .build,DerivedData,Pods

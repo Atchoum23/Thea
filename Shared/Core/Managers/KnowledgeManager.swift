@@ -16,7 +16,7 @@ final class KnowledgeManager {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
         loadIndexedFiles()
     }
 

@@ -4,7 +4,7 @@
 import Foundation
 
 /// Writes audit findings to JSON format
-struct JSONWriter {
+enum JSONWriter {
     /// Write findings and optional policy result to a JSON file
     static func write(findings: [Finding], policyResult: PolicyEvaluationResult?, to path: String) throws {
         let report = AuditReport(

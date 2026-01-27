@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Logical Inference Engine
+
 // Implements formal logical reasoning with propositions, rules, and inference chains
 
 /// A logical proposition that can be true, false, or unknown
@@ -19,9 +20,9 @@ public struct Proposition: Sendable, Codable, Identifiable, Hashable {
     }
 
     public enum PropositionSource: String, Codable, Sendable {
-        case premise       // Given as input
-        case derived       // Derived through inference
-        case assumption    // Assumed for reasoning
+        case premise // Given as input
+        case derived // Derived through inference
+        case assumption // Assumed for reasoning
         case contradiction // Result of contradiction detection
     }
 
@@ -53,32 +54,32 @@ public struct InferenceRule: Sendable, Codable, Identifiable {
     public let id: UUID
     public let name: String
     public let description: String
-    public let premises: [String]  // Pattern templates for matching
-    public let conclusion: String  // Pattern template for conclusion
+    public let premises: [String] // Pattern templates for matching
+    public let conclusion: String // Pattern template for conclusion
     public let ruleType: RuleType
 
     public enum RuleType: String, Codable, Sendable, CaseIterable {
-        case modusPonens      // If P and P→Q, then Q
-        case modusTollens     // If ¬Q and P→Q, then ¬P
-        case hypotheticalSyllogism  // If P→Q and Q→R, then P→R
-        case disjunctiveSyllogism   // If P∨Q and ¬P, then Q
-        case constructiveDilemma    // If (P→Q)∧(R→S) and P∨R, then Q∨S
-        case conjunction      // If P and Q, then P∧Q
-        case simplification   // If P∧Q, then P
-        case addition        // If P, then P∨Q
-        case custom          // User-defined rule
+        case modusPonens // If P and P→Q, then Q
+        case modusTollens // If ¬Q and P→Q, then ¬P
+        case hypotheticalSyllogism // If P→Q and Q→R, then P→R
+        case disjunctiveSyllogism // If P∨Q and ¬P, then Q
+        case constructiveDilemma // If (P→Q)∧(R→S) and P∨R, then Q∨S
+        case conjunction // If P and Q, then P∧Q
+        case simplification // If P∧Q, then P
+        case addition // If P, then P∨Q
+        case custom // User-defined rule
 
         public var displayName: String {
             switch self {
-            case .modusPonens: return "Modus Ponens"
-            case .modusTollens: return "Modus Tollens"
-            case .hypotheticalSyllogism: return "Hypothetical Syllogism"
-            case .disjunctiveSyllogism: return "Disjunctive Syllogism"
-            case .constructiveDilemma: return "Constructive Dilemma"
-            case .conjunction: return "Conjunction"
-            case .simplification: return "Simplification"
-            case .addition: return "Addition"
-            case .custom: return "Custom Rule"
+            case .modusPonens: "Modus Ponens"
+            case .modusTollens: "Modus Tollens"
+            case .hypotheticalSyllogism: "Hypothetical Syllogism"
+            case .disjunctiveSyllogism: "Disjunctive Syllogism"
+            case .constructiveDilemma: "Constructive Dilemma"
+            case .conjunction: "Conjunction"
+            case .simplification: "Simplification"
+            case .addition: "Addition"
+            case .custom: "Custom Rule"
             }
         }
     }
@@ -175,9 +176,10 @@ public final class LogicalInferenceEngine {
     public func addProposition(_ proposition: Proposition) {
         // Check for contradictions
         if let existing = knowledgeBase.first(where: { $0.statement == proposition.statement }) {
-            if existing.truthValue != proposition.truthValue &&
-               existing.truthValue != .unknown &&
-               proposition.truthValue != .unknown {
+            if existing.truthValue != proposition.truthValue,
+               existing.truthValue != .unknown,
+               proposition.truthValue != .unknown
+            {
                 // Contradiction detected
                 var contradicted = proposition
                 contradicted.truthValue = .contradictory
@@ -257,7 +259,7 @@ public final class LogicalInferenceEngine {
         var iterationCount = 0
         let maxIterations = 100
 
-        while changed && iterationCount < maxIterations {
+        while changed, iterationCount < maxIterations {
             changed = false
             iterationCount += 1
 
@@ -314,7 +316,7 @@ public final class LogicalInferenceEngine {
             for p in propositions where p.truthValue == .true {
                 for impl in propositions where impl.statement.contains("→") && impl.statement.hasPrefix(p.statement) {
                     let parts = impl.statement.components(separatedBy: " → ")
-                    if parts.count == 2 && parts[0] == p.statement {
+                    if parts.count == 2, parts[0] == p.statement {
                         let conclusionStatement = parts[1]
                         // Check if conclusion already exists
                         if !propositions.contains(where: { $0.statement == conclusionStatement && $0.truthValue == .true }) {
@@ -338,7 +340,7 @@ public final class LogicalInferenceEngine {
 
                 for impl in propositions where impl.statement.contains("→") && impl.statement.hasSuffix(qStatement) {
                     let parts = impl.statement.components(separatedBy: " → ")
-                    if parts.count == 2 && parts[1] == qStatement {
+                    if parts.count == 2, parts[1] == qStatement {
                         let conclusionStatement = "¬\(parts[0])"
                         if !propositions.contains(where: { $0.statement == conclusionStatement }) {
                             let conclusion = Proposition(

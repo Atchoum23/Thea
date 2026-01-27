@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Dynamic Tool Use Framework
+
 // Enables AI to discover, register, and execute various tools dynamically
 
 @MainActor
@@ -13,7 +14,7 @@ final class ToolFramework {
 
     private init() {
         registerBuiltInTools()
-        
+
         // Initialize MCP tool registry
         Task { @MainActor in
             _ = MCPToolRegistry.shared
@@ -39,7 +40,7 @@ final class ToolFramework {
         }
 
         let toolDescriptions = registeredTools.map { tool in
-            "\(tool.name): \(tool.description)\nParameters: \(tool.parameters.map { $0.name }.joined(separator: ", "))"
+            "\(tool.name): \(tool.description)\nParameters: \(tool.parameters.map(\.name).joined(separator: ", "))"
         }.joined(separator: "\n")
 
         let prompt = """
@@ -118,11 +119,11 @@ final class ToolFramework {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 result += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -224,26 +225,26 @@ enum ToolError: LocalizedError {
     case invalidParameters
     case executionFailed
     case notImplemented
-    case commandBlocked(String)  // SECURITY FIX (FINDING-003): Added for command validation
-    case pathBlocked(String)     // SECURITY FIX (FINDING-007): Added for path validation
-    case urlBlocked(String)      // SECURITY FIX (SSRF): Added for URL validation
+    case commandBlocked(String) // SECURITY FIX (FINDING-003): Added for command validation
+    case pathBlocked(String) // SECURITY FIX (FINDING-007): Added for path validation
+    case urlBlocked(String) // SECURITY FIX (SSRF): Added for URL validation
 
     var errorDescription: String? {
         switch self {
         case .providerNotAvailable:
-            return "AI provider not available"
+            "AI provider not available"
         case .invalidParameters:
-            return "Invalid tool parameters"
+            "Invalid tool parameters"
         case .executionFailed:
-            return "Tool execution failed"
+            "Tool execution failed"
         case .notImplemented:
-            return "Tool handler not implemented"
-        case .commandBlocked(let reason):
-            return "SECURITY: Command blocked - \(reason)"
-        case .pathBlocked(let reason):
-            return "SECURITY: Path access blocked - \(reason)"
-        case .urlBlocked(let reason):
-            return "SECURITY: URL access blocked - \(reason)"
+            "Tool handler not implemented"
+        case let .commandBlocked(reason):
+            "SECURITY: Command blocked - \(reason)"
+        case let .pathBlocked(reason):
+            "SECURITY: Path access blocked - \(reason)"
+        case let .urlBlocked(reason):
+            "SECURITY: URL access blocked - \(reason)"
         }
     }
 }

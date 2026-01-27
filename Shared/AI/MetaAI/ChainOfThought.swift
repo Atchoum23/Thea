@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Chain of Thought Reasoning Module
+
 // Implements structured step-by-step reasoning with explicit thought traces
 
 /// Represents a single reasoning step in a chain-of-thought process
@@ -73,7 +74,7 @@ public struct ThoughtChain: Sendable, Codable, Identifiable {
 
     public mutating func complete(with conclusion: String) {
         self.conclusion = conclusion
-        self.completedAt = Date()
+        completedAt = Date()
         updateConfidence()
     }
 
@@ -138,7 +139,7 @@ public final class ChainOfThoughtProcessor {
     /// Process a problem through complete chain-of-thought reasoning
     public func process(
         problem: String,
-        maxSteps: Int = 10,
+        maxSteps _: Int = 10,
         progressHandler: (@Sendable (Double, String) -> Void)? = nil
     ) async throws -> ThoughtChain {
         isProcessing = true
@@ -230,9 +231,9 @@ public final class ChainOfThoughtProcessor {
 
 // MARK: - Visualization Support
 
-extension ThoughtChain {
+public extension ThoughtChain {
     /// Generate a visual representation of the reasoning chain
-    public var visualRepresentation: String {
+    var visualRepresentation: String {
         var lines: [String] = []
         lines.append("═══════════════════════════════════════")
         lines.append("Problem: \(problem)")
@@ -245,7 +246,7 @@ extension ThoughtChain {
             lines.append("│  └─ Confidence: \(String(format: "%.0f%%", step.confidence * 100))")
         }
 
-        if let conclusion = conclusion {
+        if let conclusion {
             lines.append("│")
             lines.append("╰─ CONCLUSION ─────────────────────────")
             lines.append("   \(conclusion)")

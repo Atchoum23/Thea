@@ -16,12 +16,12 @@ final class MigrationManager {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
 
     // MARK: - Migration from other apps
 
-    func migrateFromChatGPT(exportPath: URL) async throws {
+    func migrateFromChatGPT(exportPath _: URL) async throws {
         isMigrating = true
         migrationStatus = "Reading ChatGPT export..."
         migrationProgress = 0.1
@@ -34,7 +34,7 @@ final class MigrationManager {
         isMigrating = false
     }
 
-    func migrateFromClaude(exportPath: URL) async throws {
+    func migrateFromClaude(exportPath _: URL) async throws {
         isMigrating = true
         migrationStatus = "Reading Claude export..."
         migrationProgress = 0.1
@@ -47,7 +47,7 @@ final class MigrationManager {
         isMigrating = false
     }
 
-    func migrateFromNexus(path: URL) async throws {
+    func migrateFromNexus(path _: URL) async throws {
         isMigrating = true
         migrationStatus = "Reading Nexus data..."
         migrationProgress = 0.1

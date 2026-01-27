@@ -8,9 +8,9 @@
 
 import Foundation
 #if os(macOS)
-import AppKit
+    import AppKit
 #else
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Badge Manager
@@ -56,7 +56,8 @@ public final class BadgeManager {
         badgeCount = defaults.integer(forKey: badgeCountKey)
 
         if let data = defaults.data(forKey: categoryCountsKey),
-           let counts = try? JSONDecoder().decode([String: Int].self, from: data) {
+           let counts = try? JSONDecoder().decode([String: Int].self, from: data)
+        {
             categoryCounts = counts.reduce(into: [:]) { result, pair in
                 if let category = NotificationCategory(rawValue: pair.key) {
                     result[category] = pair.value
@@ -159,19 +160,19 @@ public final class BadgeManager {
 
     private func setAppBadge(_ count: Int) {
         #if os(macOS)
-        if count > 0 {
-            NSApplication.shared.dockTile.badgeLabel = "\(count)"
-        } else {
-            NSApplication.shared.dockTile.badgeLabel = nil
-        }
-        #else
-        Task {
-            do {
-                try await UNUserNotificationCenter.current().setBadgeCount(count)
-            } catch {
-                // Handle error silently - badge update is non-critical
+            if count > 0 {
+                NSApplication.shared.dockTile.badgeLabel = "\(count)"
+            } else {
+                NSApplication.shared.dockTile.badgeLabel = nil
             }
-        }
+        #else
+            Task {
+                do {
+                    try await UNUserNotificationCenter.current().setBadgeCount(count)
+                } catch {
+                    // Handle error silently - badge update is non-critical
+                }
+            }
         #endif
     }
 
@@ -230,45 +231,45 @@ public struct BadgeConfiguration: Codable, Sendable, Equatable {
 // MARK: - Badge View Helper
 
 #if os(macOS)
-import SwiftUI
+    import SwiftUI
 
-public struct BadgeView: View {
-    let count: Int
-    let color: Color
+    public struct BadgeView: View {
+        let count: Int
+        let color: Color
 
-    public init(count: Int, color: Color = .red) {
-        self.count = count
-        self.color = color
-    }
-
-    public var body: some View {
-        // swiftlint:disable:next empty_count
-        if count > 0 {
-            Text(count > 99 ? "99+" : "\(count)")
-                .font(.caption2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(color)
-                .clipShape(Capsule())
+        public init(count: Int, color: Color = .red) {
+            self.count = count
+            self.color = color
         }
-    }
-}
 
-public extension View {
-    /// Add a badge overlay to a view
-    func badge(_ count: Int, color: Color = .red) -> some View {
-        overlay(alignment: .topTrailing) {
-            BadgeView(count: count, color: color)
-                .offset(x: 8, y: -8)
+        public var body: some View {
+            // swiftlint:disable:next empty_count
+            if count > 0 {
+                Text(count > 99 ? "99+" : "\(count)")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(color)
+                    .clipShape(Capsule())
+            }
         }
     }
 
-    /// Add a category badge overlay
-    func categoryBadge(_ category: NotificationCategory) -> some View {
-        let count = BadgeManager.shared.getBadgeCount(for: category)
-        return badge(count)
+    public extension View {
+        /// Add a badge overlay to a view
+        func badge(_ count: Int, color: Color = .red) -> some View {
+            overlay(alignment: .topTrailing) {
+                BadgeView(count: count, color: color)
+                    .offset(x: 8, y: -8)
+            }
+        }
+
+        /// Add a category badge overlay
+        func categoryBadge(_ category: NotificationCategory) -> some View {
+            let count = BadgeManager.shared.getBadgeCount(for: category)
+            return badge(count)
+        }
     }
-}
 #endif

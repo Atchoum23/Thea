@@ -5,17 +5,17 @@
 //  Enhanced accessibility features for all platforms
 //
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 #if canImport(AVFoundation)
-import AVFoundation
+    import AVFoundation
 #endif
 
 // MARK: - Accessibility Service
@@ -64,74 +64,84 @@ public class AccessibilityService: ObservableObject {
 
     private func setupAccessibilityObservers() {
         #if os(iOS)
-        // Observe VoiceOver
-        NotificationCenter.default.addObserver(
-            forName: UIAccessibility.voiceOverStatusDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.isVoiceOverRunning = UIAccessibility.isVoiceOverRunning
-        }
+            // Observe VoiceOver
+            NotificationCenter.default.addObserver(
+                forName: UIAccessibility.voiceOverStatusDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    self?.isVoiceOverRunning = UIAccessibility.isVoiceOverRunning
+                }
+            }
 
-        // Observe Reduce Motion
-        NotificationCenter.default.addObserver(
-            forName: UIAccessibility.reduceMotionStatusDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.isReduceMotionEnabled = UIAccessibility.isReduceMotionEnabled
-        }
+            // Observe Reduce Motion
+            NotificationCenter.default.addObserver(
+                forName: UIAccessibility.reduceMotionStatusDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    self?.isReduceMotionEnabled = UIAccessibility.isReduceMotionEnabled
+                }
+            }
 
-        // Observe Bold Text
-        NotificationCenter.default.addObserver(
-            forName: UIAccessibility.boldTextStatusDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.isBoldTextEnabled = UIAccessibility.isBoldTextEnabled
-        }
+            // Observe Bold Text
+            NotificationCenter.default.addObserver(
+                forName: UIAccessibility.boldTextStatusDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    self?.isBoldTextEnabled = UIAccessibility.isBoldTextEnabled
+                }
+            }
 
-        // Observe Switch Control
-        NotificationCenter.default.addObserver(
-            forName: UIAccessibility.switchControlStatusDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.isSwitchControlRunning = UIAccessibility.isSwitchControlRunning
-        }
+            // Observe Switch Control
+            NotificationCenter.default.addObserver(
+                forName: UIAccessibility.switchControlStatusDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    self?.isSwitchControlRunning = UIAccessibility.isSwitchControlRunning
+                }
+            }
 
-        // Initial state
-        isVoiceOverRunning = UIAccessibility.isVoiceOverRunning
-        isReduceMotionEnabled = UIAccessibility.isReduceMotionEnabled
-        isBoldTextEnabled = UIAccessibility.isBoldTextEnabled
-        isSwitchControlRunning = UIAccessibility.isSwitchControlRunning
-        isDifferentiateWithoutColorEnabled = UIAccessibility.shouldDifferentiateWithoutColor
-        isReduceTransparencyEnabled = UIAccessibility.isReduceTransparencyEnabled
-        isInvertColorsEnabled = UIAccessibility.isInvertColorsEnabled
-        isClosedCaptioningEnabled = UIAccessibility.isClosedCaptioningEnabled
+            // Initial state
+            isVoiceOverRunning = UIAccessibility.isVoiceOverRunning
+            isReduceMotionEnabled = UIAccessibility.isReduceMotionEnabled
+            isBoldTextEnabled = UIAccessibility.isBoldTextEnabled
+            isSwitchControlRunning = UIAccessibility.isSwitchControlRunning
+            isDifferentiateWithoutColorEnabled = UIAccessibility.shouldDifferentiateWithoutColor
+            isReduceTransparencyEnabled = UIAccessibility.isReduceTransparencyEnabled
+            isInvertColorsEnabled = UIAccessibility.isInvertColorsEnabled
+            isClosedCaptioningEnabled = UIAccessibility.isClosedCaptioningEnabled
         #endif
 
         #if os(macOS)
-        // macOS accessibility observations
-        NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.updateMacOSAccessibilitySettings()
-        }
+            // macOS accessibility observations
+            NSWorkspace.shared.notificationCenter.addObserver(
+                forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    self?.updateMacOSAccessibilitySettings()
+                }
+            }
 
-        updateMacOSAccessibilitySettings()
+            updateMacOSAccessibilitySettings()
         #endif
     }
 
     #if os(macOS)
-    private func updateMacOSAccessibilitySettings() {
-        isReduceMotionEnabled = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-        isReduceTransparencyEnabled = NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
-        isDifferentiateWithoutColorEnabled = NSWorkspace.shared.accessibilityDisplayShouldDifferentiateWithoutColor
-        isInvertColorsEnabled = NSWorkspace.shared.accessibilityDisplayShouldInvertColors
-    }
+        private func updateMacOSAccessibilitySettings() {
+            isReduceMotionEnabled = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+            isReduceTransparencyEnabled = NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
+            isDifferentiateWithoutColorEnabled = NSWorkspace.shared.accessibilityDisplayShouldDifferentiateWithoutColor
+            isInvertColorsEnabled = NSWorkspace.shared.accessibilityDisplayShouldInvertColors
+        }
     #endif
 
     // MARK: - Custom Settings Persistence
@@ -164,16 +174,18 @@ public class AccessibilityService: ObservableObject {
     /// Announce text to VoiceOver users
     public func announce(_ message: String, priority: AnnouncementPriority = .high) {
         #if os(iOS)
-        let announcement = UIAccessibility.Announcement(
-            attributedString: NSAttributedString(string: message),
-            priority: priority == .high ? .high : .low
-        )
-        UIAccessibility.post(notification: .announcement, argument: announcement)
+            // Use attributed string with priority for iOS
+            let priorityValue = priority == .high ? UIAccessibilityPriority.high : UIAccessibilityPriority.low
+            let attributedMessage = NSAttributedString(
+                string: message,
+                attributes: [.accessibilitySpeechAnnouncementPriority: priorityValue]
+            )
+            UIAccessibility.post(notification: .announcement, argument: attributedMessage)
         #elseif os(macOS)
-        NSAccessibility.post(element: NSApp, notification: .announcementRequested, userInfo: [
-            NSAccessibility.NotificationUserInfoKey.announcement: message,
-            NSAccessibility.NotificationUserInfoKey.priority: priority == .high ? NSAccessibilityPriorityLevel.high : NSAccessibilityPriorityLevel.low
-        ])
+            NSAccessibility.post(element: NSApp as Any, notification: .announcementRequested, userInfo: [
+                NSAccessibility.NotificationUserInfoKey.announcement: message,
+                NSAccessibility.NotificationUserInfoKey.priority: priority == .high ? NSAccessibilityPriorityLevel.high : NSAccessibilityPriorityLevel.low
+            ])
         #endif
     }
 
@@ -202,18 +214,18 @@ public class AccessibilityService: ObservableObject {
     /// Post a focus change notification
     public func moveFocus(to element: Any?) {
         #if os(iOS)
-        UIAccessibility.post(notification: .screenChanged, argument: element)
+            UIAccessibility.post(notification: .screenChanged, argument: element)
         #elseif os(macOS)
-        if let nsElement = element {
-            NSAccessibility.post(element: nsElement as AnyObject, notification: .focusedUIElementChanged)
-        }
+            if let nsElement = element {
+                NSAccessibility.post(element: nsElement as AnyObject, notification: .focusedUIElementChanged)
+            }
         #endif
     }
 
     /// Post a layout change notification
     public func announceLayoutChange(focusElement: Any? = nil) {
         #if os(iOS)
-        UIAccessibility.post(notification: .layoutChanged, argument: focusElement)
+            UIAccessibility.post(notification: .layoutChanged, argument: focusElement)
         #endif
     }
 
@@ -224,29 +236,29 @@ public class AccessibilityService: ObservableObject {
         guard hapticFeedbackEnabled else { return }
 
         #if os(iOS)
-        switch type {
-        case .success:
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
-        case .warning:
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.warning)
-        case .error:
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.error)
-        case .selection:
-            let generator = UISelectionFeedbackGenerator()
-            generator.selectionChanged()
-        case .light:
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
-        case .medium:
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
-        case .heavy:
-            let generator = UIImpactFeedbackGenerator(style: .heavy)
-            generator.impactOccurred()
-        }
+            switch type {
+            case .success:
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+            case .warning:
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.warning)
+            case .error:
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.error)
+            case .selection:
+                let generator = UISelectionFeedbackGenerator()
+                generator.selectionChanged()
+            case .light:
+                let generator = UIImpactFeedbackGenerator(style: .light)
+                generator.impactOccurred()
+            case .medium:
+                let generator = UIImpactFeedbackGenerator(style: .medium)
+                generator.impactOccurred()
+            case .heavy:
+                let generator = UIImpactFeedbackGenerator(style: .heavy)
+                generator.impactOccurred()
+            }
         #endif
     }
 
@@ -255,20 +267,20 @@ public class AccessibilityService: ObservableObject {
     /// Read text aloud
     public func speak(_ text: String, language: String = "en-US") {
         #if canImport(AVFoundation)
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: language)
-        utterance.rate = 0.5
+            let utterance = AVSpeechUtterance(string: text)
+            utterance.voice = AVSpeechSynthesisVoice(language: language)
+            utterance.rate = 0.5
 
-        let synthesizer = AVSpeechSynthesizer()
-        synthesizer.speak(utterance)
+            let synthesizer = AVSpeechSynthesizer()
+            synthesizer.speak(utterance)
         #endif
     }
 
     /// Stop speaking
     public func stopSpeaking() {
         #if canImport(AVFoundation)
-        let synthesizer = AVSpeechSynthesizer()
-        synthesizer.stopSpeaking(at: .immediate)
+            let synthesizer = AVSpeechSynthesizer()
+            synthesizer.stopSpeaking(at: .immediate)
         #endif
     }
 
@@ -283,11 +295,11 @@ public class AccessibilityService: ObservableObject {
     /// Generate accessibility hint for interactive elements
     public func hintForAction(_ action: String) -> String {
         switch action {
-        case "send": return "Double tap to send message to Thea"
-        case "copy": return "Double tap to copy to clipboard"
-        case "share": return "Double tap to open sharing options"
-        case "speak": return "Double tap to have Thea read this aloud"
-        default: return "Double tap to \(action)"
+        case "send": "Double tap to send message to Thea"
+        case "copy": "Double tap to copy to clipboard"
+        case "share": "Double tap to open sharing options"
+        case "speak": "Double tap to have Thea read this aloud"
+        default: "Double tap to \(action)"
         }
     }
 }
@@ -351,7 +363,7 @@ public extension String {
     /// Format for VoiceOver reading of code
     var accessibleCodeDescription: String {
         // Replace common symbols with words for better VoiceOver
-        self.replacingOccurrences(of: "{", with: " open brace ")
+        replacingOccurrences(of: "{", with: " open brace ")
             .replacingOccurrences(of: "}", with: " close brace ")
             .replacingOccurrences(of: "(", with: " open paren ")
             .replacingOccurrences(of: ")", with: " close paren ")

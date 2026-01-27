@@ -75,8 +75,9 @@ final class VoiceActivationManager {
         audioEngine = AVAudioEngine()
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
 
-        guard let audioEngine = audioEngine,
-              let request = recognitionRequest else {
+        guard let audioEngine,
+              let request = recognitionRequest
+        else {
             throw VoiceError.setupFailed
         }
 
@@ -85,7 +86,7 @@ final class VoiceActivationManager {
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
 
-        inputNode.installTap(onBus: 0, bufferSize: 1_024, format: recordingFormat) { buffer, _ in
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
             request.append(buffer)
         }
 
@@ -98,9 +99,9 @@ final class VoiceActivationManager {
         recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
             guard self != nil else { return }
             Task { @MainActor [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
 
-                if let result = result {
+                if let result {
                     self.transcriptionText = result.bestTranscription.formattedString
 
                     if result.isFinal {
@@ -149,15 +150,15 @@ enum VoiceError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notEnabled:
-            return "Voice activation is not enabled"
+            "Voice activation is not enabled"
         case .speechRecognitionNotAuthorized:
-            return "Speech recognition not authorized"
+            "Speech recognition not authorized"
         case .microphoneNotAuthorized:
-            return "Microphone access not authorized"
+            "Microphone access not authorized"
         case .recognizerNotAvailable:
-            return "Speech recognizer not available"
+            "Speech recognizer not available"
         case .setupFailed:
-            return "Failed to setup voice recognition"
+            "Failed to setup voice recognition"
         }
     }
 }

@@ -36,7 +36,7 @@ public final class AgentSecEnforcer: ObservableObject {
     ///   - method: HTTP method
     /// - Returns: EnforcementResult indicating if request is allowed
     public func validateNetworkRequest(url: URL, method: String = "GET") -> EnforcementResult {
-        guard isEnforcementActive && policy.isStrictModeEnabled else {
+        guard isEnforcementActive, policy.isStrictModeEnabled else {
             return .allowed
         }
 
@@ -102,7 +102,7 @@ public final class AgentSecEnforcer: ObservableObject {
     ///   - workspace: Optional workspace directory for validation
     /// - Returns: EnforcementResult indicating if write is allowed
     public func validateFileWrite(path: String, workspace: String? = nil) -> EnforcementResult {
-        guard isEnforcementActive && policy.isStrictModeEnabled else {
+        guard isEnforcementActive, policy.isStrictModeEnabled else {
             return .allowed
         }
 
@@ -143,8 +143,8 @@ public final class AgentSecEnforcer: ObservableObject {
     }
 
     /// Validate a file read operation
-    public func validateFileRead(path: String, workspace: String? = nil) -> EnforcementResult {
-        guard isEnforcementActive && policy.isStrictModeEnabled else {
+    public func validateFileRead(path: String, workspace _: String? = nil) -> EnforcementResult {
+        guard isEnforcementActive, policy.isStrictModeEnabled else {
             return .allowed
         }
 
@@ -178,7 +178,7 @@ public final class AgentSecEnforcer: ObservableObject {
     /// - Parameter command: The command to validate
     /// - Returns: EnforcementResult indicating if command is allowed
     public func validateTerminalCommand(_ command: String) -> EnforcementResult {
-        guard isEnforcementActive && policy.isStrictModeEnabled else {
+        guard isEnforcementActive, policy.isStrictModeEnabled else {
             return .allowed
         }
 
@@ -221,11 +221,11 @@ public final class AgentSecEnforcer: ObservableObject {
 
     /// Validate that approval was obtained for an operation
     public func validateApproval(for operationType: String, wasApproved: Bool) -> EnforcementResult {
-        guard isEnforcementActive && policy.isStrictModeEnabled else {
+        guard isEnforcementActive, policy.isStrictModeEnabled else {
             return .allowed
         }
 
-        if policy.approval.isApprovalRequired(for: operationType) && !wasApproved {
+        if policy.approval.isApprovalRequired(for: operationType), !wasApproved {
             let violation = SecurityViolation(
                 type: .approvalBypassed,
                 severity: .high,
@@ -290,9 +290,9 @@ public enum EnforcementResult: Sendable, Equatable {
     public var reason: String? {
         switch self {
         case .allowed:
-            return nil
-        case .denied(let reason), .requiresApproval(let reason):
-            return reason
+            nil
+        case let .denied(reason), let .requiresApproval(reason):
+            reason
         }
     }
 }

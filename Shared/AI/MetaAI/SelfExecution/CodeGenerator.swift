@@ -46,13 +46,13 @@ public actor CodeGenerator {
         public var errorDescription: String? {
             switch self {
             case .noProvidersConfigured:
-                return "No AI providers configured. Please add API keys in Settings → Providers."
-            case .allProvidersFailed(let errors):
-                return "All providers failed: \(errors.joined(separator: "; "))"
+                "No AI providers configured. Please add API keys in Settings → Providers."
+            case let .allProvidersFailed(errors):
+                "All providers failed: \(errors.joined(separator: "; "))"
             case .invalidRequirement:
-                return "Invalid file requirement - missing path or description."
+                "Invalid file requirement - missing path or description."
             case .contextTooLarge:
-                return "Context too large for code generation."
+                "Context too large for code generation."
             }
         }
     }
@@ -204,7 +204,7 @@ public actor CodeGenerator {
 
                 ### \(fileName)
                 ```swift
-                \(content.prefix(2_000))
+                \(content.prefix(2000))
                 ```
 
                 """
@@ -254,9 +254,18 @@ public actor CodeGenerator {
 
     private func hasLocalModels() async -> Bool {
         // Check for local models in the SharedLLMs directory
-        let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
-        let sharedLLMsPath = (homeDir as NSString).appendingPathComponent("Library/Application Support/SharedLLMs")
-        return FileManager.default.fileExists(atPath: sharedLLMsPath)
+        #if os(macOS)
+            let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+            let sharedLLMsPath = (homeDir as NSString).appendingPathComponent("Library/Application Support/SharedLLMs")
+            return FileManager.default.fileExists(atPath: sharedLLMsPath)
+        #else
+            // On iOS, local model files are stored in the app's documents directory
+            guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                return false
+            }
+            let sharedLLMsPath = documentsPath.appendingPathComponent("SharedLLMs").path
+            return FileManager.default.fileExists(atPath: sharedLLMsPath)
+        #endif
     }
 
     private func callProvider(_ provider: String, prompt: String) async throws -> GenerationResult {
@@ -291,7 +300,7 @@ public actor CodeGenerator {
 
         let body: [String: Any] = [
             "model": "claude-sonnet-4-20250514",
-            "max_tokens": 8_192,
+            "max_tokens": 8192,
             "messages": [
                 ["role": "user", "content": prompt]
             ]
@@ -302,7 +311,8 @@ public actor CodeGenerator {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+              httpResponse.statusCode == 200
+        else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
             throw NSError(domain: "Anthropic", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])
         }
@@ -338,7 +348,7 @@ public actor CodeGenerator {
 
         let body: [String: Any] = [
             "model": "gpt-4o",
-            "max_tokens": 8_192,
+            "max_tokens": 8192,
             "messages": [
                 ["role": "user", "content": prompt]
             ]
@@ -349,7 +359,8 @@ public actor CodeGenerator {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+              httpResponse.statusCode == 200
+        else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
             throw NSError(domain: "OpenAI", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])
         }
@@ -386,7 +397,7 @@ public actor CodeGenerator {
 
         let body: [String: Any] = [
             "model": "anthropic/claude-sonnet-4",
-            "max_tokens": 8_192,
+            "max_tokens": 8192,
             "messages": [
                 ["role": "user", "content": prompt]
             ]
@@ -397,7 +408,8 @@ public actor CodeGenerator {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+              httpResponse.statusCode == 200
+        else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
             throw NSError(domain: "OpenRouter", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])
         }
@@ -416,7 +428,7 @@ public actor CodeGenerator {
         )
     }
 
-    private func callLocalModel(prompt: String) async throws -> GenerationResult {
+    private func callLocalModel(prompt _: String) async throws -> GenerationResult {
         // TODO: Implement local MLX model integration
         throw GenerationError.noProvidersConfigured
     }

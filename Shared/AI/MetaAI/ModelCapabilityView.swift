@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Model Capability View
+
 // Settings panel and browser for AI model capabilities
 
 @MainActor
@@ -10,9 +11,9 @@ public struct ModelCapabilityView: View {
     @State private var selectedTaskType: ModelCapability.TaskType?
     @State private var searchText = ""
     @State private var showingCostCalculator = false
-    
+
     public init() {}
-    
+
     public var body: some View {
         NavigationSplitView {
             // Model list sidebar
@@ -30,7 +31,7 @@ public struct ModelCapabilityView: View {
             ToolbarItem(placement: .primaryAction) {
                 updateButton
             }
-            
+
             ToolbarItem(placement: .automatic) {
                 settingsMenu
             }
@@ -41,19 +42,19 @@ public struct ModelCapabilityView: View {
             }
         }
     }
-    
+
     // MARK: - Model List Sidebar
-    
+
     private var modelListSidebar: some View {
         VStack(spacing: 0) {
             // Search bar
             searchBar
-            
+
             // Task type filter
             taskTypeFilter
-            
+
             Divider()
-            
+
             // Model list
             List(filteredModels, selection: $selectedModel) { model in
                 ModelCapabilityRow(model: model)
@@ -62,15 +63,15 @@ public struct ModelCapabilityView: View {
             .listStyle(.sidebar)
         }
     }
-    
+
     private var searchBar: some View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
-            
+
             TextField("Search models...", text: $searchText)
                 .textFieldStyle(.plain)
-            
+
             if !searchText.isEmpty {
                 Button(action: { searchText = "" }) {
                     Image(systemName: "xmark.circle.fill")
@@ -84,7 +85,7 @@ public struct ModelCapabilityView: View {
         .cornerRadius(8)
         .padding()
     }
-    
+
     private var taskTypeFilter: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
@@ -94,7 +95,7 @@ public struct ModelCapabilityView: View {
                 ) {
                     selectedTaskType = nil
                 }
-                
+
                 ForEach(ModelCapability.TaskType.allCases, id: \.self) { taskType in
                     TaskTypeButton(
                         taskType: taskType,
@@ -108,59 +109,59 @@ public struct ModelCapabilityView: View {
             .padding(.vertical, 8)
         }
     }
-    
+
     private var filteredModels: [ModelCapability] {
         var filtered = database.models
-        
+
         // Filter by search text
         if !searchText.isEmpty {
             filtered = filtered.filter { model in
                 model.displayName.localizedCaseInsensitiveContains(searchText) ||
-                model.modelId.localizedCaseInsensitiveContains(searchText) ||
-                model.provider.localizedCaseInsensitiveContains(searchText)
+                    model.modelId.localizedCaseInsensitiveContains(searchText) ||
+                    model.provider.localizedCaseInsensitiveContains(searchText)
             }
         }
-        
+
         // Filter by task type
         if let taskType = selectedTaskType {
             filtered = filtered.filter { $0.strengths.contains(taskType) }
         }
-        
+
         return filtered.sorted { $0.qualityScore > $1.qualityScore }
     }
-    
+
     // MARK: - Model Detail View
-    
+
     private func modelDetailView(model: ModelCapability) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Header
                 modelHeader(model: model)
-                
+
                 Divider()
-                
+
                 // Capabilities
                 capabilitiesSection(model: model)
-                
+
                 Divider()
-                
+
                 // Specifications
                 specificationsSection(model: model)
-                
+
                 Divider()
-                
+
                 // Pricing
                 pricingSection(model: model)
-                
+
                 Divider()
-                
+
                 // Metadata
                 metadataSection(model: model)
             }
             .padding()
         }
     }
-    
+
     private func modelHeader(model: ModelCapability) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -168,35 +169,35 @@ public struct ModelCapabilityView: View {
                     Text(model.displayName)
                         .font(.title)
                         .fontWeight(.bold)
-                    
+
                     Text(model.modelId)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
                 }
-                
+
                 Spacer()
-                
+
                 qualityBadge(score: model.qualityScore)
             }
-            
+
             HStack(spacing: 16) {
                 Label(model.provider.capitalized, systemImage: "building.2")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                
+
                 Label(model.source.rawValue, systemImage: "info.circle")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
     }
-    
+
     private func capabilitiesSection(model: ModelCapability) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Strengths")
                 .font(.headline)
-            
+
             ModelFlowLayout(spacing: 8) {
                 ForEach(model.strengths, id: \.self) { strength in
                     Text(strength.rawValue)
@@ -210,12 +211,12 @@ public struct ModelCapabilityView: View {
             }
         }
     }
-    
+
     private func specificationsSection(model: ModelCapability) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Specifications")
                 .font(.headline)
-            
+
             VStack(spacing: 8) {
                 SpecRow(label: "Context Window", value: "\(formatNumber(model.contextWindow)) tokens")
                 SpecRow(label: "Average Latency", value: "\(Int(model.averageLatency))ms")
@@ -223,21 +224,21 @@ public struct ModelCapabilityView: View {
             }
         }
     }
-    
+
     private func pricingSection(model: ModelCapability) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Pricing")
                     .font(.headline)
-                
+
                 Spacer()
-                
+
                 Button(action: { showingCostCalculator = true }) {
                     Label("Calculator", systemImage: "dollarsign.circle")
                         .font(.caption)
                 }
             }
-            
+
             VStack(spacing: 8) {
                 SpecRow(label: "Input", value: String(format: "$%.2f / 1M tokens", model.costPerMillionInput))
                 SpecRow(label: "Output", value: String(format: "$%.2f / 1M tokens", model.costPerMillionOutput))
@@ -245,19 +246,19 @@ public struct ModelCapabilityView: View {
             }
         }
     }
-    
+
     private func metadataSection(model: ModelCapability) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Metadata")
                 .font(.headline)
-            
+
             VStack(spacing: 8) {
                 SpecRow(label: "Last Updated", value: formatDate(model.lastUpdated))
                 SpecRow(label: "Data Source", value: model.source.rawValue)
             }
         }
     }
-    
+
     private var emptyDetailView: some View {
         ContentUnavailableView(
             "No Model Selected",
@@ -265,9 +266,9 @@ public struct ModelCapabilityView: View {
             description: Text("Select a model to view its capabilities and specifications")
         )
     }
-    
+
     // MARK: - Toolbar
-    
+
     private var updateButton: some View {
         Button(action: { Task { await database.updateNow() } }) {
             if database.isUpdating {
@@ -279,13 +280,13 @@ public struct ModelCapabilityView: View {
         }
         .disabled(database.isUpdating)
     }
-    
+
     private var settingsMenu: some View {
         Menu {
             Toggle("Auto-Update", isOn: $database.autoUpdate)
-            
+
             Divider()
-            
+
             Menu("Update Frequency") {
                 ForEach(ModelCapabilityDatabase.UpdateFrequency.allCases, id: \.self) { frequency in
                     Button(frequency.rawValue) {
@@ -293,27 +294,27 @@ public struct ModelCapabilityView: View {
                     }
                 }
             }
-            
+
             Divider()
-            
+
             if let lastUpdate = database.lastUpdated {
                 Text("Last updated: \(formatDate(lastUpdate))")
                     .font(.caption)
             }
-            
+
             Text("\(database.models.count) models indexed")
                 .font(.caption)
         } label: {
             Image(systemName: "gear")
         }
     }
-    
+
     // MARK: - Helper Views
-    
+
     private func qualityBadge(score: Double) -> some View {
         let percentage = Int(score * 100)
         let color: Color = score >= 0.9 ? .green : (score >= 0.8 ? .blue : .orange)
-        
+
         return HStack(spacing: 4) {
             Image(systemName: "star.fill")
             Text("\(percentage)%")
@@ -326,15 +327,15 @@ public struct ModelCapabilityView: View {
         .foregroundStyle(color)
         .cornerRadius(6)
     }
-    
+
     // MARK: - Utilities
-    
+
     private func formatNumber(_ number: Int) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
-    
+
     private func formatDate(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
@@ -346,19 +347,19 @@ public struct ModelCapabilityView: View {
 
 private struct ModelCapabilityRow: View {
     let model: ModelCapability
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(model.displayName)
                 .font(.headline)
-            
+
             HStack {
                 Text(model.provider.capitalized)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                
+
                 Spacer()
-                
+
                 HStack(spacing: 2) {
                     Image(systemName: "star.fill")
                         .font(.caption2)
@@ -376,7 +377,7 @@ private struct TaskTypeButton: View {
     let taskType: ModelCapability.TaskType?
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(taskType?.rawValue ?? "All")
@@ -394,7 +395,7 @@ private struct TaskTypeButton: View {
 private struct SpecRow: View {
     let label: String
     let value: String
-    
+
     var body: some View {
         HStack {
             Text(label)
@@ -412,43 +413,43 @@ private struct SpecRow: View {
 
 private struct ModelFlowLayout: Layout {
     var spacing: CGFloat = 8
-    
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
         let result = FlowResult(in: proposal.replacingUnspecifiedDimensions().width, subviews: subviews, spacing: spacing)
         return result.size
     }
-    
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+
+    func placeSubviews(in bounds: CGRect, proposal _: ProposedViewSize, subviews: Subviews, cache _: inout ()) {
         let result = FlowResult(in: bounds.width, subviews: subviews, spacing: spacing)
         for (index, subview) in subviews.enumerated() {
             subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x, y: bounds.minY + result.positions[index].y), proposal: .unspecified)
         }
     }
-    
+
     struct FlowResult {
         var positions: [CGPoint] = []
         var size: CGSize = .zero
-        
+
         init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
             var x: CGFloat = 0
             var y: CGFloat = 0
             var lineHeight: CGFloat = 0
-            
+
             for subview in subviews {
                 let size = subview.sizeThatFits(.unspecified)
-                
-                if x + size.width > maxWidth && x > 0 {
+
+                if x + size.width > maxWidth, x > 0 {
                     x = 0
                     y += lineHeight + spacing
                     lineHeight = 0
                 }
-                
+
                 positions.append(CGPoint(x: x, y: y))
                 lineHeight = max(lineHeight, size.height)
                 x += size.width + spacing
             }
-            
-            self.size = CGSize(width: maxWidth, height: y + lineHeight)
+
+            size = CGSize(width: maxWidth, height: y + lineHeight)
         }
     }
 }
@@ -458,39 +459,39 @@ private struct ModelFlowLayout: Layout {
 private struct CostCalculatorSheet: View {
     let model: ModelCapability
     @State private var inputTokens: Double = 100_000
-    @State private var outputTokens: Double = 50_000
+    @State private var outputTokens: Double = 50000
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationStack {
             Form {
                 Section("Token Usage") {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Input Tokens: \(Int(inputTokens).formatted())")
-                        Slider(value: $inputTokens, in: 1_000...1_000_000, step: 1_000)
-                        
+                        Slider(value: $inputTokens, in: 1000 ... 1_000_000, step: 1000)
+
                         Text("Output Tokens: \(Int(outputTokens).formatted())")
-                        Slider(value: $outputTokens, in: 1_000...1_000_000, step: 1_000)
+                        Slider(value: $outputTokens, in: 1000 ... 1_000_000, step: 1000)
                     }
                 }
-                
+
                 Section("Estimated Cost") {
                     let inputCost = (inputTokens / 1_000_000) * model.costPerMillionInput
                     let outputCost = (outputTokens / 1_000_000) * model.costPerMillionOutput
                     let totalCost = inputCost + outputCost
-                    
+
                     HStack {
                         Text("Input")
                         Spacer()
                         Text("$\(inputCost, specifier: "%.4f")")
                     }
-                    
+
                     HStack {
                         Text("Output")
                         Spacer()
                         Text("$\(outputCost, specifier: "%.4f")")
                     }
-                    
+
                     HStack {
                         Text("Total")
                             .fontWeight(.bold)
@@ -502,13 +503,13 @@ private struct CostCalculatorSheet: View {
             }
             .navigationTitle("Cost Calculator")
             #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
+                .navigationBarTitleDisplayMode(.inline)
             #endif
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { dismiss() }
+                    }
                 }
-            }
         }
         .frame(minWidth: 400, minHeight: 300)
     }

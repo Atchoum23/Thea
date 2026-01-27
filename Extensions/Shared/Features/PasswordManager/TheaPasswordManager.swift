@@ -2,14 +2,14 @@
 // Secure password management (replaces iCloud Passwords)
 // Features: autofill, TOTP, breach detection, passkeys, secure sharing
 
+import CryptoKit
 import Foundation
 import OSLog
-import CryptoKit
 #if canImport(LocalAuthentication)
-import LocalAuthentication
+    import LocalAuthentication
 #endif
 #if canImport(Security)
-import Security
+    import Security
 #endif
 
 // MARK: - Password Manager
@@ -43,7 +43,8 @@ public final class TheaPasswordManager: ObservableObject {
 
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "passwordManager.settings"),
-           let loaded = try? JSONDecoder().decode(PasswordManagerSettings.self, from: data) {
+           let loaded = try? JSONDecoder().decode(PasswordManagerSettings.self, from: data)
+        {
             settings = loaded
         }
     }
@@ -75,7 +76,7 @@ public final class TheaPasswordManager: ObservableObject {
         case .biometric:
             try await unlockWithBiometrics()
 
-        case .masterPassword(let password):
+        case let .masterPassword(password):
             try await unlockWithPassword(password)
 
         case .devicePasscode:
@@ -104,26 +105,26 @@ public final class TheaPasswordManager: ObservableObject {
 
     private func unlockWithBiometrics() async throws {
         #if canImport(LocalAuthentication)
-        let context = LAContext()
-        var error: NSError?
+            let context = LAContext()
+            var error: NSError?
 
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            throw PasswordManagerError.biometricsUnavailable
-        }
+            guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+                throw PasswordManagerError.biometricsUnavailable
+            }
 
-        let success = try await context.evaluatePolicy(
-            .deviceOwnerAuthenticationWithBiometrics,
-            localizedReason: "Unlock Thea Password Manager"
-        )
+            let success = try await context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: "Unlock Thea Password Manager"
+            )
 
-        guard success else {
-            throw PasswordManagerError.authenticationFailed
-        }
+            guard success else {
+                throw PasswordManagerError.authenticationFailed
+            }
 
-        // Retrieve master key from Keychain (protected by biometrics)
-        masterKey = try retrieveMasterKey()
+            // Retrieve master key from Keychain (protected by biometrics)
+            masterKey = try retrieveMasterKey()
         #else
-        throw PasswordManagerError.biometricsUnavailable
+            throw PasswordManagerError.biometricsUnavailable
         #endif
     }
 
@@ -141,20 +142,20 @@ public final class TheaPasswordManager: ObservableObject {
 
     private func unlockWithDevicePasscode() async throws {
         #if canImport(LocalAuthentication)
-        let context = LAContext()
+            let context = LAContext()
 
-        let success = try await context.evaluatePolicy(
-            .deviceOwnerAuthentication,
-            localizedReason: "Unlock Thea Password Manager"
-        )
+            let success = try await context.evaluatePolicy(
+                .deviceOwnerAuthentication,
+                localizedReason: "Unlock Thea Password Manager"
+            )
 
-        guard success else {
-            throw PasswordManagerError.authenticationFailed
-        }
+            guard success else {
+                throw PasswordManagerError.authenticationFailed
+            }
 
-        masterKey = try retrieveMasterKey()
+            masterKey = try retrieveMasterKey()
         #else
-        throw PasswordManagerError.authenticationFailed
+            throw PasswordManagerError.authenticationFailed
         #endif
     }
 
@@ -173,8 +174,8 @@ public final class TheaPasswordManager: ObservableObject {
         let matches = credentials.filter { cred in
             let credDomain = normalizeDomain(cred.domain)
             return credDomain == normalizedDomain ||
-                   credDomain.hasSuffix(".\(normalizedDomain)") ||
-                   normalizedDomain.hasSuffix(".\(credDomain)")
+                credDomain.hasSuffix(".\(normalizedDomain)") ||
+                normalizedDomain.hasSuffix(".\(credDomain)")
         }
 
         // Sort by last used
@@ -187,7 +188,7 @@ public final class TheaPasswordManager: ObservableObject {
             throw PasswordManagerError.vaultLocked
         }
 
-        guard let masterKey = masterKey else {
+        guard let masterKey else {
             throw PasswordManagerError.noMasterKey
         }
 
@@ -275,8 +276,8 @@ public final class TheaPasswordManager: ObservableObject {
         var password = ""
         let charsetArray = Array(charset)
 
-        for _ in 0..<options.length {
-            let randomIndex = Int.random(in: 0..<charsetArray.count)
+        for _ in 0 ..< options.length {
+            let randomIndex = Int.random(in: 0 ..< charsetArray.count)
             password.append(charsetArray[randomIndex])
         }
 
@@ -298,22 +299,22 @@ public final class TheaPasswordManager: ObservableObject {
         }
 
         // Check and fix each requirement
-        if options.includeLowercase && !hasCharFrom("abcdefghijklmnopqrstuvwxyz") {
-            let idx = Int.random(in: 0..<chars.count)
+        if options.includeLowercase, !hasCharFrom("abcdefghijklmnopqrstuvwxyz") {
+            let idx = Int.random(in: 0 ..< chars.count)
             chars[idx] = randomChar(from: "abcdefghijklmnopqrstuvwxyz")
         }
-        if options.includeUppercase && !hasCharFrom("ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
-            let idx = Int.random(in: 0..<chars.count)
+        if options.includeUppercase, !hasCharFrom("ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+            let idx = Int.random(in: 0 ..< chars.count)
             chars[idx] = randomChar(from: "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         }
-        if options.includeNumbers && !hasCharFrom("0123456789") {
-            let idx = Int.random(in: 0..<chars.count)
+        if options.includeNumbers, !hasCharFrom("0123456789") {
+            let idx = Int.random(in: 0 ..< chars.count)
             chars[idx] = randomChar(from: "0123456789")
         }
         if options.includeSymbols {
             let symbols = options.customSymbols ?? "!@#$%^&*()_+-=[]{}|;:,.<>?"
             if !hasCharFrom(symbols) {
-                let idx = Int.random(in: 0..<chars.count)
+                let idx = Int.random(in: 0 ..< chars.count)
                 chars[idx] = randomChar(from: symbols)
             }
         }
@@ -326,7 +327,7 @@ public final class TheaPasswordManager: ObservableObject {
         let wordlist = EFFWordlist.large // Would contain the EFF large wordlist
 
         var words: [String] = []
-        for _ in 0..<wordCount {
+        for _ in 0 ..< wordCount {
             if let word = wordlist.randomElement() {
                 words.append(word)
             }
@@ -340,7 +341,8 @@ public final class TheaPasswordManager: ObservableObject {
     /// Generate a TOTP code
     public func generateTOTP(for credentialId: String) throws -> TOTPCode {
         guard let credential = credentials.first(where: { $0.id == credentialId }),
-              let secret = credential.totpSecret else {
+              let secret = credential.totpSecret
+        else {
             throw PasswordManagerError.noTOTPSecret
         }
 
@@ -373,12 +375,12 @@ public final class TheaPasswordManager: ObservableObject {
         let hmacData = Data(hmac)
 
         // Dynamic truncation
-        let offset = Int(hmacData.last! & 0x0f)
-        let truncatedHash = hmacData.subdata(in: offset..<(offset + 4))
+        let offset = Int(hmacData.last! & 0x0F)
+        let truncatedHash = hmacData.subdata(in: offset ..< (offset + 4))
 
         var number: UInt32 = 0
         _ = truncatedHash.withUnsafeBytes { bytes in
-            number = bytes.load(as: UInt32.self).bigEndian & 0x7FFFFFFF
+            number = bytes.load(as: UInt32.self).bigEndian & 0x7FFF_FFFF
         }
 
         // Get 6-digit code
@@ -465,7 +467,7 @@ public final class TheaPasswordManager: ObservableObject {
     // MARK: - Autofill
 
     /// Perform autofill on a page
-    public func autofill(credentialId: String, on page: PageContext) async throws -> AutofillResult {
+    public func autofill(credentialId: String, on _: PageContext) async throws -> AutofillResult {
         guard !isLocked else {
             throw PasswordManagerError.vaultLocked
         }
@@ -565,7 +567,7 @@ public final class TheaPasswordManager: ObservableObject {
     // MARK: - Private Helpers
 
     private func loadCredentials() async throws {
-        guard let masterKey = masterKey else {
+        guard let masterKey else {
             throw PasswordManagerError.noMasterKey
         }
 
@@ -699,7 +701,7 @@ public final class TheaPasswordManager: ObservableObject {
             return true
         }
 
-        guard let masterKey = masterKey else { return false }
+        guard let masterKey else { return false }
 
         do {
             let sealedBox = try AES.GCM.SealedBox(combined: encryptedToken)
@@ -729,11 +731,11 @@ public final class TheaPasswordManager: ObservableObject {
         return try JSONDecoder().decode([Data].self, from: data)
     }
 
-    private func saveEncryptedCredential(_ data: Data) async throws {
+    private func saveEncryptedCredential(_: Data) async throws {
         // This would save to Keychain
     }
 
-    private func deleteFromSecureStorage(_ credentialId: String) async throws {
+    private func deleteFromSecureStorage(_: String) async throws {
         // This would delete from Keychain
     }
 
@@ -778,7 +780,7 @@ public final class TheaPasswordManager: ObservableObject {
         for char in line {
             if char == "\"" {
                 insideQuotes.toggle()
-            } else if char == "," && !insideQuotes {
+            } else if char == ",", !insideQuotes {
                 result.append(current)
                 current = ""
             } else {
@@ -790,19 +792,19 @@ public final class TheaPasswordManager: ObservableObject {
         return result
     }
 
-    private func parseBitwardenJSON(_ data: Data) throws -> [Credential] {
+    private func parseBitwardenJSON(_: Data) throws -> [Credential] {
         // Parse Bitwarden JSON export format
-        return []
+        []
     }
 
-    private func parse1PasswordJSON(_ data: Data) throws -> [Credential] {
+    private func parse1PasswordJSON(_: Data) throws -> [Credential] {
         // Parse 1Password JSON export format
-        return []
+        []
     }
 
     private func parseLastPassCSV(_ data: Data) throws -> [Credential] {
         // Parse LastPass CSV export format
-        return try parseCSV(data)
+        try parseCSV(data)
     }
 
     private func exportToCSV() -> Data {
@@ -817,11 +819,11 @@ public final class TheaPasswordManager: ObservableObject {
     }
 
     private func exportToJSON() throws -> Data {
-        return try JSONEncoder().encode(credentials)
+        try JSONEncoder().encode(credentials)
     }
 
     private func exportEncrypted() throws -> Data {
-        guard let masterKey = masterKey else {
+        guard let masterKey else {
             throw PasswordManagerError.noMasterKey
         }
 
@@ -903,23 +905,23 @@ public enum PasswordManagerError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .vaultLocked:
-            return "Password vault is locked"
+            "Password vault is locked"
         case .noMasterKey:
-            return "Master key not available"
+            "Master key not available"
         case .authenticationFailed:
-            return "Authentication failed"
+            "Authentication failed"
         case .biometricsUnavailable:
-            return "Biometric authentication is not available"
+            "Biometric authentication is not available"
         case .invalidPassword:
-            return "Invalid master password"
+            "Invalid master password"
         case .credentialNotFound:
-            return "Credential not found"
+            "Credential not found"
         case .noTOTPSecret:
-            return "No TOTP secret configured for this credential"
+            "No TOTP secret configured for this credential"
         case .encryptionFailed:
-            return "Encryption failed"
-        case .importFailed(let reason):
-            return "Import failed: \(reason)"
+            "Encryption failed"
+        case let .importFailed(reason):
+            "Import failed: \(reason)"
         }
     }
 }

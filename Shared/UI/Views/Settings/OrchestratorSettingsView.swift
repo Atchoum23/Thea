@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Orchestrator Settings View
+
 // Configure AI orchestration, model routing, and query decomposition
 
 struct OrchestratorSettingsView: View {
@@ -129,10 +130,10 @@ struct OrchestratorSettingsView: View {
                         Slider(value: Binding(
                             get: { Double(config.classificationConfidenceThreshold) },
                             set: { config.classificationConfidenceThreshold = Float($0) }
-                        ), in: 0.5...1.0, step: 0.05)
-                        .onChange(of: config.classificationConfidenceThreshold) { _, _ in
-                            saveConfig()
-                        }
+                        ), in: 0.5 ... 1.0, step: 0.05)
+                            .onChange(of: config.classificationConfidenceThreshold) { _, _ in
+                                saveConfig()
+                            }
                         Text("High")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
@@ -172,7 +173,7 @@ struct OrchestratorSettingsView: View {
             HStack {
                 Text("Max Parallel Agents")
                 Spacer()
-                Stepper("\(config.maxParallelAgents)", value: $config.maxParallelAgents, in: 1...10)
+                Stepper("\(config.maxParallelAgents)", value: $config.maxParallelAgents, in: 1 ... 10)
                     .onChange(of: config.maxParallelAgents) { _, _ in
                         saveConfig()
                     }
@@ -202,7 +203,7 @@ struct OrchestratorSettingsView: View {
                 HStack {
                     Text("Max Retry Attempts")
                     Spacer()
-                    Stepper("\(config.maxRetryAttempts)", value: $config.maxRetryAttempts, in: 1...5)
+                    Stepper("\(config.maxRetryAttempts)", value: $config.maxRetryAttempts, in: 1 ... 5)
                         .onChange(of: config.maxRetryAttempts) { _, _ in
                             saveConfig()
                         }

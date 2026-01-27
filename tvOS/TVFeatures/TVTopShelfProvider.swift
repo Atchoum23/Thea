@@ -11,7 +11,6 @@ import TVServices
 // MARK: - Top Shelf Content Provider
 
 class TheaTopShelfProvider: TVTopShelfContentProvider {
-
     override func loadTopShelfContent(completionHandler: @escaping (TVTopShelfContent?) -> Void) {
         // Create sectioned content for Top Shelf
         let content = createTopShelfContent()
@@ -76,7 +75,7 @@ class TheaTopShelfProvider: TVTopShelfContentProvider {
             ("Daily Summary", "chart.bar.fill", "summary")
         ]
 
-        return actions.map { title, icon, action in
+        return actions.map { title, _, action in
             let item = TVTopShelfSectionedItem(identifier: "action_\(action)")
             item.title = title
 
@@ -102,7 +101,8 @@ class TheaTopShelfProvider: TVTopShelfContentProvider {
             item.title = suggestion
 
             if let encoded = suggestion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-               let url = URL(string: "thea://ask?q=\(encoded)") {
+               let url = URL(string: "thea://ask?q=\(encoded)")
+            {
                 item.setURL(url, for: .play)
             }
 

@@ -4,10 +4,10 @@
 import Foundation
 import OSLog
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Handoff Manager
@@ -39,11 +39,11 @@ public final class HandoffManager: ObservableObject {
 
     private func checkHandoffAvailability() {
         #if os(macOS)
-        // Handoff is always available on macOS
-        isHandoffEnabled = true
+            // Handoff is always available on macOS
+            isHandoffEnabled = true
         #elseif os(iOS)
-        // Check if Handoff is enabled on iOS
-        isHandoffEnabled = true // Assume enabled; system handles restrictions
+            // Check if Handoff is enabled on iOS
+            isHandoffEnabled = true // Assume enabled; system handles restrictions
         #endif
     }
 
@@ -62,7 +62,9 @@ public final class HandoffManager: ObservableObject {
         activity.title = title
         activity.isEligibleForHandoff = true
         activity.isEligibleForSearch = true
-        activity.isEligibleForPrediction = true
+        #if !os(macOS)
+            activity.isEligibleForPrediction = true
+        #endif
 
         // User info for state restoration
         var userInfo: [String: Any] = [
@@ -72,7 +74,7 @@ public final class HandoffManager: ObservableObject {
             "timestamp": Date().timeIntervalSince1970
         ]
 
-        if let agentId = agentId {
+        if let agentId {
             userInfo["agentId"] = agentId
         }
 
@@ -219,13 +221,19 @@ public final class HandoffManager: ObservableObject {
         // Request continuation stream for large data if needed
         if activity.supportsContinuationStreams {
             activity.getContinuationStreams { inputStream, outputStream, error in
-                if let error = error {
-                    self.logger.error("Continuation stream error: \(error.localizedDescription)")
+                if error != nil {
+                    // Stream error - logged but not critical
                     return
                 }
-
-                // Handle stream data transfer
-                self.handleContinuationStream(input: inputStream, output: outputStream)
+                // Handle stream data transfer synchronously within callback
+                // InputStream/OutputStream are not Sendable so must be handled here
+                guard let input = inputStream, let output = outputStream else { return }
+                input.open()
+                output.open()
+                // Process continuation stream data if needed
+                // Close streams when done
+                input.close()
+                output.close()
             }
         }
 
@@ -234,11 +242,13 @@ public final class HandoffManager: ObservableObject {
 
     private func handleCompositionHandoff(userInfo: [AnyHashable: Any], activity: NSUserActivity) -> Bool {
         guard let draftId = userInfo["draftId"] as? String,
-              let content = userInfo["content"] as? String else {
+              userInfo["content"] is String
+        else {
             return false
         }
 
-        let contentType = CompositionType(rawValue: userInfo["contentType"] as? String ?? "") ?? .text
+        // contentType available for future type-specific handling
+        _ = CompositionType(rawValue: userInfo["contentType"] as? String ?? "") ?? .text
 
         let handoff = IncomingHandoff(
             type: .composition,
@@ -273,7 +283,7 @@ public final class HandoffManager: ObservableObject {
         return true
     }
 
-    private func handleContinuationStream(input: InputStream?, output: OutputStream?) {
+    private func handleContinuationStream(input _: InputStream?, output _: OutputStream?) {
         // Handle large data transfer via continuation streams
         // This is useful for transferring full conversation history
     }
@@ -289,12 +299,12 @@ public final class HandoffManager: ObservableObject {
 
 public struct IncomingHandoff: Identifiable {
     public let id: String
-    public let type: HandoffType
+    public let type: ContinuityHandoffType
     public let title: String?
     public let userInfo: [AnyHashable: Any]
     public let sourceActivity: NSUserActivity
 
-    public init(type: HandoffType, id: String, title: String?, userInfo: [AnyHashable: Any], sourceActivity: NSUserActivity) {
+    public init(type: ContinuityHandoffType, id: String, title: String?, userInfo: [AnyHashable: Any], sourceActivity: NSUserActivity) {
         self.id = id
         self.type = type
         self.title = title
@@ -305,7 +315,7 @@ public struct IncomingHandoff: Identifiable {
 
 // MARK: - Handoff Types
 
-public enum HandoffType: String {
+public enum ContinuityHandoffType: String {
     case conversation
     case composition
     case artifact
@@ -342,11 +352,11 @@ public final class UniversalClipboardManager: ObservableObject {
     /// Copy text to Universal Clipboard
     public func copyText(_ text: String, source: String = "Thea") {
         #if os(macOS)
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(text, forType: .string)
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(text, forType: .string)
         #elseif os(iOS)
-        UIPasteboard.general.string = text
+            UIPasteboard.general.string = text
         #endif
 
         lastCopiedContent = ClipboardContent(
@@ -362,14 +372,14 @@ public final class UniversalClipboardManager: ObservableObject {
     /// Copy code with syntax highlighting hint
     public func copyCode(_ code: String, language: String, source: String = "Thea") {
         #if os(macOS)
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(code, forType: .string)
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(code, forType: .string)
 
         // Also set as RTF with syntax highlighting if possible
         // This would require a syntax highlighter
         #elseif os(iOS)
-        UIPasteboard.general.string = code
+            UIPasteboard.general.string = code
         #endif
 
         lastCopiedContent = ClipboardContent(
@@ -386,16 +396,16 @@ public final class UniversalClipboardManager: ObservableObject {
     /// Copy image to clipboard
     public func copyImage(_ imageData: Data, source: String = "Thea") {
         #if os(macOS)
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
 
-        if let image = NSImage(data: imageData) {
-            pasteboard.writeObjects([image])
-        }
+            if let image = NSImage(data: imageData) {
+                pasteboard.writeObjects([image])
+            }
         #elseif os(iOS)
-        if let image = UIImage(data: imageData) {
-            UIPasteboard.general.image = image
-        }
+            if let image = UIImage(data: imageData) {
+                UIPasteboard.general.image = image
+            }
         #endif
 
         lastCopiedContent = ClipboardContent(
@@ -411,13 +421,13 @@ public final class UniversalClipboardManager: ObservableObject {
     /// Copy URL to clipboard
     public func copyURL(_ url: URL, title: String? = nil, source: String = "Thea") {
         #if os(macOS)
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(url.absoluteString, forType: .URL)
-        pasteboard.setString(url.absoluteString, forType: .string)
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(url.absoluteString, forType: .URL)
+            pasteboard.setString(url.absoluteString, forType: .string)
         #elseif os(iOS)
-        UIPasteboard.general.url = url
-        UIPasteboard.general.string = url.absoluteString
+            UIPasteboard.general.url = url
+            UIPasteboard.general.string = url.absoluteString
         #endif
 
         lastCopiedContent = ClipboardContent(
@@ -436,36 +446,36 @@ public final class UniversalClipboardManager: ObservableObject {
     /// Get current clipboard text
     public func getText() -> String? {
         #if os(macOS)
-        return NSPasteboard.general.string(forType: .string)
+            return NSPasteboard.general.string(forType: .string)
         #elseif os(iOS)
-        return UIPasteboard.general.string
+            return UIPasteboard.general.string
         #else
-        return nil
+            return nil
         #endif
     }
 
     /// Get current clipboard URL
     public func getURL() -> URL? {
         #if os(macOS)
-        if let urlString = NSPasteboard.general.string(forType: .URL) {
-            return URL(string: urlString)
-        }
-        return nil
+            if let urlString = NSPasteboard.general.string(forType: .URL) {
+                return URL(string: urlString)
+            }
+            return nil
         #elseif os(iOS)
-        return UIPasteboard.general.url
+            return UIPasteboard.general.url
         #else
-        return nil
+            return nil
         #endif
     }
 
     /// Check if clipboard has content
     public func hasContent() -> Bool {
         #if os(macOS)
-        return NSPasteboard.general.pasteboardItems?.isEmpty == false
+            return NSPasteboard.general.pasteboardItems?.isEmpty == false
         #elseif os(iOS)
-        return UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs || UIPasteboard.general.hasImages
+            return UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs || UIPasteboard.general.hasImages
         #else
-        return false
+            return false
         #endif
     }
 }

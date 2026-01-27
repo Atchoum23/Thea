@@ -4,6 +4,7 @@ import Observation
 import SwiftUI
 
 // MARK: - Window Manager
+
 // Manages multiple window instances for native macOS multi-window support
 
 @MainActor
@@ -18,7 +19,7 @@ final class WindowManager {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
         Task {
             await restoreWindowState()
         }
@@ -40,7 +41,7 @@ final class WindowManager {
 
         // Use SwiftUI environment to open window
         #if os(macOS)
-        NSApp.activate(ignoringOtherApps: true)
+            NSApp.activate(ignoringOtherApps: true)
         #endif
     }
 
@@ -57,7 +58,7 @@ final class WindowManager {
         saveWindowState(window)
 
         #if os(macOS)
-        NSApp.activate(ignoringOtherApps: true)
+            NSApp.activate(ignoringOtherApps: true)
         #endif
     }
 
@@ -73,7 +74,7 @@ final class WindowManager {
         saveWindowState(window)
 
         #if os(macOS)
-        NSApp.activate(ignoringOtherApps: true)
+            NSApp.activate(ignoringOtherApps: true)
         #endif
     }
 
@@ -107,10 +108,10 @@ final class WindowManager {
         size: CGSize?
     ) {
         if let index = openWindows.firstIndex(where: { $0.id == windowID }) {
-            if let position = position {
+            if let position {
                 openWindows[index].position = position
             }
-            if let size = size {
+            if let size {
                 openWindows[index].size = size
             }
 
@@ -276,30 +277,30 @@ struct WindowInstance: Identifiable, Codable, Sendable {
         var defaultTitle: String {
             switch self {
             case .chat:
-                return "Chat"
+                "Chat"
             case .codeEditor:
-                return "Code Editor"
+                "Code Editor"
             case .dashboard:
-                return "Dashboard"
+                "Dashboard"
             case .lifeTracking:
-                return "Life Tracking"
+                "Life Tracking"
             case .settings:
-                return "Settings"
+                "Settings"
             }
         }
 
         var defaultSize: CGSize {
             switch self {
             case .chat:
-                return CGSize(width: 900, height: 600)
+                CGSize(width: 900, height: 600)
             case .codeEditor:
-                return CGSize(width: 1_400, height: 900)
+                CGSize(width: 1400, height: 900)
             case .dashboard:
-                return CGSize(width: 1_200, height: 800)
+                CGSize(width: 1200, height: 800)
             case .lifeTracking:
-                return CGSize(width: 1_200, height: 800)
+                CGSize(width: 1200, height: 800)
             case .settings:
-                return CGSize(width: 600, height: 500)
+                CGSize(width: 600, height: 500)
             }
         }
     }

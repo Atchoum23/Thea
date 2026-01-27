@@ -2,6 +2,7 @@ import Foundation
 import OSLog
 
 // MARK: - MCP Tool Bridge
+
 // Bridges MCP server tools to the ToolFramework
 
 struct MCPToolBridge: Sendable {
@@ -12,7 +13,7 @@ struct MCPToolBridge: Sendable {
     let mcpServerName: String
     let mcpToolName: String
 
-    @MainActor func execute(arguments: [String: Any]) async throws -> ToolResult {
+    @MainActor func execute(arguments _: [String: Any]) async throws -> ToolResult {
         // Bridge to MCP server
         // This would integrate with actual MCP client when available
         // For now, return success
@@ -26,27 +27,28 @@ struct MCPToolBridge: Sendable {
 }
 
 // MARK: - MCP Tool Registry
+
 // Discovers and registers MCP tools
 
 @MainActor
 @Observable
 final class MCPToolRegistry {
     static let shared = MCPToolRegistry()
-    
+
     private let logger = Logger(subsystem: "com.thea.metaai", category: "MCPToolRegistry")
-    
+
     private(set) var mcpTools: [MCPToolBridge] = []
     private(set) var mcpServers: [MCPServerInfo] = []
-    
+
     private init() {
         discoverMCPTools()
     }
-    
+
     // MARK: - Discovery
-    
+
     func discoverMCPTools() {
         logger.info("Discovering MCP tools...")
-        
+
         // Mock MCP servers for now
         // In production, this would scan actual MCP server configurations
         mcpServers = [
@@ -72,10 +74,10 @@ final class MCPToolRegistry {
                 toolCount: 8
             )
         ]
-        
+
         // Discover tools from each server
         var tools: [MCPToolBridge] = []
-        
+
         // Filesystem tools
         tools.append(MCPToolBridge(
             id: UUID(),
@@ -87,7 +89,7 @@ final class MCPToolRegistry {
             mcpServerName: "filesystem",
             mcpToolName: "read_file"
         ))
-        
+
         tools.append(MCPToolBridge(
             id: UUID(),
             name: "mcp_write_file",
@@ -99,7 +101,7 @@ final class MCPToolRegistry {
             mcpServerName: "filesystem",
             mcpToolName: "write_file"
         ))
-        
+
         tools.append(MCPToolBridge(
             id: UUID(),
             name: "mcp_list_dir",
@@ -110,7 +112,7 @@ final class MCPToolRegistry {
             mcpServerName: "filesystem",
             mcpToolName: "list_directory"
         ))
-        
+
         // Terminal tools
         tools.append(MCPToolBridge(
             id: UUID(),
@@ -123,7 +125,7 @@ final class MCPToolRegistry {
             mcpServerName: "terminal",
             mcpToolName: "execute"
         ))
-        
+
         // Git tools
         tools.append(MCPToolBridge(
             id: UUID(),
@@ -135,7 +137,7 @@ final class MCPToolRegistry {
             mcpServerName: "git",
             mcpToolName: "status"
         ))
-        
+
         tools.append(MCPToolBridge(
             id: UUID(),
             name: "mcp_git_commit",
@@ -147,25 +149,25 @@ final class MCPToolRegistry {
             mcpServerName: "git",
             mcpToolName: "commit"
         ))
-        
+
         mcpTools = tools
-        
+
         logger.info("Discovered \(tools.count) MCP tools from \(self.mcpServers.count) servers")
-        
+
         // Register with ToolFramework
         registerWithToolFramework()
     }
-    
+
     func refreshTools() async {
         logger.info("Refreshing MCP tools...")
         discoverMCPTools()
     }
-    
+
     // MARK: - Registration
-    
+
     private func registerWithToolFramework() {
         let toolFramework = ToolFramework.shared
-        
+
         // Register each MCP tool as a standard tool
         for mcpTool in mcpTools {
             let tool = Tool(
@@ -174,13 +176,13 @@ final class MCPToolRegistry {
                 description: mcpTool.description,
                 parameters: mcpTool.parameters,
                 category: .api
-            )                { parameters in
-                    try await mcpTool.execute(arguments: parameters).output ?? ""
-                }
-            
+            ) { parameters in
+                try await mcpTool.execute(arguments: parameters).output ?? ""
+            }
+
             toolFramework.registerTool(tool)
         }
-        
+
         logger.info("Registered \(self.mcpTools.count) MCP tools with ToolFramework")
     }
 }
@@ -193,15 +195,15 @@ struct MCPServerInfo: Identifiable, Hashable, Sendable {
     let description: String
     let status: ServerStatus
     let toolCount: Int
-    
+
     enum ServerStatus: Sendable {
         case connected, disconnected, error
-        
+
         var displayName: String {
             switch self {
-            case .connected: return "Connected"
-            case .disconnected: return "Disconnected"
-            case .error: return "Error"
+            case .connected: "Connected"
+            case .disconnected: "Disconnected"
+            case .error: "Error"
             }
         }
     }

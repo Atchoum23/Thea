@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - API Integration Framework
+
 // Dynamic API discovery, client generation, and execution
 
 @MainActor
@@ -55,7 +56,7 @@ final class APIIntegrator {
 
     // MARK: - API Discovery
 
-    func discoverAPI(from openAPISpec: String) async throws -> [APIEndpoint] {
+    func discoverAPI(from _: String) async throws -> [APIEndpoint] {
         // Parse OpenAPI/Swagger spec and generate endpoints
         // Simplified - would use proper OpenAPI parser in production
         []
@@ -141,7 +142,7 @@ final class APIIntegrator {
 
     private var rateLimiters: [String: RateLimiter] = [:]
 
-    nonisolated func checkRateLimit(for endpoint: APIEndpoint) async -> Bool {
+    nonisolated func checkRateLimit(for _: APIEndpoint) async -> Bool {
         // Simplified rate limiting
         true
     }
@@ -211,13 +212,13 @@ enum APIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid API URL"
+            "Invalid API URL"
         case .invalidResponse:
-            return "Invalid API response"
+            "Invalid API response"
         case .rateLimitExceeded:
-            return "Rate limit exceeded"
+            "Rate limit exceeded"
         case .authenticationRequired:
-            return "Authentication required"
+            "Authentication required"
         }
     }
 }

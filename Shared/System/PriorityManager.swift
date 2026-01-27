@@ -31,10 +31,11 @@ public final class PriorityManager {
 
     private init() {
         if let data = defaults.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(PriorityConfiguration.self, from: data) {
-            self.configuration = config
+           let config = try? JSONDecoder().decode(PriorityConfiguration.self, from: data)
+        {
+            configuration = config
         } else {
-            self.configuration = PriorityConfiguration()
+            configuration = PriorityConfiguration()
         }
     }
 
@@ -59,7 +60,7 @@ public final class PriorityManager {
         }
 
         // Check Do Not Disturb mode
-        if configuration.doNotDisturbEnabled && !context.isUrgent {
+        if configuration.doNotDisturbEnabled, !context.isUrgent {
             if isInDoNotDisturbPeriod() {
                 return configuration.doNotDisturbAllowUrgent && context.isUrgent ? .high : .silent
             }
@@ -67,7 +68,8 @@ public final class PriorityManager {
 
         // Check focus mode overrides
         if let focusMode = configuration.currentFocusMode,
-           let override = configuration.focusModeOverrides[focusMode]?[category] {
+           let override = configuration.focusModeOverrides[focusMode]?[category]
+        {
             return override
         }
 
@@ -82,15 +84,15 @@ public final class PriorityManager {
     public func shouldNotify(priority: NotificationPriority) -> Bool {
         switch priority {
         case .critical:
-            return true
+            true
         case .high:
-            return configuration.allowHighPriority
+            configuration.allowHighPriority
         case .normal:
-            return configuration.allowNormalPriority
+            configuration.allowNormalPriority
         case .low:
-            return configuration.allowLowPriority
+            configuration.allowLowPriority
         case .silent:
-            return false
+            false
         }
     }
 
@@ -98,7 +100,8 @@ public final class PriorityManager {
 
     private func isInDoNotDisturbPeriod() -> Bool {
         guard let startHour = configuration.doNotDisturbStartHour,
-              let endHour = configuration.doNotDisturbEndHour else {
+              let endHour = configuration.doNotDisturbEndHour
+        else {
             return false
         }
 
@@ -258,21 +261,21 @@ public enum NotificationPriority: Int, Codable, Sendable, CaseIterable, Comparab
 
     public var displayName: String {
         switch self {
-        case .silent: return "Silent"
-        case .low: return "Low"
-        case .normal: return "Normal"
-        case .high: return "High"
-        case .critical: return "Critical"
+        case .silent: "Silent"
+        case .low: "Low"
+        case .normal: "Normal"
+        case .high: "High"
+        case .critical: "Critical"
         }
     }
 
     public var icon: String {
         switch self {
-        case .silent: return "speaker.slash"
-        case .low: return "speaker"
-        case .normal: return "speaker.wave.1"
-        case .high: return "speaker.wave.2"
-        case .critical: return "speaker.wave.3"
+        case .silent: "speaker.slash"
+        case .low: "speaker"
+        case .normal: "speaker.wave.1"
+        case .high: "speaker.wave.2"
+        case .critical: "speaker.wave.3"
         }
     }
 
@@ -324,23 +327,23 @@ public enum SystemFocusMode: String, Codable, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .work: return "Work"
-        case .personal: return "Personal"
-        case .sleep: return "Sleep"
-        case .fitness: return "Fitness"
-        case .reading: return "Reading"
-        case .driving: return "Driving"
+        case .work: "Work"
+        case .personal: "Personal"
+        case .sleep: "Sleep"
+        case .fitness: "Fitness"
+        case .reading: "Reading"
+        case .driving: "Driving"
         }
     }
 
     public var icon: String {
         switch self {
-        case .work: return "briefcase"
-        case .personal: return "person"
-        case .sleep: return "moon"
-        case .fitness: return "figure.run"
-        case .reading: return "book"
-        case .driving: return "car"
+        case .work: "briefcase"
+        case .personal: "person"
+        case .sleep: "moon"
+        case .fitness: "figure.run"
+        case .reading: "book"
+        case .driving: "car"
         }
     }
 }

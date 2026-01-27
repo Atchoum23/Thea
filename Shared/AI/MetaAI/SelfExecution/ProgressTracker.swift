@@ -31,7 +31,7 @@ public actor ProgressTracker {
     }
 
     private func getProgressFile() async -> String {
-        (await getBasePath() as NSString).appendingPathComponent(".thea_progress.json")
+        await (getBasePath() as NSString).appendingPathComponent(".thea_progress.json")
     }
 
     private var currentProgress: ExecutionProgress?
@@ -116,12 +116,12 @@ public actor ProgressTracker {
     }
 
     public func loadProgress() async -> ExecutionProgress? {
-        guard FileManager.default.fileExists(atPath: await getProgressFile()) else {
+        guard await FileManager.default.fileExists(atPath: getProgressFile()) else {
             return nil
         }
 
         do {
-            let data = try Data(contentsOf: URL(fileURLWithPath: await getProgressFile()))
+            let data = try await Data(contentsOf: URL(fileURLWithPath: getProgressFile()))
             let progress = try JSONDecoder().decode(ExecutionProgress.self, from: data)
             currentProgress = progress
             return progress
@@ -138,7 +138,8 @@ public actor ProgressTracker {
 
     public func getResumePoint() async -> (phaseId: String, fileIndex: Int)? {
         guard let progress = await loadProgress(),
-              progress.status == .inProgress else {
+              progress.status == .inProgress
+        else {
             return nil
         }
         return (progress.phaseId, progress.currentFileIndex)
@@ -146,7 +147,7 @@ public actor ProgressTracker {
 
     public func clearProgress() async throws {
         currentProgress = nil
-        try? FileManager.default.removeItem(atPath: await getProgressFile())
+        try? await FileManager.default.removeItem(atPath: getProgressFile())
         logger.info("Cleared progress tracking")
     }
 
@@ -160,6 +161,6 @@ public actor ProgressTracker {
         encoder.dateEncodingStrategy = .iso8601
 
         let data = try encoder.encode(progress)
-        try data.write(to: URL(fileURLWithPath: await getProgressFile()))
+        try await data.write(to: URL(fileURLWithPath: getProgressFile()))
     }
 }

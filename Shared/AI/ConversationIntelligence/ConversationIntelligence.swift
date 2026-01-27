@@ -1,10 +1,10 @@
 // ConversationIntelligence.swift
 // Advanced conversation analysis, summarization, and management
 
-import Foundation
-import OSLog
 import Combine
+import Foundation
 import NaturalLanguage
+import OSLog
 
 // MARK: - Conversation Intelligence Service
 
@@ -31,7 +31,7 @@ public final class ConversationIntelligenceService: ObservableObject {
     // MARK: - Conversation Analysis
 
     /// Analyze a conversation
-    public func analyzeConversation(_ conversation: Conversation) async -> ConversationAnalysis {
+    public func analyzeConversation(_ conversation: AnalyzableConversation) async -> ConversationAnalysis {
         isAnalyzing = true
         defer { isAnalyzing = false }
 
@@ -43,11 +43,23 @@ public final class ConversationIntelligenceService: ObservableObject {
         let assistantMessages = messages.filter { $0.role == .assistant }
 
         // Analyze content
-        let allText = messages.map { $0.content }.joined(separator: " ")
+        let allText = messages.map(\.content).joined(separator: " ")
         let topics = extractTopics(from: allText)
-        let entities = extractEntities(from: allText)
-        let sentiment = analyzeSentiment(text: allText)
+        let extractedEntities = extractEntities(from: allText)
+        let sentimentResult = analyzeSentiment(text: allText)
         let complexity = analyzeComplexity(messages: messages)
+
+        // Convert internal types to public API types
+        let entities = extractedEntities.map { entity in
+            AnalyzedConversationEntity(
+                type: convertEntityType(entity.type),
+                value: entity.value
+            )
+        }
+        let sentiment = ConversationSentimentResult(
+            score: sentimentResult.score,
+            label: convertSentimentLabel(sentimentResult.label)
+        )
 
         // Detect conversation type
         let conversationType = detectConversationType(messages: messages)
@@ -94,8 +106,8 @@ public final class ConversationIntelligenceService: ObservableObject {
         var topicCounts: [String: Int] = [:]
 
         tagger.string = text
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType) { tag, range in
-            if let tag = tag {
+        tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .word, scheme: .nameType) { tag, range in
+            if tag != nil {
                 let word = String(text[range]).lowercased()
                 if word.count > 3 {
                     topicCounts[word, default: 0] += 1
@@ -105,7 +117,7 @@ public final class ConversationIntelligenceService: ObservableObject {
         }
 
         // Also extract noun phrases using lexical class
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .lexicalClass) { tag, range in
+        tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .word, scheme: .lexicalClass) { tag, range in
             if tag == .noun {
                 let word = String(text[range]).lowercased()
                 if word.count > 3 {
@@ -129,15 +141,14 @@ public final class ConversationIntelligenceService: ObservableObject {
         tagger.string = text
         let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace]
 
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType, options: options) { tag, range in
-            guard let tag = tag else { return true }
+        tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .word, scheme: .nameType, options: options) { tag, range in
+            guard let tag else { return true }
 
-            let entityType: EntityType?
-            switch tag {
-            case .personalName: entityType = .person
-            case .placeName: entityType = .location
-            case .organizationName: entityType = .organization
-            default: entityType = nil
+            let entityType: EntityType? = switch tag {
+            case .personalName: .person
+            case .placeName: .location
+            case .organizationName: .organization
+            default: nil
             }
 
             if let type = entityType {
@@ -155,13 +166,13 @@ public final class ConversationIntelligenceService: ObservableObject {
 
     // MARK: - Sentiment Analysis
 
-    private func analyzeSentiment(text: String) -> SentimentResult {
+    private func analyzeSentiment(text: String) -> InternalSentimentResult {
         tagger.string = text
 
         var scores: [Double] = []
 
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .sentence, scheme: .sentimentScore) { tag, _ in
-            if let tag = tag, let score = Double(tag.rawValue) {
+        tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .sentence, scheme: .sentimentScore) { tag, _ in
+            if let tag, let score = Double(tag.rawValue) {
                 scores.append(score)
             }
             return true
@@ -169,27 +180,26 @@ public final class ConversationIntelligenceService: ObservableObject {
 
         let averageScore = scores.isEmpty ? 0 : scores.reduce(0, +) / Double(scores.count)
 
-        let label: SentimentLabel
-        if averageScore > 0.3 {
-            label = .positive
+        let label: InternalSentimentLabel = if averageScore > 0.3 {
+            .positive
         } else if averageScore < -0.3 {
-            label = .negative
+            .negative
         } else {
-            label = .neutral
+            .neutral
         }
 
-        return SentimentResult(score: averageScore, label: label)
+        return InternalSentimentResult(score: averageScore, label: label)
     }
 
     // MARK: - Complexity Analysis
 
     private func analyzeComplexity(messages: [ConversationMessage]) -> ComplexityMetrics {
-        let allText = messages.map { $0.content }.joined(separator: " ")
+        let allText = messages.map(\.content).joined(separator: " ")
 
         // Word count
         tokenizer.string = allText
         var wordCount = 0
-        tokenizer.enumerateTokens(in: allText.startIndex..<allText.endIndex) { _, _ in
+        tokenizer.enumerateTokens(in: allText.startIndex ..< allText.endIndex) { _, _ in
             wordCount += 1
             return true
         }
@@ -198,7 +208,7 @@ public final class ConversationIntelligenceService: ObservableObject {
         let sentenceTokenizer = NLTokenizer(unit: .sentence)
         sentenceTokenizer.string = allText
         var sentenceCount = 0
-        sentenceTokenizer.enumerateTokens(in: allText.startIndex..<allText.endIndex) { _, _ in
+        sentenceTokenizer.enumerateTokens(in: allText.startIndex ..< allText.endIndex) { _, _ in
             sentenceCount += 1
             return true
         }
@@ -208,7 +218,7 @@ public final class ConversationIntelligenceService: ObservableObject {
         // Unique words for vocabulary diversity
         var uniqueWords = Set<String>()
         tokenizer.string = allText
-        tokenizer.enumerateTokens(in: allText.startIndex..<allText.endIndex) { range, _ in
+        tokenizer.enumerateTokens(in: allText.startIndex ..< allText.endIndex) { range, _ in
             uniqueWords.insert(String(allText[range]).lowercased())
             return true
         }
@@ -238,23 +248,23 @@ public final class ConversationIntelligenceService: ObservableObject {
 
         // Code-related keywords
         let codeKeywords = ["code", "function", "variable", "error", "bug", "implement", "class", "method", "api"]
-        let codeScore = codeKeywords.filter { allText.contains($0) }.count
+        let codeScore = codeKeywords.count { allText.contains($0) }
 
         // Question keywords
         let questionKeywords = ["how", "what", "why", "when", "where", "can you", "could you"]
-        let questionScore = questionKeywords.filter { allText.contains($0) }.count
+        let questionScore = questionKeywords.count { allText.contains($0) }
 
         // Creative keywords
         let creativeKeywords = ["write", "create", "story", "poem", "design", "imagine", "generate"]
-        let creativeScore = creativeKeywords.filter { allText.contains($0) }.count
+        let creativeScore = creativeKeywords.count { allText.contains($0) }
 
         // Analysis keywords
         let analysisKeywords = ["analyze", "compare", "evaluate", "review", "assess", "summarize"]
-        let analysisScore = analysisKeywords.filter { allText.contains($0) }.count
+        let analysisScore = analysisKeywords.count { allText.contains($0) }
 
         // Task keywords
         let taskKeywords = ["help me", "do this", "complete", "finish", "task", "todo"]
-        let taskScore = taskKeywords.filter { allText.contains($0) }.count
+        let taskScore = taskKeywords.count { allText.contains($0) }
 
         let scores: [(ConversationType, Int)] = [
             (.coding, codeScore),
@@ -264,12 +274,12 @@ public final class ConversationIntelligenceService: ObservableObject {
             (.task, taskScore)
         ]
 
-        return scores.max(by: { $0.1 < $1.1 })?.0 ?? .general
+        return scores.max { $0.1 < $1.1 }?.0 ?? .general
     }
 
     // MARK: - Summary Generation
 
-    private func generateSummary(conversation: Conversation) -> String {
+    private func generateSummary(conversation: AnalyzableConversation) -> String {
         // Extract key points from conversation
         let messages = conversation.messages
 
@@ -286,7 +296,7 @@ public final class ConversationIntelligenceService: ObservableObject {
         let lastExchange = lastMessages.map { "\($0.role == .user ? "User" : "AI"): \($0.content.prefix(50))..." }.joined(separator: " → ")
 
         let messageCount = messages.count
-        let userCount = messages.filter { $0.role == .user }.count
+        let userCount = messages.count { $0.role == .user }
 
         return "Conversation about \"\(truncatedFirst)\" with \(messageCount) messages (\(userCount) from user). Latest: \(lastExchange)"
     }
@@ -312,7 +322,7 @@ public final class ConversationIntelligenceService: ObservableObject {
                     for sentence in sentences {
                         if sentence.lowercased().contains(pattern) {
                             let trimmed = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
-                            if trimmed.count > 10 && trimmed.count < 200 {
+                            if trimmed.count > 10, trimmed.count < 200 {
                                 actionItems.append(ActionItem(
                                     text: trimmed,
                                     source: message.role == .user ? .user : .assistant,
@@ -359,11 +369,11 @@ public final class ConversationIntelligenceService: ObservableObject {
         let avgAssistantLength = assistantWordCounts.isEmpty ? 0 : Double(assistantWordCounts.reduce(0, +)) / Double(assistantWordCounts.count)
 
         // Question ratio
-        let questionCount = userMessages.filter { $0.content.contains("?") }.count
+        let questionCount = userMessages.count { $0.content.contains("?") }
         let questionRatio = userMessages.isEmpty ? 0 : Double(questionCount) / Double(userMessages.count)
 
         // Follow-up indicator (short responses suggesting continued conversation)
-        let followUps = userMessages.filter { countWords(in: $0.content) < 10 }.count
+        let followUps = userMessages.count { countWords(in: $0.content) < 10 }
         let followUpRatio = userMessages.isEmpty ? 0 : Double(followUps) / Double(userMessages.count)
 
         return EngagementMetrics(
@@ -378,7 +388,7 @@ public final class ConversationIntelligenceService: ObservableObject {
     private func countWords(in text: String) -> Int {
         tokenizer.string = text
         var count = 0
-        tokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { _, _ in
+        tokenizer.enumerateTokens(in: text.startIndex ..< text.endIndex) { _, _ in
             count += 1
             return true
         }
@@ -388,7 +398,7 @@ public final class ConversationIntelligenceService: ObservableObject {
     // MARK: - Conversation Search
 
     /// Search conversations by content
-    public func searchConversations(_ conversations: [Conversation], query: String) -> [SearchResult] {
+    public func searchConversations(_ conversations: [AnalyzableConversation], query: String) -> [ConversationSearchResult] {
         let queryLowercased = query.lowercased()
 
         return conversations.compactMap { conversation in
@@ -403,7 +413,7 @@ public final class ConversationIntelligenceService: ObservableObject {
             }
 
             if matchScore > 0 {
-                return SearchResult(
+                return ConversationSearchResult(
                     conversationId: conversation.id,
                     title: conversation.title,
                     matchScore: matchScore,
@@ -418,7 +428,7 @@ public final class ConversationIntelligenceService: ObservableObject {
     // MARK: - Smart Suggestions
 
     /// Get smart follow-up suggestions
-    public func getFollowUpSuggestions(for conversation: Conversation) -> [FollowUpSuggestion] {
+    public func getFollowUpSuggestions(for conversation: AnalyzableConversation) -> [FollowUpSuggestion] {
         var suggestions: [FollowUpSuggestion] = []
 
         guard let lastMessage = conversation.messages.last else {
@@ -454,11 +464,29 @@ public final class ConversationIntelligenceService: ObservableObject {
 
         return Array(suggestions.prefix(5))
     }
+
+    // MARK: - Type Converters
+
+    private func convertEntityType(_ type: EntityType) -> AnalyzedConversationEntityType {
+        switch type {
+        case .person: .person
+        case .location: .location
+        case .organization: .organization
+        }
+    }
+
+    private func convertSentimentLabel(_ label: InternalSentimentLabel) -> ConversationSentimentLabel {
+        switch label {
+        case .positive: .positive
+        case .neutral: .neutral
+        case .negative: .negative
+        }
+    }
 }
 
 // MARK: - Types
 
-public struct Conversation: Identifiable {
+public struct AnalyzableConversation: Identifiable {
     public let id: String
     public let title: String
     public let messages: [ConversationMessage]
@@ -500,8 +528,8 @@ public struct ConversationAnalysis {
     public let userMessageCount: Int
     public let assistantMessageCount: Int
     public let topics: [Topic]
-    public let entities: [ExtractedEntity]
-    public let sentiment: SentimentResult
+    public let entities: [AnalyzedConversationEntity]
+    public let sentiment: ConversationSentimentResult
     public let complexity: ComplexityMetrics
     public let conversationType: ConversationType
     public let summary: String
@@ -516,13 +544,13 @@ public struct Topic: Identifiable {
     public let frequency: Int
 }
 
-public struct ExtractedEntity: Identifiable {
+public struct AnalyzedConversationEntity: Identifiable {
     public let id = UUID()
-    public let type: EntityType
+    public let type: AnalyzedConversationEntityType
     public let value: String
 }
 
-public enum EntityType {
+public enum AnalyzedConversationEntityType {
     case person
     case location
     case organization
@@ -530,12 +558,12 @@ public enum EntityType {
     case product
 }
 
-public struct SentimentResult {
+public struct ConversationSentimentResult {
     public let score: Double // -1 to 1
-    public let label: SentimentLabel
+    public let label: ConversationSentimentLabel
 }
 
-public enum SentimentLabel {
+public enum ConversationSentimentLabel {
     case positive
     case neutral
     case negative
@@ -585,7 +613,7 @@ public struct EngagementMetrics {
     public let responseRatio: Double
 }
 
-public struct SearchResult: Identifiable {
+public struct ConversationSearchResult: Identifiable {
     public let id = UUID()
     public let conversationId: String
     public let title: String
@@ -607,4 +635,32 @@ public struct FollowUpSuggestion: Identifiable {
         case prioritization
         case summary
     }
+}
+
+// MARK: - Internal Helper Types
+
+/// Entity extraction result used internally
+public struct ExtractedEntity {
+    public let type: EntityType
+    public let value: String
+}
+
+/// Entity type for NLP extraction
+public enum EntityType {
+    case person
+    case location
+    case organization
+}
+
+/// Sentiment analysis result used internally
+struct InternalSentimentResult {
+    let score: Double
+    let label: InternalSentimentLabel
+}
+
+/// Sentiment classification label (internal)
+enum InternalSentimentLabel {
+    case positive
+    case neutral
+    case negative
 }

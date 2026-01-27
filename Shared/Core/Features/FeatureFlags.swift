@@ -127,6 +127,68 @@ public final class FeatureFlags: ObservableObject {
         isEnabled("tracking.screen_time", default: true)
     }
 
+    // MARK: - Integration Module Flags
+
+    /// Health integration enabled
+    public var healthEnabled: Bool {
+        get { isEnabled("integration.health", default: true) }
+        set { setFlag("integration.health", enabled: newValue) }
+    }
+
+    /// Wellness integration enabled
+    public var wellnessEnabled: Bool {
+        get { isEnabled("integration.wellness", default: true) }
+        set { setFlag("integration.wellness", enabled: newValue) }
+    }
+
+    /// Cognitive integration enabled
+    public var cognitiveEnabled: Bool {
+        get { isEnabled("integration.cognitive", default: true) }
+        set { setFlag("integration.cognitive", enabled: newValue) }
+    }
+
+    /// Financial integration enabled
+    public var financialEnabled: Bool {
+        get { isEnabled("integration.financial", default: true) }
+        set { setFlag("integration.financial", enabled: newValue) }
+    }
+
+    /// Career integration enabled
+    public var careerEnabled: Bool {
+        get { isEnabled("integration.career", default: true) }
+        set { setFlag("integration.career", enabled: newValue) }
+    }
+
+    /// Assessment integration enabled
+    public var assessmentEnabled: Bool {
+        get { isEnabled("integration.assessment", default: true) }
+        set { setFlag("integration.assessment", enabled: newValue) }
+    }
+
+    /// Nutrition integration enabled
+    public var nutritionEnabled: Bool {
+        get { isEnabled("integration.nutrition", default: true) }
+        set { setFlag("integration.nutrition", enabled: newValue) }
+    }
+
+    /// Display integration enabled (macOS only)
+    public var displayEnabled: Bool {
+        get { isEnabled("integration.display", default: true) }
+        set { setFlag("integration.display", enabled: newValue) }
+    }
+
+    /// Income analytics enabled
+    public var incomeEnabled: Bool {
+        get { isEnabled("integration.income", default: true) }
+        set { setFlag("integration.income", enabled: newValue) }
+    }
+
+    /// Automation enabled
+    public var automationEnabled: Bool {
+        get { isEnabled("integration.automation", default: true) }
+        set { setFlag("integration.automation", enabled: newValue) }
+    }
+
     // MARK: - Initialization
 
     private init() {
@@ -162,7 +224,8 @@ public final class FeatureFlags: ObservableObject {
 
     private func loadFlags() {
         guard let data = defaults.data(forKey: flagsKey),
-              let savedFlags = try? JSONDecoder().decode([String: FeatureFlag].self, from: data) else {
+              let savedFlags = try? JSONDecoder().decode([String: FeatureFlag].self, from: data)
+        else {
             return
         }
         flags = savedFlags
@@ -191,13 +254,13 @@ public struct FeatureFlag: Codable, Sendable {
     public let source: FeatureFlagSource
     public let lastUpdated: Date
 
-    public var description: String? = nil
-    public var rolloutPercentage: Double? = nil
+    public var description: String?
+    public var rolloutPercentage: Double?
 }
 
 public enum FeatureFlagSource: String, Codable, Sendable {
-    case local = "local"
-    case remote = "remote"
-    case override = "override"
+    case local
+    case remote
+    case override
     case abTest = "ab_test"
 }

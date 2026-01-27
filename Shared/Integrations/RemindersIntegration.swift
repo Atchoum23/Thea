@@ -6,8 +6,8 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
 @preconcurrency import EventKit
+import Foundation
 
 // MARK: - Reminders Integration
 
@@ -47,7 +47,7 @@ public actor RemindersIntegration: AppIntegrationModule {
         reminder.priority = priority
         reminder.calendar = list ?? eventStore.defaultCalendarForNewReminders()
 
-        if let dueDate = dueDate {
+        if let dueDate {
             reminder.dueDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: dueDate)
         }
 

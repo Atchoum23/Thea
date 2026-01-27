@@ -33,11 +33,11 @@ final class Message {
         self.id = id
         self.conversationID = conversationID
         self.role = role.rawValue
-        self.contentData = (try? JSONEncoder().encode(content)) ?? Data()
+        contentData = (try? JSONEncoder().encode(content)) ?? Data()
         self.timestamp = timestamp
         self.model = model
         self.tokenCount = tokenCount
-        self.metadataData = metadata.flatMap { try? JSONEncoder().encode($0) }
+        metadataData = metadata.flatMap { try? JSONEncoder().encode($0) }
         self.orderIndex = orderIndex
     }
 
@@ -72,11 +72,11 @@ enum MessageContent: Codable, Sendable {
 
     var textValue: String {
         switch self {
-        case .text(let string):
-            return string
-        case .multimodal(let parts):
-            return parts.compactMap { part in
-                if case .text(let text) = part.type {
+        case let .text(string):
+            string
+        case let .multimodal(parts):
+            parts.compactMap { part in
+                if case let .text(text) = part.type {
                     return text
                 }
                 return nil
@@ -91,6 +91,7 @@ struct ContentPart: Codable, Sendable {
         case image(Data)
         case file(String) // File path
     }
+
     let type: PartType
 }
 

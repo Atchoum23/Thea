@@ -6,12 +6,11 @@
 //  Created: January 23, 2026
 //
 
-import XCTest
 @testable import Thea
+import XCTest
 
 /// Security tests to verify all 15 audit findings have been properly remediated
 final class SecurityRemediationTests: XCTestCase {
-
     // MARK: - FINDING-001: SSRF Prevention Tests
 
     func testNetworkProxyIsDisabled() async throws {
@@ -31,8 +30,8 @@ final class SecurityRemediationTests: XCTestCase {
         } catch {
             // Expected - network proxy is disabled
             XCTAssertTrue(error.localizedDescription.contains("disabled") ||
-                         error.localizedDescription.contains("SSRF"),
-                         "Error should indicate SSRF prevention")
+                error.localizedDescription.contains("SSRF"),
+                "Error should indicate SSRF prevention")
         }
     }
 
@@ -41,7 +40,7 @@ final class SecurityRemediationTests: XCTestCase {
         let ssrfPayloads = [
             "http://127.0.0.1/admin",
             "http://localhost/secrets",
-            "http://169.254.169.254/latest/meta-data/",  // AWS metadata
+            "http://169.254.169.254/latest/meta-data/", // AWS metadata
             "http://[::1]/internal",
             "file:///etc/passwd",
             "gopher://internal-host:25/"
@@ -118,7 +117,7 @@ final class SecurityRemediationTests: XCTestCase {
 
         // Generate multiple pairing codes and verify strength
         var codes: Set<String> = []
-        for _ in 0..<100 {
+        for _ in 0 ..< 100 {
             let code = await connectionManager.generatePairingCode()
 
             // Verify code length (should be 12 characters now)
@@ -126,7 +125,7 @@ final class SecurityRemediationTests: XCTestCase {
 
             // Verify alphanumeric composition
             XCTAssertTrue(code.allSatisfy { $0.isLetter || $0.isNumber },
-                         "Pairing code should be alphanumeric")
+                          "Pairing code should be alphanumeric")
 
             // Check for uniqueness
             XCTAssertFalse(codes.contains(code), "Pairing codes should be unique")
@@ -174,7 +173,7 @@ final class SecurityRemediationTests: XCTestCase {
             } catch {
                 // Expected - path traversal detected
                 XCTAssertTrue(error is PathSecurityError,
-                             "Should throw PathSecurityError for: \(attempt)")
+                              "Should throw PathSecurityError for: \(attempt)")
             }
         }
     }
@@ -248,9 +247,9 @@ final class SecurityRemediationTests: XCTestCase {
 
         let modeNames = allModes.map { $0.rawValue.lowercased() }
         XCTAssertFalse(modeNames.contains("fullauto"),
-                      "fullAuto mode should be removed")
+                       "fullAuto mode should be removed")
         XCTAssertFalse(modeNames.contains("full_auto"),
-                      "full_auto mode should be removed")
+                       "full_auto mode should be removed")
 
         // Valid modes should be: supervised, automatic, dryRun
         XCTAssertTrue(modeNames.contains("supervised"))
@@ -277,7 +276,7 @@ final class SecurityRemediationTests: XCTestCase {
 
         // Verify discovery is disabled by default
         XCTAssertFalse(config.enableDiscovery,
-                      "Network discovery should be disabled by default")
+                       "Network discovery should be disabled by default")
     }
 
     func testDiscoveryRequiresExplicitOptIn() async throws {
@@ -285,7 +284,7 @@ final class SecurityRemediationTests: XCTestCase {
 
         // Verify server doesn't automatically start advertising
         XCTAssertFalse(server.networkDiscovery.isAdvertising,
-                      "Discovery should not auto-start")
+                       "Discovery should not auto-start")
     }
 
     // MARK: - TLS Certificate Validation Tests (FINDING-002)
@@ -319,7 +318,7 @@ final class SecurityRemediationTests: XCTestCase {
         for key in sensitiveKeys {
             let userDefaultsValue = UserDefaults.standard.object(forKey: key)
             XCTAssertNil(userDefaultsValue,
-                        "Sensitive key '\(key)' should not be in UserDefaults")
+                         "Sensitive key '\(key)' should not be in UserDefaults")
         }
     }
 
@@ -350,14 +349,13 @@ final class SecurityRemediationTests: XCTestCase {
 // MARK: - Fuzzing Tests
 
 extension SecurityRemediationTests {
-
     /// Fuzz test command sanitization with random inputs
     func testCommandSanitizationFuzzing() {
         let fuzzInputs = generateFuzzStrings(count: 100)
 
         for input in fuzzInputs {
             // Should not crash or allow injection
-            let _ = SystemToolBridge.isCommandAllowed(input)
+            _ = SystemToolBridge.isCommandAllowed(input)
         }
     }
 
@@ -368,7 +366,7 @@ extension SecurityRemediationTests {
 
         for input in fuzzInputs {
             do {
-                let _ = try ProjectPathManager.shared.validatePath(input, within: baseDir)
+                _ = try ProjectPathManager.shared.validatePath(input, within: baseDir)
             } catch {
                 // Expected for malformed paths
             }
@@ -391,10 +389,10 @@ extension SecurityRemediationTests {
         var results: [String] = []
         let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?`~\n\r\t\0"
 
-        for _ in 0..<count {
-            let length = Int.random(in: 1...200)
+        for _ in 0 ..< count {
+            let length = Int.random(in: 1 ... 200)
             var str = ""
-            for _ in 0..<length {
+            for _ in 0 ..< length {
                 if let char = chars.randomElement() {
                     str.append(char)
                 }
