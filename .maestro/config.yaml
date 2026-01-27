@@ -1,0 +1,12 @@
+# Maestro Configuration for Thea
+# https://maestro.mobile.dev/reference/flow-configuration
+
+flows:
+  - launch_flow.yaml
+  - navigation_flow.yaml
+
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - launch_flow.yaml
+    - navigation_flow.yaml

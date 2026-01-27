@@ -1,0 +1,9 @@
+# Thea Launch Flow - Basic app launch verification
+appId: app.theathe.ios
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: ".*"
+    timeout: 10000
+- takeScreenshot: launch_screen
