@@ -150,8 +150,8 @@ public enum KillSwitchGuard {
     ///   - onHalted: Callback if operation is halted
     /// - Returns: Result of operation or nil if halted
     @MainActor
-    public static func execute<T>(
-        _ operation: () async throws -> T,
+    public static func execute<T: Sendable>(
+        _ operation: @Sendable () async throws -> T,
         onHalted: ((String) -> Void)? = nil
     ) async throws -> T? {
         let killSwitch = AgentSecKillSwitch.shared
@@ -167,8 +167,8 @@ public enum KillSwitchGuard {
 
     /// Execute an operation with automatic kill switch on failure
     @MainActor
-    public static func executeWithProtection<T>(
-        _ operation: () async throws -> T,
+    public static func executeWithProtection<T: Sendable>(
+        _ operation: @Sendable () async throws -> T,
         triggerOnFailure: Bool = false
     ) async throws -> T {
         let killSwitch = AgentSecKillSwitch.shared
