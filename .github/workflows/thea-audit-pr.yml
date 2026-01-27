@@ -44,7 +44,7 @@ jobs:
           swift-version: "6.0"
 
       - name: Cache thea-audit Build
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.1.2
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.1.2
         with:
           path: Tools/thea-audit/.build
           key: ${{ runner.os }}-thea-audit-${{ hashFiles('Tools/thea-audit/Package.resolved') }}
