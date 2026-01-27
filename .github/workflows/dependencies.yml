@@ -66,13 +66,18 @@ jobs:
           echo "Package.swift is valid"
 
       - name: Cache XcodeGen
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.1.2
+        id: xcodegen-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: /opt/homebrew/Cellar/xcodegen
           key: ${{ runner.os }}-xcodegen-2.42.0
 
       - name: Install XcodeGen
-        run: command -v xcodegen || brew install xcodegen
+        run: |
+          if [ "${{ steps.xcodegen-cache.outputs.cache-hit }}" == "true" ]; then
+            brew link xcodegen 2>/dev/null || true
+          fi
+          command -v xcodegen || brew install xcodegen
 
       - name: Generate Xcode Project
         run: |
