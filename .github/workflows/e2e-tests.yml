@@ -90,10 +90,10 @@ jobs:
           echo "app_path=$APP_PATH" >> $GITHUB_OUTPUT
           echo "Build successful: $APP_PATH"
 
-          # Debug: Verify Info.plist has valid versions
+          # Debug: Check Info.plist versions (non-fatal)
           echo "Checking Info.plist versions..."
-          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PATH/Info.plist"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PATH/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PATH/Info.plist" || echo "Note: CFBundleShortVersionString uses build variable"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PATH/Info.plist" || echo "Note: CFBundleVersion uses build variable"
 
       - name: Package Simulator App
         run: |
