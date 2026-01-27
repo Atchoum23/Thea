@@ -342,7 +342,9 @@ import SwiftUI
 
     extension CarPlayService: CPInterfaceControllerDelegate {
         nonisolated public func templateWillAppear(_ aTemplate: CPTemplate, animated _: Bool) {
-            Task { @MainActor in
+            // CPTemplate is not Sendable, so we need to use MainActor.assumeIsolated
+            // since CPInterfaceControllerDelegate methods are called on the main thread
+            MainActor.assumeIsolated {
                 self.currentTemplate = aTemplate
             }
         }
