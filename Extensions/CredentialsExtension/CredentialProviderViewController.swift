@@ -161,7 +161,8 @@ class CredentialProviderViewController: ASCredentialProviderViewController {
         }
     }
 
-    @available(iOS 18.0, *)
+    // Note: prepareInterfaceForExtensionConfiguration is available from iOS 12.0 as part of ASCredentialProviderViewController
+    // The extension's deployment target (iOS 17.0) already satisfies this requirement
     override func prepareInterfaceForExtensionConfiguration() {
         // Called when user wants to configure the extension
         logger.info("Preparing extension configuration")
