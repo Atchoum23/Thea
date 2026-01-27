@@ -569,9 +569,9 @@ public struct LauncherCommand: Identifiable, Equatable, Sendable {
     }
 }
 
-public enum LauncherAction {
+public enum LauncherAction: Sendable {
     case navigate(String)
-    case run(() async -> Void)
+    case run(@Sendable () async -> Void)
     case openURL(URL)
     case shortcut(String)
     case script(String)
@@ -608,7 +608,21 @@ public struct ExtensionResult: Sendable {
     public let title: String
     public let subtitle: String?
     public let icon: String
-    public let execute: () async -> Void
+    public let execute: @Sendable () async -> Void
+
+    public init(
+        id: String,
+        title: String,
+        subtitle: String? = nil,
+        icon: String,
+        execute: @escaping @Sendable () async -> Void
+    ) {
+        self.id = id
+        self.title = title
+        self.subtitle = subtitle
+        self.icon = icon
+        self.execute = execute
+    }
 }
 
 // MARK: - Notifications
