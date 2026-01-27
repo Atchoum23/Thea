@@ -96,33 +96,45 @@ public final class SpotlightIntegration: ObservableObject {
             isIndexing = true
             defer { isIndexing = false }
 
-            let items = conversations.map { conversation -> CSSearchableItem in
-                let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
-                attributeSet.title = conversation.title
-                attributeSet.contentDescription = conversation.preview
-                attributeSet.textContent = conversation.content
-                attributeSet.contentCreationDate = conversation.createdAt
-                attributeSet.contentModificationDate = conversation.modifiedAt
-                attributeSet.keywords = conversation.keywords + ["conversation", "chat", "ai"]
-                attributeSet.domainIdentifier = conversationDomain
+            let domain = conversationDomain
+            let count = await performBatchIndexing(conversations: conversations, domain: domain)
 
-                return CSSearchableItem(
-                    uniqueIdentifier: "conversation:\(conversation.id)",
-                    domainIdentifier: conversationDomain,
-                    attributeSet: attributeSet
-                )
-            }
-
-            do {
-                try await searchableIndex.indexSearchableItems(items)
-                indexedItemCount += items.count
+            if !count.isZero {
+                indexedItemCount += count
                 lastIndexDate = Date()
-                logger.info("Indexed \(items.count) conversations")
-            } catch {
-                logger.error("Batch indexing failed: \(error.localizedDescription)")
+                logger.info("Indexed \(count) conversations")
             }
         #endif
     }
+
+    #if canImport(CoreSpotlight)
+    /// Perform the actual indexing in a nonisolated context to avoid Sendable issues
+    nonisolated private func performBatchIndexing(conversations: [IndexableConversation], domain: String) async -> Int {
+        let items = conversations.map { conversation -> CSSearchableItem in
+            let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+            attributeSet.title = conversation.title
+            attributeSet.contentDescription = conversation.preview
+            attributeSet.textContent = conversation.content
+            attributeSet.contentCreationDate = conversation.createdAt
+            attributeSet.contentModificationDate = conversation.modifiedAt
+            attributeSet.keywords = conversation.keywords + ["conversation", "chat", "ai"]
+            attributeSet.domainIdentifier = domain
+
+            return CSSearchableItem(
+                uniqueIdentifier: "conversation:\(conversation.id)",
+                domainIdentifier: domain,
+                attributeSet: attributeSet
+            )
+        }
+
+        do {
+            try await searchableIndex.indexSearchableItems(items)
+            return items.count
+        } catch {
+            return 0
+        }
+    }
+    #endif
 
     // MARK: - Index Artifacts
 
