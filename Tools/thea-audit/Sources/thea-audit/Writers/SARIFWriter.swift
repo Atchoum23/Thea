@@ -36,9 +36,7 @@ enum SARIFWriter {
                         )
                     )
                 ],
-                fixes: finding.recommendation.map { rec in
-                    [SARIFFix(description: SARIFMessage(text: rec))]
-                }
+                fixes: [SARIFFix(description: SARIFMessage(text: finding.recommendation))]
             )
         }
 
@@ -76,8 +74,8 @@ enum SARIFWriter {
                 shortDescription: SARIFMessage(text: finding.title),
                 fullDescription: SARIFMessage(text: finding.description),
                 help: SARIFHelp(
-                    text: finding.recommendation ?? "Review and fix this security issue",
-                    markdown: finding.recommendation.map { "**Recommendation:** \($0)" }
+                    text: finding.recommendation,
+                    markdown: "**Recommendation:** \(finding.recommendation)"
                 ),
                 properties: SARIFRuleProperties(
                     category: finding.category.rawValue,
