@@ -43,9 +43,11 @@ public final class PredictiveEngine: ObservableObject {
 
     // MARK: - Historical Data
 
-    private var activityHistory: [ActivityRecord] = []
-    private var transitionMatrix: [String: [String: Int]] = [:] // app -> next app -> count
-    private var timeBasedPatterns: [Int: [String: Int]] = [:] // hour -> app -> count
+    // These are accessed from dataQueue, so mark as nonisolated(unsafe)
+    // The dataQueue serializes access to ensure thread safety
+    nonisolated(unsafe) private var activityHistory: [ActivityRecord] = []
+    nonisolated(unsafe) private var transitionMatrix: [String: [String: Int]] = [:] // app -> next app -> count
+    nonisolated(unsafe) private var timeBasedPatterns: [Int: [String: Int]] = [:] // hour -> app -> count
 
     private let dataQueue = DispatchQueue(label: "app.thea.predictive.data")
     private var predictionTask: Task<Void, Never>?

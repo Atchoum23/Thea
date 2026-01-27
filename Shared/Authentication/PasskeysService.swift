@@ -283,11 +283,8 @@ extension PasskeysService: ASAuthorizationControllerDelegate {
                     .from(error)
                 case .credentialExport:
                     .from(error)
-                case .preferSignInWithApple:
-                    .from(error)
-                case .deviceNotConfiguredForPasskeyCreation:
-                    .from(error)
                 @unknown default:
+                    // Handles iOS 18+ cases like preferSignInWithApple and deviceNotConfiguredForPasskeyCreation
                     .from(error)
                 }
             } else {
