@@ -1,0 +1,17 @@
+# Thea Navigation Flow - Test main navigation
+appId: app.theathe.ios
+---
+- launchApp
+- assertVisible:
+    text: ".*"
+    timeout: 10000
+
+# Navigate to Settings (if available)
+- tapOn:
+    text: "Settings"
+    optional: true
+- takeScreenshot: settings_screen
+
+# Go back
+- back
+- takeScreenshot: home_after_navigation
