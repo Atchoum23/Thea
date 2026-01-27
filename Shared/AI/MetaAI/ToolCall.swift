@@ -2,6 +2,7 @@ import Foundation
 @preconcurrency import SwiftData
 
 // MARK: - Tool Call Model
+
 // Tracks tool execution for messages
 
 @Model
@@ -15,27 +16,27 @@ final class ToolCall {
     var startTime = Date()
     var endTime: Date?
     var messageId: UUID?
-    
+
     init(toolName: String, parameters: String, messageId: UUID? = nil) {
-        self.id = UUID()
+        id = UUID()
         self.toolName = toolName
         self.parameters = parameters
         self.messageId = messageId
-        self.startTime = Date()
+        startTime = Date()
     }
-    
+
     func complete(result: String, success: Bool, error: String? = nil) {
         self.result = result
         self.success = success
         self.error = error
-        self.endTime = Date()
+        endTime = Date()
     }
-    
+
     var duration: TimeInterval {
         guard let end = endTime else { return 0 }
         return end.timeIntervalSince(startTime)
     }
-    
+
     var info: ToolCallInfo {
         ToolCallInfo(
             id: id,

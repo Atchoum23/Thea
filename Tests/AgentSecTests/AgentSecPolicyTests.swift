@@ -1,12 +1,11 @@
 // AgentSecPolicyTests.swift
 // Tests for AgentSec Strict Mode policy
 
-import XCTest
 @testable import TheaCore
+import XCTest
 
 @MainActor
 final class AgentSecPolicyTests: XCTestCase {
-
     // MARK: - Network Policy Tests
 
     func testNetworkPolicyBlocksLocalhost() {

@@ -70,7 +70,7 @@ public struct PrivacyControlsView: View {
                 Stepper(
                     "Keep data for \(monitoringConfig.retentionDays) days",
                     value: $monitoringConfig.retentionDays,
-                    in: 7...365
+                    in: 7 ... 365
                 )
 
                 Toggle("Sync to iCloud", isOn: $monitoringConfig.syncToCloud)
@@ -194,10 +194,10 @@ private struct PermissionRow: View {
 
     private var statusColor: Color {
         switch status {
-        case .granted: return .green
-        case .denied: return .red
-        case .notDetermined: return .orange
-        case .restricted, .unknown: return .secondary
+        case .granted: .green
+        case .denied: .red
+        case .notDetermined: .orange
+        case .restricted, .unknown: .secondary
         }
     }
 }
@@ -221,7 +221,7 @@ public struct ActivityStatsView: View {
             .datePickerStyle(.compact)
             .labelsHidden()
 
-            if let stats = stats {
+            if let stats {
                 // Stats Cards
                 LazyVGrid(columns: [
                     GridItem(.flexible()),

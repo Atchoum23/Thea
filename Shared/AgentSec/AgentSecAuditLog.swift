@@ -111,13 +111,12 @@ public final class AgentSecAuditLog: ObservableObject {
 
     /// Log a terminal command
     public func logTerminalCommand(command: String, allowed: Bool, requiresApproval: Bool = false) {
-        let event: AuditEventType
-        if !allowed {
-            event = .terminalCommandBlocked
+        let event: AuditEventType = if !allowed {
+            .terminalCommandBlocked
         } else if requiresApproval {
-            event = .terminalCommandApprovalRequired
+            .terminalCommandApprovalRequired
         } else {
-            event = .terminalCommandAllowed
+            .terminalCommandAllowed
         }
 
         log(
@@ -196,7 +195,8 @@ public final class AgentSecAuditLog: ObservableObject {
 
                 if let timestamp = formatter.date(from: parts[0]),
                    let severity = AuditSeverity(rawValue: parts[1]),
-                   let event = AuditEventType(rawValue: parts[2]) {
+                   let event = AuditEventType(rawValue: parts[2])
+                {
                     let entry = AuditEntry(
                         id: UUID(),
                         timestamp: timestamp,
@@ -310,11 +310,11 @@ public enum AuditSeverity: String, Codable, CaseIterable, Sendable, Comparable {
 
     var numericValue: Int {
         switch self {
-        case .critical: return 5
-        case .high: return 4
-        case .medium: return 3
-        case .low: return 2
-        case .info: return 1
+        case .critical: 5
+        case .high: 4
+        case .medium: 3
+        case .low: 2
+        case .info: 1
         }
     }
 

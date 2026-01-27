@@ -1,9 +1,10 @@
 import SwiftUI
 #if os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Knowledge Graph Viewer
+
 // Interactive visualization of the knowledge graph with nodes and relationships
 
 struct KnowledgeGraphViewer: View {
@@ -20,9 +21,9 @@ struct KnowledgeGraphViewer: View {
         if !searchText.isEmpty {
             nodes = nodes.filter { node in
                 node.content.lowercased().contains(searchText.lowercased()) ||
-                node.metadata.values.contains { value in
-                    String(describing: value).lowercased().contains(searchText.lowercased())
-                }
+                    node.metadata.values.contains { value in
+                        String(describing: value).lowercased().contains(searchText.lowercased())
+                    }
             }
         }
 
@@ -81,31 +82,31 @@ struct KnowledgeGraphViewer: View {
                     FilterChip(
                         title: "All",
                         isSelected: filterType == nil
-                    )                        { filterType = nil }
+                    ) { filterType = nil }
 
                     FilterChip(
                         title: "Concepts",
                         icon: "brain",
                         isSelected: filterType == .concept
-                    )                        { filterType = .concept }
+                    ) { filterType = .concept }
 
                     FilterChip(
                         title: "Facts",
                         icon: "doc.text",
                         isSelected: filterType == .fact
-                    )                        { filterType = .fact }
+                    ) { filterType = .fact }
 
                     FilterChip(
                         title: "Insights",
                         icon: "lightbulb",
                         isSelected: filterType == .insight
-                    )                        { filterType = .insight }
+                    ) { filterType = .insight }
 
                     FilterChip(
                         title: "References",
                         icon: "link",
                         isSelected: filterType == .reference
-                    )                        { filterType = .reference }
+                    ) { filterType = .reference }
                 }
                 .padding(.horizontal, 4)
             }
@@ -156,19 +157,19 @@ struct NodeRow: View {
 
     private func iconForNodeType(_ type: NodeType) -> String {
         switch type {
-        case .concept: return "brain"
-        case .fact: return "doc.text"
-        case .insight: return "lightbulb"
-        case .reference: return "link"
+        case .concept: "brain"
+        case .fact: "doc.text"
+        case .insight: "lightbulb"
+        case .reference: "link"
         }
     }
 
     private func colorForNodeType(_ type: NodeType) -> Color {
         switch type {
-        case .concept: return .purple
-        case .fact: return .blue
-        case .insight: return .orange
-        case .reference: return .green
+        case .concept: .purple
+        case .fact: .blue
+        case .insight: .orange
+        case .reference: .green
         }
     }
 }
@@ -292,28 +293,28 @@ struct NodeDetailView: View {
 
     private func iconForType(_ type: NodeType) -> String {
         switch type {
-        case .concept: return "brain"
-        case .fact: return "doc.text"
-        case .insight: return "lightbulb"
-        case .reference: return "link"
+        case .concept: "brain"
+        case .fact: "doc.text"
+        case .insight: "lightbulb"
+        case .reference: "link"
         }
     }
 
     private func colorForType(_ type: NodeType) -> Color {
         switch type {
-        case .concept: return .purple
-        case .fact: return .blue
-        case .insight: return .orange
-        case .reference: return .green
+        case .concept: .purple
+        case .fact: .blue
+        case .insight: .orange
+        case .reference: .green
         }
     }
 
     private func typeLabel(_ type: NodeType) -> String {
         switch type {
-        case .concept: return "Concept"
-        case .fact: return "Fact"
-        case .insight: return "Insight"
-        case .reference: return "Reference"
+        case .concept: "Concept"
+        case .fact: "Fact"
+        case .insight: "Insight"
+        case .reference: "Reference"
         }
     }
 }
@@ -352,28 +353,28 @@ struct RelatedNodeCard: View {
 
     private func iconForType(_ type: NodeType) -> String {
         switch type {
-        case .concept: return "brain"
-        case .fact: return "doc.text"
-        case .insight: return "lightbulb"
-        case .reference: return "link"
+        case .concept: "brain"
+        case .fact: "doc.text"
+        case .insight: "lightbulb"
+        case .reference: "link"
         }
     }
 
     private func colorForType(_ type: NodeType) -> Color {
         switch type {
-        case .concept: return .purple
-        case .fact: return .blue
-        case .insight: return .orange
-        case .reference: return .green
+        case .concept: .purple
+        case .fact: .blue
+        case .insight: .orange
+        case .reference: .green
         }
     }
 
     private func typeLabel(_ type: NodeType) -> String {
         switch type {
-        case .concept: return "Concept"
-        case .fact: return "Fact"
-        case .insight: return "Insight"
-        case .reference: return "Reference"
+        case .concept: "Concept"
+        case .fact: "Fact"
+        case .insight: "Insight"
+        case .reference: "Reference"
         }
     }
 }
@@ -387,10 +388,10 @@ struct GraphOverviewView: View {
     private var statistics: GraphStatistics {
         GraphStatistics(
             totalNodes: nodes.count,
-            concepts: nodes.filter { $0.type == .concept }.count,
-            facts: nodes.filter { $0.type == .fact }.count,
-            insights: nodes.filter { $0.type == .insight }.count,
-            references: nodes.filter { $0.type == .reference }.count
+            concepts: nodes.count { $0.type == .concept },
+            facts: nodes.count { $0.type == .fact },
+            insights: nodes.count { $0.type == .insight },
+            references: nodes.count { $0.type == .reference }
         )
     }
 

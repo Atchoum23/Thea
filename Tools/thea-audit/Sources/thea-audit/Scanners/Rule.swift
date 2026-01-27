@@ -159,9 +159,9 @@ class ASTRule: Rule, @unchecked Sendable {
     }
 
     /// Override in subclass to implement AST-based checking
-    func check(file: String, content: String) -> [Finding] {
+    func check(file _: String, content _: String) -> [Finding] {
         // Default implementation does nothing
         // Subclasses should override to implement actual checking
-        return []
+        []
     }
 }

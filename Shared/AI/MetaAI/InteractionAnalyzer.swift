@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Interaction Analyzer
+
 // Analyzes conversations and interactions to extract insights and improve responses
 
 /// Represents an analyzed interaction
@@ -57,25 +58,25 @@ public struct InteractionAnalysis: Sendable, Codable {
 
 /// User's intent category
 public enum UserIntent: String, Codable, Sendable, CaseIterable {
-    case question           // Seeking information
-    case instruction        // Requesting action
-    case clarification      // Asking for explanation
-    case feedback           // Providing feedback
-    case conversation       // General chat
-    case complaint          // Expressing dissatisfaction
-    case praise             // Expressing satisfaction
+    case question // Seeking information
+    case instruction // Requesting action
+    case clarification // Asking for explanation
+    case feedback // Providing feedback
+    case conversation // General chat
+    case complaint // Expressing dissatisfaction
+    case praise // Expressing satisfaction
     case unknown
 
     public var displayName: String {
         switch self {
-        case .question: return "Question"
-        case .instruction: return "Instruction"
-        case .clarification: return "Clarification"
-        case .feedback: return "Feedback"
-        case .conversation: return "Conversation"
-        case .complaint: return "Complaint"
-        case .praise: return "Praise"
-        case .unknown: return "Unknown"
+        case .question: "Question"
+        case .instruction: "Instruction"
+        case .clarification: "Clarification"
+        case .feedback: "Feedback"
+        case .conversation: "Conversation"
+        case .complaint: "Complaint"
+        case .praise: "Praise"
+        case .unknown: "Unknown"
         }
     }
 }
@@ -83,9 +84,9 @@ public enum UserIntent: String, Codable, Sendable, CaseIterable {
 /// Sentiment analysis result
 public struct Sentiment: Sendable, Codable {
     public let polarity: Polarity
-    public let score: Double        // -1 to 1
-    public let confidence: Double   // 0 to 1
-    public let emotions: [String: Double]  // Emotion -> intensity
+    public let score: Double // -1 to 1
+    public let confidence: Double // 0 to 1
+    public let emotions: [String: Double] // Emotion -> intensity
 
     public enum Polarity: String, Codable, Sendable {
         case positive
@@ -109,29 +110,29 @@ public struct Sentiment: Sendable, Codable {
 
 /// Complexity level of the interaction
 public enum InteractionComplexity: String, Codable, Sendable {
-    case simple         // Single, clear request
-    case moderate       // Some nuance or context needed
-    case complex        // Multiple aspects or deep reasoning
-    case veryComplex    // Expert-level, multi-step
+    case simple // Single, clear request
+    case moderate // Some nuance or context needed
+    case complex // Multiple aspects or deep reasoning
+    case veryComplex // Expert-level, multi-step
 
     public var weight: Double {
         switch self {
-        case .simple: return 1.0
-        case .moderate: return 1.5
-        case .complex: return 2.0
-        case .veryComplex: return 3.0
+        case .simple: 1.0
+        case .moderate: 1.5
+        case .complex: 2.0
+        case .veryComplex: 3.0
         }
     }
 }
 
 /// Quality assessment of a response
 public struct ResponseQuality: Sendable, Codable {
-    public let relevance: Double      // 0-1, how relevant to query
-    public let completeness: Double   // 0-1, how complete
-    public let clarity: Double        // 0-1, how clear
-    public let accuracy: Double       // 0-1, estimated accuracy
-    public let helpfulness: Double    // 0-1, overall helpfulness
-    public let overallScore: Double   // 0-1, weighted average
+    public let relevance: Double // 0-1, how relevant to query
+    public let completeness: Double // 0-1, how complete
+    public let clarity: Double // 0-1, how clear
+    public let accuracy: Double // 0-1, estimated accuracy
+    public let helpfulness: Double // 0-1, overall helpfulness
+    public let overallScore: Double // 0-1, weighted average
 
     public init(
         relevance: Double,
@@ -147,12 +148,12 @@ public struct ResponseQuality: Sendable, Codable {
         self.helpfulness = helpfulness
 
         // Weighted average
-        self.overallScore = (
+        overallScore = (
             relevance * 0.25 +
-            completeness * 0.20 +
-            clarity * 0.15 +
-            accuracy * 0.25 +
-            helpfulness * 0.15
+                completeness * 0.20 +
+                clarity * 0.15 +
+                accuracy * 0.25 +
+                helpfulness * 0.15
         )
     }
 }
@@ -233,29 +234,34 @@ public final class InteractionAnalyzer {
         let lower = message.lowercased()
 
         if lower.contains("?") || lower.hasPrefix("what") || lower.hasPrefix("how") ||
-           lower.hasPrefix("why") || lower.hasPrefix("when") || lower.hasPrefix("who") ||
-           lower.hasPrefix("where") || lower.hasPrefix("which") {
+            lower.hasPrefix("why") || lower.hasPrefix("when") || lower.hasPrefix("who") ||
+            lower.hasPrefix("where") || lower.hasPrefix("which")
+        {
             return .question
         }
 
         if lower.hasPrefix("please") || lower.hasPrefix("can you") || lower.hasPrefix("could you") ||
-           lower.contains("create") || lower.contains("make") || lower.contains("build") ||
-           lower.contains("write") || lower.contains("generate") {
+            lower.contains("create") || lower.contains("make") || lower.contains("build") ||
+            lower.contains("write") || lower.contains("generate")
+        {
             return .instruction
         }
 
         if lower.contains("explain") || lower.contains("clarify") || lower.contains("what do you mean") ||
-           lower.contains("elaborate") {
+            lower.contains("elaborate")
+        {
             return .clarification
         }
 
         if lower.contains("thanks") || lower.contains("great") || lower.contains("excellent") ||
-           lower.contains("perfect") || lower.contains("good job") {
+            lower.contains("perfect") || lower.contains("good job")
+        {
             return .praise
         }
 
         if lower.contains("wrong") || lower.contains("incorrect") || lower.contains("bad") ||
-           lower.contains("not helpful") || lower.contains("disappointed") {
+            lower.contains("not helpful") || lower.contains("disappointed")
+        {
             return .complaint
         }
 
@@ -298,15 +304,14 @@ public final class InteractionAnalyzer {
 
         score = max(-1, min(1, score))
 
-        let polarity: Sentiment.Polarity
-        if score > 0.3 {
-            polarity = .positive
+        let polarity: Sentiment.Polarity = if score > 0.3 {
+            .positive
         } else if score < -0.3 {
-            polarity = .negative
+            .negative
         } else if !emotions.isEmpty {
-            polarity = .mixed
+            .mixed
         } else {
-            polarity = .neutral
+            .neutral
         }
 
         return Sentiment(
@@ -354,7 +359,7 @@ public final class InteractionAnalyzer {
         let frequency = Dictionary(filtered.map { ($0, 1) }, uniquingKeysWith: +)
         return unique.sorted { frequency[$0, default: 0] > frequency[$1, default: 0] }
             .prefix(5)
-            .map { $0 }
+            .map(\.self)
     }
 
     // MARK: - Response Quality Evaluation

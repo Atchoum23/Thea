@@ -90,7 +90,7 @@ public final class TaskDecomposition {
         _ task: String,
         classification: TaskClassification,
         depth: Int,
-        context: [String: Any]
+        context _: [String: Any]
     ) async throws -> [TaskStep] {
         // For simple tasks, return single step
         if depth == 1 {
@@ -120,23 +120,23 @@ public final class TaskDecomposition {
     ) async throws -> [TaskStep] {
         switch classification.primaryType {
         case .codeGeneration:
-            return decomposeCodeTask(task)
+            decomposeCodeTask(task)
 
         case .complexReasoning:
-            return decomposeReasoningTask(task)
+            decomposeReasoningTask(task)
 
         case .analysis:
-            return decomposeAnalysisTask(task)
+            decomposeAnalysisTask(task)
 
         case .planning:
-            return decomposePlanningTask(task)
+            decomposePlanningTask(task)
 
         case .debugging:
-            return decomposeDebuggingTask(task)
+            decomposeDebuggingTask(task)
 
         default:
             // Generic decomposition
-            return decomposeGenericTask(task, depth: depth)
+            decomposeGenericTask(task, depth: depth)
         }
     }
 
@@ -333,7 +333,7 @@ public final class TaskDecomposition {
         // Simple sequential decomposition
         var steps: [TaskStep] = []
 
-        for i in 0..<depth {
+        for i in 0 ..< depth {
             let previousID = i > 0 ? steps[i - 1].id : nil
 
             let step = TaskStep(
@@ -411,7 +411,7 @@ public struct OrchestrationTaskBreakdown {
     public func getParallelSteps(completed: Set<UUID>) -> [TaskStep] {
         steps.filter { step in
             !completed.contains(step.id) &&
-            step.dependencies.allSatisfy { completed.contains($0) }
+                step.dependencies.allSatisfy { completed.contains($0) }
         }
     }
 }

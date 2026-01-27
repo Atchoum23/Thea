@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - ProjectPathManager
+
 // Centralized management of project path resolution
 // SECURITY: No hardcoded paths - uses runtime detection only
 
@@ -51,14 +52,16 @@ public final class ProjectPathManager {
         // 2. Try environment variable
         if let envPath = ProcessInfo.processInfo.environment[environmentKey],
            !envPath.isEmpty,
-           FileManager.default.fileExists(atPath: envPath) {
+           FileManager.default.fileExists(atPath: envPath)
+        {
             _cachedPath = envPath
             return envPath
         }
 
         // 3. Try UserDefaults (persisted setting)
         if let savedPath = UserDefaults.standard.string(forKey: userDefaultsKey),
-           FileManager.default.fileExists(atPath: savedPath) {
+           FileManager.default.fileExists(atPath: savedPath)
+        {
             _cachedPath = savedPath
             return savedPath
         }
@@ -131,7 +134,7 @@ public final class ProjectPathManager {
         // Look for DerivedData pattern
         if let derivedDataIndex = components.firstIndex(of: "DerivedData") {
             // Path before DerivedData might be the project
-            let basePath = components[0..<derivedDataIndex].joined(separator: "/")
+            let basePath = components[0 ..< derivedDataIndex].joined(separator: "/")
 
             // Try common project locations relative to DerivedData parent
             let possiblePaths = [
@@ -148,7 +151,7 @@ public final class ProjectPathManager {
 
         // Try walking up from bundle
         var currentPath = bundlePath
-        for _ in 0..<5 { // Max 5 levels up
+        for _ in 0 ..< 5 { // Max 5 levels up
             currentPath = (currentPath as NSString).deletingLastPathComponent
             if isValidTheaProject(at: currentPath) {
                 return currentPath
@@ -161,11 +164,11 @@ public final class ProjectPathManager {
 
 // MARK: - Path Traversal Security
 
-extension ProjectPathManager {
+public extension ProjectPathManager {
     /// SECURITY: Validate that a resolved path stays within the allowed base directory
     /// Prevents path traversal attacks using ../ or symlinks
     /// SECURITY FIX (FINDING-007): Uses component-wise validation instead of string prefix
-    public func validatePath(_ relativePath: String, basePath: String) throws -> String {
+    func validatePath(_ relativePath: String, basePath: String) throws -> String {
         // SECURITY: Reject paths with null bytes (path injection attack) FIRST
         guard !relativePath.contains("\0") else {
             throw PathSecurityError.nullByteInjection(path: relativePath)
@@ -220,7 +223,7 @@ extension ProjectPathManager {
     }
 
     /// SECURITY: Validate and return a safe full path
-    public func safeFullPath(for relativePath: String) throws -> String {
+    func safeFullPath(for relativePath: String) throws -> String {
         guard let base = projectPath else {
             throw ProjectPathError.projectPathNotFound
         }
@@ -237,12 +240,12 @@ public enum PathSecurityError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .pathTraversalAttempt(let requested, let resolved, let allowed):
-            return "SECURITY: Path traversal attempt blocked. Requested '\(requested)' resolved to '\(resolved)' which is outside allowed base '\(allowed)'"
-        case .nullByteInjection(let path):
-            return "SECURITY: Null byte injection detected in path: \(path)"
-        case .suspiciousPattern(let path, let pattern):
-            return "SECURITY: Suspicious pattern '\(pattern)' detected in path: \(path)"
+        case let .pathTraversalAttempt(requested, resolved, allowed):
+            "SECURITY: Path traversal attempt blocked. Requested '\(requested)' resolved to '\(resolved)' which is outside allowed base '\(allowed)'"
+        case let .nullByteInjection(path):
+            "SECURITY: Null byte injection detected in path: \(path)"
+        case let .suspiciousPattern(path, pattern):
+            "SECURITY: Suspicious pattern '\(pattern)' detected in path: \(path)"
         }
     }
 }
@@ -257,11 +260,11 @@ public enum ProjectPathError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .projectPathNotFound:
-            return "Thea project path not found. Set THEA_PROJECT_PATH environment variable or configure in Settings."
-        case .pathDoesNotExist(let path):
-            return "Project path does not exist: \(path)"
-        case .invalidProjectStructure(let path):
-            return "Invalid Thea project structure at: \(path)"
+            "Thea project path not found. Set THEA_PROJECT_PATH environment variable or configure in Settings."
+        case let .pathDoesNotExist(path):
+            "Project path does not exist: \(path)"
+        case let .invalidProjectStructure(path):
+            "Invalid Thea project structure at: \(path)"
         }
     }
 }

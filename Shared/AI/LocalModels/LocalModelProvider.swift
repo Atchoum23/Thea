@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Local Model Support
+
 // Run AI models locally using Ollama, MLX, or GGUF
 
 @MainActor
@@ -48,24 +49,25 @@ final class LocalModelManager {
 
     private func loadCustomPaths() {
         if let data = UserDefaults.standard.data(forKey: "LocalModelManager.customPaths"),
-           let paths = try? JSONDecoder().decode([URL].self, from: data) {
+           let paths = try? JSONDecoder().decode([URL].self, from: data)
+        {
             customModelPaths = paths
         } else {
             // Default to SharedLLMs from configuration
             #if os(macOS)
-            let sharedLLMs = FileManager.default.homeDirectoryForCurrentUser
-                .appendingPathComponent(config.sharedLLMsDirectory)
-            if FileManager.default.fileExists(atPath: sharedLLMs.path) {
-                customModelPaths = [sharedLLMs]
-            }
-            #else
-            // iOS: Use app's documents directory for local models
-            if let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                let modelsPath = documentsPath.appendingPathComponent("LocalModels")
-                if FileManager.default.fileExists(atPath: modelsPath.path) {
-                    customModelPaths = [modelsPath]
+                let sharedLLMs = FileManager.default.homeDirectoryForCurrentUser
+                    .appendingPathComponent(config.sharedLLMsDirectory)
+                if FileManager.default.fileExists(atPath: sharedLLMs.path) {
+                    customModelPaths = [sharedLLMs]
                 }
-            }
+            #else
+                // iOS: Use app's documents directory for local models
+                if let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                    let modelsPath = documentsPath.appendingPathComponent("LocalModels")
+                    if FileManager.default.fileExists(atPath: modelsPath.path) {
+                        customModelPaths = [modelsPath]
+                    }
+                }
             #endif
         }
     }
@@ -85,47 +87,47 @@ final class LocalModelManager {
 
     private func checkOllamaInstallation() async -> Bool {
         #if os(macOS)
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: config.whichExecutablePath)
-        process.arguments = ["ollama"]
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: config.whichExecutablePath)
+            process.arguments = ["ollama"]
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
+            let pipe = Pipe()
+            process.standardOutput = pipe
 
-        do {
-            try process.run()
-            process.waitUntilExit()
+            do {
+                try process.run()
+                process.waitUntilExit()
 
-            return process.terminationStatus == 0
-        } catch {
-            return false
-        }
+                return process.terminationStatus == 0
+            } catch {
+                return false
+            }
         #else
-        // iOS: Ollama requires macOS - not available on iOS
-        return false
+            // iOS: Ollama requires macOS - not available on iOS
+            return false
         #endif
     }
 
     private func checkMLXInstallation() async -> Bool {
         #if os(macOS)
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: config.whichExecutablePath)
-        process.arguments = ["mlx"]
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: config.whichExecutablePath)
+            process.arguments = ["mlx"]
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
+            let pipe = Pipe()
+            process.standardOutput = pipe
 
-        do {
-            try process.run()
-            process.waitUntilExit()
+            do {
+                try process.run()
+                process.waitUntilExit()
 
-            return process.terminationStatus == 0
-        } catch {
-            return false
-        }
+                return process.terminationStatus == 0
+            } catch {
+                return false
+            }
         #else
-        // iOS: MLX requires macOS - not available on iOS
-        return false
+            // iOS: MLX requires macOS - not available on iOS
+            return false
         #endif
     }
 
@@ -148,82 +150,82 @@ final class LocalModelManager {
 
     private func discoverOllamaModels() async {
         #if os(macOS)
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: config.ollamaExecutablePath)
-        process.arguments = ["list"]
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: config.ollamaExecutablePath)
+            process.arguments = ["list"]
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
+            let pipe = Pipe()
+            process.standardOutput = pipe
 
-        do {
-            try process.run()
-            process.waitUntilExit()
+            do {
+                try process.run()
+                process.waitUntilExit()
 
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(data: data, encoding: .utf8) ?? ""
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                let output = String(data: data, encoding: .utf8) ?? ""
 
-            // Parse ollama list output
-            for line in output.split(separator: "\n").dropFirst() {
-                let parts = line.split(separator: "\t").map(String.init)
-                if let modelName = parts.first {
-                    let model = LocalModel(
-                        id: UUID(),
-                        name: modelName,
-                        path: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ollama/\(modelName)"),
-                        type: .ollama,
-                        format: "GGUF",
-                        sizeInBytes: nil,
-                        runtime: .ollama,
-                        size: 0,
-                        parameters: config.defaultParameters,
-                        quantization: config.defaultQuantization
-                    )
+                // Parse ollama list output
+                for line in output.split(separator: "\n").dropFirst() {
+                    let parts = line.split(separator: "\t").map(String.init)
+                    if let modelName = parts.first {
+                        let model = LocalModel(
+                            id: UUID(),
+                            name: modelName,
+                            path: URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ollama/\(modelName)"),
+                            type: .ollama,
+                            format: "GGUF",
+                            sizeInBytes: nil,
+                            runtime: .ollama,
+                            size: 0,
+                            parameters: config.defaultParameters,
+                            quantization: config.defaultQuantization
+                        )
 
-                    availableModels.append(model)
+                        availableModels.append(model)
+                    }
                 }
+            } catch {
+                print("Failed to discover Ollama models: \(error)")
             }
-        } catch {
-            print("Failed to discover Ollama models: \(error)")
-        }
         #else
-        // iOS: Ollama requires macOS - not available on iOS
+            // iOS: Ollama requires macOS - not available on iOS
         #endif
     }
 
     private func discoverMLXModels() async {
         #if os(macOS)
-        // MLX models are typically in ~/mlx-models
-        let mlxPath = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(config.mlxModelsDirectory)
+            // MLX models are typically in ~/mlx-models
+            let mlxPath = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent(config.mlxModelsDirectory)
 
-        guard FileManager.default.fileExists(atPath: mlxPath.path) else { return }
+            guard FileManager.default.fileExists(atPath: mlxPath.path) else { return }
 
-        do {
-            let models = try FileManager.default.contentsOfDirectory(at: mlxPath, includingPropertiesForKeys: [.isDirectoryKey])
+            do {
+                let models = try FileManager.default.contentsOfDirectory(at: mlxPath, includingPropertiesForKeys: [.isDirectoryKey])
 
-            for modelDir in models {
-                let modelName = modelDir.lastPathComponent
+                for modelDir in models {
+                    let modelName = modelDir.lastPathComponent
 
-                let model = LocalModel(
-                    id: UUID(),
-                    name: modelName,
-                    path: modelDir,
-                    type: .mlx,
-                    format: "MLX",
-                    sizeInBytes: nil,
-                    runtime: .mlx,
-                    size: 0,
-                    parameters: config.defaultParameters,
-                    quantization: "4bit"
-                )
+                    let model = LocalModel(
+                        id: UUID(),
+                        name: modelName,
+                        path: modelDir,
+                        type: .mlx,
+                        format: "MLX",
+                        sizeInBytes: nil,
+                        runtime: .mlx,
+                        size: 0,
+                        parameters: config.defaultParameters,
+                        quantization: "4bit"
+                    )
 
-                availableModels.append(model)
+                    availableModels.append(model)
+                }
+            } catch {
+                print("Failed to discover MLX models: \(error)")
             }
-        } catch {
-            print("Failed to discover MLX models: \(error)")
-        }
         #else
-        // iOS: MLX requires macOS - not available on iOS
+            // iOS: MLX requires macOS - not available on iOS
         #endif
     }
 
@@ -232,10 +234,10 @@ final class LocalModelManager {
         var ggufPaths = customModelPaths
 
         #if os(macOS)
-        ggufPaths.append(contentsOf: [
-            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(config.ggufModelsDirectory),
-            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(config.lmStudioCachePath)
-        ])
+            ggufPaths.append(contentsOf: [
+                FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(config.ggufModelsDirectory),
+                FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(config.lmStudioCachePath)
+            ])
         #endif
 
         for path in ggufPaths {
@@ -278,15 +280,13 @@ final class LocalModelManager {
             return instance
         }
 
-        let instance: LocalModelInstance
-
-        switch model.runtime {
+        let instance: LocalModelInstance = switch model.runtime {
         case .ollama:
-            instance = try await loadOllamaModel(model)
+            try await loadOllamaModel(model)
         case .mlx:
-            instance = try await loadMLXModel(model)
+            try await loadMLXModel(model)
         case .gguf:
-            instance = try await loadGGUFModel(model)
+            try await loadGGUFModel(model)
         }
 
         runningModels[model.name] = instance
@@ -319,46 +319,46 @@ final class LocalModelManager {
         }
 
         #if os(macOS)
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: config.ollamaExecutablePath)
-        process.arguments = ["pull", modelName]
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: config.ollamaExecutablePath)
+            process.arguments = ["pull", modelName]
 
-        try process.run()
-        process.waitUntilExit()
+            try process.run()
+            process.waitUntilExit()
 
-        if process.terminationStatus != 0 {
-            throw LocalModelError.installationFailed
-        }
+            if process.terminationStatus != 0 {
+                throw LocalModelError.installationFailed
+            }
 
-        // Refresh model list
-        await discoverModels()
+            // Refresh model list
+            await discoverModels()
         #else
-        // iOS: Ollama requires macOS - not available on iOS
-        throw LocalModelError.runtimeNotInstalled("Ollama")
+            // iOS: Ollama requires macOS - not available on iOS
+            throw LocalModelError.runtimeNotInstalled("Ollama")
         #endif
     }
 
     func downloadGGUFModel(from url: URL, name: String) async throws {
         #if os(macOS)
-        let destinationPath = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(config.ggufModelsDirectory)
-            .appendingPathComponent("\(name).gguf")
+            let destinationPath = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent(config.ggufModelsDirectory)
+                .appendingPathComponent("\(name).gguf")
 
-        // Create directory if needed
-        try FileManager.default.createDirectory(
-            at: destinationPath.deletingLastPathComponent(),
-            withIntermediateDirectories: true
-        )
+            // Create directory if needed
+            try FileManager.default.createDirectory(
+                at: destinationPath.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
 
-        // Download file
-        let (localURL, _) = try await URLSession.shared.download(from: url)
-        try FileManager.default.moveItem(at: localURL, to: destinationPath)
+            // Download file
+            let (localURL, _) = try await URLSession.shared.download(from: url)
+            try FileManager.default.moveItem(at: localURL, to: destinationPath)
 
-        // Refresh model list
-        await discoverModels()
+            // Refresh model list
+            await discoverModels()
         #else
-        // iOS: Home directory access not available on iOS
-        throw LocalModelError.notImplemented
+            // iOS: Home directory access not available on iOS
+            throw LocalModelError.notImplemented
         #endif
     }
 }
@@ -378,10 +378,10 @@ struct OllamaModelInstance: LocalModelInstance {
     init(model: LocalModel) {
         self.model = model
         // Capture config value at init time for Sendable compliance
-        self.ollamaURL = LocalModelConfiguration().ollamaBaseURL + LocalModelConfiguration().ollamaAPIEndpoint
+        ollamaURL = LocalModelConfiguration().ollamaBaseURL + LocalModelConfiguration().ollamaAPIEndpoint
     }
 
-    func generate(prompt: String, maxTokens: Int) async throws -> AsyncThrowingStream<String, Error> {
+    func generate(prompt: String, maxTokens _: Int) async throws -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -406,7 +406,8 @@ struct OllamaModelInstance: LocalModelInstance {
                     for try await line in bytes.lines {
                         if let data = line.data(using: .utf8),
                            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                           let response = json["response"] as? String {
+                           let response = json["response"] as? String
+                        {
                             continuation.yield(response)
                         }
                     }
@@ -427,7 +428,7 @@ struct MLXModelInstance: LocalModelInstance {
     init(model: LocalModel) {
         self.model = model
         // Capture config value at init time for Sendable compliance
-        self.mlxPath = LocalModelConfiguration().mlxExecutablePath
+        mlxPath = LocalModelConfiguration().mlxExecutablePath
     }
 
     func generate(prompt: String, maxTokens: Int) async throws -> AsyncThrowingStream<String, Error> {
@@ -435,30 +436,30 @@ struct MLXModelInstance: LocalModelInstance {
             Task {
                 do {
                     #if os(macOS)
-                    // Call MLX generation
-                    let process = Process()
-                    process.executableURL = URL(fileURLWithPath: mlxPath)
-                    process.arguments = [
-                        "generate",
-                        "--model", model.name,
-                        "--prompt", prompt,
-                        "--max-tokens", String(maxTokens)
-                    ]
+                        // Call MLX generation
+                        let process = Process()
+                        process.executableURL = URL(fileURLWithPath: mlxPath)
+                        process.arguments = [
+                            "generate",
+                            "--model", model.name,
+                            "--prompt", prompt,
+                            "--max-tokens", String(maxTokens)
+                        ]
 
-                    let pipe = Pipe()
-                    process.standardOutput = pipe
+                        let pipe = Pipe()
+                        process.standardOutput = pipe
 
-                    try process.run()
+                        try process.run()
 
-                    for try await line in pipe.fileHandleForReading.bytes.lines {
-                        continuation.yield(line)
-                    }
+                        for try await line in pipe.fileHandleForReading.bytes.lines {
+                            continuation.yield(line)
+                        }
 
-                    process.waitUntilExit()
-                    continuation.finish()
+                        process.waitUntilExit()
+                        continuation.finish()
                     #else
-                    // iOS: MLX requires macOS - not available on iOS
-                    throw LocalModelError.notImplemented
+                        // iOS: MLX requires macOS - not available on iOS
+                        throw LocalModelError.notImplemented
                     #endif
                 } catch {
                     continuation.finish(throwing: error)
@@ -471,7 +472,7 @@ struct MLXModelInstance: LocalModelInstance {
 struct GGUFModelInstance: LocalModelInstance {
     let model: LocalModel
 
-    func generate(prompt: String, maxTokens: Int) async throws -> AsyncThrowingStream<String, Error> {
+    func generate(prompt _: String, maxTokens _: Int) async throws -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 // GGUF requires llama.cpp or similar runtime
@@ -502,8 +503,8 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
             supportsVision: false,
             supportsFunctionCalling: false,
             supportsWebSearch: false,
-            maxContextTokens: 4_096,
-            maxOutputTokens: 2_048,
+            maxContextTokens: 4096,
+            maxOutputTokens: 2048,
             supportedModalities: [.text]
         )
     }
@@ -513,7 +514,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
         self.instance = instance
     }
 
-    func validateAPIKey(_ key: String) async throws -> ValidationResult {
+    func validateAPIKey(_: String) async throws -> ValidationResult {
         // Local models don't need API keys
         .success()
     }
@@ -523,8 +524,8 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
             id: modelName,
             name: modelName,
             description: "Local model",
-            contextWindow: 4_096,
-            maxOutputTokens: 2_048,
+            contextWindow: 4096,
+            maxOutputTokens: 2048,
             inputPricePerMillion: 0,
             outputPricePerMillion: 0,
             supportsVision: false,
@@ -535,7 +536,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
     func chat(
         messages: [AIMessage],
         model: String,
-        stream: Bool = false
+        stream _: Bool = false
     ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
         // Convert messages to prompt
         let prompt = messages.map { message in
@@ -545,7 +546,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let stream = try await instance.generate(prompt: prompt, maxTokens: 2_048)
+                    let stream = try await instance.generate(prompt: prompt, maxTokens: 2048)
 
                     var fullText = ""
                     for try await text in stream {
@@ -620,14 +621,14 @@ enum LocalModelError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .runtimeNotInstalled(let runtime):
-            return "\(runtime) is not installed"
+        case let .runtimeNotInstalled(runtime):
+            "\(runtime) is not installed"
         case .modelNotFound:
-            return "Model not found"
+            "Model not found"
         case .installationFailed:
-            return "Model installation failed"
+            "Model installation failed"
         case .notImplemented:
-            return "Feature not yet implemented"
+            "Feature not yet implemented"
         }
     }
 }

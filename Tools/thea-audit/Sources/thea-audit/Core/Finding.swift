@@ -32,7 +32,7 @@ struct Finding: Codable, Identifiable, Sendable {
         category: FindingCategory,
         cweID: String? = nil
     ) {
-        self.id = UUID().uuidString
+        id = UUID().uuidString
         self.ruleID = ruleID
         self.severity = severity
         self.title = title
@@ -44,14 +44,14 @@ struct Finding: Codable, Identifiable, Sendable {
         self.recommendation = recommendation
         self.category = category
         self.cweID = cweID
-        self.timestamp = Date()
+        timestamp = Date()
     }
 
     /// Location string for display
     var location: String {
-        if let line = line, let column = column {
+        if let line, let column {
             return "\(file):\(line):\(column)"
-        } else if let line = line {
+        } else if let line {
             return "\(file):\(line)"
         }
         return file
@@ -74,17 +74,17 @@ enum FindingCategory: String, Codable, CaseIterable, Sendable {
 
     var icon: String {
         switch self {
-        case .authentication: return "person.badge.key"
-        case .authorization: return "lock.shield"
-        case .injection: return "syringe"
-        case .cryptography: return "key"
-        case .dataExposure: return "eye.slash"
-        case .configuration: return "gearshape"
-        case .inputValidation: return "checkmark.shield"
-        case .accessControl: return "hand.raised"
-        case .codeQuality: return "ladybug"
-        case .supplyChain: return "shippingbox"
-        case .agentSecurity: return "brain.head.profile"
+        case .authentication: "person.badge.key"
+        case .authorization: "lock.shield"
+        case .injection: "syringe"
+        case .cryptography: "key"
+        case .dataExposure: "eye.slash"
+        case .configuration: "gearshape"
+        case .inputValidation: "checkmark.shield"
+        case .accessControl: "hand.raised"
+        case .codeQuality: "ladybug"
+        case .supplyChain: "shippingbox"
+        case .agentSecurity: "brain.head.profile"
         }
     }
 }
@@ -97,7 +97,7 @@ struct AuditReport: Codable, Sendable {
 
     init(findings: [Finding], metadata: AuditMetadata) {
         self.findings = findings
-        self.summary = AuditSummary(from: findings)
+        summary = AuditSummary(from: findings)
         self.metadata = metadata
     }
 }
@@ -113,21 +113,21 @@ struct AuditSummary: Codable, Sendable {
     let categoryCounts: [String: Int]
 
     init(from findings: [Finding]) {
-        self.totalFindings = findings.count
-        self.criticalCount = findings.filter { $0.severity == .critical }.count
-        self.highCount = findings.filter { $0.severity == .high }.count
-        self.mediumCount = findings.filter { $0.severity == .medium }.count
-        self.lowCount = findings.filter { $0.severity == .low }.count
+        totalFindings = findings.count
+        criticalCount = findings.count(where: { $0.severity == .critical })
+        highCount = findings.count(where: { $0.severity == .high })
+        mediumCount = findings.count(where: { $0.severity == .medium })
+        lowCount = findings.count(where: { $0.severity == .low })
 
         // Count unique files
-        self.filesScanned = Set(findings.map { $0.file }).count
+        filesScanned = Set(findings.map(\.file)).count
 
         // Count by category
         var categories: [String: Int] = [:]
         for finding in findings {
             categories[finding.category.rawValue, default: 0] += 1
         }
-        self.categoryCounts = categories
+        categoryCounts = categories
     }
 }
 
@@ -148,8 +148,8 @@ struct AuditMetadata: Codable, Sendable {
         scannersUsed: [String] = [],
         duration: TimeInterval? = nil
     ) {
-        self.version = "1.0.0"
-        self.timestamp = Date()
+        version = "1.0.0"
+        timestamp = Date()
         self.repositoryPath = repositoryPath
         self.deltaMode = deltaMode
         self.baseBranch = baseBranch

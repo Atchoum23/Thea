@@ -3,6 +3,7 @@ import Observation
 @preconcurrency import SwiftData
 
 // MARK: - User Preference Model
+
 // Learns and tracks user preferences for personalized prompt optimization
 
 @MainActor
@@ -16,7 +17,7 @@ final class UserPreferenceModel {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
         Task {
             await loadPreferences()
         }
@@ -181,7 +182,7 @@ final class UserPreferenceModel {
         // Length
         if output.count < 500 {
             characteristics.append(("length", "short"))
-        } else if output.count < 2_000 {
+        } else if output.count < 2000 {
             characteristics.append(("length", "medium"))
         } else {
             characteristics.append(("length", "long"))
@@ -225,7 +226,7 @@ final class UserPreferenceModel {
                 characteristics.append(("code_style", "strict_concurrency"))
             }
 
-            if output.contains("enum") && output.contains("case") {
+            if output.contains("enum"), output.contains("case") {
                 characteristics.append(("code_style", "enums"))
             }
         }
@@ -304,8 +305,8 @@ final class UserPreferenceModel {
 
         do {
             let preferences = try context.fetch(descriptor)
-            let categories = Set(preferences.map { $0.category })
-            let avgConfidence = preferences.isEmpty ? 0 : preferences.map { $0.confidence }.reduce(0, +) / Float(preferences.count)
+            let categories = Set(preferences.map(\.category))
+            let avgConfidence = preferences.isEmpty ? 0 : preferences.map(\.confidence).reduce(0, +) / Float(preferences.count)
             let mostConfident = preferences.max { a, b in a.confidence < b.confidence }
 
             return PreferenceStats(

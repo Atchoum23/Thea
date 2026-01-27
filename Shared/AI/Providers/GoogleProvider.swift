@@ -15,7 +15,7 @@ final class GoogleProvider: AIProvider, Sendable {
         supportsFunctionCalling: true,
         supportsWebSearch: false,
         maxContextTokens: 1_000_000, // Gemini 1.5 Pro
-        maxOutputTokens: 8_192,
+        maxOutputTokens: 8192,
         supportedModalities: [.text, .image, .video, .audio]
     )
 
@@ -26,7 +26,7 @@ final class GoogleProvider: AIProvider, Sendable {
         self.apiKey = apiKey
         // Capture configuration at init time for Sendable compliance
         let config = ProviderConfiguration()
-        self.baseURL = config.googleBaseURL
+        baseURL = config.googleBaseURL
     }
 
     // MARK: - Validation
@@ -89,7 +89,8 @@ final class GoogleProvider: AIProvider, Sendable {
                         let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
 
                         guard let httpResponse = response as? HTTPURLResponse,
-                              httpResponse.statusCode == 200 else {
+                              httpResponse.statusCode == 200
+                        else {
                             throw GoogleError.invalidResponse
                         }
 
@@ -101,7 +102,8 @@ final class GoogleProvider: AIProvider, Sendable {
                                   let candidates = json["candidates"] as? [[String: Any]],
                                   let content = candidates.first?["content"] as? [String: Any],
                                   let parts = content["parts"] as? [[String: Any]],
-                                  let text = parts.first?["text"] as? String else {
+                                  let text = parts.first?["text"] as? String
+                            else {
                                 continue
                             }
 
@@ -130,7 +132,8 @@ final class GoogleProvider: AIProvider, Sendable {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
+                  httpResponse.statusCode == 200
+            else {
                 throw GoogleError.invalidResponse
             }
 
@@ -138,7 +141,8 @@ final class GoogleProvider: AIProvider, Sendable {
                   let candidates = json["candidates"] as? [[String: Any]],
                   let content = candidates.first?["content"] as? [String: Any],
                   let parts = content["parts"] as? [[String: Any]],
-                  let text = parts.first?["text"] as? String else {
+                  let text = parts.first?["text"] as? String
+            else {
                 throw GoogleError.noResponse
             }
 
@@ -167,7 +171,7 @@ final class GoogleProvider: AIProvider, Sendable {
                 name: "Gemini 2.0 Flash",
                 description: "Experimental next-gen model",
                 contextWindow: 1_000_000,
-                maxOutputTokens: 8_192,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 0.00, // Free during preview
                 outputPricePerMillion: 0.00,
                 supportsVision: true,
@@ -178,7 +182,7 @@ final class GoogleProvider: AIProvider, Sendable {
                 name: "Gemini 1.5 Pro",
                 description: "Most capable Gemini model",
                 contextWindow: 1_000_000,
-                maxOutputTokens: 8_192,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 1.25,
                 outputPricePerMillion: 5.00,
                 supportsVision: true,
@@ -189,7 +193,7 @@ final class GoogleProvider: AIProvider, Sendable {
                 name: "Gemini 1.5 Flash",
                 description: "Fast and cost-effective",
                 contextWindow: 1_000_000,
-                maxOutputTokens: 8_192,
+                maxOutputTokens: 8192,
                 inputPricePerMillion: 0.075,
                 outputPricePerMillion: 0.30,
                 supportsVision: true,
@@ -208,9 +212,9 @@ enum GoogleError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Invalid response from Google"
+            "Invalid response from Google"
         case .noResponse:
-            return "No response from Google"
+            "No response from Google"
         }
     }
 }

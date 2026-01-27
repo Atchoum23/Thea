@@ -6,16 +6,15 @@
 //  Copyright © 2026. All rights reserved.
 //
 
+import Combine
 import Foundation
 import Network
-import Combine
 
 // MARK: - Remote Session Manager
 
 /// Manages active remote client sessions
 @MainActor
 public class RemoteSessionManager: ObservableObject {
-
     // MARK: - Published State
 
     @Published public private(set) var activeSessions: [RemoteSession] = []
@@ -160,7 +159,8 @@ public class RemoteSessionManager: ObservableObject {
 
     private func loadSessionHistory() {
         if let data = UserDefaults.standard.data(forKey: "thea.remote.sessionhistory"),
-           let history = try? JSONDecoder().decode([SessionRecord].self, from: data) {
+           let history = try? JSONDecoder().decode([SessionRecord].self, from: data)
+        {
             sessionHistory = history
         }
     }
@@ -211,24 +211,24 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
     }
 
     public init(connection: NWConnection) {
-        self.id = UUID().uuidString
+        id = UUID().uuidString
         self.connection = connection
-        self.createdAt = Date()
-        self.isAuthenticated = false
-        self.permissions = []
+        createdAt = Date()
+        isAuthenticated = false
+        permissions = []
 
         // Extract client info from connection
         var ipAddress = "unknown"
-        var deviceType: RemoteClient.DeviceType = .unknown
+        let deviceType: RemoteClient.DeviceType = .unknown
 
         switch connection.endpoint {
-        case .hostPort(let host, _):
+        case let .hostPort(host, _):
             ipAddress = "\(host)"
         default:
             break
         }
 
-        self.client = RemoteClient(
+        client = RemoteClient(
             id: UUID().uuidString,
             name: "Unknown",
             deviceType: deviceType,
@@ -257,7 +257,7 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             connection.send(content: framedData, completion: .contentProcessed { error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                 } else {
                     continuation.resume()
@@ -298,7 +298,7 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
     private func receiveData(length: Int) async throws -> Data {
         try await withCheckedThrowingContinuation { continuation in
             connection.receive(minimumIncompleteLength: length, maximumLength: length) { content, _, isComplete, error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                 } else if let data = content {
                     continuation.resume(returning: data)
@@ -334,7 +334,7 @@ public struct SessionRecord: Identifiable, Codable, Sendable {
     public let permissions: Set<RemotePermission>
 
     public var duration: TimeInterval? {
-        guard let endTime = endTime else { return nil }
+        guard let endTime else { return nil }
         return endTime.timeIntervalSince(startTime)
     }
 

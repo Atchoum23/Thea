@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - MLX Model Scanner
+
 // Scans directories for MLX and GGUF model files
 // Extracts metadata like size, format, quantization
 
@@ -71,7 +72,8 @@ actor MLXModelScanner {
 
         // Check for MLX model directories (typically contain config.json and weights)
         if let isDirectory = try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory,
-           isDirectory {
+           isDirectory
+        {
             return isMLXModelDirectory(url)
         }
 
@@ -115,9 +117,9 @@ actor MLXModelScanner {
 
     private func extractModelInfo(from url: URL) async throws -> ScannedModel {
         if url.pathExtension.lowercased() == "gguf" {
-            return try await extractGGUFInfo(from: url)
+            try await extractGGUFInfo(from: url)
         } else {
-            return try await extractMLXInfo(from: url)
+            try await extractMLXInfo(from: url)
         }
     }
 
@@ -157,7 +159,8 @@ actor MLXModelScanner {
 
         if FileManager.default.fileExists(atPath: configURL.path),
            let data = try? Data(contentsOf: configURL),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        {
             // Extract model parameters if available
             if let hiddenSize = json["hidden_size"] as? Int {
                 parameters = formatParameters(hiddenSize: hiddenSize)
@@ -229,11 +232,11 @@ actor MLXModelScanner {
         // Extract quantization (e.g., "q4_k_m", "4bit", "fp16")
         var quantization: String?
         let quantPatterns = [
-            #"q(\d+)_k_m"#,     // q4_k_m
-            #"q(\d+)_\d+"#,     // q4_0
-            #"(\d+)bit"#,       // 4bit
-            #"(fp\d+)"#,        // fp16, fp32
-            #"(int\d+)"#        // int8, int4
+            #"q(\d+)_k_m"#, // q4_k_m
+            #"q(\d+)_\d+"#, // q4_0
+            #"(\d+)bit"#, // 4bit
+            #"(fp\d+)"#, // fp16, fp32
+            #"(int\d+)"# // int8, int4
         ]
 
         for pattern in quantPatterns {
@@ -250,16 +253,16 @@ actor MLXModelScanner {
         // Rough estimation based on hidden size
         // This is very approximate and model-dependent
         switch hiddenSize {
-        case ..<2_048:
-            return "1B"
-        case 2_048..<4_096:
-            return "3B"
-        case 4_096..<6_144:
-            return "7B"
-        case 6_144..<8_192:
-            return "13B"
+        case ..<2048:
+            "1B"
+        case 2048 ..< 4096:
+            "3B"
+        case 4096 ..< 6144:
+            "7B"
+        case 6144 ..< 8192:
+            "13B"
         default:
-            return "70B+"
+            "70B+"
         }
     }
 }
@@ -314,12 +317,12 @@ enum ScannerError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .directoryNotFound(let path):
-            return "Directory not found: \(path)"
+        case let .directoryNotFound(path):
+            "Directory not found: \(path)"
         case .invalidModelFormat:
-            return "Invalid model format"
+            "Invalid model format"
         case .readPermissionDenied:
-            return "Permission denied to read directory"
+            "Permission denied to read directory"
         }
     }
 }

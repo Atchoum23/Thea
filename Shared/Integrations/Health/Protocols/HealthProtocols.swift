@@ -125,17 +125,17 @@ public struct HealthInsight: Sendable, Codable, Identifiable {
 
         public var color: String {
             switch self {
-            case .info: return "#3B82F6"      // Blue
-            case .warning: return "#F59E0B"   // Amber
-            case .critical: return "#EF4444"  // Red
+            case .info: "#3B82F6" // Blue
+            case .warning: "#F59E0B" // Amber
+            case .critical: "#EF4444" // Red
             }
         }
 
         public var icon: String {
             switch self {
-            case .info: return "info.circle"
-            case .warning: return "exclamationmark.triangle"
-            case .critical: return "exclamationmark.octagon"
+            case .info: "info.circle"
+            case .warning: "exclamationmark.triangle"
+            case .critical: "exclamationmark.octagon"
             }
         }
     }
@@ -149,21 +149,21 @@ public struct HealthInsight: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .sleep: return "Sleep"
-            case .heartRate: return "Heart Rate"
-            case .activity: return "Activity"
-            case .vitals: return "Vital Signs"
-            case .general: return "General"
+            case .sleep: "Sleep"
+            case .heartRate: "Heart Rate"
+            case .activity: "Activity"
+            case .vitals: "Vital Signs"
+            case .general: "General"
             }
         }
 
         public var icon: String {
             switch self {
-            case .sleep: return "bed.double.fill"
-            case .heartRate: return "heart.fill"
-            case .activity: return "figure.walk"
-            case .vitals: return "waveform.path.ecg"
-            case .general: return "heart.text.square.fill"
+            case .sleep: "bed.double.fill"
+            case .heartRate: "heart.fill"
+            case .activity: "figure.walk"
+            case .vitals: "waveform.path.ecg"
+            case .general: "heart.text.square.fill"
             }
         }
     }

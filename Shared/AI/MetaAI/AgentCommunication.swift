@@ -14,8 +14,8 @@ public final class AgentCommunication {
     private(set) var sharedContext: [String: Any] = [:]
     private(set) var subscriptions: [UUID: Set<MessageType>] = [:]
 
-    private let maxQueueSize = 1_000
-    private let messageRetentionSeconds: TimeInterval = 3_600 // 1 hour
+    private let maxQueueSize = 1000
+    private let messageRetentionSeconds: TimeInterval = 3600 // 1 hour
 
     private init() {
         // Start cleanup timer
@@ -78,7 +78,7 @@ public final class AgentCommunication {
     public func getLatestMessage(from senderID: UUID, type: MessageType? = nil) -> AgentMessage? {
         var messages = messageQueue.filter { $0.senderID == senderID }
 
-        if let type = type {
+        if let type {
             messages = messages.filter { $0.type == type }
         }
 
@@ -97,7 +97,7 @@ public final class AgentCommunication {
             subscriptions[agentID]?.insert(type)
         }
 
-        print("[AgentCommunication] Agent \(agentID) subscribed to: \(types.map { $0.rawValue }.joined(separator: ", "))")
+        print("[AgentCommunication] Agent \(agentID) subscribed to: \(types.map(\.rawValue).joined(separator: ", "))")
     }
 
     /// Unsubscribe an agent from specific message types
@@ -115,7 +115,7 @@ public final class AgentCommunication {
     // MARK: - Shared Context
 
     /// Store value in shared context
-    public func setContext<T>(_ key: String, value: T) {
+    public func setContext(_ key: String, value: some Any) {
         sharedContext[key] = value
         print("[AgentCommunication] Context updated: \(key)")
 
@@ -259,7 +259,7 @@ public final class AgentCommunication {
             totalMessages: messageQueue.count,
             messagesByType: Dictionary(grouping: messageQueue) { $0.type }
                 .mapValues { $0.count },
-            activeAgents: Set(messageQueue.map { $0.senderID }).count,
+            activeAgents: Set(messageQueue.map(\.senderID)).count,
             subscribedAgents: subscriptions.count,
             contextKeys: sharedContext.count
         )
@@ -298,16 +298,16 @@ public enum MessageType: String, Codable, CaseIterable, Hashable {
 
     public var displayName: String {
         switch self {
-        case .taskAssignment: return "Task Assignment"
-        case .taskResult: return "Task Result"
-        case .helpRequest: return "Help Request"
-        case .helpResponse: return "Help Response"
-        case .contextUpdate: return "Context Update"
-        case .resultSharing: return "Result Sharing"
-        case .event: return "Event"
-        case .coordination: return "Coordination"
-        case .error: return "Error"
-        case .status: return "Status"
+        case .taskAssignment: "Task Assignment"
+        case .taskResult: "Task Result"
+        case .helpRequest: "Help Request"
+        case .helpResponse: "Help Response"
+        case .contextUpdate: "Context Update"
+        case .resultSharing: "Result Sharing"
+        case .event: "Event"
+        case .coordination: "Coordination"
+        case .error: "Error"
+        case .status: "Status"
         }
     }
 }
@@ -321,22 +321,22 @@ public enum MessagePayload {
     /// Extract text content
     public var text: String? {
         switch self {
-        case .text(let content):
-            return content
-        case .structured(let dict):
-            return dict.description
+        case let .text(content):
+            content
+        case let .structured(dict):
+            dict.description
         case .binary:
-            return nil
+            nil
         }
     }
 
     /// Extract structured data
     public var structured: [String: Any]? {
         switch self {
-        case .structured(let dict):
-            return dict
+        case let .structured(dict):
+            dict
         default:
-            return nil
+            nil
         }
     }
 }

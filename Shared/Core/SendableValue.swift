@@ -30,47 +30,47 @@ public enum SendableValue: Codable, Sendable, Equatable, Hashable {
     /// The underlying value as Any
     public var value: Any {
         switch self {
-        case .string(let v): return v
-        case .int(let v): return v
-        case .double(let v): return v
-        case .bool(let v): return v
-        case .date(let v): return v
-        case .data(let v): return v
-        case .uuid(let v): return v
-        case .url(let v): return v
-        case .array(let v): return v.map { $0.value }
-        case .dictionary(let v): return v.mapValues { $0.value }
-        case .null: return NSNull()
+        case let .string(v): v
+        case let .int(v): v
+        case let .double(v): v
+        case let .bool(v): v
+        case let .date(v): v
+        case let .data(v): v
+        case let .uuid(v): v
+        case let .url(v): v
+        case let .array(v): v.map(\.value)
+        case let .dictionary(v): v.mapValues { $0.value }
+        case .null: NSNull()
         }
     }
 
     /// String value or nil
     public var stringValue: String? {
-        if case .string(let v) = self { return v }
+        if case let .string(v) = self { return v }
         return nil
     }
 
     /// Int value or nil
     public var intValue: Int? {
-        if case .int(let v) = self { return v }
+        if case let .int(v) = self { return v }
         return nil
     }
 
     /// Double value or nil
     public var doubleValue: Double? {
-        if case .double(let v) = self { return v }
+        if case let .double(v) = self { return v }
         return nil
     }
 
     /// Bool value or nil
     public var boolValue: Bool? {
-        if case .bool(let v) = self { return v }
+        if case let .bool(v) = self { return v }
         return nil
     }
 
     /// Date value or nil
     public var dateValue: Date? {
-        if case .date(let v) = self { return v }
+        if case let .date(v) = self { return v }
         return nil
     }
 
@@ -145,25 +145,25 @@ public enum SendableValue: Codable, Sendable, Equatable, Hashable {
         var container = encoder.singleValueContainer()
 
         switch self {
-        case .string(let v):
+        case let .string(v):
             try container.encode(v)
-        case .int(let v):
+        case let .int(v):
             try container.encode(v)
-        case .double(let v):
+        case let .double(v):
             try container.encode(v)
-        case .bool(let v):
+        case let .bool(v):
             try container.encode(v)
-        case .date(let v):
+        case let .date(v):
             try container.encode(v)
-        case .data(let v):
+        case let .data(v):
             try container.encode(v.base64EncodedString())
-        case .uuid(let v):
+        case let .uuid(v):
             try container.encode(v.uuidString)
-        case .url(let v):
+        case let .url(v):
             try container.encode(v.absoluteString)
-        case .array(let v):
+        case let .array(v):
             try container.encode(v)
-        case .dictionary(let v):
+        case let .dictionary(v):
             try container.encode(v)
         case .null:
             try container.encodeNil()
@@ -198,7 +198,7 @@ extension SendableValue: ExpressibleByBooleanLiteral {
 }
 
 extension SendableValue: ExpressibleByNilLiteral {
-    public init(nilLiteral: ()) {
+    public init(nilLiteral _: ()) {
         self = .null
     }
 }
@@ -217,7 +217,7 @@ extension SendableValue: ExpressibleByDictionaryLiteral {
 
 // MARK: - Dictionary Conversion Utilities
 
-public extension Dictionary where Key == String, Value == SendableValue {
+public extension [String: SendableValue] {
     /// Convert from [String: Any] dictionary
     init(fromAny dict: [String: Any]) {
         self = dict.mapValues { SendableValue($0) }
@@ -229,7 +229,7 @@ public extension Dictionary where Key == String, Value == SendableValue {
     }
 }
 
-public extension Dictionary where Key == AnyHashable, Value == Any {
+public extension [AnyHashable: Any] {
     /// Convert to SendableValue dictionary (filtering non-string keys)
     func toSendableDict() -> [String: SendableValue] {
         var result: [String: SendableValue] = [:]

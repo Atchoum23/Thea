@@ -1,10 +1,9 @@
-import XCTest
 @testable import TheaCore
+import XCTest
 
 /// Test suite for Health module services
 @MainActor
 final class HealthServiceTests: XCTestCase {
-
     // MARK: - Blood Pressure Tests
 
     func testBloodPressureCategorization() {
@@ -226,9 +225,9 @@ final class HealthServiceTests: XCTestCase {
 
         // Component scores should sum to overall score
         let componentAverage = (viewModel.sleepScore + viewModel.activityScore +
-                               viewModel.heartScore + viewModel.nutritionScore) / 4.0
+            viewModel.heartScore + viewModel.nutritionScore) / 4.0
         XCTAssertEqual(viewModel.healthScore, componentAverage, accuracy: 5.0,
-                      "Health score should approximate component average")
+                       "Health score should approximate component average")
     }
 
     func testInsightGeneration() async {
@@ -308,7 +307,7 @@ final class HealthServiceTests: XCTestCase {
         )
 
         XCTAssertEqual(goal.milestones.count, 4)
-        XCTAssertEqual(goal.milestones.filter { $0.isCompleted }.count, 2, "Should have 2 completed milestones")
+        XCTAssertEqual(goal.milestones.count { $0.isCompleted }, 2, "Should have 2 completed milestones")
     }
 
     func testGoalCompletion() async {

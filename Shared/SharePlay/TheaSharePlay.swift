@@ -5,9 +5,15 @@
 //  SharePlay support for collaborative AI sessions
 //
 
-import Foundation
 import Combine
+import Foundation
 import GroupActivities
+#if canImport(UIKit)
+    import UIKit
+#endif
+#if os(macOS)
+    import AppKit
+#endif
 
 // MARK: - Thea Group Activity
 
@@ -156,25 +162,25 @@ public class TheaSharePlayManager: ObservableObject {
 
     private var localParticipantId: String {
         #if os(macOS)
-        return Host.current().localizedName ?? UUID().uuidString
+            return Host.current().localizedName ?? UUID().uuidString
         #elseif os(iOS)
-        return UIDevice.current.name
+            return UIDevice.current.name
         #else
-        return UUID().uuidString
+            return UUID().uuidString
         #endif
     }
 
     private var localDeviceType: String {
         #if os(macOS)
-        return "Mac"
+            return "Mac"
         #elseif os(iOS)
-        return UIDevice.current.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
+            return UIDevice.current.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
         #elseif os(watchOS)
-        return "Apple Watch"
+            return "Apple Watch"
         #elseif os(tvOS)
-        return "Apple TV"
+            return "Apple TV"
         #else
-        return "Unknown"
+            return "Unknown"
         #endif
     }
 
@@ -203,13 +209,13 @@ public class TheaSharePlayManager: ObservableObject {
             hostName: localParticipantId
         )
 
-        let result = try await activity.prepareForActivation()
+        let result = await activity.prepareForActivation()
 
         switch result {
         case .activationDisabled:
             throw SharePlayError.activationDisabled
         case .activationPreferred:
-            activity.activate()
+            _ = try await activity.activate()
         case .cancelled:
             throw SharePlayError.cancelled
         @unknown default:
@@ -312,7 +318,7 @@ public class TheaSharePlayManager: ObservableObject {
     // MARK: - Message Handling
 
     private func startReceivingMessages() {
-        guard let messenger = messenger else { return }
+        guard let messenger else { return }
 
         let task = Task {
             for await (message, _) in messenger.messages(of: SharePlayMessage.self) {
@@ -324,43 +330,43 @@ public class TheaSharePlayManager: ObservableObject {
 
     private func handleMessage(_ message: SharePlayMessage) async {
         switch message {
-        case .chatMessage(let content):
+        case let .chatMessage(content):
             sharedMessages.append(content)
 
-        case .aiResponse(let content):
+        case let .aiResponse(content):
             if let index = sharedAIResponses.firstIndex(where: { $0.promptId == content.promptId }) {
                 sharedAIResponses[index] = content
             } else {
                 sharedAIResponses.append(content)
             }
 
-        case .typing(let indicator):
+        case let .typing(indicator):
             if indicator.isTyping {
                 typingParticipants.insert(indicator.participantName)
             } else {
                 typingParticipants.remove(indicator.participantName)
             }
 
-        case .reaction(let reaction):
+        case .reaction:
             // Handle reaction (could update message reactions)
-            break
+            return
 
         case .syncRequest:
             if isHost {
                 await sendSyncData()
             }
 
-        case .syncResponse(let data):
+        case let .syncResponse(data):
             sharedMessages = data.messages
             sharedAIResponses = data.aiResponses
 
-        case .participantJoined(let info):
+        case .participantJoined:
             // Could show notification
-            break
+            return
 
-        case .participantLeft(let participantId):
+        case .participantLeft:
             // Could show notification
-            break
+            return
         }
     }
 
@@ -425,7 +431,7 @@ public class TheaSharePlayManager: ObservableObject {
     }
 
     private func sendMessage(_ message: SharePlayMessage) async {
-        guard let messenger = messenger else { return }
+        guard let messenger else { return }
 
         do {
             try await messenger.send(message)
@@ -458,13 +464,13 @@ public enum SharePlayError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .activationDisabled:
-            return "SharePlay is not available. Make sure you're on a FaceTime call."
+            "SharePlay is not available. Make sure you're on a FaceTime call."
         case .cancelled:
-            return "SharePlay session was cancelled"
+            "SharePlay session was cancelled"
         case .notInSession:
-            return "Not currently in a SharePlay session"
+            "Not currently in a SharePlay session"
         case .messageFailed:
-            return "Failed to send message to participants"
+            "Failed to send message to participants"
         }
     }
 }

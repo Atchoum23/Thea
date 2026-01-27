@@ -127,26 +127,26 @@ public struct TransferableCodeSnippet: Codable, Transferable, Sendable {
 
     public var fileExtension: String {
         switch language.lowercased() {
-        case "swift": return "swift"
-        case "python": return "py"
-        case "javascript", "js": return "js"
-        case "typescript", "ts": return "ts"
-        case "rust": return "rs"
-        case "go": return "go"
-        case "java": return "java"
-        case "kotlin": return "kt"
-        case "c": return "c"
-        case "cpp", "c++": return "cpp"
-        case "csharp", "c#": return "cs"
-        case "ruby": return "rb"
-        case "php": return "php"
-        case "html": return "html"
-        case "css": return "css"
-        case "json": return "json"
-        case "yaml", "yml": return "yaml"
-        case "sql": return "sql"
-        case "shell", "bash": return "sh"
-        default: return "txt"
+        case "swift": "swift"
+        case "python": "py"
+        case "javascript", "js": "js"
+        case "typescript", "ts": "ts"
+        case "rust": "rs"
+        case "go": "go"
+        case "java": "java"
+        case "kotlin": "kt"
+        case "c": "c"
+        case "cpp", "c++": "cpp"
+        case "csharp", "c#": "cs"
+        case "ruby": "rb"
+        case "php": "php"
+        case "html": "html"
+        case "css": "css"
+        case "json": "json"
+        case "yaml", "yml": "yaml"
+        case "sql": "sql"
+        case "shell", "bash": "sh"
+        default: "txt"
         }
     }
 }
@@ -198,7 +198,7 @@ public struct TransferableKnowledgeItem: Codable, Transferable, Sendable {
         if !tags.isEmpty {
             text += "Tags: \(tags.joined(separator: ", "))\n"
         }
-        if let source = source {
+        if let source {
             text += "Source: \(source)\n"
         }
         text += "\n\(content)"
@@ -315,7 +315,7 @@ public struct TransferableAnalyzedImage: Transferable, @unchecked Sendable {
         self.imageData = imageData
         self.analysis = analysis
         self.tags = tags
-        self.contentTypeIdentifier = contentType.identifier
+        contentTypeIdentifier = contentType.identifier
     }
 
     public static var transferRepresentation: some TransferRepresentation {
@@ -335,24 +335,24 @@ public struct TransferableAnalyzedImage: Transferable, @unchecked Sendable {
 
 // MARK: - Custom UTTypes
 
-extension UTType {
-    public static var theaConversation: UTType {
+public extension UTType {
+    static var theaConversation: UTType {
         UTType(exportedAs: "app.thea.conversation")
     }
 
-    public static var theaCodeSnippet: UTType {
+    static var theaCodeSnippet: UTType {
         UTType(exportedAs: "app.thea.code-snippet")
     }
 
-    public static var theaKnowledge: UTType {
+    static var theaKnowledge: UTType {
         UTType(exportedAs: "app.thea.knowledge")
     }
 
-    public static var theaProject: UTType {
+    static var theaProject: UTType {
         UTType(exportedAs: "app.thea.project")
     }
 
-    public static var theaResponse: UTType {
+    static var theaResponse: UTType {
         UTType(exportedAs: "app.thea.response")
     }
 }
@@ -367,11 +367,11 @@ public struct TheaDropDelegate: DropDelegate {
     }
 
     public func performDrop(info: DropInfo) -> Bool {
-        return onDrop(info.itemProviders(for: [.text, .url, .fileURL, .image, .json]))
+        onDrop(info.itemProviders(for: [.text, .url, .fileURL, .image, .json]))
     }
 
     public func validateDrop(info: DropInfo) -> Bool {
-        return info.hasItemsConforming(to: [.text, .url, .fileURL, .image, .json, .theaConversation])
+        info.hasItemsConforming(to: [.text, .url, .fileURL, .image, .json, .theaConversation])
     }
 }
 
@@ -380,17 +380,17 @@ public struct TheaDropDelegate: DropDelegate {
 public extension View {
     /// Make a view draggable with a conversation
     func draggable(conversation: TransferableConversation) -> some View {
-        self.draggable(conversation)
+        draggable(conversation)
     }
 
     /// Make a view draggable with a code snippet
     func draggable(codeSnippet: TransferableCodeSnippet) -> some View {
-        self.draggable(codeSnippet)
+        draggable(codeSnippet)
     }
 
     /// Make a view draggable with a knowledge item
     func draggable(knowledge: TransferableKnowledgeItem) -> some View {
-        self.draggable(knowledge)
+        draggable(knowledge)
     }
 
     /// Add drop support for Thea content types
@@ -401,46 +401,29 @@ public extension View {
         onText: @escaping (String) -> Void = { _ in },
         onURL: @escaping (URL) -> Void = { _ in }
     ) -> some View {
-        self
-            .dropDestination(for: TransferableConversation.self) { items, _ in
-                items.forEach { onConversation($0) }
-                return !items.isEmpty
-            }
-            .dropDestination(for: TransferableCodeSnippet.self) { items, _ in
-                items.forEach { onCode($0) }
-                return !items.isEmpty
-            }
-            .dropDestination(for: TransferableKnowledgeItem.self) { items, _ in
-                items.forEach { onKnowledge($0) }
-                return !items.isEmpty
-            }
-            .dropDestination(for: String.self) { items, _ in
-                items.forEach { onText($0) }
-                return !items.isEmpty
-            }
-            .dropDestination(for: URL.self) { items, _ in
-                items.forEach { onURL($0) }
-                return !items.isEmpty
-            }
+        dropDestination(for: TransferableConversation.self) { items, _ in
+            items.forEach { onConversation($0) }
+            return !items.isEmpty
+        }
+        .dropDestination(for: TransferableCodeSnippet.self) { items, _ in
+            items.forEach { onCode($0) }
+            return !items.isEmpty
+        }
+        .dropDestination(for: TransferableKnowledgeItem.self) { items, _ in
+            items.forEach { onKnowledge($0) }
+            return !items.isEmpty
+        }
+        .dropDestination(for: String.self) { items, _ in
+            items.forEach { onText($0) }
+            return !items.isEmpty
+        }
+        .dropDestination(for: URL.self) { items, _ in
+            items.forEach { onURL($0) }
+            return !items.isEmpty
+        }
     }
 }
 
 // MARK: - Share Link Extensions
 
-public extension TransferableConversation {
-    var sharePreview: SharePreview<String, Image> {
-        SharePreview(title, image: Image(systemName: "bubble.left.and.bubble.right.fill"))
-    }
-}
-
-public extension TransferableCodeSnippet {
-    var sharePreview: SharePreview<String, Image> {
-        SharePreview(filename ?? "Code Snippet", image: Image(systemName: "chevron.left.forwardslash.chevron.right"))
-    }
-}
-
-public extension TransferableKnowledgeItem {
-    var sharePreview: SharePreview<String, Image> {
-        SharePreview(title, image: Image(systemName: "book.fill"))
-    }
-}
+// Share preview extensions removed - use ShareLink with inline preview instead

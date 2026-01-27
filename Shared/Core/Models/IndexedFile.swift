@@ -21,7 +21,7 @@ final class IndexedFile {
         indexedAt: Date = Date(),
         lastModified: Date = Date(),
         contentHash: String? = nil,
-        fileType: String = "",
+        fileType _: String = "",
         isIndexed: Bool = true
     ) {
         self.id = id
@@ -31,7 +31,7 @@ final class IndexedFile {
         self.indexedAt = indexedAt
         self.lastModified = lastModified
         self.contentHash = contentHash
-        self.fileType = URL(fileURLWithPath: path).pathExtension
+        fileType = URL(fileURLWithPath: path).pathExtension
         self.isIndexed = isIndexed
     }
 }

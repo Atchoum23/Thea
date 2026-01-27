@@ -5,9 +5,15 @@
 //  StoreKit 2 integration for in-app purchases and subscriptions
 //
 
-import Foundation
-import StoreKit
 import Combine
+import Foundation
+import OSLog
+import StoreKit
+import SwiftUI
+
+// MARK: - Private Logger
+
+private let logger = Logger(subsystem: "com.thea.app", category: "StoreKit")
 
 // MARK: - StoreKit Service
 
@@ -70,7 +76,7 @@ public class StoreKitService: ObservableObject {
         defer { isLoading = false }
 
         do {
-            let productIDs = ProductID.allCases.map { $0.rawValue }
+            let productIDs = ProductID.allCases.map(\.rawValue)
             let storeProducts = try await Product.products(for: productIDs)
 
             products = storeProducts.sorted { $0.price < $1.price }
@@ -82,7 +88,7 @@ public class StoreKitService: ObservableObject {
 
     // MARK: - Purchase
 
-    public func purchase(_ productID: ProductID) async throws -> Transaction? {
+    public func purchase(_ productID: ProductID) async throws -> StoreKit.Transaction? {
         guard let product = productsByID[productID.rawValue] else {
             throw StoreError.productNotFound
         }
@@ -90,14 +96,14 @@ public class StoreKitService: ObservableObject {
         return try await purchase(product)
     }
 
-    public func purchase(_ product: Product) async throws -> Transaction? {
+    public func purchase(_ product: Product) async throws -> StoreKit.Transaction? {
         isLoading = true
         defer { isLoading = false }
 
         let result = try await product.purchase()
 
         switch result {
-        case .success(let verification):
+        case let .success(verification):
             let transaction = try checkVerified(verification)
             await updatePurchasedProducts()
             await transaction.finish()
@@ -129,24 +135,39 @@ public class StoreKitService: ObservableObject {
     public func checkSubscriptionStatus() async {
         var status: SubscriptionStatus = .notSubscribed
 
-        for await result in Transaction.currentEntitlements {
-            guard case .verified(let transaction) = result else { continue }
-
-            if transaction.productType == .autoRenewable {
-                if let expirationDate = transaction.expirationDate {
-                    if expirationDate > Date() {
-                        if transaction.productID.contains("team") {
-                            status = .team(expiresAt: expirationDate)
-                        } else {
-                            status = .pro(expiresAt: expirationDate)
+        // Get subscription status from subscribed products
+        for product in products where product.type == .autoRenewable {
+            if let subscriptionInfo = product.subscription {
+                let statuses = try? await subscriptionInfo.status
+                for verificationResult in statuses ?? [] {
+                    switch verificationResult.state {
+                    case .subscribed:
+                        // Get expiration date from the transaction, not renewalInfo
+                        if let transaction = try? verificationResult.transaction.payloadValue,
+                           let expirationDate = transaction.expirationDate
+                        {
+                            if product.id.contains("team") {
+                                status = .team(expiresAt: expirationDate)
+                            } else {
+                                status = .pro(expiresAt: expirationDate)
+                            }
                         }
-                    } else {
-                        status = .expired(expiredAt: expirationDate)
+                    case .expired:
+                        if let transaction = try? verificationResult.transaction.payloadValue,
+                           let expirationDate = transaction.expirationDate
+                        {
+                            status = .expired(expiredAt: expirationDate)
+                        }
+                    default:
+                        break
                     }
                 }
-            } else if transaction.productID == ProductID.lifetimePro.rawValue {
-                status = .lifetime
             }
+        }
+
+        // Check for lifetime purchase
+        if purchasedProductIDs.contains(ProductID.lifetimePro.rawValue) {
+            status = .lifetime
         }
 
         subscriptionStatus = status
@@ -156,9 +177,9 @@ public class StoreKitService: ObservableObject {
 
     public func showManageSubscription() async {
         #if os(iOS)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            try? await AppStore.showManageSubscriptions(in: windowScene)
-        }
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                try? await AppStore.showManageSubscriptions(in: windowScene)
+            }
         #endif
     }
 
@@ -166,9 +187,17 @@ public class StoreKitService: ObservableObject {
 
     public func requestRefund(for transactionID: UInt64) async throws {
         #if os(iOS)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            try await Transaction.beginRefundRequest(for: transactionID, in: windowScene)
-        }
+            if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+                let status = try await StoreKit.Transaction.beginRefundRequest(for: transactionID, in: windowScene)
+                switch status {
+                case .success:
+                    logger.info("Refund request submitted successfully")
+                case .userCancelled:
+                    logger.info("User cancelled refund request")
+                @unknown default:
+                    break
+                }
+            }
         #endif
     }
 
@@ -176,10 +205,11 @@ public class StoreKitService: ObservableObject {
 
     private func listenForTransactions() -> Task<Void, Never> {
         Task.detached { [weak self] in
-            for await result in Transaction.updates {
-                guard let self = self else { return }
+            // Listen for unfinished transactions at app start
+            for await verificationResult in StoreKit.Transaction.unfinished {
+                guard let self else { return }
 
-                if case .verified(let transaction) = result {
+                if case let .verified(transaction) = verificationResult {
                     await self.updatePurchasedProducts()
                     await transaction.finish()
                 }
@@ -192,9 +222,23 @@ public class StoreKitService: ObservableObject {
     private func updatePurchasedProducts() async {
         var purchased: Set<String> = []
 
-        for await result in Transaction.currentEntitlements {
-            guard case .verified(let transaction) = result else { continue }
-            purchased.insert(transaction.productID)
+        // Check each product for active entitlements
+        for product in products {
+            if product.type == .autoRenewable {
+                if let subscription = product.subscription {
+                    let statuses = try? await subscription.status
+                    for status in statuses ?? [] {
+                        if status.state == .subscribed {
+                            purchased.insert(product.id)
+                        }
+                    }
+                }
+            } else {
+                // For non-subscription products, check if they have an active transaction
+                if let _ = await StoreKit.Transaction.latest(for: product.id) {
+                    purchased.insert(product.id)
+                }
+            }
         }
 
         purchasedProductIDs = purchased
@@ -203,11 +247,11 @@ public class StoreKitService: ObservableObject {
 
     // MARK: - Verification
 
-    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+    private func checkVerified(_ result: StoreKit.VerificationResult<StoreKit.Transaction>) throws -> StoreKit.Transaction {
         switch result {
         case .unverified:
             throw StoreError.failedVerification
-        case .verified(let safe):
+        case let .verified(safe):
             return safe
         }
     }
@@ -215,15 +259,15 @@ public class StoreKitService: ObservableObject {
     // MARK: - Entitlements
 
     public func hasEntitlement(_ productID: ProductID) -> Bool {
-        return purchasedProductIDs.contains(productID.rawValue)
+        purchasedProductIDs.contains(productID.rawValue)
     }
 
     public var isPro: Bool {
         switch subscriptionStatus {
         case .pro, .team, .lifetime:
-            return true
+            true
         default:
-            return hasEntitlement(.lifetimePro)
+            hasEntitlement(.lifetimePro)
         }
     }
 
@@ -245,11 +289,10 @@ public class StoreKitService: ObservableObject {
     // MARK: - Credits
 
     public func purchaseCredits(_ amount: Int) async throws {
-        let productID: ProductID
-        switch amount {
-        case ..<200: productID = .aiCredits100
-        case ..<750: productID = .aiCredits500
-        default: productID = .aiCredits1000
+        let productID: ProductID = switch amount {
+        case ..<200: .aiCredits100
+        case ..<750: .aiCredits500
+        default: .aiCredits1000
         }
 
         _ = try await purchase(productID)
@@ -306,19 +349,19 @@ public enum SubscriptionStatus: Sendable {
     public var isActive: Bool {
         switch self {
         case .pro, .team, .lifetime:
-            return true
+            true
         case .notSubscribed, .expired:
-            return false
+            false
         }
     }
 
     public var displayName: String {
         switch self {
-        case .notSubscribed: return "Free"
-        case .pro: return "Pro"
-        case .team: return "Team"
-        case .lifetime: return "Lifetime Pro"
-        case .expired: return "Expired"
+        case .notSubscribed: "Free"
+        case .pro: "Pro"
+        case .team: "Team"
+        case .lifetime: "Lifetime Pro"
+        case .expired: "Expired"
         }
     }
 }
@@ -334,13 +377,13 @@ public enum StoreError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .failedVerification:
-            return "Transaction verification failed"
+            "Transaction verification failed"
         case .productNotFound:
-            return "Product not found"
+            "Product not found"
         case .purchaseFailed:
-            return "Purchase failed"
-        case .failedToLoadProducts(let error):
-            return "Failed to load products: \(error.localizedDescription)"
+            "Purchase failed"
+        case let .failedToLoadProducts(error):
+            "Failed to load products: \(error.localizedDescription)"
         }
     }
 }

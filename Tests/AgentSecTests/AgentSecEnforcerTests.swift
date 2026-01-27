@@ -1,12 +1,11 @@
 // AgentSecEnforcerTests.swift
 // Tests for AgentSec runtime enforcement
 
-import XCTest
 @testable import TheaCore
+import XCTest
 
 @MainActor
 final class AgentSecEnforcerTests: XCTestCase {
-
     var enforcer: AgentSecEnforcer!
 
     override func setUp() async throws {

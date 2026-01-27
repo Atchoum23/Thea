@@ -57,56 +57,56 @@ struct ChatView: View {
         }
         .navigationTitle(conversation.title)
         #if os(macOS)
-        .navigationSubtitle("\(conversation.messages.count) messages")
+            .navigationSubtitle("\(conversation.messages.count) messages")
         #endif
-        .toolbar {
-            ToolbarItem {
-                Menu {
-                    Button("Rename") {
-                        newTitle = conversation.title
-                        showingRenameDialog = true
-                    }
+            .toolbar {
+                ToolbarItem {
+                    Menu {
+                        Button("Rename") {
+                            newTitle = conversation.title
+                            showingRenameDialog = true
+                        }
 
-                    Button("Export") {
-                        showingExportDialog = true
-                    }
+                        Button("Export") {
+                            showingExportDialog = true
+                        }
 
-                    Divider()
+                        Divider()
 
-                    Button("Delete", role: .destructive) {
-                        ChatManager.shared.deleteConversation(conversation)
+                        Button("Delete", role: .destructive) {
+                            ChatManager.shared.deleteConversation(conversation)
+                        }
+                    } label: {
+                        Label("More", systemImage: "ellipsis.circle")
                     }
-                } label: {
-                    Label("More", systemImage: "ellipsis.circle")
                 }
             }
-        }
-        .alert("Rename Conversation", isPresented: $showingRenameDialog) {
-            TextField("Title", text: $newTitle)
-            Button("Cancel", role: .cancel) { }
-            Button("Rename") {
-                conversation.title = newTitle
+            .alert("Rename Conversation", isPresented: $showingRenameDialog) {
+                TextField("Title", text: $newTitle)
+                Button("Cancel", role: .cancel) {}
+                Button("Rename") {
+                    conversation.title = newTitle
+                }
+            } message: {
+                Text("Enter a new name for this conversation")
             }
-        } message: {
-            Text("Enter a new name for this conversation")
-        }
-        .fileExporter(
-            isPresented: $showingExportDialog,
-            document: ConversationDocument(conversation: conversation),
-            contentType: .json,
-            defaultFilename: "\(conversation.title).json"
-        ) { result in
-            if case .failure(let error) = result {
-                showingError = error
+            .fileExporter(
+                isPresented: $showingExportDialog,
+                document: ConversationDocument(conversation: conversation),
+                contentType: .json,
+                defaultFilename: "\(conversation.title).json"
+            ) { result in
+                if case let .failure(error) = result {
+                    showingError = error
+                }
             }
-        }
-        .sheet(isPresented: $showingAPIKeySetup) {
-            APIKeySetupView()
-        }
-        .alert(error: $showingError)
-        .task {
-            await setupProvider()
-        }
+            .sheet(isPresented: $showingAPIKeySetup) {
+                APIKeySetupView()
+            }
+            .alert(error: $showingError)
+            .task {
+                await setupProvider()
+            }
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
@@ -163,14 +163,14 @@ struct ConversationDocument: FileDocument, @unchecked Sendable {
         self.conversation = conversation
     }
 
-    init(configuration: ReadConfiguration) throws {
+    init(configuration _: ReadConfiguration) throws {
         // Reading from file not supported - this is an export-only document type
         throw CocoaError(.fileReadUnsupportedScheme, userInfo: [
             NSLocalizedDescriptionKey: "Reading conversation files is not supported. This document type is for export only."
         ])
     }
 
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+    func fileWrapper(configuration _: WriteConfiguration) throws -> FileWrapper {
         let exportData = ExportedConversation(
             title: conversation.title,
             messages: conversation.messages.sorted { $0.orderIndex < $1.orderIndex }.map { message in

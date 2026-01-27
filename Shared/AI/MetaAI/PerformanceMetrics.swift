@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Performance Metrics
+
 // Tracks and analyzes performance of AI interactions and system operations
 
 /// A performance metric data point
@@ -32,66 +33,66 @@ public struct MetricDataPoint: Sendable, Codable, Identifiable {
 /// Types of metrics tracked
 public enum MetricType: String, Codable, Sendable, CaseIterable {
     // Response metrics
-    case responseTime           // Time to first token
-    case totalResponseTime      // Total generation time
-    case tokensPerSecond        // Generation speed
-    case inputTokens            // Tokens in request
-    case outputTokens           // Tokens in response
+    case responseTime // Time to first token
+    case totalResponseTime // Total generation time
+    case tokensPerSecond // Generation speed
+    case inputTokens // Tokens in request
+    case outputTokens // Tokens in response
 
     // Quality metrics
-    case responseQuality        // 0-1 quality score
-    case userSatisfaction       // Derived from feedback
-    case taskCompletionRate     // % of tasks completed
-    case errorRate              // % of errors
+    case responseQuality // 0-1 quality score
+    case userSatisfaction // Derived from feedback
+    case taskCompletionRate // % of tasks completed
+    case errorRate // % of errors
 
     // Resource metrics
-    case memoryUsage            // RAM usage
-    case cpuUsage               // CPU utilization
-    case networkLatency         // Network round-trip
-    case apiCost                // Cost in dollars
+    case memoryUsage // RAM usage
+    case cpuUsage // CPU utilization
+    case networkLatency // Network round-trip
+    case apiCost // Cost in dollars
 
     // Agent metrics
-    case reasoningSteps         // Steps in reasoning
-    case toolCalls              // Number of tool invocations
-    case retryCount             // Number of retries
-    case contextWindowUsage     // % of context used
+    case reasoningSteps // Steps in reasoning
+    case toolCalls // Number of tool invocations
+    case retryCount // Number of retries
+    case contextWindowUsage // % of context used
 
     public var displayName: String {
         switch self {
-        case .responseTime: return "Response Time"
-        case .totalResponseTime: return "Total Response Time"
-        case .tokensPerSecond: return "Tokens/Second"
-        case .inputTokens: return "Input Tokens"
-        case .outputTokens: return "Output Tokens"
-        case .responseQuality: return "Response Quality"
-        case .userSatisfaction: return "User Satisfaction"
-        case .taskCompletionRate: return "Task Completion"
-        case .errorRate: return "Error Rate"
-        case .memoryUsage: return "Memory Usage"
-        case .cpuUsage: return "CPU Usage"
-        case .networkLatency: return "Network Latency"
-        case .apiCost: return "API Cost"
-        case .reasoningSteps: return "Reasoning Steps"
-        case .toolCalls: return "Tool Calls"
-        case .retryCount: return "Retries"
-        case .contextWindowUsage: return "Context Usage"
+        case .responseTime: "Response Time"
+        case .totalResponseTime: "Total Response Time"
+        case .tokensPerSecond: "Tokens/Second"
+        case .inputTokens: "Input Tokens"
+        case .outputTokens: "Output Tokens"
+        case .responseQuality: "Response Quality"
+        case .userSatisfaction: "User Satisfaction"
+        case .taskCompletionRate: "Task Completion"
+        case .errorRate: "Error Rate"
+        case .memoryUsage: "Memory Usage"
+        case .cpuUsage: "CPU Usage"
+        case .networkLatency: "Network Latency"
+        case .apiCost: "API Cost"
+        case .reasoningSteps: "Reasoning Steps"
+        case .toolCalls: "Tool Calls"
+        case .retryCount: "Retries"
+        case .contextWindowUsage: "Context Usage"
         }
     }
 
     public var unit: String {
         switch self {
         case .responseTime, .totalResponseTime, .networkLatency:
-            return "ms"
+            "ms"
         case .tokensPerSecond:
-            return "tok/s"
+            "tok/s"
         case .inputTokens, .outputTokens, .reasoningSteps, .toolCalls, .retryCount:
-            return ""
+            ""
         case .responseQuality, .userSatisfaction, .taskCompletionRate, .errorRate, .cpuUsage, .contextWindowUsage:
-            return "%"
+            "%"
         case .memoryUsage:
-            return "MB"
+            "MB"
         case .apiCost:
-            return "$"
+            "$"
         }
     }
 }
@@ -177,8 +178,8 @@ public final class PerformanceMetricsManager {
     private(set) var isTracking = false
 
     // Configuration
-    public var retentionPeriod: TimeInterval = 7 * 24 * 60 * 60  // 7 days
-    public var maxMetricsCount: Int = 10_000
+    public var retentionPeriod: TimeInterval = 7 * 24 * 60 * 60 // 7 days
+    public var maxMetricsCount: Int = 10000
 
     private init() {}
 
@@ -221,11 +222,11 @@ public final class PerformanceMetricsManager {
         record(.outputTokens, value: Double(outputTokens))
 
         if totalTime > 0 {
-            let tokensPerSecond = Double(outputTokens) / (totalTime / 1_000.0)
+            let tokensPerSecond = Double(outputTokens) / (totalTime / 1000.0)
             record(.tokensPerSecond, value: tokensPerSecond)
         }
 
-        if let quality = quality {
+        if let quality {
             record(.responseQuality, value: quality * 100)
         }
     }
@@ -371,10 +372,10 @@ public final class PerformanceMetricsManager {
             if summary.trend == .degrading {
                 return "\(summary.metricType.displayName) is degrading"
             }
-            if summary.metricType == .errorRate && summary.average > 5 {
+            if summary.metricType == .errorRate, summary.average > 5 {
                 return "High error rate: \(String(format: "%.1f", summary.average))%"
             }
-            if summary.metricType == .responseTime && summary.average > 3_000 {
+            if summary.metricType == .responseTime, summary.average > 3000 {
                 return "Slow response time: \(String(format: "%.0f", summary.average))ms"
             }
             return nil

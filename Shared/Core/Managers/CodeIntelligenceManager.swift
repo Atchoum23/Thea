@@ -16,12 +16,12 @@ final class CodeIntelligenceManager {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
 
     // MARK: - Code Analysis
 
-    func analyzeCode(_ code: String, language: String) async -> CodeAnalysisResult {
+    func analyzeCode(_: String, language: String) async -> CodeAnalysisResult {
         isAnalyzing = true
 
         let result = CodeAnalysisResult(
@@ -39,7 +39,7 @@ final class CodeIntelligenceManager {
         return result
     }
 
-    func analyzeRepository(at path: URL) async throws -> [CodeAnalysisResult] {
+    func analyzeRepository(at _: URL) async throws -> [CodeAnalysisResult] {
         isAnalyzing = true
         let results: [CodeAnalysisResult] = []
 
@@ -49,12 +49,12 @@ final class CodeIntelligenceManager {
         return results
     }
 
-    func getSuggestions(for code: String, language: String) async -> [String] {
+    func getSuggestions(for _: String, language _: String) async -> [String] {
         // AI-powered code suggestions
         []
     }
 
-    func explainCode(_ code: String, language: String) async -> String {
+    func explainCode(_: String, language _: String) async -> String {
         // AI-powered code explanation
         "Code explanation would appear here."
     }
@@ -67,7 +67,7 @@ struct CodeAnalysisResult: Identifiable {
     let language: String
     var issues: [CodeIssue]
     var suggestions: [String]
-    var complexity: ComplexityLevel
+    var complexity: CodeComplexityLevel
     let analyzedAt: Date
 }
 
@@ -86,7 +86,7 @@ enum IssueSeverity: String {
     case hint
 }
 
-enum ComplexityLevel: String {
+enum CodeComplexityLevel: String {
     case low
     case medium
     case high

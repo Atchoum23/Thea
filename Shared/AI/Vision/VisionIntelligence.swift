@@ -4,10 +4,10 @@
 import Foundation
 import OSLog
 #if canImport(Vision)
-import Vision
+    import Vision
 #endif
 #if canImport(CoreImage)
-import CoreImage
+    import CoreImage
 #endif
 
 // MARK: - Vision Intelligence
@@ -37,19 +37,19 @@ public final class VisionIntelligence: ObservableObject {
         var features: Set<VisionFeature> = []
 
         #if canImport(Vision)
-        features.insert(.textRecognition)
-        features.insert(.objectDetection)
-        features.insert(.faceDetection)
-        features.insert(.barcodeDetection)
+            features.insert(.textRecognition)
+            features.insert(.objectDetection)
+            features.insert(.faceDetection)
+            features.insert(.barcodeDetection)
 
-        if #available(macOS 14.0, iOS 17.0, *) {
-            features.insert(.documentDetection)
-            features.insert(.subjectLifting)
-        }
+            if #available(macOS 14.0, iOS 17.0, *) {
+                features.insert(.documentDetection)
+                features.insert(.subjectLifting)
+            }
         #endif
 
         supportedFeatures = features
-        logger.info("Vision features detected: \(features.map { $0.rawValue }.joined(separator: ", "))")
+        logger.info("Vision features detected: \(features.map(\.rawValue).joined(separator: ", "))")
     }
 
     // MARK: - Text Recognition (OCR)
@@ -64,62 +64,62 @@ public final class VisionIntelligence: ObservableObject {
         defer { isProcessing = false }
 
         #if canImport(Vision)
-        guard let cgImage = createCGImage(from: imageData) else {
-            throw VisionError.invalidImage
-        }
+            guard let cgImage = createCGImage(from: imageData) else {
+                throw VisionError.invalidImage
+            }
 
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = VNRecognizeTextRequest { request, error in
-                if let error = error {
-                    continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-                    return
-                }
-
-                guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                    continuation.resume(returning: TextRecognitionResult(text: "", blocks: [], confidence: 0))
-                    return
-                }
-
-                var fullText = ""
-                var blocks: [TextBlock] = []
-                var totalConfidence: Float = 0
-
-                for observation in observations {
-                    if let topCandidate = observation.topCandidates(1).first {
-                        fullText += topCandidate.string + "\n"
-                        totalConfidence += topCandidate.confidence
-
-                        blocks.append(TextBlock(
-                            text: topCandidate.string,
-                            boundingBox: observation.boundingBox,
-                            confidence: topCandidate.confidence
-                        ))
+            return try await withCheckedThrowingContinuation { continuation in
+                let request = VNRecognizeTextRequest { request, error in
+                    if let error {
+                        continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
+                        return
                     }
+
+                    guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                        continuation.resume(returning: TextRecognitionResult(text: "", blocks: [], confidence: 0))
+                        return
+                    }
+
+                    var fullText = ""
+                    var blocks: [TextBlock] = []
+                    var totalConfidence: Float = 0
+
+                    for observation in observations {
+                        if let topCandidate = observation.topCandidates(1).first {
+                            fullText += topCandidate.string + "\n"
+                            totalConfidence += topCandidate.confidence
+
+                            blocks.append(TextBlock(
+                                text: topCandidate.string,
+                                boundingBox: observation.boundingBox,
+                                confidence: topCandidate.confidence
+                            ))
+                        }
+                    }
+
+                    let avgConfidence = observations.isEmpty ? 0 : totalConfidence / Float(observations.count)
+
+                    continuation.resume(returning: TextRecognitionResult(
+                        text: fullText.trimmingCharacters(in: .whitespacesAndNewlines),
+                        blocks: blocks,
+                        confidence: avgConfidence
+                    ))
                 }
 
-                let avgConfidence = observations.isEmpty ? 0 : totalConfidence / Float(observations.count)
+                request.recognitionLevel = .accurate
+                request.recognitionLanguages = languages
+                request.usesLanguageCorrection = true
 
-                continuation.resume(returning: TextRecognitionResult(
-                    text: fullText.trimmingCharacters(in: .whitespacesAndNewlines),
-                    blocks: blocks,
-                    confidence: avgConfidence
-                ))
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+
+                do {
+                    try handler.perform([request])
+                } catch {
+                    continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
+                }
             }
-
-            request.recognitionLevel = .accurate
-            request.recognitionLanguages = languages
-            request.usesLanguageCorrection = true
-
-            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-            }
-        }
         #else
-        throw VisionError.featureNotSupported(.textRecognition)
+            throw VisionError.featureNotSupported(.textRecognition)
         #endif
     }
 
@@ -135,50 +135,50 @@ public final class VisionIntelligence: ObservableObject {
         defer { isProcessing = false }
 
         #if canImport(Vision)
-        guard let cgImage = createCGImage(from: imageData) else {
-            throw VisionError.invalidImage
-        }
+            guard let cgImage = createCGImage(from: imageData) else {
+                throw VisionError.invalidImage
+            }
 
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = VNRecognizeAnimalsRequest { request, error in
-                if let error = error {
-                    continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-                    return
-                }
+            return try await withCheckedThrowingContinuation { continuation in
+                let request = VNRecognizeAnimalsRequest { request, error in
+                    if let error {
+                        continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
+                        return
+                    }
 
-                guard let observations = request.results as? [VNRecognizedObjectObservation] else {
-                    continuation.resume(returning: [])
-                    return
-                }
+                    guard let observations = request.results as? [VNRecognizedObjectObservation] else {
+                        continuation.resume(returning: [])
+                        return
+                    }
 
-                let objects = observations.map { observation -> DetectedObject in
-                    let labels = observation.labels.prefix(3).map { label in
-                        ObjectLabel(
-                            identifier: label.identifier,
-                            confidence: label.confidence
+                    let objects = observations.map { observation -> DetectedObject in
+                        let labels = observation.labels.prefix(3).map { label in
+                            ObjectLabel(
+                                identifier: label.identifier,
+                                confidence: label.confidence
+                            )
+                        }
+
+                        return DetectedObject(
+                            labels: Array(labels),
+                            boundingBox: observation.boundingBox,
+                            confidence: observation.confidence
                         )
                     }
 
-                    return DetectedObject(
-                        labels: Array(labels),
-                        boundingBox: observation.boundingBox,
-                        confidence: observation.confidence
-                    )
+                    continuation.resume(returning: objects)
                 }
 
-                continuation.resume(returning: objects)
-            }
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
 
-            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
+                do {
+                    try handler.perform([request])
+                } catch {
+                    continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
+                }
             }
-        }
         #else
-        throw VisionError.featureNotSupported(.objectDetection)
+            throw VisionError.featureNotSupported(.objectDetection)
         #endif
     }
 
@@ -194,44 +194,44 @@ public final class VisionIntelligence: ObservableObject {
         defer { isProcessing = false }
 
         #if canImport(Vision)
-        guard let cgImage = createCGImage(from: imageData) else {
-            throw VisionError.invalidImage
-        }
+            guard let cgImage = createCGImage(from: imageData) else {
+                throw VisionError.invalidImage
+            }
 
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = VNDetectFaceRectanglesRequest { request, error in
-                if let error = error {
+            return try await withCheckedThrowingContinuation { continuation in
+                let request = VNDetectFaceRectanglesRequest { request, error in
+                    if let error {
+                        continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
+                        return
+                    }
+
+                    guard let observations = request.results as? [VNFaceObservation] else {
+                        continuation.resume(returning: [])
+                        return
+                    }
+
+                    let faces = observations.map { observation -> DetectedFace in
+                        DetectedFace(
+                            boundingBox: observation.boundingBox,
+                            confidence: observation.confidence,
+                            roll: observation.roll?.floatValue,
+                            yaw: observation.yaw?.floatValue
+                        )
+                    }
+
+                    continuation.resume(returning: faces)
+                }
+
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+
+                do {
+                    try handler.perform([request])
+                } catch {
                     continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-                    return
                 }
-
-                guard let observations = request.results as? [VNFaceObservation] else {
-                    continuation.resume(returning: [])
-                    return
-                }
-
-                let faces = observations.map { observation -> DetectedFace in
-                    DetectedFace(
-                        boundingBox: observation.boundingBox,
-                        confidence: observation.confidence,
-                        roll: observation.roll?.floatValue,
-                        yaw: observation.yaw?.floatValue
-                    )
-                }
-
-                continuation.resume(returning: faces)
             }
-
-            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-            }
-        }
         #else
-        throw VisionError.featureNotSupported(.faceDetection)
+            throw VisionError.featureNotSupported(.faceDetection)
         #endif
     }
 
@@ -247,46 +247,46 @@ public final class VisionIntelligence: ObservableObject {
         defer { isProcessing = false }
 
         #if canImport(Vision)
-        guard let cgImage = createCGImage(from: imageData) else {
-            throw VisionError.invalidImage
-        }
+            guard let cgImage = createCGImage(from: imageData) else {
+                throw VisionError.invalidImage
+            }
 
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = VNDetectBarcodesRequest { request, error in
-                if let error = error {
+            return try await withCheckedThrowingContinuation { continuation in
+                let request = VNDetectBarcodesRequest { request, error in
+                    if let error {
+                        continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
+                        return
+                    }
+
+                    guard let observations = request.results as? [VNBarcodeObservation] else {
+                        continuation.resume(returning: [])
+                        return
+                    }
+
+                    let barcodes = observations.compactMap { observation -> DetectedBarcode? in
+                        guard let payload = observation.payloadStringValue else { return nil }
+
+                        return DetectedBarcode(
+                            payload: payload,
+                            symbology: observation.symbology.rawValue,
+                            boundingBox: observation.boundingBox,
+                            confidence: observation.confidence
+                        )
+                    }
+
+                    continuation.resume(returning: barcodes)
+                }
+
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+
+                do {
+                    try handler.perform([request])
+                } catch {
                     continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-                    return
                 }
-
-                guard let observations = request.results as? [VNBarcodeObservation] else {
-                    continuation.resume(returning: [])
-                    return
-                }
-
-                let barcodes = observations.compactMap { observation -> DetectedBarcode? in
-                    guard let payload = observation.payloadStringValue else { return nil }
-
-                    return DetectedBarcode(
-                        payload: payload,
-                        symbology: observation.symbology.rawValue,
-                        boundingBox: observation.boundingBox,
-                        confidence: observation.confidence
-                    )
-                }
-
-                continuation.resume(returning: barcodes)
             }
-
-            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-            }
-        }
         #else
-        throw VisionError.featureNotSupported(.barcodeDetection)
+            throw VisionError.featureNotSupported(.barcodeDetection)
         #endif
     }
 
@@ -303,43 +303,43 @@ public final class VisionIntelligence: ObservableObject {
         defer { isProcessing = false }
 
         #if canImport(Vision)
-        guard let cgImage = createCGImage(from: imageData) else {
-            throw VisionError.invalidImage
-        }
+            guard let cgImage = createCGImage(from: imageData) else {
+                throw VisionError.invalidImage
+            }
 
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = VNDetectDocumentSegmentationRequest { request, error in
-                if let error = error {
+            return try await withCheckedThrowingContinuation { continuation in
+                let request = VNDetectDocumentSegmentationRequest { request, error in
+                    if let error {
+                        continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
+                        return
+                    }
+
+                    guard let observation = request.results?.first as? VNRectangleObservation else {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+
+                    let document = DetectedDocument(
+                        topLeft: observation.topLeft,
+                        topRight: observation.topRight,
+                        bottomLeft: observation.bottomLeft,
+                        bottomRight: observation.bottomRight,
+                        confidence: observation.confidence
+                    )
+
+                    continuation.resume(returning: document)
+                }
+
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+
+                do {
+                    try handler.perform([request])
+                } catch {
                     continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-                    return
                 }
-
-                guard let observation = request.results?.first as? VNRectangleObservation else {
-                    continuation.resume(returning: nil)
-                    return
-                }
-
-                let document = DetectedDocument(
-                    topLeft: observation.topLeft,
-                    topRight: observation.topRight,
-                    bottomLeft: observation.bottomLeft,
-                    bottomRight: observation.bottomRight,
-                    confidence: observation.confidence
-                )
-
-                continuation.resume(returning: document)
             }
-
-            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-
-            do {
-                try handler.perform([request])
-            } catch {
-                continuation.resume(throwing: VisionError.processingFailed(error.localizedDescription))
-            }
-        }
         #else
-        throw VisionError.featureNotSupported(.documentDetection)
+            throw VisionError.featureNotSupported(.documentDetection)
         #endif
     }
 
@@ -369,7 +369,7 @@ public final class VisionIntelligence: ObservableObject {
         }
 
         if !objects.isEmpty {
-            let labels = objects.flatMap { $0.labels.map { $0.identifier } }.prefix(10)
+            let labels = objects.flatMap { $0.labels.map(\.identifier) }.prefix(10)
             summary += "Objects detected: \(labels.joined(separator: ", "))\n"
         }
 
@@ -378,7 +378,7 @@ public final class VisionIntelligence: ObservableObject {
         }
 
         if !barcodes.isEmpty {
-            summary += "Barcodes detected: \(barcodes.map { $0.payload }.joined(separator: ", "))\n"
+            summary += "Barcodes detected: \(barcodes.map(\.payload).joined(separator: ", "))\n"
         }
 
         return ImageAnalysis(
@@ -394,11 +394,11 @@ public final class VisionIntelligence: ObservableObject {
 
     private func createCGImage(from data: Data) -> CGImage? {
         #if canImport(CoreImage)
-        guard let ciImage = CIImage(data: data) else { return nil }
-        let context = CIContext()
-        return context.createCGImage(ciImage, from: ciImage.extent)
+            guard let ciImage = CIImage(data: data) else { return nil }
+            let context = CIContext()
+            return context.createCGImage(ciImage, from: ciImage.extent)
         #else
-        return nil
+            return nil
         #endif
     }
 }
@@ -423,12 +423,12 @@ public enum VisionError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .featureNotSupported(let feature):
-            return "Vision feature not supported: \(feature.rawValue)"
+        case let .featureNotSupported(feature):
+            "Vision feature not supported: \(feature.rawValue)"
         case .invalidImage:
-            return "Invalid or corrupt image data"
-        case .processingFailed(let reason):
-            return "Vision processing failed: \(reason)"
+            "Invalid or corrupt image data"
+        case let .processingFailed(reason):
+            "Vision processing failed: \(reason)"
         }
     }
 }

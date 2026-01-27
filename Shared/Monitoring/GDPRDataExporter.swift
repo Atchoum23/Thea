@@ -12,6 +12,7 @@ import Foundation
 import SwiftData
 
 // MARK: - GDPR Data Exporter
+
 // Enables users to export all their personal data in a portable format (JSON)
 // Required for GDPR Article 20 compliance (Right to Data Portability)
 
@@ -87,16 +88,16 @@ public final class GDPRDataExporter {
         }
     }
 
-    private func exportLocationHistory(context: ModelContext) async throws -> [[String: Any]] {
+    private func exportLocationHistory(context _: ModelContext) async throws -> [[String: Any]] {
         // Note: LocationRecord model would need to exist
         // This is a placeholder for the expected structure
-        return []
+        []
     }
 
-    private func exportScreenTimeData(context: ModelContext) async throws -> [[String: Any]] {
+    private func exportScreenTimeData(context _: ModelContext) async throws -> [[String: Any]] {
         // Note: ScreenTimeRecord model would need to exist
         // This is a placeholder for the expected structure
-        return []
+        []
     }
 
     private func exportConversations(context: ModelContext) async throws -> [[String: Any]] {
@@ -106,7 +107,7 @@ public final class GDPRDataExporter {
         return records.map { record in
             [
                 "id": record.id.uuidString,
-                "title": record.title ?? "Untitled",
+                "title": record.title,
                 "createdAt": ISO8601DateFormatter().string(from: record.createdAt),
                 "updatedAt": ISO8601DateFormatter().string(from: record.updatedAt),
                 "messageCount": record.messages.count
@@ -186,10 +187,10 @@ public enum GDPRExportError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .exportFailed(let reason):
-            return "Data export failed: \(reason)"
-        case .deletionFailed(let reason):
-            return "Data deletion failed: \(reason)"
+        case let .exportFailed(reason):
+            "Data export failed: \(reason)"
+        case let .deletionFailed(reason):
+            "Data deletion failed: \(reason)"
         }
     }
 }

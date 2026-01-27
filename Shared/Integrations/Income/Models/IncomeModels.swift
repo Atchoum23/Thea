@@ -230,7 +230,7 @@ public struct TaxEstimate: Sendable, Codable {
     /// Calculate tax estimate for income
     public static func calculate(grossIncome: Double, year: Int = Calendar.current.component(.year, from: Date())) -> TaxEstimate {
         // Simplified 2024 US tax calculation (single filer)
-        let standardDeduction = 14_600.0
+        let standardDeduction = 14600.0
 
         let taxableIncome = max(0, grossIncome - standardDeduction)
 
@@ -239,15 +239,15 @@ public struct TaxEstimate: Sendable, Codable {
         if taxableIncome > 578_125 {
             federalTax = 174_238.25 + (taxableIncome - 578_125) * 0.37
         } else if taxableIncome > 231_250 {
-            federalTax = 52_832.75 + (taxableIncome - 231_250) * 0.35
+            federalTax = 52832.75 + (taxableIncome - 231_250) * 0.35
         } else if taxableIncome > 182_100 {
-            federalTax = 37_104.0 + (taxableIncome - 182_100) * 0.32
-        } else if taxableIncome > 95_375 {
-            federalTax = 16_290.0 + (taxableIncome - 95_375) * 0.24
-        } else if taxableIncome > 44_725 {
-            federalTax = 5_147.0 + (taxableIncome - 44_725) * 0.22
-        } else if taxableIncome > 11_000 {
-            federalTax = 1_100.0 + (taxableIncome - 11_000) * 0.12
+            federalTax = 37104.0 + (taxableIncome - 182_100) * 0.32
+        } else if taxableIncome > 95375 {
+            federalTax = 16290.0 + (taxableIncome - 95375) * 0.24
+        } else if taxableIncome > 44725 {
+            federalTax = 5147.0 + (taxableIncome - 44725) * 0.22
+        } else if taxableIncome > 11000 {
+            federalTax = 1100.0 + (taxableIncome - 11000) * 0.12
         } else {
             federalTax = taxableIncome * 0.10
         }
@@ -282,9 +282,9 @@ public enum IncomeType: String, Sendable, Codable, CaseIterable, Hashable {
 
     public var description: String {
         switch self {
-        case .passive: return "Income generated with minimal effort"
-        case .active: return "Income requiring active work"
-        case .portfolio: return "Investment income"
+        case .passive: "Income generated with minimal effort"
+        case .active: "Income requiring active work"
+        case .portfolio: "Investment income"
         }
     }
 }
@@ -303,16 +303,16 @@ public enum IncomeCategory: String, Sendable, Codable, CaseIterable, Hashable {
 
     public var icon: String {
         switch self {
-        case .freelancing: return "briefcase.fill"
-        case .consulting: return "person.3.fill"
-        case .rental: return "house.fill"
-        case .investments: return "chart.line.uptrend.xyaxis"
-        case .royalties: return "music.note"
-        case .ecommerce: return "cart.fill"
-        case .content: return "video.fill"
-        case .affiliate: return "link"
-        case .gig: return "car.fill"
-        case .other: return "dollarsign.circle.fill"
+        case .freelancing: "briefcase.fill"
+        case .consulting: "person.3.fill"
+        case .rental: "house.fill"
+        case .investments: "chart.line.uptrend.xyaxis"
+        case .royalties: "music.note"
+        case .ecommerce: "cart.fill"
+        case .content: "video.fill"
+        case .affiliate: "link"
+        case .gig: "car.fill"
+        case .other: "dollarsign.circle.fill"
         }
     }
 }
@@ -328,13 +328,13 @@ public enum GigCategory: String, Sendable, Codable, CaseIterable, Hashable {
 
     public var platforms: [String] {
         switch self {
-        case .freelancing: return ["Upwork", "Fiverr", "Toptal", "Freelancer"]
-        case .rideshare: return ["Uber", "Lyft"]
-        case .delivery: return ["DoorDash", "Uber Eats", "Instacart", "Postmates"]
-        case .rental: return ["Airbnb", "VRBO", "Turo"]
-        case .ecommerce: return ["Etsy", "eBay", "Amazon", "Shopify"]
-        case .content: return ["YouTube", "Patreon", "Substack", "Twitch"]
-        case .taskServices: return ["TaskRabbit", "Thumbtack", "Handy"]
+        case .freelancing: ["Upwork", "Fiverr", "Toptal", "Freelancer"]
+        case .rideshare: ["Uber", "Lyft"]
+        case .delivery: ["DoorDash", "Uber Eats", "Instacart", "Postmates"]
+        case .rental: ["Airbnb", "VRBO", "Turo"]
+        case .ecommerce: ["Etsy", "eBay", "Amazon", "Shopify"]
+        case .content: ["YouTube", "Patreon", "Substack", "Twitch"]
+        case .taskServices: ["TaskRabbit", "Thumbtack", "Handy"]
         }
     }
 }
@@ -350,13 +350,13 @@ public enum IncomeError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .streamNotFound:
-            return "Income stream not found"
+            "Income stream not found"
         case .invalidAmount:
-            return "Invalid income amount"
+            "Invalid income amount"
         case .platformNotConnected:
-            return "Platform not connected"
-        case .syncFailed(let reason):
-            return "Sync failed: \(reason)"
+            "Platform not connected"
+        case let .syncFailed(reason):
+            "Sync failed: \(reason)"
         }
     }
 }

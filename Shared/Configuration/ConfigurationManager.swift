@@ -1,9 +1,9 @@
 // ConfigurationManager.swift
 // Centralized configuration management - no hardcoded values
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Configuration Manager
 
@@ -50,7 +50,7 @@ public final class ConfigurationManager: ObservableObject {
         logger.info("Loaded all configurations")
     }
 
-    private func load<T: Codable>(_ type: T.Type, key: String) -> T? {
+    private func load<T: Codable>(_: T.Type, key: String) -> T? {
         guard let data = defaults.data(forKey: key) else { return nil }
         return try? JSONDecoder().decode(T.self, from: data)
     }
@@ -71,7 +71,7 @@ public final class ConfigurationManager: ObservableObject {
         logger.info("Saved all configurations")
     }
 
-    private func save<T: Codable>(_ value: T, key: String) {
+    private func save(_ value: some Codable, key: String) {
         if let data = try? JSONEncoder().encode(value) {
             defaults.set(data, forKey: key)
         }
@@ -168,29 +168,29 @@ public enum ConfigurationCategory: String, CaseIterable, Identifiable {
 
     public var title: String {
         switch self {
-        case .general: return "General"
-        case .ai: return "AI & Models"
-        case .appearance: return "Appearance"
-        case .keyboard: return "Keyboard"
-        case .privacy: return "Privacy & Security"
-        case .sync: return "Sync & Backup"
-        case .notifications: return "Notifications"
-        case .advanced: return "Advanced"
-        case .experimental: return "Experimental"
+        case .general: "General"
+        case .ai: "AI & Models"
+        case .appearance: "Appearance"
+        case .keyboard: "Keyboard"
+        case .privacy: "Privacy & Security"
+        case .sync: "Sync & Backup"
+        case .notifications: "Notifications"
+        case .advanced: "Advanced"
+        case .experimental: "Experimental"
         }
     }
 
     public var icon: String {
         switch self {
-        case .general: return "gear"
-        case .ai: return "brain"
-        case .appearance: return "paintbrush"
-        case .keyboard: return "keyboard"
-        case .privacy: return "lock.shield"
-        case .sync: return "arrow.triangle.2.circlepath"
-        case .notifications: return "bell"
-        case .advanced: return "slider.horizontal.3"
-        case .experimental: return "flask"
+        case .general: "gear"
+        case .ai: "brain"
+        case .appearance: "paintbrush"
+        case .keyboard: "keyboard"
+        case .privacy: "lock.shield"
+        case .sync: "arrow.triangle.2.circlepath"
+        case .notifications: "bell"
+        case .advanced: "slider.horizontal.3"
+        case .experimental: "flask"
         }
     }
 }
@@ -231,7 +231,7 @@ public struct GeneralConfiguration: Codable {
 
     public enum StorageLocation: String, Codable, CaseIterable {
         case `default` = "Default"
-        case iCloud = "iCloud"
+        case iCloud
         case custom = "Custom"
     }
 }
@@ -256,7 +256,7 @@ public struct AIConfiguration: Codable {
     public var requestTimeout: TimeInterval = 60
 
     // Context
-    public var maxContextLength: Int = 100000
+    public var maxContextLength: Int = 100_000
     public var includeConversationHistory: Bool = true
     public var historyMessageLimit: Int = 50
 
@@ -339,10 +339,10 @@ public struct AppearanceConfiguration: Codable {
 
         public var value: CGFloat {
             switch self {
-            case .small: return 13
-            case .medium: return 15
-            case .large: return 17
-            case .extraLarge: return 20
+            case .small: 13
+            case .medium: 15
+            case .large: 17
+            case .extraLarge: 20
             }
         }
     }
@@ -531,10 +531,10 @@ public struct AdvancedConfiguration: Codable {
 
         public var bytes: Int {
             switch self {
-            case .small: return 100 * 1024 * 1024
-            case .medium: return 500 * 1024 * 1024
-            case .large: return 1024 * 1024 * 1024
-            case .unlimited: return Int.max
+            case .small: 100 * 1024 * 1024
+            case .medium: 500 * 1024 * 1024
+            case .large: 1024 * 1024 * 1024
+            case .unlimited: Int.max
             }
         }
     }
@@ -609,8 +609,8 @@ public struct SettingMetadata {
 }
 
 /// Registry of all settings with their metadata
-public struct SettingsRegistry {
-    public static let all: [SettingMetadata] = [
+public enum SettingsRegistry {
+    nonisolated(unsafe) public static let all: [SettingMetadata] = [
         // General
         SettingMetadata(
             key: "general.launchAtLogin",
@@ -680,9 +680,9 @@ public struct SettingsRegistry {
             description: "The maximum number of tokens to include in the conversation context. Higher values provide more context but increase costs.",
             category: .ai,
             type: .number,
-            defaultValue: 100000,
+            defaultValue: 100_000,
             options: nil,
-            range: 1000...200000,
+            range: 1000 ... 200_000,
             requiresRestart: false,
             isAdvanced: true
         ),

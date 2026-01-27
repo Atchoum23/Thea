@@ -1,9 +1,10 @@
 import SwiftUI
 #if os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Local Models Settings View
+
 // Configure MLX model paths, browse for model directories, and view installed models
 
 struct LocalModelsSettingsView: View {
@@ -302,50 +303,50 @@ struct LocalModelsSettingsView: View {
     private func iconForFormat(_ format: ModelFormat) -> String {
         switch format {
         case .mlx:
-            return "cpu"
+            "cpu"
         case .gguf:
-            return "doc.text"
+            "doc.text"
         case .safetensors:
-            return "lock.doc"
+            "lock.doc"
         case .coreML:
-            return "brain"
+            "brain"
         case .unknown:
-            return "questionmark.circle"
+            "questionmark.circle"
         }
     }
 
     private func colorForFormat(_ format: ModelFormat) -> Color {
         switch format {
         case .mlx:
-            return .blue
+            .blue
         case .gguf:
-            return .green
+            .green
         case .safetensors:
-            return .purple
+            .purple
         case .coreML:
-            return .orange
+            .orange
         case .unknown:
-            return .gray
+            .gray
         }
     }
 
     private func browseForDirectory() {
         #if os(macOS)
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.prompt = "Select Model Directory"
-        panel.message = "Choose a directory containing MLX or GGUF models"
+            let panel = NSOpenPanel()
+            panel.canChooseFiles = false
+            panel.canChooseDirectories = true
+            panel.allowsMultipleSelection = false
+            panel.prompt = "Select Model Directory"
+            panel.message = "Choose a directory containing MLX or GGUF models"
 
-        panel.begin { response in
-            if response == .OK, let url = panel.url {
-                settingsManager.mlxModelsPath = url.path
-                Task {
-                    await modelManager.addModelDirectory(url)
+            panel.begin { response in
+                if response == .OK, let url = panel.url {
+                    settingsManager.mlxModelsPath = url.path
+                    Task {
+                        await modelManager.addModelDirectory(url)
+                    }
                 }
             }
-        }
         #endif
     }
 

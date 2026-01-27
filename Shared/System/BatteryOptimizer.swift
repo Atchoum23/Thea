@@ -47,10 +47,11 @@ public final class BatteryOptimizer {
 
     private init() {
         if let data = defaults.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(BatteryOptimizerConfiguration.self, from: data) {
-            self.configuration = config
+           let config = try? JSONDecoder().decode(BatteryOptimizerConfiguration.self, from: data)
+        {
+            configuration = config
         } else {
-            self.configuration = BatteryOptimizerConfiguration()
+            configuration = BatteryOptimizerConfiguration()
         }
 
         setupObservers()
@@ -92,7 +93,7 @@ public final class BatteryOptimizer {
         let powerStatus = powerManager.powerStatus
 
         // On AC power - use performance mode
-        if powerStatus.powerSource == .ac && !powerStatus.isLowPowerMode {
+        if powerStatus.powerSource == .ac, !powerStatus.isLowPowerMode {
             updateMode(.performance)
             return
         }
@@ -149,16 +150,16 @@ public final class BatteryOptimizer {
         applyUIOptimizations(settings)
     }
 
-    private func applyNetworkOptimizations(_ settings: OptimizationSettings) {
+    private func applyNetworkOptimizations(_: OptimizationSettings) {
         // These would be read by network managers
         // Settings stored in configuration for access by other components
     }
 
-    private func applyBackgroundOptimizations(_ settings: OptimizationSettings) {
+    private func applyBackgroundOptimizations(_: OptimizationSettings) {
         // These would be read by background task managers
     }
 
-    private func applyUIOptimizations(_ settings: OptimizationSettings) {
+    private func applyUIOptimizations(_: OptimizationSettings) {
         // These would be read by UI components
     }
 
@@ -173,13 +174,13 @@ public final class BatteryOptimizer {
     public func shouldDisableFeature(_ feature: BatteryFeature) -> Bool {
         switch optimizationMode {
         case .performance:
-            return false
+            false
         case .balanced:
-            return feature.priority == .low
+            feature.priority == .low
         case .maxSaver:
-            return feature.priority != .critical
+            feature.priority != .critical
         case .ultraSaver:
-            return feature.priority != .critical
+            feature.priority != .critical
         }
     }
 
@@ -248,57 +249,57 @@ public enum OptimizationMode: String, Codable, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .performance: return "Performance"
-        case .balanced: return "Balanced"
-        case .maxSaver: return "Battery Saver"
-        case .ultraSaver: return "Ultra Saver"
+        case .performance: "Performance"
+        case .balanced: "Balanced"
+        case .maxSaver: "Battery Saver"
+        case .ultraSaver: "Ultra Saver"
         }
     }
 
     public var description: String {
         switch self {
         case .performance:
-            return "Maximum performance, no restrictions"
+            "Maximum performance, no restrictions"
         case .balanced:
-            return "Balance between performance and battery life"
+            "Balance between performance and battery life"
         case .maxSaver:
-            return "Significantly reduce power consumption"
+            "Significantly reduce power consumption"
         case .ultraSaver:
-            return "Minimal power usage, essential features only"
+            "Minimal power usage, essential features only"
         }
     }
 
     public var icon: String {
         switch self {
-        case .performance: return "bolt.fill"
-        case .balanced: return "leaf"
-        case .maxSaver: return "battery.75"
-        case .ultraSaver: return "battery.25"
+        case .performance: "bolt.fill"
+        case .balanced: "leaf"
+        case .maxSaver: "battery.75"
+        case .ultraSaver: "battery.25"
         }
     }
 
     var pollingMultiplier: Double {
         switch self {
-        case .performance: return 1.0
-        case .balanced: return 1.5
-        case .maxSaver: return 3.0
-        case .ultraSaver: return 6.0
+        case .performance: 1.0
+        case .balanced: 1.5
+        case .maxSaver: 3.0
+        case .ultraSaver: 6.0
         }
     }
 
     var batchMultiplier: Double {
         switch self {
-        case .performance: return 1.0
-        case .balanced: return 0.75
-        case .maxSaver: return 0.5
-        case .ultraSaver: return 0.25
+        case .performance: 1.0
+        case .balanced: 0.75
+        case .maxSaver: 0.5
+        case .ultraSaver: 0.25
         }
     }
 
     var settings: OptimizationSettings {
         switch self {
         case .performance:
-            return OptimizationSettings(
+            OptimizationSettings(
                 reduceAnimations: false,
                 reduceSyncFrequency: false,
                 reduceBackgroundActivity: false,
@@ -309,7 +310,7 @@ public enum OptimizationMode: String, Codable, Sendable, CaseIterable {
                 reduceImageQuality: false
             )
         case .balanced:
-            return OptimizationSettings(
+            OptimizationSettings(
                 reduceAnimations: false,
                 reduceSyncFrequency: true,
                 reduceBackgroundActivity: false,
@@ -320,7 +321,7 @@ public enum OptimizationMode: String, Codable, Sendable, CaseIterable {
                 reduceImageQuality: false
             )
         case .maxSaver:
-            return OptimizationSettings(
+            OptimizationSettings(
                 reduceAnimations: true,
                 reduceSyncFrequency: true,
                 reduceBackgroundActivity: true,
@@ -331,7 +332,7 @@ public enum OptimizationMode: String, Codable, Sendable, CaseIterable {
                 reduceImageQuality: true
             )
         case .ultraSaver:
-            return OptimizationSettings(
+            OptimizationSettings(
                 reduceAnimations: true,
                 reduceSyncFrequency: true,
                 reduceBackgroundActivity: true,
@@ -371,13 +372,13 @@ public enum BatteryFeature: String, Codable, Sendable {
 
     public var priority: FeaturePriority {
         switch self {
-        case .animations: return .low
-        case .backgroundSync: return .normal
-        case .prefetching: return .low
-        case .hdImages: return .low
-        case .liveActivity: return .normal
-        case .voiceActivation: return .high
-        case .continuousMonitoring: return .critical
+        case .animations: .low
+        case .backgroundSync: .normal
+        case .prefetching: .low
+        case .hdImages: .low
+        case .liveActivity: .normal
+        case .voiceActivation: .high
+        case .continuousMonitoring: .critical
         }
     }
 }
@@ -400,11 +401,11 @@ public enum ServiceType: String, Codable, Sendable {
 
     var basePollingInterval: TimeInterval {
         switch self {
-        case .aiStatus: return 5.0
-        case .sync: return 60.0
-        case .health: return 300.0
-        case .notifications: return 30.0
-        case .monitoring: return 10.0
+        case .aiStatus: 5.0
+        case .sync: 60.0
+        case .health: 300.0
+        case .notifications: 30.0
+        case .monitoring: 10.0
         }
     }
 }
@@ -419,10 +420,10 @@ public enum BatchOperation: String, Codable, Sendable {
 
     var baseBatchSize: Int {
         switch self {
-        case .messageSync: return 50
-        case .fileIndex: return 100
-        case .healthData: return 24
-        case .notifications: return 20
+        case .messageSync: 50
+        case .fileIndex: 100
+        case .healthData: 24
+        case .notifications: 20
         }
     }
 }

@@ -5,9 +5,9 @@
 //  CloudKit sync for conversations, settings, and user data
 //
 
-import Foundation
 import CloudKit
 import Combine
+import Foundation
 
 // MARK: - CloudKit Service
 
@@ -75,7 +75,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync all data
     public func syncAll() async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         syncStatus = .syncing
         defer { syncStatus = .idle }
@@ -91,7 +91,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync conversations
     public func syncConversations() async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         // Fetch changes since last sync
         let predicate = NSPredicate(value: true)
@@ -101,7 +101,7 @@ public class CloudKitService: ObservableObject {
         let results = try await privateDatabase.records(matching: query)
 
         for (_, result) in results.matchResults {
-            if case .success(let record) = result {
+            if case let .success(record) = result {
                 let conversation = CloudConversation(from: record)
                 // Merge with local data
                 await mergeConversation(conversation)
@@ -111,7 +111,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync settings
     public func syncSettings() async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         let recordID = CKRecord.ID(recordName: "userSettings")
 
@@ -127,7 +127,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync knowledge base
     public func syncKnowledge() async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: RecordType.knowledge.rawValue, predicate: predicate)
@@ -135,7 +135,7 @@ public class CloudKitService: ObservableObject {
         let results = try await privateDatabase.records(matching: query)
 
         for (_, result) in results.matchResults {
-            if case .success(let record) = result {
+            if case let .success(record) = result {
                 let item = CloudKnowledgeItem(from: record)
                 await mergeKnowledgeItem(item)
             }
@@ -144,7 +144,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync projects
     public func syncProjects() async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: RecordType.project.rawValue, predicate: predicate)
@@ -152,7 +152,7 @@ public class CloudKitService: ObservableObject {
         let results = try await privateDatabase.records(matching: query)
 
         for (_, result) in results.matchResults {
-            if case .success(let record) = result {
+            if case let .success(record) = result {
                 let project = CloudProject(from: record)
                 await mergeProject(project)
             }
@@ -163,7 +163,7 @@ public class CloudKitService: ObservableObject {
 
     /// Save a conversation to CloudKit
     public func saveConversation(_ conversation: CloudConversation) async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         let record = conversation.toRecord()
         try await privateDatabase.save(record)
@@ -172,7 +172,7 @@ public class CloudKitService: ObservableObject {
 
     /// Save settings to CloudKit
     public func saveSettings() async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         let settings = CloudSettings.current()
         let record = settings.toRecord()
@@ -181,7 +181,7 @@ public class CloudKitService: ObservableObject {
 
     /// Save a knowledge item to CloudKit
     public func saveKnowledgeItem(_ item: CloudKnowledgeItem) async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         let record = item.toRecord()
         try await privateDatabase.save(record)
@@ -189,7 +189,7 @@ public class CloudKitService: ObservableObject {
 
     /// Save a project to CloudKit
     public func saveProject(_ project: CloudProject) async throws {
-        guard syncEnabled && iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable else { return }
 
         let record = project.toRecord()
         try await privateDatabase.save(record)
@@ -262,21 +262,21 @@ public class CloudKitService: ObservableObject {
 
     // MARK: - Merge Operations
 
-    private func mergeConversation(_ conversation: CloudConversation) async {
+    private func mergeConversation(_: CloudConversation) async {
         // Implement conflict resolution
         // Compare modifiedAt timestamps
         // Keep newer version or merge intelligently
     }
 
-    private func mergeKnowledgeItem(_ item: CloudKnowledgeItem) async {
+    private func mergeKnowledgeItem(_: CloudKnowledgeItem) async {
         // Merge knowledge items
     }
 
-    private func mergeProject(_ project: CloudProject) async {
+    private func mergeProject(_: CloudProject) async {
         // Merge project data
     }
 
-    private func applySettings(_ settings: CloudSettings) async {
+    private func applySettings(_: CloudSettings) async {
         // Apply synced settings to local storage
     }
 
@@ -326,7 +326,7 @@ public class CloudKitService: ObservableObject {
 
         let results = try await privateDatabase.modifyRecords(saving: [record, share], deleting: [])
 
-        guard let savedShare = results.saveResults[share.recordID]?.get() as? CKShare else {
+        guard let savedShare = try results.saveResults[share.recordID]?.get() as? CKShare else {
             throw CloudKitError.sharingFailed
         }
 
@@ -364,13 +364,13 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
     }
 
     init(from record: CKRecord) {
-        self.id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "conversation-", with: "")) ?? UUID()
-        self.title = record["title"] as? String ?? ""
-        self.messages = [] // Fetched separately
-        self.aiModel = record["aiModel"] as? String ?? "Claude"
-        self.createdAt = record["createdAt"] as? Date ?? Date()
-        self.modifiedAt = record["modifiedAt"] as? Date ?? Date()
-        self.tags = record["tags"] as? [String] ?? []
+        id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "conversation-", with: "")) ?? UUID()
+        title = record["title"] as? String ?? ""
+        messages = [] // Fetched separately
+        aiModel = record["aiModel"] as? String ?? "Claude"
+        createdAt = record["createdAt"] as? Date ?? Date()
+        modifiedAt = record["modifiedAt"] as? Date ?? Date()
+        tags = record["tags"] as? [String] ?? []
     }
 
     func toRecord() -> CKRecord {
@@ -424,12 +424,12 @@ public struct CloudSettings: Sendable {
     }
 
     init(from record: CKRecord) {
-        self.theme = record["theme"] as? String ?? "system"
-        self.aiModel = record["aiModel"] as? String ?? "Claude"
-        self.autoSave = record["autoSave"] as? Bool ?? true
-        self.syncEnabled = record["syncEnabled"] as? Bool ?? true
-        self.notificationsEnabled = record["notificationsEnabled"] as? Bool ?? true
-        self.modifiedAt = record["modifiedAt"] as? Date ?? Date()
+        theme = record["theme"] as? String ?? "system"
+        aiModel = record["aiModel"] as? String ?? "Claude"
+        autoSave = record["autoSave"] as? Bool ?? true
+        syncEnabled = record["syncEnabled"] as? Bool ?? true
+        notificationsEnabled = record["notificationsEnabled"] as? Bool ?? true
+        modifiedAt = record["modifiedAt"] as? Date ?? Date()
     }
 
     static func current() -> CloudSettings {
@@ -460,13 +460,13 @@ public struct CloudKnowledgeItem: Identifiable, Sendable {
     public var createdAt: Date
 
     init(from record: CKRecord) {
-        self.id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "knowledge-", with: "")) ?? UUID()
-        self.title = record["title"] as? String ?? ""
-        self.content = record["content"] as? String ?? ""
-        self.category = record["category"] as? String ?? ""
-        self.tags = record["tags"] as? [String] ?? []
-        self.source = record["source"] as? String ?? ""
-        self.createdAt = record["createdAt"] as? Date ?? Date()
+        id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "knowledge-", with: "")) ?? UUID()
+        title = record["title"] as? String ?? ""
+        content = record["content"] as? String ?? ""
+        category = record["category"] as? String ?? ""
+        tags = record["tags"] as? [String] ?? []
+        source = record["source"] as? String ?? ""
+        createdAt = record["createdAt"] as? Date ?? Date()
     }
 
     func toRecord() -> CKRecord {
@@ -491,12 +491,12 @@ public struct CloudProject: Identifiable, Sendable {
     public var lastModified: Date
 
     init(from record: CKRecord) {
-        self.id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "project-", with: "")) ?? UUID()
-        self.name = record["name"] as? String ?? ""
-        self.description = record["description"] as? String ?? ""
-        self.path = record["path"] as? String ?? ""
-        self.tags = record["tags"] as? [String] ?? []
-        self.lastModified = record["lastModified"] as? Date ?? Date()
+        id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "project-", with: "")) ?? UUID()
+        name = record["name"] as? String ?? ""
+        description = record["description"] as? String ?? ""
+        path = record["path"] as? String ?? ""
+        tags = record["tags"] as? [String] ?? []
+        lastModified = record["lastModified"] as? Date ?? Date()
     }
 
     func toRecord() -> CKRecord {
@@ -532,12 +532,12 @@ public enum CloudKitError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .notAuthenticated: return "Not signed in to iCloud"
-        case .networkError: return "Network connection error"
-        case .quotaExceeded: return "iCloud storage quota exceeded"
-        case .sharingFailed: return "Failed to share content"
-        case .recordNotFound: return "Record not found"
-        case .conflictDetected: return "Sync conflict detected"
+        case .notAuthenticated: "Not signed in to iCloud"
+        case .networkError: "Network connection error"
+        case .quotaExceeded: "iCloud storage quota exceeded"
+        case .sharingFailed: "Failed to share content"
+        case .recordNotFound: "Record not found"
+        case .conflictDetected: "Sync conflict detected"
         }
     }
 }

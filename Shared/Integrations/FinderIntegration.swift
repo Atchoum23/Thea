@@ -8,7 +8,7 @@
 
 import Foundation
 #if os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Finder Integration
@@ -36,9 +36,9 @@ public actor FinderIntegration: AppIntegrationModule {
 
     public func connect() async throws {
         #if os(macOS)
-        isConnected = true
+            isConnected = true
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -48,9 +48,9 @@ public actor FinderIntegration: AppIntegrationModule {
 
     public func isAvailable() async -> Bool {
         #if os(macOS)
-        return true // Finder is always available on macOS
+            return true // Finder is always available on macOS
         #else
-        return false
+            return false
         #endif
     }
 
@@ -59,63 +59,63 @@ public actor FinderIntegration: AppIntegrationModule {
     /// Get selected files in Finder
     public func getSelectedFiles() async throws -> [URL] {
         #if os(macOS)
-        let script = """
-        tell application "Finder"
-            set selectedItems to selection
-            set filePaths to {}
-            repeat with item in selectedItems
-                set end of filePaths to POSIX path of (item as alias)
-            end repeat
-            return filePaths
-        end tell
-        """
-        let result = try await executeAppleScript(script)
-        guard let paths = result else { return [] }
+            let script = """
+            tell application "Finder"
+                set selectedItems to selection
+                set filePaths to {}
+                repeat with item in selectedItems
+                    set end of filePaths to POSIX path of (item as alias)
+                end repeat
+                return filePaths
+            end tell
+            """
+            let result = try await executeAppleScript(script)
+            guard let paths = result else { return [] }
 
-        return paths.components(separatedBy: ", ")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .compactMap { URL(fileURLWithPath: $0) }
+            return paths.components(separatedBy: ", ")
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .compactMap { URL(fileURLWithPath: $0) }
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Get current Finder location
     public func getCurrentLocation() async throws -> URL? {
         #if os(macOS)
-        let script = """
-        tell application "Finder"
-            if (count of Finder windows) > 0 then
-                return POSIX path of (target of front Finder window as alias)
-            end if
-        end tell
-        """
-        let result = try await executeAppleScript(script)
-        return result.map { URL(fileURLWithPath: $0) }
+            let script = """
+            tell application "Finder"
+                if (count of Finder windows) > 0 then
+                    return POSIX path of (target of front Finder window as alias)
+                end if
+            end tell
+            """
+            let result = try await executeAppleScript(script)
+            return result.map { URL(fileURLWithPath: $0) }
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Open a folder in Finder
     public func openFolder(_ url: URL) async throws {
         #if os(macOS)
-        await MainActor.run {
-            _ = NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path)
-        }
+            await MainActor.run {
+                _ = NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path)
+            }
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Reveal a file in Finder
     public func revealFile(_ url: URL) async throws {
         #if os(macOS)
-        await MainActor.run {
-            NSWorkspace.shared.activateFileViewerSelecting([url])
-        }
+            await MainActor.run {
+                NSWorkspace.shared.activateFileViewerSelecting([url])
+            }
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -129,10 +129,10 @@ public actor FinderIntegration: AppIntegrationModule {
     /// Move file to trash
     public func moveToTrash(_ url: URL) async throws {
         #if os(macOS)
-        var resultURL: NSURL?
-        try FileManager.default.trashItem(at: url, resultingItemURL: &resultURL)
+            var resultURL: NSURL?
+            try FileManager.default.trashItem(at: url, resultingItemURL: &resultURL)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -170,18 +170,18 @@ public actor FinderIntegration: AppIntegrationModule {
     /// Quick Look preview
     public func quickLook(_ urls: [URL]) async throws {
         #if os(macOS)
-        let script = """
-        tell application "Finder"
-            activate
-            select (POSIX file "\(urls.first?.path ?? "")")
-            tell application "System Events"
-                keystroke " "
+            let script = """
+            tell application "Finder"
+                activate
+                select (POSIX file "\(urls.first?.path ?? "")")
+                tell application "System Events"
+                    keystroke " "
+                end tell
             end tell
-        end tell
-        """
-        _ = try await executeAppleScript(script)
+            """
+            _ = try await executeAppleScript(script)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -200,43 +200,43 @@ public actor FinderIntegration: AppIntegrationModule {
     /// Get file tags
     public func getTags(_ url: URL) async throws -> [String] {
         #if os(macOS)
-        let resourceValues = try url.resourceValues(forKeys: [.tagNamesKey])
-        return resourceValues.tagNames ?? []
+            let resourceValues = try url.resourceValues(forKeys: [.tagNamesKey])
+            return resourceValues.tagNames ?? []
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Set file tags
     public func setTags(_ tags: [String], for url: URL) async throws {
         #if os(macOS)
-        // Use NSURL extended attributes for tag setting
-        try (url as NSURL).setResourceValue(tags, forKey: .tagNamesKey)
+            // Use NSURL extended attributes for tag setting
+            try (url as NSURL).setResourceValue(tags, forKey: .tagNamesKey)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     // MARK: - Helper Methods
 
     #if os(macOS)
-    private func executeAppleScript(_ source: String) async throws -> String? {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                var error: NSDictionary?
-                if let script = NSAppleScript(source: source) {
-                    let result = script.executeAndReturnError(&error)
-                    if let error = error {
-                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
+        private func executeAppleScript(_ source: String) async throws -> String? {
+            try await withCheckedThrowingContinuation { continuation in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    var error: NSDictionary?
+                    if let script = NSAppleScript(source: source) {
+                        let result = script.executeAndReturnError(&error)
+                        if let error {
+                            continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
+                        } else {
+                            continuation.resume(returning: result.stringValue)
+                        }
                     } else {
-                        continuation.resume(returning: result.stringValue)
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                     }
-                } else {
-                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }
-    }
     #endif
 }
 

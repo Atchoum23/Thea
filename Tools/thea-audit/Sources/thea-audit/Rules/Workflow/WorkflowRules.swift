@@ -10,25 +10,25 @@ final class SecretsInEnvRule: RegexRule {
             id: "WORKFLOW-SECRETS-001",
             name: "Secrets Exposed in Environment",
             description: """
-                Detects secrets being exposed through environment variables in workflows.
-                Secrets in env can be logged or accessed by child processes.
-                """,
+            Detects secrets being exposed through environment variables in workflows.
+            Secrets in env can be logged or accessed by child processes.
+            """,
             severity: .high,
             category: .dataExposure,
             cweID: "CWE-200",
             recommendation: """
-                Use secrets directly in steps that need them rather than exposing in env.
-                Use GITHUB_TOKEN sparingly and with minimal permissions.
-                Consider using OIDC for cloud provider authentication instead of long-lived secrets.
-                """,
+            Use secrets directly in steps that need them rather than exposing in env.
+            Use GITHUB_TOKEN sparingly and with minimal permissions.
+            Consider using OIDC for cloud provider authentication instead of long-lived secrets.
+            """,
             patterns: [
-                "env:.*\\$\\{\\{\\s*secrets\\.",  // secrets in env block
-                "export.*\\$\\{\\{\\s*secrets\\.",  // export secrets
-                "echo.*\\$\\{\\{\\s*secrets\\."     // echo secrets
+                "env:.*\\$\\{\\{\\s*secrets\\.", // secrets in env block
+                "export.*\\$\\{\\{\\s*secrets\\.", // export secrets
+                "echo.*\\$\\{\\{\\s*secrets\\." // echo secrets
             ],
             excludePatterns: [
-                "#.*secrets",  // Comments
-                "GITHUB_TOKEN"  // GITHUB_TOKEN is generally safe
+                "#.*secrets", // Comments
+                "GITHUB_TOKEN" // GITHUB_TOKEN is generally safe
             ]
         )
     }
@@ -41,29 +41,29 @@ final class UntrustedActionRule: RegexRule {
             id: "WORKFLOW-ACTION-001",
             name: "Untrusted Third-Party Action",
             description: """
-                Detects usage of third-party GitHub Actions that:
-                - Are not from verified publishers
-                - Use mutable tags like @main or @master
-                - Don't use commit SHA pinning
-                """,
+            Detects usage of third-party GitHub Actions that:
+            - Are not from verified publishers
+            - Use mutable tags like @main or @master
+            - Don't use commit SHA pinning
+            """,
             severity: .medium,
             category: .supplyChain,
             cweID: "CWE-829",
             recommendation: """
-                Pin third-party actions to specific commit SHAs.
-                Prefer actions from verified publishers (github, actions/*).
-                Review action source code before using.
-                Consider vendoring critical actions.
-                """,
+            Pin third-party actions to specific commit SHAs.
+            Prefer actions from verified publishers (github, actions/*).
+            Review action source code before using.
+            Consider vendoring critical actions.
+            """,
             patterns: [
                 "uses:.*@main",
                 "uses:.*@master",
                 "uses:.*@latest",
-                "uses:.*@v\\d+$"  // Major version only (not pinned to patch)
+                "uses:.*@v\\d+$" // Major version only (not pinned to patch)
             ],
             excludePatterns: [
-                "uses:\\s*actions/",  // Official GitHub actions
-                "uses:\\s*github/"    // GitHub org actions
+                "uses:\\s*actions/", // Official GitHub actions
+                "uses:\\s*github/" // GitHub org actions
             ]
         )
     }
@@ -76,17 +76,17 @@ final class MissingPinningRule: ASTRule {
             id: "WORKFLOW-PIN-001",
             name: "Missing Action Version Pinning",
             description: """
-                Detects GitHub Actions that aren't pinned to a specific version.
-                Using unpinned actions can lead to supply chain attacks.
-                """,
+            Detects GitHub Actions that aren't pinned to a specific version.
+            Using unpinned actions can lead to supply chain attacks.
+            """,
             severity: .medium,
             category: .supplyChain,
             cweID: "CWE-829",
             recommendation: """
-                Pin all actions to specific commit SHAs:
-                - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
-                Add comment with version for maintainability.
-                """
+            Pin all actions to specific commit SHAs:
+            - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+            Add comment with version for maintainability.
+            """
         )
     }
 
@@ -99,7 +99,8 @@ final class MissingPinningRule: ASTRule {
 
         for (lineIndex, line) in lines.enumerated() {
             guard let regex = usesPattern,
-                  let match = regex.firstMatch(in: line, options: [], range: NSRange(line.startIndex..., in: line)) else {
+                  let match = regex.firstMatch(in: line, options: [], range: NSRange(line.startIndex..., in: line))
+            else {
                 continue
             }
 
@@ -113,7 +114,7 @@ final class MissingPinningRule: ASTRule {
 
                 if !isSHA {
                     // Skip official actions for medium severity
-                    if line.contains("actions/") && !line.contains("@main") && !line.contains("@master") {
+                    if line.contains("actions/"), !line.contains("@main"), !line.contains("@master") {
                         continue
                     }
 
@@ -144,25 +145,25 @@ final class ExcessivePermissionsRule: RegexRule {
             id: "WORKFLOW-PERMS-001",
             name: "Excessive Workflow Permissions",
             description: """
-                Detects workflows with excessive permissions:
-                - write-all permission
-                - Broad contents: write
-                - Missing permission restrictions
-                """,
+            Detects workflows with excessive permissions:
+            - write-all permission
+            - Broad contents: write
+            - Missing permission restrictions
+            """,
             severity: .medium,
             category: .authorization,
             cweID: "CWE-250",
             recommendation: """
-                Follow principle of least privilege:
-                - Specify minimal required permissions
-                - Use read-only permissions where possible
-                - Avoid write-all permission
-                """,
+            Follow principle of least privilege:
+            - Specify minimal required permissions
+            - Use read-only permissions where possible
+            - Avoid write-all permission
+            """,
             patterns: [
                 "permissions:\\s*write-all",
-                "contents:\\s*write(?!.*#.*required)",  // contents: write without justification
+                "contents:\\s*write(?!.*#.*required)", // contents: write without justification
                 "packages:\\s*write",
-                "id-token:\\s*write"  // OIDC token write (review needed)
+                "id-token:\\s*write" // OIDC token write (review needed)
             ],
             excludePatterns: [
                 "#.*required",
@@ -179,22 +180,22 @@ final class DangerousTriggerRule: RegexRule {
             id: "WORKFLOW-TRIGGER-001",
             name: "Dangerous Workflow Trigger",
             description: """
-                Detects workflow triggers that could enable attacks:
-                - pull_request_target with checkout
-                - workflow_dispatch without input validation
-                - issue_comment execution
-                """,
+            Detects workflow triggers that could enable attacks:
+            - pull_request_target with checkout
+            - workflow_dispatch without input validation
+            - issue_comment execution
+            """,
             severity: .high,
             category: .injection,
             cweID: "CWE-94",
             recommendation: """
-                For pull_request_target:
-                - Never checkout PR code with write permissions
-                - Use pull_request event instead where possible
-                For workflow_dispatch:
-                - Validate all inputs before use
-                - Don't use inputs directly in shell commands
-                """,
+            For pull_request_target:
+            - Never checkout PR code with write permissions
+            - Use pull_request event instead where possible
+            For workflow_dispatch:
+            - Validate all inputs before use
+            - Don't use inputs directly in shell commands
+            """,
             patterns: [
                 "pull_request_target:",
                 "issue_comment:",

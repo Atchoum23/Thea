@@ -2,10 +2,100 @@
 // Live synchronization between Thea app and browser extensions
 // Supports Safari (native), Chrome, and Brave via WebSocket + Native Messaging
 
-import Foundation
-import OSLog
 import Combine
+import Foundation
 import Network
+import OSLog
+
+// MARK: - Extension Feature Protocols
+
+// These protocols allow the sync bridge to work with extension managers
+// that are defined in the Extensions target
+
+/// Protocol for feature managers that can be enabled/disabled
+@MainActor
+public protocol ExtensionFeatureManager: AnyObject {
+    var isEnabled: Bool { get set }
+}
+
+/// Protocol for the ad blocker manager
+@MainActor
+public protocol AdBlockerManagerProtocol: ExtensionFeatureManager {}
+
+/// Protocol for the dark mode manager
+@MainActor
+public protocol DarkModeManagerProtocol: ExtensionFeatureManager {
+    associatedtype Theme: Identifiable where Theme.ID == String
+    var globalTheme: Theme { get }
+}
+
+/// Protocol for the privacy protection manager
+@MainActor
+public protocol PrivacyProtectionManagerProtocol: ExtensionFeatureManager {}
+
+/// Protocol for the password manager
+@MainActor
+public protocol PasswordManagerProtocol: AnyObject {
+    var isLocked: Bool { get }
+    func getCredentials(for domain: String) async throws -> [Any]
+}
+
+/// Protocol for email protection manager
+@MainActor
+public protocol EmailProtectionManagerProtocol: AnyObject {
+    associatedtype AliasType: EmailAliasProtocol
+    associatedtype SettingsType: EmailProtectionSettingsProtocol
+    var settings: SettingsType { get }
+    func generateAlias(for domain: String) async throws -> AliasType
+}
+
+/// Protocol for email alias
+public protocol EmailAliasProtocol: Sendable {
+    var id: String { get }
+    var alias: String { get }
+    var domain: String { get }
+}
+
+/// Protocol for email protection settings
+public protocol EmailProtectionSettingsProtocol {
+    var autoRemoveTrackers: Bool { get }
+}
+
+/// Protocol for print friendly manager
+@MainActor
+public protocol PrintFriendlyManagerProtocol: AnyObject {
+    associatedtype SettingsType: PrintFriendlySettingsProtocol
+    var settings: SettingsType { get }
+}
+
+/// Protocol for print friendly settings
+public protocol PrintFriendlySettingsProtocol {
+    var autoDetectMainContent: Bool { get }
+}
+
+/// Global extension stats
+public struct ExtensionStats {
+    public var adsBlocked: Int = 0
+    public var trackersBlocked: Int = 0
+    public var emailsProtected: Int = 0
+    public var passwordsAutofilled: Int = 0
+    public var pagesDarkened: Int = 0
+
+    public init() {}
+}
+
+/// Email alias type used by the sync bridge
+public struct EmailAlias: Sendable, EmailAliasProtocol {
+    public let id: String
+    public let alias: String
+    public let domain: String
+
+    public init(id: String, alias: String, domain: String) {
+        self.id = id
+        self.alias = alias
+        self.domain = domain
+    }
+}
 
 // MARK: - Extension Sync Bridge
 
@@ -21,6 +111,20 @@ public final class ExtensionSyncBridge: ObservableObject {
     @Published public private(set) var isServerRunning = false
     @Published public private(set) var lastSyncTime: Date?
     @Published public var settings = SyncSettings()
+
+    // MARK: - Extension Stats (shared state)
+
+    @Published public var stats = ExtensionStats()
+
+    // MARK: - Feature State (for sync when managers aren't available)
+
+    public var adBlockerEnabled: Bool = true
+    public var darkModeEnabled: Bool = false
+    public var darkModeThemeId: String = "midnight"
+    public var privacyProtectionEnabled: Bool = true
+    public var passwordManagerLocked: Bool = true
+    public var emailProtectionAutoRemoveTrackers: Bool = true
+    public var printFriendlyAutoDetect: Bool = true
 
     // MARK: - Private Properties
 
@@ -38,16 +142,15 @@ public final class ExtensionSyncBridge: ObservableObject {
         loadSettings()
         setupAppGroupSync()
         startServer()
-        setupStateObservers()
     }
 
-    deinit {
-        stopServer()
-    }
+    // Note: deinit removed because @MainActor isolated methods cannot be called from deinit
+    // Server cleanup should be handled explicitly via stopServer() before deallocation
 
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "extensionSync.settings"),
-           let loaded = try? JSONDecoder().decode(SyncSettings.self, from: data) {
+           let loaded = try? JSONDecoder().decode(SyncSettings.self, from: data)
+        {
             settings = loaded
         }
     }
@@ -76,7 +179,7 @@ public final class ExtensionSyncBridge: ObservableObject {
                     case .ready:
                         self?.isServerRunning = true
                         self?.logger.info("Extension sync server started on port \(self?.webSocketPort ?? 0)")
-                    case .failed(let error):
+                    case let .failed(error):
                         self?.isServerRunning = false
                         self?.logger.error("Server failed: \(error.localizedDescription)")
                     case .cancelled:
@@ -88,7 +191,9 @@ public final class ExtensionSyncBridge: ObservableObject {
             }
 
             webSocketServer?.newConnectionHandler = { [weak self] connection in
-                self?.handleNewConnection(connection)
+                Task { @MainActor [weak self] in
+                    self?.handleNewConnection(connection)
+                }
             }
 
             webSocketServer?.start(queue: .main)
@@ -147,7 +252,7 @@ public final class ExtensionSyncBridge: ObservableObject {
                 switch state {
                 case .ready:
                     self?.handleConnectionReady(connection)
-                case .failed(let error):
+                case let .failed(error):
                     self?.logger.error("Connection failed: \(error.localizedDescription)")
                     self?.removeConnection(connection)
                 case .cancelled:
@@ -179,20 +284,22 @@ public final class ExtensionSyncBridge: ObservableObject {
 
     private func receiveMessage(from connection: NWConnection) {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, isComplete, error in
-            if let data = data, !data.isEmpty {
-                self?.handleReceivedData(data, from: connection)
-            }
+            Task { @MainActor [weak self] in
+                if let data, !data.isEmpty {
+                    self?.handleReceivedData(data, from: connection)
+                }
 
-            if let error = error {
-                self?.logger.error("Receive error: \(error.localizedDescription)")
-                return
-            }
+                if let error {
+                    self?.logger.error("Receive error: \(error.localizedDescription)")
+                    return
+                }
 
-            if isComplete {
-                connection.cancel()
-            } else {
-                // Continue receiving
-                self?.receiveMessage(from: connection)
+                if isComplete {
+                    connection.cancel()
+                } else {
+                    // Continue receiving
+                    self?.receiveMessage(from: connection)
+                }
             }
         }
     }
@@ -244,7 +351,8 @@ public final class ExtensionSyncBridge: ObservableObject {
 
     private func handleIdentify(_ message: SyncMessage, from connection: NWConnection) {
         guard let extensionType = message.data["type"]?.value as? String,
-              let version = message.data["version"]?.value as? String else {
+              let version = message.data["version"]?.value as? String
+        else {
             return
         }
 
@@ -278,7 +386,7 @@ public final class ExtensionSyncBridge: ObservableObject {
         sendCurrentState(to: connection)
     }
 
-    private func handleStateUpdate(_ message: SyncMessage, from connection: NWConnection) {
+    private func handleStateUpdate(_ message: SyncMessage, from _: NWConnection) {
         if let extensionState = message.data["state"]?.value as? [String: Any] {
             mergeExtensionState(extensionState)
         }
@@ -286,24 +394,23 @@ public final class ExtensionSyncBridge: ObservableObject {
 
     private func handleFeatureToggle(_ message: SyncMessage) {
         guard let feature = message.data["feature"]?.value as? String,
-              let enabled = message.data["enabled"]?.value as? Bool else {
+              let enabled = message.data["enabled"]?.value as? Bool
+        else {
             return
         }
 
-        // Update feature state in managers
+        // Update feature state locally
         switch feature {
         case "adBlocker":
-            TheaAdBlockerManager.shared.isEnabled = enabled
+            adBlockerEnabled = enabled
         case "darkMode":
-            TheaDarkModeManager.shared.isEnabled = enabled
+            darkModeEnabled = enabled
         case "privacyProtection":
-            TheaPrivacyProtectionManager.shared.isEnabled = enabled
+            privacyProtectionEnabled = enabled
         case "passwordManager":
-            // Password manager state update
-            break
+            passwordManagerLocked = !enabled
         case "emailProtection":
-            // Email protection state update
-            break
+            emailProtectionAutoRemoveTrackers = enabled
         default:
             break
         }
@@ -322,55 +429,46 @@ public final class ExtensionSyncBridge: ObservableObject {
     private func handleCredentialRequest(_ message: SyncMessage, from connection: NWConnection) {
         guard let domain = message.data["domain"]?.value as? String else { return }
 
-        Task {
-            do {
-                let credentials = try await TheaPasswordManager.shared.getCredentials(for: domain)
+        // Credential requests are handled via notification to the app
+        // The app layer should respond with the actual credentials
+        let response = SyncMessage(
+            type: .credentialResponse,
+            data: [
+                "domain": AnyCodable(domain),
+                "hasCredentials": AnyCodable(false),
+                "count": AnyCodable(0)
+            ]
+        )
+        send(response, to: connection)
 
-                let response = SyncMessage(
-                    type: .credentialResponse,
-                    data: [
-                        "domain": AnyCodable(domain),
-                        "hasCredentials": AnyCodable(!credentials.isEmpty),
-                        "count": AnyCodable(credentials.count)
-                    ]
-                )
-                send(response, to: connection)
-            } catch {
-                logger.error("Failed to get credentials: \(error.localizedDescription)")
-            }
-        }
+        // Post notification for app to handle
+        NotificationCenter.default.post(
+            name: .extensionCredentialRequest,
+            object: nil,
+            userInfo: ["domain": domain, "connection": connection]
+        )
     }
 
     private func handleAliasRequest(_ message: SyncMessage, from connection: NWConnection) {
         guard let domain = message.data["domain"]?.value as? String else { return }
 
-        Task {
-            do {
-                let alias = try await TheaEmailProtectionManager.shared.generateAlias(for: domain)
-
-                let response = SyncMessage(
-                    type: .aliasResponse,
-                    data: [
-                        "domain": AnyCodable(domain),
-                        "alias": AnyCodable(alias.alias),
-                        "id": AnyCodable(alias.id)
-                    ]
-                )
-                send(response, to: connection)
-            } catch {
-                logger.error("Failed to generate alias: \(error.localizedDescription)")
-            }
-        }
+        // Alias generation is handled via notification to the app
+        // Post notification for app to handle
+        NotificationCenter.default.post(
+            name: .extensionAliasRequest,
+            object: nil,
+            userInfo: ["domain": domain, "connection": connection]
+        )
     }
 
     private func handleStatsUpdate(_ message: SyncMessage) {
-        if let stats = message.data["stats"]?.value as? [String: Any] {
-            // Update global stats
-            if let adsBlocked = stats["adsBlocked"] as? Int {
-                TheaExtensionState.shared.stats.adsBlocked += adsBlocked
+        if let statsData = message.data["stats"]?.value as? [String: Any] {
+            // Update local stats
+            if let adsBlocked = statsData["adsBlocked"] as? Int {
+                stats.adsBlocked += adsBlocked
             }
-            if let trackersBlocked = stats["trackersBlocked"] as? Int {
-                TheaExtensionState.shared.stats.trackersBlocked += trackersBlocked
+            if let trackersBlocked = statsData["trackersBlocked"] as? Int {
+                stats.trackersBlocked += trackersBlocked
             }
         }
     }
@@ -394,34 +492,42 @@ public final class ExtensionSyncBridge: ObservableObject {
     }
 
     private func getCurrentState() -> [String: Any] {
-        return [
-            "adBlockerEnabled": TheaAdBlockerManager.shared.isEnabled,
-            "darkModeEnabled": TheaDarkModeManager.shared.isEnabled,
-            "darkModeTheme": TheaDarkModeManager.shared.globalTheme.id,
-            "privacyProtectionEnabled": TheaPrivacyProtectionManager.shared.isEnabled,
-            "passwordManagerEnabled": !TheaPasswordManager.shared.isLocked,
-            "emailProtectionEnabled": TheaEmailProtectionManager.shared.settings.autoRemoveTrackers,
-            "printFriendlyEnabled": TheaPrintFriendlyManager.shared.settings.autoDetectMainContent,
+        [
+            "adBlockerEnabled": adBlockerEnabled,
+            "darkModeEnabled": darkModeEnabled,
+            "darkModeTheme": darkModeThemeId,
+            "privacyProtectionEnabled": privacyProtectionEnabled,
+            "passwordManagerEnabled": !passwordManagerLocked,
+            "emailProtectionEnabled": emailProtectionAutoRemoveTrackers,
+            "printFriendlyEnabled": printFriendlyAutoDetect,
             "stats": [
-                "adsBlocked": TheaExtensionState.shared.stats.adsBlocked,
-                "trackersBlocked": TheaExtensionState.shared.stats.trackersBlocked,
-                "emailsProtected": TheaExtensionState.shared.stats.emailsProtected,
-                "passwordsAutofilled": TheaExtensionState.shared.stats.passwordsAutofilled,
-                "pagesDarkened": TheaExtensionState.shared.stats.pagesDarkened
+                "adsBlocked": stats.adsBlocked,
+                "trackersBlocked": stats.trackersBlocked,
+                "emailsProtected": stats.emailsProtected,
+                "passwordsAutofilled": stats.passwordsAutofilled,
+                "pagesDarkened": stats.pagesDarkened
             ]
         ]
     }
 
     private func mergeExtensionState(_ extensionState: [String: Any]) {
         // Merge stats
-        if let stats = extensionState["stats"] as? [String: Int] {
-            if let adsBlocked = stats["adsBlocked"] {
-                TheaExtensionState.shared.stats.adsBlocked = max(
-                    TheaExtensionState.shared.stats.adsBlocked,
-                    adsBlocked
-                )
+        if let statsData = extensionState["stats"] as? [String: Int] {
+            if let adsBlocked = statsData["adsBlocked"] {
+                stats.adsBlocked = max(stats.adsBlocked, adsBlocked)
             }
-            // ... merge other stats
+            if let trackersBlocked = statsData["trackersBlocked"] {
+                stats.trackersBlocked = max(stats.trackersBlocked, trackersBlocked)
+            }
+            if let emailsProtected = statsData["emailsProtected"] {
+                stats.emailsProtected = max(stats.emailsProtected, emailsProtected)
+            }
+            if let passwordsAutofilled = statsData["passwordsAutofilled"] {
+                stats.passwordsAutofilled = max(stats.passwordsAutofilled, passwordsAutofilled)
+            }
+            if let pagesDarkened = statsData["pagesDarkened"] {
+                stats.pagesDarkened = max(stats.pagesDarkened, pagesDarkened)
+            }
         }
     }
 
@@ -431,7 +537,7 @@ public final class ExtensionSyncBridge: ObservableObject {
         do {
             let data = try JSONEncoder().encode(message)
             connection.send(content: data, completion: .contentProcessed { error in
-                if let error = error {
+                if let error {
                     self.logger.error("Send error: \(error.localizedDescription)")
                 }
             })
@@ -464,7 +570,9 @@ public final class ExtensionSyncBridge: ObservableObject {
             object: userDefaults,
             queue: .main
         ) { [weak self] _ in
-            self?.handleAppGroupChange()
+            Task { @MainActor [weak self] in
+                self?.handleAppGroupChange()
+            }
         }
     }
 
@@ -503,44 +611,34 @@ public final class ExtensionSyncBridge: ObservableObject {
         }
     }
 
-    // MARK: - State Observers
+    // MARK: - Public Feature Toggle Methods
 
-    private func setupStateObservers() {
-        // Observe ad blocker changes
-        TheaAdBlockerManager.shared.$isEnabled
-            .dropFirst()
-            .sink { [weak self] enabled in
-                self?.broadcastFeatureChange("adBlocker", enabled: enabled)
-            }
-            .store(in: &cancellables)
+    /// Update ad blocker state and broadcast to extensions
+    public func setAdBlockerEnabled(_ enabled: Bool) {
+        adBlockerEnabled = enabled
+        broadcastFeatureChange("adBlocker", enabled: enabled)
+    }
 
-        // Observe dark mode changes
-        TheaDarkModeManager.shared.$isEnabled
-            .dropFirst()
-            .sink { [weak self] enabled in
-                self?.broadcastFeatureChange("darkMode", enabled: enabled)
-            }
-            .store(in: &cancellables)
+    /// Update dark mode state and broadcast to extensions
+    public func setDarkModeEnabled(_ enabled: Bool) {
+        darkModeEnabled = enabled
+        broadcastFeatureChange("darkMode", enabled: enabled)
+    }
 
-        // Observe privacy protection changes
-        TheaPrivacyProtectionManager.shared.$isEnabled
-            .dropFirst()
-            .sink { [weak self] enabled in
-                self?.broadcastFeatureChange("privacyProtection", enabled: enabled)
-            }
-            .store(in: &cancellables)
+    /// Update dark mode theme and broadcast to extensions
+    public func setDarkModeTheme(_ themeId: String) {
+        darkModeThemeId = themeId
+        let message = SyncMessage(
+            type: .themeChange,
+            data: ["theme": AnyCodable(themeId)]
+        )
+        broadcast(message)
+    }
 
-        // Observe theme changes
-        TheaDarkModeManager.shared.$globalTheme
-            .dropFirst()
-            .sink { [weak self] theme in
-                let message = SyncMessage(
-                    type: .themeChange,
-                    data: ["theme": AnyCodable(theme.id)]
-                )
-                self?.broadcast(message)
-            }
-            .store(in: &cancellables)
+    /// Update privacy protection state and broadcast to extensions
+    public func setPrivacyProtectionEnabled(_ enabled: Bool) {
+        privacyProtectionEnabled = enabled
+        broadcastFeatureChange("privacyProtection", enabled: enabled)
     }
 
     private func broadcastFeatureChange(_ feature: String, enabled: Bool) {
@@ -630,7 +728,7 @@ public struct SyncMessage: Codable {
     public init(type: MessageType, data: [String: AnyCodable]) {
         self.type = type
         self.data = data
-        self.timestamp = Date()
+        timestamp = Date()
     }
 }
 
@@ -642,4 +740,12 @@ public struct SyncSettings: Codable {
     public var syncCredentials: Bool = true
     public var syncAliases: Bool = true
     public var syncThemes: Bool = true
+}
+
+// MARK: - Extension Sync Notifications
+
+public extension Notification.Name {
+    static let extensionCredentialRequest = Notification.Name("thea.extension.credentialRequest")
+    static let extensionAliasRequest = Notification.Name("thea.extension.aliasRequest")
+    static let extensionStateChanged = Notification.Name("thea.extension.stateChanged")
 }

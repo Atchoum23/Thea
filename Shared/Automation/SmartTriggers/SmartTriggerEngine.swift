@@ -1,11 +1,14 @@
 // SmartTriggerEngine.swift
 // Intelligent automation triggers based on context, time, location, and events
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 #if canImport(CoreLocation)
-import CoreLocation
+    import CoreLocation
+#endif
+#if canImport(AppKit)
+    import AppKit
 #endif
 
 // MARK: - Smart Trigger Engine
@@ -68,7 +71,7 @@ public final class SmartTriggerEngine: ObservableObject {
     public func setEnabled(_ enabled: Bool) {
         isEnabled = enabled
         if enabled {
-            triggers.filter { $0.isEnabled }.forEach { activateTrigger($0) }
+            triggers.filter(\.isEnabled).forEach { activateTrigger($0) }
         } else {
             triggers.forEach { deactivateTrigger($0) }
         }
@@ -77,34 +80,34 @@ public final class SmartTriggerEngine: ObservableObject {
     // MARK: - Trigger Activation
 
     private func activateTrigger(_ trigger: SmartTrigger) {
-        guard trigger.isEnabled && isEnabled else { return }
+        guard trigger.isEnabled, isEnabled else { return }
 
         switch trigger.condition {
-        case .time(let config):
+        case let .time(config):
             activateTimeTrigger(trigger, config: config)
-        case .location(let config):
+        case let .location(config):
             activateLocationTrigger(trigger, config: config)
-        case .appLaunch(let appId):
+        case let .appLaunch(appId):
             activateAppLaunchTrigger(trigger, appId: appId)
-        case .appQuit(let appId):
+        case let .appQuit(appId):
             activateAppQuitTrigger(trigger, appId: appId)
-        case .deviceConnect(let deviceType):
+        case let .deviceConnect(deviceType):
             activateDeviceConnectTrigger(trigger, deviceType: deviceType)
-        case .networkChange(let config):
+        case let .networkChange(config):
             activateNetworkTrigger(trigger, config: config)
-        case .batteryLevel(let threshold, let isCharging):
+        case let .batteryLevel(threshold, isCharging):
             activateBatteryTrigger(trigger, threshold: threshold, isCharging: isCharging)
-        case .focusModeChange(let mode):
+        case let .focusModeChange(mode):
             activateFocusModeTrigger(trigger, mode: mode)
-        case .calendarEvent(let config):
+        case let .calendarEvent(config):
             activateCalendarTrigger(trigger, config: config)
-        case .fileChange(let path):
+        case let .fileChange(path):
             activateFileChangeTrigger(trigger, path: path)
-        case .webhook(let url):
+        case let .webhook(url):
             activateWebhookTrigger(trigger, url: url)
         case .manual:
             break // Manual triggers don't need activation
-        case .aiContext(let pattern):
+        case let .aiContext(pattern):
             activateAIContextTrigger(trigger, pattern: pattern)
         }
     }
@@ -122,18 +125,18 @@ public final class SmartTriggerEngine: ObservableObject {
         var nextFireDate: Date?
 
         switch config.schedule {
-        case .once(let date):
+        case let .once(date):
             if date > now {
                 nextFireDate = date
             }
-        case .daily(let time):
+        case let .daily(time):
             nextFireDate = calculateNextDaily(time: time)
-        case .weekly(let days, let time):
+        case let .weekly(days, time):
             nextFireDate = calculateNextWeekly(days: days, time: time)
-        case .interval(let seconds):
+        case let .interval(seconds):
             nextFireDate = now.addingTimeInterval(seconds)
-        case .cron(let expression):
-            nextFireDate = calculateNextCron(expression: expression)
+        case let .cron(expression):
+            nextFireDate = calculateNextCron(expression)
         }
 
         guard let fireDate = nextFireDate else { return }
@@ -147,7 +150,8 @@ public final class SmartTriggerEngine: ObservableObject {
 
     @objc private func timerFired(_ timer: Timer) {
         guard let triggerId = timer.userInfo as? UUID,
-              let trigger = triggers.first(where: { $0.id == triggerId }) else {
+              let trigger = triggers.first(where: { $0.id == triggerId })
+        else {
             return
         }
 
@@ -155,7 +159,7 @@ public final class SmartTriggerEngine: ObservableObject {
             await executeTrigger(trigger)
 
             // Re-schedule if recurring
-            if case .time(let config) = trigger.condition {
+            if case let .time(config) = trigger.condition {
                 switch config.schedule {
                 case .once:
                     break // Don't reschedule
@@ -186,7 +190,7 @@ public final class SmartTriggerEngine: ObservableObject {
         let now = Date()
         let currentWeekday = calendar.component(.weekday, from: now)
 
-        for dayOffset in 0..<7 {
+        for dayOffset in 0 ..< 7 {
             let targetWeekday = (currentWeekday + dayOffset - 1) % 7 + 1
             if days.contains(targetWeekday) {
                 var components = calendar.dateComponents([.year, .month, .day], from: now)
@@ -203,18 +207,18 @@ public final class SmartTriggerEngine: ObservableObject {
         return nil
     }
 
-    private func calculateNextCron(_ expression: String) -> Date? {
+    private func calculateNextCron(_: String) -> Date? {
         // Simplified cron parsing (minute hour day month weekday)
         // For full cron support, use a proper cron library
-        return Date().addingTimeInterval(3600) // Placeholder: 1 hour
+        Date().addingTimeInterval(3600) // Placeholder: 1 hour
     }
 
     // MARK: - Location Triggers
 
-    private func activateLocationTrigger(_ trigger: SmartTrigger, config: LocationTriggerConfig) {
+    private func activateLocationTrigger(_ trigger: SmartTrigger, config _: LocationTriggerConfig) {
         #if canImport(CoreLocation) && os(iOS)
-        // Setup location monitoring
-        logger.debug("Location trigger activated: \(trigger.name)")
+            // Setup location monitoring
+            logger.debug("Location trigger activated: \(trigger.name)")
         #endif
     }
 
@@ -222,82 +226,82 @@ public final class SmartTriggerEngine: ObservableObject {
 
     private func activateAppLaunchTrigger(_ trigger: SmartTrigger, appId: String) {
         #if os(macOS)
-        NSWorkspace.shared.notificationCenter
-            .publisher(for: NSWorkspace.didLaunchApplicationNotification)
-            .sink { [weak self] notification in
-                guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-                      app.bundleIdentifier == appId else { return }
-                Task { await self?.executeTrigger(trigger) }
-            }
-            .store(in: &cancellables)
+            NSWorkspace.shared.notificationCenter
+                .publisher(for: NSWorkspace.didLaunchApplicationNotification)
+                .sink { [weak self] notification in
+                    guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                          app.bundleIdentifier == appId else { return }
+                    Task { await self?.executeTrigger(trigger) }
+                }
+                .store(in: &cancellables)
         #endif
     }
 
     private func activateAppQuitTrigger(_ trigger: SmartTrigger, appId: String) {
         #if os(macOS)
-        NSWorkspace.shared.notificationCenter
-            .publisher(for: NSWorkspace.didTerminateApplicationNotification)
-            .sink { [weak self] notification in
-                guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-                      app.bundleIdentifier == appId else { return }
-                Task { await self?.executeTrigger(trigger) }
-            }
-            .store(in: &cancellables)
+            NSWorkspace.shared.notificationCenter
+                .publisher(for: NSWorkspace.didTerminateApplicationNotification)
+                .sink { [weak self] notification in
+                    guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                          app.bundleIdentifier == appId else { return }
+                    Task { await self?.executeTrigger(trigger) }
+                }
+                .store(in: &cancellables)
         #endif
     }
 
     // MARK: - Device Triggers
 
-    private func activateDeviceConnectTrigger(_ trigger: SmartTrigger, deviceType: String) {
+    private func activateDeviceConnectTrigger(_: SmartTrigger, deviceType: String) {
         // Monitor for device connections (Bluetooth, USB, etc.)
         logger.debug("Device trigger activated for: \(deviceType)")
     }
 
     // MARK: - Network Triggers
 
-    private func activateNetworkTrigger(_ trigger: SmartTrigger, config: NetworkTriggerConfig) {
+    private func activateNetworkTrigger(_: SmartTrigger, config: NetworkTriggerConfig) {
         // Monitor network changes
         logger.debug("Network trigger activated: \(config.ssid ?? "any")")
     }
 
     // MARK: - Battery Triggers
 
-    private func activateBatteryTrigger(_ trigger: SmartTrigger, threshold: Int, isCharging: Bool?) {
+    private func activateBatteryTrigger(_: SmartTrigger, threshold: Int, isCharging _: Bool?) {
         // Monitor battery level
         logger.debug("Battery trigger activated: \(threshold)%")
     }
 
     // MARK: - Focus Mode Triggers
 
-    private func activateFocusModeTrigger(_ trigger: SmartTrigger, mode: String) {
+    private func activateFocusModeTrigger(_: SmartTrigger, mode: String) {
         // Monitor Focus mode changes
         logger.debug("Focus mode trigger activated: \(mode)")
     }
 
     // MARK: - Calendar Triggers
 
-    private func activateCalendarTrigger(_ trigger: SmartTrigger, config: CalendarTriggerConfig) {
+    private func activateCalendarTrigger(_: SmartTrigger, config _: CalendarTriggerConfig) {
         // Monitor calendar events
         logger.debug("Calendar trigger activated")
     }
 
     // MARK: - File Change Triggers
 
-    private func activateFileChangeTrigger(_ trigger: SmartTrigger, path: String) {
+    private func activateFileChangeTrigger(_: SmartTrigger, path: String) {
         // Use FSEvents or DispatchSource to monitor file changes
         logger.debug("File change trigger activated: \(path)")
     }
 
     // MARK: - Webhook Triggers
 
-    private func activateWebhookTrigger(_ trigger: SmartTrigger, url: String) {
+    private func activateWebhookTrigger(_: SmartTrigger, url: String) {
         // Setup webhook endpoint
         logger.debug("Webhook trigger activated: \(url)")
     }
 
     // MARK: - AI Context Triggers
 
-    private func activateAIContextTrigger(_ trigger: SmartTrigger, pattern: String) {
+    private func activateAIContextTrigger(_: SmartTrigger, pattern: String) {
         // Monitor AI conversation for patterns
         logger.debug("AI context trigger activated: \(pattern)")
     }
@@ -305,7 +309,7 @@ public final class SmartTriggerEngine: ObservableObject {
     // MARK: - Trigger Execution
 
     public func executeTrigger(_ trigger: SmartTrigger) async {
-        guard trigger.isEnabled && isEnabled else { return }
+        guard trigger.isEnabled, isEnabled else { return }
 
         logger.info("Executing trigger: \(trigger.name)")
 
@@ -348,7 +352,7 @@ public final class SmartTriggerEngine: ObservableObject {
     private func evaluateConditions(_ conditions: [TriggerConditionCheck]) -> Bool {
         for condition in conditions {
             switch condition {
-            case .timeRange(let start, let end):
+            case let .timeRange(start, end):
                 let now = Date()
                 let calendar = Calendar.current
                 let currentHour = calendar.component(.hour, from: now)
@@ -361,23 +365,23 @@ public final class SmartTriggerEngine: ObservableObject {
                     return false
                 }
 
-            case .dayOfWeek(let days):
+            case let .dayOfWeek(days):
                 let weekday = Calendar.current.component(.weekday, from: Date())
                 if !days.contains(weekday) {
                     return false
                 }
 
-            case .batteryAbove(let threshold):
+            case .batteryAbove:
                 // Check battery level
-                break
+                return true
 
-            case .networkConnected(let ssid):
+            case .networkConnected:
                 // Check network
-                break
+                return true
 
-            case .focusModeActive(let mode):
+            case .focusModeActive:
                 // Check focus mode
-                break
+                return true
             }
         }
         return true
@@ -385,63 +389,63 @@ public final class SmartTriggerEngine: ObservableObject {
 
     private func executeAction(_ action: TriggerAction) async throws {
         switch action {
-        case .runShortcut(let name):
+        case let .runShortcut(name):
             // Run Shortcuts automation
             logger.info("Running shortcut: \(name)")
 
-        case .sendNotification(let title, let body):
+        case let .sendNotification(title, _):
             // Send local notification
             logger.info("Sending notification: \(title)")
 
-        case .executeCommand(let command):
+        case let .executeCommand(command):
             // Execute terminal command (with AgentSec validation)
             logger.info("Executing command: \(command)")
 
-        case .openApp(let appId):
+        case let .openApp(appId):
             #if os(macOS)
-            if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: appId) {
-                NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
-            }
+                if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: appId) {
+                    _ = try? await NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+                }
             #endif
 
-        case .openURL(let urlString):
+        case let .openURL(urlString):
             if let url = URL(string: urlString) {
                 #if os(macOS)
-                NSWorkspace.shared.open(url)
+                    NSWorkspace.shared.open(url)
                 #endif
             }
 
-        case .setClipboard(let text):
+        case let .setClipboard(text):
             #if os(macOS)
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(text, forType: .string)
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(text, forType: .string)
             #endif
 
-        case .playSound(let soundName):
+        case let .playSound(soundName):
             // Play system sound
             #if os(macOS)
-            NSSound(named: NSSound.Name(soundName))?.play()
+                NSSound(named: NSSound.Name(soundName))?.play()
             #endif
 
-        case .speakText(let text):
+        case let .speakText(text):
             await SpeechIntelligence.shared.speak(text)
 
-        case .sendMessage(let recipient, let message):
+        case let .sendMessage(recipient, message):
             logger.info("Would send message to \(recipient): \(message)")
 
-        case .controlHomeKit(let sceneId):
+        case let .controlHomeKit(sceneId):
             logger.info("Would activate HomeKit scene: \(sceneId)")
 
-        case .setVariable(let key, let value):
+        case let .setVariable(key, value):
             defaults.set(value, forKey: "thea.trigger.var.\(key)")
 
-        case .aiPrompt(let prompt):
+        case let .aiPrompt(prompt):
             logger.info("Would send AI prompt: \(prompt)")
 
-        case .webhook(let url, let method, let body):
+        case let .webhook(url, method, body):
             try await executeWebhook(url: url, method: method, body: body)
 
-        case .chain(let actions):
+        case let .chain(actions):
             for chainedAction in actions {
                 try await executeAction(chainedAction)
             }
@@ -454,7 +458,7 @@ public final class SmartTriggerEngine: ObservableObject {
         var request = URLRequest(url: requestURL)
         request.httpMethod = method
 
-        if let body = body {
+        if let body {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
@@ -462,7 +466,8 @@ public final class SmartTriggerEngine: ObservableObject {
         let (_, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
+              (200 ... 299).contains(httpResponse.statusCode)
+        else {
             throw TriggerError.webhookFailed
         }
     }
@@ -472,19 +477,19 @@ public final class SmartTriggerEngine: ObservableObject {
     private func setupSystemObservers() {
         // Setup observers for system events
         #if os(macOS)
-        NSWorkspace.shared.notificationCenter
-            .publisher(for: NSWorkspace.willSleepNotification)
-            .sink { [weak self] _ in
-                self?.handleSystemSleep()
-            }
-            .store(in: &cancellables)
+            NSWorkspace.shared.notificationCenter
+                .publisher(for: NSWorkspace.willSleepNotification)
+                .sink { [weak self] _ in
+                    self?.handleSystemSleep()
+                }
+                .store(in: &cancellables)
 
-        NSWorkspace.shared.notificationCenter
-            .publisher(for: NSWorkspace.didWakeNotification)
-            .sink { [weak self] _ in
-                self?.handleSystemWake()
-            }
-            .store(in: &cancellables)
+            NSWorkspace.shared.notificationCenter
+                .publisher(for: NSWorkspace.didWakeNotification)
+                .sink { [weak self] _ in
+                    self?.handleSystemWake()
+                }
+                .store(in: &cancellables)
         #endif
     }
 
@@ -495,18 +500,19 @@ public final class SmartTriggerEngine: ObservableObject {
     private func handleSystemWake() {
         logger.debug("System woke up")
         // Re-evaluate time-based triggers
-        triggers.filter { $0.isEnabled }.forEach { activateTrigger($0) }
+        triggers.filter(\.isEnabled).forEach { activateTrigger($0) }
     }
 
     // MARK: - Persistence
 
     private func loadTriggers() {
         guard let data = defaults.data(forKey: triggersKey),
-              let saved = try? JSONDecoder().decode([SmartTrigger].self, from: data) else {
+              let saved = try? JSONDecoder().decode([SmartTrigger].self, from: data)
+        else {
             return
         }
         triggers = saved
-        triggers.filter { $0.isEnabled }.forEach { activateTrigger($0) }
+        triggers.filter(\.isEnabled).forEach { activateTrigger($0) }
     }
 
     private func saveTriggers() {
@@ -544,7 +550,7 @@ public struct SmartTrigger: Identifiable, Codable, Sendable {
         self.condition = condition
         self.additionalConditions = additionalConditions
         self.actions = actions
-        self.createdAt = Date()
+        createdAt = Date()
     }
 }
 
@@ -641,7 +647,7 @@ public struct TriggerExecution: Identifiable, Codable, Sendable {
     public var error: String?
 
     public init(triggerId: UUID, triggerName: String, timestamp: Date, success: Bool, error: String? = nil) {
-        self.id = UUID()
+        id = UUID()
         self.triggerId = triggerId
         self.triggerName = triggerName
         self.timestamp = timestamp

@@ -18,7 +18,7 @@ final class ChatManager: ObservableObject {
     // MARK: - Setup
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
         loadConversations()
     }
 
@@ -155,18 +155,18 @@ final class ChatManager: ObservableObject {
 
             for try await chunk in responseStream {
                 switch chunk.type {
-                case .delta(let text):
+                case let .delta(text):
                     streamingText += text
                     assistantMessage.contentData = try JSONEncoder().encode(MessageContent.text(streamingText))
 
-                case .complete(let finalMessage):
+                case let .complete(finalMessage):
                     assistantMessage.contentData = try JSONEncoder().encode(finalMessage.content)
                     assistantMessage.tokenCount = finalMessage.tokenCount
                     if let metadata = finalMessage.metadata {
                         assistantMessage.metadataData = try? JSONEncoder().encode(metadata)
                     }
 
-                case .error(let error):
+                case let .error(error):
                     throw error
                 }
             }
@@ -186,14 +186,15 @@ final class ChatManager: ObservableObject {
         streamingText = ""
     }
 
-    func deleteMessage(_ message: Message, from conversation: Conversation) {
+    func deleteMessage(_ message: Message, from _: Conversation) {
         modelContext?.delete(message)
         try? modelContext?.save()
     }
 
     func regenerateLastMessage(in conversation: Conversation) async throws {
         if let lastMessage = conversation.messages.last,
-           lastMessage.messageRole == .assistant {
+           lastMessage.messageRole == .assistant
+        {
             deleteMessage(lastMessage, from: conversation)
         }
 
@@ -249,13 +250,13 @@ enum ChatError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noModelContext:
-            return "Model context not available"
+            "Model context not available"
         case .noUserMessage:
-            return "No user message found"
+            "No user message found"
         case .providerNotAvailable:
-            return "AI provider not available"
+            "AI provider not available"
         case .invalidAPIKey:
-            return "Invalid API key"
+            "Invalid API key"
         }
     }
 }

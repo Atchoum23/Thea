@@ -1,13 +1,13 @@
 // KeyboardShortcutsSystem.swift
 // Comprehensive keyboard shortcuts with customization
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 import SwiftUI
 #if os(macOS)
-import AppKit
-import Carbon.HIToolbox
+    import AppKit
+    import Carbon.HIToolbox
 #endif
 
 // MARK: - Keyboard Shortcuts Manager
@@ -337,38 +337,40 @@ public final class KeyboardShortcutsSystem: ObservableObject {
 
     // MARK: - Persistence
 
+    private struct SavedShortcut: Codable {
+        let id: String
+        let key: String
+        let modifiers: [Int]
+    }
+
     private func saveCustomizations() {
-        let customizations = shortcuts.compactMap { shortcut -> (String, KeyCombo)? in
+        var saved: [SavedShortcut] = []
+        for shortcut in shortcuts where shortcut.customKey != nil {
             if let custom = shortcut.customKey {
-                return (shortcut.id, custom)
+                saved.append(SavedShortcut(
+                    id: shortcut.id,
+                    key: custom.key,
+                    modifiers: custom.modifiers.map(\.rawValue)
+                ))
             }
-            return nil
         }
 
-        let dict = customizations.reduce(into: [String: [String: Any]]()) { result, item in
-            result[item.0] = [
-                "key": item.1.key,
-                "modifiers": item.1.modifiers.map { $0.rawValue }
-            ]
-        }
-
-        if let data = try? JSONEncoder().encode(dict) {
+        if let data = try? JSONEncoder().encode(saved) {
             UserDefaults.standard.set(data, forKey: "keyboard.customizations")
         }
     }
 
     private func loadCustomizations() {
         guard let data = UserDefaults.standard.data(forKey: "keyboard.customizations"),
-              let dict = try? JSONDecoder().decode([String: [String: Any]].self, from: data) else {
+              let saved = try? JSONDecoder().decode([SavedShortcut].self, from: data)
+        else {
             return
         }
 
-        for (id, value) in dict {
-            if let index = shortcuts.firstIndex(where: { $0.id == id }),
-               let key = value["key"] as? String,
-               let modifierRaw = value["modifiers"] as? [Int] {
-                let modifiers = Set(modifierRaw.compactMap { KeyModifier(rawValue: $0) })
-                shortcuts[index].customKey = KeyCombo(key: key, modifiers: modifiers)
+        for item in saved {
+            if let index = shortcuts.firstIndex(where: { $0.id == item.id }) {
+                let modifiers = Set(item.modifiers.compactMap { KeyModifier(rawValue: $0) })
+                shortcuts[index].customKey = KeyCombo(key: item.key, modifiers: modifiers)
             }
         }
     }
@@ -397,7 +399,7 @@ public final class KeyboardShortcutsSystem: ObservableObject {
         conflicts = newConflicts
 
         if !conflicts.isEmpty {
-            logger.warning("Found \(conflicts.count) shortcut conflicts")
+            logger.warning("Found \(self.conflicts.count) shortcut conflicts")
         }
     }
 
@@ -429,78 +431,79 @@ public final class KeyboardShortcutsSystem: ObservableObject {
     // MARK: - macOS Global Shortcuts
 
     #if os(macOS)
-    private var globalMonitor: Any?
-    private var localMonitor: Any?
+        private var globalMonitor: Any?
+        private var localMonitor: Any?
 
-    /// Setup global keyboard monitoring
-    public func setupGlobalMonitoring() {
-        // Global monitor for global shortcuts
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            self?.handleKeyEvent(event, isGlobal: true)
-        }
-
-        // Local monitor for app shortcuts
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            self?.handleKeyEvent(event, isGlobal: false)
-            return event
-        }
-
-        logger.info("Global keyboard monitoring enabled")
-    }
-
-    /// Stop global monitoring
-    public func stopGlobalMonitoring() {
-        if let monitor = globalMonitor {
-            NSEvent.removeMonitor(monitor)
-            globalMonitor = nil
-        }
-        if let monitor = localMonitor {
-            NSEvent.removeMonitor(monitor)
-            localMonitor = nil
-        }
-
-        logger.info("Global keyboard monitoring disabled")
-    }
-
-    private func handleKeyEvent(_ event: NSEvent, isGlobal: Bool) {
-        guard let characters = event.charactersIgnoringModifiers else { return }
-
-        let modifiers = modifiersFromEvent(event)
-
-        // Check for recording
-        if isListening {
-            Task { @MainActor in
-                recordKey(key: characters, modifiers: modifiers)
+        /// Setup global keyboard monitoring
+        public func setupGlobalMonitoring() {
+            // Global monitor for global shortcuts
+            globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                self?.handleKeyEvent(event, isGlobal: true)
             }
-            return
+
+            // Local monitor for app shortcuts
+            localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                self?.handleKeyEvent(event, isGlobal: false)
+                return event
+            }
+
+            logger.info("Global keyboard monitoring enabled")
         }
 
-        // Find matching shortcut
-        for shortcut in shortcuts {
-            // Skip non-global shortcuts in global context
-            if isGlobal && !shortcut.isGlobal { continue }
+        /// Stop global monitoring
+        public func stopGlobalMonitoring() {
+            if let monitor = globalMonitor {
+                NSEvent.removeMonitor(monitor)
+                globalMonitor = nil
+            }
+            if let monitor = localMonitor {
+                NSEvent.removeMonitor(monitor)
+                localMonitor = nil
+            }
 
-            let keyCombo = shortcut.effectiveKeyCombo
-            if keyCombo.key.lowercased() == characters.lowercased() &&
-               keyCombo.modifiers == modifiers {
+            logger.info("Global keyboard monitoring disabled")
+        }
+
+        private func handleKeyEvent(_ event: NSEvent, isGlobal: Bool) {
+            guard let characters = event.charactersIgnoringModifiers else { return }
+
+            let modifiers = modifiersFromEvent(event)
+
+            // Check for recording
+            if isListening {
                 Task { @MainActor in
-                    executeAction(shortcut.action)
+                    recordKey(key: characters, modifiers: modifiers)
                 }
-                break
+                return
+            }
+
+            // Find matching shortcut
+            for shortcut in shortcuts {
+                // Skip non-global shortcuts in global context
+                if isGlobal, !shortcut.isGlobal { continue }
+
+                let keyCombo = shortcut.effectiveKeyCombo
+                if keyCombo.key.lowercased() == characters.lowercased(),
+                   keyCombo.modifiers == modifiers
+                {
+                    Task { @MainActor in
+                        executeAction(shortcut.action)
+                    }
+                    break
+                }
             }
         }
-    }
 
-    private func modifiersFromEvent(_ event: NSEvent) -> Set<KeyModifier> {
-        var modifiers: Set<KeyModifier> = []
+        private func modifiersFromEvent(_ event: NSEvent) -> Set<KeyModifier> {
+            var modifiers: Set<KeyModifier> = []
 
-        if event.modifierFlags.contains(.command) { modifiers.insert(.command) }
-        if event.modifierFlags.contains(.option) { modifiers.insert(.option) }
-        if event.modifierFlags.contains(.control) { modifiers.insert(.control) }
-        if event.modifierFlags.contains(.shift) { modifiers.insert(.shift) }
+            if event.modifierFlags.contains(.command) { modifiers.insert(.command) }
+            if event.modifierFlags.contains(.option) { modifiers.insert(.option) }
+            if event.modifierFlags.contains(.control) { modifiers.insert(.control) }
+            if event.modifierFlags.contains(.shift) { modifiers.insert(.shift) }
 
-        return modifiers
-    }
+            return modifiers
+        }
     #endif
 
     // MARK: - Lookup
@@ -560,18 +563,17 @@ public struct KeyCombo: Equatable, Codable {
         if modifiers.contains(.command) { parts.append("⌘") }
 
         // Map special keys
-        let keyDisplay: String
-        switch key.lowercased() {
-        case " ": keyDisplay = "Space"
-        case "\r", "return": keyDisplay = "↩"
-        case "\t", "tab": keyDisplay = "⇥"
-        case "delete", "\u{7f}": keyDisplay = "⌫"
-        case "escape", "\u{1b}": keyDisplay = "⎋"
-        case "↑", "up": keyDisplay = "↑"
-        case "↓", "down": keyDisplay = "↓"
-        case "←", "left": keyDisplay = "←"
-        case "→", "right": keyDisplay = "→"
-        default: keyDisplay = key.uppercased()
+        let keyDisplay: String = switch key.lowercased() {
+        case " ": "Space"
+        case "\r", "return": "↩"
+        case "\t", "tab": "⇥"
+        case "delete", "\u{7f}": "⌫"
+        case "escape", "\u{1b}": "⎋"
+        case "↑", "up": "↑"
+        case "↓", "down": "↓"
+        case "←", "left": "←"
+        case "→", "right": "→"
+        default: key.uppercased()
         }
 
         parts.append(keyDisplay)
@@ -607,55 +609,90 @@ public struct RecordedShortcut {
 
 // MARK: - SwiftUI Views
 
-public struct KeyboardShortcutsView: View {
-    @ObservedObject var system = KeyboardShortcutsSystem.shared
-    @State private var selectedCategory: String?
-    @State private var editingShortcut: KeyboardShortcut?
+#if os(macOS)
+    public struct KeyboardShortcutsView: View {
+        @ObservedObject var system = KeyboardShortcutsSystem.shared
+        @State private var selectedCategory: String?
+        @State private var editingShortcut: KeyboardShortcut?
 
-    public init() {}
+        public init() {}
 
-    public var body: some View {
-        HSplitView {
-            // Categories list
-            List(selection: $selectedCategory) {
-                ForEach(system.categories) { category in
-                    Label(category.name, systemImage: category.icon)
-                        .tag(category.id)
-                }
-            }
-            .listStyle(.sidebar)
-            .frame(minWidth: 150)
-
-            // Shortcuts list
-            List {
-                if let category = selectedCategory {
-                    ForEach(system.shortcuts(in: category)) { shortcut in
-                        ShortcutRowView(shortcut: shortcut) {
-                            editingShortcut = shortcut
-                        }
+        public var body: some View {
+            HSplitView {
+                // Categories list
+                List(selection: $selectedCategory) {
+                    ForEach(system.categories) { category in
+                        Label(category.name, systemImage: category.icon)
+                            .tag(category.id)
                     }
-                } else {
-                    Text("Select a category")
-                        .foregroundStyle(.secondary)
+                }
+                .listStyle(.sidebar)
+                .frame(minWidth: 150)
+
+                // Shortcuts list
+                List {
+                    if let category = selectedCategory {
+                        ForEach(system.shortcuts(in: category)) { shortcut in
+                            ShortcutRowView(shortcut: shortcut) {
+                                editingShortcut = shortcut
+                            }
+                        }
+                    } else {
+                        Text("Select a category")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .frame(minWidth: 400)
+            }
+            .sheet(item: $editingShortcut) { shortcut in
+                ShortcutEditorView(shortcut: shortcut)
+            }
+            .toolbar {
+                ToolbarItem {
+                    Button("Reset All") {
+                        system.resetAllToDefaults()
+                    }
                 }
             }
-            .frame(minWidth: 400)
-        }
-        .sheet(item: $editingShortcut) { shortcut in
-            ShortcutEditorView(shortcut: shortcut)
-        }
-        .toolbar {
-            ToolbarItem {
-                Button("Reset All") {
-                    system.resetAllToDefaults()
-                }
+            .onAppear {
+                selectedCategory = system.categories.first?.id
             }
-        }
-        .onAppear {
-            selectedCategory = system.categories.first?.id
         }
     }
-}
+#else
+    public struct KeyboardShortcutsView: View {
+        @ObservedObject var system = KeyboardShortcutsSystem.shared
+        @State private var selectedCategory: String?
+        @State private var editingShortcut: KeyboardShortcut?
+
+        public init() {}
+
+        public var body: some View {
+            NavigationStack {
+                List {
+                    ForEach(system.categories) { category in
+                        NavigationLink {
+                            List {
+                                ForEach(system.shortcuts(in: category.id)) { shortcut in
+                                    ShortcutRowView(shortcut: shortcut) {
+                                        editingShortcut = shortcut
+                                    }
+                                }
+                            }
+                            .navigationTitle(category.name)
+                        } label: {
+                            Label(category.name, systemImage: category.icon)
+                        }
+                    }
+                }
+                .navigationTitle("Keyboard Shortcuts")
+            }
+            .sheet(item: $editingShortcut) { shortcut in
+                ShortcutEditorView(shortcut: shortcut)
+            }
+        }
+    }
+#endif
 
 struct ShortcutRowView: View {
     let shortcut: KeyboardShortcut

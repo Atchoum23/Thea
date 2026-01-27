@@ -17,17 +17,17 @@ public actor NutritionDataImporter {
         public var errorDescription: String? {
             switch self {
             case .invalidFormat:
-                return "The file format is invalid or corrupted"
+                "The file format is invalid or corrupted"
             case .fileNotFound:
-                return "The specified file could not be found"
+                "The specified file could not be found"
             case .parsingFailed:
-                return "Failed to parse the nutrition data"
+                "Failed to parse the nutrition data"
             case .unsupportedFileType:
-                return "This file type is not supported"
+                "This file type is not supported"
             case .networkError:
-                return "Network error occurred while fetching data"
+                "Network error occurred while fetching data"
             case .barcodeNotFound:
-                return "No product found for this barcode"
+                "No product found for this barcode"
             }
         }
     }
@@ -46,14 +46,14 @@ public actor NutritionDataImporter {
     /// Imports nutrition data from specified source
     public func importData(from source: ImportSource) async throws -> [FoodItem] {
         switch source {
-        case .csv(let url):
-            return try await importFromCSV(url)
-        case .json(let url):
-            return try await importFromJSON(url)
-        case .usdaAPI(let foodName):
-            return try await importFromUSDA(foodName)
-        case .barcode(let code):
-            return try await importFromBarcode(code)
+        case let .csv(url):
+            try await importFromCSV(url)
+        case let .json(url):
+            try await importFromJSON(url)
+        case let .usdaAPI(foodName):
+            try await importFromUSDA(foodName)
+        case let .barcode(code):
+            try await importFromBarcode(code)
         }
     }
 
@@ -227,7 +227,7 @@ public actor NutritionDataImporter {
         for char in line {
             if char == "\"" {
                 insideQuotes.toggle()
-            } else if char == "," && !insideQuotes {
+            } else if char == ",", !insideQuotes {
                 fields.append(currentField.trimmingCharacters(in: .whitespaces))
                 currentField = ""
             } else {
@@ -326,9 +326,9 @@ public final class NutritionImportCoordinator: ObservableObject {
     public func exportData(format: ExportFormat) async throws -> String {
         switch format {
         case .csv:
-            return try await importer.exportToCSV(importedItems)
+            try await importer.exportToCSV(importedItems)
         case .json:
-            return try await importer.exportToJSON(importedItems)
+            try await importer.exportToJSON(importedItems)
         }
     }
 

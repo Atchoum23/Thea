@@ -39,13 +39,11 @@ struct MemoryInspectorView: View {
     }
 
     private var filteredMemories: [Memory] {
-        let tierMemories: [Memory]
-
-        switch selectedTier {
+        let tierMemories: [Memory] = switch selectedTier {
         case .shortTerm:
-            tierMemories = memorySystem.shortTermMemory
+            memorySystem.shortTermMemory
         case .longTerm:
-            tierMemories = memorySystem.longTermMemory
+            memorySystem.longTermMemory
         }
 
         if searchText.isEmpty {
@@ -65,25 +63,25 @@ struct MemoryStatsView: View {
 
     var body: some View {
         HStack(spacing: 20) {
-            StatCard(
+            MemoryStatCard(
                 title: "Short-Term",
                 value: "\(memorySystem.shortTermMemory.count)",
                 color: .blue
             )
 
-            StatCard(
+            MemoryStatCard(
                 title: "Long-Term",
                 value: "\(memorySystem.longTermMemory.count)",
                 color: .purple
             )
 
-            StatCard(
+            MemoryStatCard(
                 title: "Episodic",
                 value: "\(memorySystem.episodicMemory.count)",
                 color: .green
             )
 
-            StatCard(
+            MemoryStatCard(
                 title: "Semantic",
                 value: "\(memorySystem.semanticMemory.count)",
                 color: .orange
@@ -96,7 +94,7 @@ struct MemoryStatsView: View {
     }
 }
 
-struct StatCard: View {
+struct MemoryStatCard: View {
     let title: String
     let value: String
     let color: Color
@@ -155,7 +153,7 @@ struct MemoryRow: View {
                 Spacer()
 
                 HStack(spacing: 4) {
-                    ForEach(0..<Int(memory.importance * 5), id: \.self) { _ in
+                    ForEach(0 ..< Int(memory.importance * 5), id: \.self) { _ in
                         Image(systemName: "star.fill")
                             .font(.caption2)
                             .foregroundStyle(.yellow)
@@ -189,21 +187,21 @@ struct MemoryRow: View {
 
     private func iconForType(_ type: MemoryType) -> String {
         switch type {
-        case .episodic: return "clock"
-        case .semantic: return "book"
-        case .procedural: return "gearshape"
-        case .factual: return "doc.text"
-        case .contextual: return "context.menu"
+        case .episodic: "clock"
+        case .semantic: "book"
+        case .procedural: "gearshape"
+        case .factual: "doc.text"
+        case .contextual: "context.menu"
         }
     }
 
     private func colorForType(_ type: MemoryType) -> Color {
         switch type {
-        case .episodic: return .blue
-        case .semantic: return .green
-        case .procedural: return .orange
-        case .factual: return .purple
-        case .contextual: return .pink
+        case .episodic: .blue
+        case .semantic: .green
+        case .procedural: .orange
+        case .factual: .purple
+        case .contextual: .pink
         }
     }
 }

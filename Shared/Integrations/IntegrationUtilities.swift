@@ -3,27 +3,27 @@ import SwiftUI
 
 // MARK: - Number Formatting
 
-extension Double {
+public extension Double {
     /// Formats the number with specified decimal places
-    public func formatted(decimals: Int) -> String {
+    func formatted(decimals: Int) -> String {
         String(format: "%.\(decimals)f", self)
     }
 
     /// Formats as percentage with specified decimal places
-    public func formattedAsPercentage(decimals: Int = 0) -> String {
+    func formattedAsPercentage(decimals: Int = 0) -> String {
         String(format: "%.\(decimals)f%%", self)
     }
 
     /// Rounds to specified decimal places
-    public func rounded(toPlaces places: Int) -> Double {
+    func rounded(toPlaces places: Int) -> Double {
         let multiplier = pow(10.0, Double(places))
         return (self * multiplier).rounded() / multiplier
     }
 }
 
-extension Int {
+public extension Int {
     /// Formats with thousands separators
-    public var formattedWithSeparators: String {
+    var formattedWithSeparators: String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = ","
@@ -33,7 +33,7 @@ extension Int {
 
 // MARK: - Duration Formatting
 
-public struct DurationFormatter {
+public enum DurationFormatter {
     /// Formats minutes as "Xh Ym"
     public static func formatMinutes(_ minutes: Int) -> String {
         let hours = minutes / 60
@@ -64,8 +64,8 @@ public struct DurationFormatter {
 
     /// Formats time interval as human-readable string
     public static func formatInterval(_ interval: TimeInterval) -> String {
-        let hours = Int(interval) / 3_600
-        let minutes = (Int(interval) % 3_600) / 60
+        let hours = Int(interval) / 3600
+        let minutes = (Int(interval) % 3600) / 60
 
         if hours == 0 {
             return "\(minutes) min"
@@ -81,7 +81,7 @@ public struct DurationFormatter {
 
 // MARK: - Statistical Utilities
 
-public struct Statistics {
+public enum Statistics {
     /// Calculates the mean (average) of an array of doubles
     public static func mean(_ values: [Double]) -> Double {
         guard !values.isEmpty else { return 0 }
@@ -115,7 +115,7 @@ public struct Statistics {
     /// Calculates the percentile (0-100) value from array
     public static func percentile(_ values: [Double], percentile: Double) -> Double {
         guard !values.isEmpty else { return 0 }
-        guard percentile >= 0 && percentile <= 100 else { return 0 }
+        guard percentile >= 0, percentile <= 100 else { return 0 }
 
         let sorted = values.sorted()
         let index = (percentile / 100.0) * Double(sorted.count - 1)
@@ -139,7 +139,7 @@ public struct Statistics {
 
 // MARK: - Validation Utilities
 
-public struct Validator {
+public enum Validator {
     /// Validates email format
     public static func isValidEmail(_ email: String) -> Bool {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
@@ -167,7 +167,7 @@ public struct Validator {
 
 // MARK: - Data Export Utilities
 
-public struct DataExporter {
+public enum DataExporter {
     /// Exports data to CSV format
     public static func toCSV<T>(_ data: [T], headers: [String], rowMapper: (T) -> [String]) -> String {
         var csv = headers.joined(separator: ",") + "\n"
@@ -187,7 +187,7 @@ public struct DataExporter {
     }
 
     /// Exports data to JSON format
-    public static func toJSON<T: Encodable>(_ data: [T]) -> String? {
+    public static func toJSON(_ data: [some Encodable]) -> String? {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
@@ -199,7 +199,7 @@ public struct DataExporter {
 
 // MARK: - Trend Analysis
 
-public struct TrendAnalyzer {
+public enum TrendAnalyzer {
     /// Analyzes trend direction from array of values
     public static func analyzeTrend(_ values: [Double]) -> Trend {
         guard values.count >= 2 else { return .unknown }
@@ -241,10 +241,9 @@ public struct TrendAnalyzer {
     }
 }
 
-
 // MARK: - Notification Helpers
 
-public struct NotificationHelper {
+public enum NotificationHelper {
     /// Creates a notification content with standard formatting
     public static func createNotification(
         title: String,
@@ -258,11 +257,11 @@ public struct NotificationHelper {
     /// Formats a reminder notification for health goals
     public static func formatGoalReminder(goalTitle: String, progress: Double) -> String {
         if progress >= 0.75 {
-            return "You're almost there! \(Int((1.0 - progress) * 100))% left to complete '\(goalTitle)'"
+            "You're almost there! \(Int((1.0 - progress) * 100))% left to complete '\(goalTitle)'"
         } else if progress >= 0.5 {
-            return "Halfway to your goal '\(goalTitle)'! Keep going!"
+            "Halfway to your goal '\(goalTitle)'! Keep going!"
         } else {
-            return "Don't forget to work on '\(goalTitle)' today"
+            "Don't forget to work on '\(goalTitle)' today"
         }
     }
 }

@@ -40,9 +40,9 @@ public struct UIRecommendations: Sendable, Codable {
 
         public var displayName: String {
             switch self {
-            case .light: return "Light"
-            case .dark: return "Dark"
-            case .auto: return "Auto"
+            case .light: "Light"
+            case .dark: "Dark"
+            case .auto: "Auto"
             }
         }
     }

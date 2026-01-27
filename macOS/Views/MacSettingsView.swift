@@ -4,9 +4,9 @@ struct MacSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var settingsManager = SettingsManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
-    
+
     @State private var selectedTab: SettingsTab = .general
-    
+
     // Temporary state for Cancel/OK pattern
     @State private var tempDefaultProvider: String = ""
     @State private var tempStreamResponses: Bool = false
@@ -23,10 +23,10 @@ struct MacSettingsView: View {
     @State private var tempDebugMode: Bool = false
     @State private var tempShowPerformanceMetrics: Bool = false
     @State private var tempBetaFeaturesEnabled: Bool = false
-    
+
     // API Keys (temporary)
     @State private var tempAPIKeys: [String: String] = [:]
-    
+
     @State private var hasChanges: Bool = false
 
     enum SettingsTab: String, CaseIterable {
@@ -43,16 +43,16 @@ struct MacSettingsView: View {
 
         var icon: String {
             switch self {
-            case .general: return "gear"
-            case .aiProviders: return "brain.head.profile"
-            case .models: return "cube.box"
-            case .localModels: return "cpu"
-            case .orchestrator: return "network"
-            case .selfExecution: return "bolt.fill"
-            case .voice: return "mic.fill"
-            case .sync: return "icloud.fill"
-            case .privacy: return "lock.fill"
-            case .advanced: return "slider.horizontal.3"
+            case .general: "gear"
+            case .aiProviders: "brain.head.profile"
+            case .models: "cube.box"
+            case .localModels: "cpu"
+            case .orchestrator: "network"
+            case .selfExecution: "bolt.fill"
+            case .voice: "mic.fill"
+            case .sync: "icloud.fill"
+            case .privacy: "lock.fill"
+            case .advanced: "slider.horizontal.3"
             }
         }
     }
@@ -68,9 +68,9 @@ struct MacSettingsView: View {
                         .tag(tab)
                 }
             }
-            
+
             Divider()
-            
+
             // Bottom bar with Cancel/OK buttons
             HStack {
                 if hasChanges {
@@ -78,14 +78,14 @@ struct MacSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                
+
                 Spacer()
-                
+
                 Button("Cancel") {
                     dismiss()
                 }
                 .keyboardShortcut(.escape, modifiers: [])
-                
+
                 Button("OK") {
                     saveAllSettings()
                     dismiss()
@@ -100,9 +100,9 @@ struct MacSettingsView: View {
             loadCurrentSettings()
         }
     }
-    
+
     // MARK: - Load/Save Settings
-    
+
     private func loadCurrentSettings() {
         tempDefaultProvider = settingsManager.defaultProvider
         tempStreamResponses = settingsManager.streamResponses
@@ -119,15 +119,15 @@ struct MacSettingsView: View {
         tempDebugMode = settingsManager.debugMode
         tempShowPerformanceMetrics = settingsManager.showPerformanceMetrics
         tempBetaFeaturesEnabled = settingsManager.betaFeaturesEnabled
-        
+
         // Load API keys
         for provider in settingsManager.availableProviders {
             tempAPIKeys[provider] = settingsManager.getAPIKey(for: provider) ?? ""
         }
-        
+
         hasChanges = false
     }
-    
+
     private func saveAllSettings() {
         settingsManager.defaultProvider = tempDefaultProvider
         settingsManager.streamResponses = tempStreamResponses
@@ -144,18 +144,18 @@ struct MacSettingsView: View {
         settingsManager.debugMode = tempDebugMode
         settingsManager.showPerformanceMetrics = tempShowPerformanceMetrics
         settingsManager.betaFeaturesEnabled = tempBetaFeaturesEnabled
-        
+
         // Save API keys
         for (provider, key) in tempAPIKeys {
             if !key.isEmpty {
                 settingsManager.setAPIKey(key, for: provider)
             }
         }
-        
+
         UserDefaults.standard.synchronize()
         print("✅ All settings saved")
     }
-    
+
     private func markChanged() {
         hasChanges = true
     }
@@ -263,7 +263,7 @@ struct MacSettingsView: View {
                 }
             ))
             .textFieldStyle(.roundedBorder)
-            
+
             if let currentKey = tempAPIKeys[key], !currentKey.isEmpty {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)

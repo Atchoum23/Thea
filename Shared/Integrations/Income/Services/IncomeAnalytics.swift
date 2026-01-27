@@ -49,7 +49,7 @@ public actor IncomeAnalytics {
         var projections: [MonthlyProjection] = []
         var accumulatedIncome = 0.0
 
-        for month in 1...months {
+        for month in 1 ... months {
             let monthlyAmount = currentMonthly * pow(1 + (historicalGrowth / 100), Double(month))
             accumulatedIncome += monthlyAmount
 
@@ -135,13 +135,13 @@ public actor IncomeAnalytics {
 
     // MARK: - Private Helpers
 
-    private func filterByPeriod(_ streams: [IncomeStream], period: AnalysisPeriod) -> [IncomeStream] {
+    private func filterByPeriod(_ streams: [IncomeStream], period _: AnalysisPeriod) -> [IncomeStream] {
         // Would filter based on actual date ranges
         // For now, return all streams
         streams
     }
 
-    private func calculateGrowthRate(_ streams: [IncomeStream], period: AnalysisPeriod) -> Double {
+    private func calculateGrowthRate(_ streams: [IncomeStream], period _: AnalysisPeriod) -> Double {
         // Simplified growth calculation
         guard streams.count >= 2 else { return 0.0 }
 
@@ -158,7 +158,7 @@ public actor IncomeAnalytics {
     private func calculateVolatility(_ streams: [IncomeStream]) -> Double {
         guard streams.count > 1 else { return 0.0 }
 
-        let incomes = streams.map { $0.monthlyAmount }
+        let incomes = streams.map(\.monthlyAmount)
         let average = incomes.reduce(0, +) / Double(incomes.count)
 
         let squaredDifferences = incomes.map { pow($0 - average, 2) }
@@ -181,7 +181,7 @@ public actor IncomeAnalytics {
 
         // Convert to diversification score (0-100, higher is better)
         // HHI ranges from 1/n*10000 (perfectly diversified) to 10000 (monopoly)
-        let maxHHI = 10_000.0
+        let maxHHI = 10000.0
         return max(0, min(100, (1 - (hhi / maxHHI)) * 100))
     }
 
@@ -225,11 +225,11 @@ public actor IncomeAnalytics {
     private func generateTaxRecommendations(_ estimate: TaxEstimate) -> [String] {
         var recommendations: [String] = []
 
-        if estimate.selfEmploymentTax > 5_000 {
+        if estimate.selfEmploymentTax > 5000 {
             recommendations.append("Consider S-Corp election to potentially reduce self-employment tax")
         }
 
-        if estimate.totalTax > 20_000 {
+        if estimate.totalTax > 20000 {
             recommendations.append("Make quarterly estimated tax payments to avoid penalties")
         }
 
@@ -249,9 +249,9 @@ public actor IncomeAnalytics {
         public var errorDescription: String? {
             switch self {
             case .insufficientData:
-                return "Insufficient data for analysis"
+                "Insufficient data for analysis"
             case .invalidPeriod:
-                return "Invalid analysis period"
+                "Invalid analysis period"
             }
         }
     }
@@ -267,10 +267,10 @@ public enum AnalysisPeriod: Sendable {
 
     var months: Int {
         switch self {
-        case .month: return 1
-        case .quarter: return 3
-        case .year: return 12
-        case .custom(let months): return months
+        case .month: 1
+        case .quarter: 3
+        case .year: 12
+        case let .custom(months): months
         }
     }
 }

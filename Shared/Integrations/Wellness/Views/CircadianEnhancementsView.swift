@@ -255,7 +255,7 @@ public struct CircadianEnhancementsView: View {
 
     private func angleForTime(hour: Int, minute: Int) -> Double {
         let totalMinutes = Double(hour * 60 + minute)
-        return (totalMinutes / 1_440.0) * 360.0 // 1440 minutes in a day
+        return (totalMinutes / 1440.0) * 360.0 // 1440 minutes in a day
     }
 
     private func updateCircadianPhase() async {
@@ -349,8 +349,6 @@ private struct RecommendationCard: View {
 }
 
 // MARK: - Circadian Phase Model
-
-
 
 // MARK: - ViewModel
 

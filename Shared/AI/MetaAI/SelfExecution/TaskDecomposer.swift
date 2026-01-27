@@ -55,10 +55,9 @@ public actor TaskDecomposer {
             let taskId = UUID()
             taskIdMap[file.path] = taskId
 
-            let task: Task
-            switch file.status {
+            let task = switch file.status {
             case .new:
-                task = Task(
+                Task(
                     id: taskId,
                     type: .createFile,
                     description: "Create new file: \(file.path)",
@@ -68,7 +67,7 @@ public actor TaskDecomposer {
                     status: .pending
                 )
             case .edit:
-                task = Task(
+                Task(
                     id: taskId,
                     type: .editFile,
                     description: "Edit existing file: \(file.path)",
@@ -78,7 +77,7 @@ public actor TaskDecomposer {
                     status: .pending
                 )
             case .exists:
-                task = Task(
+                Task(
                     id: taskId,
                     type: .verifyChecklist,
                     description: "Verify file exists: \(file.path)",
@@ -99,7 +98,7 @@ public actor TaskDecomposer {
             description: "Build project and verify compilation",
             file: nil,
             codeToGenerate: nil,
-            dependencies: tasks.map { $0.id },
+            dependencies: tasks.map(\.id),
             status: .pending
         )
         tasks.append(buildTask)
@@ -138,7 +137,7 @@ public actor TaskDecomposer {
             description: "Request human approval before finalizing phase",
             file: nil,
             codeToGenerate: nil,
-            dependencies: tasks.map { $0.id },
+            dependencies: tasks.map(\.id),
             status: .pending
         )
         tasks.append(approvalTask)
@@ -157,7 +156,7 @@ public actor TaskDecomposer {
             tasks.append(dmgTask)
         }
 
-        let estimatedDuration = Double(phase.estimatedHours.lowerBound) * 3_600
+        let estimatedDuration = Double(phase.estimatedHours.lowerBound) * 3600
 
         logger.info("Created \(tasks.count) tasks for phase \(phase.number)")
 

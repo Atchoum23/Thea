@@ -208,7 +208,7 @@ public actor MCPServerGenerator {
         return code
     }
 
-    private func generateToolHandler(_ tool: MCPToolSpec, serverName: String) -> String {
+    private func generateToolHandler(_ tool: MCPToolSpec, serverName _: String) -> String {
         let paramExtraction = tool.parameters.map { param in
             "let \(param.name) = params[\"\(param.name)\"] as\(param.isRequired ? "!" : "?") \(param.swiftType)"
         }.joined(separator: "\n            ")
@@ -233,7 +233,7 @@ public actor MCPServerGenerator {
         """
     }
 
-    private func generateResourceHandler(_ resource: MCPResourceSpec, serverName: String) -> String {
+    private func generateResourceHandler(_ resource: MCPResourceSpec, serverName _: String) -> String {
         """
 
             // MARK: - \(resource.name) Resource
@@ -250,7 +250,7 @@ public actor MCPServerGenerator {
         """
     }
 
-    private func generatePromptHandler(_ prompt: MCPPromptSpec, serverName: String) -> String {
+    private func generatePromptHandler(_ prompt: MCPPromptSpec, serverName _: String) -> String {
         """
 
             // MARK: - \(prompt.name) Prompt
@@ -347,7 +347,8 @@ public actor MCPServerGenerator {
 
         // Convert to JSON string representation
         if let data = try? JSONSerialization.data(withJSONObject: schema),
-           let string = String(data: data, encoding: .utf8) {
+           let string = String(data: data, encoding: .utf8)
+        {
             return string
         }
         return "{}"
@@ -517,26 +518,25 @@ public struct MCPParameterSpec: Codable, Sendable {
     }
 
     public var swiftType: String {
-        let baseType: String
-        switch type {
-        case .string: baseType = "String"
-        case .number: baseType = "Double"
-        case .integer: baseType = "Int"
-        case .boolean: baseType = "Bool"
-        case .array: baseType = "[Any]"
-        case .object: baseType = "[String: Any]"
+        let baseType = switch type {
+        case .string: "String"
+        case .number: "Double"
+        case .integer: "Int"
+        case .boolean: "Bool"
+        case .array: "[Any]"
+        case .object: "[String: Any]"
         }
         return isRequired ? baseType : "\(baseType)?"
     }
 
     public var jsonType: String {
         switch type {
-        case .string: return "string"
-        case .number: return "number"
-        case .integer: return "integer"
-        case .boolean: return "boolean"
-        case .array: return "array"
-        case .object: return "object"
+        case .string: "string"
+        case .number: "number"
+        case .integer: "integer"
+        case .boolean: "boolean"
+        case .array: "array"
+        case .object: "object"
         }
     }
 }
@@ -654,14 +654,14 @@ public enum MCPGeneratorError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .templateNotFound(let name):
-            return "Template not found: \(name)"
-        case .serverNotFound(let id):
-            return "Generated server not found: \(id)"
-        case .invalidSpec(let reason):
-            return "Invalid specification: \(reason)"
-        case .generationFailed(let reason):
-            return "Code generation failed: \(reason)"
+        case let .templateNotFound(name):
+            "Template not found: \(name)"
+        case let .serverNotFound(id):
+            "Generated server not found: \(id)"
+        case let .invalidSpec(reason):
+            "Invalid specification: \(reason)"
+        case let .generationFailed(reason):
+            "Code generation failed: \(reason)"
         }
     }
 }
@@ -814,18 +814,18 @@ public enum MCPError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .methodNotFound(let method):
-            return "Method not found: \(method)"
-        case .invalidParams(let reason):
-            return "Invalid parameters: \(reason)"
-        case .toolNotFound(let name):
-            return "Tool not found: \(name)"
-        case .resourceNotFound(let uri):
-            return "Resource not found: \(uri)"
-        case .promptNotFound(let name):
-            return "Prompt not found: \(name)"
-        case .internalError(let reason):
-            return "Internal error: \(reason)"
+        case let .methodNotFound(method):
+            "Method not found: \(method)"
+        case let .invalidParams(reason):
+            "Invalid parameters: \(reason)"
+        case let .toolNotFound(name):
+            "Tool not found: \(name)"
+        case let .resourceNotFound(uri):
+            "Resource not found: \(uri)"
+        case let .promptNotFound(name):
+            "Prompt not found: \(name)"
+        case let .internalError(reason):
+            "Internal error: \(reason)"
         }
     }
 }

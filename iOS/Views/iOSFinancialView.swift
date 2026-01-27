@@ -13,9 +13,9 @@ struct iOSFinancialView: View {
 
         var icon: String {
             switch self {
-            case .overview: return "chart.pie.fill"
-            case .transactions: return "list.bullet"
-            case .insights: return "lightbulb.fill"
+            case .overview: "chart.pie.fill"
+            case .transactions: "list.bullet"
+            case .insights: "lightbulb.fill"
             }
         }
     }
@@ -239,28 +239,28 @@ struct OverviewTabView: View {
         .background(Color(uiColor: .systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
-    
-    private func calculateMonthlyData(from transactions: [FinancialTransaction], months: Int) -> [MonthlyData] {
+
+    private func calculateMonthlyData(from transactions: [FinancialTransaction], months _: Int) -> [MonthlyData] {
         let calendar = Calendar.current
-        let now = Date()
-        
+        _ = Date()
+
         var monthlyTotals: [String: (income: Decimal, expenses: Decimal)] = [:]
-        
+
         for transaction in transactions {
             let monthKey = calendar.dateComponents([.year, .month], from: transaction.date)
             guard let date = calendar.date(from: monthKey) else { continue }
-            
+
             let formatter = DateFormatter()
             formatter.dateFormat = "MMM"
             let monthString = formatter.string(from: date)
-            
+
             if transaction.amount < 0 {
                 monthlyTotals[monthString, default: (0, 0)].expenses += Decimal(abs(transaction.amount))
             } else {
                 monthlyTotals[monthString, default: (0, 0)].income += Decimal(transaction.amount)
             }
         }
-        
+
         return monthlyTotals.map { month, totals in
             MonthlyData(month: month, income: totals.income, expenses: totals.expenses)
         }.sorted { $0.month < $1.month }
@@ -297,7 +297,7 @@ struct OverviewTabView: View {
     }
 
     private func barHeight(for value: Decimal, in data: [MonthlyData]) -> CGFloat {
-        let maxExpense = data.map { $0.expenses }.max() ?? 1
+        let maxExpense = data.map(\.expenses).max() ?? 1
         let ratio = Double(truncating: value as NSNumber) / Double(truncating: maxExpense as NSNumber)
         return CGFloat(ratio) * 120
     }
@@ -357,12 +357,12 @@ struct CategoryRow: View {
 
     private func iconForCategory(_ category: String) -> String {
         switch category.lowercased() {
-        case "groceries": return "cart.fill"
-        case "dining": return "fork.knife"
-        case "transportation": return "car.fill"
-        case "entertainment": return "tv.fill"
-        case "shopping": return "bag.fill"
-        default: return "circle.fill"
+        case "groceries": "cart.fill"
+        case "dining": "fork.knife"
+        case "transportation": "car.fill"
+        case "entertainment": "tv.fill"
+        case "shopping": "bag.fill"
+        default: "circle.fill"
         }
     }
 
@@ -386,7 +386,7 @@ struct TransactionsTabView: View {
                 let accountTransactions = financialManager.transactions
                     .filter { $0.accountId == account.id }
                     .sorted { $0.date > $1.date }
-                
+
                 List {
                     ForEach(accountTransactions) { transaction in
                         TransactionRowView(transaction: transaction, currency: account.currency)
@@ -444,12 +444,12 @@ struct TransactionRowView: View {
 
     private func iconForCategory(_ category: String) -> String {
         switch category.lowercased() {
-        case "groceries": return "cart.fill"
-        case "dining": return "fork.knife"
-        case "transportation": return "car.fill"
-        case "entertainment": return "tv.fill"
-        case "shopping": return "bag.fill"
-        default: return "circle.fill"
+        case "groceries": "cart.fill"
+        case "dining": "fork.knife"
+        case "transportation": "car.fill"
+        case "entertainment": "tv.fill"
+        case "shopping": "bag.fill"
+        default: "circle.fill"
         }
     }
 
@@ -538,13 +538,13 @@ struct InsightsTabView: View {
             anomalies = detectAnomalies(for: account)
         }
     }
-    
+
     private func generateBudgetRecommendations(for account: FinancialAccount) -> [BudgetRecommendation] {
-        let accountTransactions = financialManager.transactions.filter { $0.accountId == account.id }
+        _ = financialManager.transactions.filter { $0.accountId == account.id }
         let categorySpending = financialManager.getSpendingByCategory()
-        
+
         var recommendations: [BudgetRecommendation] = []
-        
+
         for (category, amount) in categorySpending.sorted(by: { $0.value > $1.value }).prefix(3) {
             if amount > 500 {
                 recommendations.append(BudgetRecommendation(
@@ -555,23 +555,23 @@ struct InsightsTabView: View {
                 ))
             }
         }
-        
+
         return recommendations
     }
-    
+
     private func detectAnomalies(for account: FinancialAccount) -> [TransactionAnomaly] {
         let accountTransactions = financialManager.transactions.filter { $0.accountId == account.id }
         var anomalies: [TransactionAnomaly] = []
-        
+
         // Simple anomaly detection: transactions over $1000
-        for transaction in accountTransactions where abs(transaction.amount) > 1_000 {
+        for transaction in accountTransactions where abs(transaction.amount) > 1000 {
             anomalies.append(TransactionAnomaly(
                 transaction: transaction,
                 reason: "Unusually large transaction amount",
-                severity: abs(transaction.amount) > 5_000 ? .high : .medium
+                severity: abs(transaction.amount) > 5000 ? .high : .medium
             ))
         }
-        
+
         return anomalies
     }
 }
@@ -737,16 +737,15 @@ struct iOSAddAccountView: View {
     private func addAccount() {
         Task {
             // Map account type string to enum
-            let accountTypeEnum: AccountType
-            switch accountType {
-            case "Checking": accountTypeEnum = .checking
-            case "Savings": accountTypeEnum = .savings
-            case "Credit Card": accountTypeEnum = .credit
-            case "Investment": accountTypeEnum = .investment
-            case "Crypto": accountTypeEnum = .crypto
-            default: accountTypeEnum = .checking
+            let accountTypeEnum: AccountType = switch accountType {
+            case "Checking": .checking
+            case "Savings": .savings
+            case "Credit Card": .credit
+            case "Investment": .investment
+            case "Crypto": .crypto
+            default: .checking
             }
-            
+
             _ = financialManager.addAccount(
                 name: accountName,
                 type: accountTypeEnum,

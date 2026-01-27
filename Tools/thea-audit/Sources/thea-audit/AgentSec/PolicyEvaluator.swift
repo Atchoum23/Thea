@@ -11,7 +11,7 @@ struct PolicyEvaluator {
         let url = URL(fileURLWithPath: policyPath)
         let data = try Data(contentsOf: url)
         let decoder = JSONDecoder()
-        self.policy = try decoder.decode(AgentSecPolicy.self, from: data)
+        policy = try decoder.decode(AgentSecPolicy.self, from: data)
     }
 
     init(policy: AgentSecPolicy) {
@@ -60,7 +60,7 @@ struct PolicyEvaluator {
         }
 
         // Check for kill switch violations
-        if policy.killSwitch.enabled && policy.killSwitch.triggerOnCritical {
+        if policy.killSwitch.enabled, policy.killSwitch.triggerOnCritical {
             checkedInvariants.append("KillSwitch: Critical violation halt")
             let criticalFindings = findings.filter { $0.severity == .critical }
             if !criticalFindings.isEmpty {

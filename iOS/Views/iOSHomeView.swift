@@ -23,11 +23,11 @@ struct iOSHomeView: View {
 
         var icon: String {
             switch self {
-            case .chat: return "message.fill"
-            case .projects: return "folder.fill"
-            case .knowledge: return "brain.head.profile"
-            case .financial: return "dollarsign.circle.fill"
-            case .settings: return "gear"
+            case .chat: "message.fill"
+            case .projects: "folder.fill"
+            case .knowledge: "brain.head.profile"
+            case .financial: "dollarsign.circle.fill"
+            case .settings: "gear"
             }
         }
     }
@@ -88,7 +88,7 @@ struct iOSHomeView: View {
             }
         case .projects:
             Button {
-                projectManager.createProject(title: "New Project")
+                _ = projectManager.createProject(title: "New Project")
             } label: {
                 Image(systemName: "plus")
             }
@@ -214,7 +214,7 @@ private struct IOSConversationRow: View {
             }
 
             if let lastMessage = conversation.messages.last {
-                Text(lastMessage.content)
+                Text(lastMessage.content.textValue)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
@@ -307,7 +307,7 @@ struct iOSChatView: View {
                     .padding(.vertical, 12)
                     .background(Color(uiColor: .systemGray6))
                     .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .lineLimit(1...6)
+                    .lineLimit(1 ... 6)
                     .focused($isInputFocused)
                     .disabled(chatManager.isStreaming)
 
@@ -316,7 +316,7 @@ struct iOSChatView: View {
                 } label: {
                     Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
                         .font(.system(size: 32))
-                        .foregroundStyle(messageText.isEmpty && !chatManager.isStreaming ? .secondary : .theaPrimary)
+                        .foregroundColor(messageText.isEmpty && !chatManager.isStreaming ? .secondary : Color.theaPrimary)
                 }
                 .disabled(messageText.isEmpty && !chatManager.isStreaming)
             }
@@ -412,9 +412,9 @@ struct iOSNewConversationView: View {
 
     private func createConversation() {
         let conversation = chatManager.createConversation(
-            title: title.isEmpty ? "New Conversation" : title,
-            projectID: selectedProject?.id
+            title: title.isEmpty ? "New Conversation" : title
         )
+        // TODO: Associate with project when ChatManager supports projectID
         chatManager.selectConversation(conversation)
         dismiss()
     }

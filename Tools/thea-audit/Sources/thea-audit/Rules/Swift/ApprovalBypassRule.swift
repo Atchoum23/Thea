@@ -10,19 +10,19 @@ final class ApprovalBypassRule: RegexRule {
             id: "SWIFT-APPROVAL-001",
             name: "Approval Gate Bypass",
             description: """
-                Detects patterns where approval gates can be bypassed, such as:
-                - Auto-approve when not in verbose mode
-                - Unconditional return of approved=true
-                - Approval gates that never wait for user input
-                """,
+            Detects patterns where approval gates can be bypassed, such as:
+            - Auto-approve when not in verbose mode
+            - Unconditional return of approved=true
+            - Approval gates that never wait for user input
+            """,
             severity: .critical,
             category: .agentSecurity,
             cweID: "CWE-285",
             recommendation: """
-                Ensure all security-critical operations require explicit human approval.
-                Remove auto-approve logic for file writes, terminal execution, and network requests.
-                Use verboseMode only for logging, not for bypassing approval.
-                """,
+            Ensure all security-critical operations require explicit human approval.
+            Remove auto-approve logic for file writes, terminal execution, and network requests.
+            Use verboseMode only for logging, not for bypassing approval.
+            """,
             patterns: [
                 // Auto-approve when not in verbose mode
                 "!verboseMode.*return.*approved.*true",
@@ -36,9 +36,9 @@ final class ApprovalBypassRule: RegexRule {
                 "return\\s+ApprovalResponse\\(approved:\\s*true.*\\)(?!.*await)"
             ],
             excludePatterns: [
-                "//.*Auto-approv",  // Comments
-                "///.*Auto-approv",  // Doc comments
-                "\\*.*Auto-approv"   // Block comments
+                "//.*Auto-approv", // Comments
+                "///.*Auto-approv", // Doc comments
+                "\\*.*Auto-approv" // Block comments
             ]
         )
     }
@@ -51,18 +51,18 @@ final class MissingApprovalRule: ASTRule {
             id: "SWIFT-APPROVAL-002",
             name: "Missing Approval Requirement",
             description: """
-                Detects sensitive operations that don't check for approval:
-                - File write operations without approval gate
-                - Terminal execution without approval gate
-                - Network requests without approval gate
-                """,
+            Detects sensitive operations that don't check for approval:
+            - File write operations without approval gate
+            - Terminal execution without approval gate
+            - Network requests without approval gate
+            """,
             severity: .high,
             category: .agentSecurity,
             cweID: "CWE-862",
             recommendation: """
-                Add ApprovalGate.shared.requestApproval() before all sensitive operations.
-                Ensure approval is awaited and checked before proceeding.
-                """
+            Add ApprovalGate.shared.requestApproval() before all sensitive operations.
+            Ensure approval is awaited and checked before proceeding.
+            """
         )
     }
 
@@ -89,11 +89,12 @@ final class MissingApprovalRule: ASTRule {
                     if regex.firstMatch(in: line, options: [], range: range) != nil {
                         // Check if there's an approval check nearby (within 10 lines above)
                         let startLine = max(0, lineIndex - 10)
-                        let contextLines = lines[startLine..<lineIndex].joined(separator: "\n")
+                        let contextLines = lines[startLine ..< lineIndex].joined(separator: "\n")
 
-                        if !contextLines.contains("requestApproval") &&
-                           !contextLines.contains("ApprovalGate") &&
-                           !contextLines.contains("isApproved") {
+                        if !contextLines.contains("requestApproval"),
+                           !contextLines.contains("ApprovalGate"),
+                           !contextLines.contains("isApproved")
+                        {
                             findings.append(Finding(
                                 ruleID: id,
                                 severity: severity,

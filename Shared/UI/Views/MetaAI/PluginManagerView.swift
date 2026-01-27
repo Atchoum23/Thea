@@ -104,11 +104,11 @@ struct PluginRowView: View {
 
     private func typeIcon(_ type: PluginType) -> String {
         switch type {
-        case .aiProvider: return "brain"
-        case .tool: return "wrench"
-        case .uiComponent: return "rectangle.3.group"
-        case .dataSource: return "cylinder"
-        case .workflow: return "flowchart"
+        case .aiProvider: "brain"
+        case .tool: "wrench"
+        case .uiComponent: "rectangle.3.group"
+        case .dataSource: "cylinder"
+        case .workflow: "flowchart"
         }
     }
 }
@@ -363,7 +363,7 @@ struct PluginMarketplaceSheet: View {
         if !searchText.isEmpty {
             filtered = filtered.filter {
                 $0.name.localizedCaseInsensitiveContains(searchText) ||
-                $0.description.localizedCaseInsensitiveContains(searchText)
+                    $0.description.localizedCaseInsensitiveContains(searchText)
             }
         }
 

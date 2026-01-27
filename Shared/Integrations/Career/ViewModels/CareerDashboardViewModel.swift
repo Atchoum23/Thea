@@ -248,11 +248,11 @@ public final class CareerDashboardViewModel {
     }
 
     public var activeGoalsCount: Int {
-        goals.filter { $0.status == .inProgress }.count
+        goals.count { $0.status == .inProgress }
     }
 
     public var completedGoalsCount: Int {
-        goals.filter { $0.status == .completed }.count
+        goals.count { $0.status == .completed }
     }
 
     public var averageGoalProgress: Double {
@@ -262,10 +262,10 @@ public final class CareerDashboardViewModel {
     }
 
     public var skillsInProgress: Int {
-        skills.filter { skill in
+        skills.count { skill in
             guard let target = skill.targetProficiency else { return false }
             return skill.proficiency < target
-        }.count
+        }
     }
 
     public var totalPracticeHours: Double {

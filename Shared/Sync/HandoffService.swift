@@ -8,9 +8,9 @@
 
 import Foundation
 #if os(macOS)
-import AppKit
+    import AppKit
 #else
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Handoff Service
@@ -42,7 +42,7 @@ public final class HandoffService {
     // MARK: - Initialization
 
     private init() {
-        self.configuration = HandoffConfiguration.load()
+        configuration = HandoffConfiguration.load()
         setupNotifications()
     }
 
@@ -50,16 +50,16 @@ public final class HandoffService {
 
     private func setupNotifications() {
         #if os(macOS)
-        NotificationCenter.default.addObserver(
-            forName: NSApplication.willBecomeActiveNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard self != nil else { return }
-            Task { @MainActor [weak self] in
-                self?.handleAppBecameActive()
+            NotificationCenter.default.addObserver(
+                forName: NSApplication.willBecomeActiveNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard self != nil else { return }
+                Task { @MainActor [weak self] in
+                    self?.handleAppBecameActive()
+                }
             }
-        }
         #endif
     }
 
@@ -82,7 +82,7 @@ public final class HandoffService {
         activity.isEligibleForHandoff = true
         activity.isEligibleForSearch = true
         #if os(iOS)
-        activity.isEligibleForPrediction = true
+            activity.isEligibleForPrediction = true
         #endif
 
         activity.userInfo = [
@@ -93,7 +93,7 @@ public final class HandoffService {
         ]
 
         #if os(macOS)
-        activity.keywords = Set(["thea", "chat", "conversation", title.lowercased()])
+            activity.keywords = Set(["thea", "chat", "conversation", title.lowercased()])
         #endif
 
         activity.needsSave = true
@@ -165,7 +165,8 @@ public final class HandoffService {
         switch activity.activityType {
         case Self.conversationActivityType:
             guard let conversationId = userInfo["conversationId"] as? String,
-                  let title = userInfo["title"] as? String else {
+                  let title = userInfo["title"] as? String
+            else {
                 return nil
             }
             return HandoffContext(
@@ -177,7 +178,8 @@ public final class HandoffService {
 
         case Self.projectActivityType:
             guard let projectId = userInfo["projectId"] as? String,
-                  let name = userInfo["name"] as? String else {
+                  let name = userInfo["name"] as? String
+            else {
                 return nil
             }
             return HandoffContext(
@@ -251,7 +253,7 @@ public struct HandoffContext: Sendable {
         self.type = type
         self.id = id
         self.title = title
-        self.metadata = Dictionary(fromAny: rawMetadata)
+        metadata = Dictionary(fromAny: rawMetadata)
     }
 }
 
@@ -265,10 +267,10 @@ public enum HandoffType: String, Codable, Sendable {
 
     public var icon: String {
         switch self {
-        case .conversation: return "bubble.left.and.bubble.right"
-        case .project: return "folder"
-        case .search: return "magnifyingglass"
-        case .settings: return "gear"
+        case .conversation: "bubble.left.and.bubble.right"
+        case .project: "folder"
+        case .search: "magnifyingglass"
+        case .settings: "gear"
         }
     }
 }
@@ -300,7 +302,8 @@ public struct HandoffConfiguration: Codable, Sendable {
 
     public static func load() -> HandoffConfiguration {
         if let data = UserDefaults.standard.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(HandoffConfiguration.self, from: data) {
+           let config = try? JSONDecoder().decode(HandoffConfiguration.self, from: data)
+        {
             return config
         }
         return HandoffConfiguration()
@@ -341,7 +344,7 @@ public actor PresenceMonitor {
         isMonitoring = true
 
         presenceTask = Task {
-            while !Task.isCancelled && isMonitoring {
+            while !Task.isCancelled, isMonitoring {
                 await updatePresence()
                 try? await Task.sleep(nanoseconds: UInt64(updateInterval * 1_000_000_000))
             }

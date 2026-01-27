@@ -10,22 +10,22 @@ final class URLValidationRule: ASTRule {
             id: "SWIFT-URL-001",
             name: "Missing URL Validation",
             description: """
-                Detects HTTP request code that doesn't validate URLs:
-                - No check for localhost/127.0.0.1
-                - No check for metadata endpoints (169.254.169.254)
-                - No check for internal IP ranges
-                This can lead to SSRF (Server-Side Request Forgery) vulnerabilities.
-                """,
+            Detects HTTP request code that doesn't validate URLs:
+            - No check for localhost/127.0.0.1
+            - No check for metadata endpoints (169.254.169.254)
+            - No check for internal IP ranges
+            This can lead to SSRF (Server-Side Request Forgery) vulnerabilities.
+            """,
             severity: .critical,
             category: .inputValidation,
             cweID: "CWE-918",
             recommendation: """
-                Add URL validation before making any HTTP request:
-                - Block localhost, 127.0.0.1, ::1
-                - Block cloud metadata endpoints (169.254.169.254, metadata.google.internal)
-                - Block private IP ranges (10.x, 172.16-31.x, 192.168.x)
-                - Validate URL scheme (only allow https where possible)
-                """
+            Add URL validation before making any HTTP request:
+            - Block localhost, 127.0.0.1, ::1
+            - Block cloud metadata endpoints (169.254.169.254, metadata.google.internal)
+            - Block private IP ranges (10.x, 172.16-31.x, 192.168.x)
+            - Validate URL scheme (only allow https where possible)
+            """
         )
     }
 
@@ -80,11 +80,11 @@ final class URLValidationRule: ASTRule {
 
             if inHTTPContext {
                 httpContextContent += line + "\n"
-                braceCount += line.filter { $0 == "{" }.count
-                braceCount -= line.filter { $0 == "}" }.count
+                braceCount += line.count(where: { $0 == "{" })
+                braceCount -= line.count(where: { $0 == "}" })
 
                 // End of context (function/struct closed)
-                if braceCount <= 0 && httpContextContent.count > 50 {
+                if braceCount <= 0, httpContextContent.count > 50 {
                     // Check if URL validation is present
                     var hasValidation = false
                     for validationPattern in validationPatterns {
@@ -95,11 +95,11 @@ final class URLValidationRule: ASTRule {
                     }
 
                     // If making HTTP requests without validation, report it
-                    if !hasValidation &&
-                       (httpContextContent.contains("URLSession") ||
-                        httpContextContent.contains("URLRequest") ||
-                        httpContextContent.contains("data(for:")) {
-
+                    if !hasValidation,
+                       httpContextContent.contains("URLSession") ||
+                       httpContextContent.contains("URLRequest") ||
+                       httpContextContent.contains("data(for:")
+                    {
                         findings.append(Finding(
                             ruleID: id,
                             severity: severity,
@@ -130,19 +130,19 @@ final class HardcodedURLRule: RegexRule {
             id: "SWIFT-URL-002",
             name: "Hardcoded Sensitive URL",
             description: """
-                Detects hardcoded URLs to sensitive endpoints:
-                - Localhost URLs
-                - Cloud metadata endpoints
-                - Internal API endpoints
-                """,
+            Detects hardcoded URLs to sensitive endpoints:
+            - Localhost URLs
+            - Cloud metadata endpoints
+            - Internal API endpoints
+            """,
             severity: .high,
             category: .configuration,
             cweID: "CWE-798",
             recommendation: """
-                Move URLs to configuration files.
-                Add URL validation before use.
-                Never hardcode internal endpoint URLs.
-                """,
+            Move URLs to configuration files.
+            Add URL validation before use.
+            Never hardcode internal endpoint URLs.
+            """,
             patterns: [
                 "\"http://localhost",
                 "\"http://127\\.0\\.0\\.1",
@@ -155,8 +155,8 @@ final class HardcodedURLRule: RegexRule {
                 "\"http://192\\.168\\."
             ],
             excludePatterns: [
-                "//.*http://localhost",  // Comments
-                "///.*http://localhost"   // Doc comments
+                "//.*http://localhost", // Comments
+                "///.*http://localhost" // Doc comments
             ]
         )
     }

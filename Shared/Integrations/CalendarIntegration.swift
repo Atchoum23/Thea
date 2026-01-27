@@ -6,8 +6,8 @@
 //  Copyright © 2026. All rights reserved.
 //
 
-import Foundation
 @preconcurrency import EventKit
+import Foundation
 
 // MARK: - Calendar Integration
 

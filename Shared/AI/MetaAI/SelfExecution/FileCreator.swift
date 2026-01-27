@@ -45,16 +45,16 @@ public actor FileCreator {
 
         public var errorDescription: String? {
             switch self {
-            case .fileAlreadyExists(let path):
-                return "File already exists: \(path)"
-            case .directoryCreationFailed(let path):
-                return "Failed to create directory: \(path)"
-            case .writeFailure(let path, let reason):
-                return "Failed to write \(path): \(reason)"
-            case .invalidPath(let path):
-                return "Invalid path: \(path)"
-            case .pathTraversalBlocked(let path):
-                return "SECURITY: Path traversal attempt blocked for: \(path)"
+            case let .fileAlreadyExists(path):
+                "File already exists: \(path)"
+            case let .directoryCreationFailed(path):
+                "Failed to create directory: \(path)"
+            case let .writeFailure(path, reason):
+                "Failed to write \(path): \(reason)"
+            case let .invalidPath(path):
+                "Invalid path: \(path)"
+            case let .pathTraversalBlocked(path):
+                "SECURITY: Path traversal attempt blocked for: \(path)"
             }
         }
     }
@@ -85,7 +85,7 @@ public actor FileCreator {
         logger.info("Creating file: \(fullPath)")
 
         // Check if file exists
-        if FileManager.default.fileExists(atPath: fullPath) && !overwrite {
+        if FileManager.default.fileExists(atPath: fullPath), !overwrite {
             throw CreationError.fileAlreadyExists(path: fullPath)
         }
 

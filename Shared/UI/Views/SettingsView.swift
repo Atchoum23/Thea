@@ -26,15 +26,15 @@ struct SettingsView: View {
                 }
 
             #if os(macOS)
-            TerminalSettingsView()
-                .tabItem {
-                    Label("Terminal", systemImage: "terminal")
-                }
+                TerminalSettingsView()
+                    .tabItem {
+                        Label("Terminal", systemImage: "terminal")
+                    }
 
-            CoworkSettingsView()
-                .tabItem {
-                    Label("Cowork", systemImage: "person.2.badge.gearshape")
-                }
+                CoworkSettingsView()
+                    .tabItem {
+                        Label("Cowork", systemImage: "person.2.badge.gearshape")
+                    }
             #endif
 
             PrivacySettingsView()
@@ -43,10 +43,10 @@ struct SettingsView: View {
                 }
 
             #if os(macOS)
-            QASettingsView()
-                .tabItem {
-                    Label("QA Tools", systemImage: "checkmark.seal")
-                }
+                QASettingsView()
+                    .tabItem {
+                        Label("QA Tools", systemImage: "checkmark.seal")
+                    }
             #endif
 
             // TODO: Restore LifeTrackingSettingsView after implementation
@@ -143,12 +143,12 @@ struct ProvidersSettingsView: View {
         }
         .formStyle(.grouped)
         .alert("Success", isPresented: $showingSuccessMessage) {
-            Button("OK", role: .cancel) { }
+            Button("OK", role: .cancel) {}
         } message: {
             Text(successText)
         }
         .alert("Error", isPresented: $showingErrorMessage) {
-            Button("OK", role: .cancel) { }
+            Button("OK", role: .cancel) {}
         } message: {
             Text(errorText)
         }
@@ -216,7 +216,7 @@ struct MetaAISettingsView: View {
                                 get: { Double(config.maxConcurrentSwarmAgents) },
                                 set: { config.maxConcurrentSwarmAgents = Int($0) }
                             ),
-                            in: 1...10,
+                            in: 1 ... 10,
                             step: 1
                         )
                     }
@@ -328,17 +328,17 @@ struct FeaturesSettingsView: View {
                 }
 
                 #if os(macOS)
-                NavigationLink {
-                    CodeProjectView()
-                } label: {
-                    Label("Code Intelligence", systemImage: "chevron.left.forwardslash.chevron.right")
-                }
+                    NavigationLink {
+                        CodeProjectView()
+                    } label: {
+                        Label("Code Intelligence", systemImage: "chevron.left.forwardslash.chevron.right")
+                    }
 
-                NavigationLink {
-                    LocalModelsView()
-                } label: {
-                    Label("Local Models", systemImage: "cpu")
-                }
+                    NavigationLink {
+                        LocalModelsView()
+                    } label: {
+                        Label("Local Models", systemImage: "cpu")
+                    }
                 #endif
             }
 
@@ -428,11 +428,11 @@ struct AdvancedSettingsView: View {
             }
 
             #if os(macOS)
-            Section("Code Intelligence") {
-                NavigationLink("Code Models & Executables") {
-                    CodeIntelligenceConfigurationView()
+                Section("Code Intelligence") {
+                    NavigationLink("Code Models & Executables") {
+                        CodeIntelligenceConfigurationView()
+                    }
                 }
-            }
             #endif
 
             Section("API Validation") {
@@ -482,16 +482,16 @@ struct ProviderConfigurationView: View {
             }
 
             Section("Generation Defaults") {
-                Stepper("Max Tokens: \(config.defaultMaxTokens)", value: $config.defaultMaxTokens, in: 256...32_768, step: 256)
+                Stepper("Max Tokens: \(config.defaultMaxTokens)", value: $config.defaultMaxTokens, in: 256 ... 32768, step: 256)
 
                 VStack(alignment: .leading) {
                     Text("Temperature: \(config.defaultTemperature, specifier: "%.2f")")
-                    Slider(value: $config.defaultTemperature, in: 0...2, step: 0.1)
+                    Slider(value: $config.defaultTemperature, in: 0 ... 2, step: 0.1)
                 }
 
                 VStack(alignment: .leading) {
                     Text("Top P: \(config.defaultTopP, specifier: "%.2f")")
-                    Slider(value: $config.defaultTopP, in: 0...1, step: 0.1)
+                    Slider(value: $config.defaultTopP, in: 0 ... 1, step: 0.1)
                 }
 
                 Toggle("Stream Responses", isOn: $config.streamResponses)
@@ -502,13 +502,13 @@ struct ProviderConfigurationView: View {
                 TextField("Summarization Model", text: $config.defaultSummarizationModel)
                 TextField("Reasoning Model", text: $config.defaultReasoningModel)
                 TextField("Embedding Model", text: $config.defaultEmbeddingModel)
-                Stepper("Embedding Dimensions: \(config.embeddingDimensions)", value: $config.embeddingDimensions, in: 256...4_096, step: 256)
+                Stepper("Embedding Dimensions: \(config.embeddingDimensions)", value: $config.embeddingDimensions, in: 256 ... 4096, step: 256)
             }
 
             Section("Request Settings") {
-                Stepper("Timeout (seconds): \(Int(config.requestTimeoutSeconds))", value: $config.requestTimeoutSeconds, in: 10...300, step: 10)
-                Stepper("Max Retries: \(config.maxRetries)", value: $config.maxRetries, in: 0...10)
-                Stepper("Retry Delay (seconds): \(Int(config.retryDelaySeconds))", value: $config.retryDelaySeconds, in: 0...10, step: 1)
+                Stepper("Timeout (seconds): \(Int(config.requestTimeoutSeconds))", value: $config.requestTimeoutSeconds, in: 10 ... 300, step: 10)
+                Stepper("Max Retries: \(config.maxRetries)", value: $config.maxRetries, in: 0 ... 10)
+                Stepper("Retry Delay (seconds): \(Int(config.retryDelaySeconds))", value: $config.retryDelaySeconds, in: 0 ... 10, step: 1)
             }
 
             Section {
@@ -567,7 +567,7 @@ struct VoiceConfigurationView: View {
             Section("Speech Recognition") {
                 TextField("Recognition Language", text: $config.recognitionLanguage)
                 Toggle("On-Device Recognition Only", isOn: $config.requiresOnDeviceRecognition)
-                Stepper("Audio Buffer Size: \(config.audioBufferSize)", value: $config.audioBufferSize, in: 256...4_096, step: 256)
+                Stepper("Audio Buffer Size: \(config.audioBufferSize)", value: $config.audioBufferSize, in: 256 ... 4096, step: 256)
             }
 
             Section("Speech Synthesis") {
@@ -575,29 +575,29 @@ struct VoiceConfigurationView: View {
 
                 VStack(alignment: .leading) {
                     Text("Speech Rate: \(config.speechRate, specifier: "%.2f")")
-                    Slider(value: $config.speechRate, in: 0.1...1.0, step: 0.05)
+                    Slider(value: $config.speechRate, in: 0.1 ... 1.0, step: 0.05)
                 }
 
                 VStack(alignment: .leading) {
                     Text("Pitch: \(config.pitchMultiplier, specifier: "%.2f")")
-                    Slider(value: $config.pitchMultiplier, in: 0.5...2.0, step: 0.1)
+                    Slider(value: $config.pitchMultiplier, in: 0.5 ... 2.0, step: 0.1)
                 }
 
                 VStack(alignment: .leading) {
                     Text("Volume: \(config.volume, specifier: "%.2f")")
-                    Slider(value: $config.volume, in: 0...1, step: 0.1)
+                    Slider(value: $config.volume, in: 0 ... 1, step: 0.1)
                 }
             }
 
             Section("Conversation Mode") {
                 VStack(alignment: .leading) {
                     Text("Silence Threshold: \(config.silenceThresholdSeconds, specifier: "%.1f")s")
-                    Slider(value: $config.silenceThresholdSeconds, in: 1...10, step: 0.5)
+                    Slider(value: $config.silenceThresholdSeconds, in: 1 ... 10, step: 0.5)
                 }
 
                 VStack(alignment: .leading) {
                     Text("Conversation Timeout: \(Int(config.conversationTimeoutSeconds))s")
-                    Slider(value: $config.conversationTimeoutSeconds, in: 10...120, step: 10)
+                    Slider(value: $config.conversationTimeoutSeconds, in: 10 ... 120, step: 10)
                 }
             }
 
@@ -658,21 +658,21 @@ struct KnowledgeScannerConfigurationView: View {
                             get: { Double(config.maxFileSizeBytes) / 1_000_000 },
                             set: { config.maxFileSizeBytes = Int64($0 * 1_000_000) }
                         ),
-                        in: 1...100,
+                        in: 1 ... 100,
                         step: 1
                     )
                 }
 
-                Stepper("Batch Size: \(config.indexingBatchSize)", value: $config.indexingBatchSize, in: 10...500, step: 10)
+                Stepper("Batch Size: \(config.indexingBatchSize)", value: $config.indexingBatchSize, in: 10 ... 500, step: 10)
             }
 
             Section("Embedding") {
-                Stepper("Embedding Dimension: \(config.embeddingDimension)", value: $config.embeddingDimension, in: 128...1_536, step: 128)
+                Stepper("Embedding Dimension: \(config.embeddingDimension)", value: $config.embeddingDimension, in: 128 ... 1536, step: 128)
             }
 
             Section("Search") {
-                Stepper("Default Top K: \(config.defaultSearchTopK)", value: $config.defaultSearchTopK, in: 5...50, step: 5)
-                Stepper("Full-Text Top K: \(config.fullTextSearchTopK)", value: $config.fullTextSearchTopK, in: 5...50, step: 5)
+                Stepper("Default Top K: \(config.defaultSearchTopK)", value: $config.defaultSearchTopK, in: 5 ... 50, step: 5)
+                Stepper("Full-Text Top K: \(config.fullTextSearchTopK)", value: $config.fullTextSearchTopK, in: 5 ... 50, step: 5)
             }
 
             Section("File Watching") {
@@ -721,7 +721,7 @@ struct ExtensionListEditor: View {
                     TextField("New extension (without dot)", text: $newExtension)
                     Button {
                         let cleaned = newExtension.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                        if !cleaned.isEmpty && !extensions.contains(cleaned) {
+                        if !cleaned.isEmpty, !extensions.contains(cleaned) {
                             extensions.append(cleaned)
                             newExtension = ""
                         }
@@ -745,31 +745,31 @@ struct MemoryConfigurationView: View {
     var body: some View {
         Form {
             Section("Capacity") {
-                Stepper("Short-Term: \(config.shortTermCapacity)", value: $config.shortTermCapacity, in: 5...100, step: 5)
-                Stepper("Long-Term Max: \(config.longTermMaxItems)", value: $config.longTermMaxItems, in: 1_000...50_000, step: 1_000)
-                Stepper("Episodic Max: \(config.episodicMaxItems)", value: $config.episodicMaxItems, in: 1_000...20_000, step: 1_000)
-                Stepper("Semantic Max: \(config.semanticMaxItems)", value: $config.semanticMaxItems, in: 1_000...20_000, step: 1_000)
-                Stepper("Procedural Max: \(config.proceduralMaxItems)", value: $config.proceduralMaxItems, in: 100...5_000, step: 100)
+                Stepper("Short-Term: \(config.shortTermCapacity)", value: $config.shortTermCapacity, in: 5 ... 100, step: 5)
+                Stepper("Long-Term Max: \(config.longTermMaxItems)", value: $config.longTermMaxItems, in: 1000 ... 50000, step: 1000)
+                Stepper("Episodic Max: \(config.episodicMaxItems)", value: $config.episodicMaxItems, in: 1000 ... 20000, step: 1000)
+                Stepper("Semantic Max: \(config.semanticMaxItems)", value: $config.semanticMaxItems, in: 1000 ... 20000, step: 1000)
+                Stepper("Procedural Max: \(config.proceduralMaxItems)", value: $config.proceduralMaxItems, in: 100 ... 5000, step: 100)
             }
 
             Section("Decay Rates") {
                 VStack(alignment: .leading) {
                     Text("General Decay: \(config.generalDecayRate, specifier: "%.2f")")
-                    Slider(value: $config.generalDecayRate, in: 0.8...1.0, step: 0.01)
+                    Slider(value: $config.generalDecayRate, in: 0.8 ... 1.0, step: 0.01)
                 }
 
                 VStack(alignment: .leading) {
                     Text("Semantic Decay: \(config.semanticDecayRate, specifier: "%.2f")")
-                    Slider(value: $config.semanticDecayRate, in: 0.9...1.0, step: 0.01)
+                    Slider(value: $config.semanticDecayRate, in: 0.9 ... 1.0, step: 0.01)
                 }
             }
 
             Section("Retrieval") {
-                Stepper("Default Limit: \(config.defaultRetrievalLimit)", value: $config.defaultRetrievalLimit, in: 5...50, step: 5)
+                Stepper("Default Limit: \(config.defaultRetrievalLimit)", value: $config.defaultRetrievalLimit, in: 5 ... 50, step: 5)
 
                 VStack(alignment: .leading) {
                     Text("Similarity Threshold: \(config.defaultSimilarityThreshold, specifier: "%.2f")")
-                    Slider(value: $config.defaultSimilarityThreshold, in: 0.3...0.9, step: 0.05)
+                    Slider(value: $config.defaultSimilarityThreshold, in: 0.3 ... 0.9, step: 0.05)
                 }
             }
 
@@ -796,22 +796,22 @@ struct AgentConfigurationView: View {
     var body: some View {
         Form {
             Section("Task Execution") {
-                Stepper("Max Retries: \(config.maxRetryCount)", value: $config.maxRetryCount, in: 0...10)
-                Stepper("Base Task Duration: \(Int(config.baseTaskDurationSeconds))s", value: $config.baseTaskDurationSeconds, in: 10...120, step: 10)
+                Stepper("Max Retries: \(config.maxRetryCount)", value: $config.maxRetryCount, in: 0 ... 10)
+                Stepper("Base Task Duration: \(Int(config.baseTaskDurationSeconds))s", value: $config.baseTaskDurationSeconds, in: 10 ... 120, step: 10)
             }
 
             Section("Sub-Agents") {
-                Stepper("Max Concurrent: \(config.maxConcurrentAgents)", value: $config.maxConcurrentAgents, in: 1...20)
-                Stepper("Timeout: \(Int(config.agentTimeoutSeconds))s", value: $config.agentTimeoutSeconds, in: 60...600, step: 60)
+                Stepper("Max Concurrent: \(config.maxConcurrentAgents)", value: $config.maxConcurrentAgents, in: 1 ... 20)
+                Stepper("Timeout: \(Int(config.agentTimeoutSeconds))s", value: $config.agentTimeoutSeconds, in: 60 ... 600, step: 60)
             }
 
             Section("Reasoning") {
-                Stepper("Chain of Thought Steps: \(config.chainOfThoughtSteps)", value: $config.chainOfThoughtSteps, in: 2...10)
-                Stepper("Max Decomposition: \(config.maxDecompositionSteps)", value: $config.maxDecompositionSteps, in: 5...20)
+                Stepper("Chain of Thought Steps: \(config.chainOfThoughtSteps)", value: $config.chainOfThoughtSteps, in: 2 ... 10)
+                Stepper("Max Decomposition: \(config.maxDecompositionSteps)", value: $config.maxDecompositionSteps, in: 5 ... 20)
 
                 VStack(alignment: .leading) {
                     Text("Reasoning Temperature: \(config.reasoningTemperature, specifier: "%.1f")")
-                    Slider(value: $config.reasoningTemperature, in: 0...1, step: 0.1)
+                    Slider(value: $config.reasoningTemperature, in: 0 ... 1, step: 0.1)
                 }
             }
 
@@ -859,8 +859,8 @@ struct LocalModelConfigurationView: View {
             }
 
             Section("Defaults") {
-                Stepper("Context Tokens: \(config.defaultContextTokens)", value: $config.defaultContextTokens, in: 1_024...32_768, step: 1_024)
-                Stepper("Max Output Tokens: \(config.defaultMaxOutputTokens)", value: $config.defaultMaxOutputTokens, in: 256...8_192, step: 256)
+                Stepper("Context Tokens: \(config.defaultContextTokens)", value: $config.defaultContextTokens, in: 1024 ... 32768, step: 1024)
+                Stepper("Max Output Tokens: \(config.defaultMaxOutputTokens)", value: $config.defaultMaxOutputTokens, in: 256 ... 8192, step: 256)
                 TextField("Default Quantization", text: $config.defaultQuantization)
                 TextField("Default Parameters", text: $config.defaultParameters)
             }
@@ -897,12 +897,12 @@ struct ThemeConfigurationView: View {
             Section("Font Sizes") {
                 VStack(alignment: .leading) {
                     Text("Body Size: \(Int(config.bodySize))pt")
-                    Slider(value: $config.bodySize, in: 12...24, step: 1)
+                    Slider(value: $config.bodySize, in: 12 ... 24, step: 1)
                 }
 
                 VStack(alignment: .leading) {
                     Text("Code Size: \(Int(config.codeSize))pt")
-                    Slider(value: $config.codeSize, in: 10...20, step: 1)
+                    Slider(value: $config.codeSize, in: 10 ... 20, step: 1)
                 }
             }
 
@@ -962,12 +962,12 @@ struct PrivacySettingsView: View {
             contentType: .json,
             defaultFilename: "thea-export-\(Date().formatted(date: .numeric, time: .omitted)).json"
         ) { result in
-            if case .failure(let error) = result {
+            if case let .failure(error) = result {
                 print("Export failed: \(error)")
             }
         }
         .alert("Delete All Data", isPresented: $showingDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {}
             Button("Delete All", role: .destructive) {
                 deleteAllData()
             }
@@ -992,14 +992,14 @@ struct DataExportDocument: FileDocument, @unchecked Sendable {
 
     init() {}
 
-    init(configuration: ReadConfiguration) throws {
+    init(configuration _: ReadConfiguration) throws {
         // Reading from file not supported - this is an export-only document type
         throw CocoaError(.fileReadUnsupportedScheme, userInfo: [
             NSLocalizedDescriptionKey: "Reading data export files is not supported. This document type is for export only."
         ])
     }
 
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+    func fileWrapper(configuration _: WriteConfiguration) throws -> FileWrapper {
         let exportData: [String: Any] = [
             "version": AppConfiguration.AppInfo.version,
             "buildType": AppConfiguration.AppInfo.buildType,
@@ -1034,70 +1034,71 @@ struct AboutView: View {
 }
 
 #if os(macOS)
-// MARK: - Code Intelligence Configuration View
 
-struct CodeIntelligenceConfigurationView: View {
-    @State private var config = AppConfiguration.shared.codeIntelligenceConfig
-    @State private var newExtension = ""
+    // MARK: - Code Intelligence Configuration View
 
-    var body: some View {
-        Form {
-            Section("AI Models for Code Tasks") {
-                TextField("Code Completion Model", text: $config.codeCompletionModel)
-                TextField("Code Explanation Model", text: $config.codeExplanationModel)
-                TextField("Code Review Model", text: $config.codeReviewModel)
-            }
+    struct CodeIntelligenceConfigurationView: View {
+        @State private var config = AppConfiguration.shared.codeIntelligenceConfig
+        @State private var newExtension = ""
 
-            Section("Executable Paths") {
-                TextField("Git Path", text: $config.gitExecutablePath)
-                TextField("Swift Path", text: $config.swiftExecutablePath)
-                TextField("Python Path", text: $config.pythonExecutablePath)
-                TextField("Node/Env Path", text: $config.nodeExecutablePath)
-            }
+        var body: some View {
+            Form {
+                Section("AI Models for Code Tasks") {
+                    TextField("Code Completion Model", text: $config.codeCompletionModel)
+                    TextField("Code Explanation Model", text: $config.codeExplanationModel)
+                    TextField("Code Review Model", text: $config.codeReviewModel)
+                }
 
-            Section("Code File Extensions") {
-                ForEach(config.codeFileExtensions, id: \.self) { ext in
+                Section("Executable Paths") {
+                    TextField("Git Path", text: $config.gitExecutablePath)
+                    TextField("Swift Path", text: $config.swiftExecutablePath)
+                    TextField("Python Path", text: $config.pythonExecutablePath)
+                    TextField("Node/Env Path", text: $config.nodeExecutablePath)
+                }
+
+                Section("Code File Extensions") {
+                    ForEach(config.codeFileExtensions, id: \.self) { ext in
+                        HStack {
+                            Text(".\(ext)")
+                            Spacer()
+                            Button(role: .destructive) {
+                                config.codeFileExtensions.removeAll { $0 == ext }
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
                     HStack {
-                        Text(".\(ext)")
-                        Spacer()
-                        Button(role: .destructive) {
-                            config.codeFileExtensions.removeAll { $0 == ext }
+                        TextField("New extension (without dot)", text: $newExtension)
+                        Button {
+                            let cleaned = newExtension.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                            if !cleaned.isEmpty, !config.codeFileExtensions.contains(cleaned) {
+                                config.codeFileExtensions.append(cleaned)
+                                newExtension = ""
+                            }
                         } label: {
-                            Image(systemName: "minus.circle.fill")
+                            Image(systemName: "plus.circle.fill")
                         }
-                        .buttonStyle(.plain)
+                        .disabled(newExtension.isEmpty)
                     }
                 }
 
-                HStack {
-                    TextField("New extension (without dot)", text: $newExtension)
-                    Button {
-                        let cleaned = newExtension.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                        if !cleaned.isEmpty && !config.codeFileExtensions.contains(cleaned) {
-                            config.codeFileExtensions.append(cleaned)
-                            newExtension = ""
-                        }
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
+                Section {
+                    Button("Reset to Defaults") {
+                        config = CodeIntelligenceConfiguration()
                     }
-                    .disabled(newExtension.isEmpty)
+                    .foregroundStyle(.red)
                 }
             }
-
-            Section {
-                Button("Reset to Defaults") {
-                    config = CodeIntelligenceConfiguration()
-                }
-                .foregroundStyle(.red)
+            .formStyle(.grouped)
+            .navigationTitle("Code Intelligence")
+            .onChange(of: config) { _, newValue in
+                AppConfiguration.shared.codeIntelligenceConfig = newValue
             }
-        }
-        .formStyle(.grouped)
-        .navigationTitle("Code Intelligence")
-        .onChange(of: config) { _, newValue in
-            AppConfiguration.shared.codeIntelligenceConfig = newValue
         }
     }
-}
 #endif
 
 // MARK: - API Validation Configuration View
@@ -1178,9 +1179,9 @@ struct TerminalSettingsSectionView: View {
     @State private var fontSize: Double = 12
     @State private var fontFamily = "SF Mono"
     @State private var enableAutoComplete = true
-    @State private var historyLimit = 1_000
+    @State private var historyLimit = 1000
     @State private var colorScheme = "Default"
-    
+
     var body: some View {
         Form {
             Section("Terminal Configuration") {
@@ -1188,13 +1189,13 @@ struct TerminalSettingsSectionView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            
+
             Section("Shell") {
                 TextField("Shell Path", text: $shellPath)
                     .help("Path to the shell executable")
                 LabeledContent("Current Shell", value: shellPath)
             }
-            
+
             Section("Appearance") {
                 Picker("Color Scheme", selection: $colorScheme) {
                     Text("Default").tag("Default")
@@ -1203,23 +1204,23 @@ struct TerminalSettingsSectionView: View {
                     Text("Solarized Dark").tag("Solarized Dark")
                     Text("Solarized Light").tag("Solarized Light")
                 }
-                
+
                 TextField("Font Family", text: $fontFamily)
-                
+
                 VStack(alignment: .leading) {
                     Text("Font Size: \(Int(fontSize))pt")
-                    Slider(value: $fontSize, in: 8...24, step: 1)
+                    Slider(value: $fontSize, in: 8 ... 24, step: 1)
                 }
-                
+
                 Toggle("Syntax Highlighting", isOn: $enableSyntaxHighlighting)
             }
-            
+
             Section("Behavior") {
                 Toggle("Enable Auto-Complete", isOn: $enableAutoComplete)
-                
-                Stepper("History Limit: \(historyLimit)", value: $historyLimit, in: 100...10_000, step: 100)
+
+                Stepper("History Limit: \(historyLimit)", value: $historyLimit, in: 100 ... 10000, step: 100)
             }
-            
+
             Section {
                 Button("Reset to Defaults") {
                     shellPath = "/bin/zsh"
@@ -1227,7 +1228,7 @@ struct TerminalSettingsSectionView: View {
                     fontSize = 12
                     fontFamily = "SF Mono"
                     enableAutoComplete = true
-                    historyLimit = 1_000
+                    historyLimit = 1000
                     colorScheme = "Default"
                 }
                 .foregroundStyle(.red)
@@ -1247,7 +1248,7 @@ struct CoworkSettingsSectionView: View {
     @State private var autoSyncInterval: Double = 30
     @State private var shareByDefault = false
     @State private var maxCollaborators = 5
-    
+
     var body: some View {
         Form {
             Section("Collaboration Features") {
@@ -1255,10 +1256,10 @@ struct CoworkSettingsSectionView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            
+
             Section("Status") {
                 Toggle("Enable Cowork Mode", isOn: $enableCowork)
-                
+
                 if enableCowork {
                     LabeledContent("Status", value: "Active")
                         .foregroundStyle(.green)
@@ -1267,35 +1268,35 @@ struct CoworkSettingsSectionView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            
+
             Section("Server Configuration") {
                 TextField("Server URL", text: $serverURL)
                     .help("URL of the collaboration server")
                     .disabled(!enableCowork)
-                
+
                 SecureField("API Key", text: $apiKey)
                     .disabled(!enableCowork)
             }
-            
+
             Section("Collaboration Settings") {
                 Toggle("Share by Default", isOn: $shareByDefault)
                     .disabled(!enableCowork)
-                
-                Stepper("Max Collaborators: \(maxCollaborators)", value: $maxCollaborators, in: 1...20)
+
+                Stepper("Max Collaborators: \(maxCollaborators)", value: $maxCollaborators, in: 1 ... 20)
                     .disabled(!enableCowork)
-                
+
                 Toggle("Enable Notifications", isOn: $enableNotifications)
                     .disabled(!enableCowork)
             }
-            
+
             Section("Sync") {
                 VStack(alignment: .leading) {
                     Text("Auto-Sync Interval: \(Int(autoSyncInterval))s")
-                    Slider(value: $autoSyncInterval, in: 10...300, step: 10)
+                    Slider(value: $autoSyncInterval, in: 10 ... 300, step: 10)
                 }
                 .disabled(!enableCowork)
             }
-            
+
             Section {
                 Button("Reset to Defaults") {
                     enableCowork = false

@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Reasoning Engine
+
 // Multi-step reasoning with chain-of-thought, tree-of-thought, and various reasoning strategies
 
 @MainActor
@@ -23,7 +24,7 @@ final class ReasoningEngine {
 
     func chainOfThought(
         problem: String,
-        context: [String: Any] = [:],
+        context _: [String: Any] = [:],
         progressHandler: @escaping @Sendable (ReasoningProgress) -> Void
     ) async throws -> ReasoningResult {
         var steps: [ReasoningStep] = []
@@ -31,36 +32,36 @@ final class ReasoningEngine {
         // Step 1: Problem decomposition
         progressHandler(ReasoningProgress(phase: "Decomposing problem", percentage: 0.2))
         let decomposition = try await askProvider(prompt: """
-            Decompose this problem into its component parts: \(problem)
-            List the key sub-problems or aspects that need to be addressed.
-            """)
+        Decompose this problem into its component parts: \(problem)
+        List the key sub-problems or aspects that need to be addressed.
+        """)
         steps.append(ReasoningStep(stepNumber: 1, description: "Problem decomposition", reasoning: decomposition, confidence: 0.9))
 
         // Step 2: Identify key information
         progressHandler(ReasoningProgress(phase: "Identifying key information", percentage: 0.4))
         let keyInfo = try await askProvider(prompt: """
-            Given this problem: \(problem)
-            And this decomposition: \(decomposition)
-            Identify the key information, constraints, and requirements needed to solve this problem.
-            """)
+        Given this problem: \(problem)
+        And this decomposition: \(decomposition)
+        Identify the key information, constraints, and requirements needed to solve this problem.
+        """)
         steps.append(ReasoningStep(stepNumber: 2, description: "Key information extraction", reasoning: keyInfo, confidence: 0.85))
 
         // Step 3: Develop solution
         progressHandler(ReasoningProgress(phase: "Developing solution", percentage: 0.7))
         let solution = try await askProvider(prompt: """
-            Problem: \(problem)
-            Key information: \(keyInfo)
-            Develop a step-by-step solution. For each step, explain your reasoning clearly.
-            """)
+        Problem: \(problem)
+        Key information: \(keyInfo)
+        Develop a step-by-step solution. For each step, explain your reasoning clearly.
+        """)
         steps.append(ReasoningStep(stepNumber: 3, description: "Solution development", reasoning: solution, confidence: 0.85))
 
         // Step 4: Validate solution
         progressHandler(ReasoningProgress(phase: "Validating solution", percentage: 0.9))
         let validation = try await askProvider(prompt: """
-            Validate this solution: \(solution)
-            For the problem: \(problem)
-            Is the solution correct? Are there any errors or gaps? Rate confidence 0-1.
-            """)
+        Validate this solution: \(solution)
+        For the problem: \(problem)
+        Is the solution correct? Are there any errors or gaps? Rate confidence 0-1.
+        """)
         steps.append(ReasoningStep(stepNumber: 4, description: "Solution validation", reasoning: validation, confidence: 0.85))
 
         progressHandler(ReasoningProgress(phase: "Complete", percentage: 1.0))
@@ -80,7 +81,7 @@ final class ReasoningEngine {
     func abductiveReasoning(
         observation: String,
         possibleCauses: [String],
-        context: [String: Any] = [:],
+        context _: [String: Any] = [:],
         progressHandler: @escaping @Sendable (ReasoningProgress) -> Void
     ) async throws -> ReasoningResult {
         var steps: [ReasoningStep] = []
@@ -94,11 +95,11 @@ final class ReasoningEngine {
             progressHandler(ReasoningProgress(phase: "Evaluating cause \(index + 1)/\(possibleCauses.count)", percentage: progress))
 
             let evaluation = try await askProvider(prompt: """
-                Observation: \(observation)
-                Possible cause: \(cause)
-                Evaluate how well this cause explains the observation.
-                Provide a score (0-1) and reasoning.
-                """)
+            Observation: \(observation)
+            Possible cause: \(cause)
+            Evaluate how well this cause explains the observation.
+            Provide a score (0-1) and reasoning.
+            """)
 
             let score: Float = 0.7 // Simplified - would parse from response in production
             causeScores.append((cause, score, evaluation))
@@ -150,7 +151,7 @@ final class ReasoningEngine {
         targetProblem: String,
         sourceDomain: String,
         sourceExample: String,
-        context: [String: Any] = [:],
+        context _: [String: Any] = [:],
         progressHandler: @escaping @Sendable (ReasoningProgress) -> Void
     ) async throws -> ReasoningResult {
         var steps: [ReasoningStep] = []
@@ -158,27 +159,27 @@ final class ReasoningEngine {
         // Step 1: Map source to target
         progressHandler(ReasoningProgress(phase: "Mapping domains", percentage: 0.2))
         let mapping = try await askProvider(prompt: """
-            Map this source domain: \(sourceDomain)
-            With example: \(sourceExample)
-            To this target domain: \(targetProblem)
-            Identify analogous elements and relationships.
-            """)
+        Map this source domain: \(sourceDomain)
+        With example: \(sourceExample)
+        To this target domain: \(targetProblem)
+        Identify analogous elements and relationships.
+        """)
         steps.append(ReasoningStep(stepNumber: 1, description: "Domain mapping", reasoning: mapping, confidence: 0.8))
 
         // Step 2: Transfer solution
         progressHandler(ReasoningProgress(phase: "Transferring solution", percentage: 0.5))
         let transfer = try await askProvider(prompt: """
-            Based on this domain mapping: \(mapping)
-            Transfer the solution to this target problem: \(targetProblem)
-            """)
+        Based on this domain mapping: \(mapping)
+        Transfer the solution to this target problem: \(targetProblem)
+        """)
         steps.append(ReasoningStep(stepNumber: 2, description: "Solution transfer", reasoning: transfer, confidence: 0.75))
 
         // Step 3: Adapt to target
         progressHandler(ReasoningProgress(phase: "Adapting solution", percentage: 0.8))
         let adapted = try await askProvider(prompt: """
-            Adapt this transferred solution: \(transfer)
-            To specifically solve: \(targetProblem)
-            """)
+        Adapt this transferred solution: \(transfer)
+        To specifically solve: \(targetProblem)
+        """)
         steps.append(ReasoningStep(stepNumber: 3, description: "Solution adaptation", reasoning: adapted, confidence: 0.8))
 
         progressHandler(ReasoningProgress(phase: "Complete", percentage: 1.0))
@@ -198,7 +199,7 @@ final class ReasoningEngine {
     func counterfactualReasoning(
         scenario: String,
         change: String,
-        context: [String: Any] = [:],
+        context _: [String: Any] = [:],
         progressHandler: @escaping @Sendable (ReasoningProgress) -> Void
     ) async throws -> ReasoningResult {
         var steps: [ReasoningStep] = []
@@ -211,10 +212,10 @@ final class ReasoningEngine {
         // Step 2: Apply change
         progressHandler(ReasoningProgress(phase: "Applying change", percentage: 0.4))
         let modified = try await askProvider(prompt: """
-            Original: \(scenario)
-            Change: \(change)
-            Describe the modified scenario after applying this change.
-            """)
+        Original: \(scenario)
+        Change: \(change)
+        Describe the modified scenario after applying this change.
+        """)
         steps.append(ReasoningStep(stepNumber: 2, description: "Change application", reasoning: modified, confidence: 0.85))
 
         // Step 3: Trace consequences
@@ -225,11 +226,11 @@ final class ReasoningEngine {
         // Step 4: Compare outcomes
         progressHandler(ReasoningProgress(phase: "Comparing outcomes", percentage: 0.9))
         let comparison = try await askProvider(prompt: """
-            Compare these outcomes:
-            Original: \(scenario)
-            Modified: \(consequences)
-            What changed and why?
-            """)
+        Compare these outcomes:
+        Original: \(scenario)
+        Modified: \(consequences)
+        What changed and why?
+        """)
         steps.append(ReasoningStep(stepNumber: 4, description: "Outcome comparison", reasoning: comparison, confidence: 0.75))
 
         progressHandler(ReasoningProgress(phase: "Complete", percentage: 1.0))
@@ -267,11 +268,11 @@ final class ReasoningEngine {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 result += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -281,50 +282,49 @@ final class ReasoningEngine {
 
     private func calculateOverallConfidence(_ steps: [ReasoningStep]) -> Float {
         guard !steps.isEmpty else { return 0 }
-        let total = steps.map { $0.confidence }.reduce(0, +)
+        let total = steps.map(\.confidence).reduce(0, +)
         return total / Float(steps.count)
     }
 
     // MARK: - Deep Agent Integration Methods
 
-    func analyzeTask(_ instruction: String, context: TaskContext) async throws -> String {
+    func analyzeTask(_ instruction: String, context _: TaskContext) async throws -> String {
         // Analyze task using chain-of-thought reasoning
         let analysis = try await askProvider(prompt: """
-            Analyze this task and provide a detailed breakdown:
-            Task: \(instruction)
+        Analyze this task and provide a detailed breakdown:
+        Task: \(instruction)
 
-            Provide:
-            1. Task complexity assessment
-            2. Required capabilities
-            3. Potential challenges
-            4. Success criteria
-            """)
+        Provide:
+        1. Task complexity assessment
+        2. Required capabilities
+        3. Potential challenges
+        4. Success criteria
+        """)
         return analysis
     }
 
     func decomposeTask(_ instruction: String, taskType: TaskType, maxSteps: Int? = nil) async throws -> [String] {
         let actualMaxSteps = maxSteps ?? config.maxDecompositionSteps
 
-        let taskTypeName: String
-        switch taskType {
-        case .appDevelopment: taskTypeName = "App Development"
-        case .research: taskTypeName = "Research"
-        case .contentCreation: taskTypeName = "Content Creation"
-        case .workflowAutomation: taskTypeName = "Workflow Automation"
-        case .codeGeneration: taskTypeName = "Code Generation"
-        case .informationRetrieval: taskTypeName = "Information Retrieval"
-        case .creation: taskTypeName = "Creation"
-        case .general: taskTypeName = "General"
-        default: taskTypeName = taskType.displayName
+        let taskTypeName: String = switch taskType {
+        case .appDevelopment: "App Development"
+        case .research: "Research"
+        case .contentCreation: "Content Creation"
+        case .workflowAutomation: "Workflow Automation"
+        case .codeGeneration: "Code Generation"
+        case .informationRetrieval: "Information Retrieval"
+        case .creation: "Creation"
+        case .general: "General"
+        default: taskType.displayName
         }
 
         let prompt = """
-            Decompose this \(taskTypeName) task into specific, actionable subtasks:
-            Task: \(instruction)
+        Decompose this \(taskTypeName) task into specific, actionable subtasks:
+        Task: \(instruction)
 
-            Provide exactly \(actualMaxSteps) subtasks as a numbered list.
-            Each subtask should be atomic and independently executable.
-            """
+        Provide exactly \(actualMaxSteps) subtasks as a numbered list.
+        Each subtask should be atomic and independently executable.
+        """
 
         let decomposition = try await askProvider(prompt: prompt)
 
@@ -347,19 +347,19 @@ final class ReasoningEngine {
         let criteriaText = expectedCriteria.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
 
         let verification = try await askProvider(prompt: """
-            Verify if this output meets the following criteria:
+        Verify if this output meets the following criteria:
 
-            Output:
-            \(output)
+        Output:
+        \(output)
 
-            Criteria:
-            \(criteriaText)
+        Criteria:
+        \(criteriaText)
 
-            Respond in this exact format:
-            VALID: yes/no
-            CONFIDENCE: 0.0-1.0
-            ISSUES: list any problems found, or "none"
-            """)
+        Respond in this exact format:
+        VALID: yes/no
+        CONFIDENCE: 0.0-1.0
+        ISSUES: list any problems found, or "none"
+        """)
 
         let isValid = verification.lowercased().contains("valid: yes")
         let confidence = extractConfidence(from: verification)
@@ -372,14 +372,14 @@ final class ReasoningEngine {
         let resultsText = results.enumerated().map { "Result \($0.offset + 1):\n\($0.element)" }.joined(separator: "\n\n")
 
         let synthesis = try await askProvider(prompt: """
-            Synthesize these results into a final answer for the original task:
+        Synthesize these results into a final answer for the original task:
 
-            Original Task: \(instruction)
+        Original Task: \(instruction)
 
-            \(resultsText)
+        \(resultsText)
 
-            Provide a comprehensive, coherent final answer.
-            """)
+        Provide a comprehensive, coherent final answer.
+        """)
 
         return synthesis
     }
@@ -387,7 +387,8 @@ final class ReasoningEngine {
     private func extractConfidence(from text: String) -> Double {
         if let range = text.range(of: "confidence:\\s*([0-9.]+)", options: [.regularExpression, .caseInsensitive]),
            let valueStr = text[range].components(separatedBy: ":").last?.trimmingCharacters(in: .whitespaces),
-           let value = Double(valueStr) {
+           let value = Double(valueStr)
+        {
             return value
         }
         return config.defaultConfidence
@@ -447,9 +448,9 @@ enum ReasoningError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .providerNotAvailable:
-            return "AI provider is not available for reasoning"
+            "AI provider is not available for reasoning"
         case .noValidExplanation:
-            return "No valid explanation found"
+            "No valid explanation found"
         }
     }
 }

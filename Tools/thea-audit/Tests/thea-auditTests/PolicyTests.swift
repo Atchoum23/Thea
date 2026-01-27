@@ -1,11 +1,10 @@
 // PolicyTests.swift
 // Tests for AgentSec policy
 
-import XCTest
 @testable import thea_audit
+import XCTest
 
 final class PolicyTests: XCTestCase {
-
     // MARK: - Policy Template Tests
 
     func testStrictPolicyTemplate() {

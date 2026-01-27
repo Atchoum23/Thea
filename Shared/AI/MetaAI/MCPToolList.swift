@@ -1,13 +1,14 @@
 import SwiftUI
 
 // MARK: - MCP Tool List
+
 // Displays tools available from a specific MCP server
 
 struct MCPToolList: View {
     let server: MCPServerInfo
     @State private var tools: [MCPToolInfo] = []
     @State private var searchText = ""
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -16,19 +17,19 @@ struct MCPToolList: View {
                     Image(systemName: serverIcon)
                         .font(.title)
                         .foregroundColor(.theaPrimary)
-                    
+
                     VStack(alignment: .leading) {
                         Text(server.name)
                             .font(.title2)
                             .fontWeight(.bold)
-                        
+
                         Text(server.description)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
-                    
+
                     Spacer()
-                    
+
                     // Status badge
                     HStack(spacing: 4) {
                         Circle()
@@ -43,7 +44,7 @@ struct MCPToolList: View {
                     .background(Color.secondary.opacity(0.1))
                     .cornerRadius(8)
                 }
-                
+
                 // Stats
                 HStack(spacing: 16) {
                     Label("\(tools.count) tools", systemImage: "wrench.and.screwdriver")
@@ -53,16 +54,16 @@ struct MCPToolList: View {
             }
             .padding()
             .background(Color.secondary.opacity(0.05))
-            
+
             Divider()
-            
+
             // Search bar
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
                 TextField("Search tools...", text: $searchText)
                     .textFieldStyle(.plain)
-                
+
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
@@ -75,7 +76,7 @@ struct MCPToolList: View {
             .background(Color.secondary.opacity(0.1))
             .cornerRadius(8)
             .padding()
-            
+
             // Tool list
             ScrollView {
                 LazyVStack(spacing: 12) {
@@ -88,40 +89,40 @@ struct MCPToolList: View {
         }
         .onAppear { loadTools() }
     }
-    
+
     // MARK: - Computed Properties
-    
+
     private var filteredTools: [MCPToolInfo] {
         if searchText.isEmpty {
-            return tools
+            tools
         } else {
-            return tools.filter { tool in
+            tools.filter { tool in
                 tool.name.lowercased().contains(searchText.lowercased()) ||
-                tool.description.lowercased().contains(searchText.lowercased())
+                    tool.description.lowercased().contains(searchText.lowercased())
             }
         }
     }
-    
+
     private var statusColor: Color {
         switch server.status {
-        case .connected: return .green
-        case .disconnected: return .gray
-        case .error: return .red
+        case .connected: .green
+        case .disconnected: .gray
+        case .error: .red
         }
     }
-    
+
     private var serverIcon: String {
         switch server.name.lowercased() {
-        case "filesystem": return "folder.fill"
-        case "terminal": return "terminal.fill"
-        case "git": return "chevron.left.forwardslash.chevron.right"
-        case "web": return "globe"
-        default: return "server.rack"
+        case "filesystem": "folder.fill"
+        case "terminal": "terminal.fill"
+        case "git": "chevron.left.forwardslash.chevron.right"
+        case "web": "globe"
+        default: "server.rack"
         }
     }
-    
+
     // MARK: - Actions
-    
+
     private func loadTools() {
         // Load tools from MCP server
         // For now, use mock data based on server type
@@ -159,7 +160,7 @@ struct MCPToolList: View {
                     parameters: ["path"]
                 )
             ]
-            
+
         case "terminal":
             tools = [
                 MCPToolInfo(
@@ -175,7 +176,7 @@ struct MCPToolList: View {
                     parameters: ["command", "args"]
                 )
             ]
-            
+
         case "git":
             tools = [
                 MCPToolInfo(
@@ -227,7 +228,7 @@ struct MCPToolList: View {
                     parameters: ["url", "destination"]
                 )
             ]
-            
+
         default:
             tools = []
         }
@@ -239,43 +240,43 @@ struct MCPToolList: View {
 private struct ToolCard: View {
     let tool: MCPToolInfo
     @State private var isExpanded = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "function")
                     .foregroundColor(.theaPrimary)
-                
+
                 Text(tool.name)
                     .font(.system(.body, design: .monospaced))
                     .fontWeight(.semibold)
-                
+
                 Spacer()
-                
+
                 Button(action: { withAnimation { isExpanded.toggle() } }) {
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
             }
-            
+
             Text(tool.description)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            
-            if isExpanded && !tool.parameters.isEmpty {
+
+            if isExpanded, !tool.parameters.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Parameters:")
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundColor(.secondary)
-                    
+
                     ForEach(tool.parameters, id: \.self) { param in
                         HStack {
                             Circle()
                                 .fill(Color.blue)
                                 .frame(width: 4, height: 4)
-                            
+
                             Text(param)
                                 .font(.system(.caption, design: .monospaced))
                                 .foregroundColor(.primary)

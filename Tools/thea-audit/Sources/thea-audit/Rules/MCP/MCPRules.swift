@@ -10,23 +10,23 @@ final class PathRestrictionRule: ASTRule {
             id: "MCP-PATH-001",
             name: "MCP Path Restriction Validation",
             description: """
-                Validates that MCP servers properly implement path restrictions:
-                - ALLOWED_DIRECTORIES list exists
-                - BLOCKED_PATHS list exists
-                - isPathAllowed function is implemented
-                - Path validation is called before file operations
-                """,
+            Validates that MCP servers properly implement path restrictions:
+            - ALLOWED_DIRECTORIES list exists
+            - BLOCKED_PATHS list exists
+            - isPathAllowed function is implemented
+            - Path validation is called before file operations
+            """,
             severity: .critical,
             category: .accessControl,
             cweID: "CWE-22",
             recommendation: """
-                Implement comprehensive path restrictions:
-                - Define ALLOWED_DIRECTORIES allowlist
-                - Define BLOCKED_PATHS blocklist
-                - Create isPathAllowed() validation function
-                - Call isPathAllowed() before all file operations
-                - Resolve paths before validation to prevent bypass
-                """
+            Implement comprehensive path restrictions:
+            - Define ALLOWED_DIRECTORIES allowlist
+            - Define BLOCKED_PATHS blocklist
+            - Create isPathAllowed() validation function
+            - Call isPathAllowed() before all file operations
+            - Resolve paths before validation to prevent bypass
+            """
         )
     }
 
@@ -41,10 +41,10 @@ final class PathRestrictionRule: ASTRule {
 
         // Check for file operations
         let hasFileOps = content.contains("fs.") ||
-                         content.contains("readFile") ||
-                         content.contains("writeFile") ||
-                         content.contains("unlink") ||
-                         content.contains("mkdir")
+            content.contains("readFile") ||
+            content.contains("writeFile") ||
+            content.contains("unlink") ||
+            content.contains("mkdir")
 
         if hasFileOps {
             if !hasAllowedDirs {
@@ -111,11 +111,12 @@ final class PathRestrictionRule: ASTRule {
                     if regex.firstMatch(in: line, options: [], range: range) != nil {
                         // Check context for path validation
                         let startLine = max(0, lineIndex - 5)
-                        let contextLines = lines[startLine..<lineIndex].joined(separator: "\n")
+                        let contextLines = lines[startLine ..< lineIndex].joined(separator: "\n")
 
-                        if !contextLines.contains("isPathAllowed") &&
-                           !contextLines.contains("validatePath") &&
-                           !line.contains("isPathAllowed") {
+                        if !contextLines.contains("isPathAllowed"),
+                           !contextLines.contains("validatePath"),
+                           !line.contains("isPathAllowed")
+                        {
                             findings.append(Finding(
                                 ruleID: id,
                                 severity: .high,
@@ -145,34 +146,34 @@ final class CommandInjectionRule: RegexRule {
             id: "MCP-INJECT-001",
             name: "MCP Command Injection Risk",
             description: """
-                Detects patterns that could lead to command injection:
-                - Unsanitized input to shell commands
-                - Template literals with user input in exec
-                - Direct variable interpolation in commands
-                """,
+            Detects patterns that could lead to command injection:
+            - Unsanitized input to shell commands
+            - Template literals with user input in exec
+            - Direct variable interpolation in commands
+            """,
             severity: .critical,
             category: .injection,
             cweID: "CWE-78",
             recommendation: """
-                Prevent command injection:
-                - Use parameterized command execution
-                - Validate and sanitize all inputs
-                - Use allow-lists for command arguments
-                - Avoid shell: true in spawn/exec
-                - Use execFile instead of exec where possible
-                """,
+            Prevent command injection:
+            - Use parameterized command execution
+            - Validate and sanitize all inputs
+            - Use allow-lists for command arguments
+            - Avoid shell: true in spawn/exec
+            - Use execFile instead of exec where possible
+            """,
             patterns: [
-                "exec\\(`",                          // Template literal in exec
-                "exec\\(.*\\$\\{",                   // Variable interpolation in exec
-                "spawn\\(.*shell:\\s*true",          // spawn with shell
-                "execSync\\(`",                      // Template literal in execSync
-                "child_process.*\\$\\{",             // Variable in child_process
-                "\\.exec\\(.*\\+.*\\)",              // String concatenation in exec
-                "command\\s*:\\s*`"                  // Template literal command
+                "exec\\(`", // Template literal in exec
+                "exec\\(.*\\$\\{", // Variable interpolation in exec
+                "spawn\\(.*shell:\\s*true", // spawn with shell
+                "execSync\\(`", // Template literal in execSync
+                "child_process.*\\$\\{", // Variable in child_process
+                "\\.exec\\(.*\\+.*\\)", // String concatenation in exec
+                "command\\s*:\\s*`" // Template literal command
             ],
             excludePatterns: [
-                "//.*exec",    // Comments
-                "/\\*.*exec"   // Block comments
+                "//.*exec", // Comments
+                "/\\*.*exec" // Block comments
             ]
         )
     }
@@ -185,32 +186,32 @@ final class UnsafeTypeScriptRule: RegexRule {
             id: "MCP-TS-001",
             name: "Unsafe TypeScript Pattern",
             description: """
-                Detects unsafe TypeScript patterns:
-                - eval() usage
-                - Function constructor
-                - Unsafe type assertions
-                - any type in security-critical code
-                """,
+            Detects unsafe TypeScript patterns:
+            - eval() usage
+            - Function constructor
+            - Unsafe type assertions
+            - any type in security-critical code
+            """,
             severity: .high,
             category: .codeQuality,
             cweID: "CWE-94",
             recommendation: """
-                Avoid unsafe TypeScript patterns:
-                - Never use eval() with user input
-                - Avoid new Function() constructor
-                - Use proper TypeScript types instead of any
-                - Add runtime validation for external input
-                """,
+            Avoid unsafe TypeScript patterns:
+            - Never use eval() with user input
+            - Avoid new Function() constructor
+            - Use proper TypeScript types instead of any
+            - Add runtime validation for external input
+            """,
             patterns: [
                 "\\beval\\s*\\(",
                 "new\\s+Function\\s*\\(",
                 "as\\s+any(?![a-zA-Z])",
                 ":\\s*any(?![a-zA-Z])",
-                "JSON\\.parse\\([^)]*\\)(?!.*catch)"  // JSON.parse without error handling
+                "JSON\\.parse\\([^)]*\\)(?!.*catch)" // JSON.parse without error handling
             ],
             excludePatterns: [
-                "//.*eval",     // Comments
-                "/\\*.*eval"    // Block comments
+                "//.*eval", // Comments
+                "/\\*.*eval" // Block comments
             ]
         )
     }
@@ -223,21 +224,21 @@ final class MissingInputValidationRule: ASTRule {
             id: "MCP-INPUT-001",
             name: "Missing Input Validation",
             description: """
-                Detects MCP tool handlers without proper input validation:
-                - Missing Zod schema validation
-                - Direct use of request parameters
-                - Missing type guards
-                """,
+            Detects MCP tool handlers without proper input validation:
+            - Missing Zod schema validation
+            - Direct use of request parameters
+            - Missing type guards
+            """,
             severity: .high,
             category: .inputValidation,
             cweID: "CWE-20",
             recommendation: """
-                Add input validation to all MCP tool handlers:
-                - Use Zod schemas to validate input
-                - Add runtime type checking
-                - Validate string lengths and patterns
-                - Sanitize before using in operations
-                """
+            Add input validation to all MCP tool handlers:
+            - Use Zod schemas to validate input
+            - Add runtime type checking
+            - Validate string lengths and patterns
+            - Sanitize before using in operations
+            """
         )
     }
 
@@ -286,11 +287,11 @@ final class MissingInputValidationRule: ASTRule {
 
             if inHandler {
                 handlerContent += line + "\n"
-                braceCount += line.filter { $0 == "{" }.count
-                braceCount -= line.filter { $0 == "}" }.count
+                braceCount += line.count(where: { $0 == "{" })
+                braceCount -= line.count(where: { $0 == "}" })
 
                 // Handler ended
-                if braceCount <= 0 && handlerContent.count > 20 {
+                if braceCount <= 0, handlerContent.count > 20 {
                     // Check for validation
                     var hasValidation = false
                     for validationPattern in validationPatterns {
@@ -302,11 +303,11 @@ final class MissingInputValidationRule: ASTRule {
 
                     // Check if handler uses parameters
                     let usesParams = handlerContent.contains("params") ||
-                                    handlerContent.contains("args") ||
-                                    handlerContent.contains("input") ||
-                                    handlerContent.contains("request")
+                        handlerContent.contains("args") ||
+                        handlerContent.contains("input") ||
+                        handlerContent.contains("request")
 
-                    if usesParams && !hasValidation {
+                    if usesParams, !hasValidation {
                         findings.append(Finding(
                             ruleID: id,
                             severity: severity,

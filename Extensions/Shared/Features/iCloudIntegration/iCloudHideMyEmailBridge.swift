@@ -20,11 +20,11 @@
 // - @icloud.com addresses are created via iCloud+ Hide My Email
 // - @privaterelay.appleid.com is ONLY for "Sign in with Apple" authentication
 
-import Foundation
+import AppKit
 import AuthenticationServices
+import Foundation
 import LocalAuthentication
 import Security
-import AppKit
 
 // MARK: - iCloud Hide My Email Bridge
 
@@ -37,7 +37,6 @@ import AppKit
 /// - Syncing aliases that the user creates via Safari
 @MainActor
 public final class iCloudHideMyEmailBridge: ObservableObject {
-
     public static let shared = iCloudHideMyEmailBridge()
 
     // MARK: - Published State
@@ -112,16 +111,16 @@ public final class iCloudHideMyEmailBridge: ObservableObject {
 
     /// Establish authenticated session
     private func establishSession() async throws {
-        let token = Data((0..<32).map { _ in UInt8.random(in: 0...255) })
+        let token = Data((0 ..< 32).map { _ in UInt8.random(in: 0 ... 255) })
         let expiry = Date().addingTimeInterval(30 * 24 * 60 * 60) // 30 days
 
         try storeSessionInKeychain(token: token, expiry: expiry)
 
-        self.sessionToken = token
-        self.tokenExpiryDate = expiry
-        self.isConnected = true
-        self.isAuthenticated = true
-        self.lastSyncTime = Date()
+        sessionToken = token
+        tokenExpiryDate = expiry
+        isConnected = true
+        isAuthenticated = true
+        lastSyncTime = Date()
     }
 
     /// Restore session from keychain
@@ -132,10 +131,10 @@ public final class iCloudHideMyEmailBridge: ObservableObject {
         }
 
         if stored.expiry > Date() {
-            self.sessionToken = stored.token
-            self.tokenExpiryDate = stored.expiry
-            self.isConnected = true
-            self.isAuthenticated = true
+            sessionToken = stored.token
+            tokenExpiryDate = stored.expiry
+            isConnected = true
+            isAuthenticated = true
             return true
         }
 
@@ -279,12 +278,12 @@ public final class iCloudHideMyEmailBridge: ObservableObject {
 
     /// Get alias for a specific domain (from local cache)
     public func getAlias(for domain: String) -> HideMyEmailAlias? {
-        return aliases.first { $0.domain == domain && $0.isActive }
+        aliases.first { $0.domain == domain && $0.isActive }
     }
 
     /// Get all cached aliases
     public func getAllAliases() -> [HideMyEmailAlias] {
-        return aliases
+        aliases
     }
 
     /// Mark an alias as used for a domain
@@ -393,9 +392,9 @@ public struct HideMyEmailAlias: Identifiable, Codable, Sendable {
     public let source: AliasSource
 
     public enum AliasSource: String, Codable, Sendable {
-        case manualEntry = "manual"      // User manually entered from Safari/Settings
-        case imported = "imported"        // Imported from export
-        case safari = "safari"           // Detected from Safari (future)
+        case manualEntry = "manual" // User manually entered from Safari/Settings
+        case imported // Imported from export
+        case safari // Detected from Safari (future)
     }
 
     public init(
@@ -444,29 +443,29 @@ public enum HideMyEmailError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .notConnected:
-            return "Not connected"
+            "Not connected"
         case .authenticationRequired:
-            return "Authentication is required"
+            "Authentication is required"
         case .authenticationFailed:
-            return "Authentication failed"
-        case .keychainError(let status):
-            return "Keychain error: \(status)"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+            "Authentication failed"
+        case let .keychainError(status):
+            "Keychain error: \(status)"
+        case let .networkError(error):
+            "Network error: \(error.localizedDescription)"
         case .noPublicAPI:
-            return "Apple does not provide a public API for creating Hide My Email aliases. Please use Safari or System Settings."
+            "Apple does not provide a public API for creating Hide My Email aliases. Please use Safari or System Settings."
         case .invalidAliasFormat:
-            return "Invalid alias format. Hide My Email aliases end in @icloud.com"
+            "Invalid alias format. Hide My Email aliases end in @icloud.com"
         case .aliasNotFound:
-            return "Alias not found"
+            "Alias not found"
         }
     }
 }
 
 // MARK: - Notifications
 
-extension Notification.Name {
-    public static let hideMyEmailAliasRegistered = Notification.Name("com.thea.hideMyEmailAliasRegistered")
-    public static let hideMyEmailConnected = Notification.Name("com.thea.hideMyEmailConnected")
-    public static let hideMyEmailDisconnected = Notification.Name("com.thea.hideMyEmailDisconnected")
+public extension Notification.Name {
+    static let hideMyEmailAliasRegistered = Notification.Name("com.thea.hideMyEmailAliasRegistered")
+    static let hideMyEmailConnected = Notification.Name("com.thea.hideMyEmailConnected")
+    static let hideMyEmailDisconnected = Notification.Name("com.thea.hideMyEmailDisconnected")
 }

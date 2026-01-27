@@ -11,7 +11,7 @@ public actor PermissionManager {
     // MARK: - Initialization
 
     public init(preferences: UserPermissionPreferences = .default) {
-        self.userPreferences = preferences
+        userPreferences = preferences
     }
 
     // MARK: - Permission Requests
@@ -29,17 +29,16 @@ public actor PermissionManager {
         let consequence = classifyConsequence(action)
 
         // Determine if permission is required based on user preferences
-        let decision: PermissionDecision
-        switch consequence {
+        let decision: PermissionDecision = switch consequence {
         case .safe:
             // Safe actions don't require permission
-            decision = .allowed(reason: "Safe read-only operation")
+            .allowed(reason: "Safe read-only operation")
 
         case .moderate:
             if userPreferences.autoApproveModerate {
-                decision = .allowed(reason: "Auto-approved moderate action")
+                .allowed(reason: "Auto-approved moderate action")
             } else {
-                decision = .requiresConfirmation(
+                .requiresConfirmation(
                     action: action,
                     consequence: consequence,
                     reason: "Non-destructive write operation"
@@ -47,14 +46,14 @@ public actor PermissionManager {
             }
 
         case .high:
-            decision = .requiresConfirmation(
+            .requiresConfirmation(
                 action: action,
                 consequence: consequence,
                 reason: "High-impact operation (file changes, payments)"
             )
 
         case .critical:
-            decision = .requiresConfirmation(
+            .requiresConfirmation(
                 action: action,
                 consequence: consequence,
                 reason: "Critical operation (system changes, deletions)"
@@ -71,50 +70,53 @@ public actor PermissionManager {
         switch action {
         // Safe operations (read-only)
         case .screenshot, .readText, .getTitle, .getCurrentURL, .extractLinks, .extractText:
-            return .safe
+            .safe
 
         // Moderate operations (non-destructive writes)
         case .navigate, .click, .scroll, .fillField:
-            return .moderate
+            .moderate
 
         // High-impact operations (file operations, payments)
         case .submitForm, .uploadFile, .downloadFile:
-            return .high
+            .high
 
         // Critical operations (system changes, deletions)
         case .deleteFile, .modifySystemSettings, .executeScript:
-            return .critical
+            .critical
 
         // Custom actions evaluated by pattern matching
-        case .custom(let name, let parameters):
-            return evaluateCustomAction(name: name, parameters: parameters)
+        case let .custom(name, parameters):
+            evaluateCustomAction(name: name, parameters: parameters)
         }
     }
 
     /// Evaluate custom action consequence level
-    private func evaluateCustomAction(name: String, parameters: [String: String]) -> ConsequenceLevel {
+    private func evaluateCustomAction(name: String, parameters _: [String: String]) -> ConsequenceLevel {
         let lowercaseName = name.lowercased()
 
         // Critical patterns
         if lowercaseName.contains("delete") ||
-           lowercaseName.contains("remove") ||
-           lowercaseName.contains("destroy") ||
-           lowercaseName.contains("system") {
+            lowercaseName.contains("remove") ||
+            lowercaseName.contains("destroy") ||
+            lowercaseName.contains("system")
+        {
             return .critical
         }
 
         // High patterns
         if lowercaseName.contains("payment") ||
-           lowercaseName.contains("purchase") ||
-           lowercaseName.contains("transfer") ||
-           lowercaseName.contains("file") {
+            lowercaseName.contains("purchase") ||
+            lowercaseName.contains("transfer") ||
+            lowercaseName.contains("file")
+        {
             return .high
         }
 
         // Moderate patterns
         if lowercaseName.contains("write") ||
-           lowercaseName.contains("update") ||
-           lowercaseName.contains("modify") {
+            lowercaseName.contains("update") ||
+            lowercaseName.contains("modify")
+        {
             return .moderate
         }
 
@@ -141,7 +143,7 @@ public actor PermissionManager {
 
     /// Update user preferences
     public func updatePreferences(_ preferences: UserPermissionPreferences) {
-        self.userPreferences = preferences
+        userPreferences = preferences
         // Clear cache when preferences change
         permissionCache.removeAll()
     }
@@ -189,50 +191,50 @@ public enum AutomationAction: Sendable {
 
     var identifier: String {
         switch self {
-        case .navigate(let url):
-            return "navigate:\(url)"
+        case let .navigate(url):
+            "navigate:\(url)"
         case .screenshot:
-            return "screenshot"
+            "screenshot"
         case .getCurrentURL:
-            return "getCurrentURL"
-        case .readText(let selector):
-            return "readText:\(selector)"
-        case .extractText(let selector):
-            return "extractText:\(selector)"
+            "getCurrentURL"
+        case let .readText(selector):
+            "readText:\(selector)"
+        case let .extractText(selector):
+            "extractText:\(selector)"
         case .extractLinks:
-            return "extractLinks"
+            "extractLinks"
         case .getTitle:
-            return "getTitle"
-        case .click(let selector):
-            return "click:\(selector)"
-        case .scroll(let direction):
-            return "scroll:\(direction)"
-        case .fillField(let selector, _):
-            return "fillField:\(selector)"
-        case .submitForm(let selector):
-            return "submitForm:\(selector)"
-        case .uploadFile(let path):
-            return "uploadFile:\(path)"
-        case .downloadFile(let url):
-            return "downloadFile:\(url)"
-        case .deleteFile(let path):
-            return "deleteFile:\(path)"
-        case .modifySystemSettings(let setting):
-            return "modifySystemSettings:\(setting)"
+            "getTitle"
+        case let .click(selector):
+            "click:\(selector)"
+        case let .scroll(direction):
+            "scroll:\(direction)"
+        case let .fillField(selector, _):
+            "fillField:\(selector)"
+        case let .submitForm(selector):
+            "submitForm:\(selector)"
+        case let .uploadFile(path):
+            "uploadFile:\(path)"
+        case let .downloadFile(url):
+            "downloadFile:\(url)"
+        case let .deleteFile(path):
+            "deleteFile:\(path)"
+        case let .modifySystemSettings(setting):
+            "modifySystemSettings:\(setting)"
         case .executeScript:
-            return "executeScript"
-        case .custom(let name, _):
-            return "custom:\(name)"
+            "executeScript"
+        case let .custom(name, _):
+            "custom:\(name)"
         }
     }
 }
 
 /// Consequence level of an automation action
 public enum ConsequenceLevel: Int, Sendable, Comparable {
-    case safe = 0          // Read-only operations
-    case moderate = 1      // Non-destructive writes
-    case high = 2          // File operations, payments
-    case critical = 3      // System changes, deletions
+    case safe = 0 // Read-only operations
+    case moderate = 1 // Non-destructive writes
+    case high = 2 // File operations, payments
+    case critical = 3 // System changes, deletions
 
     public static func < (lhs: ConsequenceLevel, rhs: ConsequenceLevel) -> Bool {
         lhs.rawValue < rhs.rawValue
@@ -241,26 +243,26 @@ public enum ConsequenceLevel: Int, Sendable, Comparable {
     public var description: String {
         switch self {
         case .safe:
-            return "Safe (read-only)"
+            "Safe (read-only)"
         case .moderate:
-            return "Moderate (non-destructive)"
+            "Moderate (non-destructive)"
         case .high:
-            return "High (file operations, payments)"
+            "High (file operations, payments)"
         case .critical:
-            return "Critical (system changes, deletions)"
+            "Critical (system changes, deletions)"
         }
     }
 
     public var icon: String {
         switch self {
         case .safe:
-            return "checkmark.shield.fill"
+            "checkmark.shield.fill"
         case .moderate:
-            return "exclamationmark.shield.fill"
+            "exclamationmark.shield.fill"
         case .high:
-            return "exclamationmark.triangle.fill"
+            "exclamationmark.triangle.fill"
         case .critical:
-            return "xmark.octagon.fill"
+            "xmark.octagon.fill"
         }
     }
 }
@@ -346,10 +348,10 @@ public enum PermissionError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .permissionDenied(let action, let reason):
-            return "Permission denied for \(action): \(reason)"
-        case .requiresUserConfirmation(let action, let consequence):
-            return "User confirmation required for \(action) (\(consequence.description))"
+        case let .permissionDenied(action, reason):
+            "Permission denied for \(action): \(reason)"
+        case let .requiresUserConfirmation(action, consequence):
+            "User confirmation required for \(action) (\(consequence.description))"
         }
     }
 }

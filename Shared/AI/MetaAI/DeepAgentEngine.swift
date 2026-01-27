@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Deep Agent Engine
+
 // Advanced agentic AI with multi-step reasoning, verification, and self-correction
 // Inspired by Abacus.ai Deep Agent capabilities
 
@@ -146,7 +147,7 @@ final class DeepAgentEngine {
     private func decomposeTask(_ instruction: String, type: TaskType, context: TaskContext) async throws -> [Subtask] {
         switch type {
         case .appDevelopment:
-            return [
+            [
                 Subtask(step: 1, description: "Design application architecture and data models", dependencies: []),
                 Subtask(step: 2, description: "Implement backend logic and APIs", dependencies: [1]),
                 Subtask(step: 3, description: "Create user interface and styling", dependencies: [2]),
@@ -156,7 +157,7 @@ final class DeepAgentEngine {
             ]
 
         case .research:
-            return [
+            [
                 Subtask(step: 1, description: "Define research scope and questions", dependencies: []),
                 Subtask(step: 2, description: "Gather information from multiple sources", dependencies: [1]),
                 Subtask(step: 3, description: "Analyze and synthesize findings", dependencies: [2]),
@@ -164,7 +165,7 @@ final class DeepAgentEngine {
             ]
 
         case .contentCreation:
-            return [
+            [
                 Subtask(step: 1, description: "Research topic and gather information", dependencies: []),
                 Subtask(step: 2, description: "Create outline and structure", dependencies: [1]),
                 Subtask(step: 3, description: "Write content sections", dependencies: [2]),
@@ -173,7 +174,7 @@ final class DeepAgentEngine {
             ]
 
         case .workflowAutomation:
-            return [
+            [
                 Subtask(step: 1, description: "Understand workflow requirements", dependencies: []),
                 Subtask(step: 2, description: "Identify tools and integrations needed", dependencies: [1]),
                 Subtask(step: 3, description: "Configure connections and permissions", dependencies: [2]),
@@ -182,7 +183,7 @@ final class DeepAgentEngine {
             ]
 
         case .codeGeneration:
-            return [
+            [
                 Subtask(step: 1, description: "Understand requirements and constraints", dependencies: []),
                 Subtask(step: 2, description: "Design solution architecture", dependencies: [1]),
                 Subtask(step: 3, description: "Implement code", dependencies: [2]),
@@ -191,7 +192,7 @@ final class DeepAgentEngine {
             ]
 
         case .informationRetrieval:
-            return [
+            [
                 Subtask(step: 1, description: "Parse query and identify key terms", dependencies: []),
                 Subtask(step: 2, description: "Search relevant sources", dependencies: [1]),
                 Subtask(step: 3, description: "Filter and rank results", dependencies: [2]),
@@ -200,17 +201,17 @@ final class DeepAgentEngine {
 
         case .creation, .general:
             // Use AI to dynamically decompose
-            return try await dynamicDecomposition(instruction, context: context)
+            try await dynamicDecomposition(instruction, context: context)
 
         case .simpleQA, .factual:
-            return [
+            [
                 Subtask(step: 1, description: "Parse question and identify key information needs", dependencies: []),
                 Subtask(step: 2, description: "Retrieve relevant information", dependencies: [1]),
                 Subtask(step: 3, description: "Formulate clear and accurate answer", dependencies: [2])
             ]
 
         case .complexReasoning, .analysis:
-            return [
+            [
                 Subtask(step: 1, description: "Break down problem into components", dependencies: []),
                 Subtask(step: 2, description: "Analyze each component systematically", dependencies: [1]),
                 Subtask(step: 3, description: "Synthesize findings and draw conclusions", dependencies: [2]),
@@ -218,7 +219,7 @@ final class DeepAgentEngine {
             ]
 
         case .creativeWriting:
-            return [
+            [
                 Subtask(step: 1, description: "Understand creative brief and requirements", dependencies: []),
                 Subtask(step: 2, description: "Brainstorm ideas and themes", dependencies: [1]),
                 Subtask(step: 3, description: "Create initial draft", dependencies: [2]),
@@ -227,7 +228,7 @@ final class DeepAgentEngine {
             ]
 
         case .mathLogic:
-            return [
+            [
                 Subtask(step: 1, description: "Parse problem and identify mathematical concepts", dependencies: []),
                 Subtask(step: 2, description: "Plan solution approach", dependencies: [1]),
                 Subtask(step: 3, description: "Execute calculations step by step", dependencies: [2]),
@@ -235,7 +236,7 @@ final class DeepAgentEngine {
             ]
 
         case .summarization:
-            return [
+            [
                 Subtask(step: 1, description: "Read and understand source material", dependencies: []),
                 Subtask(step: 2, description: "Identify key points and themes", dependencies: [1]),
                 Subtask(step: 3, description: "Condense into coherent summary", dependencies: [2]),
@@ -243,7 +244,7 @@ final class DeepAgentEngine {
             ]
 
         case .planning:
-            return [
+            [
                 Subtask(step: 1, description: "Define goals and constraints", dependencies: []),
                 Subtask(step: 2, description: "Research options and approaches", dependencies: [1]),
                 Subtask(step: 3, description: "Create structured plan with milestones", dependencies: [2]),
@@ -252,7 +253,7 @@ final class DeepAgentEngine {
             ]
 
         case .debugging:
-            return [
+            [
                 Subtask(step: 1, description: "Reproduce and understand the issue", dependencies: []),
                 Subtask(step: 2, description: "Identify potential root causes", dependencies: [1]),
                 Subtask(step: 3, description: "Test hypotheses systematically", dependencies: [2]),
@@ -262,7 +263,7 @@ final class DeepAgentEngine {
         }
     }
 
-    private func dynamicDecomposition(_ instruction: String, context: TaskContext) async throws -> [Subtask] {
+    private func dynamicDecomposition(_ instruction: String, context _: TaskContext) async throws -> [Subtask] {
         // Use reasoning engine for custom decomposition
         let taskType = classifyTask(instruction)
         let subtaskDescriptions = try await reasoningEngine.decomposeTask(instruction, taskType: taskType, maxSteps: 10)
@@ -399,7 +400,7 @@ final class DeepAgentEngine {
 
     private func synthesizeResults(_ results: [SubtaskResult], originalInstruction: String) async throws -> TaskResult {
         // Combine all outputs intelligently
-        let outputs = results.map { $0.output }
+        let outputs = results.map(\.output)
 
         // Use reasoning to create coherent final result
         let synthesis = try await reasoningEngine.synthesize(outputs, instruction: originalInstruction)
@@ -505,7 +506,7 @@ struct EmptyDeepTool: DeepTool {
     let description = "Placeholder tool"
     let capabilities: [String] = []
 
-    func execute(input: String, context: TaskContext, previousResults: [SubtaskResult]) async throws -> String {
+    func execute(input _: String, context _: TaskContext, previousResults _: [SubtaskResult]) async throws -> String {
         ""
     }
 }
@@ -539,7 +540,7 @@ final class ToolRegistry {
         registeredTools.append(tool)
     }
 
-    func selectTools(for task: String) async -> [DeepTool] {
+    func selectTools(for _: String) async -> [DeepTool] {
         // Use AI to select optimal tools
         // For now, return empty tool
         [EmptyDeepTool()]

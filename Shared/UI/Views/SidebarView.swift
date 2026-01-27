@@ -44,9 +44,9 @@ struct SidebarView: View {
 
     private var filteredConversations: [Conversation] {
         if searchText.isEmpty {
-            return conversations.filter { !$0.isPinned }
+            conversations.filter { !$0.isPinned }
         } else {
-            return conversations.filter { !$0.isPinned && $0.title.localizedCaseInsensitiveContains(searchText) }
+            conversations.filter { !$0.isPinned && $0.title.localizedCaseInsensitiveContains(searchText) }
         }
     }
 

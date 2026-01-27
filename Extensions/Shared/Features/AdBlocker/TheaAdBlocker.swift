@@ -2,9 +2,9 @@
 // Advanced ad blocking and tracker prevention
 // Features: filter lists, element hiding, network blocking, anti-anti-adblock
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Ad Blocker Manager
 
@@ -129,7 +129,8 @@ public final class TheaAdBlockerManager: ObservableObject {
 
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "adBlocker.settings"),
-           let loaded = try? JSONDecoder().decode(AdBlockerSettings.self, from: data) {
+           let loaded = try? JSONDecoder().decode(AdBlockerSettings.self, from: data)
+        {
             settings = loaded
             isEnabled = settings.enabled
         }
@@ -144,7 +145,8 @@ public final class TheaAdBlockerManager: ObservableObject {
 
     private func loadFilterLists() {
         if let data = UserDefaults.standard.data(forKey: "adBlocker.filterLists"),
-           let loaded = try? JSONDecoder().decode([FilterList].self, from: data) {
+           let loaded = try? JSONDecoder().decode([FilterList].self, from: data)
+        {
             filterLists = loaded
         } else {
             filterLists = Self.defaultFilterLists
@@ -169,7 +171,8 @@ public final class TheaAdBlockerManager: ObservableObject {
 
     private func loadStats() {
         if let data = UserDefaults.standard.data(forKey: "adBlocker.stats"),
-           let loaded = try? JSONDecoder().decode(AdBlockerStats.self, from: data) {
+           let loaded = try? JSONDecoder().decode(AdBlockerStats.self, from: data)
+        {
             stats = loaded
         }
     }
@@ -262,13 +265,13 @@ public final class TheaAdBlockerManager: ObservableObject {
 
     /// Get cosmetic selectors for hiding elements
     public func getCosmeticSelectors(for domain: String) -> [String] {
-        guard isEnabled && !isWhitelisted(domain) else {
+        guard isEnabled, !isWhitelisted(domain) else {
             return []
         }
 
         return cosmeticRules
             .filter { $0.appliesTo(domain: domain) }
-            .map { $0.selector }
+            .map(\.selector)
     }
 
     /// Get CSS for element hiding
@@ -421,7 +424,7 @@ public final class TheaAdBlockerManager: ObservableObject {
 
     /// Get blocking statistics
     public func getBlockingStats() -> AdBlockerStats {
-        return stats
+        stats
     }
 
     /// Reset statistics
@@ -552,7 +555,7 @@ public final class TheaAdBlockerManager: ObservableObject {
     }
 
     private func compileCosmeticRule(_ rule: ParsedRule) -> CosmeticRule? {
-        return CosmeticRule(
+        CosmeticRule(
             selector: rule.pattern,
             domains: rule.domains?.components(separatedBy: ","),
             excludedDomains: nil,
@@ -567,7 +570,8 @@ public final class TheaAdBlockerManager: ObservableObject {
 
     private func loadFilterRules(for listId: String) -> [ParsedRule]? {
         guard let data = UserDefaults.standard.data(forKey: "adBlocker.rules.\(listId)"),
-              let rules = try? JSONDecoder().decode([ParsedRule].self, from: data) else {
+              let rules = try? JSONDecoder().decode([ParsedRule].self, from: data)
+        else {
             return nil
         }
         return rules
@@ -720,7 +724,7 @@ struct CosmeticRule {
 
     func appliesTo(domain: String) -> Bool {
         // If no domains specified, applies to all
-        guard let domains = domains, !domains.isEmpty else {
+        guard let domains, !domains.isEmpty else {
             return true
         }
 
@@ -765,11 +769,11 @@ public enum AdBlockerError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .filterListNotFound:
-            return "Filter list not found"
+            "Filter list not found"
         case .invalidFilterList:
-            return "Invalid filter list format"
-        case .updateFailed(let reason):
-            return "Update failed: \(reason)"
+            "Invalid filter list format"
+        case let .updateFailed(reason):
+            "Update failed: \(reason)"
         }
     }
 }

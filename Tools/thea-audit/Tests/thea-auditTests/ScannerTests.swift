@@ -1,11 +1,10 @@
 // ScannerTests.swift
 // Tests for security scanners
 
-import XCTest
 @testable import thea_audit
+import XCTest
 
 final class ScannerTests: XCTestCase {
-
     // MARK: - Finding Model Tests
 
     func testFindingCreation() {

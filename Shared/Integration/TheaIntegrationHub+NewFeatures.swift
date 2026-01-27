@@ -1,14 +1,20 @@
 // TheaIntegrationHub+NewFeatures.swift
 // Integration of all new features into TheaIntegrationHub
 
+import Combine
 import Foundation
 import OSLog
-import Combine
+#if canImport(UserNotifications)
+    import UserNotifications
+#endif
+
+// MARK: - Private Logger
+
+private let logger = Logger(subsystem: "com.thea.app", category: "IntegrationHub")
 
 // MARK: - New Feature Integration
 
 extension TheaIntegrationHub {
-
     /// Initialize all new feature managers
     public func initializeNewFeatures() async {
         logger.info("Initializing new feature integrations...")
@@ -57,9 +63,9 @@ extension TheaIntegrationHub {
 
             // App Clips (iOS)
             #if os(iOS)
-            group.addTask { @MainActor in
-                _ = AppClipManager.shared
-            }
+                group.addTask { @MainActor in
+                    _ = AppClipManager.shared
+                }
             #endif
 
             // Self Evolution
@@ -79,9 +85,9 @@ extension TheaIntegrationHub {
 
             // Window Manager (macOS)
             #if os(macOS)
-            group.addTask { @MainActor in
-                _ = WindowManager.shared
-            }
+                group.addTask { @MainActor in
+                    _ = WindowManager.shared
+                }
             #endif
 
             // Global Quick Prompt
@@ -94,16 +100,18 @@ extension TheaIntegrationHub {
                 _ = SpotlightIntegration.shared
             }
 
-            // Handoff
-            group.addTask { @MainActor in
-                _ = HandoffManager.shared
-            }
+            // Handoff (macOS only)
+            #if os(macOS)
+                group.addTask { @MainActor in
+                    _ = HandoffManager.shared
+                }
+            #endif
 
             // Live Activities (iOS)
             #if os(iOS)
-            group.addTask { @MainActor in
-                _ = LiveActivityManager.shared
-            }
+                group.addTask { @MainActor in
+                    _ = LiveActivityManager.shared
+                }
             #endif
 
             // Notifications
@@ -167,9 +175,11 @@ extension TheaIntegrationHub {
             queue: .main
         ) { notification in
             if let id = notification.userInfo?["conversationId"] as? String {
-                AnalyticsManager.shared.track("conversation_created", properties: [
-                    "conversationId": id
-                ])
+                Task { @MainActor in
+                    AnalyticsManager.shared.track("conversation_created", properties: [
+                        "conversationId": id
+                    ])
+                }
             }
         }
 
@@ -180,9 +190,11 @@ extension TheaIntegrationHub {
             queue: .main
         ) { notification in
             if let name = notification.userInfo?["agentName"] as? String {
-                AnalyticsManager.shared.track("agent_started", properties: [
-                    "agentName": name
-                ])
+                Task { @MainActor in
+                    AnalyticsManager.shared.track("agent_started", properties: [
+                        "agentName": name
+                    ])
+                }
             }
         }
 
@@ -191,8 +203,10 @@ extension TheaIntegrationHub {
             forName: .missionCompleted,
             object: nil,
             queue: .main
-        ) { notification in
-            AnalyticsManager.shared.track("mission_completed")
+        ) { _ in
+            Task { @MainActor in
+                AnalyticsManager.shared.track("mission_completed")
+            }
         }
     }
 
@@ -210,24 +224,24 @@ extension TheaIntegrationHub {
 
             Task { @MainActor in
                 switch result {
-                case .reply(let conversationId, let text):
+                case let .reply(conversationId, text):
                     // Handle reply
                     self.handleNotificationReply(conversationId: conversationId, text: text)
 
-                case .openConversation(let id):
-                    DeepLinkRouter.shared.navigate(to: "/conversation/\(id)")
+                case let .openConversation(id):
+                    _ = await DeepLinkRouter.shared.navigate(to: "/conversation/\(id)")
 
-                case .openAgent(let id):
-                    DeepLinkRouter.shared.navigate(to: "/agent/\(id)")
+                case let .openAgent(id):
+                    _ = await DeepLinkRouter.shared.navigate(to: "/agent/\(id)")
 
-                case .openMission(let id):
-                    DeepLinkRouter.shared.navigate(to: "/mission/\(id)")
+                case let .openMission(id):
+                    _ = await DeepLinkRouter.shared.navigate(to: "/mission/\(id)")
 
-                case .stopAgent(let id):
+                case .stopAgent:
                     // Stop the agent
                     break
 
-                case .stopMission(let id):
+                case .stopMission:
                     MissionOrchestrator.shared.cancelMission()
 
                 default:
@@ -237,7 +251,7 @@ extension TheaIntegrationHub {
         }
     }
 
-    private func handleNotificationReply(conversationId: String, text: String) {
+    private func handleNotificationReply(conversationId _: String, text _: String) {
         // Process the reply
         Task {
             // Add message to conversation
@@ -271,28 +285,32 @@ extension TheaIntegrationHub {
 
         DeepLinkRouter.shared.register("/backup/restore") { _ async in
             // Open backup restore UI
-            return true
+            true
         }
     }
 
     private func setupHandoffIntegration() {
-        // Start handoff for active conversations
-        NotificationCenter.default.addObserver(
-            forName: .conversationBecameActive,
-            object: nil,
-            queue: .main
-        ) { notification in
-            guard let id = notification.userInfo?["conversationId"] as? String,
-                  let title = notification.userInfo?["title"] as? String else { return }
+        #if os(macOS)
+            // Start handoff for active conversations
+            NotificationCenter.default.addObserver(
+                forName: .conversationBecameActive,
+                object: nil,
+                queue: .main
+            ) { notification in
+                guard let id = notification.userInfo?["conversationId"] as? String,
+                      let title = notification.userInfo?["title"] as? String else { return }
 
-            Task { @MainActor in
-                _ = HandoffManager.shared.startConversationActivity(
-                    conversationId: id,
-                    title: title,
-                    preview: notification.userInfo?["preview"] as? String
-                )
+                // Extract preview value before crossing async boundary
+                let preview = (notification.userInfo?["preview"] as? String) ?? ""
+                Task { @MainActor in
+                    HandoffManager.shared.startConversationActivity(
+                        conversationId: id,
+                        title: title,
+                        preview: preview
+                    )
+                }
             }
-        }
+        #endif
     }
 
     private func setupAccessibilityIntegration() {
@@ -302,10 +320,15 @@ extension TheaIntegrationHub {
             object: nil,
             queue: .main
         ) { notification in
-            if AccessibilityManager.shared.isVoiceOverRunning,
-               AccessibilityManager.shared.settings.autoReadResponses {
-                if let response = notification.userInfo?["response"] as? String {
-                    AccessibilityManager.shared.announce("AI responded: \(response.prefix(200))")
+            // Extract response before entering Task to avoid data race
+            let response = notification.userInfo?["response"] as? String
+            Task { @MainActor in
+                if AccessibilityManager.shared.isVoiceOverRunning,
+                   AccessibilityManager.shared.settings.autoReadResponses
+                {
+                    if let response {
+                        AccessibilityManager.shared.announce("AI responded: \(response.prefix(200))")
+                    }
                 }
             }
         }
@@ -333,33 +356,33 @@ extension TheaIntegrationHub {
 
         // Import migrated data from App Clip
         #if os(iOS)
-        if let data = AppClipManager.shared.importMigratedData() {
-            // Process migrated data
-            handleMigratedAppClipData(data)
-        }
+            if let data = AppClipManager.shared.importMigratedData() {
+                // Process migrated data
+                handleMigratedAppClipData(data)
+            }
         #endif
     }
 
     #if os(iOS)
-    private func handleMigratedAppClipData(_ data: AppClipData) {
-        // Import conversations
-        for conversationData in data.conversations {
-            // Create conversation from data
-        }
+        private func handleMigratedAppClipData(_ data: AppClipData) {
+            // Import conversations
+            for _ in data.conversations {
+                // Create conversation from data - implementation pending
+            }
 
-        // Apply preferences
-        // ...
-    }
+            // Apply preferences
+            // ...
+        }
     #endif
 
     /// Handle URL opening
     public func handleURL(_ url: URL) -> Bool {
         // Check for App Clip invocation
         #if os(iOS)
-        if url.scheme == "https" && url.host?.contains("appclip") == true {
-            AppClipManager.shared.handleInvocation(url: url)
-            return true
-        }
+            if url.scheme == "https", url.host?.contains("appclip") == true {
+                AppClipManager.shared.handleInvocation(url: url)
+                return true
+            }
         #endif
 
         // Handle deep links
@@ -372,11 +395,13 @@ extension TheaIntegrationHub {
 
     /// Handle user activity (Handoff, Spotlight, etc.)
     public func handleUserActivity(_ activity: NSUserActivity) -> Bool {
-        // Handoff
-        if let result = HandoffManager.shared.handleIncomingActivity(activity) {
-            handleHandoffResult(result)
-            return true
-        }
+        #if os(macOS)
+            // Handoff
+            if HandoffManager.shared.handleIncomingActivity(activity) {
+                // Handoff was handled
+                return true
+            }
+        #endif
 
         // Spotlight
         if let conversationId = SpotlightIntegration.shared.handleSpotlightActivity(activity) {
@@ -388,33 +413,6 @@ extension TheaIntegrationHub {
 
         return false
     }
-
-    private func handleHandoffResult(_ result: HandoffResult) {
-        switch result.type {
-        case .conversation:
-            if let id = result.data["conversationId"] as? String {
-                Task {
-                    _ = await DeepLinkRouter.shared.navigate(to: "/conversation/\(id)")
-                }
-            }
-
-        case .composing:
-            if let draft = result.data["draftText"] as? String {
-                GlobalQuickPromptManager.shared.promptText = draft
-                GlobalQuickPromptManager.shared.show()
-            }
-
-        case .agent:
-            if let id = result.data["agentId"] as? String {
-                Task {
-                    _ = await DeepLinkRouter.shared.navigate(to: "/agent/\(id)")
-                }
-            }
-
-        default:
-            break
-        }
-    }
 }
 
 // MARK: - Additional Notifications
@@ -423,7 +421,7 @@ public extension Notification.Name {
     static let conversationCreated = Notification.Name("thea.conversation.created")
     static let conversationBecameActive = Notification.Name("thea.conversation.becameActive")
     static let agentStarted = Notification.Name("thea.agent.started")
-    static let missionCompleted = Notification.Name("thea.mission.completed")
+    // missionCompleted defined in MissionOrchestrator.swift
     static let aiResponseReceived = Notification.Name("thea.ai.responseReceived")
     static let openSettingsSection = Notification.Name("thea.settings.openSection")
 }

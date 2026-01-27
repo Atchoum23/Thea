@@ -5,15 +5,15 @@
 //  Universal Links, Handoff, and Continuity Camera support
 //
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Continuity Service
@@ -56,7 +56,7 @@ public class ContinuityService: ObservableObject {
     private func setupHandoff() {
         // Register activity types
         #if os(iOS)
-        UIApplication.shared.registerForRemoteNotifications()
+            UIApplication.shared.registerForRemoteNotifications()
         #endif
     }
 
@@ -72,20 +72,22 @@ public class ContinuityService: ObservableObject {
         activity.userInfo = userInfo as [AnyHashable: Any]
         activity.isEligibleForHandoff = true
         activity.isEligibleForSearch = true
-        activity.isEligibleForPrediction = true
+        #if os(iOS)
+            activity.isEligibleForPrediction = true
+        #endif
 
         // Add content attributes for Spotlight
         activity.contentAttributeSet = createAttributeSet(title: title, type: type)
 
         // Set webpage URL for universal links
-        if let webpageURL = webpageURL {
+        if let webpageURL {
             activity.webpageURL = webpageURL
         } else {
             activity.webpageURL = createUniversalLink(for: type, userInfo: userInfo)
         }
 
         // Required keys for Handoff
-        activity.requiredUserInfoKeys = Set(userInfo.keys.compactMap { $0 as? String })
+        activity.requiredUserInfoKeys = Set(userInfo.keys)
 
         activity.becomeCurrent()
         activeActivity = activity
@@ -172,10 +174,10 @@ public class ContinuityService: ObservableObject {
             let id = String(path.dropFirst("/conversation/".count))
             return .conversation(id: id)
         } else if path == "/project" {
-            let projectPath = queryItems.first(where: { $0.name == "path" })?.value ?? ""
+            let projectPath = queryItems.first { $0.name == "path" }?.value ?? ""
             return .project(path: projectPath)
         } else if path == "/ask" {
-            let question = queryItems.first(where: { $0.name == "q" })?.value ?? ""
+            let question = queryItems.first { $0.name == "q" }?.value ?? ""
             return .question(text: question)
         } else if path.hasPrefix("/knowledge/") {
             let id = String(path.dropFirst("/knowledge/".count))
@@ -183,7 +185,7 @@ public class ContinuityService: ObservableObject {
         } else if path == "/code" {
             return .codeGeneration(context: "")
         } else if path == "/focus" {
-            let duration = Int(queryItems.first(where: { $0.name == "duration" })?.value ?? "25") ?? 25
+            let duration = Int(queryItems.first { $0.name == "duration" }?.value ?? "25") ?? 25
             return .focusSession(duration: duration)
         }
 
@@ -193,50 +195,50 @@ public class ContinuityService: ObservableObject {
     // MARK: - Continuity Camera
 
     #if os(macOS)
-    /// Configure Continuity Camera for document scanning
-    public func configureContinuityCamera(for view: NSView) {
-        // Continuity Camera menu integration
-    }
-
-    /// Insert scanned document
-    public func handleScannedDocument(_ data: Data, type: ContinuityScanType) async -> ContinuityScanResult {
-        switch type {
-        case .document:
-            return await processDocumentScan(data)
-        case .photo:
-            return await processPhotoScan(data)
-        case .sketch:
-            return await processSketchScan(data)
+        /// Configure Continuity Camera for document scanning
+        public func configureContinuityCamera(for _: NSView) {
+            // Continuity Camera menu integration
         }
-    }
 
-    private func processDocumentScan(_ data: Data) async -> ContinuityScanResult {
-        // OCR processing for documents
-        return ContinuityScanResult(
-            type: .document,
-            imageData: data,
-            extractedText: nil,
-            confidence: 0
-        )
-    }
+        /// Insert scanned document
+        public func handleScannedDocument(_ data: Data, type: ContinuityScanType) async -> ContinuityScanResult {
+            switch type {
+            case .document:
+                await processDocumentScan(data)
+            case .photo:
+                await processPhotoScan(data)
+            case .sketch:
+                await processSketchScan(data)
+            }
+        }
 
-    private func processPhotoScan(_ data: Data) async -> ContinuityScanResult {
-        return ContinuityScanResult(
-            type: .photo,
-            imageData: data,
-            extractedText: nil,
-            confidence: 0
-        )
-    }
+        private func processDocumentScan(_ data: Data) async -> ContinuityScanResult {
+            // OCR processing for documents
+            ContinuityScanResult(
+                type: .document,
+                imageData: data,
+                extractedText: nil,
+                confidence: 0
+            )
+        }
 
-    private func processSketchScan(_ data: Data) async -> ContinuityScanResult {
-        return ContinuityScanResult(
-            type: .sketch,
-            imageData: data,
-            extractedText: nil,
-            confidence: 0
-        )
-    }
+        private func processPhotoScan(_ data: Data) async -> ContinuityScanResult {
+            ContinuityScanResult(
+                type: .photo,
+                imageData: data,
+                extractedText: nil,
+                confidence: 0
+            )
+        }
+
+        private func processSketchScan(_ data: Data) async -> ContinuityScanResult {
+            ContinuityScanResult(
+                type: .sketch,
+                imageData: data,
+                extractedText: nil,
+                confidence: 0
+            )
+        }
     #endif
 
     // MARK: - Helper Methods

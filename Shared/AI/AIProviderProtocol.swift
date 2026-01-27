@@ -62,7 +62,7 @@ struct ProviderCapabilities: Codable, Sendable {
         supportsFunctionCalling: Bool = false,
         supportsWebSearch: Bool = false,
         maxContextTokens: Int = 128_000,
-        maxOutputTokens: Int = 4_096,
+        maxOutputTokens: Int = 4096,
         supportedModalities: [Modality] = [.text]
     ) {
         self.supportsStreaming = supportsStreaming
@@ -98,6 +98,7 @@ struct ChatResponse: Sendable {
         case complete(AIMessage) // Final message
         case error(Error)
     }
+
     let type: ResponseType
 
     static func delta(_ text: String) -> ChatResponse {

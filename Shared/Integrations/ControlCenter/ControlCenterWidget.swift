@@ -4,7 +4,10 @@
 import Foundation
 import OSLog
 #if canImport(WidgetKit)
-import WidgetKit
+    import WidgetKit
+#endif
+#if canImport(UIKit)
+    import UIKit
 #endif
 
 // MARK: - Control Center Widget Manager
@@ -138,7 +141,7 @@ public final class ControlCenterWidgetManager: ObservableObject {
     private func handleVoiceMode(_ action: ControlCenterAction) async {
         if action.isEnabled {
             // Stop voice mode
-            await SpeechIntelligence.shared.stopRecognition()
+            SpeechIntelligence.shared.stopRecognition()
             toggleAction(action.id)
         } else {
             // Start voice mode
@@ -155,10 +158,23 @@ public final class ControlCenterWidgetManager: ObservableObject {
         widgetState = .processing
 
         // Get clipboard content
-        guard let text = UniversalClipboardManager.shared.getText() else {
-            widgetState = .idle
-            return
-        }
+        #if os(macOS)
+            guard let text = UniversalClipboardManager.shared.getText() else {
+                widgetState = .idle
+                return
+            }
+        #elseif os(iOS)
+            guard let text = UIPasteboard.general.string else {
+                widgetState = .idle
+                return
+            }
+        #else
+            let text: String? = nil
+            guard text != nil else {
+                widgetState = .idle
+                return
+            }
+        #endif
 
         // Send to AI
         NotificationCenter.default.post(
@@ -174,11 +190,11 @@ public final class ControlCenterWidgetManager: ObservableObject {
         widgetState = .processing
 
         #if os(macOS)
-        // Trigger screen capture
-        NotificationCenter.default.post(name: .controlCenterScreenCapture, object: nil)
+            // Trigger screen capture
+            NotificationCenter.default.post(name: .controlCenterScreenCapture, object: nil)
         #elseif os(iOS)
-        // Use screenshot API
-        NotificationCenter.default.post(name: .controlCenterScreenCapture, object: nil)
+            // Use screenshot API
+            NotificationCenter.default.post(name: .controlCenterScreenCapture, object: nil)
         #endif
 
         widgetState = .idle
@@ -217,7 +233,7 @@ public final class ControlCenterWidgetManager: ObservableObject {
 
     private func getLastConversationPreview() -> String? {
         // Return last conversation preview
-        return UserDefaults.standard.string(forKey: "lastConversationPreview")
+        UserDefaults.standard.string(forKey: "lastConversationPreview")
     }
 
     private func getAIStatus() -> AIStatus {
@@ -240,7 +256,8 @@ public final class ControlCenterWidgetManager: ObservableObject {
 
     private func loadActionStates() {
         guard let data = UserDefaults.standard.data(forKey: "controlCenter.actionStates"),
-              let states = try? JSONDecoder().decode([String: Bool].self, from: data) else {
+              let states = try? JSONDecoder().decode([String: Bool].self, from: data)
+        else {
             return
         }
 
@@ -255,7 +272,7 @@ public final class ControlCenterWidgetManager: ObservableObject {
 
     private func reloadWidgets() {
         #if canImport(WidgetKit)
-        WidgetCenter.shared.reloadTimelines(ofKind: "TheaControlCenterWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: "TheaControlCenterWidget")
         #endif
     }
 }
@@ -281,7 +298,7 @@ public struct ControlCenterWidgetData {
     public let aiStatus: AIStatus
 }
 
-public enum WidgetState {
+public enum WidgetState: Equatable {
     case idle
     case processing
     case error(String)
@@ -305,94 +322,61 @@ public extension Notification.Name {
 // MARK: - Widget Intent Configuration
 
 #if canImport(AppIntents)
-import AppIntents
+    import AppIntents
 
-@available(iOS 16.0, macOS 13.0, *)
-public struct QuickAskIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Ask Thea"
-    public static var description = IntentDescription("Quickly ask Thea a question")
+    @available(iOS 16.0, macOS 13.0, *)
+    public struct QuickAskIntent: AppIntent {
+        nonisolated(unsafe) public static var title: LocalizedStringResource = "Ask Thea"
+        nonisolated(unsafe) public static var description = IntentDescription("Quickly ask Thea a question")
 
-    @Parameter(title: "Question")
-    public var question: String?
+        @Parameter(title: "Question")
+        public var question: String?
 
-    public init() {}
+        public init() {}
 
-    public init(question: String) {
-        self.question = question
-    }
-
-    public func perform() async throws -> some IntentResult {
-        if let question = question {
-            // Process the question
-            NotificationCenter.default.post(
-                name: .controlCenterQuickAsk,
-                object: nil,
-                userInfo: ["question": question]
-            )
+        public init(question: String) {
+            self.question = question
         }
-        return .result()
+
+        public func perform() async throws -> some IntentResult {
+            if let question {
+                // Process the question
+                NotificationCenter.default.post(
+                    name: .controlCenterQuickAsk,
+                    object: nil,
+                    userInfo: ["question": question]
+                )
+            }
+            return .result()
+        }
     }
-}
 
-@available(iOS 16.0, macOS 13.0, *)
-public struct ToggleVoiceModeIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Toggle Voice Mode"
-    public static var description = IntentDescription("Enable or disable voice interaction")
+    @available(iOS 16.0, macOS 13.0, *)
+    public struct ToggleVoiceModeIntent: AppIntent {
+        nonisolated(unsafe) public static var title: LocalizedStringResource = "Toggle Voice Mode"
+        nonisolated(unsafe) public static var description = IntentDescription("Enable or disable voice interaction")
 
-    public init() {}
+        public init() {}
 
-    public func perform() async throws -> some IntentResult {
-        await ControlCenterWidgetManager.shared.executeAction("voice-mode")
-        return .result()
+        public func perform() async throws -> some IntentResult {
+            await ControlCenterWidgetManager.shared.executeAction("voice-mode")
+            return .result()
+        }
     }
-}
 
-@available(iOS 16.0, macOS 13.0, *)
-public struct AnalyzeClipboardIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Analyze Clipboard"
-    public static var description = IntentDescription("Have AI analyze clipboard contents")
+    @available(iOS 16.0, macOS 13.0, *)
+    public struct AnalyzeClipboardIntent: AppIntent {
+        nonisolated(unsafe) public static var title: LocalizedStringResource = "Analyze Clipboard"
+        nonisolated(unsafe) public static var description = IntentDescription("Have AI analyze clipboard contents")
 
-    public init() {}
+        public init() {}
 
-    public func perform() async throws -> some IntentResult {
-        await ControlCenterWidgetManager.shared.executeAction("clipboard-ai")
-        return .result()
+        public func perform() async throws -> some IntentResult {
+            await ControlCenterWidgetManager.shared.executeAction("clipboard-ai")
+            return .result()
+        }
     }
-}
 
-@available(iOS 16.0, macOS 13.0, *)
-public struct TheaShortcuts: AppShortcutsProvider {
-    public static var appShortcuts: [AppShortcut] {
-        AppShortcut(
-            intent: QuickAskIntent(),
-            phrases: [
-                "Ask \(.applicationName)",
-                "Quick question for \(.applicationName)",
-                "Hey \(.applicationName)"
-            ],
-            shortTitle: "Ask Thea",
-            systemImageName: "sparkles"
-        )
+    // MARK: - Control Center Shortcuts (Intents only - shortcuts registered in TheaAppIntents.swift)
 
-        AppShortcut(
-            intent: ToggleVoiceModeIntent(),
-            phrases: [
-                "Start voice mode in \(.applicationName)",
-                "Talk to \(.applicationName)"
-            ],
-            shortTitle: "Voice Mode",
-            systemImageName: "mic.fill"
-        )
-
-        AppShortcut(
-            intent: AnalyzeClipboardIntent(),
-            phrases: [
-                "Analyze clipboard with \(.applicationName)",
-                "What's on my clipboard \(.applicationName)"
-            ],
-            shortTitle: "Analyze Clipboard",
-            systemImageName: "doc.on.clipboard"
-        )
-    }
-}
 #endif

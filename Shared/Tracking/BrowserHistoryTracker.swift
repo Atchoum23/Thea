@@ -3,6 +3,7 @@ import Observation
 @preconcurrency import SwiftData
 
 // MARK: - Browser History Tracker
+
 // Tracks browsing activity for context-aware assistance
 
 @MainActor
@@ -22,7 +23,7 @@ final class BrowserHistoryTracker {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
 
     // MARK: - Tracking Control
@@ -47,7 +48,7 @@ final class BrowserHistoryTracker {
 
     // MARK: - Page Visit Tracking
 
-    func trackPageVisit(url: URL, title: String?, content: String?) {
+    func trackPageVisit(url: URL, title: String?, content _: String?) {
         guard isTracking else { return }
 
         let visit = PageVisit(

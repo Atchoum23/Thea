@@ -18,11 +18,11 @@ public actor CareerGoalTracker {
         public var errorDescription: String? {
             switch self {
             case .goalNotFound:
-                return "Career goal not found"
+                "Career goal not found"
             case .invalidData:
-                return "Invalid goal data provided"
+                "Invalid goal data provided"
             case .milestoneNotFound:
-                return "Milestone not found"
+                "Milestone not found"
             }
         }
     }
@@ -118,7 +118,7 @@ public actor CareerGoalTracker {
         let goalReflections = reflections[goalID] ?? []
         let sorted = goalReflections.sorted { $0.date > $1.date }
 
-        if let limit = limit {
+        if let limit {
             return Array(sorted.prefix(limit))
         }
         return sorted
@@ -134,7 +134,7 @@ public actor CareerGoalTracker {
         let goalMilestones = milestones[goalID] ?? []
         guard !goalMilestones.isEmpty else { return }
 
-        let completedCount = goalMilestones.filter { $0.isCompleted }.count
+        let completedCount = goalMilestones.count { $0.isCompleted }
         let progress = Double(completedCount) / Double(goalMilestones.count)
 
         goals[index].progress = progress
@@ -151,7 +151,7 @@ public actor CareerGoalTracker {
         let goalMilestones = await getMilestones(for: goalID)
         let goalReflections = await getReflections(for: goalID)
 
-        let completedMilestones = goalMilestones.filter { $0.isCompleted }.count
+        let completedMilestones = goalMilestones.count { $0.isCompleted }
         let totalMilestones = goalMilestones.count
 
         let daysSinceStart = Calendar.current.dateComponents([.day], from: goal.startDate, to: Date()).day ?? 0
@@ -166,7 +166,7 @@ public actor CareerGoalTracker {
             currentProgress: goal.progress,
             daysSinceStart: daysSinceStart,
             daysToDeadline: daysToDeadline,
-            recentReflections: goalReflections.prefix(5).map { $0 },
+            recentReflections: goalReflections.prefix(5).map(\.self),
             momentum: calculateMomentum(goalReflections)
         )
     }
@@ -177,9 +177,9 @@ public actor CareerGoalTracker {
         guard reflections.count >= 3 else { return "Insufficient data" }
 
         let recentReflections = reflections.prefix(7)
-        let positiveCount = recentReflections.filter {
+        let positiveCount = recentReflections.count {
             $0.mood == .motivated || $0.mood == .accomplished
-        }.count
+        }
 
         let percentage = Double(positiveCount) / Double(recentReflections.count)
 
@@ -190,13 +190,13 @@ public actor CareerGoalTracker {
 
     public func getOverallStatistics() async -> CareerStatistics {
         let totalGoals = goals.count
-        let activeGoals = goals.filter { $0.status == .inProgress }.count
-        let completedGoals = goals.filter { $0.status == .completed }.count
+        let activeGoals = goals.count { $0.status == .inProgress }
+        let completedGoals = goals.count { $0.status == .completed }
 
-        let allMilestones = milestones.values.flatMap { $0 }
-        let completedMilestones = allMilestones.filter { $0.isCompleted }.count
+        let allMilestones = milestones.values.flatMap(\.self)
+        let completedMilestones = allMilestones.count { $0.isCompleted }
 
-        let allReflections = reflections.values.flatMap { $0 }
+        let allReflections = reflections.values.flatMap(\.self)
         let reflectionStreak = calculateReflectionStreak(allReflections)
 
         let goalsByCategory = Dictionary(grouping: goals) { $0.category }
@@ -288,14 +288,14 @@ public enum CareerGoalCategory: String, Sendable, Codable, CaseIterable {
 
     public var icon: String {
         switch self {
-        case .skillDevelopment: return "brain.head.profile"
-        case .certification: return "rosette"
-        case .promotion: return "arrow.up.right.circle"
-        case .networking: return "person.3"
-        case .projectCompletion: return "checkmark.circle"
-        case .careerChange: return "arrow.triangle.2.circlepath"
-        case .leadership: return "crown"
-        case .other: return "star"
+        case .skillDevelopment: "brain.head.profile"
+        case .certification: "rosette"
+        case .promotion: "arrow.up.right.circle"
+        case .networking: "person.3"
+        case .projectCompletion: "checkmark.circle"
+        case .careerChange: "arrow.triangle.2.circlepath"
+        case .leadership: "crown"
+        case .other: "star"
         }
     }
 }

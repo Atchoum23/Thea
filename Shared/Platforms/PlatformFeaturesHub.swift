@@ -3,6 +3,9 @@
 
 import Foundation
 import OSLog
+#if canImport(UIKit)
+    import UIKit
+#endif
 
 // MARK: - Platform Features Hub
 
@@ -30,21 +33,21 @@ public final class PlatformFeaturesHub: ObservableObject {
 
     private func detectPlatform() {
         #if os(macOS)
-        currentPlatform = .macOS
+            currentPlatform = .macOS
         #elseif os(iOS)
-        #if targetEnvironment(macCatalyst)
-        currentPlatform = .macCatalyst
-        #else
-        currentPlatform = UIDevice.current.userInterfaceIdiom == .pad ? .iPadOS : .iOS
-        #endif
+            #if targetEnvironment(macCatalyst)
+                currentPlatform = .macCatalyst
+            #else
+                currentPlatform = UIDevice.current.userInterfaceIdiom == .pad ? .iPadOS : .iOS
+            #endif
         #elseif os(watchOS)
-        currentPlatform = .watchOS
+            currentPlatform = .watchOS
         #elseif os(tvOS)
-        currentPlatform = .tvOS
+            currentPlatform = .tvOS
         #elseif os(visionOS)
-        currentPlatform = .visionOS
+            currentPlatform = .visionOS
         #else
-        currentPlatform = .unknown
+            currentPlatform = .unknown
         #endif
 
         logger.info("Detected platform: \(self.currentPlatform.rawValue)")
@@ -159,13 +162,13 @@ public final class PlatformFeaturesHub: ObservableObject {
         logger.info("Initializing platform features for \(self.currentPlatform.rawValue)")
 
         #if os(macOS)
-        await initializeMacOSFeatures()
+            await initializeMacOSFeatures()
         #elseif os(iOS)
-        await initializeiOSFeatures()
+            await initializeiOSFeatures()
         #elseif os(watchOS)
-        await initializeWatchOSFeatures()
+            await initializeWatchOSFeatures()
         #elseif os(visionOS)
-        await initializeVisionOSFeatures()
+            await initializeVisionOSFeatures()
         #endif
 
         // Common initializations
@@ -178,47 +181,43 @@ public final class PlatformFeaturesHub: ObservableObject {
     // MARK: - Platform-Specific Initialization
 
     #if os(macOS)
-    private func initializeMacOSFeatures() async {
-        // Setup menu bar
-        MenuBarManager.shared.setup()
+        private func initializeMacOSFeatures() async {
+            // Setup menu bar
+            MenuBarManager.shared.setup()
 
-        // Register global hotkeys
-        GlobalHotkeyManager.shared.registerAllHotkeys()
+            // Register global hotkeys
+            GlobalHotkeyManager.shared.registerAllHotkeys()
 
-        logger.info("macOS features initialized")
-    }
+            logger.info("macOS features initialized")
+        }
     #endif
 
     #if os(iOS)
-    private func initializeiOSFeatures() async {
-        // Setup home screen quick actions
-        HomeScreenActionsManager.shared.setupQuickActions()
+        private func initializeiOSFeatures() async {
+            // Setup home screen quick actions
+            HomeScreenActionsManager.shared.setupQuickActions()
 
-        // Donate common shortcuts to Siri
-        for action in QuickAction.allCases {
-            SiriShortcutsManager.shared.donateQuickActionShortcut(action)
+            // SiriShortcuts donation is handled lazily when actions are used
+            logger.info("iOS features initialized")
         }
-
-        logger.info("iOS features initialized")
-    }
     #endif
 
     #if os(watchOS)
-    private func initializeWatchOSFeatures() async {
-        // Update complications
-        ComplicationManager.shared.updateComplications()
+        private func initializeWatchOSFeatures() async {
+            // Update complications
+            ComplicationManager.shared.updateComplications()
 
-        logger.info("watchOS features initialized")
-    }
+            logger.info("watchOS features initialized")
+        }
     #endif
 
     #if os(visionOS)
-    private func initializeVisionOSFeatures() async {
-        // Setup spatial computing
-        // Hand tracking, etc. require explicit user permission
+        private func initializeVisionOSFeatures() async {
+            // Setup spatial computing
+            // Hand tracking, etc. require explicit user permission
 
-        logger.info("visionOS features initialized")
-    }
+            logger.info("visionOS features initialized")
+        }
     #endif
 
     private func initializeCommonFeatures() async {
@@ -227,7 +226,7 @@ public final class PlatformFeaturesHub: ObservableObject {
 
         // Setup Live Activities if available
         #if canImport(ActivityKit)
-        // Live Activity setup handled on-demand
+            // Live Activity setup handled on-demand
         #endif
     }
 
@@ -235,62 +234,62 @@ public final class PlatformFeaturesHub: ObservableObject {
 
     /// Get menu bar manager (macOS only)
     #if os(macOS)
-    public var menuBar: MenuBarManager {
-        MenuBarManager.shared
-    }
+        public var menuBar: MenuBarManager {
+            MenuBarManager.shared
+        }
 
-    public var globalHotkeys: GlobalHotkeyManager {
-        GlobalHotkeyManager.shared
-    }
+        public var globalHotkeys: GlobalHotkeyManager {
+            GlobalHotkeyManager.shared
+        }
 
-    public var finder: FinderIntegration {
-        FinderIntegration.shared
-    }
+        public var finder: FinderIntegration {
+            FinderIntegration.shared
+        }
     #endif
 
     /// Get Siri shortcuts manager (iOS/iPadOS)
     #if os(iOS)
-    public var siriShortcuts: SiriShortcutsManager {
-        SiriShortcutsManager.shared
-    }
+        public var siriShortcuts: SiriShortcutsManager {
+            SiriShortcutsManager.shared
+        }
 
-    public var homeScreenActions: HomeScreenActionsManager {
-        HomeScreenActionsManager.shared
-    }
+        public var homeScreenActions: HomeScreenActionsManager {
+            HomeScreenActionsManager.shared
+        }
 
-    public var haptics: HapticFeedbackManager {
-        HapticFeedbackManager.shared
-    }
+        public var haptics: HapticFeedbackManager {
+            HapticFeedbackManager.shared
+        }
     #endif
 
     /// Get watch-specific managers (watchOS)
     #if os(watchOS)
-    public var complications: ComplicationManager {
-        ComplicationManager.shared
-    }
+        public var complications: ComplicationManager {
+            ComplicationManager.shared
+        }
 
-    public var digitalCrown: DigitalCrownManager {
-        DigitalCrownManager.shared
-    }
+        public var digitalCrown: DigitalCrownManager {
+            DigitalCrownManager.shared
+        }
 
-    public var watchHaptics: WatchHapticManager {
-        WatchHapticManager.shared
-    }
+        public var watchHaptics: WatchHapticManager {
+            WatchHapticManager.shared
+        }
     #endif
 
     /// Get spatial computing managers (visionOS)
     #if os(visionOS)
-    public var spatialComputing: SpatialComputingManager {
-        SpatialComputingManager.shared
-    }
+        public var spatialComputing: SpatialComputingManager {
+            SpatialComputingManager.shared
+        }
 
-    public var spatialUI: SpatialUIManager {
-        SpatialUIManager.shared
-    }
+        public var spatialUI: SpatialUIManager {
+            SpatialUIManager.shared
+        }
 
-    public var spatialGestures: SpatialGestureManager {
-        SpatialGestureManager.shared
-    }
+        public var spatialGestures: SpatialGestureManager {
+            SpatialGestureManager.shared
+        }
     #endif
 
     /// Common features available on all platforms
@@ -306,9 +305,11 @@ public final class PlatformFeaturesHub: ObservableObject {
         UniversalClipboardManager.shared
     }
 
-    public var liveActivities: TheaLiveActivityManager {
-        TheaLiveActivityManager.shared
-    }
+    #if os(iOS)
+        public var liveActivities: TheaLiveActivityManager {
+            TheaLiveActivityManager.shared
+        }
+    #endif
 }
 
 // MARK: - Platform Enum
@@ -325,26 +326,26 @@ public enum Platform: String, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .macOS: return "macOS"
-        case .iOS: return "iPhone"
-        case .iPadOS: return "iPad"
-        case .watchOS: return "Apple Watch"
-        case .tvOS: return "Apple TV"
-        case .visionOS: return "Apple Vision Pro"
-        case .macCatalyst: return "Mac (Catalyst)"
-        case .unknown: return "Unknown"
+        case .macOS: "macOS"
+        case .iOS: "iPhone"
+        case .iPadOS: "iPad"
+        case .watchOS: "Apple Watch"
+        case .tvOS: "Apple TV"
+        case .visionOS: "Apple Vision Pro"
+        case .macCatalyst: "Mac (Catalyst)"
+        case .unknown: "Unknown"
         }
     }
 
     public var iconName: String {
         switch self {
-        case .macOS, .macCatalyst: return "desktopcomputer"
-        case .iOS: return "iphone"
-        case .iPadOS: return "ipad"
-        case .watchOS: return "applewatch"
-        case .tvOS: return "appletv"
-        case .visionOS: return "visionpro"
-        case .unknown: return "questionmark.circle"
+        case .macOS, .macCatalyst: "desktopcomputer"
+        case .iOS: "iphone"
+        case .iPadOS: "ipad"
+        case .watchOS: "applewatch"
+        case .tvOS: "appletv"
+        case .visionOS: "visionpro"
+        case .unknown: "questionmark.circle"
         }
     }
 }
@@ -403,41 +404,41 @@ public enum PlatformFeature: String, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .core: return "Core Features"
-        case .menuBar: return "Menu Bar"
-        case .globalHotkeys: return "Global Hotkeys"
-        case .touchBar: return "Touch Bar"
-        case .services: return "Services Menu"
-        case .finderIntegration: return "Finder Integration"
-        case .appleScript: return "AppleScript"
-        case .siriShortcuts: return "Siri Shortcuts"
-        case .homeScreenQuickActions: return "Quick Actions"
-        case .widgets: return "Widgets"
-        case .liveActivities: return "Live Activities"
-        case .shareExtension: return "Share Extension"
-        case .pencilSupport: return "Apple Pencil"
-        case .stageManager: return "Stage Manager"
-        case .spotlight: return "Spotlight Search"
-        case .handoff: return "Handoff"
-        case .universalClipboard: return "Universal Clipboard"
-        case .multiWindow: return "Multi-Window"
-        case .accessibility: return "Accessibility"
-        case .haptics: return "Haptic Feedback"
-        case .faceID: return "Face ID"
-        case .healthKit: return "Health Integration"
-        case .coreLocation: return "Location Services"
-        case .sharePlay: return "SharePlay"
-        case .complications: return "Complications"
-        case .glances: return "Glances"
-        case .digitalCrown: return "Digital Crown"
-        case .workoutKit: return "Workout Tracking"
-        case .immersiveSpaces: return "Immersive Spaces"
-        case .volumetricWindows: return "Volumetric Windows"
-        case .handTracking: return "Hand Tracking"
-        case .eyeTracking: return "Eye Tracking"
-        case .spatialAudio: return "Spatial Audio"
-        case .siriRemote: return "Siri Remote"
-        case .topShelf: return "Top Shelf"
+        case .core: "Core Features"
+        case .menuBar: "Menu Bar"
+        case .globalHotkeys: "Global Hotkeys"
+        case .touchBar: "Touch Bar"
+        case .services: "Services Menu"
+        case .finderIntegration: "Finder Integration"
+        case .appleScript: "AppleScript"
+        case .siriShortcuts: "Siri Shortcuts"
+        case .homeScreenQuickActions: "Quick Actions"
+        case .widgets: "Widgets"
+        case .liveActivities: "Live Activities"
+        case .shareExtension: "Share Extension"
+        case .pencilSupport: "Apple Pencil"
+        case .stageManager: "Stage Manager"
+        case .spotlight: "Spotlight Search"
+        case .handoff: "Handoff"
+        case .universalClipboard: "Universal Clipboard"
+        case .multiWindow: "Multi-Window"
+        case .accessibility: "Accessibility"
+        case .haptics: "Haptic Feedback"
+        case .faceID: "Face ID"
+        case .healthKit: "Health Integration"
+        case .coreLocation: "Location Services"
+        case .sharePlay: "SharePlay"
+        case .complications: "Complications"
+        case .glances: "Glances"
+        case .digitalCrown: "Digital Crown"
+        case .workoutKit: "Workout Tracking"
+        case .immersiveSpaces: "Immersive Spaces"
+        case .volumetricWindows: "Volumetric Windows"
+        case .handTracking: "Hand Tracking"
+        case .eyeTracking: "Eye Tracking"
+        case .spatialAudio: "Spatial Audio"
+        case .siriRemote: "Siri Remote"
+        case .topShelf: "Top Shelf"
         }
     }
 }

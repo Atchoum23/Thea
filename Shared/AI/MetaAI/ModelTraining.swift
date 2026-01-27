@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Custom Model Training
+
 // Fine-tuning, few-shot learning, and continual learning capabilities
 
 @MainActor
@@ -23,7 +24,7 @@ final class ModelTraining {
         provider: String,
         baseModel: String,
         trainingData: [TrainingExample],
-        validationData: [TrainingExample] = [],
+        validationData _: [TrainingExample] = [],
         config: FineTuningConfig = FineTuningConfig()
     ) async throws -> TrainingJob {
         // Validate training data
@@ -97,7 +98,7 @@ final class ModelTraining {
         }
     }
 
-    nonisolated private func submitFineTuningJob(_ job: TrainingJob) async throws -> String {
+    nonisolated private func submitFineTuningJob(_: TrainingJob) async throws -> String {
         // In production, submit to actual fine-tuning API
         // For OpenAI: POST https://api.openai.com/v1/fine_tuning/jobs
         // For Anthropic: When available
@@ -108,12 +109,12 @@ final class ModelTraining {
         return "ft-\(UUID().uuidString.prefix(8))"
     }
 
-    nonisolated private func waitForCompletion(_ job: TrainingJob, modelId: String) async throws {
+    nonisolated private func waitForCompletion(_ job: TrainingJob, modelId _: String) async throws {
         // Poll for completion (in production, query actual API)
         var completed = false
         var iterations = 0
 
-        while !completed && iterations < 100 {
+        while !completed, iterations < 100 {
             try await Task.sleep(nanoseconds: 1_000_000_000)
 
             // Simulate progress
@@ -145,7 +146,8 @@ final class ModelTraining {
             ]
 
             if let data = try? JSONSerialization.data(withJSONObject: json),
-               let jsonString = String(data: data, encoding: .utf8) {
+               let jsonString = String(data: data, encoding: .utf8)
+            {
                 lines.append(jsonString)
             }
         }
@@ -246,7 +248,7 @@ final class ModelTraining {
         var bestScore = 0.0
         var variations: [String] = []
 
-        for iteration in 0..<iterations {
+        for iteration in 0 ..< iterations {
             // Generate variations
             let variation = try await generatePromptVariation(bestPrompt, iteration: iteration)
             variations.append(variation)
@@ -271,9 +273,9 @@ final class ModelTraining {
 
     nonisolated private func generatePromptVariation(
         _ prompt: String,
-        iteration: Int
+        iteration _: Int
     ) async throws -> String {
-        let provider = await ProviderRegistry.shared.getProvider(id: await SettingsManager.shared.defaultProvider)!
+        let provider = await ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)!
 
         let optimizationPrompt = """
         Improve this prompt to be more effective. Make it more clear, specific, and actionable.
@@ -299,11 +301,11 @@ final class ModelTraining {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 result += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -320,7 +322,7 @@ final class ModelTraining {
         for testCase in testCases {
             let fullPrompt = prompt.replacingOccurrences(of: "{input}", with: testCase.input)
 
-            let provider = await ProviderRegistry.shared.getProvider(id: await SettingsManager.shared.defaultProvider)!
+            let provider = await ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)!
             let message = AIMessage(
                 id: UUID(),
                 conversationID: UUID(),
@@ -335,7 +337,7 @@ final class ModelTraining {
 
             for try await chunk in stream {
                 switch chunk.type {
-                case .delta(let text):
+                case let .delta(text):
                     response += text
                 case .complete:
                     break
@@ -368,12 +370,12 @@ final class ModelTraining {
         // Extract valuable patterns from conversation
         var examples: [TrainingExample] = []
 
-        for i in 0..<messages.count - 1 {
-            if messages[i].role == .user && messages[i + 1].role == .assistant {
+        for i in 0 ..< messages.count - 1 {
+            if messages[i].role == .user, messages[i + 1].role == .assistant {
                 let input = messages[i].content.textValue
                 let output = messages[i + 1].content.textValue
 
-                if !input.isEmpty && !output.isEmpty {
+                if !input.isEmpty, !output.isEmpty {
                     examples.append(TrainingExample(
                         input: input,
                         output: output,
@@ -649,13 +651,13 @@ enum TrainingError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .insufficientData:
-            return "Insufficient training data"
+            "Insufficient training data"
         case .templateNotFound:
-            return "Prompt template not found"
-        case .missingVariable(let variable):
-            return "Missing template variable: \(variable)"
+            "Prompt template not found"
+        case let .missingVariable(variable):
+            "Missing template variable: \(variable)"
         case .trainingFailed:
-            return "Training job failed"
+            "Training job failed"
         }
     }
 }

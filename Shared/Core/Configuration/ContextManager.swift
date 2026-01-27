@@ -41,10 +41,10 @@ public actor ContextManager {
         switch config.tokenCountingMethod {
         case .estimate:
             // Fast estimation: ~4 chars per token average
-            return Int(Double(text.count) * ConversationConfiguration.TokenCountingMethod.tokensPerChar)
+            Int(Double(text.count) * ConversationConfiguration.TokenCountingMethod.tokensPerChar)
         case .accurate:
             // More accurate: use tiktoken-style counting
-            return accurateTokenCount(text)
+            accurateTokenCount(text)
         }
     }
 
@@ -57,7 +57,7 @@ public actor ContextManager {
         let totalTokens = config.getEffectiveContextSize(for: provider)
 
         // Calculate reserved space
-        let reservedForResponse = 4_096 // Space for model's response
+        let reservedForResponse = 4096 // Space for model's response
         let reservedForMetaAI = forMetaAI ? config.metaAIReservedTokens : 0
         let availableForMessages = totalTokens - reservedForResponse - reservedForMetaAI
 
@@ -83,7 +83,7 @@ public actor ContextManager {
         forMetaAI: Bool = false
     ) async -> [TokenizedMessage] {
         let totalTokens = config.getEffectiveContextSize(for: provider)
-        let reservedForResponse = 4_096
+        let reservedForResponse = 4096
         let reservedForMetaAI = forMetaAI ? config.metaAIReservedTokens : 0
         let availableForMessages = totalTokens - reservedForResponse - reservedForMetaAI
 
@@ -115,7 +115,7 @@ public actor ContextManager {
         guard config.contextStrategy != .unlimited else { return false }
 
         let maxTokens = config.getEffectiveContextSize(for: provider)
-        let reservedForResponse = 4_096
+        let reservedForResponse = 4096
         return (currentTokens + newMessageTokens) > (maxTokens - reservedForResponse)
     }
 

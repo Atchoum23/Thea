@@ -1,9 +1,15 @@
 // QuickLauncher.swift
 // Raycast-style quick launcher with command palette and AI integration
 
+import Combine
 import Foundation
 import OSLog
-import Combine
+#if canImport(AppKit)
+    import AppKit
+#endif
+#if canImport(UIKit)
+    import UIKit
+#endif
 
 // MARK: - Quick Launcher
 
@@ -86,7 +92,7 @@ public final class QuickLauncher: ObservableObject {
         // 1. Exact command matches
         let commandMatches = registeredCommands.filter { command in
             command.title.localizedCaseInsensitiveContains(query) ||
-            command.keywords.contains { $0.localizedCaseInsensitiveContains(query) }
+                command.keywords.contains { $0.localizedCaseInsensitiveContains(query) }
         }.map { LauncherResult.command($0) }
         matchingResults.append(contentsOf: commandMatches)
 
@@ -138,23 +144,23 @@ public final class QuickLauncher: ObservableObject {
         hide()
 
         switch result {
-        case .command(let command):
+        case let .command(command):
             await executeCommand(command)
             addToRecent(command)
 
-        case .file(let url):
+        case let .file(url):
             openFile(url)
 
-        case .url(let url):
+        case let .url(url):
             openURL(url)
 
-        case .aiSuggestion(let query):
+        case let .aiSuggestion(query):
             await askAI(query)
 
-        case .calculation(_, let value):
+        case let .calculation(_, value):
             copyToClipboard(value)
 
-        case .extension(let extResult):
+        case let .extension(extResult):
             await extResult.execute()
         }
     }
@@ -165,7 +171,7 @@ public final class QuickLauncher: ObservableObject {
         logger.info("Executing command: \(command.id)")
 
         switch command.action {
-        case .navigate(let destination):
+        case let .navigate(destination):
             // Navigate to destination in app
             NotificationCenter.default.post(
                 name: .launcherNavigate,
@@ -173,19 +179,19 @@ public final class QuickLauncher: ObservableObject {
                 userInfo: ["destination": destination]
             )
 
-        case .run(let handler):
+        case let .run(handler):
             await handler()
 
-        case .openURL(let url):
+        case let .openURL(url):
             openURL(url)
 
-        case .shortcut(let name):
+        case let .shortcut(name):
             await runShortcut(name)
 
-        case .script(let script):
+        case let .script(script):
             await runScript(script)
 
-        case .aiPrompt(let prompt):
+        case let .aiPrompt(prompt):
             await askAI(prompt)
         }
     }
@@ -219,7 +225,7 @@ public final class QuickLauncher: ObservableObject {
                 subtitle: "Quick question to Thea",
                 icon: "sparkles",
                 keywords: ["ask", "question", "help"],
-                action: .run { [weak self] in
+                action: .run {
                     // Show AI input
                     NotificationCenter.default.post(name: .launcherQuickAsk, object: nil)
                 }
@@ -387,7 +393,7 @@ public final class QuickLauncher: ObservableObject {
         // Deduplicate
         var seenIds = Set<String>()
         results = results.filter { result in
-            if case .command(let cmd) = result {
+            if case let .command(cmd) = result {
                 if seenIds.contains(cmd.id) { return false }
                 seenIds.insert(cmd.id)
             }
@@ -418,7 +424,8 @@ public final class QuickLauncher: ObservableObject {
     private func loadRecentCommands() {
         // Load from UserDefaults
         if let data = UserDefaults.standard.data(forKey: "launcher.recent"),
-           let ids = try? JSONDecoder().decode([String].self, from: data) {
+           let ids = try? JSONDecoder().decode([String].self, from: data)
+        {
             recentCommands = ids.compactMap { id in
                 registeredCommands.first { $0.id == id }
             }
@@ -426,7 +433,7 @@ public final class QuickLauncher: ObservableObject {
     }
 
     private func saveRecentCommands() {
-        let ids = recentCommands.map { $0.id }
+        let ids = recentCommands.map(\.id)
         if let data = try? JSONEncoder().encode(ids) {
             UserDefaults.standard.set(data, forKey: "launcher.recent")
         }
@@ -434,7 +441,8 @@ public final class QuickLauncher: ObservableObject {
 
     private func loadPinnedCommands() {
         if let data = UserDefaults.standard.data(forKey: "launcher.pinned"),
-           let ids = try? JSONDecoder().decode([String].self, from: data) {
+           let ids = try? JSONDecoder().decode([String].self, from: data)
+        {
             pinnedCommands = ids.compactMap { id in
                 registeredCommands.first { $0.id == id }
             }
@@ -445,7 +453,7 @@ public final class QuickLauncher: ObservableObject {
     public func pin(_ command: LauncherCommand) {
         guard !pinnedCommands.contains(where: { $0.id == command.id }) else { return }
         pinnedCommands.append(command)
-        let ids = pinnedCommands.map { $0.id }
+        let ids = pinnedCommands.map(\.id)
         if let data = try? JSONEncoder().encode(ids) {
             UserDefaults.standard.set(data, forKey: "launcher.pinned")
         }
@@ -454,7 +462,7 @@ public final class QuickLauncher: ObservableObject {
     /// Unpin a command
     public func unpin(_ command: LauncherCommand) {
         pinnedCommands.removeAll { $0.id == command.id }
-        let ids = pinnedCommands.map { $0.id }
+        let ids = pinnedCommands.map(\.id)
         if let data = try? JSONEncoder().encode(ids) {
             UserDefaults.standard.set(data, forKey: "launcher.pinned")
         }
@@ -464,19 +472,19 @@ public final class QuickLauncher: ObservableObject {
 
     private func openFile(_ url: URL) {
         #if os(macOS)
-        NSWorkspace.shared.open(url)
+            NSWorkspace.shared.open(url)
         #elseif os(iOS)
-        // Handle file opening on iOS
+            // Handle file opening on iOS
         #endif
     }
 
     private func openURL(_ url: URL) {
         #if os(macOS)
-        NSWorkspace.shared.open(url)
+            NSWorkspace.shared.open(url)
         #elseif os(iOS)
-        Task { @MainActor in
-            await UIApplication.shared.open(url)
-        }
+            Task { @MainActor in
+                await UIApplication.shared.open(url)
+            }
         #endif
     }
 
@@ -485,9 +493,15 @@ public final class QuickLauncher: ObservableObject {
 
         // Replace [CLIPBOARD] placeholder
         if query.contains("[CLIPBOARD]") {
-            if let clipboard = UniversalClipboardManager.shared.getText() {
-                finalQuery = query.replacingOccurrences(of: "[CLIPBOARD]", with: clipboard)
-            }
+            #if os(macOS)
+                if let clipboard = UniversalClipboardManager.shared.getText() {
+                    finalQuery = query.replacingOccurrences(of: "[CLIPBOARD]", with: clipboard)
+                }
+            #elseif os(iOS)
+                if let clipboard = UIPasteboard.general.string {
+                    finalQuery = query.replacingOccurrences(of: "[CLIPBOARD]", with: clipboard)
+                }
+            #endif
         }
 
         NotificationCenter.default.post(
@@ -497,26 +511,30 @@ public final class QuickLauncher: ObservableObject {
         )
     }
 
-    private func runShortcut(_ name: String) async {
+    private func runShortcut(_: String) async {
         #if os(iOS)
         // Run Siri Shortcut
         #elseif os(macOS)
-        // Run Shortcuts app shortcut via AppleScript
+            // Run Shortcuts app shortcut via AppleScript
         #endif
     }
 
     private func runScript(_ script: String) async {
         #if os(macOS)
-        // Run AppleScript
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", script]
-        try? process.run()
+            // Run AppleScript
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+            process.arguments = ["-e", script]
+            try? process.run()
         #endif
     }
 
     private func copyToClipboard(_ text: String) {
-        UniversalClipboardManager.shared.copyText(text, source: "QuickLauncher")
+        #if os(macOS)
+            UniversalClipboardManager.shared.copyText(text, source: "QuickLauncher")
+        #elseif os(iOS)
+            UIPasteboard.general.string = text
+        #endif
     }
 }
 
@@ -570,17 +588,17 @@ public enum LauncherResult: Identifiable {
 
     public var id: String {
         switch self {
-        case .command(let cmd): return "cmd-\(cmd.id)"
-        case .file(let url): return "file-\(url.path)"
-        case .url(let url): return "url-\(url.absoluteString)"
-        case .aiSuggestion(let query): return "ai-\(query)"
-        case .calculation(let expr, _): return "calc-\(expr)"
-        case .extension(let result): return "ext-\(result.id)"
+        case let .command(cmd): "cmd-\(cmd.id)"
+        case let .file(url): "file-\(url.path)"
+        case let .url(url): "url-\(url.absoluteString)"
+        case let .aiSuggestion(query): "ai-\(query)"
+        case let .calculation(expr, _): "calc-\(expr)"
+        case let .extension(result): "ext-\(result.id)"
         }
     }
 }
 
-public protocol LauncherExtension {
+public protocol LauncherExtension: Sendable {
     var name: String { get }
     func search(query: String) async -> [LauncherResult]?
 }

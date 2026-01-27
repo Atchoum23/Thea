@@ -33,10 +33,11 @@ public final class FontManager {
 
     private init() {
         if let data = defaults.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(FontConfiguration.self, from: data) {
-            self.configuration = config
+           let config = try? JSONDecoder().decode(FontConfiguration.self, from: data)
+        {
+            configuration = config
         } else {
-            self.configuration = FontConfiguration()
+            configuration = FontConfiguration()
         }
     }
 
@@ -70,53 +71,52 @@ public final class FontManager {
             return .system(size: scaledSize, weight: style.weight, design: .rounded)
         case .serif:
             return .system(size: scaledSize, weight: style.weight, design: .serif)
-        case .custom(let name):
+        case let .custom(name):
             return .custom(name, size: scaledSize)
         }
     }
 
     /// Get a UIFont/NSFont with the current configuration applied
     #if os(macOS)
-    public func platformFont(_ style: FontStyle) -> NSFont {
-        let baseSize = style.baseSize
-        let scaledSize = baseSize * configuration.scaleFactor
+        public func platformFont(_ style: FontStyle) -> NSFont {
+            let baseSize = style.baseSize
+            let scaledSize = baseSize * configuration.scaleFactor
 
-        switch configuration.fontFamily {
-        case .system, .rounded, .serif:
-            return NSFont.systemFont(ofSize: scaledSize, weight: style.nsWeight)
-        case .monospaced:
-            return NSFont.monospacedSystemFont(ofSize: scaledSize, weight: style.nsWeight)
-        case .custom(let name):
-            return NSFont(name: name, size: scaledSize) ?? NSFont.systemFont(ofSize: scaledSize)
+            switch configuration.fontFamily {
+            case .system, .rounded, .serif:
+                return NSFont.systemFont(ofSize: scaledSize, weight: style.nsWeight)
+            case .monospaced:
+                return NSFont.monospacedSystemFont(ofSize: scaledSize, weight: style.nsWeight)
+            case let .custom(name):
+                return NSFont(name: name, size: scaledSize) ?? NSFont.systemFont(ofSize: scaledSize)
+            }
         }
-    }
     #else
-    public func platformFont(_ style: FontStyle) -> UIFont {
-        let baseSize = style.baseSize
-        let scaledSize = baseSize * configuration.scaleFactor
+        public func platformFont(_ style: FontStyle) -> UIFont {
+            let baseSize = style.baseSize
+            let scaledSize = baseSize * configuration.scaleFactor
 
-        switch configuration.fontFamily {
-        case .system, .rounded, .serif:
-            return UIFont.systemFont(ofSize: scaledSize, weight: style.uiWeight)
-        case .monospaced:
-            return UIFont.monospacedSystemFont(ofSize: scaledSize, weight: style.uiWeight)
-        case .custom(let name):
-            return UIFont(name: name, size: scaledSize) ?? UIFont.systemFont(ofSize: scaledSize)
+            switch configuration.fontFamily {
+            case .system, .rounded, .serif:
+                return UIFont.systemFont(ofSize: scaledSize, weight: style.uiWeight)
+            case .monospaced:
+                return UIFont.monospacedSystemFont(ofSize: scaledSize, weight: style.uiWeight)
+            case let .custom(name):
+                return UIFont(name: name, size: scaledSize) ?? UIFont.systemFont(ofSize: scaledSize)
+            }
         }
-    }
     #endif
 
     private func systemFont(size: CGFloat, weight: Font.Weight, design: FontDesign) -> Font {
-        let swiftUIDesign: Font.Design
-        switch design {
+        let swiftUIDesign: Font.Design = switch design {
         case .default:
-            swiftUIDesign = .default
+            .default
         case .rounded:
-            swiftUIDesign = .rounded
+            .rounded
         case .serif:
-            swiftUIDesign = .serif
+            .serif
         case .monospaced:
-            swiftUIDesign = .monospaced
+            .monospaced
         }
         return .system(size: size, weight: weight, design: swiftUIDesign)
     }
@@ -125,13 +125,13 @@ public final class FontManager {
 
     /// Get list of available system fonts
     #if os(macOS)
-    public var availableFonts: [String] {
-        NSFontManager.shared.availableFontFamilies.sorted()
-    }
+        public var availableFonts: [String] {
+            NSFontManager.shared.availableFontFamilies.sorted()
+        }
     #else
-    public var availableFonts: [String] {
-        UIFont.familyNames.sorted()
-    }
+        public var availableFonts: [String] {
+            UIFont.familyNames.sorted()
+        }
     #endif
 
     // MARK: - Reset
@@ -190,11 +190,11 @@ public enum FontFamily: Codable, Sendable, Equatable, Hashable {
 
     public var displayName: String {
         switch self {
-        case .system: return "System Default"
-        case .monospaced: return "Monospaced"
-        case .rounded: return "Rounded"
-        case .serif: return "Serif"
-        case .custom(let name): return name
+        case .system: "System Default"
+        case .monospaced: "Monospaced"
+        case .rounded: "Rounded"
+        case .serif: "Serif"
+        case let .custom(name): name
         }
     }
 
@@ -206,17 +206,17 @@ public enum FontFamily: Codable, Sendable, Equatable, Hashable {
 // MARK: - Font Design
 
 public enum FontDesign: String, Codable, Sendable, CaseIterable {
-    case `default` = "default"
-    case rounded = "rounded"
-    case serif = "serif"
-    case monospaced = "monospaced"
+    case `default`
+    case rounded
+    case serif
+    case monospaced
 
     public var displayName: String {
         switch self {
-        case .default: return "Default"
-        case .rounded: return "Rounded"
-        case .serif: return "Serif"
-        case .monospaced: return "Monospaced"
+        case .default: "Default"
+        case .rounded: "Rounded"
+        case .serif: "Serif"
+        case .monospaced: "Monospaced"
         }
     }
 }
@@ -240,75 +240,75 @@ public enum FontStyle: String, CaseIterable, Sendable {
 
     public var baseSize: CGFloat {
         switch self {
-        case .largeTitle: return 34
-        case .title: return 28
-        case .title2: return 22
-        case .title3: return 20
-        case .headline: return 17
-        case .subheadline: return 15
-        case .body: return 17
-        case .callout: return 16
-        case .footnote: return 13
-        case .caption: return 12
-        case .caption2: return 11
-        case .code: return 14
-        case .codeInline: return 16
+        case .largeTitle: 34
+        case .title: 28
+        case .title2: 22
+        case .title3: 20
+        case .headline: 17
+        case .subheadline: 15
+        case .body: 17
+        case .callout: 16
+        case .footnote: 13
+        case .caption: 12
+        case .caption2: 11
+        case .code: 14
+        case .codeInline: 16
         }
     }
 
     public var weight: Font.Weight {
         switch self {
-        case .largeTitle: return .bold
-        case .title: return .bold
-        case .title2: return .semibold
-        case .title3: return .semibold
-        case .headline: return .semibold
-        case .subheadline: return .regular
-        case .body: return .regular
-        case .callout: return .regular
-        case .footnote: return .regular
-        case .caption: return .regular
-        case .caption2: return .regular
-        case .code: return .regular
-        case .codeInline: return .medium
+        case .largeTitle: .bold
+        case .title: .bold
+        case .title2: .semibold
+        case .title3: .semibold
+        case .headline: .semibold
+        case .subheadline: .regular
+        case .body: .regular
+        case .callout: .regular
+        case .footnote: .regular
+        case .caption: .regular
+        case .caption2: .regular
+        case .code: .regular
+        case .codeInline: .medium
         }
     }
 
     #if os(macOS)
-    public var nsWeight: NSFont.Weight {
-        switch self {
-        case .largeTitle, .title: return .bold
-        case .title2, .title3, .headline: return .semibold
-        case .codeInline: return .medium
-        default: return .regular
+        public var nsWeight: NSFont.Weight {
+            switch self {
+            case .largeTitle, .title: .bold
+            case .title2, .title3, .headline: .semibold
+            case .codeInline: .medium
+            default: .regular
+            }
         }
-    }
     #else
-    public var uiWeight: UIFont.Weight {
-        switch self {
-        case .largeTitle, .title: return .bold
-        case .title2, .title3, .headline: return .semibold
-        case .codeInline: return .medium
-        default: return .regular
+        public var uiWeight: UIFont.Weight {
+            switch self {
+            case .largeTitle, .title: .bold
+            case .title2, .title3, .headline: .semibold
+            case .codeInline: .medium
+            default: .regular
+            }
         }
-    }
     #endif
 
     public var displayName: String {
         switch self {
-        case .largeTitle: return "Large Title"
-        case .title: return "Title"
-        case .title2: return "Title 2"
-        case .title3: return "Title 3"
-        case .headline: return "Headline"
-        case .subheadline: return "Subheadline"
-        case .body: return "Body"
-        case .callout: return "Callout"
-        case .footnote: return "Footnote"
-        case .caption: return "Caption"
-        case .caption2: return "Caption 2"
-        case .code: return "Code"
-        case .codeInline: return "Inline Code"
+        case .largeTitle: "Large Title"
+        case .title: "Title"
+        case .title2: "Title 2"
+        case .title3: "Title 3"
+        case .headline: "Headline"
+        case .subheadline: "Subheadline"
+        case .body: "Body"
+        case .callout: "Callout"
+        case .footnote: "Footnote"
+        case .caption: "Caption"
+        case .caption2: "Caption 2"
+        case .code: "Code"
+        case .codeInline: "Inline Code"
         }
     }
 }
@@ -324,7 +324,7 @@ public extension Notification.Name {
 public extension View {
     /// Apply themed font from FontManager
     func themedFont(_ style: FontStyle) -> some View {
-        self.font(FontManager.shared.font(style))
+        font(FontManager.shared.font(style))
     }
 }
 

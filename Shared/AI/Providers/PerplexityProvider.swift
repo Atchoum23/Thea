@@ -15,7 +15,7 @@ final class PerplexityProvider: AIProvider, Sendable {
         supportsFunctionCalling: false,
         supportsWebSearch: true, // Perplexity's specialty!
         maxContextTokens: 127_000,
-        maxOutputTokens: 4_096,
+        maxOutputTokens: 4096,
         supportedModalities: [.text]
     )
 
@@ -100,7 +100,8 @@ final class PerplexityProvider: AIProvider, Sendable {
                         let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
 
                         guard let httpResponse = response as? HTTPURLResponse,
-                              httpResponse.statusCode == 200 else {
+                              httpResponse.statusCode == 200
+                        else {
                             throw PerplexityError.invalidResponse
                         }
 
@@ -127,7 +128,8 @@ final class PerplexityProvider: AIProvider, Sendable {
                                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                       let choices = json["choices"] as? [[String: Any]],
                                       let delta = choices.first?["delta"] as? [String: Any],
-                                      let content = delta["content"] as? String else {
+                                      let content = delta["content"] as? String
+                                else {
                                     continue
                                 }
 
@@ -148,14 +150,16 @@ final class PerplexityProvider: AIProvider, Sendable {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
+                  httpResponse.statusCode == 200
+            else {
                 throw PerplexityError.invalidResponse
             }
 
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let choices = json["choices"] as? [[String: Any]],
                   let message = choices.first?["message"] as? [String: Any],
-                  let content = message["content"] as? String else {
+                  let content = message["content"] as? String
+            else {
                 throw PerplexityError.noResponse
             }
 
@@ -184,7 +188,7 @@ final class PerplexityProvider: AIProvider, Sendable {
                 name: "Sonar Large (Online)",
                 description: "Most capable with web search",
                 contextWindow: 127_000,
-                maxOutputTokens: 4_096,
+                maxOutputTokens: 4096,
                 inputPricePerMillion: 1.00,
                 outputPricePerMillion: 1.00,
                 supportsVision: false,
@@ -195,7 +199,7 @@ final class PerplexityProvider: AIProvider, Sendable {
                 name: "Sonar Small (Online)",
                 description: "Fast with web search",
                 contextWindow: 127_000,
-                maxOutputTokens: 4_096,
+                maxOutputTokens: 4096,
                 inputPricePerMillion: 0.20,
                 outputPricePerMillion: 0.20,
                 supportsVision: false,
@@ -206,7 +210,7 @@ final class PerplexityProvider: AIProvider, Sendable {
                 name: "Llama 3.1 8B",
                 description: "Fast open-source model (no search)",
                 contextWindow: 127_000,
-                maxOutputTokens: 4_096,
+                maxOutputTokens: 4096,
                 inputPricePerMillion: 0.20,
                 outputPricePerMillion: 0.20,
                 supportsVision: false,
@@ -219,9 +223,9 @@ final class PerplexityProvider: AIProvider, Sendable {
 
     private func convertRole(_ role: MessageRole) -> String {
         switch role {
-        case .user: return "user"
-        case .assistant: return "assistant"
-        case .system: return "system"
+        case .user: "user"
+        case .assistant: "assistant"
+        case .system: "system"
         }
     }
 }
@@ -235,9 +239,9 @@ enum PerplexityError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Invalid response from Perplexity"
+            "Invalid response from Perplexity"
         case .noResponse:
-            return "No response from Perplexity"
+            "No response from Perplexity"
         }
     }
 }

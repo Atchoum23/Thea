@@ -1,10 +1,13 @@
 // BackupManager.swift
 // Comprehensive backup and restore system
 
-import Foundation
-import OSLog
 import Combine
 import Compression
+import Foundation
+import OSLog
+#if canImport(UIKit)
+    import UIKit
+#endif
 
 // MARK: - Backup Manager
 
@@ -86,10 +89,10 @@ public final class BackupManager: ObservableObject {
                     if let lastDate = lastBackupDate {
                         let timeSinceLastBackup = Date().timeIntervalSince(lastDate)
                         if timeSinceLastBackup >= autoBackupInterval {
-                            try? await createBackup(type: .automatic)
+                            _ = try? await createBackup(type: .automatic)
                         }
                     } else {
-                        try? await createBackup(type: .automatic)
+                        _ = try? await createBackup(type: .automatic)
                     }
                 }
             }
@@ -161,11 +164,11 @@ public final class BackupManager: ObservableObject {
                     let size = try getDirectorySize(destPath)
                     totalSize += size
 
-                    includedItems.append(BackupItem(
+                    try includedItems.append(BackupItem(
                         name: category.name,
                         type: .directory,
                         size: size,
-                        itemCount: try countItems(in: destPath)
+                        itemCount: countItems(in: destPath)
                     ))
 
                     logger.debug("Backed up \(category.name): \(size) bytes")
@@ -214,12 +217,12 @@ public final class BackupManager: ObservableObject {
         try await compressDirectory(tempDir, to: backupPath)
 
         // Update state
-        let backupInfo = BackupInfo(
+        let backupInfo = try BackupInfo(
             id: backupId,
             name: backupName,
             type: type,
             createdAt: timestamp,
-            size: try fileManager.attributesOfItem(atPath: backupPath.path)[.size] as? Int64 ?? 0,
+            size: fileManager.attributesOfItem(atPath: backupPath.path)[.size] as? Int64 ?? 0,
             path: backupPath
         )
 
@@ -310,7 +313,7 @@ public final class BackupManager: ObservableObject {
             let destPath = dataDirectory.appendingPathComponent(category.capitalized)
 
             // Remove existing data
-            if options.contains(.overwrite) && fileManager.fileExists(atPath: destPath.path) {
+            if options.contains(.overwrite), fileManager.fileExists(atPath: destPath.path) {
                 try fileManager.removeItem(at: destPath)
             }
 
@@ -340,14 +343,14 @@ public final class BackupManager: ObservableObject {
 
     private func shouldRestore(category: String, options: RestoreOptions) -> Bool {
         switch category {
-        case "conversations": return options.contains(.conversations)
-        case "agents": return options.contains(.agents)
-        case "artifacts": return options.contains(.artifacts)
-        case "memories": return options.contains(.memories)
-        case "settings", "preferences": return options.contains(.settings)
-        case "tools": return options.contains(.tools)
-        case "templates": return options.contains(.templates)
-        default: return false
+        case "conversations": options.contains(.conversations)
+        case "agents": options.contains(.agents)
+        case "artifacts": options.contains(.artifacts)
+        case "memories": options.contains(.memories)
+        case "settings", "preferences": options.contains(.settings)
+        case "tools": options.contains(.tools)
+        case "templates": options.contains(.templates)
+        default: false
         }
     }
 
@@ -408,12 +411,12 @@ public final class BackupManager: ObservableObject {
         try fileManager.copyItem(at: source, to: destPath)
 
         // Create backup info
-        let backupInfo = BackupInfo(
+        let backupInfo = try BackupInfo(
             id: UUID().uuidString,
             name: source.deletingPathExtension().lastPathComponent,
             type: .imported,
             createdAt: Date(),
-            size: try fileManager.attributesOfItem(atPath: destPath.path)[.size] as? Int64 ?? 0,
+            size: fileManager.attributesOfItem(atPath: destPath.path)[.size] as? Int64 ?? 0,
             path: destPath
         )
 
@@ -492,16 +495,16 @@ public final class BackupManager: ObservableObject {
 
     private func getDeviceName() -> String {
         #if os(macOS)
-        return Host.current().localizedName ?? "Mac"
+            return Host.current().localizedName ?? "Mac"
         #else
-        return UIDevice.current.name
+            return UIDevice.current.name
         #endif
     }
 
-    private func isCompatible(metadata: BackupMetadata) -> Bool {
+    private func isCompatible(metadata _: BackupMetadata) -> Bool {
         // For now, accept all backups
         // In production, check version compatibility
-        return true
+        true
     }
 
     // MARK: - UserDefaults Backup
@@ -677,7 +680,7 @@ public struct BackupItem: Codable {
     }
 }
 
-public struct RestoreOptions: OptionSet {
+public struct RestoreOptions: OptionSet, Sendable {
     public let rawValue: Int
 
     public init(rawValue: Int) {
@@ -709,13 +712,13 @@ public enum BackupError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .backupInProgress: return "A backup is already in progress"
-        case .restoreInProgress: return "A restore is already in progress"
-        case .invalidBackupFile: return "Invalid backup file"
-        case .incompatibleVersion(let version): return "Incompatible backup version: \(version)"
-        case .compressionFailed: return "Failed to compress backup"
-        case .decompressionFailed: return "Failed to decompress backup"
-        case .fileNotFound: return "Backup file not found"
+        case .backupInProgress: "A backup is already in progress"
+        case .restoreInProgress: "A restore is already in progress"
+        case .invalidBackupFile: "Invalid backup file"
+        case let .incompatibleVersion(version): "Incompatible backup version: \(version)"
+        case .compressionFailed: "Failed to compress backup"
+        case .decompressionFailed: "Failed to decompress backup"
+        case .fileNotFound: "Backup file not found"
         }
     }
 }

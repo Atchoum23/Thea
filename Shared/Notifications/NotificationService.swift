@@ -5,15 +5,15 @@
 //  Comprehensive notification management with rich notifications
 //
 
+import Combine
 import Foundation
 import UserNotifications
-import Combine
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Notification Service
@@ -302,13 +302,13 @@ public class NotificationService: ObservableObject {
     // MARK: - Badge Management
 
     #if os(iOS)
-    public func setBadgeCount(_ count: Int) async {
-        try? await UNUserNotificationCenter.current().setBadgeCount(count)
-    }
+        public func setBadgeCount(_ count: Int) async {
+            try? await UNUserNotificationCenter.current().setBadgeCount(count)
+        }
 
-    public func clearBadge() async {
-        try? await UNUserNotificationCenter.current().setBadgeCount(0)
-    }
+        public func clearBadge() async {
+            try? await UNUserNotificationCenter.current().setBadgeCount(0)
+        }
     #endif
 
     // MARK: - Action Handling
@@ -345,10 +345,10 @@ public class NotificationService: ObservableObject {
         case .copy:
             let text = userInfo["responsePreview"] as? String ?? notification.request.content.body
             #if os(iOS)
-            UIPasteboard.general.string = text
+                UIPasteboard.general.string = text
             #elseif os(macOS)
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(text, forType: .string)
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(text, forType: .string)
             #endif
             return .copied
 
@@ -371,11 +371,12 @@ public class NotificationService: ObservableObject {
         let imageURL = tempDir.appendingPathComponent("notification_image.png")
 
         #if os(iOS)
-        if let image = UIImage(systemName: "brain.fill"),
-           let data = image.pngData() {
-            try? data.write(to: imageURL)
-            return imageURL
-        }
+            if let image = UIImage(systemName: "brain.fill"),
+               let data = image.pngData()
+            {
+                try? data.write(to: imageURL)
+                return imageURL
+            }
         #endif
 
         return nil
@@ -385,6 +386,7 @@ public class NotificationService: ObservableObject {
 // MARK: - Notification Action Result
 
 public enum NotificationActionResult: Sendable {
+    case none
     case openConversation(id: String)
     case openContent(identifier: String)
     case dismissed
@@ -393,17 +395,22 @@ public enum NotificationActionResult: Sendable {
     case showShareSheet(content: String)
     case startFocusSession
     case endFocusSession
+    case reply(conversationId: String, text: String)
+    case openAgent(String)
+    case openMission(String)
+    case stopAgent(String)
+    case stopMission(String)
 }
 
 // MARK: - Notification Delegate
 
-public class TheaNotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+public class TheaNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     public static let shared = TheaNotificationDelegate()
 
     public var onNotificationReceived: ((UNNotification) -> Void)?
     public var onActionSelected: ((UNNotificationResponse) -> Void)?
 
-    private override init() {
+    override private init() {
         super.init()
     }
 
@@ -412,7 +419,7 @@ public class TheaNotificationDelegate: NSObject, UNUserNotificationCenterDelegat
     }
 
     public func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
+        _: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
         onNotificationReceived?(notification)
@@ -422,15 +429,15 @@ public class TheaNotificationDelegate: NSObject, UNUserNotificationCenterDelegat
     }
 
     public func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
+        _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
         onActionSelected?(response)
     }
 
     public func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        openSettingsFor notification: UNNotification?
+        _: UNUserNotificationCenter,
+        openSettingsFor _: UNNotification?
     ) {
         // Open notification settings in app
         NotificationCenter.default.post(name: .openNotificationSettings, object: nil)

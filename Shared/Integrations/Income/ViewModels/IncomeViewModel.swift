@@ -134,7 +134,7 @@ public final class IncomeViewModel {
     // MARK: - Computed Properties
 
     public var totalMonthlyIncome: Double {
-        streams.filter { $0.isActive }.reduce(0.0) { $0 + $1.monthlyAmount }
+        streams.filter(\.isActive).reduce(0.0) { $0 + $1.monthlyAmount }
     }
 
     public var totalAnnualProjection: Double {
@@ -142,7 +142,7 @@ public final class IncomeViewModel {
     }
 
     public var activeStreamsCount: Int {
-        streams.filter { $0.isActive }.count
+        streams.count { $0.isActive }
     }
 
     public var passiveIncomePercentage: Double {
@@ -152,7 +152,7 @@ public final class IncomeViewModel {
     }
 
     public var topStream: IncomeStream? {
-        streams.filter { $0.isActive }.max { $0.monthlyAmount < $1.monthlyAmount }
+        streams.filter(\.isActive).max { $0.monthlyAmount < $1.monthlyAmount }
     }
 
     public var categoryBreakdown: [(IncomeCategory, Double)] {

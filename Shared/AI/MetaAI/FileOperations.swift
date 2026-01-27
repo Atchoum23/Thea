@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Advanced File Operations
+
 // Comprehensive file system management
 
 @MainActor
@@ -67,7 +68,7 @@ final class FileOperations {
             return enumerator?.allObjects.compactMap { $0 as? String } ?? []
         } else {
             let contents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
-            return contents.map { $0.lastPathComponent }
+            return contents.map(\.lastPathComponent)
         }
     }
 
@@ -283,11 +284,11 @@ enum FileError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .fileNotFound:
-            return "File not found"
+            "File not found"
         case .permissionDenied:
-            return "Permission denied"
+            "Permission denied"
         case .invalidPath:
-            return "Invalid file path"
+            "Invalid file path"
         }
     }
 }

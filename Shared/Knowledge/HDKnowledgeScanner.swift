@@ -2,6 +2,7 @@ import Foundation
 import UniformTypeIdentifiers
 
 // MARK: - HD Knowledge Scanner
+
 // Index all documents on system for AI context
 
 @MainActor
@@ -52,12 +53,14 @@ final class HDKnowledgeScanner {
     private func loadConfiguration() {
         // Load from UserDefaults
         if let data = UserDefaults.standard.data(forKey: "HDKnowledgeScanner.scanPaths"),
-           let paths = try? JSONDecoder().decode([URL].self, from: data) {
+           let paths = try? JSONDecoder().decode([URL].self, from: data)
+        {
             scanPaths = paths
         }
 
         if let data = UserDefaults.standard.data(forKey: "HDKnowledgeScanner.excludedPaths"),
-           let paths = try? JSONDecoder().decode([URL].self, from: data) {
+           let paths = try? JSONDecoder().decode([URL].self, from: data)
+        {
             excludedPaths = Set(paths)
         }
     }
@@ -201,7 +204,8 @@ final class HDKnowledgeScanner {
 
         // Check file size
         if let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize,
-           size > config.maxFileSizeBytes {
+           size > config.maxFileSizeBytes
+        {
             return false
         }
 
@@ -246,7 +250,7 @@ final class HDKnowledgeScanner {
 
         for (index, word) in words.prefix(dimension).enumerated() {
             let hash = abs(word.hashValue)
-            embedding[index] = Float(hash % 1_000) / 1_000.0
+            embedding[index] = Float(hash % 1000) / 1000.0
         }
 
         // Normalize
@@ -274,7 +278,7 @@ final class HDKnowledgeScanner {
             }
             .sorted { $0.relevanceScore > $1.relevanceScore }
             .prefix(searchTopK)
-            .map { $0 }
+            .map(\.self)
     }
 
     func fullTextSearch(_ query: String, topK: Int? = nil) -> [ScannedFile] {
@@ -284,7 +288,7 @@ final class HDKnowledgeScanner {
         return indexedFiles
             .filter { $0.content.lowercased().contains(lowercaseQuery) }
             .prefix(searchTopK)
-            .map { $0 }
+            .map(\.self)
     }
 
     private func cosineSimilarity(_ vectorA: [Float], _ vectorB: [Float]) -> Float {
@@ -294,7 +298,7 @@ final class HDKnowledgeScanner {
         let magnitudeA = sqrt(vectorA.reduce(0.0) { $0 + $1 * $1 })
         let magnitudeB = sqrt(vectorB.reduce(0.0) { $0 + $1 * $1 })
 
-        guard magnitudeA > 0 && magnitudeB > 0 else { return 0 }
+        guard magnitudeA > 0, magnitudeB > 0 else { return 0 }
 
         return dotProduct / (magnitudeA * magnitudeB)
     }
@@ -316,7 +320,7 @@ final class HDKnowledgeScanner {
         score += Float(min(matches, config.maxContentMatchBonus)) * config.contentMatchBonus
 
         // Recency bonus (files modified recently)
-        let daysSinceModified = Date().timeIntervalSince(file.lastModified) / (24 * 3_600)
+        let daysSinceModified = Date().timeIntervalSince(file.lastModified) / (24 * 3600)
         if daysSinceModified < config.recentFileDaysThreshold {
             score += config.recentFileBonus
         } else if daysSinceModified < config.moderateRecentFileDaysThreshold {
@@ -447,7 +451,7 @@ class FileWatcher {
         )
 
         source?.setEventHandler { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.onChange(self.path)
         }
 
@@ -472,10 +476,10 @@ enum KnowledgeError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .pathNotFound(let path):
-            return "Path not found: \(path)"
+        case let .pathNotFound(path):
+            "Path not found: \(path)"
         case .noProvider:
-            return "No AI provider configured for embeddings"
+            "No AI provider configured for embeddings"
         }
     }
 }

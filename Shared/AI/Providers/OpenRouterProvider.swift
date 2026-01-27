@@ -15,7 +15,7 @@ final class OpenRouterProvider: AIProvider, Sendable {
         supportsFunctionCalling: true,
         supportsWebSearch: false,
         maxContextTokens: 200_000, // Depends on model
-        maxOutputTokens: 16_384,
+        maxOutputTokens: 16384,
         supportedModalities: [.text, .image]
     )
 
@@ -91,7 +91,8 @@ final class OpenRouterProvider: AIProvider, Sendable {
                         let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
 
                         guard let httpResponse = response as? HTTPURLResponse,
-                              httpResponse.statusCode == 200 else {
+                              httpResponse.statusCode == 200
+                        else {
                             throw OpenRouterError.invalidResponse
                         }
 
@@ -118,7 +119,8 @@ final class OpenRouterProvider: AIProvider, Sendable {
                                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                       let choices = json["choices"] as? [[String: Any]],
                                       let delta = choices.first?["delta"] as? [String: Any],
-                                      let content = delta["content"] as? String else {
+                                      let content = delta["content"] as? String
+                                else {
                                     continue
                                 }
 
@@ -139,14 +141,16 @@ final class OpenRouterProvider: AIProvider, Sendable {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
+                  httpResponse.statusCode == 200
+            else {
                 throw OpenRouterError.invalidResponse
             }
 
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let choices = json["choices"] as? [[String: Any]],
                   let message = choices.first?["message"] as? [String: Any],
-                  let content = message["content"] as? String else {
+                  let content = message["content"] as? String
+            else {
                 throw OpenRouterError.noResponse
             }
 
@@ -178,13 +182,15 @@ final class OpenRouterProvider: AIProvider, Sendable {
         let (data, _) = try await URLSession.shared.data(for: request)
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let modelsData = json["data"] as? [[String: Any]] else {
+              let modelsData = json["data"] as? [[String: Any]]
+        else {
             throw OpenRouterError.noModels
         }
 
         return modelsData.compactMap { modelData in
             guard let id = modelData["id"] as? String,
-                  let name = modelData["name"] as? String else {
+                  let name = modelData["name"] as? String
+            else {
                 return nil
             }
 
@@ -198,7 +204,7 @@ final class OpenRouterProvider: AIProvider, Sendable {
                 name: name,
                 description: modelData["description"] as? String,
                 contextWindow: contextWindow,
-                maxOutputTokens: 16_384,
+                maxOutputTokens: 16384,
                 inputPricePerMillion: inputPrice,
                 outputPricePerMillion: outputPrice,
                 supportsVision: id.contains("vision") || id.contains("gpt-4o") || id.contains("claude"),
@@ -211,9 +217,9 @@ final class OpenRouterProvider: AIProvider, Sendable {
 
     private func convertRole(_ role: MessageRole) -> String {
         switch role {
-        case .user: return "user"
-        case .assistant: return "assistant"
-        case .system: return "system"
+        case .user: "user"
+        case .assistant: "assistant"
+        case .system: "system"
         }
     }
 }
@@ -228,11 +234,11 @@ enum OpenRouterError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Invalid response from OpenRouter"
+            "Invalid response from OpenRouter"
         case .noResponse:
-            return "No response from OpenRouter"
+            "No response from OpenRouter"
         case .noModels:
-            return "No models available from OpenRouter"
+            "No models available from OpenRouter"
         }
     }
 }

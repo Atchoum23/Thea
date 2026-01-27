@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Liquid Glass Style Support for iOS 26+
+
 //
 // Apple's Liquid Glass design language was introduced in iOS 26 (2025).
 // This file provides conditional support for Liquid Glass effects while
@@ -12,13 +13,14 @@ import SwiftUI
 // Reference: https://developer.apple.com/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views
 
 // MARK: - Compile-time SDK check
+
 // glassEffect API is only available in Xcode 16+ SDK (iOS 26+, macOS 26+)
 // We use compiler version check since the API doesn't exist in older SDKs
 
 #if compiler(>=6.0) && canImport(SwiftUI, _version: 6.0)
-private let hasGlassEffectAPI = true
+    private let hasGlassEffectAPI = true
 #else
-private let hasGlassEffectAPI = false
+    private let hasGlassEffectAPI = false
 #endif
 
 /// View modifier that conditionally applies Liquid Glass effect on iOS 26+
@@ -80,7 +82,7 @@ extension View {
     @ViewBuilder
     func liquidGlassTint(_ color: Color) -> some View {
         // tint is always available, just apply it
-        self.tint(color)
+        tint(color)
     }
 }
 
@@ -108,16 +110,16 @@ struct GlassContainer<Content: View>: View {
 struct AdaptiveToolbarStyle: ViewModifier {
     func body(content: Content) -> some View {
         #if os(iOS)
-        // toolbarBackgroundVisibility with .navigationBar requires iOS 16+
-        if #available(iOS 16.0, *) {
-            content
-                .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
-        } else {
-            content
-        }
+            // toolbarBackgroundVisibility with .navigationBar requires iOS 18+
+            if #available(iOS 18.0, *) {
+                content
+                    .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
+            } else {
+                content
+            }
         #else
-        // macOS doesn't have navigationBar toolbar placement
-        content
+            // macOS doesn't have navigationBar toolbar placement
+            content
         #endif
     }
 }

@@ -32,8 +32,8 @@ final class VoiceActivationEngine {
     private var lastSpeechTime: Date?
 
     private init() {
-        self.speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: config.recognitionLanguage))
-        self.isWakeWordEnabled = config.wakeWordEnabled
+        speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: config.recognitionLanguage))
+        isWakeWordEnabled = config.wakeWordEnabled
     }
 
     // MARK: - Configuration Updates
@@ -79,15 +79,15 @@ final class VoiceActivationEngine {
         recognitionTask = nil
 
         #if os(iOS)
-        // Configure audio session (iOS only)
-        let audioSession = AVAudioSession.sharedInstance()
-        try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-        try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            // Configure audio session (iOS only)
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         #endif
 
         // Create recognition request
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        guard let recognitionRequest = recognitionRequest else {
+        guard let recognitionRequest else {
             throw VoiceEngineError.recognitionFailed
         }
 
@@ -111,9 +111,9 @@ final class VoiceActivationEngine {
             guard self != nil else { return }
 
             Task { @MainActor [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
 
-                if let result = result {
+                if let result {
                     let transcript = result.bestTranscription.formattedString.lowercased()
                     self.lastTranscript = transcript
 
@@ -153,7 +153,7 @@ final class VoiceActivationEngine {
     // MARK: - Wake Word Detection
 
     private func detectWakeWord(in transcript: String) -> Bool {
-        guard isWakeWordEnabled && !conversationMode else { return false }
+        guard isWakeWordEnabled, !conversationMode else { return false }
 
         return config.wakeWords.contains { wakeWord in
             transcript.contains(wakeWord)
@@ -236,11 +236,11 @@ final class VoiceActivationEngine {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 response += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -286,7 +286,8 @@ final class VoiceActivationEngine {
                 try? await Task.sleep(nanoseconds: UInt64(silenceThreshold * 1_000_000_000))
 
                 if let lastSpeech = lastSpeechTime,
-                   Date().timeIntervalSince(lastSpeech) >= silenceThreshold {
+                   Date().timeIntervalSince(lastSpeech) >= silenceThreshold
+                {
                     // Exit conversation mode after silence
                     await exitConversationMode()
                     break
@@ -330,7 +331,7 @@ final class VoiceActivationEngine {
         case .disableConversationMode:
             await exitConversationMode()
 
-        case .custom(let text):
+        case let .custom(text):
             await processVoiceCommand(text)
         }
     }
@@ -345,7 +346,7 @@ private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unch
         self.onComplete = onComplete
     }
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+    func speechSynthesizer(_: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance) {
         onComplete()
     }
 }
@@ -371,11 +372,11 @@ enum VoiceEngineError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .authorizationDenied:
-            return "Speech recognition authorization denied"
+            "Speech recognition authorization denied"
         case .recognitionFailed:
-            return "Speech recognition failed to start"
+            "Speech recognition failed to start"
         case .noProvider:
-            return "No AI provider configured"
+            "No AI provider configured"
         }
     }
 }

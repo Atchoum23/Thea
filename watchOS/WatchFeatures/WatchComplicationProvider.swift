@@ -5,9 +5,9 @@
 //  Watch complications and Smart Stack integration
 //
 
+import ClockKit
 import SwiftUI
 import WidgetKit
-import ClockKit
 
 // MARK: - Complication Entry
 
@@ -29,11 +29,11 @@ struct ComplicationData {
 // MARK: - Complication Provider
 
 struct TheaComplicationProvider: TimelineProvider {
-    func placeholder(in context: Context) -> TheaComplicationEntry {
+    func placeholder(in _: Context) -> TheaComplicationEntry {
         TheaComplicationEntry(date: Date(), data: ComplicationData())
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (TheaComplicationEntry) -> Void) {
+    func getSnapshot(in _: Context, completion: @escaping (TheaComplicationEntry) -> Void) {
         let entry = TheaComplicationEntry(
             date: Date(),
             data: ComplicationData(
@@ -46,7 +46,7 @@ struct TheaComplicationProvider: TimelineProvider {
         completion(entry)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<TheaComplicationEntry>) -> Void) {
+    func getTimeline(in _: Context, completion: @escaping (Timeline<TheaComplicationEntry>) -> Void) {
         let data = loadComplicationData()
         let entry = TheaComplicationEntry(date: Date(), data: data)
 
@@ -206,7 +206,7 @@ struct CornerComplicationView: View {
 
 // MARK: - Smart Stack Relevant Context
 
-struct TheaRelevantContext {
+enum TheaRelevantContext {
     /// Define when Thea widget should appear in Smart Stack
     static func getRelevantIntents() -> [RelevantIntent] {
         var intents: [RelevantIntent] = []
@@ -239,7 +239,7 @@ extension View {
         if #available(watchOS 10.0, *) {
             self.onTapGesture(count: 2, perform: action)
         } else {
-            self.onTapGesture(perform: action)
+            onTapGesture(perform: action)
         }
     }
 }

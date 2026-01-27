@@ -147,7 +147,7 @@ struct iOSNewProjectView: View {
     }
 
     private func createProject() {
-        projectManager.createProject(title: title, customInstructions: customInstructions)
+        _ = projectManager.createProject(title: title, customInstructions: customInstructions)
         dismiss()
     }
 }
@@ -306,8 +306,24 @@ struct iOSProjectDetailView: View {
     }
 
     private func exportProject() {
+        // Export project as JSON
         do {
-            let data = try $projectManager.exportProject(project)
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            encoder.dateEncodingStrategy = .iso8601
+
+            // Create export data structure
+            let exportData: [String: Any] = [
+                "id": project.id.uuidString,
+                "title": project.title,
+                "customInstructions": project.customInstructions,
+                "createdAt": ISO8601DateFormatter().string(from: project.createdAt),
+                "updatedAt": ISO8601DateFormatter().string(from: project.updatedAt),
+                "conversationCount": project.conversations.count,
+                "fileCount": project.files.count
+            ]
+
+            let data = try JSONSerialization.data(withJSONObject: exportData, options: .prettyPrinted)
             exportedData = data
             showingShareSheet = true
         } catch {
@@ -321,9 +337,9 @@ struct iOSProjectDetailView: View {
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
 
-    func makeUIViewController(context: Context) -> UIActivityViewController {
+    func makeUIViewController(context _: Context) -> UIActivityViewController {
         UIActivityViewController(activityItems: items, applicationActivities: nil)
     }
 
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+    func updateUIViewController(_: UIActivityViewController, context _: Context) {}
 }

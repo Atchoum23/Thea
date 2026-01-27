@@ -1,10 +1,10 @@
 // NotificationManager.swift
 // Comprehensive notification management with rich notifications
 
-import Foundation
-import UserNotifications
-import OSLog
 import Combine
+import Foundation
+import OSLog
+import UserNotifications
 
 // MARK: - Notification Manager
 
@@ -47,12 +47,15 @@ public final class NotificationManager: ObservableObject {
     private init() {
         setupCategories()
         loadSettings()
-        checkAuthorizationStatus()
+        Task {
+            await checkAuthorizationStatus()
+        }
     }
 
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "notifications.settings"),
-           let loadedSettings = try? JSONDecoder().decode(NotificationSettings.self, from: data) {
+           let loadedSettings = try? JSONDecoder().decode(NotificationSettings.self, from: data)
+        {
             settings = loadedSettings
         }
     }
@@ -86,7 +89,7 @@ public final class NotificationManager: ObservableObject {
         let settings = await center.notificationSettings()
         authorizationStatus = settings.authorizationStatus
         isAuthorized = settings.authorizationStatus == .authorized ||
-                       settings.authorizationStatus == .provisional
+            settings.authorizationStatus == .provisional
     }
 
     // MARK: - Category Setup
@@ -192,7 +195,7 @@ public final class NotificationManager: ObservableObject {
         ]
 
         // Rich notification with preview
-        if let preview = preview {
+        if let preview {
             content.subtitle = preview
         }
 
@@ -230,7 +233,7 @@ public final class NotificationManager: ObservableObject {
             "type": "agent"
         ]
 
-        if let detail = detail {
+        if let detail {
             content.subtitle = detail
         }
 
@@ -268,7 +271,7 @@ public final class NotificationManager: ObservableObject {
             "type": "mission"
         ]
 
-        if let progress = progress {
+        if let progress {
             content.subtitle = "\(Int(progress * 100))% complete"
         }
 
@@ -352,6 +355,9 @@ public final class NotificationManager: ObservableObject {
         case .low:
             content.interruptionLevel = .passive
             content.sound = nil
+        case .silent:
+            content.interruptionLevel = .passive
+            content.sound = nil
         }
 
         let request = UNNotificationRequest(
@@ -381,7 +387,7 @@ public final class NotificationManager: ObservableObject {
             let delivered = await center.deliveredNotifications()
             let toRemove = delivered
                 .filter { $0.request.content.threadIdentifier == threadId }
-                .map { $0.request.identifier }
+                .map(\.request.identifier)
             center.removeDeliveredNotifications(withIdentifiers: toRemove)
         }
     }
@@ -415,18 +421,20 @@ public final class NotificationManager: ObservableObject {
         withResponse textResponse: String? = nil
     ) async -> NotificationActionResult {
         let userInfo = notification.request.content.userInfo
-        let category = notification.request.content.categoryIdentifier
+        // category identifier available for future category-specific handling
+        _ = notification.request.content.categoryIdentifier
 
         switch actionIdentifier {
         case Action.reply.rawValue:
             if let conversationId = userInfo["conversationId"] as? String,
-               let reply = textResponse {
+               let reply = textResponse
+            {
                 return .reply(conversationId: conversationId, text: reply)
             }
 
         case Action.view.rawValue:
             if let conversationId = userInfo["conversationId"] as? String {
-                return .openConversation(conversationId)
+                return .openConversation(id: conversationId)
             } else if let agentId = userInfo["agentId"] as? String {
                 return .openAgent(agentId)
             } else if let missionId = userInfo["missionId"] as? String {
@@ -444,7 +452,7 @@ public final class NotificationManager: ObservableObject {
                 trigger: trigger
             )
             try? await center.add(request)
-            return .snoozed
+            return .snoozed(minutes: 15)
 
         case Action.stop.rawValue:
             if let agentId = userInfo["agentId"] as? String {
@@ -479,64 +487,14 @@ public struct NotificationSettings: Codable {
     public var quietHoursEnd: Date = Calendar.current.date(from: DateComponents(hour: 7)) ?? Date()
 }
 
-public enum NotificationPriority {
+public enum AlertPriority {
     case critical
     case high
     case normal
     case low
 }
 
-public enum NotificationActionResult {
-    case none
-    case dismissed
-    case snoozed
-    case reply(conversationId: String, text: String)
-    case openConversation(String)
-    case openAgent(String)
-    case openMission(String)
-    case stopAgent(String)
-    case stopMission(String)
-}
-
-// MARK: - Notification Delegate
-
-public class TheaNotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
-    public static let shared = TheaNotificationDelegate()
-
-    private override init() {
-        super.init()
-    }
-
-    public func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification
-    ) async -> UNNotificationPresentationOptions {
-        // Show notifications even when app is in foreground
-        return [.banner, .sound, .badge]
-    }
-
-    public func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse
-    ) async {
-        let textResponse = (response as? UNTextInputNotificationResponse)?.userText
-
-        let result = await NotificationManager.shared.handleAction(
-            response.actionIdentifier,
-            for: response.notification,
-            withResponse: textResponse
-        )
-
-        // Post notification for app to handle
-        await MainActor.run {
-            NotificationCenter.default.post(
-                name: .notificationActionReceived,
-                object: nil,
-                userInfo: ["result": result]
-            )
-        }
-    }
-}
+// NotificationActionResult and TheaNotificationDelegate are defined in NotificationService.swift
 
 // MARK: - Notifications
 

@@ -10,7 +10,7 @@ import OSLog
 /// Central policy configuration for AgentSec Strict Mode
 /// This policy enforces security invariants across all agent operations
 @MainActor
-public final class AgentSecPolicy: ObservableObject, Sendable {
+public final class AgentSecPolicy: ObservableObject {
     public static let shared = AgentSecPolicy()
 
     private let logger = Logger(subsystem: "com.thea.app", category: "AgentSecPolicy")
@@ -69,9 +69,18 @@ public final class AgentSecPolicy: ObservableObject, Sendable {
         enableStrictMode()
 
         // Try to load custom policy from file
-        let policyPath = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".thea")
-            .appendingPathComponent("agentsec-policy.json")
+        #if os(macOS)
+            let policyPath = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent(".thea")
+                .appendingPathComponent("agentsec-policy.json")
+        #else
+            guard let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                return
+            }
+            let policyPath = docDir
+                .appendingPathComponent(".thea")
+                .appendingPathComponent("agentsec-policy.json")
+        #endif
 
         guard FileManager.default.fileExists(atPath: policyPath.path) else {
             return
@@ -103,7 +112,7 @@ public final class AgentSecPolicy: ObservableObject, Sendable {
         logger.warning("Security violation: \(violation.description)")
 
         // Check if kill switch should trigger
-        if killSwitch.enabled && violation.severity == .critical && killSwitch.triggerOnCritical {
+        if killSwitch.enabled, violation.severity == .critical, killSwitch.triggerOnCritical {
             AgentSecKillSwitch.shared.trigger(reason: violation.description)
         }
     }
@@ -129,10 +138,10 @@ public struct NetworkPolicy: Codable, Sendable {
                 "127.0.0.1",
                 "::1",
                 "0.0.0.0",
-                "169.254.169.254",           // AWS metadata
-                "metadata.google.internal",   // GCP metadata
-                "169.254.170.2",             // ECS metadata
-                "[fd00:ec2::254]"             // AWS IPv6 metadata
+                "169.254.169.254", // AWS metadata
+                "metadata.google.internal", // GCP metadata
+                "169.254.170.2", // ECS metadata
+                "[fd00:ec2::254]" // AWS IPv6 metadata
             ],
             allowExternalRequests: true,
             maxRequestTimeout: 30
@@ -170,14 +179,16 @@ public struct NetworkPolicy: Codable, Sendable {
     private func isPrivateIP(_ host: String) -> Bool {
         // Check for private IPv4 ranges
         if host.hasPrefix("10.") ||
-           host.hasPrefix("192.168.") ||
-           host.starts(with: "172.") {
+            host.hasPrefix("192.168.") ||
+            host.starts(with: "172.")
+        {
             // Check 172.16-31.x.x range
             if host.hasPrefix("172.") {
                 let components = host.split(separator: ".")
                 if components.count >= 2,
                    let second = Int(components[1]),
-                   second >= 16 && second <= 31 {
+                   second >= 16, second <= 31
+                {
                     return true
                 }
             }
@@ -249,7 +260,7 @@ public struct FilesystemPolicy: Codable, Sendable {
         }
 
         // If we have a workspace, check if path is within it
-        if let workspace = workspace {
+        if let workspace {
             let expandedWorkspace = NSString(string: workspace).expandingTildeInPath
             return expandedPath.hasPrefix(expandedWorkspace)
         }
@@ -291,7 +302,7 @@ public struct TerminalPolicy: Codable, Sendable {
             blockedPatterns: [
                 "rm -rf /",
                 "rm -rf /*",
-                ":(){ :|:& };:",              // Fork bomb
+                ":(){ :|:& };:", // Fork bomb
                 "dd if=/dev/zero of=/dev/",
                 "mkfs",
                 "> /dev/sda",
@@ -329,7 +340,7 @@ public struct TerminalPolicy: Codable, Sendable {
         let lowercaseCommand = command.lowercased()
 
         // Check sudo first
-        if !allowSudo && lowercaseCommand.hasPrefix("sudo ") {
+        if !allowSudo, lowercaseCommand.hasPrefix("sudo ") {
             return (true, "Sudo commands are blocked by AgentSec policy")
         }
 
@@ -466,11 +477,11 @@ public struct SecurityViolation: Sendable {
         description: String,
         context: [String: String] = [:]
     ) {
-        self.id = UUID()
+        id = UUID()
         self.type = type
         self.severity = severity
         self.description = description
-        self.timestamp = Date()
+        timestamp = Date()
         self.context = context
     }
 }

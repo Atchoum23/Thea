@@ -9,7 +9,7 @@ final class ScannerRegistry: Sendable {
     let scanners: [any Scanner]
 
     init() {
-        self.scanners = [
+        scanners = [
             SwiftScanner(),
             WorkflowScanner(),
             ScriptScanner(),

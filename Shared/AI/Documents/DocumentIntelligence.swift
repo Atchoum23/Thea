@@ -4,10 +4,10 @@
 import Foundation
 import OSLog
 #if canImport(PDFKit)
-import PDFKit
+    import PDFKit
 #endif
 #if canImport(NaturalLanguage)
-import NaturalLanguage
+    import NaturalLanguage
 #endif
 
 // MARK: - Document Intelligence
@@ -55,66 +55,66 @@ public final class DocumentIntelligence: ObservableObject {
 
     private func analyzePDF(data: Data) async throws -> DocumentAnalysis {
         #if canImport(PDFKit)
-        guard let document = PDFDocument(data: data) else {
-            throw DocumentError.invalidDocument("Failed to parse PDF")
-        }
+            guard let document = PDFDocument(data: data) else {
+                throw DocumentError.invalidDocument("Failed to parse PDF")
+            }
 
-        var fullText = ""
-        var pages: [DocumentPage] = []
+            var fullText = ""
+            var pages: [DocumentPage] = []
 
-        for i in 0..<document.pageCount {
-            guard let page = document.page(at: i) else { continue }
+            for i in 0 ..< document.pageCount {
+                guard let page = document.page(at: i) else { continue }
 
-            let pageText = page.string ?? ""
-            fullText += pageText + "\n\n"
+                let pageText = page.string ?? ""
+                fullText += pageText + "\n\n"
 
-            pages.append(DocumentPage(
-                number: i + 1,
-                text: pageText,
-                bounds: page.bounds(for: .mediaBox)
-            ))
-        }
+                pages.append(DocumentPage(
+                    number: i + 1,
+                    text: pageText,
+                    bounds: page.bounds(for: .mediaBox)
+                ))
+            }
 
-        // Extract metadata
-        let metadata = extractPDFMetadata(document)
+            // Extract metadata
+            let metadata = extractPDFMetadata(document)
 
-        // Analyze text content
-        let textAnalysis = await analyzeTextContent(fullText)
+            // Analyze text content
+            let textAnalysis = await analyzeTextContent(fullText)
 
-        lastAnalysis = DocumentAnalysis(
-            type: .pdf,
-            pageCount: document.pageCount,
-            text: fullText,
-            pages: pages,
-            metadata: metadata,
-            entities: textAnalysis.entities,
-            summary: textAnalysis.summary,
-            keywords: textAnalysis.keywords,
-            sentiment: textAnalysis.sentiment,
-            language: textAnalysis.language
-        )
+            lastAnalysis = DocumentAnalysis(
+                type: .pdf,
+                pageCount: document.pageCount,
+                text: fullText,
+                pages: pages,
+                metadata: metadata,
+                entities: textAnalysis.entities,
+                summary: textAnalysis.summary,
+                keywords: textAnalysis.keywords,
+                sentiment: textAnalysis.sentiment,
+                language: textAnalysis.language
+            )
 
-        return lastAnalysis!
+            return lastAnalysis!
         #else
-        throw DocumentError.featureNotAvailable("PDF support not available")
+            throw DocumentError.featureNotAvailable("PDF support not available")
         #endif
     }
 
     #if canImport(PDFKit)
-    private func extractPDFMetadata(_ document: PDFDocument) -> DocumentMetadata {
-        let attributes = document.documentAttributes ?? [:]
+        private func extractPDFMetadata(_ document: PDFDocument) -> DocumentMetadata {
+            let attributes = document.documentAttributes ?? [:]
 
-        return DocumentMetadata(
-            title: attributes[PDFDocumentAttribute.titleAttribute] as? String,
-            author: attributes[PDFDocumentAttribute.authorAttribute] as? String,
-            subject: attributes[PDFDocumentAttribute.subjectAttribute] as? String,
-            keywords: (attributes[PDFDocumentAttribute.keywordsAttribute] as? String)?.components(separatedBy: ","),
-            creator: attributes[PDFDocumentAttribute.creatorAttribute] as? String,
-            producer: attributes[PDFDocumentAttribute.producerAttribute] as? String,
-            creationDate: attributes[PDFDocumentAttribute.creationDateAttribute] as? Date,
-            modificationDate: attributes[PDFDocumentAttribute.modificationDateAttribute] as? Date
-        )
-    }
+            return DocumentMetadata(
+                title: attributes[PDFDocumentAttribute.titleAttribute] as? String,
+                author: attributes[PDFDocumentAttribute.authorAttribute] as? String,
+                subject: attributes[PDFDocumentAttribute.subjectAttribute] as? String,
+                keywords: (attributes[PDFDocumentAttribute.keywordsAttribute] as? String)?.components(separatedBy: ","),
+                creator: attributes[PDFDocumentAttribute.creatorAttribute] as? String,
+                producer: attributes[PDFDocumentAttribute.producerAttribute] as? String,
+                creationDate: attributes[PDFDocumentAttribute.creationDateAttribute] as? Date,
+                modificationDate: attributes[PDFDocumentAttribute.modificationDateAttribute] as? Date
+            )
+        }
     #endif
 
     // MARK: - Text Analysis
@@ -255,48 +255,48 @@ public final class DocumentIntelligence: ObservableObject {
         var language: String?
 
         #if canImport(NaturalLanguage)
-        // Detect language
-        let recognizer = NLLanguageRecognizer()
-        recognizer.processString(text)
-        if let dominantLanguage = recognizer.dominantLanguage {
-            language = dominantLanguage.rawValue
-        }
-
-        // Extract named entities
-        let tagger = NLTagger(tagSchemes: [.nameType, .lexicalClass])
-        tagger.string = text
-
-        let options: NLTagger.Options = [.omitWhitespace, .omitPunctuation]
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType, options: options) { tag, range in
-            if let tag = tag {
-                let entity = String(text[range])
-                let entityType = DocumentEntityType(from: tag)
-                if entityType != .unknown {
-                    entities.append(DocumentEntity(
-                        text: entity,
-                        type: entityType,
-                        range: range
-                    ))
-                }
+            // Detect language
+            let recognizer = NLLanguageRecognizer()
+            recognizer.processString(text)
+            if let dominantLanguage = recognizer.dominantLanguage {
+                language = dominantLanguage.rawValue
             }
-            return true
-        }
 
-        // Extract keywords using lexical analysis
-        var wordFrequency: [String: Int] = [:]
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .lexicalClass, options: options) { tag, range in
-            if let tag = tag, tag == .noun || tag == .verb || tag == .adjective {
-                let word = String(text[range]).lowercased()
-                if word.count > 3 {
-                    wordFrequency[word, default: 0] += 1
+            // Extract named entities
+            let tagger = NLTagger(tagSchemes: [.nameType, .lexicalClass])
+            tagger.string = text
+
+            let options: NLTagger.Options = [.omitWhitespace, .omitPunctuation]
+            tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .word, scheme: .nameType, options: options) { tag, range in
+                if let tag {
+                    let entity = String(text[range])
+                    let entityType = DocumentEntityType(from: tag)
+                    if entityType != .unknown {
+                        entities.append(DocumentEntity(
+                            text: entity,
+                            type: entityType,
+                            range: range
+                        ))
+                    }
                 }
+                return true
             }
-            return true
-        }
-        keywords = wordFrequency.sorted { $0.value > $1.value }.prefix(20).map { $0.key }
 
-        // Sentiment analysis
-        if let sentimentTagger = try? NLTagger(tagSchemes: [.sentimentScore]) {
+            // Extract keywords using lexical analysis
+            var wordFrequency: [String: Int] = [:]
+            tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .word, scheme: .lexicalClass, options: options) { tag, range in
+                if let tag, tag == .noun || tag == .verb || tag == .adjective {
+                    let word = String(text[range]).lowercased()
+                    if word.count > 3 {
+                        wordFrequency[word, default: 0] += 1
+                    }
+                }
+                return true
+            }
+            keywords = wordFrequency.sorted { $0.value > $1.value }.prefix(20).map(\.key)
+
+            // Sentiment analysis
+            let sentimentTagger = NLTagger(tagSchemes: [.sentimentScore])
             sentimentTagger.string = text
             let (sentimentTag, _) = sentimentTagger.tag(at: text.startIndex, unit: .paragraph, scheme: .sentimentScore)
             if let scoreString = sentimentTag?.rawValue, let score = Double(scoreString) {
@@ -305,7 +305,6 @@ public final class DocumentIntelligence: ObservableObject {
                     label: score > 0.3 ? .positive : (score < -0.3 ? .negative : .neutral)
                 )
             }
-        }
         #endif
 
         // Generate summary (simple extraction-based)
@@ -336,14 +335,15 @@ public final class DocumentIntelligence: ObservableObject {
         for line in lines {
             // Parse headers
             if line.hasPrefix("#") {
-                let level = line.prefix(while: { $0 == "#" }).count
+                let level = line.prefix { $0 == "#" }.count
                 let headerText = String(line.dropFirst(level)).trimmingCharacters(in: .whitespaces)
                 headers.append(DocumentHeader(level: level, text: headerText))
             }
 
             // Parse lists
             if line.trimmingCharacters(in: .whitespaces).hasPrefix("- ") ||
-               line.trimmingCharacters(in: .whitespaces).hasPrefix("* ") {
+                line.trimmingCharacters(in: .whitespaces).hasPrefix("* ")
+            {
                 let item = String(line.trimmingCharacters(in: .whitespaces).dropFirst(2))
                 currentListItems.append(item)
             } else if !currentListItems.isEmpty {
@@ -445,12 +445,12 @@ public enum DocumentError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .invalidDocument(let reason):
-            return "Invalid document: \(reason)"
-        case .featureNotAvailable(let feature):
-            return "Feature not available: \(feature)"
-        case .analysisError(let reason):
-            return "Analysis error: \(reason)"
+        case let .invalidDocument(reason):
+            "Invalid document: \(reason)"
+        case let .featureNotAvailable(feature):
+            "Feature not available: \(feature)"
+        case let .analysisError(reason):
+            "Analysis error: \(reason)"
         }
     }
 }
@@ -521,14 +521,14 @@ public enum DocumentEntityType: String, Sendable {
     case unknown
 
     #if canImport(NaturalLanguage)
-    init(from tag: NLTag) {
-        switch tag {
-        case .personalName: self = .person
-        case .placeName: self = .place
-        case .organizationName: self = .organization
-        default: self = .unknown
+        init(from tag: NLTag) {
+            switch tag {
+            case .personalName: self = .person
+            case .placeName: self = .place
+            case .organizationName: self = .organization
+            default: self = .unknown
+            }
         }
-    }
     #endif
 }
 

@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Improvement Suggestions Engine
+
 // Generates actionable improvement suggestions based on performance analysis
 
 /// An improvement suggestion
@@ -19,21 +20,21 @@ public struct ImprovementSuggestion: Sendable, Codable, Identifiable {
     public var status: Status
 
     public enum SuggestionCategory: String, Codable, Sendable, CaseIterable {
-        case performance       // Speed and efficiency
-        case quality           // Response quality
-        case userExperience    // User satisfaction
-        case cost              // API cost optimization
-        case reliability       // Error reduction
-        case capability        // New features/capabilities
+        case performance // Speed and efficiency
+        case quality // Response quality
+        case userExperience // User satisfaction
+        case cost // API cost optimization
+        case reliability // Error reduction
+        case capability // New features/capabilities
 
         public var icon: String {
             switch self {
-            case .performance: return "bolt"
-            case .quality: return "star"
-            case .userExperience: return "face.smiling"
-            case .cost: return "dollarsign.circle"
-            case .reliability: return "shield.checkered"
-            case .capability: return "plus.circle"
+            case .performance: "bolt"
+            case .quality: "star"
+            case .userExperience: "face.smiling"
+            case .cost: "dollarsign.circle"
+            case .reliability: "shield.checkered"
+            case .capability: "plus.circle"
             }
         }
     }
@@ -50,19 +51,19 @@ public struct ImprovementSuggestion: Sendable, Codable, Identifiable {
 
         public var displayName: String {
             switch self {
-            case .low: return "Low"
-            case .medium: return "Medium"
-            case .high: return "High"
-            case .critical: return "Critical"
+            case .low: "Low"
+            case .medium: "Medium"
+            case .high: "High"
+            case .critical: "Critical"
             }
         }
 
         public var color: String {
             switch self {
-            case .low: return "gray"
-            case .medium: return "blue"
-            case .high: return "orange"
-            case .critical: return "red"
+            case .low: "gray"
+            case .medium: "blue"
+            case .high: "orange"
+            case .critical: "red"
             }
         }
     }
@@ -75,11 +76,11 @@ public struct ImprovementSuggestion: Sendable, Codable, Identifiable {
     }
 
     public enum EffortLevel: String, Codable, Sendable {
-        case trivial       // < 1 hour
-        case small         // 1-4 hours
-        case medium        // 1-3 days
-        case large         // 1-2 weeks
-        case massive       // > 2 weeks
+        case trivial // < 1 hour
+        case small // 1-4 hours
+        case medium // 1-3 days
+        case large // 1-2 weeks
+        case massive // > 2 weeks
     }
 
     public enum Status: String, Codable, Sendable {
@@ -120,21 +121,19 @@ public struct ImprovementSuggestion: Sendable, Codable, Identifiable {
 
     /// ROI score (impact vs effort)
     public var roiScore: Double {
-        let impactValue: Double
-        switch impact {
-        case .minimal: impactValue = 1
-        case .moderate: impactValue = 2
-        case .significant: impactValue = 3
-        case .transformative: impactValue = 4
+        let impactValue: Double = switch impact {
+        case .minimal: 1
+        case .moderate: 2
+        case .significant: 3
+        case .transformative: 4
         }
 
-        let effortValue: Double
-        switch effort {
-        case .trivial: effortValue = 1
-        case .small: effortValue = 2
-        case .medium: effortValue = 3
-        case .large: effortValue = 4
-        case .massive: effortValue = 5
+        let effortValue: Double = switch effort {
+        case .trivial: 1
+        case .small: 2
+        case .medium: 3
+        case .large: 4
+        case .massive: 5
         }
 
         return impactValue / effortValue
@@ -231,11 +230,11 @@ public final class ImprovementSuggestionsEngine {
         let complexInteractions = interactions.filter {
             $0.analysis.complexity == .complex || $0.analysis.complexity == .veryComplex
         }
-        let complexSuccessRate = complexInteractions.filter {
+        let complexSuccessRate = complexInteractions.count {
             $0.analysis.responseQuality.overallScore >= 0.6
-        }.count
+        }
 
-        if complexInteractions.count > 5 && Double(complexSuccessRate) / Double(complexInteractions.count) < 0.7 {
+        if complexInteractions.count > 5, Double(complexSuccessRate) / Double(complexInteractions.count) < 0.7 {
             newSuggestions.append(ImprovementSuggestion(
                 category: .capability,
                 priority: .medium,
@@ -262,14 +261,14 @@ public final class ImprovementSuggestionsEngine {
     private func analyzeMetric(_ summary: MetricSummary) -> ImprovementSuggestion? {
         switch summary.metricType {
         case .responseTime:
-            if summary.average > 2_000 {
+            if summary.average > 2000 {
                 return ImprovementSuggestion(
                     category: .performance,
-                    priority: summary.average > 5_000 ? .high : .medium,
+                    priority: summary.average > 5000 ? .high : .medium,
                     title: "Reduce Response Latency",
                     description: "Average response time is \(String(format: "%.0f", summary.average))ms",
                     rationale: "Users expect responses within 1-2 seconds. Current latency may impact satisfaction.",
-                    impact: summary.average > 5_000 ? .significant : .moderate,
+                    impact: summary.average > 5000 ? .significant : .moderate,
                     effort: .medium,
                     actionItems: [
                         "Use faster models for simple queries",
@@ -352,7 +351,7 @@ public final class ImprovementSuggestionsEngine {
         let costSummary = summaries.first { $0.metricType == .apiCost }
 
         if let quality = qualitySummary, let cost = costSummary {
-            if quality.average < 60 && cost.trend == .improving {
+            if quality.average < 60, cost.trend == .improving {
                 suggestions.append(ImprovementSuggestion(
                     category: .quality,
                     priority: .high,
@@ -388,8 +387,8 @@ public final class ImprovementSuggestionsEngine {
     ) -> [ImprovementSuggestion] {
         suggestions.filter { suggestion in
             (category == nil || suggestion.category == category) &&
-            suggestion.priority >= minPriority &&
-            (status == nil || suggestion.status == status)
+                suggestion.priority >= minPriority &&
+                (status == nil || suggestion.status == status)
         }
     }
 

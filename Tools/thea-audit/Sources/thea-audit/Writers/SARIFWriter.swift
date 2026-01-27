@@ -4,7 +4,7 @@
 import Foundation
 
 /// Writes audit findings in SARIF (Static Analysis Results Interchange Format)
-struct SARIFWriter {
+enum SARIFWriter {
     /// Write findings to a SARIF file
     static func write(findings: [Finding], to path: String) throws {
         let sarif = generateSARIF(findings: findings)
@@ -93,20 +93,20 @@ struct SARIFWriter {
     /// Convert severity to SARIF level
     private static func severityToLevel(_ severity: Severity) -> String {
         switch severity {
-        case .critical: return "error"
-        case .high: return "error"
-        case .medium: return "warning"
-        case .low: return "note"
+        case .critical: "error"
+        case .high: "error"
+        case .medium: "warning"
+        case .low: "note"
         }
     }
 
     /// Convert severity to security score (0-10)
     private static func severityToScore(_ severity: Severity) -> String {
         switch severity {
-        case .critical: return "9.0"
-        case .high: return "7.0"
-        case .medium: return "5.0"
-        case .low: return "3.0"
+        case .critical: "9.0"
+        case .high: "7.0"
+        case .medium: "5.0"
+        case .low: "3.0"
         }
     }
 }

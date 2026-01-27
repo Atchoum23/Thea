@@ -3,6 +3,7 @@ import Observation
 @preconcurrency import SwiftData
 
 // MARK: - Tab Manager
+
 // Manages tabs within windows for multi-tab conversation support
 
 @MainActor
@@ -16,7 +17,7 @@ final class TabManager {
     init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
 
     // MARK: - Tab Operations
@@ -25,7 +26,7 @@ final class TabManager {
     func openNewTab(conversation: Conversation? = nil) {
         let tab: ConversationTab
 
-        if let conversation = conversation {
+        if let conversation {
             tab = ConversationTab(
                 conversation: conversation,
                 title: conversation.title,
@@ -88,7 +89,8 @@ final class TabManager {
         openTabs.removeAll { !$0.isPinned }
 
         if let selected = selectedTab,
-           !openTabs.contains(where: { $0.id == selected }) {
+           !openTabs.contains(where: { $0.id == selected })
+        {
             selectedTab = openTabs.first?.id
         }
     }
@@ -103,7 +105,8 @@ final class TabManager {
     /// Selects the next tab
     func selectNextTab() {
         guard let currentID = selectedTab,
-              let currentIndex = openTabs.firstIndex(where: { $0.id == currentID }) else {
+              let currentIndex = openTabs.firstIndex(where: { $0.id == currentID })
+        else {
             return
         }
 
@@ -114,7 +117,8 @@ final class TabManager {
     /// Selects the previous tab
     func selectPreviousTab() {
         guard let currentID = selectedTab,
-              let currentIndex = openTabs.firstIndex(where: { $0.id == currentID }) else {
+              let currentIndex = openTabs.firstIndex(where: { $0.id == currentID })
+        else {
             return
         }
 
@@ -170,7 +174,7 @@ final class TabManager {
 
     /// Gets all pinned tabs
     func getPinnedTabs() -> [ConversationTab] {
-        openTabs.filter { $0.isPinned }
+        openTabs.filter(\.isPinned)
     }
 
     /// Gets all unpinned tabs

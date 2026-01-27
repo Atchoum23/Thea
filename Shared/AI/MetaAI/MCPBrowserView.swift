@@ -1,12 +1,13 @@
 import SwiftUI
 
 // MARK: - MCP Browser View
+
 // Browse and inspect MCP servers and their tools
 
 struct MCPBrowserView: View {
     @State private var servers: [MCPServerInfo] = []
     @State private var selectedServer: MCPServerInfo?
-    
+
     var body: some View {
         NavigationSplitView {
             // Server list sidebar
@@ -36,9 +37,9 @@ struct MCPBrowserView: View {
         }
         .onAppear { loadServers() }
     }
-    
+
     // MARK: - Actions
-    
+
     private func loadServers() {
         servers = MCPToolRegistry.shared.mcpServers
         if servers.isEmpty {
@@ -67,7 +68,7 @@ struct MCPBrowserView: View {
             ]
         }
     }
-    
+
     private func refreshServers() {
         Task {
             await MCPToolRegistry.shared.refreshTools()

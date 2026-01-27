@@ -88,7 +88,8 @@ public final class AssessmentViewModel {
 
     public var currentQuestion: AssessmentQuestion? {
         guard let progress = currentProgress,
-              progress.currentQuestionIndex < currentQuestions.count else {
+              progress.currentQuestionIndex < currentQuestions.count
+        else {
             return nil
         }
         return currentQuestions[progress.currentQuestionIndex]

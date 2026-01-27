@@ -16,7 +16,7 @@ public final class IntegrationCoordinator {
 
     // MARK: - Feature Flags
 
-    public var featureFlags = FeatureFlags()
+    public var featureFlags: FeatureFlags { FeatureFlags.shared }
 
     // MARK: - Module Coordinators
 
@@ -27,8 +27,8 @@ public final class IntegrationCoordinator {
     public var incomeAnalytics: IncomeAnalyticsCoordinator?
 
     #if os(macOS)
-    // Display module uses actor-based DisplayProfileManager directly
-    // public var displayProfiles: DisplayProfileCoordinator?
+        // Display module uses actor-based DisplayProfileManager directly
+        // public var displayProfiles: DisplayProfileCoordinator?
     #endif
 
     private init() {}
@@ -44,7 +44,7 @@ public final class IntegrationCoordinator {
         isInitialized = true
     }
 
-    private func initializeEnabledModules(context: ModelContext) async {
+    private func initializeEnabledModules(context _: ModelContext) async {
         // Initialize Health module
         if featureFlags.healthEnabled {
             await initializeHealthModule()
@@ -82,9 +82,9 @@ public final class IntegrationCoordinator {
 
         // Initialize Display module (macOS only)
         #if os(macOS)
-        if featureFlags.displayEnabled {
-            await initializeDisplayModule()
-        }
+            if featureFlags.displayEnabled {
+                await initializeDisplayModule()
+            }
         #endif
 
         // Initialize Income module
@@ -102,10 +102,10 @@ public final class IntegrationCoordinator {
 
         // Check HealthKit availability
         #if canImport(HealthKit)
-        moduleStatus[.health] = .active
-        activeModules.insert(.health)
+            moduleStatus[.health] = .active
+            activeModules.insert(.health)
         #else
-        moduleStatus[.health] = .unavailable
+            moduleStatus[.health] = .unavailable
         #endif
     }
 
@@ -162,16 +162,16 @@ public final class IntegrationCoordinator {
     }
 
     #if os(macOS)
-    private func initializeDisplayModule() async {
-        moduleStatus[.display] = .initializing
+        private func initializeDisplayModule() async {
+            moduleStatus[.display] = .initializing
 
-        // DisplayProfileCoordinator not yet implemented
-        // displayProfiles = DisplayProfileCoordinator()
-        // await displayProfiles?.loadProfiles()
+            // DisplayProfileCoordinator not yet implemented
+            // displayProfiles = DisplayProfileCoordinator()
+            // await displayProfiles?.loadProfiles()
 
-        moduleStatus[.display] = .active
-        activeModules.insert(.display)
-    }
+            moduleStatus[.display] = .active
+            activeModules.insert(.display)
+        }
     #endif
 
     private func initializeIncomeModule() async {
@@ -190,33 +190,33 @@ public final class IntegrationCoordinator {
 
         switch module {
         case .health:
-            featureFlags.healthEnabled = true
+            featureFlags.setFlag("integration.health", enabled: true)
             await initializeHealthModule()
         case .wellness:
-            featureFlags.wellnessEnabled = true
+            featureFlags.setFlag("integration.wellness", enabled: true)
             await initializeWellnessModule()
         case .cognitive:
-            featureFlags.cognitiveEnabled = true
+            featureFlags.setFlag("integration.cognitive", enabled: true)
             await initializeCognitiveModule()
         case .financial:
-            featureFlags.financialEnabled = true
+            featureFlags.setFlag("integration.financial", enabled: true)
             await initializeFinancialModule()
         case .career:
-            featureFlags.careerEnabled = true
+            featureFlags.setFlag("integration.career", enabled: true)
             await initializeCareerModule()
         case .assessment:
-            featureFlags.assessmentEnabled = true
+            featureFlags.setFlag("integration.assessment", enabled: true)
             await initializeAssessmentModule()
         case .nutrition:
-            featureFlags.nutritionEnabled = true
+            featureFlags.setFlag("integration.nutrition", enabled: true)
             await initializeNutritionModule()
         case .display:
             #if os(macOS)
-            featureFlags.displayEnabled = true
-            await initializeDisplayModule()
+                featureFlags.setFlag("integration.display", enabled: true)
+                await initializeDisplayModule()
             #endif
         case .income:
-            featureFlags.incomeEnabled = true
+            featureFlags.setFlag("integration.income", enabled: true)
             await initializeIncomeModule()
         }
     }
@@ -229,30 +229,30 @@ public final class IntegrationCoordinator {
 
         switch module {
         case .health:
-            featureFlags.healthEnabled = false
+            featureFlags.setFlag("integration.health", enabled: false)
             healthSync = nil
         case .wellness:
-            featureFlags.wellnessEnabled = false
+            featureFlags.setFlag("integration.wellness", enabled: false)
         case .cognitive:
-            featureFlags.cognitiveEnabled = false
+            featureFlags.setFlag("integration.cognitive", enabled: false)
         case .financial:
-            featureFlags.financialEnabled = false
+            featureFlags.setFlag("integration.financial", enabled: false)
         case .career:
-            featureFlags.careerEnabled = false
+            featureFlags.setFlag("integration.career", enabled: false)
             careerGoals = nil
         case .assessment:
-            featureFlags.assessmentEnabled = false
+            featureFlags.setFlag("integration.assessment", enabled: false)
             assessmentExport = nil
         case .nutrition:
-            featureFlags.nutritionEnabled = false
+            featureFlags.setFlag("integration.nutrition", enabled: false)
             nutritionImport = nil
         case .display:
             #if os(macOS)
-            featureFlags.displayEnabled = false
-            // displayProfiles = nil
+                featureFlags.setFlag("integration.display", enabled: false)
+                // displayProfiles = nil
             #endif
         case .income:
-            featureFlags.incomeEnabled = false
+            featureFlags.setFlag("integration.income", enabled: false)
             incomeAnalytics = nil
         }
     }
@@ -298,9 +298,9 @@ public final class IntegrationCoordinator {
                 reports[.nutrition] = nutritionImport != nil ? "Operational" : "Coordinator missing"
             case .display:
                 #if os(macOS)
-                reports[.display] = "Not implemented"
+                    reports[.display] = "Not implemented"
                 #else
-                reports[.display] = "Platform unsupported"
+                    reports[.display] = "Platform unsupported"
                 #endif
             case .income:
                 reports[.income] = incomeAnalytics != nil ? "Operational" : "Coordinator missing"
@@ -333,29 +333,29 @@ public enum IntegrationModule: String, CaseIterable, Sendable, Identifiable {
 
     public var icon: String {
         switch self {
-        case .health: return "heart.fill"
-        case .wellness: return "leaf.fill"
-        case .cognitive: return "brain.head.profile"
-        case .financial: return "dollarsign.circle.fill"
-        case .career: return "briefcase.fill"
-        case .assessment: return "chart.bar.doc.horizontal.fill"
-        case .nutrition: return "fork.knife"
-        case .display: return "display"
-        case .income: return "banknote.fill"
+        case .health: "heart.fill"
+        case .wellness: "leaf.fill"
+        case .cognitive: "brain.head.profile"
+        case .financial: "dollarsign.circle.fill"
+        case .career: "briefcase.fill"
+        case .assessment: "chart.bar.doc.horizontal.fill"
+        case .nutrition: "fork.knife"
+        case .display: "display"
+        case .income: "banknote.fill"
         }
     }
 
     public var color: Color {
         switch self {
-        case .health: return .red
-        case .wellness: return .green
-        case .cognitive: return .purple
-        case .financial: return .blue
-        case .career: return .orange
-        case .assessment: return .indigo
-        case .nutrition: return .yellow
-        case .display: return .cyan
-        case .income: return .mint
+        case .health: .red
+        case .wellness: .green
+        case .cognitive: .purple
+        case .financial: .blue
+        case .career: .orange
+        case .assessment: .indigo
+        case .nutrition: .yellow
+        case .display: .cyan
+        case .income: .mint
         }
     }
 }
@@ -369,21 +369,21 @@ public enum ModuleStatus: Sendable {
 
     public var displayName: String {
         switch self {
-        case .disabled: return "Disabled"
-        case .initializing: return "Initializing..."
-        case .active: return "Active"
-        case .error(let message): return "Error: \(message)"
-        case .unavailable: return "Unavailable"
+        case .disabled: "Disabled"
+        case .initializing: "Initializing..."
+        case .active: "Active"
+        case let .error(message): "Error: \(message)"
+        case .unavailable: "Unavailable"
         }
     }
 
     public var color: Color {
         switch self {
-        case .disabled: return .gray
-        case .initializing: return .yellow
-        case .active: return .green
-        case .error: return .red
-        case .unavailable: return .orange
+        case .disabled: .gray
+        case .initializing: .yellow
+        case .active: .green
+        case .error: .red
+        case .unavailable: .orange
         }
     }
 }

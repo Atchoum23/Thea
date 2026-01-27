@@ -535,10 +535,10 @@ public enum TimeRange: String, CaseIterable, Sendable {
 
     public var days: Int {
         switch self {
-        case .week: return 7
-        case .month: return 30
-        case .quarter: return 90
-        case .year: return 365
+        case .week: 7
+        case .month: 30
+        case .quarter: 90
+        case .year: 365
         }
     }
 }
@@ -578,11 +578,11 @@ public enum InsightCategory: String, Sendable {
 
     var displayName: String {
         switch self {
-        case .sleep: return "Sleep"
-        case .activity: return "Activity"
-        case .heart: return "Heart Health"
-        case .nutrition: return "Nutrition"
-        case .overall: return "Overall Health"
+        case .sleep: "Sleep"
+        case .activity: "Activity"
+        case .heart: "Heart Health"
+        case .nutrition: "Nutrition"
+        case .overall: "Overall Health"
         }
     }
 }
@@ -595,10 +595,10 @@ public enum InsightSeverity: Sendable {
 
     var color: Color {
         switch self {
-        case .positive: return .green
-        case .neutral: return .blue
-        case .warning: return .orange
-        case .critical: return .red
+        case .positive: .green
+        case .neutral: .blue
+        case .warning: .orange
+        case .critical: .red
         }
     }
 
@@ -659,17 +659,17 @@ public enum CorrelationStrength: Sendable {
 
     var displayName: String {
         switch self {
-        case .strong: return "Strong"
-        case .moderate: return "Moderate"
-        case .weak: return "Weak"
+        case .strong: "Strong"
+        case .moderate: "Moderate"
+        case .weak: "Weak"
         }
     }
 
     var color: Color {
         switch self {
-        case .strong: return .green
-        case .moderate: return .yellow
-        case .weak: return .orange
+        case .strong: .green
+        case .moderate: .yellow
+        case .weak: .orange
         }
     }
 }
@@ -725,7 +725,7 @@ final class HealthInsightsViewModel {
 
         // Mock averages
         averageSleepDuration = 420 // 7 hours
-        averageSteps = 8_500
+        averageSteps = 8500
         averageRestingHR = 62
         averageActiveCalories = 450
 
@@ -737,7 +737,7 @@ final class HealthInsightsViewModel {
 
         // Mock trend data
         sleepTrendData = generateMockTrendData(days: timeRange.days, baseValue: 7.0, variance: 1.5)
-        activityTrendData = generateMockTrendData(days: timeRange.days, baseValue: 8_500, variance: 2_000)
+        activityTrendData = generateMockTrendData(days: timeRange.days, baseValue: 8500, variance: 2000)
         heartRateTrendData = generateMockTrendData(days: timeRange.days, baseValue: 62, variance: 5)
 
         await generateInsights()
@@ -745,9 +745,9 @@ final class HealthInsightsViewModel {
     }
 
     private func generateMockTrendData(days: Int, baseValue: Double, variance: Double) -> [TrendDataPoint] {
-        (0..<days).map { day in
+        (0 ..< days).map { day in
             let date = Calendar.current.date(byAdding: .day, value: -days + day, to: Date()) ?? Date().addingTimeInterval(Double(-days + day) * 86400)
-            let randomVariance = Double.random(in: -variance...variance)
+            let randomVariance = Double.random(in: -variance ... variance)
             return TrendDataPoint(date: date, value: baseValue + randomVariance)
         }
     }

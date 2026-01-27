@@ -55,7 +55,7 @@ struct HelpButton: View {
 extension HelpButton {
     /// Creates a help button with just an explanation (uses "Help" as title)
     init(explanation: String) {
-        self.title = "Help"
+        title = "Help"
         self.explanation = explanation
     }
 }

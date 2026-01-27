@@ -1,6 +1,6 @@
 import Foundation
-import SwiftUI
 import OSLog
+import SwiftUI
 
 /// Centralized approval manager for all operations
 /// Handles user confirmation for sensitive operations with proper async continuation handling
@@ -10,15 +10,15 @@ public final class ApprovalManager {
     public static let shared = ApprovalManager()
 
     private let logger = Logger(subsystem: "com.thea.core", category: "ApprovalManager")
-    
+
     // Pending approvals
     public var pendingApprovals: [ApprovalRequest] = []
     public var showApprovalDialog: Bool = false
     public var currentRequest: ApprovalRequest?
-    
+
     /// Stored continuations for pending approval requests
     private var continuations: [UUID: CheckedContinuation<ApprovalDecision, Error>] = [:]
-    
+
     /// Timeout for approval requests (default: 5 minutes)
     public var approvalTimeout: TimeInterval = 300
 
@@ -39,7 +39,7 @@ public final class ApprovalManager {
         }
 
         // In normal mode, check if operation requires approval
-        if mode == .normal && shouldAutoApprove(operation) {
+        if mode == .normal, shouldAutoApprove(operation) {
             logger.debug("Auto-approving \(operation.rawValue) based on settings")
             return .approved
         }
@@ -80,16 +80,16 @@ public final class ApprovalManager {
         try await withCheckedThrowingContinuation { continuation in
             // Store the continuation for later resolution
             self.continuations[request.id] = continuation
-            
+
             // Update UI state
             self.currentRequest = request
             self.pendingApprovals.append(request)
             self.showApprovalDialog = true
-            
+
             // Set up timeout
             Task {
                 try? await Task.sleep(nanoseconds: UInt64(approvalTimeout * 1_000_000_000))
-                
+
                 // If still pending after timeout, reject
                 if self.continuations[request.id] != nil {
                     self.logger.warning("Approval request timed out: \(request.id)")
@@ -102,12 +102,12 @@ public final class ApprovalManager {
     /// User responded to approval request
     public func respondToRequest(id: UUID, decision: ApprovalDecision) {
         logger.info("User responded to approval \(id): \(decision.rawValue)")
-        
+
         // Resume the continuation with the decision
         if let continuation = continuations.removeValue(forKey: id) {
             continuation.resume(returning: decision)
         }
-        
+
         // Update pending approvals list
         pendingApprovals.removeAll { $0.id == id }
 
@@ -119,17 +119,17 @@ public final class ApprovalManager {
             currentRequest = pendingApprovals.first
         }
     }
-    
+
     /// Cancel a pending approval request
     public func cancelRequest(id: UUID) {
         logger.info("Cancelling approval request: \(id)")
-        
+
         if let continuation = continuations.removeValue(forKey: id) {
             continuation.resume(throwing: ApprovalError.cancelled)
         }
-        
+
         pendingApprovals.removeAll { $0.id == id }
-        
+
         if pendingApprovals.isEmpty {
             showApprovalDialog = false
             currentRequest = nil
@@ -137,28 +137,28 @@ public final class ApprovalManager {
             currentRequest = pendingApprovals.first
         }
     }
-    
+
     /// Cancel all pending approval requests
     public func cancelAllRequests() {
-        let count = self.continuations.count
+        let count = continuations.count
         logger.info("Cancelling all \(count) pending approval requests")
-        
-        for (id, continuation) in self.continuations {
+
+        for (id, continuation) in continuations {
             continuation.resume(throwing: ApprovalError.cancelled)
-            self.pendingApprovals.removeAll { $0.id == id }
+            pendingApprovals.removeAll { $0.id == id }
         }
-        
-        self.continuations.removeAll()
-        self.pendingApprovals.removeAll()
-        self.showApprovalDialog = false
-        self.currentRequest = nil
+
+        continuations.removeAll()
+        pendingApprovals.removeAll()
+        showApprovalDialog = false
+        currentRequest = nil
     }
-    
+
     /// Check if there are any pending approvals
     public var hasPendingApprovals: Bool {
         !pendingApprovals.isEmpty
     }
-    
+
     /// Get the count of pending approvals
     public var pendingCount: Int {
         pendingApprovals.count
@@ -171,15 +171,15 @@ public enum ApprovalError: LocalizedError {
     case cancelled
     case timeout
     case invalidRequest
-    
+
     public var errorDescription: String? {
         switch self {
         case .cancelled:
-            return "Approval request was cancelled"
+            "Approval request was cancelled"
         case .timeout:
-            return "Approval request timed out"
+            "Approval request timed out"
         case .invalidRequest:
-            return "Invalid approval request"
+            "Invalid approval request"
         }
     }
 }
@@ -196,29 +196,29 @@ public enum OperationType: String, Codable, Sendable, CaseIterable {
     case browserAction = "Browser Action"
     case systemAutomation = "System Automation"
     case executePlan = "Execute Plan"
-    
+
     /// Icon for the operation type
     public var icon: String {
         switch self {
-        case .readFile: return "doc.text"
-        case .writeFile: return "doc.text.fill"
-        case .deleteFile: return "trash"
-        case .listDirectory: return "folder"
-        case .searchData: return "magnifyingglass"
-        case .executeTerminalCommand: return "terminal"
-        case .browserAction: return "globe"
-        case .systemAutomation: return "gearshape.2"
-        case .executePlan: return "list.bullet.clipboard"
+        case .readFile: "doc.text"
+        case .writeFile: "doc.text.fill"
+        case .deleteFile: "trash"
+        case .listDirectory: "folder"
+        case .searchData: "magnifyingglass"
+        case .executeTerminalCommand: "terminal"
+        case .browserAction: "globe"
+        case .systemAutomation: "gearshape.2"
+        case .executePlan: "list.bullet.clipboard"
         }
     }
-    
+
     /// Whether this operation is considered destructive
     public var isDestructive: Bool {
         switch self {
         case .deleteFile, .executeTerminalCommand, .systemAutomation:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }
@@ -229,14 +229,14 @@ public enum ApprovalDecision: String, Codable, Sendable {
     case approved = "Approved"
     case rejected = "Rejected"
     case editAndApprove = "Edit and Approve"
-    
+
     /// Whether the operation should proceed
     public var shouldProceed: Bool {
         switch self {
         case .approved, .editAndApprove:
-            return true
+            true
         case .rejected:
-            return false
+            false
         }
     }
 }
@@ -249,7 +249,7 @@ public struct ApprovalRequest: Identifiable, Sendable {
     public let details: String
     public let previewData: String?
     public let timestamp: Date
-    
+
     public init(
         id: UUID = UUID(),
         operation: OperationType,

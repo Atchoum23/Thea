@@ -24,7 +24,7 @@ final class ReflectionEngine {
     func reflect(
         on output: String,
         task: String,
-        context: [String: Any] = [:]
+        context _: [String: Any] = [:]
     ) async throws -> Reflection {
         // Step 1: Self-critique
         let critique = try await selfCritique(output: output, task: task)
@@ -75,7 +75,7 @@ final class ReflectionEngine {
         guard !learnings.isEmpty else { return prompt }
 
         let recentLearnings = learnings.suffix(5)
-        let learningsSummary = recentLearnings.map { $0.insight }.joined(separator: "\n")
+        let learningsSummary = recentLearnings.map(\.insight).joined(separator: "\n")
 
         return """
         \(prompt)
@@ -160,7 +160,7 @@ final class ReflectionEngine {
             throw ReflectionError.providerNotAvailable
         }
 
-        let weaknessDescriptions = weaknesses.map { $0.description }.joined(separator: "\n")
+        let weaknessDescriptions = weaknesses.map(\.description).joined(separator: "\n")
 
         let prompt = """
         Original output:
@@ -193,7 +193,7 @@ final class ReflectionEngine {
             throw ReflectionError.providerNotAvailable
         }
 
-        let suggestionList = suggestions.map { $0.suggestion }.joined(separator: "\n")
+        let suggestionList = suggestions.map(\.suggestion).joined(separator: "\n")
 
         let prompt = """
         Original output:
@@ -208,7 +208,7 @@ final class ReflectionEngine {
         return try await streamProviderResponse(provider: provider, prompt: prompt, model: config.reflectionModel)
     }
 
-    private func extractLearnings(original: String, improved: String, weaknesses: [Weakness]) async throws -> Learning {
+    private func extractLearnings(original: String, improved: String, weaknesses _: [Weakness]) async throws -> Learning {
         guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
             throw ReflectionError.providerNotAvailable
         }
@@ -249,11 +249,11 @@ final class ReflectionEngine {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 result += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -319,7 +319,7 @@ enum ReflectionError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .providerNotAvailable:
-            return "AI provider not available for reflection"
+            "AI provider not available for reflection"
         }
     }
 }

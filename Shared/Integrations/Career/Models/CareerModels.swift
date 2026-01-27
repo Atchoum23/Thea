@@ -53,13 +53,13 @@ public enum SkillCategory: String, Sendable, Codable, CaseIterable {
 
     public var icon: String {
         switch self {
-        case .technical: return "cpu"
-        case .soft: return "person.2"
-        case .leadership: return "crown"
-        case .communication: return "bubble.left.and.bubble.right"
-        case .creative: return "paintbrush"
-        case .analytical: return "chart.bar"
-        case .other: return "star"
+        case .technical: "cpu"
+        case .soft: "person.2"
+        case .leadership: "crown"
+        case .communication: "bubble.left.and.bubble.right"
+        case .creative: "paintbrush"
+        case .analytical: "chart.bar"
+        case .other: "star"
         }
     }
 }
@@ -76,10 +76,10 @@ public enum ProficiencyLevel: Int, Sendable, Codable, CaseIterable, Comparable {
 
     public var displayName: String {
         switch self {
-        case .beginner: return "Beginner"
-        case .intermediate: return "Intermediate"
-        case .advanced: return "Advanced"
-        case .expert: return "Expert"
+        case .beginner: "Beginner"
+        case .intermediate: "Intermediate"
+        case .advanced: "Advanced"
+        case .expert: "Expert"
         }
     }
 }
@@ -174,25 +174,25 @@ public enum Mood: String, Sendable, Codable, CaseIterable {
 
     public var icon: String {
         switch self {
-        case .frustrated: return "face.frowning"
-        case .stressed: return "exclamationmark.triangle.fill"
-        case .neutral: return "face.neutral"
-        case .satisfied: return "face.smiling"
-        case .motivated: return "bolt.fill"
-        case .accomplished: return "star.fill"
-        case .excited: return "sparkles"
+        case .frustrated: "face.frowning"
+        case .stressed: "exclamationmark.triangle.fill"
+        case .neutral: "face.neutral"
+        case .satisfied: "face.smiling"
+        case .motivated: "bolt.fill"
+        case .accomplished: "star.fill"
+        case .excited: "sparkles"
         }
     }
 
     public var color: String {
         switch self {
-        case .frustrated: return "#EF4444"
-        case .stressed: return "#F59E0B"
-        case .neutral: return "#6B7280"
-        case .satisfied: return "#10B981"
-        case .motivated: return "#3B82F6"
-        case .accomplished: return "#8B5CF6"
-        case .excited: return "#EC4899"
+        case .frustrated: "#EF4444"
+        case .stressed: "#F59E0B"
+        case .neutral: "#6B7280"
+        case .satisfied: "#10B981"
+        case .motivated: "#3B82F6"
+        case .accomplished: "#8B5CF6"
+        case .excited: "#EC4899"
         }
     }
 }
@@ -222,7 +222,7 @@ public struct GrowthRecommendation: Identifiable, Sendable, Codable {
     ) {
         self.id = id
         self.type = type
-        self.category = type
+        category = type
         self.title = title
         self.description = description
         self.priority = priority
@@ -242,12 +242,12 @@ public enum RecommendationType: String, Sendable, Codable {
 
     public var icon: String {
         switch self {
-        case .skillDevelopment: return "brain.head.profile"
-        case .networking: return "person.2"
-        case .certification: return "rosette"
-        case .mentorship: return "person.badge.plus"
-        case .projectWork: return "folder.badge.gearshape"
-        case .leadership: return "crown"
+        case .skillDevelopment: "brain.head.profile"
+        case .networking: "person.2"
+        case .certification: "rosette"
+        case .mentorship: "person.badge.plus"
+        case .projectWork: "folder.badge.gearshape"
+        case .leadership: "crown"
         }
     }
 }
@@ -267,21 +267,21 @@ public enum CareerError: Error, Sendable, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .goalNotFound:
-            return "Career goal not found"
+            "Career goal not found"
         case .skillNotFound:
-            return "Skill not found"
+            "Skill not found"
         case .reflectionNotFound:
-            return "Reflection not found"
+            "Reflection not found"
         case .invalidData:
-            return "Invalid data provided"
-        case .invalidGoal(let message):
-            return "Invalid goal: \(message)"
-        case .invalidSkill(let message):
-            return "Invalid skill: \(message)"
-        case .invalidCareerReflection(let message):
-            return "Invalid career reflection: \(message)"
+            "Invalid data provided"
+        case let .invalidGoal(message):
+            "Invalid goal: \(message)"
+        case let .invalidSkill(message):
+            "Invalid skill: \(message)"
+        case let .invalidCareerReflection(message):
+            "Invalid career reflection: \(message)"
         case .saveFailed:
-            return "Failed to save career data"
+            "Failed to save career data"
         }
     }
 }

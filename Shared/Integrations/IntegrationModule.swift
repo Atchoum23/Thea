@@ -1,5 +1,5 @@
 //
-//  AppIntegrationModule.swift
+//  IntegrationModule.swift
 //  Thea
 //
 //  Created by Claude Code on 2026-01-20
@@ -52,27 +52,27 @@ public enum AppIntegrationModuleError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .notSupported:
-            return "This integration is not supported on this platform"
-        case .appNotRunning(let app):
-            return "\(app) is not running"
-        case .appNotInstalled(let app):
-            return "\(app) is not installed"
-        case .permissionDenied(let reason):
-            return "Permission denied: \(reason)"
-        case .connectionFailed(let reason):
-            return "Connection failed: \(reason)"
-        case .scriptError(let reason):
-            return "Script error: \(reason)"
-        case .operationFailed(let reason):
-            return "Operation failed: \(reason)"
+            "This integration is not supported on this platform"
+        case let .appNotRunning(app):
+            "\(app) is not running"
+        case let .appNotInstalled(app):
+            "\(app) is not installed"
+        case let .permissionDenied(reason):
+            "Permission denied: \(reason)"
+        case let .connectionFailed(reason):
+            "Connection failed: \(reason)"
+        case let .scriptError(reason):
+            "Script error: \(reason)"
+        case let .operationFailed(reason):
+            "Operation failed: \(reason)"
         case .timeout:
-            return "Operation timed out"
-        case .invalidInput(let reason):
-            return "Invalid input: \(reason)"
-        case .invalidPath(let reason):
-            return "Invalid path: \(reason)"
-        case .securityError(let reason):
-            return "Security error: \(reason)"
+            "Operation timed out"
+        case let .invalidInput(reason):
+            "Invalid input: \(reason)"
+        case let .invalidPath(reason):
+            "Invalid path: \(reason)"
+        case let .securityError(reason):
+            "Security error: \(reason)"
         }
     }
 }
@@ -96,19 +96,23 @@ public actor IntegrationRegistry {
 
     /// Initialize and register default modules
     public func initializeDefaultModules() async {
-        // Register built-in modules
+        // Register built-in modules (cross-platform)
         await registerModule(SafariIntegration.shared)
-        await registerModule(FinderIntegration.shared)
         await registerModule(MailIntegration.shared)
         await registerModule(CalendarIntegration.shared)
         await registerModule(NotesIntegration.shared)
         await registerModule(RemindersIntegration.shared)
         await registerModule(MessagesIntegration.shared)
         await registerModule(MusicIntegration.shared)
-        await registerModule(TerminalIntegration.shared)
-        await registerModule(XcodeIntegration.shared)
-        await registerModule(SystemIntegration.shared)
         await registerModule(ShortcutsIntegration.shared)
+
+        // macOS-only modules
+        #if os(macOS)
+            await registerModule(FinderIntegration.shared)
+            await registerModule(TerminalIntegration.shared)
+            await registerModule(XcodeIntegration.shared)
+            await registerModule(SystemIntegration.shared)
+        #endif
     }
 
     private func registerModule(_ module: any AppIntegrationModule) async {

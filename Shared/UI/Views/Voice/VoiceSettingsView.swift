@@ -42,7 +42,7 @@ struct VoiceSettingsView: View {
                     Text("Speech Rate")
                         .font(.caption)
 
-                    Slider(value: $speechRate, in: 0.25...1.0)
+                    Slider(value: $speechRate, in: 0.25 ... 1.0)
 
                     HStack {
                         Text("Slow")

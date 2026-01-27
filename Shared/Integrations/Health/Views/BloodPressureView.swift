@@ -84,14 +84,14 @@ public struct BloodPressureView: View {
                         .clipShape(Capsule())
 
                     // Pulse data not available in current model
-                    /*if let pulse = reading.pulse {
-                        HStack(spacing: 4) {
-                            Image(systemName: "heart.fill")
-                                .foregroundStyle(.red)
-                            Text("\(pulse) BPM")
-                                .font(.subheadline)
-                        }
-                    }*/
+                    /* if let pulse = reading.pulse {
+                         HStack(spacing: 4) {
+                             Image(systemName: "heart.fill")
+                                 .foregroundStyle(.red)
+                             Text("\(pulse) BPM")
+                                 .font(.subheadline)
+                         }
+                     } */
                 }
             }
 
@@ -372,7 +372,7 @@ final class BloodPressureViewModel {
     }
 
     var averagePulse: Int {
-        let pulseReadings = readings.compactMap { $0.pulse }
+        let pulseReadings = readings.compactMap(\.pulse)
         guard !pulseReadings.isEmpty else { return 0 }
         return pulseReadings.reduce(0, +) / pulseReadings.count
     }
@@ -384,7 +384,6 @@ final class BloodPressureViewModel {
 
 // MARK: - Models
 
-
 enum BPCategory {
     case normal
     case elevated
@@ -394,21 +393,21 @@ enum BPCategory {
 
     var displayName: String {
         switch self {
-        case .normal: return "Normal"
-        case .elevated: return "Elevated"
-        case .stage1Hypertension: return "Stage 1"
-        case .stage2Hypertension: return "Stage 2"
-        case .hypertensiveCrisis: return "Crisis"
+        case .normal: "Normal"
+        case .elevated: "Elevated"
+        case .stage1Hypertension: "Stage 1"
+        case .stage2Hypertension: "Stage 2"
+        case .hypertensiveCrisis: "Crisis"
         }
     }
 
     var color: String {
         switch self {
-        case .normal: return "green"
-        case .elevated: return "yellow"
-        case .stage1Hypertension: return "orange"
-        case .stage2Hypertension: return "red"
-        case .hypertensiveCrisis: return "purple"
+        case .normal: "green"
+        case .elevated: "yellow"
+        case .stage1Hypertension: "orange"
+        case .stage2Hypertension: "red"
+        case .hypertensiveCrisis: "purple"
         }
     }
 }

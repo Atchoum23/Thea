@@ -100,8 +100,8 @@ struct AuditCommand: ParsableCommand {
 
         // Strict mode: exit with error if high/critical findings
         if strict {
-            let criticalCount = findings.filter { $0.severity == .critical }.count
-            let highCount = findings.filter { $0.severity == .high }.count
+            let criticalCount = findings.count(where: { $0.severity == .critical })
+            let highCount = findings.count(where: { $0.severity == .high })
 
             if criticalCount > 0 || highCount > 0 {
                 throw AuditError.strictModeViolation(
@@ -119,10 +119,10 @@ struct AuditCommand: ParsableCommand {
         print("Duration: \(String(format: "%.2f", duration))s")
         print("")
 
-        let criticalCount = findings.filter { $0.severity == .critical }.count
-        let highCount = findings.filter { $0.severity == .high }.count
-        let mediumCount = findings.filter { $0.severity == .medium }.count
-        let lowCount = findings.filter { $0.severity == .low }.count
+        let criticalCount = findings.count(where: { $0.severity == .critical })
+        let highCount = findings.count(where: { $0.severity == .high })
+        let mediumCount = findings.count(where: { $0.severity == .medium })
+        let lowCount = findings.count(where: { $0.severity == .low })
 
         print("Findings:")
         print("  Critical: \(criticalCount)")
@@ -169,10 +169,10 @@ enum OutputFormat: String, ExpressibleByArgument, CaseIterable {
 
     var fileExtension: String {
         switch self {
-        case .yaml: return "yaml"
-        case .json: return "json"
-        case .sarif: return "sarif"
-        case .markdown: return "md"
+        case .yaml: "yaml"
+        case .json: "json"
+        case .sarif: "sarif"
+        case .markdown: "md"
         }
     }
 }
@@ -185,14 +185,14 @@ enum AuditError: Error, CustomStringConvertible {
 
     var description: String {
         switch self {
-        case .strictModeViolation(let critical, let high):
-            return "Strict mode violation: \(critical) critical, \(high) high findings"
-        case .fileNotFound(let path):
-            return "File not found: \(path)"
-        case .invalidPolicy(let reason):
-            return "Invalid policy: \(reason)"
-        case .scannerError(let reason):
-            return "Scanner error: \(reason)"
+        case let .strictModeViolation(critical, high):
+            "Strict mode violation: \(critical) critical, \(high) high findings"
+        case let .fileNotFound(path):
+            "File not found: \(path)"
+        case let .invalidPolicy(reason):
+            "Invalid policy: \(reason)"
+        case let .scannerError(reason):
+            "Scanner error: \(reason)"
         }
     }
 }

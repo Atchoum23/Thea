@@ -5,14 +5,14 @@
 //  Advanced Shortcuts automation and Siri integration
 //
 
-import Foundation
 import AppIntents
+import Foundation
 import Intents
 
 #if os(iOS)
-import UIKit
+    import UIKit
 #elseif os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Extended App Intents
@@ -21,8 +21,8 @@ import AppKit
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct AskWithContextIntent: AppIntent {
-    static var title: LocalizedStringResource = "Ask Thea with Context"
-    static var description: IntentDescription = "Ask Thea a question with additional context from files or clipboard"
+    nonisolated(unsafe) static var title: LocalizedStringResource = "Ask Thea with Context"
+    nonisolated(unsafe) static var description: IntentDescription = "Ask Thea a question with additional context from files or clipboard"
 
     @Parameter(title: "Question")
     var question: String
@@ -48,26 +48,27 @@ struct AskWithContextIntent: AppIntent {
         }
     }
 
-    func perform() async throws -> some ReturningIntent<String> {
+    func perform() async throws -> some IntentResult & ReturnsValue<String> {
         var fullContext = question
 
         // Add clipboard content if requested
         if includeClipboard {
             #if os(iOS)
-            if let clipboardText = UIPasteboard.general.string {
-                fullContext += "\n\nClipboard content:\n\(clipboardText)"
-            }
+                if let clipboardText = UIPasteboard.general.string {
+                    fullContext += "\n\nClipboard content:\n\(clipboardText)"
+                }
             #elseif os(macOS)
-            if let clipboardText = NSPasteboard.general.string(forType: .string) {
-                fullContext += "\n\nClipboard content:\n\(clipboardText)"
-            }
+                if let clipboardText = NSPasteboard.general.string(forType: .string) {
+                    fullContext += "\n\nClipboard content:\n\(clipboardText)"
+                }
             #endif
         }
 
         // Add file contents
         if let files = contextFiles {
             for file in files {
-                if let data = file.data, let text = String(data: data, encoding: .utf8) {
+                let data = file.data
+                if let text = String(data: data, encoding: .utf8) {
                     fullContext += "\n\nFile (\(file.filename)):\n\(text)"
                 }
             }
@@ -84,8 +85,8 @@ struct AskWithContextIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct GenerateCodeIntent: AppIntent {
-    static var title: LocalizedStringResource = "Generate Code"
-    static var description: IntentDescription = "Generate code using Thea AI"
+    nonisolated(unsafe) static var title: LocalizedStringResource = "Generate Code"
+    nonisolated(unsafe) static var description: IntentDescription = "Generate code using Thea AI"
 
     @Parameter(title: "Description")
     var description: String
@@ -106,7 +107,7 @@ struct GenerateCodeIntent: AppIntent {
         }
     }
 
-    func perform() async throws -> some ReturningIntent<String> {
+    func perform() async throws -> some IntentResult & ReturnsValue<String> {
         // Code generation logic would go here
         let code = """
         // Generated \(language.rawValue) code
@@ -125,8 +126,8 @@ struct GenerateCodeIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct SummarizeContentIntent: AppIntent {
-    static var title: LocalizedStringResource = "Summarize Content"
-    static var description: IntentDescription = "Summarize text, files, or web pages"
+    nonisolated(unsafe) static var title: LocalizedStringResource = "Summarize Content"
+    nonisolated(unsafe) static var description: IntentDescription = "Summarize text, files, or web pages"
 
     @Parameter(title: "Content Type")
     var contentType: ContentTypeParameter
@@ -156,20 +157,18 @@ struct SummarizeContentIntent: AppIntent {
         }
     }
 
-    func perform() async throws -> some ReturningIntent<String> {
-        let textToSummarize: String
-
-        switch contentType {
+    func perform() async throws -> some IntentResult & ReturnsValue<String> {
+        let textToSummarize: String = switch contentType {
         case .text:
-            textToSummarize = content ?? ""
+            content ?? ""
         case .url:
             // Fetch URL content
-            textToSummarize = "Content from URL: \(url?.absoluteString ?? "")"
+            "Content from URL: \(url?.absoluteString ?? "")"
         case .file:
             if let data = file?.data, let text = String(data: data, encoding: .utf8) {
-                textToSummarize = text
+                text
             } else {
-                textToSummarize = ""
+                ""
             }
         }
 
@@ -181,9 +180,9 @@ struct SummarizeContentIntent: AppIntent {
 // MARK: Translate Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
-struct TranslateTextIntent: AppIntent {
-    static var title: LocalizedStringResource = "Translate with Thea"
-    static var description: IntentDescription = "Translate text to another language"
+struct AutomationTranslateIntent: AppIntent {
+    nonisolated(unsafe) static var title: LocalizedStringResource = "Translate with Thea"
+    nonisolated(unsafe) static var description: IntentDescription = "Translate text to another language"
 
     @Parameter(title: "Text")
     var text: String
@@ -204,7 +203,7 @@ struct TranslateTextIntent: AppIntent {
         }
     }
 
-    func perform() async throws -> some ReturningIntent<String> {
+    func perform() async throws -> some IntentResult & ReturnsValue<String> {
         let translation = "Translated text: \(text)"
         return .result(value: translation)
     }
@@ -214,8 +213,8 @@ struct TranslateTextIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct CreateAutomationIntent: AppIntent {
-    static var title: LocalizedStringResource = "Create Thea Automation"
-    static var description: IntentDescription = "Create a new automation workflow"
+    nonisolated(unsafe) static var title: LocalizedStringResource = "Create Thea Automation"
+    nonisolated(unsafe) static var description: IntentDescription = "Create a new automation workflow"
 
     @Parameter(title: "Automation Name")
     var name: String
@@ -231,7 +230,7 @@ struct CreateAutomationIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         // Create automation
-        return .result()
+        .result()
     }
 }
 
@@ -260,9 +259,9 @@ enum AIModelParameter: String, AppEnum {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 enum ResponseLengthParameter: String, AppEnum {
-    case brief = "brief"
-    case standard = "standard"
-    case detailed = "detailed"
+    case brief
+    case standard
+    case detailed
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation {
         TypeDisplayRepresentation(name: "Response Length")
@@ -312,9 +311,9 @@ enum ProgrammingLanguageParameter: String, AppEnum {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 enum ContentTypeParameter: String, AppEnum {
-    case text = "text"
-    case url = "url"
-    case file = "file"
+    case text
+    case url
+    case file
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation {
         TypeDisplayRepresentation(name: "Content Type")
@@ -331,10 +330,10 @@ enum ContentTypeParameter: String, AppEnum {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 enum SummaryStyleParameter: String, AppEnum {
-    case bullets = "bullets"
-    case paragraph = "paragraph"
-    case keyPoints = "keyPoints"
-    case executive = "executive"
+    case bullets
+    case paragraph
+    case keyPoints
+    case executive
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation {
         TypeDisplayRepresentation(name: "Summary Style")
@@ -385,12 +384,12 @@ enum LanguageParameter: String, AppEnum {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 enum AutomationTriggerParameter: String, AppEnum {
-    case time = "time"
-    case location = "location"
-    case appOpen = "appOpen"
-    case focusMode = "focusMode"
-    case webhook = "webhook"
-    case manual = "manual"
+    case time
+    case location
+    case appOpen
+    case focusMode
+    case webhook
+    case manual
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation {
         TypeDisplayRepresentation(name: "Trigger Type")
@@ -408,50 +407,4 @@ enum AutomationTriggerParameter: String, AppEnum {
     }
 }
 
-// MARK: - Extended Shortcuts Provider
-
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
-struct TheaExtendedShortcuts: AppShortcutsProvider {
-    static var appShortcuts: [AppShortcut] {
-        AppShortcut(
-            intent: AskWithContextIntent(),
-            phrases: [
-                "Ask \(.applicationName) with context",
-                "Ask \(.applicationName) about my clipboard"
-            ],
-            shortTitle: "Ask with Context",
-            systemImageName: "doc.text.magnifyingglass"
-        )
-
-        AppShortcut(
-            intent: GenerateCodeIntent(),
-            phrases: [
-                "Generate code with \(.applicationName)",
-                "Write \(\.$language) code with \(.applicationName)"
-            ],
-            shortTitle: "Generate Code",
-            systemImageName: "chevron.left.forwardslash.chevron.right"
-        )
-
-        AppShortcut(
-            intent: SummarizeContentIntent(),
-            phrases: [
-                "Summarize with \(.applicationName)",
-                "Get a summary from \(.applicationName)"
-            ],
-            shortTitle: "Summarize",
-            systemImageName: "doc.text"
-        )
-
-        AppShortcut(
-            intent: TranslateTextIntent(),
-            phrases: [
-                "Translate with \(.applicationName)",
-                "Translate to \(\.$targetLanguage) using \(.applicationName)"
-            ],
-            shortTitle: "Translate",
-            systemImageName: "globe"
-        )
-    }
-}
-
+// MARK: - Extended Shortcuts (Intents only - shortcuts registered in TheaAppIntents.swift)

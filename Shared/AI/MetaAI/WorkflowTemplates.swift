@@ -26,7 +26,7 @@ public final class WorkflowTemplates {
             )
         ]
     }
-    
+
     // TODO: Implement template library (code review, research, analysis, etc.)
     // TODO: Implement template instantiation
     // TODO: Implement template customization

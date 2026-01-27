@@ -22,7 +22,7 @@ struct DataStorageErrorView: View {
                     .multilineTextAlignment(.center)
             }
 
-            if let error = error {
+            if let error {
                 GroupBox {
                     ScrollView {
                         Text(error.localizedDescription)
@@ -80,25 +80,25 @@ struct DataStorageErrorView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
             #if os(macOS)
-            Color(nsColor: .windowBackgroundColor)
-                .ignoresSafeArea()
+                Color(nsColor: .windowBackgroundColor)
+                    .ignoresSafeArea()
             #else
-            Color(uiColor: .systemBackground)
-                .ignoresSafeArea()
+                Color(uiColor: .systemBackground)
+                    .ignoresSafeArea()
             #endif
         }
     }
 
     private func restart() {
         #if os(macOS)
-        let task = Process()
-        task.launchPath = "/usr/bin/open"
-        task.arguments = [Bundle.main.bundlePath]
-        task.launch()
-        NSApplication.shared.terminate(nil)
+            let task = Process()
+            task.launchPath = "/usr/bin/open"
+            task.arguments = [Bundle.main.bundlePath]
+            task.launch()
+            NSApplication.shared.terminate(nil)
         #elseif os(iOS)
-        // iOS doesn't allow programmatic app termination
-        // User must manually restart
+            // iOS doesn't allow programmatic app termination
+            // User must manually restart
         #endif
     }
 
@@ -110,9 +110,9 @@ struct DataStorageErrorView: View {
 
     private func quit() {
         #if os(macOS)
-        NSApplication.shared.terminate(nil)
+            NSApplication.shared.terminate(nil)
         #elseif os(iOS)
-        // iOS doesn't allow programmatic termination
+            // iOS doesn't allow programmatic termination
         #endif
     }
 }

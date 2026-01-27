@@ -84,7 +84,7 @@ public actor TaskBreakdownService: TaskBreakdownServiceProtocol {
         }
     }
 
-    private func generateSubtasks(for task: String, complexity: TaskBreakdown.Difficulty) -> [CognitiveSubtask] {
+    private func generateSubtasks(for _: String, complexity: TaskBreakdown.Difficulty) -> [CognitiveSubtask] {
         // In production, this would use AI to generate context-aware subtasks
         // For now, we'll create a generic breakdown structure
 

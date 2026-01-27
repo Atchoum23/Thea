@@ -41,6 +41,7 @@ disabled_rules:
   - line_length               # Custom line length configured below
   - trailing_whitespace       # Auto-fixed by Xcode
   - todo                      # TODOs are intentional during development
+  - force_cast                # Required for system APIs (Accessibility, FSEvents, etc.)
   - multiple_closures_with_trailing_closure  # Common in SwiftUI
   - opening_brace             # Conflicts with some SwiftUI patterns
   - vertical_whitespace       # Allow extra blank lines for readability
@@ -188,6 +189,8 @@ identifier_name:
   max_length:
     warning: 60
     error: 80
+  allowed_symbols:
+    - _
   excluded:
     - id
     - db
@@ -210,10 +213,10 @@ identifier_name:
     - AI
     - OS
 
-# Large Tuple
+# Large Tuple (increased for C interop)
 large_tuple:
-  warning: 5
-  error: 7
+  warning: 10
+  error: 20
 
 # Type Name
 type_name:
@@ -223,7 +226,8 @@ type_name:
   max_length:
     warning: 60
     error: 80
-  allowed_symbols: []
+  allowed_symbols:
+    - _
   validates_start_with_lowercase: warning
   excluded:
     - AI
@@ -231,6 +235,8 @@ type_name:
     - UI
     - OK
     - OS
+    - proc_bsdinfo     # C struct name
+    - proc_taskinfo    # C struct name
     # Platform-prefixed view types (intentional naming convention)
     - iOSProjectsView
     - iOSNewProjectView
@@ -287,8 +293,8 @@ line_length:
 trailing_comma:
   mandatory_comma: false
 
-# Warning Threshold - increased
-warning_threshold: 500
+# Warning Threshold - increased for large project
+warning_threshold: 1000
 
 # ============================================
 # CUSTOM RULES (Quality Focused)

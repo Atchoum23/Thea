@@ -66,19 +66,19 @@ private enum CareerTab: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .goals: return "Goals"
-        case .skills: return "Skills"
-        case .reflection: return "CareerReflection"
-        case .recommendations: return "Growth"
+        case .goals: "Goals"
+        case .skills: "Skills"
+        case .reflection: "CareerReflection"
+        case .recommendations: "Growth"
         }
     }
 
     var icon: String {
         switch self {
-        case .goals: return "target"
-        case .skills: return "brain.head.profile"
-        case .reflection: return "book.fill"
-        case .recommendations: return "lightbulb.fill"
+        case .goals: "target"
+        case .skills: "brain.head.profile"
+        case .reflection: "book.fill"
+        case .recommendations: "lightbulb.fill"
         }
     }
 }

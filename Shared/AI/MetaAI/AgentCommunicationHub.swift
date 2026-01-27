@@ -2,32 +2,33 @@ import Foundation
 import OSLog
 
 // MARK: - Agent Communication Protocol
+
 // Standardized communication between agents in the orchestration system
 
 actor AgentCommunicationHub {
     static let shared = AgentCommunicationHub()
-    
+
     private let logger = Logger(subsystem: "com.thea.metaai", category: "AgentComm")
-    
+
     private var messageQueue: [HubAgentMessage] = []
     private var subscribers: [UUID: MessageHandler] = [:]
     private var messageHistory: [UUID: [HubAgentMessage]] = [:]
-    
+
     typealias MessageHandler = @Sendable (HubAgentMessage) async -> Void
-    
+
     private init() {}
-    
+
     // MARK: - Message Passing
-    
+
     func sendMessage(_ message: HubAgentMessage) async {
         logger.info("Message sent: from=\(message.fromAgent.uuidString) to=\(message.toAgent?.uuidString ?? "broadcast") type=\(message.type.rawValue)")
-        
+
         // Add to history
         messageHistory[message.fromAgent, default: []].append(message)
-        
+
         // Add to queue
         messageQueue.append(message)
-        
+
         // Deliver to specific recipient or broadcast
         if let toAgent = message.toAgent {
             await deliverToAgent(toAgent, message: message)
@@ -35,39 +36,39 @@ actor AgentCommunicationHub {
             await broadcast(message)
         }
     }
-    
+
     func subscribe(agentId: UUID, handler: @escaping MessageHandler) {
         subscribers[agentId] = handler
         logger.info("Agent \(agentId.uuidString) subscribed to messages")
     }
-    
+
     func unsubscribe(agentId: UUID) {
         subscribers.removeValue(forKey: agentId)
         logger.info("Agent \(agentId.uuidString) unsubscribed from messages")
     }
-    
+
     func getMessageHistory(for agentId: UUID) async -> [HubAgentMessage] {
         messageHistory[agentId] ?? []
     }
-    
+
     func clearHistory(for agentId: UUID) async {
         messageHistory.removeValue(forKey: agentId)
     }
-    
+
     // MARK: - Private Delivery
-    
+
     private func deliverToAgent(_ agentId: UUID, message: HubAgentMessage) async {
         guard let handler = subscribers[agentId] else {
             logger.warning("No subscriber for agent \(agentId.uuidString)")
             return
         }
-        
+
         await handler(message)
     }
-    
+
     private func broadcast(_ message: HubAgentMessage) async {
         logger.info("Broadcasting message from \(message.fromAgent.uuidString) to \(self.subscribers.count) subscribers")
-        
+
         for (agentId, handler) in subscribers {
             if agentId != message.fromAgent {
                 await handler(message)
@@ -86,7 +87,7 @@ struct HubAgentMessage: Identifiable, Sendable {
     let payload: HubMessagePayload
     let timestamp: Date
     let priority: MessagePriority
-    
+
     init(
         id: UUID = UUID(),
         fromAgent: UUID,
@@ -104,7 +105,7 @@ struct HubAgentMessage: Identifiable, Sendable {
         self.timestamp = timestamp
         self.priority = priority
     }
-    
+
     enum MessageType: String, Sendable {
         case taskRequest
         case taskResponse
@@ -115,7 +116,7 @@ struct HubAgentMessage: Identifiable, Sendable {
         case query
         case acknowledgment
     }
-    
+
     enum MessagePriority: Int, Sendable {
         case low = 0
         case normal = 1
@@ -172,12 +173,12 @@ struct AgentErrorInfo: Sendable {
 
 actor AgentRequestResponse {
     static let shared = AgentRequestResponse()
-    
+
     private var pendingRequests: [UUID: CheckedContinuation<HubAgentMessage, Error>] = [:]
     private let timeout: TimeInterval = 30.0
-    
+
     private init() {}
-    
+
     func sendRequest(
         from: UUID,
         to: UUID,
@@ -185,7 +186,7 @@ actor AgentRequestResponse {
         payload: HubMessagePayload
     ) async throws -> HubAgentMessage {
         let requestId = UUID()
-        
+
         let request = HubAgentMessage(
             id: requestId,
             fromAgent: from,
@@ -193,16 +194,16 @@ actor AgentRequestResponse {
             type: type,
             payload: payload
         )
-        
+
         return try await withCheckedThrowingContinuation { continuation in
             pendingRequests[requestId] = continuation
-            
+
             Task {
                 await AgentCommunicationHub.shared.sendMessage(request)
-                
+
                 // Setup timeout
                 try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
-                
+
                 if let pending = pendingRequests[requestId] {
                     pendingRequests.removeValue(forKey: requestId)
                     pending.resume(throwing: AgentError.timeout)
@@ -210,7 +211,7 @@ actor AgentRequestResponse {
             }
         }
     }
-    
+
     func respondToRequest(requestId: UUID, response: HubAgentMessage) async {
         if let continuation = pendingRequests.removeValue(forKey: requestId) {
             continuation.resume(returning: response)
@@ -223,13 +224,13 @@ enum AgentError: Error, LocalizedError {
     case agentNotFound
     case invalidResponse
     case communicationFailed
-    
+
     var errorDescription: String? {
         switch self {
-        case .timeout: return "Request timed out"
-        case .agentNotFound: return "Agent not found"
-        case .invalidResponse: return "Invalid response from agent"
-        case .communicationFailed: return "Agent communication failed"
+        case .timeout: "Request timed out"
+        case .agentNotFound: "Agent not found"
+        case .invalidResponse: "Invalid response from agent"
+        case .communicationFailed: "Agent communication failed"
         }
     }
 }

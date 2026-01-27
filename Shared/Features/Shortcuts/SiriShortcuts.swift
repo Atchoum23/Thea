@@ -1,89 +1,18 @@
 // SiriShortcuts.swift
 // Siri Shortcuts and App Intents integration
 
-import Foundation
 import AppIntents
+import Foundation
 import OSLog
 
-// MARK: - App Shortcuts Provider
-
-@available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct TheaShortcuts: AppShortcutsProvider {
-    public static var appShortcuts: [AppShortcut] {
-        AppShortcut(
-            intent: AskTheaIntent(),
-            phrases: [
-                "Ask \(.applicationName)",
-                "Ask \(.applicationName) \(\.$query)",
-                "What does \(.applicationName) think about \(\.$query)",
-                "Hey \(.applicationName)",
-                "\(.applicationName) help me with \(\.$query)"
-            ],
-            shortTitle: "Ask Thea",
-            systemImageName: "sparkles"
-        )
-
-        AppShortcut(
-            intent: StartConversationIntent(),
-            phrases: [
-                "Start a conversation with \(.applicationName)",
-                "New chat with \(.applicationName)",
-                "Begin \(.applicationName) conversation"
-            ],
-            shortTitle: "New Conversation",
-            systemImageName: "bubble.left.and.bubble.right"
-        )
-
-        AppShortcut(
-            intent: QuickPromptIntent(),
-            phrases: [
-                "Quick prompt \(.applicationName)",
-                "\(.applicationName) quick question"
-            ],
-            shortTitle: "Quick Prompt",
-            systemImageName: "text.cursor"
-        )
-
-        AppShortcut(
-            intent: RunAgentIntent(),
-            phrases: [
-                "Run \(.applicationName) agent \(\.$agentName)",
-                "Start \(\.$agentName) agent",
-                "Use \(\.$agentName) in \(.applicationName)"
-            ],
-            shortTitle: "Run Agent",
-            systemImageName: "person.fill.badge.plus"
-        )
-
-        AppShortcut(
-            intent: SummarizeTextIntent(),
-            phrases: [
-                "Summarize with \(.applicationName)",
-                "\(.applicationName) summarize this",
-                "Get summary from \(.applicationName)"
-            ],
-            shortTitle: "Summarize",
-            systemImageName: "doc.text"
-        )
-
-        AppShortcut(
-            intent: TranslateTextIntent(),
-            phrases: [
-                "Translate with \(.applicationName)",
-                "\(.applicationName) translate to \(\.$targetLanguage)"
-            ],
-            shortTitle: "Translate",
-            systemImageName: "globe"
-        )
-    }
-}
+// MARK: - Siri Shortcuts (Intents only - shortcuts registered in TheaAppIntents.swift)
 
 // MARK: - Ask Thea Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct AskTheaIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Ask Thea"
-    public static var description = IntentDescription("Ask Thea AI a question and get an intelligent response")
+public struct SiriAskTheaIntent: AppIntent {
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Ask Thea"
+    nonisolated(unsafe) public static var description = IntentDescription("Ask Thea AI a question and get an intelligent response")
 
     @Parameter(title: "Question")
     public var query: String
@@ -106,17 +35,17 @@ public struct AskTheaIntent: AppIntent {
     private func processQuery(_ query: String) async throws -> String {
         // This would integrate with your AI service
         // For now, return a placeholder
-        return "I'll help you with: \(query)"
+        "I'll help you with: \(query)"
     }
 }
 
 // MARK: - Start Conversation Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct StartConversationIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Start Conversation"
-    public static var description = IntentDescription("Start a new conversation with Thea AI")
-    public static var openAppWhenRun = true
+public struct SiriStartConversationIntent: AppIntent {
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Start Conversation"
+    nonisolated(unsafe) public static var description = IntentDescription("Start a new conversation with Thea AI")
+    nonisolated(unsafe) public static var openAppWhenRun = true
 
     @Parameter(title: "Initial Message")
     public var initialMessage: String?
@@ -137,10 +66,10 @@ public struct StartConversationIntent: AppIntent {
 // MARK: - Quick Prompt Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct QuickPromptIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Quick Prompt"
-    public static var description = IntentDescription("Open the quick prompt overlay")
-    public static var openAppWhenRun = true
+public struct SiriQuickPromptIntent: AppIntent {
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Quick Prompt"
+    nonisolated(unsafe) public static var description = IntentDescription("Open the quick prompt overlay")
+    nonisolated(unsafe) public static var openAppWhenRun = true
 
     public init() {}
 
@@ -154,9 +83,9 @@ public struct QuickPromptIntent: AppIntent {
 // MARK: - Run Agent Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct RunAgentIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Run Agent"
-    public static var description = IntentDescription("Run a Thea AI agent")
+public struct SiriRunAgentIntent: AppIntent {
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Run Agent"
+    nonisolated(unsafe) public static var description = IntentDescription("Run a Thea AI agent")
 
     @Parameter(title: "Agent Name")
     public var agentName: String
@@ -178,22 +107,22 @@ public struct RunAgentIntent: AppIntent {
 
     private func startAgent(_ name: String, task: String?) async throws -> String {
         // This would integrate with your agent system
-        return "Started agent '\(name)' with task: \(task ?? "default")"
+        "Started agent '\(name)' with task: \(task ?? "default")"
     }
 }
 
 // MARK: - Summarize Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct SummarizeTextIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Summarize"
-    public static var description = IntentDescription("Summarize text using Thea AI")
+public struct SiriSummarizeTextIntent: AppIntent {
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Summarize"
+    nonisolated(unsafe) public static var description = IntentDescription("Summarize text using Thea AI")
 
     @Parameter(title: "Text to Summarize")
     public var text: String
 
     @Parameter(title: "Summary Length", default: .medium)
-    public var length: SummaryLength
+    public var length: SiriSummaryLength
 
     public init() {}
 
@@ -206,20 +135,20 @@ public struct SummarizeTextIntent: AppIntent {
         )
     }
 
-    private func summarize(_ text: String, length: SummaryLength) async throws -> String {
+    private func summarize(_ text: String, length _: SiriSummaryLength) async throws -> String {
         // This would integrate with your AI service
-        return "Summary of: \(text.prefix(50))..."
+        "Summary of: \(text.prefix(50))..."
     }
 }
 
-public enum SummaryLength: String, AppEnum {
+public enum SiriSummaryLength: String, AppEnum {
     case brief
     case medium
     case detailed
 
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Summary Length")
+    nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Summary Length")
 
-    public static var caseDisplayRepresentations: [SummaryLength: DisplayRepresentation] = [
+    nonisolated(unsafe) public static var caseDisplayRepresentations: [SiriSummaryLength: DisplayRepresentation] = [
         .brief: "Brief",
         .medium: "Medium",
         .detailed: "Detailed"
@@ -229,15 +158,15 @@ public enum SummaryLength: String, AppEnum {
 // MARK: - Translate Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct TranslateTextIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Translate"
-    public static var description = IntentDescription("Translate text using Thea AI")
+public struct SiriTranslateTextIntent: AppIntent {
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Translate"
+    nonisolated(unsafe) public static var description = IntentDescription("Translate text using Thea AI")
 
     @Parameter(title: "Text to Translate")
     public var text: String
 
     @Parameter(title: "Target Language")
-    public var targetLanguage: TranslationLanguage
+    public var targetLanguage: SiriTranslationLanguage
 
     public init() {}
 
@@ -250,13 +179,13 @@ public struct TranslateTextIntent: AppIntent {
         )
     }
 
-    private func translate(_ text: String, to language: TranslationLanguage) async throws -> String {
+    private func translate(_ text: String, to language: SiriTranslationLanguage) async throws -> String {
         // This would integrate with your AI service
-        return "[\(language.rawValue)] \(text)"
+        "[\(language.rawValue)] \(text)"
     }
 }
 
-public enum TranslationLanguage: String, AppEnum {
+public enum SiriTranslationLanguage: String, AppEnum {
     case english = "en"
     case spanish = "es"
     case french = "fr"
@@ -270,9 +199,9 @@ public enum TranslationLanguage: String, AppEnum {
     case russian = "ru"
     case hindi = "hi"
 
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Language")
+    nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Language")
 
-    public static var caseDisplayRepresentations: [TranslationLanguage: DisplayRepresentation] = [
+    nonisolated(unsafe) public static var caseDisplayRepresentations: [SiriTranslationLanguage: DisplayRepresentation] = [
         .english: "English",
         .spanish: "Spanish",
         .french: "French",
@@ -291,8 +220,8 @@ public enum TranslationLanguage: String, AppEnum {
 // MARK: - Entity Queries
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct ConversationEntity: AppEntity {
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Conversation")
+public struct SiriConversationEntity: AppEntity {
+    nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Conversation")
 
     public var id: String
     public var title: String
@@ -305,27 +234,27 @@ public struct ConversationEntity: AppEntity {
         )
     }
 
-    public static var defaultQuery = ConversationQuery()
+    nonisolated(unsafe) public static var defaultQuery = SiriConversationQuery()
 }
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct ConversationQuery: EntityQuery {
+public struct SiriConversationQuery: EntityQuery {
     public init() {}
 
-    public func entities(for identifiers: [String]) async throws -> [ConversationEntity] {
+    public func entities(for _: [String]) async throws -> [SiriConversationEntity] {
         // Fetch conversations by IDs
-        return []
+        []
     }
 
-    public func suggestedEntities() async throws -> [ConversationEntity] {
+    public func suggestedEntities() async throws -> [SiriConversationEntity] {
         // Return recent conversations
-        return []
+        []
     }
 }
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct AgentEntity: AppEntity {
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Agent")
+public struct SiriAgentEntity: AppEntity {
+    nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Agent")
 
     public var id: String
     public var name: String
@@ -338,32 +267,32 @@ public struct AgentEntity: AppEntity {
         )
     }
 
-    public static var defaultQuery = AgentQuery()
+    nonisolated(unsafe) public static var defaultQuery = SiriAgentQuery()
 }
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct AgentQuery: EntityQuery {
+public struct SiriAgentQuery: EntityQuery {
     public init() {}
 
-    public func entities(for identifiers: [String]) async throws -> [AgentEntity] {
-        return []
+    public func entities(for _: [String]) async throws -> [SiriAgentEntity] {
+        []
     }
 
-    public func suggestedEntities() async throws -> [AgentEntity] {
-        return []
+    public func suggestedEntities() async throws -> [SiriAgentEntity] {
+        []
     }
 }
 
 // MARK: - Continue Conversation Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct ContinueConversationIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Continue Conversation"
-    public static var description = IntentDescription("Continue an existing Thea conversation")
-    public static var openAppWhenRun = true
+public struct SiriContinueConversationIntent: AppIntent {
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Continue Conversation"
+    nonisolated(unsafe) public static var description = IntentDescription("Continue an existing Thea conversation")
+    nonisolated(unsafe) public static var openAppWhenRun = true
 
     @Parameter(title: "Conversation")
-    public var conversation: ConversationEntity
+    public var conversation: SiriConversationEntity
 
     public init() {}
 
@@ -376,22 +305,20 @@ public struct ContinueConversationIntent: AppIntent {
 // MARK: - Analyze Image Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
-public struct AnalyzeImageIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Analyze Image"
-    public static var description = IntentDescription("Analyze an image using Thea AI vision")
+public struct SiriAnalyzeImageIntent: AppIntent {
+    nonisolated(unsafe) public static var title: LocalizedStringResource = "Analyze Image"
+    nonisolated(unsafe) public static var description = IntentDescription("Analyze an image using Thea AI vision")
 
     @Parameter(title: "Image")
     public var image: IntentFile
 
     @Parameter(title: "Analysis Type", default: .general)
-    public var analysisType: ImageAnalysisType
+    public var analysisType: SiriImageAnalysisType
 
     public init() {}
 
     public func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-        guard let imageData = image.data else {
-            throw TheaIntentError.invalidInput("No image data")
-        }
+        let imageData = image.data
 
         let analysis = try await analyzeImage(imageData, type: analysisType)
 
@@ -401,22 +328,22 @@ public struct AnalyzeImageIntent: AppIntent {
         )
     }
 
-    private func analyzeImage(_ data: Data, type: ImageAnalysisType) async throws -> String {
+    private func analyzeImage(_: Data, type: SiriImageAnalysisType) async throws -> String {
         // This would integrate with your vision service
-        return "Image analysis result for \(type.rawValue)"
+        "Image analysis result for \(type.rawValue)"
     }
 }
 
-public enum ImageAnalysisType: String, AppEnum {
+public enum SiriImageAnalysisType: String, AppEnum {
     case general
     case text
     case objects
     case faces
     case document
 
-    public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Analysis Type")
+    nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Analysis Type")
 
-    public static var caseDisplayRepresentations: [ImageAnalysisType: DisplayRepresentation] = [
+    nonisolated(unsafe) public static var caseDisplayRepresentations: [SiriImageAnalysisType: DisplayRepresentation] = [
         .general: "General",
         .text: "Extract Text",
         .objects: "Identify Objects",
@@ -427,19 +354,19 @@ public enum ImageAnalysisType: String, AppEnum {
 
 // MARK: - Error Types
 
-public enum TheaIntentError: Error, LocalizedError {
+public enum SiriIntentError: Error, LocalizedError {
     case invalidInput(String)
     case processingFailed(String)
     case serviceUnavailable
 
     public var errorDescription: String? {
         switch self {
-        case .invalidInput(let reason):
-            return "Invalid input: \(reason)"
-        case .processingFailed(let reason):
-            return "Processing failed: \(reason)"
+        case let .invalidInput(reason):
+            "Invalid input: \(reason)"
+        case let .processingFailed(reason):
+            "Processing failed: \(reason)"
         case .serviceUnavailable:
-            return "Thea AI service is unavailable"
+            "Thea AI service is unavailable"
         }
     }
 }

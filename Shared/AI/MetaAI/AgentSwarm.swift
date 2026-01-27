@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Agent Swarm
+
 // Parallel agent execution with load balancing and consensus
 
 @MainActor
@@ -33,17 +34,15 @@ final class AgentSwarm {
 
         activeSwarms.append(swarm)
 
-        let result: SwarmResult
-
-        switch strategy {
+        let result: SwarmResult = switch strategy {
         case .parallel:
-            result = try await executeParallel(swarm: swarm, progressHandler: progressHandler)
+            try await executeParallel(swarm: swarm, progressHandler: progressHandler)
         case .competitive:
-            result = try await executeCompetitive(swarm: swarm, progressHandler: progressHandler)
+            try await executeCompetitive(swarm: swarm, progressHandler: progressHandler)
         case .collaborative:
-            result = try await executeCollaborative(swarm: swarm, progressHandler: progressHandler)
+            try await executeCollaborative(swarm: swarm, progressHandler: progressHandler)
         case .consensus:
-            result = try await executeConsensus(swarm: swarm, progressHandler: progressHandler)
+            try await executeConsensus(swarm: swarm, progressHandler: progressHandler)
         }
 
         swarmResults.append(result)
@@ -64,7 +63,7 @@ final class AgentSwarm {
         var agentResults: [AgentResult] = []
 
         // Execute all agents sequentially (satisfies Swift 6 region-based isolation)
-        for i in 0..<swarm.agentCount {
+        for i in 0 ..< swarm.agentCount {
             let progress = Float(i) / Float(swarm.agentCount)
             progressHandler(SwarmProgress(phase: "Agent \(i + 1) executing", percentage: progress))
 
@@ -99,7 +98,7 @@ final class AgentSwarm {
         var agentResults: [AgentResult] = []
 
         // Execute all agents sequentially (satisfies Swift 6 region-based isolation)
-        for i in 0..<swarm.agentCount {
+        for i in 0 ..< swarm.agentCount {
             let result = try await executeAgent(
                 task: swarm.task,
                 agentIndex: i,
@@ -132,7 +131,7 @@ final class AgentSwarm {
         var currentContext = swarm.task
 
         // Execute agents sequentially, each building on previous
-        for i in 0..<swarm.agentCount {
+        for i in 0 ..< swarm.agentCount {
             let progress = Float(i) / Float(swarm.agentCount)
             progressHandler(SwarmProgress(phase: "Agent \(i + 1) collaborating", percentage: progress))
 
@@ -166,7 +165,7 @@ final class AgentSwarm {
         var agentResults: [AgentResult] = []
 
         // Execute all agents sequentially (satisfies Swift 6 region-based isolation)
-        for i in 0..<swarm.agentCount {
+        for i in 0 ..< swarm.agentCount {
             let result = try await executeAgent(
                 task: swarm.task,
                 agentIndex: i,
@@ -221,11 +220,11 @@ final class AgentSwarm {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 output += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -241,7 +240,7 @@ final class AgentSwarm {
     // MARK: - Result Processing
 
     private func aggregateResults(_ results: [AgentResult]) async throws -> String {
-        let outputs = results.map { $0.output }.joined(separator: "\n\n---\n\n")
+        let outputs = results.map(\.output).joined(separator: "\n\n---\n\n")
 
         guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
             throw SwarmError.providerNotAvailable
@@ -269,11 +268,11 @@ final class AgentSwarm {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 aggregated += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -335,10 +334,10 @@ struct SwarmProgress: Sendable {
 }
 
 enum SwarmStrategy {
-    case parallel       // All agents execute independently
-    case competitive    // Best result wins
-    case collaborative  // Agents build on each other
-    case consensus      // Vote/agree on final result
+    case parallel // All agents execute independently
+    case competitive // Best result wins
+    case collaborative // Agents build on each other
+    case consensus // Vote/agree on final result
 }
 
 enum SwarmError: LocalizedError {
@@ -348,9 +347,9 @@ enum SwarmError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .providerNotAvailable:
-            return "AI provider not available"
+            "AI provider not available"
         case .executionFailed:
-            return "Swarm execution failed"
+            "Swarm execution failed"
         }
     }
 }

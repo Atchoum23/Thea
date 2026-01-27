@@ -26,7 +26,7 @@ final class AnthropicProviderTests: XCTestCase {
         XCTAssertTrue(capabilities.supportsVision)
         XCTAssertTrue(capabilities.supportsFunctionCalling)
         XCTAssertEqual(capabilities.maxContextTokens, 200_000)
-        XCTAssertEqual(capabilities.maxOutputTokens, 8_192)
+        XCTAssertEqual(capabilities.maxOutputTokens, 8192)
     }
 
     func testListModels() async throws {

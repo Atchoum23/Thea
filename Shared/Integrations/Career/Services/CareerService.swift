@@ -43,7 +43,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
             .sorted { $0.startDate > $1.startDate }
     }
 
-    public func addMilestone(_ milestone: Milestone, to goalID: UUID) async throws {
+    public func addMilestone(_: Milestone, to goalID: UUID) async throws {
         guard let goal = goals[goalID] else {
             throw CareerError.invalidGoal("Goal not found")
         }
@@ -53,19 +53,19 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         goals[goalID] = goal
     }
 
-    public func completeMilestone(milestoneID: UUID, in goalID: UUID) async throws {
+    public func completeMilestone(milestoneID _: UUID, in goalID: UUID) async throws {
         guard let goal = goals[goalID] else {
             throw CareerError.invalidGoal("Goal not found")
         }
 
         // Milestone management moved to CareerGoalTracker
-        /*guard let index = goal.milestones.firstIndex(where: { $0.id == milestoneID }) else {
-            throw CareerError.invalidGoal("Milestone not found")
-        }
+        /* guard let index = goal.milestones.firstIndex(where: { $0.id == milestoneID }) else {
+             throw CareerError.invalidGoal("Milestone not found")
+         }
 
-        goal.milestones[index].completed = true
-        goal.milestones[index].completedDate = Date()
-        goal.updateProgress()*/
+         goal.milestones[index].completed = true
+         goal.milestones[index].completedDate = Date()
+         goal.updateProgress() */
         goals[goalID] = goal
     }
 
@@ -97,9 +97,9 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         // Auto-upgrade proficiency based on hours invested
         if let targetHours = skill.targetHours, let targetProf = skill.targetProficiency {
             let progressRatio = skill.hoursInvested / targetHours
-            if progressRatio >= 0.8 && skill.proficiency < targetProf {
+            if progressRatio >= 0.8, skill.proficiency < targetProf {
                 skill.proficiency = min(ProficiencyLevel(rawValue: skill.proficiency.rawValue + 1) ?? skill.proficiency,
-                                       targetProf)
+                                        targetProf)
             }
         }
 
@@ -115,7 +115,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
             .sorted { $0.name < $1.name }
     }
 
-    public func addResource(_ resource: LearningResource, to skillID: UUID) async throws {
+    public func addResource(_: LearningResource, to skillID: UUID) async throws {
         guard skills[skillID] != nil else {
             throw CareerError.invalidSkill("Skill not found")
         }
@@ -202,13 +202,12 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
             sum + (moodValues[reflection.mood] ?? 3.0)
         } / Double(max(secondHalf.count, 1))
 
-        let trend: Trend
-        if secondHalfAvg > firstHalfAvg + 0.5 {
-            trend = .improving
+        let trend: Trend = if secondHalfAvg > firstHalfAvg + 0.5 {
+            .improving
         } else if secondHalfAvg < firstHalfAvg - 0.5 {
-            trend = .declining
+            .declining
         } else {
-            trend = .stable
+            .stable
         }
 
         return MoodTrend(
@@ -264,7 +263,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
 
     // MARK: - Private Helpers
 
-    private func identifySkillGaps(goals: [CareerGoal], skills: [Skill]) -> [GrowthRecommendation] {
+    private func identifySkillGaps(goals _: [CareerGoal], skills: [Skill]) -> [GrowthRecommendation] {
         var recommendations: [GrowthRecommendation] = []
 
         // Identify skills that haven't been practiced recently
@@ -317,7 +316,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         return recommendations
     }
 
-    private func generateWellbeingRecommendations(reflections: [CareerReflection]) async throws -> [GrowthRecommendation] {
+    private func generateWellbeingRecommendations(reflections _: [CareerReflection]) async throws -> [GrowthRecommendation] {
         var recommendations: [GrowthRecommendation] = []
 
         let moodTrend = try await analyzeMoodTrends(days: 7)

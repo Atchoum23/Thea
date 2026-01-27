@@ -2,27 +2,84 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleDevelopmentRegion</key>
-    <string>$(DEVELOPMENT_LANGUAGE)</string>
-    <key>CFBundleDisplayName</key>
-    <string>Thea Watch</string>
-    <key>CFBundleExecutable</key>
-    <string>$(EXECUTABLE_NAME)</string>
-    <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>CFBundleName</key>
-    <string>$(PRODUCT_NAME)</string>
-    <key>CFBundlePackageType</key>
-    <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
-    <key>CFBundleShortVersionString</key>
-    <string>$(MARKETING_VERSION)</string>
-    <key>CFBundleVersion</key>
-    <string>$(CURRENT_PROJECT_VERSION)</string>
-    <key>WKApplication</key>
-    <true/>
-    <key>WKRunsIndependentlyOfCompanionApp</key>
-    <true/>
+	<!-- ================================ -->
+	<!-- Bundle Information               -->
+	<!-- ================================ -->
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Thea Watch</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Thea Watch</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+
+	<!-- ================================ -->
+	<!-- watchOS App Configuration        -->
+	<!-- ================================ -->
+	<key>WKApplication</key>
+	<true/>
+	<key>WKRunsIndependentlyOfCompanionApp</key>
+	<true/>
+	<key>WKWatchOnly</key>
+	<false/>
+	<key>UIUserInterfaceStyle</key>
+	<string>Automatic</string>
+
+	<!-- ================================ -->
+	<!-- Background Modes                 -->
+	<!-- ================================ -->
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
+		<string>remote-notification</string>
+		<string>self-care</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Privacy Usage Descriptions       -->
+	<!-- ================================ -->
+	<!-- Microphone -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Thea uses the microphone for voice conversations.</string>
+
+	<!-- Health -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>Thea reads your health data to provide wellness insights.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Thea writes health data you authorize.</string>
+
+	<!-- Motion -->
+	<key>NSMotionUsageDescription</key>
+	<string>Thea tracks your activity for fitness insights.</string>
+
+	<!-- Siri -->
+	<key>NSSiriUsageDescription</key>
+	<string>Use Siri to interact with Thea on your Apple Watch.</string>
+
+	<!-- ================================ -->
+	<!-- Export Compliance                -->
+	<!-- ================================ -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!-- ================================ -->
+	<!-- User Activities                  -->
+	<!-- ================================ -->
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>app.thea.watchos.conversation</string>
+		<string>app.thea.watchos.quick-query</string>
+	</array>
 </dict>
 </plist>

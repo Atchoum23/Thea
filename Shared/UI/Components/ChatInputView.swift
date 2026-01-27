@@ -18,10 +18,10 @@ struct ChatInputView: View {
                     selectedModel: $selectedModel
                 )
                 .onChange(of: selectedModel) { _, newValue in
-                        var providerConfig = AppConfiguration.shared.providerConfig
-                        providerConfig.defaultModel = newValue
-                        AppConfiguration.shared.providerConfig = providerConfig
-                    }
+                    var providerConfig = AppConfiguration.shared.providerConfig
+                    providerConfig.defaultModel = newValue
+                    AppConfiguration.shared.providerConfig = providerConfig
+                }
 
                 Spacer()
             }
@@ -31,28 +31,28 @@ struct ChatInputView: View {
             HStack(alignment: .bottom, spacing: 12) {
                 // Screenshot button
                 #if os(macOS)
-                Button(action: captureScreenshot) {
-                    Image(systemName: "camera.viewfinder")
-                        .font(.system(size: 20))
-                        .foregroundColor(.theaPrimary)
-                }
-                .buttonStyle(.plain)
-                .help("Capture Screenshot")
-                .disabled(isStreaming)
+                    Button(action: captureScreenshot) {
+                        Image(systemName: "camera.viewfinder")
+                            .font(.system(size: 20))
+                            .foregroundColor(.theaPrimary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Capture Screenshot")
+                    .disabled(isStreaming)
                 #endif
-                
+
                 // Text input
                 TextField("Message THEA...", text: $text, axis: .vertical)
                     .textFieldStyle(.plain)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    #if os(macOS)
+                #if os(macOS)
                     .background(Color(nsColor: .systemGray))
-                    #else
+                #else
                     .background(Color(uiColor: .systemGray6))
-                    #endif
+                #endif
                     .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .lineLimit(1...10)
+                    .lineLimit(1 ... 10)
                     .focused($isFocused)
                     .disabled(isStreaming)
                     .onSubmit {
@@ -85,7 +85,7 @@ struct ChatInputView: View {
                 ScreenshotPreview(
                     image: NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height)),
                     onSend: sendScreenshot
-                )                    { showingScreenshotPreview = false }
+                ) { showingScreenshotPreview = false }
             }
         }
         #endif
@@ -94,29 +94,29 @@ struct ChatInputView: View {
     private var canSend: Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
-    
+
     // MARK: - Screenshot Handling
-    
+
     #if os(macOS)
-    private func captureScreenshot() {
-        Task {
-            do {
-                let cgImage = try await ScreenCapture.shared.captureScreen()
-                capturedImage = cgImage
-                showingScreenshotPreview = true
-            } catch {
-                print("Screenshot capture failed: \(error)")
+        private func captureScreenshot() {
+            Task {
+                do {
+                    let cgImage = try await ScreenCapture.shared.captureScreen()
+                    capturedImage = cgImage
+                    showingScreenshotPreview = true
+                } catch {
+                    print("Screenshot capture failed: \(error)")
+                }
             }
         }
-    }
-    
-    private func sendScreenshot() {
-        // Add screenshot to chat (would need image message support)
-        text = "[Screenshot attached] " + text
-        showingScreenshotPreview = false
-        capturedImage = nil
-        onSend()
-    }
+
+        private func sendScreenshot() {
+            // Add screenshot to chat (would need image message support)
+            text = "[Screenshot attached] " + text
+            showingScreenshotPreview = false
+            capturedImage = nil
+            onSend()
+        }
     #endif
 }
 

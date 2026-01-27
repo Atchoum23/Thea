@@ -12,7 +12,7 @@ public struct PhaseProgressView: View {
         VStack(spacing: 16) {
             if isLoading {
                 ProgressView("Loading progress...")
-            } else if let progress = progress {
+            } else if let progress {
                 progressDetails(for: progress)
             } else {
                 noProgressView
@@ -140,17 +140,17 @@ public struct PhaseProgressView: View {
     private func statusColor(for status: ExecutionProgress.ExecutionStatus) -> Color {
         switch status {
         case .notStarted:
-            return .secondary
+            .secondary
         case .inProgress:
-            return .blue
+            .blue
         case .waitingForApproval:
-            return .orange
+            .orange
         case .paused:
-            return .yellow
+            .yellow
         case .completed:
-            return .green
+            .green
         case .failed:
-            return .red
+            .red
         }
     }
 

@@ -12,18 +12,18 @@ final class NetworkBlocklistRule: ASTRule {
             id: "AGENTSEC-NET-001",
             name: "Network Blocklist Enforcement",
             description: """
-                Verifies that the network blocklist invariant is enforced:
-                - Localhost (127.0.0.1, ::1) must be blocked
-                - Cloud metadata endpoints (169.254.169.254) must be blocked
-                - Private IP ranges (10.x, 172.16-31.x, 192.168.x) must be blocked
-                """,
+            Verifies that the network blocklist invariant is enforced:
+            - Localhost (127.0.0.1, ::1) must be blocked
+            - Cloud metadata endpoints (169.254.169.254) must be blocked
+            - Private IP ranges (10.x, 172.16-31.x, 192.168.x) must be blocked
+            """,
             severity: .critical,
             category: .agentSecurity,
             cweID: "CWE-918",
             recommendation: """
-                Ensure NetworkPolicy.isHostBlocked() is called before all HTTP requests.
-                Verify the blockedHosts list includes all required entries.
-                """
+            Ensure NetworkPolicy.isHostBlocked() is called before all HTTP requests.
+            Verify the blockedHosts list includes all required entries.
+            """
         )
     }
 
@@ -52,7 +52,7 @@ final class NetworkBlocklistRule: ASTRule {
                 }
 
                 // Check for array end
-                if content.contains("blockedHosts") && line.contains("]") {
+                if content.contains("blockedHosts"), line.contains("]") {
                     let missingHosts = Set(requiredBlockedHosts).subtracting(foundHosts)
                     for missing in missingHosts {
                         findings.append(Finding(
@@ -75,14 +75,14 @@ final class NetworkBlocklistRule: ASTRule {
 
         // Check that network validation is called before requests
         let hasHTTPCode = content.contains("URLSession") ||
-                          content.contains("URLRequest") ||
-                          content.contains("httpRequest")
+            content.contains("URLRequest") ||
+            content.contains("httpRequest")
 
         let hasValidation = content.contains("isHostBlocked") ||
-                           content.contains("validateNetworkRequest") ||
-                           content.contains("AgentSecEnforcer")
+            content.contains("validateNetworkRequest") ||
+            content.contains("AgentSecEnforcer")
 
-        if hasHTTPCode && !hasValidation {
+        if hasHTTPCode, !hasValidation {
             findings.append(Finding(
                 ruleID: id,
                 severity: .critical,
@@ -108,18 +108,18 @@ final class FilesystemBlocklistRule: ASTRule {
             id: "AGENTSEC-FS-001",
             name: "Filesystem Blocklist Enforcement",
             description: """
-                Verifies that the filesystem blocklist invariant is enforced:
-                - System paths (/System, /Library, /usr) must be blocked
-                - Sensitive paths (.ssh, .gnupg, .aws) must be blocked
-                - Writes outside workspace must be blocked
-                """,
+            Verifies that the filesystem blocklist invariant is enforced:
+            - System paths (/System, /Library, /usr) must be blocked
+            - Sensitive paths (.ssh, .gnupg, .aws) must be blocked
+            - Writes outside workspace must be blocked
+            """,
             severity: .critical,
             category: .agentSecurity,
             cweID: "CWE-22",
             recommendation: """
-                Ensure FilesystemPolicy.isPathBlocked() is called before all file writes.
-                Verify the blockedPaths list includes all required entries.
-                """
+            Ensure FilesystemPolicy.isPathBlocked() is called before all file writes.
+            Verify the blockedPaths list includes all required entries.
+            """
         )
     }
 
@@ -163,16 +163,16 @@ final class FilesystemBlocklistRule: ASTRule {
 
         // Check that filesystem validation is called before writes
         let hasWriteCode = content.contains("writeFile") ||
-                           content.contains("write(toFile") ||
-                           content.contains("createFile") ||
-                           content.contains("FileManager")
+            content.contains("write(toFile") ||
+            content.contains("createFile") ||
+            content.contains("FileManager")
 
         let hasValidation = content.contains("isPathBlocked") ||
-                           content.contains("isWriteAllowed") ||
-                           content.contains("validateFileWrite") ||
-                           content.contains("AgentSecEnforcer")
+            content.contains("isWriteAllowed") ||
+            content.contains("validateFileWrite") ||
+            content.contains("AgentSecEnforcer")
 
-        if hasWriteCode && !hasValidation {
+        if hasWriteCode, !hasValidation {
             findings.append(Finding(
                 ruleID: id,
                 severity: .high,
@@ -198,18 +198,18 @@ final class TerminalBlocklistRule: ASTRule {
             id: "AGENTSEC-TERM-001",
             name: "Terminal Blocklist Enforcement",
             description: """
-                Verifies that the terminal blocklist invariant is enforced:
-                - Dangerous commands (rm -rf /, fork bomb) must be blocked
-                - Remote code execution patterns (curl|sh) must be blocked
-                - Sudo commands must require approval or be blocked
-                """,
+            Verifies that the terminal blocklist invariant is enforced:
+            - Dangerous commands (rm -rf /, fork bomb) must be blocked
+            - Remote code execution patterns (curl|sh) must be blocked
+            - Sudo commands must require approval or be blocked
+            """,
             severity: .critical,
             category: .agentSecurity,
             cweID: "CWE-78",
             recommendation: """
-                Ensure TerminalPolicy.isCommandBlocked() is called before all command execution.
-                Verify the blockedPatterns list includes all required entries.
-                """
+            Ensure TerminalPolicy.isCommandBlocked() is called before all command execution.
+            Verify the blockedPatterns list includes all required entries.
+            """
         )
     }
 
@@ -253,16 +253,16 @@ final class TerminalBlocklistRule: ASTRule {
 
         // Check that terminal validation is called before execution
         let hasExecCode = content.contains("Process()") ||
-                          content.contains("process.run") ||
-                          content.contains("exec(") ||
-                          content.contains("spawn(")
+            content.contains("process.run") ||
+            content.contains("exec(") ||
+            content.contains("spawn(")
 
         let hasValidation = content.contains("isCommandBlocked") ||
-                           content.contains("validateTerminalCommand") ||
-                           content.contains("AgentSecEnforcer") ||
-                           content.contains("TerminalSecurityPolicy")
+            content.contains("validateTerminalCommand") ||
+            content.contains("AgentSecEnforcer") ||
+            content.contains("TerminalSecurityPolicy")
 
-        if hasExecCode && !hasValidation {
+        if hasExecCode, !hasValidation {
             findings.append(Finding(
                 ruleID: id,
                 severity: .high,
@@ -288,18 +288,18 @@ final class ApprovalRequirementRule: ASTRule {
             id: "AGENTSEC-APPROVE-001",
             name: "Approval Gate Enforcement",
             description: """
-                Verifies that approval gate invariant is enforced:
-                - File writes must require approval
-                - Terminal execution must require approval
-                - Network requests must require approval (for sensitive operations)
-                """,
+            Verifies that approval gate invariant is enforced:
+            - File writes must require approval
+            - Terminal execution must require approval
+            - Network requests must require approval (for sensitive operations)
+            """,
             severity: .high,
             category: .agentSecurity,
             cweID: "CWE-862",
             recommendation: """
-                Ensure ApprovalGate or AgentSecEnforcer approval checks are called
-                before all sensitive operations. Never auto-approve in production.
-                """
+            Ensure ApprovalGate or AgentSecEnforcer approval checks are called
+            before all sensitive operations. Never auto-approve in production.
+            """
         )
     }
 
@@ -342,7 +342,7 @@ final class ApprovalRequirementRule: ASTRule {
             let requiredTypes = ["fileWrite", "terminalExec", "networkRequest"]
 
             for type in requiredTypes {
-                if !content.contains("\"\(type)\"") && !content.contains("'\(type)'") {
+                if !content.contains("\"\(type)\""), !content.contains("'\(type)'") {
                     findings.append(Finding(
                         ruleID: id,
                         severity: .high,
@@ -371,18 +371,18 @@ final class KillSwitchInvariantRule: ASTRule {
             id: "AGENTSEC-KILL-001",
             name: "Kill Switch Configuration",
             description: """
-                Verifies that kill switch invariant is enforced:
-                - Kill switch must be enabled by default
-                - Must trigger on critical violations
-                - Must notify user and log to audit
-                """,
+            Verifies that kill switch invariant is enforced:
+            - Kill switch must be enabled by default
+            - Must trigger on critical violations
+            - Must notify user and log to audit
+            """,
             severity: .high,
             category: .agentSecurity,
             cweID: "CWE-754",
             recommendation: """
-                Ensure KillSwitchPolicy.enabled is true by default.
-                Verify triggerOnCritical, notifyUser, and logToAudit are all true.
-                """
+            Ensure KillSwitchPolicy.enabled is true by default.
+            Verify triggerOnCritical, notifyUser, and logToAudit are all true.
+            """
         )
     }
 
@@ -393,8 +393,9 @@ final class KillSwitchInvariantRule: ASTRule {
         if content.contains("killSwitch") || content.contains("KillSwitch") {
             // Check for enabled: false
             if content.contains("enabled:\\s*false") ||
-               content.contains("enabled = false") ||
-               content.contains("isEnabled = false") {
+                content.contains("enabled = false") ||
+                content.contains("isEnabled = false")
+            {
                 findings.append(Finding(
                     ruleID: id,
                     severity: .critical,
@@ -410,7 +411,8 @@ final class KillSwitchInvariantRule: ASTRule {
 
             // Check for triggerOnCritical: false
             if content.contains("triggerOnCritical:\\s*false") ||
-               content.contains("triggerOnCritical = false") {
+                content.contains("triggerOnCritical = false")
+            {
                 findings.append(Finding(
                     ruleID: id,
                     severity: .high,

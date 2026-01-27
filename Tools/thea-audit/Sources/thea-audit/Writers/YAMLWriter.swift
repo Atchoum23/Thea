@@ -5,7 +5,7 @@ import Foundation
 import Yams
 
 /// Writes audit findings to YAML format
-struct YAMLWriter {
+enum YAMLWriter {
     /// Write findings and optional policy result to a YAML file
     static func write(findings: [Finding], policyResult: PolicyEvaluationResult?, to path: String) throws {
         let report = AuditReport(

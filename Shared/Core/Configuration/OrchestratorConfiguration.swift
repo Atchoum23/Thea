@@ -23,13 +23,13 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
         public var description: String {
             switch self {
             case .always:
-                return "Only use local models (fail if unavailable)"
+                "Only use local models (fail if unavailable)"
             case .prefer:
-                return "Try local first, fallback to cloud"
+                "Try local first, fallback to cloud"
             case .balanced:
-                return "Use local for simple tasks, cloud for complex"
+                "Use local for simple tasks, cloud for complex"
             case .cloudFirst:
-                return "Prefer cloud models, use local only offline"
+                "Prefer cloud models, use local only offline"
             }
         }
     }
@@ -101,7 +101,8 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
 
     public static func load() -> OrchestratorConfiguration {
         guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let config = try? JSONDecoder().decode(OrchestratorConfiguration.self, from: data) else {
+              let config = try? JSONDecoder().decode(OrchestratorConfiguration.self, from: data)
+        else {
             return OrchestratorConfiguration()
         }
         return config
@@ -131,11 +132,11 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
     public func executionStrategy(for complexity: QueryComplexity) -> ExecutionStrategy {
         switch complexity {
         case .simple:
-            return .direct
+            .direct
         case .moderate:
-            return .decompose
+            .decompose
         case .complex:
-            return .deepAgent
+            .deepAgent
         }
     }
 }
@@ -152,9 +153,9 @@ public enum QueryComplexity: String, Codable, Sendable {
 
     public var description: String {
         switch self {
-        case .simple: return "Single-task, straightforward query"
-        case .moderate: return "Multi-step or requires decomposition"
-        case .complex: return "Complex reasoning, verification needed"
+        case .simple: "Single-task, straightforward query"
+        case .moderate: "Multi-step or requires decomposition"
+        case .complex: "Complex reasoning, verification needed"
         }
     }
 }

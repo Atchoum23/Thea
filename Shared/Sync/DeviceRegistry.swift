@@ -8,9 +8,9 @@
 
 import Foundation
 #if os(macOS)
-import AppKit
+    import AppKit
 #else
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Device Registry
@@ -44,7 +44,7 @@ public final class DeviceRegistry {
     // MARK: - Initialization
 
     private init() {
-        self.currentDevice = Self.createCurrentDeviceInfo()
+        currentDevice = Self.createCurrentDeviceInfo()
         loadRegisteredDevices()
         registerCurrentDevice()
     }
@@ -55,13 +55,13 @@ public final class DeviceRegistry {
         let deviceId = getOrCreateDeviceId()
 
         #if os(macOS)
-        let deviceName = Host.current().localizedName ?? "Mac"
-        let deviceType: DeviceType = .mac
-        let osVersion = ProcessInfo.processInfo.operatingSystemVersionString
+            let deviceName = Host.current().localizedName ?? "Mac"
+            let deviceType: DeviceType = .mac
+            let osVersion = ProcessInfo.processInfo.operatingSystemVersionString
         #else
-        let deviceName = UIDevice.current.name
-        let deviceType: DeviceType = UIDevice.current.userInterfaceIdiom == .pad ? .iPad : .iPhone
-        let osVersion = UIDevice.current.systemVersion
+            let deviceName = UIDevice.current.name
+            let deviceType: DeviceType = UIDevice.current.userInterfaceIdiom == .pad ? .iPad : .iPhone
+            let osVersion = UIDevice.current.systemVersion
         #endif
 
         return DeviceInfo(
@@ -156,7 +156,8 @@ public final class DeviceRegistry {
 
     private func loadRegisteredDevices() {
         if let data = defaults.data(forKey: devicesKey),
-           let devices = try? JSONDecoder().decode([DeviceInfo].self, from: data) {
+           let devices = try? JSONDecoder().decode([DeviceInfo].self, from: data)
+        {
             registeredDevices = devices
         }
     }
@@ -220,21 +221,21 @@ public enum DeviceType: String, Codable, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .mac: return "Mac"
-        case .iPhone: return "iPhone"
-        case .iPad: return "iPad"
-        case .watch: return "Apple Watch"
-        case .vision: return "Apple Vision"
+        case .mac: "Mac"
+        case .iPhone: "iPhone"
+        case .iPad: "iPad"
+        case .watch: "Apple Watch"
+        case .vision: "Apple Vision"
         }
     }
 
     public var icon: String {
         switch self {
-        case .mac: return "desktopcomputer"
-        case .iPhone: return "iphone"
-        case .iPad: return "ipad"
-        case .watch: return "applewatch"
-        case .vision: return "visionpro"
+        case .mac: "desktopcomputer"
+        case .iPhone: "iphone"
+        case .iPad: "ipad"
+        case .watch: "applewatch"
+        case .vision: "visionpro"
         }
     }
 }
@@ -267,23 +268,23 @@ public struct DeviceCapabilities: Codable, Sendable, Equatable {
 
     public static var current: DeviceCapabilities {
         #if os(macOS)
-        return DeviceCapabilities(
-            supportsVoice: true,
-            supportsNotifications: true,
-            supportsBackgroundTasks: true,
-            supportsHandoff: true,
-            supportsCloudKit: true,
-            supportsLocalModels: true
-        )
+            return DeviceCapabilities(
+                supportsVoice: true,
+                supportsNotifications: true,
+                supportsBackgroundTasks: true,
+                supportsHandoff: true,
+                supportsCloudKit: true,
+                supportsLocalModels: true
+            )
         #else
-        return DeviceCapabilities(
-            supportsVoice: true,
-            supportsNotifications: true,
-            supportsBackgroundTasks: true,
-            supportsHandoff: true,
-            supportsCloudKit: true,
-            supportsLocalModels: false
-        )
+            return DeviceCapabilities(
+                supportsVoice: true,
+                supportsNotifications: true,
+                supportsBackgroundTasks: true,
+                supportsHandoff: true,
+                supportsCloudKit: true,
+                supportsLocalModels: false
+            )
         #endif
     }
 }

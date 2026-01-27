@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Model Selection Configuration
+
 // Defines model categories, presets, and selection criteria
 
 struct ModelSelectionConfiguration: Codable, Sendable, Equatable {
@@ -49,23 +50,23 @@ struct ModelSelectionConfiguration: Codable, Sendable, Equatable {
 
         var icon: String {
             switch self {
-            case .fast: return "hare"
-            case .balanced: return "scale.3d"
-            case .powerful: return "crown"
-            case .code: return "chevron.left.forwardslash.chevron.right"
+            case .fast: "hare"
+            case .balanced: "scale.3d"
+            case .powerful: "crown"
+            case .code: "chevron.left.forwardslash.chevron.right"
             }
         }
 
         var description: String {
             switch self {
             case .fast:
-                return "Quick responses, lower cost"
+                "Quick responses, lower cost"
             case .balanced:
-                return "Good balance of speed and quality"
+                "Good balance of speed and quality"
             case .powerful:
-                return "Best quality, higher cost"
+                "Best quality, higher cost"
             case .code:
-                return "Optimized for code generation"
+                "Optimized for code generation"
             }
         }
     }
@@ -74,10 +75,10 @@ struct ModelSelectionConfiguration: Codable, Sendable, Equatable {
 
     func models(for category: ModelCategory) -> [String] {
         switch category {
-        case .fast: return fastModels
-        case .balanced: return balancedModels
-        case .powerful: return powerfulModels
-        case .code: return codeModels
+        case .fast: fastModels
+        case .balanced: balancedModels
+        case .powerful: powerfulModels
+        case .code: codeModels
         }
     }
 
@@ -120,8 +121,8 @@ struct ModelInfo: Identifiable, Sendable, Equatable {
 }
 
 struct ModelPricing: Codable, Sendable, Equatable {
-    let promptTokenPrice: Double  // Per million tokens
-    let completionTokenPrice: Double  // Per million tokens
+    let promptTokenPrice: Double // Per million tokens
+    let completionTokenPrice: Double // Per million tokens
 
     var formattedPromptPrice: String {
         "$\(String(format: "%.2f", promptTokenPrice))/1M tokens"
@@ -146,7 +147,8 @@ extension AppConfiguration {
     var modelSelectionConfig: ModelSelectionConfiguration {
         get {
             if let data = UserDefaults.standard.data(forKey: "AppConfiguration.modelSelectionConfig"),
-               let config = try? JSONDecoder().decode(ModelSelectionConfiguration.self, from: data) {
+               let config = try? JSONDecoder().decode(ModelSelectionConfiguration.self, from: data)
+            {
                 return config
             }
             return ModelSelectionConfiguration()

@@ -8,7 +8,7 @@
 
 import Foundation
 #if os(macOS)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Messages Integration
@@ -28,9 +28,9 @@ public actor MessagesIntegration: AppIntegrationModule {
 
     public func connect() async throws {
         #if os(macOS)
-        isConnected = true
+            isConnected = true
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
@@ -38,62 +38,62 @@ public actor MessagesIntegration: AppIntegrationModule {
 
     public func isAvailable() async -> Bool {
         #if os(macOS)
-        return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) != nil
+            return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) != nil
         #else
-        return false
+            return false
         #endif
     }
 
     /// Send a message
     public func sendMessage(to recipient: String, text: String) async throws {
         #if os(macOS)
-        let script = """
-        tell application "Messages"
-            set targetService to 1st account whose service type = iMessage
-            set targetBuddy to participant "\(recipient)" of targetService
-            send "\(text)" to targetBuddy
-        end tell
-        """
-        _ = try await executeAppleScript(script)
+            let script = """
+            tell application "Messages"
+                set targetService to 1st account whose service type = iMessage
+                set targetBuddy to participant "\(recipient)" of targetService
+                send "\(text)" to targetBuddy
+            end tell
+            """
+            _ = try await executeAppleScript(script)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     /// Open a conversation
     public func openConversation(with participant: String) async throws {
         #if os(macOS)
-        let script = """
-        tell application "Messages"
-            activate
-            set targetService to 1st account whose service type = iMessage
-            set targetBuddy to participant "\(participant)" of targetService
-            set targetChat to make new text chat with properties {participants:{targetBuddy}}
-        end tell
-        """
-        _ = try await executeAppleScript(script)
+            let script = """
+            tell application "Messages"
+                activate
+                set targetService to 1st account whose service type = iMessage
+                set targetBuddy to participant "\(participant)" of targetService
+                set targetChat to make new text chat with properties {participants:{targetBuddy}}
+            end tell
+            """
+            _ = try await executeAppleScript(script)
         #else
-        throw AppIntegrationModuleError.notSupported
+            throw AppIntegrationModuleError.notSupported
         #endif
     }
 
     #if os(macOS)
-    private func executeAppleScript(_ source: String) async throws -> String? {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                var error: NSDictionary?
-                if let script = NSAppleScript(source: source) {
-                    let result = script.executeAndReturnError(&error)
-                    if let error = error {
-                        continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
+        private func executeAppleScript(_ source: String) async throws -> String? {
+            try await withCheckedThrowingContinuation { continuation in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    var error: NSDictionary?
+                    if let script = NSAppleScript(source: source) {
+                        let result = script.executeAndReturnError(&error)
+                        if let error {
+                            continuation.resume(throwing: AppIntegrationModuleError.scriptError(error.description))
+                        } else {
+                            continuation.resume(returning: result.stringValue)
+                        }
                     } else {
-                        continuation.resume(returning: result.stringValue)
+                        continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                     }
-                } else {
-                    continuation.resume(throwing: AppIntegrationModuleError.scriptError("Failed to create script"))
                 }
             }
         }
-    }
     #endif
 }

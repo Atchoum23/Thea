@@ -60,7 +60,7 @@ struct NutritionServiceTests {
     }
 
     @Test("Search by barcode")
-    func testSearchByBarcode() async throws {
+    func searchByBarcode() async throws {
         let service = NutritionService()
 
         let result = try await service.fetchFoodByBarcode("12345678")
@@ -98,11 +98,11 @@ struct NutritionServiceTests {
     // MARK: - Goals Tests
 
     @Test("Update and fetch goals")
-    func testGoalsManagement() async throws {
+    func goalsManagement() async throws {
         let service = NutritionService()
 
         let newGoals = NutritionGoals(
-            dailyCalories: 2_500,
+            dailyCalories: 2500,
             proteinGrams: 150,
             carbsGrams: 250,
             fatGrams: 70
@@ -112,12 +112,12 @@ struct NutritionServiceTests {
 
         let fetchedGoals = try await service.fetchGoals()
 
-        #expect(fetchedGoals.dailyCalories == 2_500)
+        #expect(fetchedGoals.dailyCalories == 2500)
         #expect(fetchedGoals.proteinGrams == 150)
     }
 
     @Test("Calculate personalized goals")
-    func testPersonalizedGoals() {
+    func personalizedGoals() {
         let goals = NutritionGoals.calculate(
             age: 30,
             biologicalSex: .male,
@@ -155,7 +155,7 @@ struct NutritionServiceTests {
         let engine = NutritionAnalysisEngine()
 
         var nutrients = NutrientProfile()
-        nutrients.calories = 2_000
+        nutrients.calories = 2000
         nutrients.protein = 150 // 600 cal = 30%
         nutrients.carbohydrates = 200 // 800 cal = 40%
         nutrients.totalFat = 67 // 603 cal = 30%
@@ -172,7 +172,7 @@ struct NutritionServiceTests {
         let engine = NutritionAnalysisEngine()
 
         var nutrients = NutrientProfile()
-        nutrients.calories = 2_000
+        nutrients.calories = 2000
         nutrients.protein = 50
         nutrients.carbohydrates = 250
         nutrients.totalFat = 70
@@ -182,7 +182,7 @@ struct NutritionServiceTests {
             date: Date(),
             totalNutrients: nutrients,
             meals: [],
-            caloriesConsumed: 2_000,
+            caloriesConsumed: 2000,
             caloriesRemaining: 0,
             macroBalance: MacroBalance(proteinPercent: 25, carbsPercent: 50, fatPercent: 25)
         )
@@ -206,7 +206,7 @@ struct NutritionServiceTests {
             date: Date(),
             totalNutrients: nutrients,
             meals: [],
-            caloriesConsumed: 1_500,
+            caloriesConsumed: 1500,
             caloriesRemaining: 500,
             macroBalance: MacroBalance(proteinPercent: 20, carbsPercent: 50, fatPercent: 30)
         )
@@ -221,7 +221,7 @@ struct NutritionServiceTests {
     // MARK: - Nutrient Profile Tests
 
     @Test("Nutrition score calculation")
-    func testNutritionScoreCalculation() {
+    func nutritionScoreCalculation() {
         var highQuality = NutrientProfile()
         highQuality.protein = 25
         highQuality.fiber = 10
@@ -236,7 +236,7 @@ struct NutritionServiceTests {
 
         var lowQuality = NutrientProfile()
         lowQuality.saturatedFat = 20
-        lowQuality.sodium = 2_000
+        lowQuality.sodium = 2000
         lowQuality.addedSugars = 50
         lowQuality.transFat = 5
 

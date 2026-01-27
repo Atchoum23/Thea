@@ -1,5 +1,5 @@
 import Foundation
-internal import KeychainAccess
+import KeychainAccess
 
 @MainActor
 final class SecureStorage {
@@ -8,7 +8,7 @@ final class SecureStorage {
     private let keychain: Keychain
 
     private init() {
-        self.keychain = Keychain(service: "ai.thea.app")
+        keychain = Keychain(service: "ai.thea.app")
             .synchronizable(false) // Don't sync via iCloud Keychain for security
             .accessibility(.whenUnlocked)
     }
@@ -88,13 +88,13 @@ enum SecureStorageError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .keyGenerationFailed:
-            return "Failed to generate encryption key"
+            "Failed to generate encryption key"
         case .keyNotFound:
-            return "Encryption key not found"
+            "Encryption key not found"
         case .encodingFailed:
-            return "Failed to encode credentials"
+            "Failed to encode credentials"
         case .decodingFailed:
-            return "Failed to decode credentials"
+            "Failed to decode credentials"
         }
     }
 }

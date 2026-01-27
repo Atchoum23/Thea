@@ -19,8 +19,8 @@ public final class IntegrationsManager {
     public var focusForestService: FocusForestService?
     public var careerService: CareerService?
     #if os(macOS)
-    public var automationEngine: AutomationEngine?
-    public var browserAutomationService: BrowserAutomationService?
+        public var automationEngine: AutomationEngine?
+        public var browserAutomationService: BrowserAutomationService?
     #endif
     public var taskScheduler: TaskScheduler?
     public var permissionManager: PermissionManager?
@@ -36,14 +36,14 @@ public final class IntegrationsManager {
     private init() {}
 
     /// Initialize all enabled integration modules
-    public func initializeModules(context: ModelContext, featureFlags: FeatureFlags) async {
+    public func initializeModules(context _: ModelContext, featureFlags: FeatureFlags) async {
         guard !isInitialized else { return }
 
         // Health Module
         if featureFlags.healthEnabled {
             #if canImport(HealthKit)
-            healthKitService = HealthKitService()
-            enabledModules.insert(.health)
+                healthKitService = HealthKitService()
+                enabledModules.insert(.health)
             #endif
         }
 
@@ -71,10 +71,10 @@ public final class IntegrationsManager {
         // Automation (ChatGPT Agent Parity)
         if featureFlags.automationEnabled {
             #if os(macOS)
-            automationEngine = AutomationEngine()
-            browserAutomationService = BrowserAutomationService()
+                automationEngine = AutomationEngine()
+                browserAutomationService = BrowserAutomationService()
             #endif
-            taskScheduler = TaskScheduler()
+            taskScheduler = TaskScheduler.shared
             permissionManager = PermissionManager()
             enabledModules.insert(.automation)
         }
@@ -83,14 +83,14 @@ public final class IntegrationsManager {
     }
 
     /// Enable a specific module
-    public func enableModule(_ module: IntegrationModuleType, context: ModelContext) async {
+    public func enableModule(_ module: IntegrationModuleType, context _: ModelContext) async {
         guard !enabledModules.contains(module) else { return }
 
         switch module {
         case .health:
             #if canImport(HealthKit)
-            healthKitService = HealthKitService()
-            enabledModules.insert(.health)
+                healthKitService = HealthKitService()
+                enabledModules.insert(.health)
             #endif
 
         case .wellness:
@@ -110,10 +110,10 @@ public final class IntegrationsManager {
 
         case .automation:
             #if os(macOS)
-            automationEngine = AutomationEngine()
-            browserAutomationService = BrowserAutomationService()
+                automationEngine = AutomationEngine()
+                browserAutomationService = BrowserAutomationService()
             #endif
-            taskScheduler = TaskScheduler()
+            taskScheduler = TaskScheduler.shared
             permissionManager = PermissionManager()
             enabledModules.insert(.automation)
 
@@ -149,8 +149,8 @@ public final class IntegrationsManager {
 
         case .automation:
             #if os(macOS)
-            automationEngine = nil
-            browserAutomationService = nil
+                automationEngine = nil
+                browserAutomationService = nil
             #endif
             taskScheduler = nil
             permissionManager = nil
@@ -190,56 +190,56 @@ public enum IntegrationModuleType: String, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .health: return "Health"
-        case .wellness: return "Wellness"
-        case .cognitive: return "Cognitive Tools"
-        case .financial: return "Financial"
-        case .career: return "Career Development"
-        case .assessment: return "Assessments"
-        case .nutrition: return "Nutrition"
-        case .display: return "Display Control"
-        case .income: return "Income Tracking"
-        case .automation: return "Automation (ChatGPT Agent)"
+        case .health: "Health"
+        case .wellness: "Wellness"
+        case .cognitive: "Cognitive Tools"
+        case .financial: "Financial"
+        case .career: "Career Development"
+        case .assessment: "Assessments"
+        case .nutrition: "Nutrition"
+        case .display: "Display Control"
+        case .income: "Income Tracking"
+        case .automation: "Automation (ChatGPT Agent)"
         }
     }
 
     public var icon: String {
         switch self {
-        case .health: return "heart.fill"
-        case .wellness: return "leaf.fill"
-        case .cognitive: return "brain.head.profile"
-        case .financial: return "dollarsign.circle.fill"
-        case .career: return "target"
-        case .assessment: return "chart.bar.fill"
-        case .nutrition: return "fork.knife"
-        case .display: return "display"
-        case .income: return "banknote.fill"
-        case .automation: return "gearshape.2.fill"
+        case .health: "heart.fill"
+        case .wellness: "leaf.fill"
+        case .cognitive: "brain.head.profile"
+        case .financial: "dollarsign.circle.fill"
+        case .career: "target"
+        case .assessment: "chart.bar.fill"
+        case .nutrition: "fork.knife"
+        case .display: "display"
+        case .income: "banknote.fill"
+        case .automation: "gearshape.2.fill"
         }
     }
 
     public var description: String {
         switch self {
         case .health:
-            return "HealthKit integration for sleep, heart rate, activity tracking"
+            "HealthKit integration for sleep, heart rate, activity tracking"
         case .wellness:
-            return "Circadian rhythm, focus modes, ambient audio"
+            "Circadian rhythm, focus modes, ambient audio"
         case .cognitive:
-            return "Task breakdown, Pomodoro timer, Focus Forest gamification"
+            "Task breakdown, Pomodoro timer, Focus Forest gamification"
         case .financial:
-            return "Zero-based budgeting, transaction categorization, subscription monitoring"
+            "Zero-based budgeting, transaction categorization, subscription monitoring"
         case .career:
-            return "SMART goals, skill tracking, daily reflections, growth recommendations"
+            "SMART goals, skill tracking, daily reflections, growth recommendations"
         case .assessment:
-            return "EQ assessments, HSP scale, cognitive benchmarking"
+            "EQ assessments, HSP scale, cognitive benchmarking"
         case .nutrition:
-            return "84-nutrient tracking, meal planning, barcode scanning"
+            "84-nutrient tracking, meal planning, barcode scanning"
         case .display:
-            return "DDC/CI hardware control for brightness and contrast (macOS)"
+            "DDC/CI hardware control for brightness and contrast (macOS)"
         case .income:
-            return "Passive income tracking, side hustle management"
+            "Passive income tracking, side hustle management"
         case .automation:
-            return "ChatGPT Agent equivalent: GUI automation, browser control, task scheduling"
+            "ChatGPT Agent equivalent: GUI automation, browser control, task scheduling"
         }
     }
 }

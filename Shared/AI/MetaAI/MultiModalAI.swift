@@ -3,12 +3,13 @@ import Foundation
 import Vision
 
 #if os(macOS)
-import AppKit
+    import AppKit
 #else
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Multi-Modal AI
+
 // Vision, audio, video, and document understanding
 
 @MainActor
@@ -20,17 +21,19 @@ final class MultiModalAI {
 
     // MARK: - Vision
 
-    func analyzeImage(data: Data) async throws -> ImageAnalysis {
+    func analyzeImage(data: Data) async throws -> MultiModalImageAnalysis {
         #if os(macOS)
-        guard let image = NSImage(data: data),
-              let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            throw MultiModalError.invalidImage
-        }
+            guard let image = NSImage(data: data),
+                  let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)
+            else {
+                throw MultiModalError.invalidImage
+            }
         #else
-        guard let image = UIImage(data: data),
-              let cgImage = image.cgImage else {
-            throw MultiModalError.invalidImage
-        }
+            guard let image = UIImage(data: data),
+                  let cgImage = image.cgImage
+            else {
+                throw MultiModalError.invalidImage
+            }
         #endif
 
         // Object detection
@@ -42,7 +45,7 @@ final class MultiModalAI {
         // Scene classification
         let scene = try await classifyScene(cgImage)
 
-        return ImageAnalysis(
+        return MultiModalImageAnalysis(
             objects: objects,
             text: text,
             scene: scene,
@@ -50,17 +53,17 @@ final class MultiModalAI {
         )
     }
 
-    private func detectObjects(in image: CGImage) async throws -> [DetectedObject] {
+    private func detectObjects(in image: CGImage) async throws -> [MultiModalDetectedObject] {
         try await withCheckedThrowingContinuation { continuation in
             let request = VNDetectRectanglesRequest { request, error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                     return
                 }
 
                 let observations = request.results as? [VNRectangleObservation] ?? []
                 let objects = observations.map { obs in
-                    DetectedObject(
+                    MultiModalDetectedObject(
                         label: "Rectangle",
                         confidence: obs.confidence,
                         boundingBox: obs.boundingBox
@@ -77,7 +80,7 @@ final class MultiModalAI {
     private func recognizeText(in image: CGImage) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             let request = VNRecognizeTextRequest { request, error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                     return
                 }
@@ -97,7 +100,7 @@ final class MultiModalAI {
     private func classifyScene(_ image: CGImage) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             let request = VNClassifyImageRequest { request, error in
-                if let error = error {
+                if let error {
                     continuation.resume(throwing: error)
                     return
                 }
@@ -112,14 +115,14 @@ final class MultiModalAI {
         }
     }
 
-    private func extractDominantColors(_ image: CGImage) -> [String] {
+    private func extractDominantColors(_: CGImage) -> [String] {
         // Simplified color extraction
         ["#FFFFFF", "#000000"]
     }
 
     // MARK: - Document Processing
 
-    func parsePDF(data: Data) async throws -> DocumentContent {
+    func parsePDF(data _: Data) async throws -> DocumentContent {
         // Simplified PDF parsing
         DocumentContent(
             text: "PDF content",
@@ -129,7 +132,7 @@ final class MultiModalAI {
         )
     }
 
-    func extractTables(from data: Data) async throws -> [TableData] {
+    func extractTables(from _: Data) async throws -> [TableData] {
         // Simplified table extraction
         []
     }
@@ -147,7 +150,7 @@ final class MultiModalAI {
         )
     }
 
-    func interpretStatistics(data: String) async throws -> StatisticalInsights {
+    func interpretStatistics(data _: String) async throws -> StatisticalInsights {
         // Parse and analyze statistical data
         StatisticalInsights(
             summary: "Statistical summary",
@@ -160,14 +163,14 @@ final class MultiModalAI {
 
 // MARK: - Models
 
-struct ImageAnalysis: Codable, Sendable {
-    let objects: [DetectedObject]
+struct MultiModalImageAnalysis: Codable, Sendable {
+    let objects: [MultiModalDetectedObject]
     let text: String
     let scene: String
     let dominantColors: [String]
 }
 
-struct DetectedObject: Codable, Sendable {
+struct MultiModalDetectedObject: Codable, Sendable {
     let label: String
     let confidence: Float
     let boundingBox: CGRect
@@ -189,7 +192,7 @@ struct ChartAnalysis {
     let chartType: String
     let dataPoints: [DataPoint]
     let insights: String
-    let imageAnalysis: ImageAnalysis
+    let imageAnalysis: MultiModalImageAnalysis
 }
 
 struct DataPoint {
@@ -213,11 +216,11 @@ enum MultiModalError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidImage:
-            return "Invalid image data"
+            "Invalid image data"
         case .invalidDocument:
-            return "Invalid document data"
+            "Invalid document data"
         case .processingFailed:
-            return "Processing failed"
+            "Processing failed"
         }
     }
 }

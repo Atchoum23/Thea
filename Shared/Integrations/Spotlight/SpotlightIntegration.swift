@@ -4,10 +4,10 @@
 import Foundation
 import OSLog
 #if canImport(CoreSpotlight)
-import CoreSpotlight
+    import CoreSpotlight
 #endif
 #if canImport(MobileCoreServices)
-import MobileCoreServices
+    import MobileCoreServices
 #endif
 
 // MARK: - Spotlight Integration
@@ -50,72 +50,72 @@ public final class SpotlightIntegration: ObservableObject {
         tags: [String] = []
     ) async {
         #if canImport(CoreSpotlight)
-        let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
-        attributeSet.title = title
-        attributeSet.contentDescription = preview
-        attributeSet.textContent = messages.joined(separator: "\n")
+            let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+            attributeSet.title = title
+            attributeSet.contentDescription = preview
+            attributeSet.textContent = messages.joined(separator: "\n")
 
-        // Metadata
-        attributeSet.creator = agentName ?? "Thea"
-        attributeSet.contentCreationDate = createdAt
-        attributeSet.contentModificationDate = modifiedAt
-        attributeSet.keywords = tags + ["conversation", "chat", "ai"]
+            // Metadata
+            attributeSet.creator = agentName ?? "Thea"
+            attributeSet.contentCreationDate = createdAt
+            attributeSet.contentModificationDate = modifiedAt
+            attributeSet.keywords = tags + ["conversation", "chat", "ai"]
 
-        // Thumbnail
-        attributeSet.thumbnailData = createConversationThumbnail()
+            // Thumbnail
+            attributeSet.thumbnailData = createConversationThumbnail()
 
-        // Ranking
-        attributeSet.relatedUniqueIdentifier = id
-        attributeSet.domainIdentifier = conversationDomain
+            // Ranking
+            attributeSet.relatedUniqueIdentifier = id
+            attributeSet.domainIdentifier = conversationDomain
 
-        let item = CSSearchableItem(
-            uniqueIdentifier: "conversation:\(id)",
-            domainIdentifier: conversationDomain,
-            attributeSet: attributeSet
-        )
-        item.expirationDate = Date().addingTimeInterval(86400 * 365) // 1 year
+            let item = CSSearchableItem(
+                uniqueIdentifier: "conversation:\(id)",
+                domainIdentifier: conversationDomain,
+                attributeSet: attributeSet
+            )
+            item.expirationDate = Date().addingTimeInterval(86400 * 365) // 1 year
 
-        do {
-            try await CSSearchableIndex.default().indexSearchableItems([item])
-            indexedItemCount += 1
-            logger.debug("Indexed conversation: \(title)")
-        } catch {
-            logger.error("Failed to index conversation: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().indexSearchableItems([item])
+                indexedItemCount += 1
+                logger.debug("Indexed conversation: \(title)")
+            } catch {
+                logger.error("Failed to index conversation: \(error.localizedDescription)")
+            }
         #endif
     }
 
     /// Index multiple conversations in batch
     public func indexConversations(_ conversations: [IndexableConversation]) async {
         #if canImport(CoreSpotlight)
-        isIndexing = true
-        defer { isIndexing = false }
+            isIndexing = true
+            defer { isIndexing = false }
 
-        let items = conversations.map { conversation -> CSSearchableItem in
-            let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
-            attributeSet.title = conversation.title
-            attributeSet.contentDescription = conversation.preview
-            attributeSet.textContent = conversation.content
-            attributeSet.contentCreationDate = conversation.createdAt
-            attributeSet.contentModificationDate = conversation.modifiedAt
-            attributeSet.keywords = conversation.keywords + ["conversation", "chat", "ai"]
-            attributeSet.domainIdentifier = conversationDomain
+            let items = conversations.map { conversation -> CSSearchableItem in
+                let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+                attributeSet.title = conversation.title
+                attributeSet.contentDescription = conversation.preview
+                attributeSet.textContent = conversation.content
+                attributeSet.contentCreationDate = conversation.createdAt
+                attributeSet.contentModificationDate = conversation.modifiedAt
+                attributeSet.keywords = conversation.keywords + ["conversation", "chat", "ai"]
+                attributeSet.domainIdentifier = conversationDomain
 
-            return CSSearchableItem(
-                uniqueIdentifier: "conversation:\(conversation.id)",
-                domainIdentifier: conversationDomain,
-                attributeSet: attributeSet
-            )
-        }
+                return CSSearchableItem(
+                    uniqueIdentifier: "conversation:\(conversation.id)",
+                    domainIdentifier: conversationDomain,
+                    attributeSet: attributeSet
+                )
+            }
 
-        do {
-            try await CSSearchableIndex.default().indexSearchableItems(items)
-            indexedItemCount += items.count
-            lastIndexDate = Date()
-            logger.info("Indexed \(items.count) conversations")
-        } catch {
-            logger.error("Batch indexing failed: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().indexSearchableItems(items)
+                indexedItemCount += items.count
+                lastIndexDate = Date()
+                logger.info("Indexed \(items.count) conversations")
+            } catch {
+                logger.error("Batch indexing failed: \(error.localizedDescription)")
+            }
         #endif
     }
 
@@ -131,31 +131,31 @@ public final class SpotlightIntegration: ObservableObject {
         createdAt: Date
     ) async {
         #if canImport(CoreSpotlight)
-        let attributeSet = CSSearchableItemAttributeSet(contentType: .sourceCode)
-        attributeSet.title = title
-        attributeSet.contentDescription = "\(language) code artifact"
-        attributeSet.textContent = code
-        attributeSet.contentCreationDate = createdAt
-        attributeSet.keywords = ["code", "artifact", language.lowercased(), "programming"]
-        attributeSet.domainIdentifier = artifactDomain
+            let attributeSet = CSSearchableItemAttributeSet(contentType: .sourceCode)
+            attributeSet.title = title
+            attributeSet.contentDescription = "\(language) code artifact"
+            attributeSet.textContent = code
+            attributeSet.contentCreationDate = createdAt
+            attributeSet.keywords = ["code", "artifact", language.lowercased(), "programming"]
+            attributeSet.domainIdentifier = artifactDomain
 
-        if let conversationId = conversationId {
-            attributeSet.relatedUniqueIdentifier = "conversation:\(conversationId)"
-        }
+            if let conversationId {
+                attributeSet.relatedUniqueIdentifier = "conversation:\(conversationId)"
+            }
 
-        let item = CSSearchableItem(
-            uniqueIdentifier: "artifact:\(id)",
-            domainIdentifier: artifactDomain,
-            attributeSet: attributeSet
-        )
+            let item = CSSearchableItem(
+                uniqueIdentifier: "artifact:\(id)",
+                domainIdentifier: artifactDomain,
+                attributeSet: attributeSet
+            )
 
-        do {
-            try await CSSearchableIndex.default().indexSearchableItems([item])
-            indexedItemCount += 1
-            logger.debug("Indexed artifact: \(title)")
-        } catch {
-            logger.error("Failed to index artifact: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().indexSearchableItems([item])
+                indexedItemCount += 1
+                logger.debug("Indexed artifact: \(title)")
+            } catch {
+                logger.error("Failed to index artifact: \(error.localizedDescription)")
+            }
         #endif
     }
 
@@ -169,26 +169,26 @@ public final class SpotlightIntegration: ObservableObject {
         createdAt: Date
     ) async {
         #if canImport(CoreSpotlight)
-        let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
-        attributeSet.title = "Memory: \(content.prefix(50))"
-        attributeSet.contentDescription = content
-        attributeSet.textContent = content
-        attributeSet.contentCreationDate = createdAt
-        attributeSet.keywords = ["memory", "fact", type, "knowledge"]
-        attributeSet.domainIdentifier = memoryDomain
+            let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+            attributeSet.title = "Memory: \(content.prefix(50))"
+            attributeSet.contentDescription = content
+            attributeSet.textContent = content
+            attributeSet.contentCreationDate = createdAt
+            attributeSet.keywords = ["memory", "fact", type, "knowledge"]
+            attributeSet.domainIdentifier = memoryDomain
 
-        let item = CSSearchableItem(
-            uniqueIdentifier: "memory:\(id)",
-            domainIdentifier: memoryDomain,
-            attributeSet: attributeSet
-        )
+            let item = CSSearchableItem(
+                uniqueIdentifier: "memory:\(id)",
+                domainIdentifier: memoryDomain,
+                attributeSet: attributeSet
+            )
 
-        do {
-            try await CSSearchableIndex.default().indexSearchableItems([item])
-            indexedItemCount += 1
-        } catch {
-            logger.error("Failed to index memory: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().indexSearchableItems([item])
+                indexedItemCount += 1
+            } catch {
+                logger.error("Failed to index memory: \(error.localizedDescription)")
+            }
         #endif
     }
 
@@ -202,25 +202,25 @@ public final class SpotlightIntegration: ObservableObject {
         capabilities: [String]
     ) async {
         #if canImport(CoreSpotlight)
-        let attributeSet = CSSearchableItemAttributeSet(contentType: .content)
-        attributeSet.title = name
-        attributeSet.contentDescription = description
-        attributeSet.keywords = capabilities + ["agent", "assistant", "ai"]
-        attributeSet.domainIdentifier = agentDomain
+            let attributeSet = CSSearchableItemAttributeSet(contentType: .content)
+            attributeSet.title = name
+            attributeSet.contentDescription = description
+            attributeSet.keywords = capabilities + ["agent", "assistant", "ai"]
+            attributeSet.domainIdentifier = agentDomain
 
-        let item = CSSearchableItem(
-            uniqueIdentifier: "agent:\(id)",
-            domainIdentifier: agentDomain,
-            attributeSet: attributeSet
-        )
+            let item = CSSearchableItem(
+                uniqueIdentifier: "agent:\(id)",
+                domainIdentifier: agentDomain,
+                attributeSet: attributeSet
+            )
 
-        do {
-            try await CSSearchableIndex.default().indexSearchableItems([item])
-            indexedItemCount += 1
-            logger.debug("Indexed agent: \(name)")
-        } catch {
-            logger.error("Failed to index agent: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().indexSearchableItems([item])
+                indexedItemCount += 1
+                logger.debug("Indexed agent: \(name)")
+            } catch {
+                logger.error("Failed to index agent: \(error.localizedDescription)")
+            }
         #endif
     }
 
@@ -229,47 +229,47 @@ public final class SpotlightIntegration: ObservableObject {
     /// Index quick actions for Spotlight search
     public func indexQuickActions() async {
         #if canImport(CoreSpotlight)
-        let actions: [(id: String, title: String, description: String, keywords: [String])] = [
-            ("new_conversation", "New Conversation", "Start a new AI conversation", ["new", "chat", "conversation", "start"]),
-            ("voice_input", "Voice Input", "Start voice conversation", ["voice", "speak", "microphone", "talk"]),
-            ("quick_translate", "Quick Translate", "Translate text quickly", ["translate", "language", "convert"]),
-            ("summarize_clipboard", "Summarize Clipboard", "Summarize copied text", ["summarize", "clipboard", "tldr"]),
-            ("generate_code", "Generate Code", "Generate code snippet", ["code", "programming", "generate"]),
-            ("explain_code", "Explain Code", "Explain code in clipboard", ["explain", "code", "understand"]),
-            ("write_email", "Write Email", "Draft an email", ["email", "write", "compose", "mail"]),
-            ("brainstorm", "Brainstorm Ideas", "Generate ideas on a topic", ["brainstorm", "ideas", "creative"]),
-            ("proofread", "Proofread Text", "Check grammar and spelling", ["proofread", "grammar", "spelling", "check"]),
-            ("ask_about_screen", "Ask About Screen", "Ask about visible content", ["screen", "visible", "screenshot"])
-        ]
+            let actions: [(id: String, title: String, description: String, keywords: [String])] = [
+                ("new_conversation", "New Conversation", "Start a new AI conversation", ["new", "chat", "conversation", "start"]),
+                ("voice_input", "Voice Input", "Start voice conversation", ["voice", "speak", "microphone", "talk"]),
+                ("quick_translate", "Quick Translate", "Translate text quickly", ["translate", "language", "convert"]),
+                ("summarize_clipboard", "Summarize Clipboard", "Summarize copied text", ["summarize", "clipboard", "tldr"]),
+                ("generate_code", "Generate Code", "Generate code snippet", ["code", "programming", "generate"]),
+                ("explain_code", "Explain Code", "Explain code in clipboard", ["explain", "code", "understand"]),
+                ("write_email", "Write Email", "Draft an email", ["email", "write", "compose", "mail"]),
+                ("brainstorm", "Brainstorm Ideas", "Generate ideas on a topic", ["brainstorm", "ideas", "creative"]),
+                ("proofread", "Proofread Text", "Check grammar and spelling", ["proofread", "grammar", "spelling", "check"]),
+                ("ask_about_screen", "Ask About Screen", "Ask about visible content", ["screen", "visible", "screenshot"])
+            ]
 
-        var items: [CSSearchableItem] = []
+            var items: [CSSearchableItem] = []
 
-        for action in actions {
-            let attributeSet = CSSearchableItemAttributeSet(contentType: .content)
-            attributeSet.title = action.title
-            attributeSet.contentDescription = action.description
-            attributeSet.keywords = action.keywords + ["thea", "action", "quick"]
-            attributeSet.domainIdentifier = actionDomain
+            for action in actions {
+                let attributeSet = CSSearchableItemAttributeSet(contentType: .content)
+                attributeSet.title = action.title
+                attributeSet.contentDescription = action.description
+                attributeSet.keywords = action.keywords + ["thea", "action", "quick"]
+                attributeSet.domainIdentifier = actionDomain
 
-            // Make actions rank higher
-            attributeSet.rankingHint = 1.0
+                // Make actions rank higher
+                attributeSet.rankingHint = 1.0
 
-            let item = CSSearchableItem(
-                uniqueIdentifier: "action:\(action.id)",
-                domainIdentifier: actionDomain,
-                attributeSet: attributeSet
-            )
+                let item = CSSearchableItem(
+                    uniqueIdentifier: "action:\(action.id)",
+                    domainIdentifier: actionDomain,
+                    attributeSet: attributeSet
+                )
 
-            items.append(item)
-        }
+                items.append(item)
+            }
 
-        do {
-            try await CSSearchableIndex.default().indexSearchableItems(items)
-            indexedItemCount += items.count
-            logger.info("Indexed \(items.count) quick actions")
-        } catch {
-            logger.error("Failed to index quick actions: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().indexSearchableItems(items)
+                indexedItemCount += items.count
+                logger.info("Indexed \(items.count) quick actions")
+            } catch {
+                logger.error("Failed to index quick actions: \(error.localizedDescription)")
+            }
         #endif
     }
 
@@ -278,47 +278,46 @@ public final class SpotlightIntegration: ObservableObject {
     /// Remove a specific item from the index
     public func removeItem(identifier: String) async {
         #if canImport(CoreSpotlight)
-        do {
-            try await CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [identifier])
-            indexedItemCount = max(0, indexedItemCount - 1)
-            logger.debug("Removed item: \(identifier)")
-        } catch {
-            logger.error("Failed to remove item: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [identifier])
+                indexedItemCount = max(0, indexedItemCount - 1)
+                logger.debug("Removed item: \(identifier)")
+            } catch {
+                logger.error("Failed to remove item: \(error.localizedDescription)")
+            }
         #endif
     }
 
     /// Remove all items in a domain
     public func removeAllItems(in domain: SpotlightDomain) async {
         #if canImport(CoreSpotlight)
-        let domainIdentifier: String
-        switch domain {
-        case .conversations: domainIdentifier = conversationDomain
-        case .artifacts: domainIdentifier = artifactDomain
-        case .memories: domainIdentifier = memoryDomain
-        case .agents: domainIdentifier = agentDomain
-        case .actions: domainIdentifier = actionDomain
-        }
+            let domainIdentifier: String = switch domain {
+            case .conversations: conversationDomain
+            case .artifacts: artifactDomain
+            case .memories: memoryDomain
+            case .agents: agentDomain
+            case .actions: actionDomain
+            }
 
-        do {
-            try await CSSearchableIndex.default().deleteSearchableItems(withDomainIdentifiers: [domainIdentifier])
-            logger.info("Removed all items in domain: \(domainIdentifier)")
-        } catch {
-            logger.error("Failed to remove domain items: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().deleteSearchableItems(withDomainIdentifiers: [domainIdentifier])
+                logger.info("Removed all items in domain: \(domainIdentifier)")
+            } catch {
+                logger.error("Failed to remove domain items: \(error.localizedDescription)")
+            }
         #endif
     }
 
     /// Remove all indexed items
     public func removeAllItems() async {
         #if canImport(CoreSpotlight)
-        do {
-            try await CSSearchableIndex.default().deleteAllSearchableItems()
-            indexedItemCount = 0
-            logger.info("Removed all indexed items")
-        } catch {
-            logger.error("Failed to remove all items: \(error.localizedDescription)")
-        }
+            do {
+                try await CSSearchableIndex.default().deleteAllSearchableItems()
+                indexedItemCount = 0
+                logger.info("Removed all indexed items")
+            } catch {
+                logger.error("Failed to remove all items: \(error.localizedDescription)")
+            }
         #endif
     }
 
@@ -327,7 +326,8 @@ public final class SpotlightIntegration: ObservableObject {
     /// Handle when user taps a Spotlight result
     public func handleSpotlightActivity(_ userActivity: NSUserActivity) -> SpotlightResult? {
         guard userActivity.activityType == CSSearchableItemActionType,
-              let identifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String else {
+              let identifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String
+        else {
             return nil
         }
 
@@ -375,7 +375,7 @@ public final class SpotlightIntegration: ObservableObject {
 
     private func createConversationThumbnail() -> Data? {
         // Create a simple thumbnail for conversations
-        return nil // Implement with CoreGraphics if needed
+        nil // Implement with CoreGraphics if needed
     }
 }
 

@@ -1,9 +1,9 @@
 // DeepLinkRouter.swift
 // Universal deep linking and URL scheme handling
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Deep Link Router
 
@@ -27,8 +27,8 @@ public final class DeepLinkRouter: ObservableObject {
 
     // MARK: - URL Schemes
 
-    public let urlScheme = "thea"
-    public let universalLinkDomain = "theathe.app"
+    nonisolated public static let urlScheme = "thea"
+    nonisolated public static let universalLinkDomain = "theathe.app"
 
     // MARK: - Initialization
 
@@ -206,7 +206,8 @@ public final class DeepLinkRouter: ObservableObject {
         // Spotlight
         register("spotlight/:type/:id") { link in
             if let type = link.parameters["type"],
-               let id = link.parameters["id"] {
+               let id = link.parameters["id"]
+            {
                 NotificationCenter.default.post(
                     name: .deepLinkNavigate,
                     object: nil,
@@ -228,6 +229,23 @@ public final class DeepLinkRouter: ObservableObject {
         }
 
         logger.info("Registered \(self.routes.count) default routes")
+    }
+
+    // MARK: - Navigation
+
+    /// Navigate to a path using the internal URL scheme
+    @discardableResult
+    public func navigate(to path: String) async -> Bool {
+        var components = URLComponents()
+        components.scheme = Self.urlScheme
+        components.host = ""
+        components.path = path.hasPrefix("/") ? path : "/\(path)"
+
+        guard let url = components.url else {
+            return false
+        }
+
+        return await handle(url)
     }
 
     // MARK: - URL Handling
@@ -280,13 +298,13 @@ public final class DeepLinkRouter: ObservableObject {
 
     /// Handle universal link (associated domain)
     public func handleUniversalLink(_ url: URL) async -> Bool {
-        guard url.host == universalLinkDomain || url.host == "www.\(universalLinkDomain)" else {
+        guard url.host == Self.universalLinkDomain || url.host == "www.\(Self.universalLinkDomain)" else {
             return false
         }
 
         // Convert to deep link
         var components = URLComponents()
-        components.scheme = urlScheme
+        components.scheme = Self.urlScheme
         components.host = ""
         components.path = url.path
         components.queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
@@ -302,16 +320,18 @@ public final class DeepLinkRouter: ObservableObject {
     public func handleUserActivity(_ activity: NSUserActivity) async -> Bool {
         // Handle universal link from user activity
         if activity.activityType == NSUserActivityTypeBrowsingWeb,
-           let url = activity.webpageURL {
+           let url = activity.webpageURL
+        {
             return await handleUniversalLink(url)
         }
 
         // Handle Spotlight result
         if activity.activityType == "com.thea.app.spotlight" {
             if let identifier = activity.userInfo?["identifier"] as? String,
-               let type = activity.userInfo?["type"] as? String {
+               let type = activity.userInfo?["type"] as? String
+            {
                 var components = URLComponents()
-                components.scheme = urlScheme
+                components.scheme = Self.urlScheme
                 components.path = "/spotlight/\(type)/\(identifier)"
 
                 if let url = components.url {
@@ -325,7 +345,7 @@ public final class DeepLinkRouter: ObservableObject {
             let action = activity.activityType.replacingOccurrences(of: "com.thea.app.", with: "")
 
             var components = URLComponents()
-            components.scheme = urlScheme
+            components.scheme = Self.urlScheme
             components.path = "/\(action)"
 
             // Add user info as query parameters
@@ -351,13 +371,12 @@ public final class DeepLinkRouter: ObservableObject {
             return nil
         }
 
-        let source: DeepLinkSource
-        if url.scheme == urlScheme {
-            source = .urlScheme
-        } else if url.host == universalLinkDomain || url.host == "www.\(universalLinkDomain)" {
-            source = .universalLink
+        let source: DeepLinkSource = if url.scheme == Self.urlScheme {
+            .urlScheme
+        } else if url.host == Self.universalLinkDomain || url.host == "www.\(Self.universalLinkDomain)" {
+            .universalLink
         } else {
-            source = .other
+            .other
         }
 
         var path = components.path
@@ -383,7 +402,7 @@ public final class DeepLinkRouter: ObservableObject {
     /// Generate deep link URL
     public func generateURL(for path: String, parameters: [String: String]? = nil) -> URL? {
         var components = URLComponents()
-        components.scheme = urlScheme
+        components.scheme = Self.urlScheme
         components.host = ""
         components.path = path.hasPrefix("/") ? path : "/\(path)"
 
@@ -398,7 +417,7 @@ public final class DeepLinkRouter: ObservableObject {
     public func generateUniversalLink(for path: String, parameters: [String: String]? = nil) -> URL? {
         var components = URLComponents()
         components.scheme = "https"
-        components.host = universalLinkDomain
+        components.host = Self.universalLinkDomain
         components.path = path.hasPrefix("/") ? path : "/\(path)"
 
         if let params = parameters, !params.isEmpty {
@@ -456,7 +475,7 @@ public final class DeepLinkRouter: ObservableObject {
 
 // MARK: - Types
 
-public struct DeepLink {
+public struct DeepLink: Sendable {
     public let url: URL
     public let source: DeepLinkSource
     public let path: String
@@ -468,7 +487,7 @@ public struct DeepLink {
     }
 }
 
-public enum DeepLinkSource: String {
+public enum DeepLinkSource: String, Sendable {
     case urlScheme
     case universalLink
     case spotlight
@@ -490,13 +509,13 @@ private struct DeepLinkRoute {
     init(pattern: String, handler: @escaping (DeepLink) async -> Bool) {
         self.pattern = pattern
         self.handler = handler
-        self.patternComponents = pattern.components(separatedBy: "/").map { component in
+        patternComponents = pattern.components(separatedBy: "/").map { component in
             if component.hasPrefix(":") {
-                return .parameter(String(component.dropFirst()))
+                .parameter(String(component.dropFirst()))
             } else if component == "*" {
-                return .wildcard
+                .wildcard
             } else {
-                return .literal(component)
+                .literal(component)
             }
         }
     }
@@ -506,7 +525,7 @@ private struct DeepLinkRoute {
 
         // Check component count (unless pattern has wildcard)
         let hasWildcard = patternComponents.contains { if case .wildcard = $0 { return true }; return false }
-        if !hasWildcard && pathComponents.count != patternComponents.count {
+        if !hasWildcard, pathComponents.count != patternComponents.count {
             return nil
         }
 
@@ -523,11 +542,11 @@ private struct DeepLinkRoute {
             let pathComponent = pathComponents[index]
 
             switch patternComponent {
-            case .literal(let value):
+            case let .literal(value):
                 if value != pathComponent {
                     return nil
                 }
-            case .parameter(let name):
+            case let .parameter(name):
                 parameters[name] = pathComponent
             case .wildcard:
                 // Match rest of path
@@ -557,8 +576,8 @@ public extension Notification.Name {
 public extension URL {
     /// Check if URL is a Thea deep link
     var isTheaDeepLink: Bool {
-        scheme == DeepLinkRouter.shared.urlScheme ||
-        host == DeepLinkRouter.shared.universalLinkDomain ||
-        host == "www.\(DeepLinkRouter.shared.universalLinkDomain)"
+        scheme == DeepLinkRouter.urlScheme ||
+            host == DeepLinkRouter.universalLinkDomain ||
+            host == "www.\(DeepLinkRouter.universalLinkDomain)"
     }
 }

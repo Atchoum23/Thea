@@ -5,10 +5,25 @@
 //  Core ML integration for on-device AI models
 //
 
-import Foundation
-import CoreML
 import Combine
+import CoreML
+import Foundation
 import NaturalLanguage
+
+// MARK: - MLModel Wrapper
+
+/// Wrapper to handle MLModel prediction synchronously to avoid Sendable issues
+private final class MLModelWrapper: @unchecked Sendable {
+    private let model: MLModel
+
+    init(model: MLModel) {
+        self.model = model
+    }
+
+    func predict(from inputProvider: MLFeatureProvider) throws -> MLFeatureProvider {
+        try model.prediction(from: inputProvider)
+    }
+}
 
 // MARK: - Core ML Service
 
@@ -83,11 +98,10 @@ public class CoreMLService: ObservableObject {
 
     private func loadModelInfo(from url: URL, source: ModelSource) async -> CoreMLModelInfo? {
         do {
-            let compiledURL: URL
-            if url.pathExtension == "mlpackage" {
-                compiledURL = try await MLModel.compileModel(at: url)
+            let compiledURL: URL = if url.pathExtension == "mlpackage" {
+                try await MLModel.compileModel(at: url)
             } else {
-                compiledURL = url
+                url
             }
 
             let model = try MLModel(contentsOf: compiledURL)
@@ -148,9 +162,13 @@ public class CoreMLService: ObservableObject {
         }
 
         let model = try await loadModel(modelId)
-        let inputProvider = try MLDictionaryFeatureProvider(dictionary: inputs)
 
-        return try model.prediction(from: inputProvider)
+        // Create input and run prediction synchronously on MainActor
+        // to avoid non-Sendable type issues
+        let inputProvider = try MLDictionaryFeatureProvider(dictionary: inputs)
+        // Use nonisolated wrapper class for MLModel prediction
+        let wrapper = MLModelWrapper(model: model)
+        return try wrapper.predict(from: inputProvider)
     }
 
     /// Run batch inference
@@ -167,11 +185,13 @@ public class CoreMLService: ObservableObject {
         }
 
         let model = try await loadModel(modelId)
+        let wrapper = MLModelWrapper(model: model)
         var results: [MLFeatureProvider] = []
 
         for inputs in batchInputs {
             let inputProvider = try MLDictionaryFeatureProvider(dictionary: inputs)
-            let prediction = try model.prediction(from: inputProvider)
+            // Prediction using wrapper to avoid Sendable requirements
+            let prediction = try wrapper.predict(from: inputProvider)
             results.append(prediction)
         }
 
@@ -181,13 +201,13 @@ public class CoreMLService: ObservableObject {
     // MARK: - Natural Language Processing
 
     /// Analyze sentiment of text
-    public func analyzeSentiment(_ text: String) -> SentimentResult {
+    public func analyzeSentiment(_ text: String) -> CoreMLSentimentResult {
         tagger.string = text
-        tagger.setLanguage(.english, range: text.startIndex..<text.endIndex)
+        tagger.setLanguage(.english, range: text.startIndex ..< text.endIndex)
 
         var scores: [Double] = []
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .sentence, scheme: .sentimentScore) { tag, range in
-            if let tag = tag, let score = Double(tag.rawValue) {
+        tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .sentence, scheme: .sentimentScore) { tag, _ in
+            if let tag, let score = Double(tag.rawValue) {
                 scores.append(score)
             }
             return true
@@ -195,16 +215,15 @@ public class CoreMLService: ObservableObject {
 
         let averageScore = scores.isEmpty ? 0 : scores.reduce(0, +) / Double(scores.count)
 
-        let sentiment: Sentiment
-        if averageScore > 0.3 {
-            sentiment = .positive
+        let sentiment: CoreMLSentiment = if averageScore > 0.3 {
+            .positive
         } else if averageScore < -0.3 {
-            sentiment = .negative
+            .negative
         } else {
-            sentiment = .neutral
+            .neutral
         }
 
-        return SentimentResult(
+        return CoreMLSentimentResult(
             sentiment: sentiment,
             score: averageScore,
             confidence: min(abs(averageScore) * 2, 1.0)
@@ -212,15 +231,15 @@ public class CoreMLService: ObservableObject {
     }
 
     /// Extract named entities from text
-    public func extractEntities(_ text: String) -> [ExtractedEntity] {
-        var entities: [ExtractedEntity] = []
+    public func extractEntities(_ text: String) -> [CoreMLExtractedEntity] {
+        var entities: [CoreMLExtractedEntity] = []
 
         tagger.string = text
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType) { tag, range in
-            if let tag = tag, tag != .other {
-                let entity = ExtractedEntity(
+        tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .word, scheme: .nameType) { tag, range in
+            if let tag, tag != .other {
+                let entity = CoreMLExtractedEntity(
                     text: String(text[range]),
-                    type: EntityType(from: tag),
+                    type: CoreMLEntityType(from: tag),
                     range: range,
                     in: text
                 )
@@ -255,7 +274,7 @@ public class CoreMLService: ObservableObject {
         tokenizer.string = text
         var tokens: [String] = []
 
-        tokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { range, _ in
+        tokenizer.enumerateTokens(in: text.startIndex ..< text.endIndex) { range, _ in
             tokens.append(String(text[range]))
             return true
         }
@@ -292,8 +311,8 @@ public class CoreMLService: ObservableObject {
         var tags: [PartOfSpeechTag] = []
 
         tagger.string = text
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .lexicalClass) { tag, range in
-            if let tag = tag {
+        tagger.enumerateTags(in: text.startIndex ..< text.endIndex, unit: .word, scheme: .lexicalClass) { tag, range in
+            if let tag {
                 tags.append(PartOfSpeechTag(
                     word: String(text[range]),
                     tag: tag,
@@ -310,23 +329,23 @@ public class CoreMLService: ObservableObject {
     // MARK: - Text Classification
 
     /// Classify text intent
-    public func classifyIntent(_ text: String) async -> IntentClassification {
+    public func classifyIntent(_ text: String) async -> CoreMLIntentClassification {
         // Keyword-based classification as fallback
         let lowercased = text.lowercased()
 
         if lowercased.contains("how") || lowercased.contains("what") || lowercased.contains("?") {
-            return IntentClassification(intent: .question, confidence: 0.8, alternatives: [])
+            return CoreMLIntentClassification(intent: .question, confidence: 0.8, alternatives: [])
         } else if lowercased.contains("create") || lowercased.contains("make") || lowercased.contains("generate") {
-            return IntentClassification(intent: .creation, confidence: 0.8, alternatives: [])
+            return CoreMLIntentClassification(intent: .creation, confidence: 0.8, alternatives: [])
         } else if lowercased.contains("find") || lowercased.contains("search") || lowercased.contains("look") {
-            return IntentClassification(intent: .search, confidence: 0.8, alternatives: [])
+            return CoreMLIntentClassification(intent: .search, confidence: 0.8, alternatives: [])
         } else if lowercased.contains("explain") || lowercased.contains("describe") || lowercased.contains("tell") {
-            return IntentClassification(intent: .explanation, confidence: 0.8, alternatives: [])
+            return CoreMLIntentClassification(intent: .explanation, confidence: 0.8, alternatives: [])
         } else if lowercased.contains("fix") || lowercased.contains("solve") || lowercased.contains("debug") {
-            return IntentClassification(intent: .troubleshooting, confidence: 0.8, alternatives: [])
+            return CoreMLIntentClassification(intent: .troubleshooting, confidence: 0.8, alternatives: [])
         }
 
-        return IntentClassification(intent: .general, confidence: 0.5, alternatives: [])
+        return CoreMLIntentClassification(intent: .general, confidence: 0.5, alternatives: [])
     }
 
     // MARK: - Model Download
@@ -383,33 +402,33 @@ public enum ModelSource: String, Sendable {
     case custom
 }
 
-public enum Sentiment: String, Sendable {
+public enum CoreMLSentiment: String, Sendable {
     case positive
     case negative
     case neutral
 }
 
-public struct SentimentResult: Sendable {
-    public let sentiment: Sentiment
+public struct CoreMLSentimentResult: Sendable {
+    public let sentiment: CoreMLSentiment
     public let score: Double
     public let confidence: Double
 }
 
-public struct ExtractedEntity: @unchecked Sendable {
+public struct CoreMLExtractedEntity: @unchecked Sendable {
     public let text: String
-    public let type: EntityType
+    public let type: CoreMLEntityType
     public let startOffset: Int
     public let endOffset: Int
 
-    init(text: String, type: EntityType, range: Range<String.Index>, in string: String) {
+    init(text: String, type: CoreMLEntityType, range: Range<String.Index>, in string: String) {
         self.text = text
         self.type = type
-        self.startOffset = string.distance(from: string.startIndex, to: range.lowerBound)
-        self.endOffset = string.distance(from: string.startIndex, to: range.upperBound)
+        startOffset = string.distance(from: string.startIndex, to: range.lowerBound)
+        endOffset = string.distance(from: string.startIndex, to: range.upperBound)
     }
 }
 
-public enum EntityType: String, Sendable {
+public enum CoreMLEntityType: String, Sendable {
     case person
     case place
     case organization
@@ -440,12 +459,12 @@ public struct PartOfSpeechTag: @unchecked Sendable {
     init(word: String, tag: NLTag, range: Range<String.Index>, in string: String) {
         self.word = word
         self.tag = tag
-        self.startOffset = string.distance(from: string.startIndex, to: range.lowerBound)
-        self.endOffset = string.distance(from: string.startIndex, to: range.upperBound)
+        startOffset = string.distance(from: string.startIndex, to: range.lowerBound)
+        endOffset = string.distance(from: string.startIndex, to: range.upperBound)
     }
 }
 
-public enum UserIntent: String, Sendable {
+public enum CoreMLUserIntent: String, Sendable {
     case question
     case creation
     case search
@@ -454,10 +473,10 @@ public enum UserIntent: String, Sendable {
     case general
 }
 
-public struct IntentClassification: Sendable {
-    public let intent: UserIntent
+public struct CoreMLIntentClassification: Sendable {
+    public let intent: CoreMLUserIntent
     public let confidence: Double
-    public let alternatives: [(UserIntent, Double)]
+    public let alternatives: [(CoreMLUserIntent, Double)]
 }
 
 public enum CoreMLError: Error, LocalizedError, Sendable {
@@ -469,11 +488,11 @@ public enum CoreMLError: Error, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .modelNotFound: return "Model not found"
-        case .loadFailed: return "Failed to load model"
-        case .inferenceError: return "Inference failed"
-        case .invalidInput: return "Invalid input format"
-        case .compilationFailed: return "Model compilation failed"
+        case .modelNotFound: "Model not found"
+        case .loadFailed: "Failed to load model"
+        case .inferenceError: "Inference failed"
+        case .invalidInput: "Invalid input format"
+        case .compilationFailed: "Model compilation failed"
         }
     }
 }

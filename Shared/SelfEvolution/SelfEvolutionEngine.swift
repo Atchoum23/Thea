@@ -1,9 +1,9 @@
 // SelfEvolutionEngine.swift
 // Autonomous feature implementation and codebase evolution
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Self Evolution Engine
 
@@ -175,7 +175,7 @@ public final class SelfEvolutionEngine: ObservableObject {
         }
     }
 
-    private func identifyAffectedAreas(_ request: String, category: FeatureCategory) -> [(path: String, isNew: Bool, description: String)] {
+    private func identifyAffectedAreas(_: String, category: FeatureCategory) -> [(path: String, isNew: Bool, description: String)] {
         var areas: [(path: String, isNew: Bool, description: String)] = []
 
         switch category {
@@ -202,13 +202,13 @@ public final class SelfEvolutionEngine: ObservableObject {
 
     private func identifyDependencies(_ category: FeatureCategory) -> [String] {
         switch category {
-        case .ui: return ["SwiftUI", "Combine"]
-        case .networking: return ["Foundation", "Network"]
-        case .ai: return ["NaturalLanguage", "CoreML"]
-        case .data: return ["SwiftData", "Foundation"]
-        case .settings: return ["SwiftUI", "Combine"]
-        case .security: return ["CryptoKit", "LocalAuthentication"]
-        case .core: return ["Foundation", "Combine"]
+        case .ui: ["SwiftUI", "Combine"]
+        case .networking: ["Foundation", "Network"]
+        case .ai: ["NaturalLanguage", "CoreML"]
+        case .data: ["SwiftData", "Foundation"]
+        case .settings: ["SwiftUI", "Combine"]
+        case .security: ["CryptoKit", "LocalAuthentication"]
+        case .core: ["Foundation", "Combine"]
         }
     }
 
@@ -223,7 +223,7 @@ public final class SelfEvolutionEngine: ObservableObject {
             ))
         }
 
-        let modifyCount = affectedFiles.filter { $0.action == .modify }.count
+        let modifyCount = affectedFiles.count { $0.action == .modify }
         if modifyCount > 5 {
             risks.append(ImplementationRisk(
                 level: .medium,
@@ -295,13 +295,12 @@ public final class SelfEvolutionEngine: ObservableObject {
         let stepCount = plan.steps.count
         let duration = plan.estimatedTotalDuration
 
-        let level: ComplexityLevel
-        if stepCount <= 3 && duration < 600 {
-            level = .low
-        } else if stepCount <= 6 && duration < 1800 {
-            level = .medium
+        let level: ComplexityLevel = if stepCount <= 3, duration < 600 {
+            .low
+        } else if stepCount <= 6, duration < 1800 {
+            .medium
         } else {
-            level = .high
+            .high
         }
 
         return ComplexityEstimate(
@@ -444,11 +443,11 @@ public final class SelfEvolutionEngine: ObservableObject {
         """
     }
 
-    private func generateModifications(original: String, path: String, task: EvolutionTask) async throws -> String {
+    private func generateModifications(original: String, path _: String, task: EvolutionTask) async throws -> String {
         // This would integrate with AI to generate appropriate modifications
         // For now, return original with a comment
 
-        return """
+        """
         // Modified by Thea Self-Evolution Engine
         // Task: \(task.request)
 
@@ -474,11 +473,11 @@ public final class SelfEvolutionEngine: ObservableObject {
             (.signing, 0.1)
         ]
 
-        for (phase, weight) in phases {
+        for (phase, _) in phases {
             buildProgress = BuildProgress(phase: phase, progress: 0)
 
             // Simulate build progress
-            for i in 0...10 {
+            for i in 0 ... 10 {
                 try await Task.sleep(nanoseconds: 50_000_000)
                 buildProgress = BuildProgress(phase: phase, progress: Double(i) / 10.0)
             }
@@ -522,56 +521,67 @@ public final class SelfEvolutionEngine: ObservableObject {
     }
 
     private func executeBuild() async throws -> BuildResult {
-        let projectPath = projectRoot.appendingPathComponent(xcodeProjectName)
-        let outputPath = buildDirectory.appendingPathComponent("Thea.app")
+        #if os(macOS)
+            let projectPath = projectRoot.appendingPathComponent(xcodeProjectName)
+            let outputPath = buildDirectory.appendingPathComponent("Thea.app")
 
-        // Create build directory
-        try? fileManager.createDirectory(at: buildDirectory, withIntermediateDirectories: true)
+            // Create build directory
+            try? fileManager.createDirectory(at: buildDirectory, withIntermediateDirectories: true)
 
-        // Execute xcodebuild
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/xcodebuild")
-        process.arguments = [
-            "-project", projectPath.path,
-            "-scheme", schemeName,
-            "-configuration", "Release",
-            "-derivedDataPath", buildDirectory.path,
-            "build"
-        ]
+            // Execute xcodebuild
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/xcodebuild")
+            process.arguments = [
+                "-project", projectPath.path,
+                "-scheme", schemeName,
+                "-configuration", "Release",
+                "-derivedDataPath", buildDirectory.path,
+                "build"
+            ]
 
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
-        process.standardOutput = outputPipe
-        process.standardError = errorPipe
+            let outputPipe = Pipe()
+            let errorPipe = Pipe()
+            process.standardOutput = outputPipe
+            process.standardError = errorPipe
 
-        do {
-            try process.run()
-            process.waitUntilExit()
+            do {
+                try process.run()
+                process.waitUntilExit()
 
-            let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+                let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
 
-            let output = String(data: outputData, encoding: .utf8) ?? ""
-            let errors = String(data: errorData, encoding: .utf8) ?? ""
+                let output = String(data: outputData, encoding: .utf8) ?? ""
+                let errors = String(data: errorData, encoding: .utf8) ?? ""
 
-            let success = process.terminationStatus == 0
+                let success = process.terminationStatus == 0
 
-            return BuildResult(
-                success: success,
-                outputPath: success ? outputPath : nil,
-                duration: 0,
-                warnings: extractWarnings(from: output),
-                errors: success ? [] : [errors]
-            )
-        } catch {
+                return BuildResult(
+                    success: success,
+                    outputPath: success ? outputPath : nil,
+                    duration: 0,
+                    warnings: extractWarnings(from: output),
+                    errors: success ? [] : [errors]
+                )
+            } catch {
+                return BuildResult(
+                    success: false,
+                    outputPath: nil,
+                    duration: 0,
+                    warnings: [],
+                    errors: [error.localizedDescription]
+                )
+            }
+        #else
+            // Building is not supported on iOS
             return BuildResult(
                 success: false,
                 outputPath: nil,
                 duration: 0,
                 warnings: [],
-                errors: [error.localizedDescription]
+                errors: ["Self-evolution build is only available on macOS"]
             )
-        }
+        #endif
     }
 
     private func extractWarnings(from output: String) -> [String] {
@@ -582,24 +592,29 @@ public final class SelfEvolutionEngine: ObservableObject {
     // MARK: - Testing
 
     private func runTests() async throws {
-        isTesting = true
-        defer { isTesting = false }
+        #if os(macOS)
+            isTesting = true
+            defer { isTesting = false }
 
-        logger.info("Running tests...")
+            logger.info("Running tests...")
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/xcodebuild")
-        process.arguments = [
-            "-project", projectRoot.appendingPathComponent(xcodeProjectName).path,
-            "-scheme", schemeName,
-            "-destination", "platform=macOS",
-            "test"
-        ]
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/xcodebuild")
+            process.arguments = [
+                "-project", projectRoot.appendingPathComponent(xcodeProjectName).path,
+                "-scheme", schemeName,
+                "-destination", "platform=macOS",
+                "test"
+            ]
 
-        try process.run()
-        process.waitUntilExit()
+            try process.run()
+            process.waitUntilExit()
 
-        currentTask?.testsPassed = process.terminationStatus == 0
+            currentTask?.testsPassed = process.terminationStatus == 0
+        #else
+            // Testing is not supported on iOS
+            logger.warning("Self-evolution testing is only available on macOS")
+        #endif
     }
 
     // MARK: - Installation
@@ -658,7 +673,8 @@ public final class SelfEvolutionEngine: ObservableObject {
 
     private func loadTaskHistory() {
         if let data = UserDefaults.standard.data(forKey: "evolution.taskHistory"),
-           let history = try? JSONDecoder().decode([EvolutionTask].self, from: data) {
+           let history = try? JSONDecoder().decode([EvolutionTask].self, from: data)
+        {
             taskHistory = history
         }
     }
@@ -697,6 +713,38 @@ public class EvolutionTask: Identifiable, ObservableObject, Codable {
         self.request = request
         self.status = status
         self.createdAt = createdAt
+    }
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        request = try container.decode(String.self, forKey: .request)
+        status = try container.decode(TaskStatus.self, forKey: .status)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        analysis = try container.decodeIfPresent(FeatureAnalysis.self, forKey: .analysis)
+        plan = try container.decodeIfPresent(ImplementationPlan.self, forKey: .plan)
+        estimate = try container.decodeIfPresent(ComplexityEstimate.self, forKey: .estimate)
+        currentStep = try container.decodeIfPresent(Int.self, forKey: .currentStep) ?? 0
+        completedSteps = try container.decodeIfPresent([Int].self, forKey: .completedSteps) ?? []
+        buildResult = try container.decodeIfPresent(BuildResult.self, forKey: .buildResult)
+        testsPassed = try container.decodeIfPresent(Bool.self, forKey: .testsPassed) ?? false
+        error = try container.decodeIfPresent(String.self, forKey: .error)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(request, forKey: .request)
+        try container.encode(status, forKey: .status)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(analysis, forKey: .analysis)
+        try container.encodeIfPresent(plan, forKey: .plan)
+        try container.encodeIfPresent(estimate, forKey: .estimate)
+        try container.encode(currentStep, forKey: .currentStep)
+        try container.encode(completedSteps, forKey: .completedSteps)
+        try container.encodeIfPresent(buildResult, forKey: .buildResult)
+        try container.encode(testsPassed, forKey: .testsPassed)
+        try container.encodeIfPresent(error, forKey: .error)
     }
 }
 
@@ -835,12 +883,12 @@ public enum EvolutionError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .noPlan: return "No implementation plan available"
-        case .fileNotFound(let path): return "File not found: \(path)"
-        case .buildFailed(let reason): return "Build failed: \(reason)"
-        case .testsFailed: return "Tests failed"
-        case .noUpdateAvailable: return "No update available"
-        case .installFailed(let reason): return "Installation failed: \(reason)"
+        case .noPlan: "No implementation plan available"
+        case let .fileNotFound(path): "File not found: \(path)"
+        case let .buildFailed(reason): "Build failed: \(reason)"
+        case .testsFailed: "Tests failed"
+        case .noUpdateAvailable: "No update available"
+        case let .installFailed(reason): "Installation failed: \(reason)"
         }
     }
 }

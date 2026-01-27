@@ -93,7 +93,8 @@ public actor SpecParser {
         let pattern = #"\*\*Spec Version\*\*:\s*(\d+\.\d+\.\d+)"#
         guard let regex = try? NSRegularExpression(pattern: pattern),
               let match = regex.firstMatch(in: content, range: NSRange(content.startIndex..., in: content)),
-              let range = Range(match.range(at: 1), in: content) else {
+              let range = Range(match.range(at: 1), in: content)
+        else {
             return "unknown"
         }
         return String(content[range])
@@ -114,7 +115,8 @@ public actor SpecParser {
             guard let numberRange = Range(match.range(at: 1), in: content),
                   let titleRange = Range(match.range(at: 2), in: content),
                   let minHoursRange = Range(match.range(at: 3), in: content),
-                  let maxHoursRange = Range(match.range(at: 4), in: content) else {
+                  let maxHoursRange = Range(match.range(at: 4), in: content)
+            else {
                 continue
             }
 
@@ -134,7 +136,7 @@ public actor SpecParser {
                 number: number,
                 title: title,
                 description: extractDescription(from: sectionContent),
-                estimatedHours: minHours...maxHours,
+                estimatedHours: minHours ... maxHours,
                 deliverable: deliverable,
                 files: files,
                 verificationChecklist: checklist,
@@ -183,7 +185,8 @@ public actor SpecParser {
 
         for match in matches {
             guard let pathRange = Range(match.range(at: 1), in: section),
-                  let statusRange = Range(match.range(at: 2), in: section) else {
+                  let statusRange = Range(match.range(at: 2), in: section)
+            else {
                 continue
             }
 
@@ -246,7 +249,8 @@ public actor SpecParser {
 
         for match in matches {
             guard let statusRange = Range(match.range(at: 1), in: section),
-                  let descRange = Range(match.range(at: 2), in: section) else {
+                  let descRange = Range(match.range(at: 2), in: section)
+            else {
                 continue
             }
 
@@ -283,7 +287,8 @@ public actor SpecParser {
         let pattern = #"\*\*Deliverable\*\*:\s*`?([^`\n]+)`?"#
         guard let regex = try? NSRegularExpression(pattern: pattern),
               let match = regex.firstMatch(in: section, range: NSRange(section.startIndex..., in: section)),
-              let range = Range(match.range(at: 1), in: section) else {
+              let range = Range(match.range(at: 1), in: section)
+        else {
             return nil
         }
         return String(section[range]).trimmingCharacters(in: .whitespaces)
@@ -300,7 +305,7 @@ public actor SpecParser {
                 foundHeader = true
                 continue
             }
-            if foundHeader && !line.isEmpty && !line.hasPrefix("#") && !line.hasPrefix("**") && !line.hasPrefix("-") && !line.hasPrefix("`") {
+            if foundHeader, !line.isEmpty, !line.hasPrefix("#"), !line.hasPrefix("**"), !line.hasPrefix("-"), !line.hasPrefix("`") {
                 description = line.trimmingCharacters(in: .whitespaces)
                 break
             }
@@ -314,12 +319,13 @@ public actor SpecParser {
 
         // Find the rules section
         guard let startRange = content.range(of: "### 2.1 Immutable Rules"),
-              let codeStart = content.range(of: "```", range: startRange.upperBound..<content.endIndex),
-              let codeEnd = content.range(of: "```", range: codeStart.upperBound..<content.endIndex) else {
+              let codeStart = content.range(of: "```", range: startRange.upperBound ..< content.endIndex),
+              let codeEnd = content.range(of: "```", range: codeStart.upperBound ..< content.endIndex)
+        else {
             return rules
         }
 
-        let rulesContent = content[codeStart.upperBound..<codeEnd.lowerBound]
+        let rulesContent = content[codeStart.upperBound ..< codeEnd.lowerBound]
 
         // Parse numbered rules
         let pattern = #"(\d+)\.\s*([A-Z]+):\s*(.+)"#
@@ -357,20 +363,20 @@ public actor SpecParser {
 
         for match in matches {
             guard let pathRange = Range(match.range(at: 1), in: section),
-                  let statusRange = Range(match.range(at: 2), in: section) else {
+                  let statusRange = Range(match.range(at: 2), in: section)
+            else {
                 continue
             }
 
             let path = String(section[pathRange])
             let statusStr = String(section[statusRange])
 
-            let status: FileRequirement.FileStatus
-            if statusStr.contains("EXISTS") {
-                status = .exists
+            let status: FileRequirement.FileStatus = if statusStr.contains("EXISTS") {
+                .exists
             } else if statusStr.contains("EDIT") {
-                status = .edit
+                .edit
             } else {
-                status = .new
+                .new
             }
 
             index[path] = status

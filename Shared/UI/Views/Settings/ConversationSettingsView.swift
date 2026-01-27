@@ -112,7 +112,7 @@ public struct ConversationSettingsView: View {
                         get: { config.maxConversationLength ?? 100 },
                         set: { config.maxConversationLength = $0 }
                     ),
-                    in: 10...1_000,
+                    in: 10 ... 1000,
                     step: 10
                 )
             }
@@ -164,7 +164,7 @@ public struct ConversationSettingsView: View {
                 Stepper(
                     "Streaming Buffer: \(config.streamingBufferSize) chars",
                     value: $config.streamingBufferSize,
-                    in: 10...500,
+                    in: 10 ... 500,
                     step: 10
                 )
             }
@@ -212,9 +212,9 @@ public struct ConversationSettingsView: View {
 
     private func formatTokens(_ count: Int) -> String {
         if count >= 1_000_000 {
-            return "\(count / 1_000_000)M tokens"
+            "\(count / 1_000_000)M tokens"
         } else {
-            return "\(count / 1_000)K tokens"
+            "\(count / 1000)K tokens"
         }
     }
 }

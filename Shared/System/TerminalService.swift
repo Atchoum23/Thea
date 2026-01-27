@@ -2,6 +2,7 @@ import Foundation
 import OSLog
 
 // MARK: - TerminalService
+
 // Hardened terminal execution service for running shell commands and build tools
 
 public actor TerminalService {
@@ -39,14 +40,14 @@ public actor TerminalService {
 
         public var errorDescription: String? {
             switch self {
-            case .commandFailed(let message):
-                return "Command failed: \(message)"
-            case .processError(let message):
-                return "Process error: \(message)"
+            case let .commandFailed(message):
+                "Command failed: \(message)"
+            case let .processError(message):
+                "Process error: \(message)"
             case .timeout:
-                return "Command timed out"
+                "Command timed out"
             case .invalidCommand:
-                return "Invalid command"
+                "Invalid command"
             }
         }
     }
@@ -81,7 +82,7 @@ public actor TerminalService {
         process.executableURL = URL(fileURLWithPath: command)
         process.arguments = arguments
 
-        if let workingDirectory = workingDirectory {
+        if let workingDirectory {
             process.currentDirectoryURL = URL(fileURLWithPath: workingDirectory)
         }
 
@@ -112,7 +113,7 @@ public actor TerminalService {
         timeoutTask.cancel()
 
         // Check if timed out
-        if !Task.isCancelled && process.terminationReason == .exit && process.terminationStatus == 15 {
+        if !Task.isCancelled, process.terminationReason == .exit, process.terminationStatus == 15 {
             throw TerminalError.timeout
         }
 
@@ -151,7 +152,7 @@ public actor TerminalService {
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
         process.arguments = ["-c", script]
 
-        if let workingDirectory = workingDirectory {
+        if let workingDirectory {
             process.currentDirectoryURL = URL(fileURLWithPath: workingDirectory)
         }
 
@@ -182,7 +183,7 @@ public actor TerminalService {
         timeoutTask.cancel()
 
         // Check if timed out
-        if !Task.isCancelled && process.terminationReason == .exit && process.terminationStatus == 15 {
+        if !Task.isCancelled, process.terminationReason == .exit, process.terminationStatus == 15 {
             throw TerminalError.timeout
         }
 

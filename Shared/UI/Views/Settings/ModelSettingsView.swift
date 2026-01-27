@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Model Settings View
+
 // Configure default models, categories, and model catalog preferences
 
 struct ModelSettingsView: View {

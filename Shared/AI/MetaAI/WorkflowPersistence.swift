@@ -11,17 +11,17 @@ public final class WorkflowPersistence {
     private let workflowsDirectory: URL
     private let workflowsFileName = "workflows.json"
     private let logger = Logger(subsystem: "com.thea.workflows", category: "Persistence")
-    
+
     /// Current schema version for migration support
     private static let currentSchemaVersion = 1
 
     private init() {
         // Default workflows directory with safe unwrapping
         if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            self.workflowsDirectory = appSupport.appendingPathComponent("Thea/workflows")
+            workflowsDirectory = appSupport.appendingPathComponent("Thea/workflows")
         } else {
             // Fallback to temporary directory if app support unavailable
-            self.workflowsDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("Thea/workflows")
+            workflowsDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("Thea/workflows")
         }
 
         // Create directory if needed
@@ -35,25 +35,25 @@ public final class WorkflowPersistence {
     /// Load workflows from disk
     public func load() async throws -> [Workflow] {
         let fileURL = workflowsDirectory.appendingPathComponent(workflowsFileName)
-        
+
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             logger.info("No workflows file found, returning empty array")
             return []
         }
-        
+
         do {
             let data = try Data(contentsOf: fileURL)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            
+
             let container = try decoder.decode(WorkflowsContainer.self, from: data)
-            
+
             // Handle schema migration if needed
             if container.schemaVersion < Self.currentSchemaVersion {
                 logger.info("Migrating workflows from schema v\(container.schemaVersion) to v\(Self.currentSchemaVersion)")
                 // Future migration logic here
             }
-            
+
             logger.info("Loaded \(container.workflows.count) workflows")
             return container.workflows.map { $0.toWorkflow() }
         } catch {
@@ -61,11 +61,11 @@ public final class WorkflowPersistence {
             throw WorkflowPersistenceError.loadFailed(error.localizedDescription)
         }
     }
-    
+
     /// Save workflows to disk
     public func save(_ workflows: [Workflow]) async throws {
         let fileURL = workflowsDirectory.appendingPathComponent(workflowsFileName)
-        
+
         do {
             let codableWorkflows = workflows.map { CodableWorkflow(from: $0) }
             let container = WorkflowsContainer(
@@ -73,21 +73,21 @@ public final class WorkflowPersistence {
                 savedAt: Date(),
                 workflows: codableWorkflows
             )
-            
+
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            
+
             let data = try encoder.encode(container)
             try data.write(to: fileURL, options: .atomic)
-            
+
             logger.info("Saved \(workflows.count) workflows")
         } catch {
             logger.error("Failed to save workflows: \(error.localizedDescription)")
             throw WorkflowPersistenceError.saveFailed(error.localizedDescription)
         }
     }
-    
+
     /// Auto-save workflows (debounced save operation)
     public func autoSave(_ workflows: [Workflow]) async {
         do {
@@ -96,7 +96,7 @@ public final class WorkflowPersistence {
             logger.error("Auto-save failed: \(error.localizedDescription)")
         }
     }
-    
+
     /// Export workflows to a specific location
     public func export(_ workflows: [Workflow], to url: URL) async throws {
         let codableWorkflows = workflows.map { CodableWorkflow(from: $0) }
@@ -105,33 +105,33 @@ public final class WorkflowPersistence {
             savedAt: Date(),
             workflows: codableWorkflows
         )
-        
+
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        
+
         let data = try encoder.encode(container)
         try data.write(to: url, options: .atomic)
-        
+
         logger.info("Exported \(workflows.count) workflows to \(url.lastPathComponent)")
     }
-    
+
     /// Import workflows from a file
     public func importWorkflows(from url: URL) async throws -> [Workflow] {
         let data = try Data(contentsOf: url)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        
+
         let container = try decoder.decode(WorkflowsContainer.self, from: data)
         logger.info("Imported \(container.workflows.count) workflows from \(url.lastPathComponent)")
-        
+
         return container.workflows.map { $0.toWorkflow() }
     }
-    
+
     /// Delete all saved workflows
     public func deleteAll() async throws {
         let fileURL = workflowsDirectory.appendingPathComponent(workflowsFileName)
-        
+
         if FileManager.default.fileExists(atPath: fileURL.path) {
             try FileManager.default.removeItem(at: fileURL)
             logger.info("Deleted all workflows")
@@ -146,17 +146,17 @@ public enum WorkflowPersistenceError: LocalizedError {
     case saveFailed(String)
     case migrationFailed(String)
     case importFailed(String)
-    
+
     public var errorDescription: String? {
         switch self {
-        case .loadFailed(let reason):
-            return "Failed to load workflows: \(reason)"
-        case .saveFailed(let reason):
-            return "Failed to save workflows: \(reason)"
-        case .migrationFailed(let reason):
-            return "Failed to migrate workflows: \(reason)"
-        case .importFailed(let reason):
-            return "Failed to import workflows: \(reason)"
+        case let .loadFailed(reason):
+            "Failed to load workflows: \(reason)"
+        case let .saveFailed(reason):
+            "Failed to save workflows: \(reason)"
+        case let .migrationFailed(reason):
+            "Failed to migrate workflows: \(reason)"
+        case let .importFailed(reason):
+            "Failed to import workflows: \(reason)"
         }
     }
 }
@@ -181,19 +181,19 @@ private struct CodableWorkflow: Codable {
     let isActive: Bool
     let createdAt: Date
     let modifiedAt: Date
-    
+
     init(from workflow: Workflow) {
-        self.id = workflow.id
-        self.name = workflow.name
-        self.description = workflow.description
-        self.nodes = workflow.nodes.map { CodableWorkflowNode(from: $0) }
-        self.edges = workflow.edges.map { CodableWorkflowEdge(from: $0) }
-        self.variables = workflow.variables.mapValues { CodableValue(from: $0) }
-        self.isActive = workflow.isActive
-        self.createdAt = workflow.createdAt
-        self.modifiedAt = workflow.modifiedAt
+        id = workflow.id
+        name = workflow.name
+        description = workflow.description
+        nodes = workflow.nodes.map { CodableWorkflowNode(from: $0) }
+        edges = workflow.edges.map { CodableWorkflowEdge(from: $0) }
+        variables = workflow.variables.mapValues { CodableValue(from: $0) }
+        isActive = workflow.isActive
+        createdAt = workflow.createdAt
+        modifiedAt = workflow.modifiedAt
     }
-    
+
     func toWorkflow() -> Workflow {
         Workflow(
             id: id,
@@ -218,17 +218,17 @@ private struct CodableWorkflowNode: Codable {
     let config: [String: CodableValue]
     let inputs: [CodableNodePort]
     let outputs: [CodableNodePort]
-    
+
     init(from node: WorkflowNode) {
-        self.id = node.id
-        self.type = node.type.rawValue
-        self.positionX = node.position.x
-        self.positionY = node.position.y
-        self.config = node.config.mapValues { CodableValue(from: $0) }
-        self.inputs = node.inputs.map { CodableNodePort(from: $0) }
-        self.outputs = node.outputs.map { CodableNodePort(from: $0) }
+        id = node.id
+        type = node.type.rawValue
+        positionX = node.position.x
+        positionY = node.position.y
+        config = node.config.mapValues { CodableValue(from: $0) }
+        inputs = node.inputs.map { CodableNodePort(from: $0) }
+        outputs = node.outputs.map { CodableNodePort(from: $0) }
     }
-    
+
     func toWorkflowNode() -> WorkflowNode {
         WorkflowNode(
             id: id,
@@ -248,15 +248,15 @@ private struct CodableWorkflowEdge: Codable {
     let sourcePort: String
     let targetNodeId: UUID
     let targetPort: String
-    
+
     init(from edge: WorkflowEdge) {
-        self.id = edge.id
-        self.sourceNodeId = edge.sourceNodeId
-        self.sourcePort = edge.sourcePort
-        self.targetNodeId = edge.targetNodeId
-        self.targetPort = edge.targetPort
+        id = edge.id
+        sourceNodeId = edge.sourceNodeId
+        sourcePort = edge.sourcePort
+        targetNodeId = edge.targetNodeId
+        targetPort = edge.targetPort
     }
-    
+
     func toWorkflowEdge() -> WorkflowEdge {
         WorkflowEdge(
             id: id,
@@ -272,12 +272,12 @@ private struct CodableWorkflowEdge: Codable {
 private struct CodableNodePort: Codable {
     let name: String
     let type: String
-    
+
     init(from port: NodePort) {
-        self.name = port.name
-        self.type = portTypeToString(port.type)
+        name = port.name
+        type = portTypeToString(port.type)
     }
-    
+
     func toNodePort() -> NodePort {
         NodePort(name: name, type: stringToPortType(type))
     }
@@ -286,24 +286,24 @@ private struct CodableNodePort: Codable {
 /// Helper to convert PortType to String
 private func portTypeToString(_ type: NodePort.PortType) -> String {
     switch type {
-    case .string: return "string"
-    case .number: return "number"
-    case .boolean: return "boolean"
-    case .array: return "array"
-    case .object: return "object"
-    case .any: return "any"
+    case .string: "string"
+    case .number: "number"
+    case .boolean: "boolean"
+    case .array: "array"
+    case .object: "object"
+    case .any: "any"
     }
 }
 
 /// Helper to convert String to PortType
 private func stringToPortType(_ string: String) -> NodePort.PortType {
     switch string {
-    case "string": return .string
-    case "number": return .number
-    case "boolean": return .boolean
-    case "array": return .array
-    case "object": return .object
-    default: return .any
+    case "string": .string
+    case "number": .number
+    case "boolean": .boolean
+    case "array": .array
+    case "object": .object
+    default: .any
     }
 }
 
@@ -316,7 +316,7 @@ private enum CodableValue: Codable {
     case array([CodableValue])
     case dictionary([String: CodableValue])
     case null
-    
+
     init(from value: Any) {
         switch value {
         case let string as String:
@@ -335,22 +335,22 @@ private enum CodableValue: Codable {
             self = .null
         }
     }
-    
+
     func toAny() -> Any {
         switch self {
-        case .string(let value): return value
-        case .int(let value): return value
-        case .double(let value): return value
-        case .bool(let value): return value
-        case .array(let values): return values.map { $0.toAny() }
-        case .dictionary(let dict): return dict.mapValues { $0.toAny() }
-        case .null: return NSNull()
+        case let .string(value): value
+        case let .int(value): value
+        case let .double(value): value
+        case let .bool(value): value
+        case let .array(values): values.map { $0.toAny() }
+        case let .dictionary(dict): dict.mapValues { $0.toAny() }
+        case .null: NSNull()
         }
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        
+
         if container.decodeNil() {
             self = .null
         } else if let bool = try? container.decode(Bool.self) {
@@ -369,22 +369,22 @@ private enum CodableValue: Codable {
             self = .null
         }
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
+
         switch self {
-        case .string(let value):
+        case let .string(value):
             try container.encode(value)
-        case .int(let value):
+        case let .int(value):
             try container.encode(value)
-        case .double(let value):
+        case let .double(value):
             try container.encode(value)
-        case .bool(let value):
+        case let .bool(value):
             try container.encode(value)
-        case .array(let values):
+        case let .array(values):
             try container.encode(values)
-        case .dictionary(let dict):
+        case let .dictionary(dict):
             try container.encode(dict)
         case .null:
             try container.encodeNil()

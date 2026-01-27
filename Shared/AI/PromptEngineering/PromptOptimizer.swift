@@ -3,6 +3,7 @@ import Observation
 @preconcurrency import SwiftData
 
 // MARK: - Prompt Optimizer
+
 // Automatically optimizes prompts for maximum accuracy and effectiveness
 
 @MainActor
@@ -22,7 +23,7 @@ final class PromptOptimizer {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
         templateLibrary.setModelContext(context)
         userPreferenceModel.setModelContext(context)
     }
@@ -75,7 +76,7 @@ final class PromptOptimizer {
 
     private func selectBestTemplate(
         for agentType: SubAgentOrchestrator.AgentType,
-        taskInstruction: String
+        taskInstruction _: String
     ) async -> PromptTemplate? {
         await templateLibrary.selectBestTemplate(
             for: agentType.rawValue,
@@ -216,7 +217,7 @@ final class PromptOptimizer {
         }
 
         // Create few-shot example if highly successful
-        if success && confidence > 0.9, let output = output {
+        if success, confidence > 0.9, let output {
             let example = CodeFewShotExample(
                 taskType: taskType,
                 inputExample: "Task type: \(taskType)",
@@ -256,7 +257,7 @@ final class PromptOptimizer {
         // Implement epsilon-greedy strategy
         let epsilon = 0.1 // 10% exploration
 
-        if Double.random(in: 0...1) < epsilon {
+        if Double.random(in: 0 ... 1) < epsilon {
             // Explore: random selection
             return variants.randomElement()
         } else {
@@ -345,7 +346,7 @@ final class PromptOptimizer {
         let templates = (try? context.fetch(templateDescriptor)) ?? []
         let examples = (try? context.fetch(exampleDescriptor)) ?? []
 
-        let avgSuccessRate = templates.isEmpty ? 0 : templates.map { $0.successRate }.reduce(0, +) / Float(templates.count)
+        let avgSuccessRate = templates.isEmpty ? 0 : templates.map(\.successRate).reduce(0, +) / Float(templates.count)
         let totalOptimizations = templates.reduce(0) { $0 + $1.successCount + $1.failureCount }
 
         return OptimizationStats(

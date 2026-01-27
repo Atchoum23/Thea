@@ -24,7 +24,7 @@ final class CloudSyncManager: ObservableObject {
     // MARK: - Setup
 
     func setModelContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
 
     // MARK: - Sync Operations
@@ -105,7 +105,7 @@ final class CloudSyncManager: ObservableObject {
     // MARK: - Conversations Sync
 
     private func syncConversations() async throws {
-        guard let modelContext = modelContext else { return }
+        guard let modelContext else { return }
 
         let descriptor = FetchDescriptor<Conversation>()
         let localConversations = try modelContext.fetch(descriptor)
@@ -118,7 +118,7 @@ final class CloudSyncManager: ObservableObject {
     }
 
     private func syncConversationsSince(_ date: Date) async throws {
-        guard let modelContext = modelContext else { return }
+        guard let modelContext else { return }
 
         // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<Conversation>()
@@ -174,9 +174,9 @@ final class CloudSyncManager: ObservableObject {
 
         for (recordID, result) in results.matchResults {
             switch result {
-            case .success(let record):
+            case let .success(record):
                 try await processConversationRecord(record)
-            case .failure(let error):
+            case let .failure(error):
                 print("Failed to fetch conversation \(recordID): \(error)")
             }
         }
@@ -190,16 +190,16 @@ final class CloudSyncManager: ObservableObject {
 
         for (recordID, result) in results.matchResults {
             switch result {
-            case .success(let record):
+            case let .success(record):
                 try await processConversationRecord(record)
-            case .failure(let error):
+            case let .failure(error):
                 print("Failed to fetch conversation \(recordID): \(error)")
             }
         }
     }
 
     private func processConversationRecord(_ record: CKRecord) async throws {
-        guard let modelContext = modelContext else { return }
+        guard let modelContext else { return }
 
         let conversationID = UUID(uuidString: record.recordID.recordName) ?? UUID()
         let title = record["title"] as? String ?? "Untitled"
@@ -247,16 +247,16 @@ final class CloudSyncManager: ObservableObject {
 
         for (recordID, result) in results.matchResults {
             switch result {
-            case .success(let record):
+            case let .success(record):
                 try processMessageRecord(record, conversationID: conversationID)
-            case .failure(let error):
+            case let .failure(error):
                 print("Failed to fetch message \(recordID): \(error)")
             }
         }
     }
 
     private func processMessageRecord(_ record: CKRecord, conversationID: UUID) throws {
-        guard let modelContext = modelContext else { return }
+        guard let modelContext else { return }
 
         let messageID = UUID(uuidString: record.recordID.recordName) ?? UUID()
         let contentText = record["content"] as? String ?? ""
@@ -288,7 +288,7 @@ final class CloudSyncManager: ObservableObject {
     // MARK: - Projects Sync
 
     private func syncProjects() async throws {
-        guard let modelContext = modelContext else { return }
+        guard let modelContext else { return }
 
         let descriptor = FetchDescriptor<Project>()
         let localProjects = try modelContext.fetch(descriptor)
@@ -301,7 +301,7 @@ final class CloudSyncManager: ObservableObject {
     }
 
     private func syncProjectsSince(_ date: Date) async throws {
-        guard let modelContext = modelContext else { return }
+        guard let modelContext else { return }
 
         // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<Project>()
@@ -333,9 +333,9 @@ final class CloudSyncManager: ObservableObject {
 
         for (recordID, result) in results.matchResults {
             switch result {
-            case .success(let record):
+            case let .success(record):
                 try processProjectRecord(record)
-            case .failure(let error):
+            case let .failure(error):
                 print("Failed to fetch project \(recordID): \(error)")
             }
         }
@@ -349,16 +349,16 @@ final class CloudSyncManager: ObservableObject {
 
         for (recordID, result) in results.matchResults {
             switch result {
-            case .success(let record):
+            case let .success(record):
                 try processProjectRecord(record)
-            case .failure(let error):
+            case let .failure(error):
                 print("Failed to fetch project \(recordID): \(error)")
             }
         }
     }
 
     private func processProjectRecord(_ record: CKRecord) throws {
-        guard let modelContext = modelContext else { return }
+        guard let modelContext else { return }
 
         let projectID = UUID(uuidString: record.recordID.recordName) ?? UUID()
         let title = record["title"] as? String ?? "Untitled"
@@ -433,19 +433,19 @@ enum CloudSyncError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noiCloudAccount:
-            return "No iCloud account is configured on this device"
+            "No iCloud account is configured on this device"
         case .iCloudRestricted:
-            return "iCloud access is restricted"
+            "iCloud access is restricted"
         case .accountStatusUnknown:
-            return "Could not determine iCloud account status"
+            "Could not determine iCloud account status"
         case .temporarilyUnavailable:
-            return "iCloud is temporarily unavailable"
+            "iCloud is temporarily unavailable"
         case .syncFailed:
-            return "Sync operation failed"
+            "Sync operation failed"
         case .uploadFailed:
-            return "Failed to upload data to iCloud"
+            "Failed to upload data to iCloud"
         case .downloadFailed:
-            return "Failed to download data from iCloud"
+            "Failed to download data from iCloud"
         }
     }
 }
@@ -457,7 +457,7 @@ struct SyncError: Identifiable, Codable {
     let errorType: SyncErrorType
 
     init(timestamp: Date, errorDescription: String, errorType: SyncErrorType) {
-        self.id = UUID()
+        id = UUID()
         self.timestamp = timestamp
         self.errorDescription = errorDescription
         self.errorType = errorType

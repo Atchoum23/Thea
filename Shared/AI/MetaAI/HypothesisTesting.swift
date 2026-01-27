@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Hypothesis Testing Engine
+
 // Implements scientific method for hypothesis generation, testing, and validation
 
 /// A hypothesis that can be tested
@@ -16,20 +17,20 @@ public struct Hypothesis: Sendable, Codable, Identifiable {
     public var testedAt: Date?
 
     public enum HypothesisType: String, Codable, Sendable {
-        case causal         // X causes Y
-        case correlational  // X is related to Y
-        case predictive     // If X then Y
-        case descriptive    // X has property Y
-        case explanatory    // X explains Y
+        case causal // X causes Y
+        case correlational // X is related to Y
+        case predictive // If X then Y
+        case descriptive // X has property Y
+        case explanatory // X explains Y
     }
 
     public enum HypothesisStatus: String, Codable, Sendable {
-        case proposed       // Initial hypothesis
-        case testing        // Currently being tested
-        case supported      // Evidence supports it
-        case refuted        // Evidence contradicts it
-        case inconclusive   // Mixed evidence
-        case modified       // Revised based on evidence
+        case proposed // Initial hypothesis
+        case testing // Currently being tested
+        case supported // Evidence supports it
+        case refuted // Evidence contradicts it
+        case inconclusive // Mixed evidence
+        case modified // Revised based on evidence
     }
 
     public init(
@@ -78,17 +79,17 @@ public struct Evidence: Sendable, Codable, Identifiable {
     public let description: String
     public let source: String
     public let type: EvidenceType
-    public let weight: Double      // 0-1, importance of evidence
+    public let weight: Double // 0-1, importance of evidence
     public let reliability: Double // 0-1, trustworthiness of source
     public let timestamp: Date
 
     public enum EvidenceType: String, Codable, Sendable {
-        case observation    // Direct observation
-        case experiment     // Experimental result
-        case analysis       // Data analysis
-        case inference      // Logical inference
-        case testimony      // External source
-        case simulation     // Simulated result
+        case observation // Direct observation
+        case experiment // Experimental result
+        case analysis // Data analysis
+        case inference // Logical inference
+        case testimony // External source
+        case simulation // Simulated result
     }
 
     public init(
@@ -344,7 +345,7 @@ public final class HypothesisTestingEngine {
         var passedTests = 0
         for _ in plan.tests {
             // In production, this would execute actual tests
-            let passed = Double.random(in: 0...1) > 0.3 // Simulation
+            let passed = Double.random(in: 0 ... 1) > 0.3 // Simulation
             if passed { passedTests += 1 }
         }
 
@@ -353,17 +354,16 @@ public final class HypothesisTestingEngine {
         let evidenceScore = hypothesis.weightedScore
         let combinedScore = (testScore + evidenceScore) / 2
 
-        let verdict: HypothesisTestResult.Verdict
-        if combinedScore >= 0.8 {
-            verdict = .stronglySupported
+        let verdict: HypothesisTestResult.Verdict = if combinedScore >= 0.8 {
+            .stronglySupported
         } else if combinedScore >= 0.6 {
-            verdict = .supported
+            .supported
         } else if combinedScore >= 0.4 {
-            verdict = .inconclusive
+            .inconclusive
         } else if combinedScore >= 0.2 {
-            verdict = .weaklyRefuted
+            .weaklyRefuted
         } else {
-            verdict = .stronglyRefuted
+            .stronglyRefuted
         }
 
         // Generate recommendations

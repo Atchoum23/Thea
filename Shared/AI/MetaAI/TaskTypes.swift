@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Task Types for ReasoningEngine
+
 // Full implementation for DeepAgentEngine and AI Orchestration integration
 
 /// Task context for deep agent integration
@@ -76,45 +77,45 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
 
     public var displayName: String {
         switch self {
-        case .simpleQA: return "Simple Q&A"
-        case .codeGeneration: return "Code Generation"
-        case .complexReasoning: return "Complex Reasoning"
-        case .creativeWriting: return "Creative Writing"
-        case .mathLogic: return "Math & Logic"
-        case .summarization: return "Summarization"
-        case .factual: return "Factual Lookup"
-        case .analysis: return "Analysis"
-        case .planning: return "Planning"
-        case .debugging: return "Debugging"
-        case .appDevelopment: return "App Development"
-        case .research: return "Research"
-        case .contentCreation: return "Content Creation"
-        case .workflowAutomation: return "Workflow Automation"
-        case .informationRetrieval: return "Information Retrieval"
-        case .creation: return "Creation"
-        case .general: return "General"
+        case .simpleQA: "Simple Q&A"
+        case .codeGeneration: "Code Generation"
+        case .complexReasoning: "Complex Reasoning"
+        case .creativeWriting: "Creative Writing"
+        case .mathLogic: "Math & Logic"
+        case .summarization: "Summarization"
+        case .factual: "Factual Lookup"
+        case .analysis: "Analysis"
+        case .planning: "Planning"
+        case .debugging: "Debugging"
+        case .appDevelopment: "App Development"
+        case .research: "Research"
+        case .contentCreation: "Content Creation"
+        case .workflowAutomation: "Workflow Automation"
+        case .informationRetrieval: "Information Retrieval"
+        case .creation: "Creation"
+        case .general: "General"
         }
     }
 
     public var icon: String {
         switch self {
-        case .simpleQA: return "questionmark.circle"
-        case .codeGeneration: return "chevron.left.forwardslash.chevron.right"
-        case .complexReasoning: return "brain.head.profile"
-        case .creativeWriting: return "pencil.and.outline"
-        case .mathLogic: return "function"
-        case .summarization: return "text.alignleft"
-        case .factual: return "book"
-        case .analysis: return "chart.bar"
-        case .planning: return "list.bullet.clipboard"
-        case .debugging: return "ant"
-        case .appDevelopment: return "hammer"
-        case .research: return "magnifyingglass"
-        case .contentCreation: return "doc.text"
-        case .workflowAutomation: return "gearshape.2"
-        case .informationRetrieval: return "doc.text.magnifyingglass"
-        case .creation: return "plus.circle"
-        case .general: return "circle"
+        case .simpleQA: "questionmark.circle"
+        case .codeGeneration: "chevron.left.forwardslash.chevron.right"
+        case .complexReasoning: "brain.head.profile"
+        case .creativeWriting: "pencil.and.outline"
+        case .mathLogic: "function"
+        case .summarization: "text.alignleft"
+        case .factual: "book"
+        case .analysis: "chart.bar"
+        case .planning: "list.bullet.clipboard"
+        case .debugging: "ant"
+        case .appDevelopment: "hammer"
+        case .research: "magnifyingglass"
+        case .contentCreation: "doc.text"
+        case .workflowAutomation: "gearshape.2"
+        case .informationRetrieval: "doc.text.magnifyingglass"
+        case .creation: "plus.circle"
+        case .general: "circle"
         }
     }
 }

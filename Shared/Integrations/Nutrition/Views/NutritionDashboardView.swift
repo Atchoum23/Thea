@@ -302,9 +302,9 @@ private struct NutritionInsightCard: View {
 
     private func iconForSeverity(_ severity: NutritionInsightSeverity) -> String {
         switch severity {
-        case .info: return "info.circle.fill"
-        case .warning: return "exclamationmark.triangle.fill"
-        case .critical: return "exclamationmark.octagon.fill"
+        case .info: "info.circle.fill"
+        case .warning: "exclamationmark.triangle.fill"
+        case .critical: "exclamationmark.octagon.fill"
         }
     }
 }

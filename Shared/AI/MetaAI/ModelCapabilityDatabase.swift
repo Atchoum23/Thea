@@ -2,10 +2,11 @@ import Foundation
 import OSLog
 
 // MARK: - Model Capability Database
+
 // Maintains up-to-date database of AI model capabilities for intelligent routing
 
 public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
-    public let id: String  // modelId
+    public let id: String // modelId
     public let modelId: String
     public let displayName: String
     public let provider: String
@@ -17,14 +18,14 @@ public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
     public let qualityScore: Double
     public let lastUpdated: Date
     public let source: DataSource
-    
+
     public enum DataSource: String, Codable, Sendable {
         case artificialAnalysis = "Artificial Analysis"
         case openRouter = "OpenRouter API"
         case huggingFace = "Hugging Face"
         case manual = "Manual Entry"
     }
-    
+
     public enum TaskType: String, Codable, Sendable, CaseIterable {
         case code = "Code Generation"
         case reasoning = "Complex Reasoning"
@@ -37,7 +38,7 @@ public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
         case multimodal = "Multimodal"
         case conversational = "Conversation"
     }
-    
+
     public init(
         modelId: String,
         displayName: String,
@@ -51,7 +52,7 @@ public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
         lastUpdated: Date = Date(),
         source: DataSource
     ) {
-        self.id = modelId
+        id = modelId
         self.modelId = modelId
         self.displayName = displayName
         self.provider = provider
@@ -64,11 +65,11 @@ public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
         self.lastUpdated = lastUpdated
         self.source = source
     }
-    
+
     public var costPerToken: Double {
         (costPerMillionInput + costPerMillionOutput) / 2_000_000
     }
-    
+
     public var qualityCostRatio: Double {
         qualityScore / (costPerMillionInput + costPerMillionOutput)
     }
@@ -80,53 +81,53 @@ public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
 @Observable
 public final class ModelCapabilityDatabase {
     public static let shared = ModelCapabilityDatabase()
-    
+
     private let logger = Logger(subsystem: "com.thea.orchestrator", category: "ModelCapabilityDatabase")
-    
+
     public private(set) var models: [ModelCapability] = []
     public private(set) var lastUpdated: Date?
     public private(set) var isUpdating: Bool = false
-    
+
     private let storageKey = "com.thea.model.capability.database"
-    private let cacheExpiration: TimeInterval = 86_400 // 24 hours
-    
+    private let cacheExpiration: TimeInterval = 86400 // 24 hours
+
     public var autoUpdate: Bool = true {
         didSet {
             UserDefaults.standard.set(autoUpdate, forKey: "modelCapability.autoUpdate")
         }
     }
-    
+
     public var updateFrequency: UpdateFrequency = .daily {
         didSet {
             UserDefaults.standard.set(updateFrequency.rawValue, forKey: "modelCapability.updateFrequency")
         }
     }
-    
+
     public enum UpdateFrequency: String, Codable, CaseIterable, Sendable {
         case hourly = "Hourly"
         case daily = "Daily"
         case weekly = "Weekly"
         case manual = "Manual Only"
-        
+
         public var interval: TimeInterval {
             switch self {
-            case .hourly: return 3_600
-            case .daily: return 86_400
-            case .weekly: return 604_800
-            case .manual: return .infinity
+            case .hourly: 3600
+            case .daily: 86400
+            case .weekly: 604_800
+            case .manual: .infinity
             }
         }
     }
-    
+
     private init() {
         loadAutoUpdateSettings()
         loadModels()
-        
+
         // Add seed data if empty
         if models.isEmpty {
             addSeedData()
         }
-        
+
         // Auto-update check
         if autoUpdate {
             Task {
@@ -134,9 +135,9 @@ public final class ModelCapabilityDatabase {
             }
         }
     }
-    
+
     // MARK: - Seed Data
-    
+
     private func addSeedData() {
         models = [
             // Claude Models
@@ -148,7 +149,7 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 200_000,
                 costPerMillionInput: 15.0,
                 costPerMillionOutput: 75.0,
-                averageLatency: 2_500,
+                averageLatency: 2500,
                 qualityScore: 0.95,
                 source: .manual
             ),
@@ -160,11 +161,11 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 200_000,
                 costPerMillionInput: 3.0,
                 costPerMillionOutput: 15.0,
-                averageLatency: 1_800,
+                averageLatency: 1800,
                 qualityScore: 0.92,
                 source: .manual
             ),
-            
+
             // OpenAI Models
             ModelCapability(
                 modelId: "openai/gpt-4o",
@@ -174,7 +175,7 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 128_000,
                 costPerMillionInput: 5.0,
                 costPerMillionOutput: 15.0,
-                averageLatency: 1_500,
+                averageLatency: 1500,
                 qualityScore: 0.90,
                 source: .manual
             ),
@@ -190,7 +191,7 @@ public final class ModelCapabilityDatabase {
                 qualityScore: 0.80,
                 source: .manual
             ),
-            
+
             // Google Models
             ModelCapability(
                 modelId: "google/gemini-2.0-flash",
@@ -200,11 +201,11 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 1_000_000,
                 costPerMillionInput: 0.10,
                 costPerMillionOutput: 0.40,
-                averageLatency: 1_200,
+                averageLatency: 1200,
                 qualityScore: 0.88,
                 source: .manual
             ),
-            
+
             // DeepSeek Models
             ModelCapability(
                 modelId: "deepseek/deepseek-chat",
@@ -214,11 +215,11 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 128_000,
                 costPerMillionInput: 0.14,
                 costPerMillionOutput: 0.28,
-                averageLatency: 1_600,
+                averageLatency: 1600,
                 qualityScore: 0.85,
                 source: .manual
             ),
-            
+
             // Meta Models
             ModelCapability(
                 modelId: "meta-llama/llama-3.1-405b",
@@ -228,39 +229,39 @@ public final class ModelCapabilityDatabase {
                 contextWindow: 128_000,
                 costPerMillionInput: 3.0,
                 costPerMillionOutput: 3.0,
-                averageLatency: 2_000,
+                averageLatency: 2000,
                 qualityScore: 0.87,
                 source: .manual
             )
         ]
-        
+
         lastUpdated = Date()
         saveModels()
         logger.info("Added \(self.models.count) seed models to database")
     }
-    
+
     // MARK: - Public API
-    
+
     public func updateNow() async {
         guard !isUpdating else {
             logger.warning("Update already in progress")
             return
         }
-        
+
         isUpdating = true
         defer { isUpdating = false }
-        
+
         logger.info("Starting model capability database update...")
-        
+
         // Update from OpenRouter API
         await updateFromOpenRouter()
-        
+
         lastUpdated = Date()
         saveModels()
-        
+
         logger.info("Database updated: \(self.models.count) models indexed")
     }
-    
+
     public func getBestModel(for taskType: ModelCapability.TaskType, preferences: RoutingPreferences) -> ModelCapability? {
         models
             .filter { $0.strengths.contains(taskType) }
@@ -273,24 +274,24 @@ public final class ModelCapabilityDatabase {
             }
             .first
     }
-    
+
     public func getModel(id: String) -> ModelCapability? {
         models.first { $0.modelId == id }
     }
-    
+
     public func getModels(for provider: String) -> [ModelCapability] {
         models.filter { $0.provider == provider }
     }
-    
+
     public func getModels(strongIn taskType: ModelCapability.TaskType) -> [ModelCapability] {
         models.filter { $0.strengths.contains(taskType) }
     }
-    
+
     public struct RoutingPreferences: Sendable {
         public let localPreferred: Bool
         public let maxCostPerMillion: Double?
         public let minQualityScore: Double?
-        
+
         public init(
             localPreferred: Bool = false,
             maxCostPerMillion: Double? = nil,
@@ -301,12 +302,12 @@ public final class ModelCapabilityDatabase {
             self.minQualityScore = minQualityScore
         }
     }
-    
+
     // MARK: - Auto-Update
-    
+
     private func checkAndUpdate() async {
         guard autoUpdate else { return }
-        
+
         let shouldUpdate: Bool
         if let lastUpdate = lastUpdated {
             let elapsed = Date().timeIntervalSince(lastUpdate)
@@ -314,28 +315,28 @@ public final class ModelCapabilityDatabase {
         } else {
             shouldUpdate = true
         }
-        
+
         if shouldUpdate {
             await updateNow()
         }
     }
-    
+
     // MARK: - Data Sources
-    
+
     private func updateFromOpenRouter() async {
         // Stub implementation - would call OpenRouter API
         // GET https://openrouter.ai/api/v1/models
         logger.info("Updating from OpenRouter API (stub)")
-        
+
         // In production:
         // 1. Fetch models from API
         // 2. Parse response
         // 3. Map to ModelCapability
         // 4. Merge with existing models
     }
-    
+
     // MARK: - Persistence
-    
+
     private func saveModels() {
         do {
             let encoder = JSONEncoder()
@@ -343,7 +344,7 @@ public final class ModelCapabilityDatabase {
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             let data = try encoder.encode(models)
             UserDefaults.standard.set(data, forKey: storageKey)
-            
+
             if let lastUpdate = lastUpdated {
                 UserDefaults.standard.set(lastUpdate, forKey: "\(storageKey).lastUpdated")
             }
@@ -351,12 +352,12 @@ public final class ModelCapabilityDatabase {
             logger.error("Failed to save models: \(error.localizedDescription)")
         }
     }
-    
+
     private func loadModels() {
         guard let data = UserDefaults.standard.data(forKey: storageKey) else {
             return
         }
-        
+
         do {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
@@ -367,11 +368,12 @@ public final class ModelCapabilityDatabase {
             logger.error("Failed to load models: \(error.localizedDescription)")
         }
     }
-    
+
     private func loadAutoUpdateSettings() {
         autoUpdate = UserDefaults.standard.bool(forKey: "modelCapability.autoUpdate")
         if let frequencyRaw = UserDefaults.standard.string(forKey: "modelCapability.updateFrequency"),
-           let frequency = UpdateFrequency(rawValue: frequencyRaw) {
+           let frequency = UpdateFrequency(rawValue: frequencyRaw)
+        {
             updateFrequency = frequency
         }
     }

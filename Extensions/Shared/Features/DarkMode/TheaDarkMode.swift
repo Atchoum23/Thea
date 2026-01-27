@@ -2,10 +2,10 @@
 // Intelligent dark mode for websites (replaces Noir)
 // Features: auto-generation, per-site themes, OLED black, scheduled activation
 
+import Combine
 import Foundation
 import OSLog
 import SwiftUI
-import Combine
 
 // MARK: - Dark Mode Manager
 
@@ -120,13 +120,15 @@ public final class TheaDarkModeManager: ObservableObject {
 
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "darkMode.settings"),
-           let loaded = try? JSONDecoder().decode(DarkModeSettings.self, from: data) {
+           let loaded = try? JSONDecoder().decode(DarkModeSettings.self, from: data)
+        {
             settings = loaded
             isEnabled = settings.enabled
         }
 
         if let themeId = UserDefaults.standard.string(forKey: "darkMode.globalTheme"),
-           let theme = Self.builtInThemes.first(where: { $0.id == themeId }) {
+           let theme = Self.builtInThemes.first(where: { $0.id == themeId })
+        {
             globalTheme = theme
         }
     }
@@ -141,7 +143,8 @@ public final class TheaDarkModeManager: ObservableObject {
 
     private func loadCustomThemes() {
         if let data = UserDefaults.standard.data(forKey: "darkMode.customThemes"),
-           let loaded = try? JSONDecoder().decode([DarkTheme].self, from: data) {
+           let loaded = try? JSONDecoder().decode([DarkTheme].self, from: data)
+        {
             customThemes = loaded
         }
     }
@@ -154,7 +157,8 @@ public final class TheaDarkModeManager: ObservableObject {
 
     private func loadSitePreferences() {
         if let data = UserDefaults.standard.data(forKey: "darkMode.sitePreferences"),
-           let loaded = try? JSONDecoder().decode([String: SitePreference].self, from: data) {
+           let loaded = try? JSONDecoder().decode([String: SitePreference].self, from: data)
+        {
             sitePreferences = loaded
         }
     }
@@ -168,15 +172,15 @@ public final class TheaDarkModeManager: ObservableObject {
     private func setupSystemThemeObserver() {
         // Observe system appearance changes
         #if os(macOS)
-        DistributedNotificationCenter.default().addObserver(
-            forName: Notification.Name("AppleInterfaceThemeChangedNotification"),
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.handleSystemThemeChange()
+            DistributedNotificationCenter.default().addObserver(
+                forName: Notification.Name("AppleInterfaceThemeChangedNotification"),
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.handleSystemThemeChange()
+                }
             }
-        }
         #endif
     }
 
@@ -200,11 +204,11 @@ public final class TheaDarkModeManager: ObservableObject {
 
     private func checkSystemDarkMode() -> Bool {
         #if os(macOS)
-        return NSApp?.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            return NSApp?.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
         #elseif os(iOS)
-        return UITraitCollection.current.userInterfaceStyle == .dark
+            return UITraitCollection.current.userInterfaceStyle == .dark
         #else
-        return false
+            return false
         #endif
     }
 
@@ -242,7 +246,7 @@ public final class TheaDarkModeManager: ObservableObject {
 
     /// Get all available themes
     public func getThemes() -> [DarkTheme] {
-        return Self.builtInThemes + customThemes
+        Self.builtInThemes + customThemes
     }
 
     /// Set the default global theme
@@ -261,7 +265,7 @@ public final class TheaDarkModeManager: ObservableObject {
 
     /// Get site preference
     public func getSitePreference(for domain: String) -> SitePreference? {
-        return sitePreferences[normalizeDomain(domain)]
+        sitePreferences[normalizeDomain(domain)]
     }
 
     /// Remove site preference
@@ -501,7 +505,8 @@ public final class TheaDarkModeManager: ObservableObject {
 
     private func getThemeForSite(_ domain: String) -> DarkTheme? {
         guard let pref = sitePreferences[normalizeDomain(domain)],
-              let themeId = pref.themeId else {
+              let themeId = pref.themeId
+        else {
             return nil
         }
 

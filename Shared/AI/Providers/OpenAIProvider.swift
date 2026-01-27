@@ -1,5 +1,5 @@
 import Foundation
-internal import OpenAI
+import OpenAI
 
 final class OpenAIProvider: AIProvider, Sendable {
     let metadata = ProviderMetadata(
@@ -16,14 +16,14 @@ final class OpenAIProvider: AIProvider, Sendable {
         supportsFunctionCalling: true,
         supportsWebSearch: false,
         maxContextTokens: 128_000,
-        maxOutputTokens: 16_384,
+        maxOutputTokens: 16384,
         supportedModalities: [.text, .image]
     )
 
     private let client: OpenAI
 
     init(apiKey: String) {
-        self.client = OpenAI(apiToken: apiKey)
+        client = OpenAI(apiToken: apiKey)
     }
 
     // MARK: - Validation
@@ -96,7 +96,8 @@ final class OpenAIProvider: AIProvider, Sendable {
             let result = try await client.chats(query: query)
 
             guard let choice = result.choices.first,
-                  let content = choice.message.content else {
+                  let content = choice.message.content
+            else {
                 throw OpenAIError.noResponse
             }
 
@@ -128,7 +129,7 @@ final class OpenAIProvider: AIProvider, Sendable {
                 name: "GPT-4o",
                 description: "Most capable GPT-4 model with vision",
                 contextWindow: 128_000,
-                maxOutputTokens: 16_384,
+                maxOutputTokens: 16384,
                 inputPricePerMillion: 2.50,
                 outputPricePerMillion: 10.00,
                 supportsVision: true,
@@ -139,7 +140,7 @@ final class OpenAIProvider: AIProvider, Sendable {
                 name: "GPT-4 Turbo",
                 description: "Fast and capable GPT-4",
                 contextWindow: 128_000,
-                maxOutputTokens: 4_096,
+                maxOutputTokens: 4096,
                 inputPricePerMillion: 10.00,
                 outputPricePerMillion: 30.00,
                 supportsVision: true,
@@ -149,8 +150,8 @@ final class OpenAIProvider: AIProvider, Sendable {
                 id: "gpt-3.5-turbo",
                 name: "GPT-3.5 Turbo",
                 description: "Fast and cost-effective",
-                contextWindow: 16_385,
-                maxOutputTokens: 4_096,
+                contextWindow: 16385,
+                maxOutputTokens: 4096,
                 inputPricePerMillion: 0.50,
                 outputPricePerMillion: 1.50,
                 supportsVision: false,
@@ -161,7 +162,7 @@ final class OpenAIProvider: AIProvider, Sendable {
                 name: "o1",
                 description: "Reasoning model",
                 contextWindow: 128_000,
-                maxOutputTokens: 32_768,
+                maxOutputTokens: 32768,
                 inputPricePerMillion: 15.00,
                 outputPricePerMillion: 60.00,
                 supportsVision: false,
@@ -175,11 +176,11 @@ final class OpenAIProvider: AIProvider, Sendable {
     private func convertRole(_ role: MessageRole) -> ChatQuery.ChatCompletionMessageParam.Role {
         switch role {
         case .user:
-            return .user
+            .user
         case .assistant:
-            return .assistant
+            .assistant
         case .system:
-            return .system
+            .system
         }
     }
 }
@@ -192,7 +193,7 @@ enum OpenAIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noResponse:
-            return "No response from OpenAI"
+            "No response from OpenAI"
         }
     }
 }

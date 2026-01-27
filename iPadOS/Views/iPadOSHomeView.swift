@@ -24,11 +24,11 @@ struct iPadOSHomeView: View {
 
         var icon: String {
             switch self {
-            case .chat: return "message.fill"
-            case .projects: return "folder.fill"
-            case .knowledge: return "brain.head.profile"
-            case .financial: return "dollarsign.circle.fill"
-            case .settings: return "gear"
+            case .chat: "message.fill"
+            case .projects: "folder.fill"
+            case .knowledge: "brain.head.profile"
+            case .financial: "dollarsign.circle.fill"
+            case .settings: "gear"
             }
         }
     }
@@ -253,7 +253,7 @@ struct iPadOSChatDetailView: View {
                 .padding(.vertical, 14)
                 .background(Color(uiColor: .systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 24))
-                .lineLimit(1...8)
+                .lineLimit(1 ... 8)
                 .focused($isInputFocused)
                 .disabled(chatManager.isStreaming)
 

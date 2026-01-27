@@ -5,10 +5,10 @@
 //  HomeKit integration for smart home control
 //
 
-import Foundation
 import Combine
+import Foundation
 #if canImport(HomeKit)
-import HomeKit
+    import HomeKit
 #endif
 
 // MARK: - HomeKit Service
@@ -31,23 +31,23 @@ public class HomeKitService: NSObject, ObservableObject {
     // MARK: - HomeKit Manager
 
     #if canImport(HomeKit)
-    private var homeManager: HMHomeManager?
+        private var homeManager: HMHomeManager?
     #endif
 
     // MARK: - Initialization
 
-    private override init() {
+    override private init() {
         super.init()
         #if canImport(HomeKit)
-        setupHomeKit()
+            setupHomeKit()
         #endif
     }
 
     #if canImport(HomeKit)
-    private func setupHomeKit() {
-        homeManager = HMHomeManager()
-        homeManager?.delegate = self
-    }
+        private func setupHomeKit() {
+            homeManager = HMHomeManager()
+            homeManager?.delegate = self
+        }
     #endif
 
     // MARK: - Home Management
@@ -55,18 +55,23 @@ public class HomeKitService: NSObject, ObservableObject {
     /// Get all available homes
     public func refreshHomes() async {
         #if canImport(HomeKit)
-        guard let manager = homeManager else { return }
+            guard let manager = homeManager else { return }
 
-        homes = manager.homes.map { SmartHome(from: $0) }
-        primaryHome = manager.primaryHome.map { SmartHome(from: $0) }
+            homes = manager.homes.map { SmartHome(from: $0) }
+            // Use first home as primary (primaryHome was deprecated in iOS 16.1)
+            let firstHome = manager.homes.first
+            primaryHome = firstHome.map { SmartHome(from: $0) }
 
-        // Refresh accessories for primary home
-        if let primary = manager.primaryHome {
-            accessories = primary.accessories.map { SmartAccessory(from: $0) }
-            scenes = primary.actionSets.filter { !$0.isBuiltIn }.map { SmartScene(from: $0) }
-        }
+            // Refresh accessories for primary home
+            if let primary = firstHome {
+                accessories = primary.accessories.map { SmartAccessory(from: $0) }
+                // Filter to user-created scenes (exclude built-in types)
+                scenes = primary.actionSets.filter { actionSet in
+                    actionSet.actionSetType == HMActionSetTypeUserDefined
+                }.map { SmartScene(from: $0) }
+            }
 
-        isAvailable = true
+            isAvailable = true
         #endif
     }
 
@@ -75,91 +80,96 @@ public class HomeKitService: NSObject, ObservableObject {
     /// Turn on/off an accessory
     public func setAccessoryPower(accessoryId: String, on: Bool) async throws {
         #if canImport(HomeKit)
-        guard let manager = homeManager,
-              let home = manager.primaryHome,
-              let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId }) else {
-            throw HomeKitError.accessoryNotFound
-        }
-
-        // Find power characteristic
-        for service in accessory.services {
-            for characteristic in service.characteristics where characteristic.characteristicType == HMCharacteristicTypePowerState {
-                try await characteristic.writeValue(on)
-                return
+            guard let manager = homeManager,
+                  let home = manager.homes.first,
+                  let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId })
+            else {
+                throw HomeKitError.accessoryNotFound
             }
-        }
 
-        throw HomeKitError.characteristicNotFound
+            // Find power characteristic
+            for service in accessory.services {
+                for characteristic in service.characteristics where characteristic.characteristicType == HMCharacteristicTypePowerState {
+                    try await characteristic.writeValue(on)
+                    return
+                }
+            }
+
+            throw HomeKitError.characteristicNotFound
         #else
-        throw HomeKitError.notAvailable
+            throw HomeKitError.notAvailable
         #endif
     }
 
     /// Set brightness for a light
     public func setLightBrightness(accessoryId: String, brightness: Int) async throws {
         #if canImport(HomeKit)
-        guard let manager = homeManager,
-              let home = manager.primaryHome,
-              let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId }) else {
-            throw HomeKitError.accessoryNotFound
-        }
-
-        for service in accessory.services {
-            for characteristic in service.characteristics where characteristic.characteristicType == HMCharacteristicTypeBrightness {
-                try await characteristic.writeValue(brightness)
-                return
+            guard let manager = homeManager,
+                  let home = manager.homes.first,
+                  let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId })
+            else {
+                throw HomeKitError.accessoryNotFound
             }
-        }
 
-        throw HomeKitError.characteristicNotFound
+            for service in accessory.services {
+                for characteristic in service.characteristics where characteristic.characteristicType == HMCharacteristicTypeBrightness {
+                    try await characteristic.writeValue(brightness)
+                    return
+                }
+            }
+
+            throw HomeKitError.characteristicNotFound
         #else
-        throw HomeKitError.notAvailable
+            throw HomeKitError.notAvailable
         #endif
     }
 
     /// Set thermostat temperature
     public func setThermostatTemperature(accessoryId: String, temperature: Double) async throws {
         #if canImport(HomeKit)
-        guard let manager = homeManager,
-              let home = manager.primaryHome,
-              let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId }) else {
-            throw HomeKitError.accessoryNotFound
-        }
-
-        for service in accessory.services {
-            for characteristic in service.characteristics where characteristic.characteristicType == HMCharacteristicTypeTargetTemperature {
-                try await characteristic.writeValue(temperature)
-                return
+            guard let manager = homeManager,
+                  let home = manager.homes.first,
+                  let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId })
+            else {
+                throw HomeKitError.accessoryNotFound
             }
-        }
 
-        throw HomeKitError.characteristicNotFound
+            for service in accessory.services {
+                for characteristic in service.characteristics where characteristic.characteristicType == HMCharacteristicTypeTargetTemperature {
+                    try await characteristic.writeValue(temperature)
+                    return
+                }
+            }
+
+            throw HomeKitError.characteristicNotFound
         #else
-        throw HomeKitError.notAvailable
+            throw HomeKitError.notAvailable
         #endif
     }
 
     /// Lock/unlock a door lock
     public func setLockState(accessoryId: String, locked: Bool) async throws {
         #if canImport(HomeKit)
-        guard let manager = homeManager,
-              let home = manager.primaryHome,
-              let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId }) else {
-            throw HomeKitError.accessoryNotFound
-        }
-
-        let targetState = locked ? HMLockMechanismTargetState.secured : HMLockMechanismTargetState.unsecured
-
-        for service in accessory.services {
-            for characteristic in service.characteristics where characteristic.characteristicType == HMCharacteristicTypeLockMechanismTargetState {
-                try await characteristic.writeValue(targetState.rawValue)
-                return
+            guard let manager = homeManager,
+                  let home = manager.homes.first,
+                  let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId })
+            else {
+                throw HomeKitError.accessoryNotFound
             }
-        }
 
-        throw HomeKitError.characteristicNotFound
+            // Lock mechanism target state: 0 = unsecured, 1 = secured
+            let targetState = locked ? 1 : 0
+
+            for service in accessory.services {
+                for characteristic in service.characteristics where characteristic.characteristicType == HMCharacteristicTypeTargetLockMechanismState {
+                    try await characteristic.writeValue(targetState)
+                    return
+                }
+            }
+
+            throw HomeKitError.characteristicNotFound
         #else
-        throw HomeKitError.notAvailable
+            throw HomeKitError.notAvailable
         #endif
     }
 
@@ -168,15 +178,16 @@ public class HomeKitService: NSObject, ObservableObject {
     /// Execute a scene
     public func executeScene(sceneId: String) async throws {
         #if canImport(HomeKit)
-        guard let manager = homeManager,
-              let home = manager.primaryHome,
-              let actionSet = home.actionSets.first(where: { $0.uniqueIdentifier.uuidString == sceneId }) else {
-            throw HomeKitError.sceneNotFound
-        }
+            guard let manager = homeManager,
+                  let home = manager.homes.first,
+                  let actionSet = home.actionSets.first(where: { $0.uniqueIdentifier.uuidString == sceneId })
+            else {
+                throw HomeKitError.sceneNotFound
+            }
 
-        try await home.executeActionSet(actionSet)
+            try await home.executeActionSet(actionSet)
         #else
-        throw HomeKitError.notAvailable
+            throw HomeKitError.notAvailable
         #endif
     }
 
@@ -185,15 +196,16 @@ public class HomeKitService: NSObject, ObservableObject {
     /// Get accessories in a specific room
     public func getAccessoriesInRoom(roomName: String) -> [SmartAccessory] {
         #if canImport(HomeKit)
-        guard let manager = homeManager,
-              let home = manager.primaryHome,
-              let room = home.rooms.first(where: { $0.name == roomName }) else {
-            return []
-        }
+            guard let manager = homeManager,
+                  let home = manager.homes.first,
+                  let room = home.rooms.first(where: { $0.name == roomName })
+            else {
+                return []
+            }
 
-        return room.accessories.map { SmartAccessory(from: $0) }
+            return room.accessories.map { SmartAccessory(from: $0) }
         #else
-        return []
+            return []
         #endif
     }
 
@@ -259,7 +271,7 @@ public class HomeKitService: NSObject, ObservableObject {
     }
 
     private func extractSceneName(from command: String) -> String {
-        return command.replacingOccurrences(of: "activate scene", with: "")
+        command.replacingOccurrences(of: "activate scene", with: "")
             .replacingOccurrences(of: "run scene", with: "")
             .trimmingCharacters(in: .whitespaces)
     }
@@ -276,19 +288,19 @@ public class HomeKitService: NSObject, ObservableObject {
 // MARK: - HomeKit Delegate
 
 #if canImport(HomeKit)
-extension HomeKitService: HMHomeManagerDelegate {
-    nonisolated public func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
-        Task { @MainActor in
-            await refreshHomes()
+    extension HomeKitService: HMHomeManagerDelegate {
+        nonisolated public func homeManagerDidUpdateHomes(_: HMHomeManager) {
+            Task { @MainActor in
+                await refreshHomes()
+            }
         }
-    }
 
-    nonisolated public func homeManagerDidUpdatePrimaryHome(_ manager: HMHomeManager) {
-        Task { @MainActor in
-            await refreshHomes()
+        nonisolated public func homeManagerDidUpdatePrimaryHome(_: HMHomeManager) {
+            Task { @MainActor in
+                await refreshHomes()
+            }
         }
     }
-}
 #endif
 
 // MARK: - Data Models
@@ -301,13 +313,13 @@ public struct SmartHome: Identifiable, Sendable {
     public let accessoryCount: Int
 
     #if canImport(HomeKit)
-    init(from home: HMHome) {
-        self.id = home.uniqueIdentifier.uuidString
-        self.name = home.name
-        self.isPrimary = home.isPrimary
-        self.roomCount = home.rooms.count
-        self.accessoryCount = home.accessories.count
-    }
+        init(from home: HMHome) {
+            id = home.uniqueIdentifier.uuidString
+            name = home.name
+            isPrimary = home.isPrimary
+            roomCount = home.rooms.count
+            accessoryCount = home.accessories.count
+        }
     #endif
 
     public init(id: String, name: String, isPrimary: Bool, roomCount: Int, accessoryCount: Int) {
@@ -343,28 +355,38 @@ public struct SmartAccessory: Identifiable, Sendable {
     }
 
     #if canImport(HomeKit)
-    init(from accessory: HMAccessory) {
-        self.id = accessory.uniqueIdentifier.uuidString
-        self.name = accessory.name
-        self.room = accessory.room?.name
-        self.isReachable = accessory.isReachable
-        self.manufacturer = accessory.manufacturer
-        self.model = accessory.model
+        init(from accessory: HMAccessory) {
+            id = accessory.uniqueIdentifier.uuidString
+            name = accessory.name
+            room = accessory.room?.name
+            isReachable = accessory.isReachable
+            manufacturer = accessory.manufacturer
+            model = accessory.model
 
-        // Determine category
-        switch accessory.category.categoryType {
-        case .lightbulb: self.category = .light
-        case .thermostat: self.category = .thermostat
-        case .doorLock: self.category = .lock
-        case .outlet: self.category = .outlet
-        case .fan: self.category = .fan
-        case .sensor: self.category = .sensor
-        case .videoDoorbell: self.category = .doorbell
-        case .garageDoorOpener: self.category = .garageDoor
-        case .securitySystem: self.category = .securitySystem
-        default: self.category = .other
+            // Determine category using string constants
+            let categoryType = accessory.category.categoryType
+            if categoryType == HMAccessoryCategoryTypeLightbulb {
+                category = .light
+            } else if categoryType == HMAccessoryCategoryTypeThermostat {
+                category = .thermostat
+            } else if categoryType == HMAccessoryCategoryTypeDoorLock {
+                category = .lock
+            } else if categoryType == HMAccessoryCategoryTypeOutlet {
+                category = .outlet
+            } else if categoryType == HMAccessoryCategoryTypeFan {
+                category = .fan
+            } else if categoryType == HMAccessoryCategoryTypeSensor {
+                category = .sensor
+            } else if categoryType == HMAccessoryCategoryTypeVideoDoorbell {
+                category = .doorbell
+            } else if categoryType == HMAccessoryCategoryTypeGarageDoorOpener {
+                category = .garageDoor
+            } else if categoryType == HMAccessoryCategoryTypeSecuritySystem {
+                category = .securitySystem
+            } else {
+                category = .other
+            }
         }
-    }
     #endif
 
     public init(id: String, name: String, room: String?, category: AccessoryCategory, isReachable: Bool, manufacturer: String?, model: String?) {
@@ -384,11 +406,11 @@ public struct SmartScene: Identifiable, Sendable {
     public let actionCount: Int
 
     #if canImport(HomeKit)
-    init(from actionSet: HMActionSet) {
-        self.id = actionSet.uniqueIdentifier.uuidString
-        self.name = actionSet.name
-        self.actionCount = actionSet.actions.count
-    }
+        init(from actionSet: HMActionSet) {
+            id = actionSet.uniqueIdentifier.uuidString
+            name = actionSet.name
+            actionCount = actionSet.actions.count
+        }
     #endif
 
     public init(id: String, name: String, actionCount: Int) {
@@ -426,19 +448,19 @@ public enum HomeKitError: Error, LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .notAvailable:
-            return "HomeKit is not available on this device"
+            "HomeKit is not available on this device"
         case .accessoryNotFound:
-            return "Accessory not found"
+            "Accessory not found"
         case .sceneNotFound:
-            return "Scene not found"
+            "Scene not found"
         case .characteristicNotFound:
-            return "Device characteristic not found"
+            "Device characteristic not found"
         case .commandNotRecognized:
-            return "Command not recognized"
+            "Command not recognized"
         case .permissionDenied:
-            return "HomeKit permission denied"
+            "HomeKit permission denied"
         case .communicationFailed:
-            return "Failed to communicate with device"
+            "Failed to communicate with device"
         }
     }
 }

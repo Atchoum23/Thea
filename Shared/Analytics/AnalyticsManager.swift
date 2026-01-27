@@ -1,9 +1,9 @@
 // AnalyticsManager.swift
 // Privacy-first analytics and telemetry system
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Analytics Manager
 
@@ -179,7 +179,7 @@ public final class AnalyticsManager: ObservableObject {
     public func trackAction(_ action: String, target: String? = nil, properties: [String: Any]? = nil) {
         var props = properties ?? [:]
         props["action"] = action
-        if let target = target {
+        if let target {
             props["target"] = target
         }
         track("user_action", properties: props)
@@ -190,7 +190,7 @@ public final class AnalyticsManager: ObservableObject {
         var props = properties ?? [:]
         props["error_type"] = String(describing: type(of: error))
         props["error_message"] = error.localizedDescription
-        if let context = context {
+        if let context {
             props["context"] = context
         }
         track("error", properties: props)
@@ -201,7 +201,7 @@ public final class AnalyticsManager: ObservableObject {
         var props = properties ?? [:]
         props["metric"] = metric
         props["value"] = value
-        if let unit = unit {
+        if let unit {
             props["unit"] = unit
         }
         track("performance", properties: props)
@@ -265,7 +265,7 @@ public final class AnalyticsManager: ObservableObject {
     public func trackConversion(_ conversionName: String, value: Double? = nil, properties: [String: Any]? = nil) {
         var props = properties ?? [:]
         props["conversion_name"] = conversionName
-        if let value = value {
+        if let value {
             props["conversion_value"] = value
         }
         track("conversion", properties: props)
@@ -376,17 +376,17 @@ public final class AnalyticsManager: ObservableObject {
 
     private func getPlatform() -> String {
         #if os(macOS)
-        return "macOS"
+            return "macOS"
         #elseif os(iOS)
-        return "iOS"
+            return "iOS"
         #elseif os(watchOS)
-        return "watchOS"
+            return "watchOS"
         #elseif os(tvOS)
-        return "tvOS"
+            return "tvOS"
         #elseif os(visionOS)
-        return "visionOS"
+            return "visionOS"
         #else
-        return "unknown"
+            return "unknown"
         #endif
     }
 
@@ -400,33 +400,33 @@ public final class AnalyticsManager: ObservableObject {
 
     private func getDeviceModel() -> String {
         #if os(macOS)
-        var size = 0
-        sysctlbyname("hw.model", nil, &size, nil, 0)
-        var model = [CChar](repeating: 0, count: size)
-        sysctlbyname("hw.model", &model, &size, nil, 0)
-        return String(cString: model)
+            var size = 0
+            sysctlbyname("hw.model", nil, &size, nil, 0)
+            var model = [CChar](repeating: 0, count: size)
+            sysctlbyname("hw.model", &model, &size, nil, 0)
+            return String(decoding: model.map { UInt8(bitPattern: $0) }, as: UTF8.self).trimmingCharacters(in: .controlCharacters)
         #else
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        return withUnsafePointer(to: &systemInfo.machine) {
-            $0.withMemoryRebound(to: CChar.self, capacity: 1) {
-                String(cString: $0)
+            var systemInfo = utsname()
+            uname(&systemInfo)
+            return withUnsafePointer(to: &systemInfo.machine) {
+                $0.withMemoryRebound(to: CChar.self, capacity: 1) {
+                    String(cString: $0)
+                }
             }
-        }
         #endif
     }
 }
 
 // MARK: - Timing Helper
 
-public class AnalyticsTimer {
+public final class AnalyticsTimer: @unchecked Sendable {
     private let startTime: Date
     private let category: String
     private let variable: String
     private var properties: [String: Any]
 
     public init(category: String, variable: String, properties: [String: Any] = [:]) {
-        self.startTime = Date()
+        startTime = Date()
         self.category = category
         self.variable = variable
         self.properties = properties
@@ -434,8 +434,12 @@ public class AnalyticsTimer {
 
     public func stop() {
         let duration = Date().timeIntervalSince(startTime)
+        // Capture values before async boundary to avoid data races
+        let capturedCategory = category
+        let capturedVariable = variable
+        let capturedProperties = properties
         Task { @MainActor in
-            AnalyticsManager.shared.trackTiming(category, variable: variable, duration: duration, properties: properties)
+            AnalyticsManager.shared.trackTiming(capturedCategory, variable: capturedVariable, duration: duration, properties: capturedProperties)
         }
     }
 
@@ -446,8 +450,8 @@ public class AnalyticsTimer {
 
 // MARK: - Types
 
-public struct AnalyticsEvent: Identifiable, Codable {
-    public let id = UUID()
+public struct AnalyticsEvent: Identifiable, Codable, @unchecked Sendable {
+    public var id = UUID()
     public let name: String
     public let properties: [String: AnyCodable]
     public let timestamp: Date
@@ -496,7 +500,7 @@ public struct AnyCodable: Codable {
         } else if let string = try? container.decode(String.self) {
             value = string
         } else if let array = try? container.decode([AnyCodable].self) {
-            value = array.map { $0.value }
+            value = array.map(\.value)
         } else if let dict = try? container.decode([String: AnyCodable].self) {
             value = dict.mapValues { $0.value }
         } else {
@@ -530,7 +534,7 @@ public struct AnyCodable: Codable {
 
 // MARK: - Analytics Provider Protocol
 
-public protocol AnalyticsProvider {
+public protocol AnalyticsProvider: Sendable {
     func track(_ event: AnalyticsEvent)
     func setUserProperty(_ key: String, value: Any)
     func setUserId(_ userId: String?)
@@ -539,7 +543,7 @@ public protocol AnalyticsProvider {
 
 // MARK: - Local Analytics Provider
 
-public class LocalAnalyticsProvider: AnalyticsProvider {
+public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.app", category: "Analytics.Local")
     private let fileURL: URL
 
@@ -547,18 +551,18 @@ public class LocalAnalyticsProvider: AnalyticsProvider {
         guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("Unable to access documents directory - this should never happen on a properly configured system")
         }
-        self.fileURL = documentsPath.appendingPathComponent("analytics.json")
+        fileURL = documentsPath.appendingPathComponent("analytics.json")
     }
 
-    public func track(_ event: AnalyticsEvent) {
+    public func track(_: AnalyticsEvent) {
         // Already stored in AnalyticsManager
     }
 
-    public func setUserProperty(_ key: String, value: Any) {
+    public func setUserProperty(_: String, value _: Any) {
         // Stored in AnalyticsManager
     }
 
-    public func setUserId(_ userId: String?) {
+    public func setUserId(_: String?) {
         // Stored in AnalyticsManager
     }
 
@@ -576,32 +580,32 @@ public class LocalAnalyticsProvider: AnalyticsProvider {
 
 // MARK: - Console Analytics Provider (Debug)
 
-public class ConsoleAnalyticsProvider: AnalyticsProvider {
+public final class ConsoleAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.app", category: "Analytics.Console")
 
     public init() {}
 
     public func track(_ event: AnalyticsEvent) {
         #if DEBUG
-        logger.info("📊 [\(event.name)] \(event.properties)")
+            logger.info("📊 [\(event.name)] \(event.properties)")
         #endif
     }
 
     public func setUserProperty(_ key: String, value: Any) {
         #if DEBUG
-        logger.info("👤 User property: \(key) = \(value)")
+            logger.info("👤 User property: \(key) = \(String(describing: value))")
         #endif
     }
 
     public func setUserId(_ userId: String?) {
         #if DEBUG
-        logger.info("👤 User ID: \(userId ?? "nil")")
+            logger.info("👤 User ID: \(userId ?? "nil")")
         #endif
     }
 
     public func flush(_ events: [AnalyticsEvent]) async {
         #if DEBUG
-        logger.info("📤 Flushing \(events.count) events")
+            logger.info("📤 Flushing \(events.count) events")
         #endif
     }
 }

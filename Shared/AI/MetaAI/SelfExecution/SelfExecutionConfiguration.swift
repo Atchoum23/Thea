@@ -26,10 +26,10 @@ public struct SelfExecutionConfiguration: Codable, Sendable {
 
         public var keyName: String {
             switch self {
-            case .anthropic: return "anthropic_api_key"
-            case .openAI: return "openai_api_key"
-            case .openRouter: return "openrouter_api_key"
-            case .local: return "local_models_path"
+            case .anthropic: "anthropic_api_key"
+            case .openAI: "openai_api_key"
+            case .openRouter: "openrouter_api_key"
+            case .local: "local_models_path"
             }
         }
     }
@@ -47,11 +47,11 @@ public struct SelfExecutionConfiguration: Codable, Sendable {
         public var description: String {
             switch self {
             case .supervised:
-                return "Approval required at phase start/end and for risky operations"
+                "Approval required at phase start/end and for risky operations"
             case .alwaysAllow:
-                return "Execute all phases without interruption (⚠️ Use with caution)"
+                "Execute all phases without interruption (⚠️ Use with caution)"
             case .dryRun:
-                return "Simulate execution without making changes"
+                "Simulate execution without making changes"
             }
         }
     }
@@ -115,7 +115,8 @@ public struct SelfExecutionConfiguration: Codable, Sendable {
 
     public static func load() -> SelfExecutionConfiguration {
         guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let config = try? JSONDecoder().decode(SelfExecutionConfiguration.self, from: data) else {
+              let config = try? JSONDecoder().decode(SelfExecutionConfiguration.self, from: data)
+        else {
             return SelfExecutionConfiguration()
         }
         return config
@@ -146,13 +147,13 @@ public struct SelfExecutionConfiguration: Codable, Sendable {
                 return SecureStorage.shared.hasAPIKey(for: "openrouter")
             case .local:
                 #if os(macOS)
-                // Check for local models in the SharedLLMs directory (macOS only)
-                let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
-                let sharedLLMsPath = (homeDir as NSString).appendingPathComponent("Library/Application Support/SharedLLMs")
-                return FileManager.default.fileExists(atPath: sharedLLMsPath)
+                    // Check for local models in the SharedLLMs directory (macOS only)
+                    let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+                    let sharedLLMsPath = (homeDir as NSString).appendingPathComponent("Library/Application Support/SharedLLMs")
+                    return FileManager.default.fileExists(atPath: sharedLLMsPath)
                 #else
-                // Local models not supported on iOS
-                return false
+                    // Local models not supported on iOS
+                    return false
                 #endif
             }
         }

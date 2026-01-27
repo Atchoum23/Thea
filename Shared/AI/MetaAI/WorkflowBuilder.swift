@@ -2,6 +2,7 @@ import Foundation
 @preconcurrency import SwiftData
 
 // MARK: - Sendable Wrapper for [String: Any]
+
 // Safely transfers dictionaries across actor boundaries
 
 @frozen
@@ -9,7 +10,7 @@ public struct SendableDict: @unchecked Sendable {
     private let storage: [String: Any]
 
     public init(_ dict: [String: Any]) {
-        self.storage = dict
+        storage = dict
     }
 
     public var value: [String: Any] {
@@ -18,6 +19,7 @@ public struct SendableDict: @unchecked Sendable {
 }
 
 // MARK: - Visual Workflow Builder
+
 // Node-based workflow creation and execution engine
 
 @MainActor
@@ -37,15 +39,15 @@ final class WorkflowBuilder {
             await loadWorkflows()
         }
     }
-    
+
     // MARK: - Persistence
-    
+
     func loadWorkflows() async {
         do {
             let loaded = try await WorkflowPersistence.shared.load()
             workflows = loaded
             workflowIndex = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
-            
+
             // Add templates if no workflows exist
             if workflows.isEmpty {
                 for template in WorkflowTemplates.all {
@@ -60,7 +62,7 @@ final class WorkflowBuilder {
             workflowIndex = Dictionary(uniqueKeysWithValues: workflows.map { ($0.id, $0) })
         }
     }
-    
+
     func saveWorkflows() async {
         await WorkflowPersistence.shared.autoSave(workflows)
     }
@@ -82,7 +84,7 @@ final class WorkflowBuilder {
 
         workflows.append(workflow)
         workflowIndex[workflow.id] = workflow
-        
+
         Task {
             await saveWorkflows()
         }
@@ -186,7 +188,8 @@ final class WorkflowBuilder {
         position: CGPoint
     ) throws {
         guard let workflow = workflowIndex[workflowId],
-              let node = workflow.nodes.first(where: { $0.id == nodeId }) else {
+              let node = workflow.nodes.first(where: { $0.id == nodeId })
+        else {
             throw WorkflowError.nodeNotFound
         }
 
@@ -200,7 +203,8 @@ final class WorkflowBuilder {
         config: [String: Any]
     ) throws {
         guard let workflow = workflowIndex[workflowId],
-              let node = workflow.nodes.first(where: { $0.id == nodeId }) else {
+              let node = workflow.nodes.first(where: { $0.id == nodeId })
+        else {
             throw WorkflowError.nodeNotFound
         }
 
@@ -222,13 +226,15 @@ final class WorkflowBuilder {
         }
 
         guard let sourceNode = workflow.nodes.first(where: { $0.id == sourceNodeId }),
-              let targetNode = workflow.nodes.first(where: { $0.id == targetNodeId }) else {
+              let targetNode = workflow.nodes.first(where: { $0.id == targetNodeId })
+        else {
             throw WorkflowError.nodeNotFound
         }
 
         // Validate ports exist
         guard sourceNode.outputs.contains(where: { $0.name == outputPort }),
-              targetNode.inputs.contains(where: { $0.name == inputPort }) else {
+              targetNode.inputs.contains(where: { $0.name == inputPort })
+        else {
             throw WorkflowError.invalidConnection
         }
 
@@ -386,37 +392,36 @@ final class WorkflowBuilder {
     ) async throws -> SendableDict {
         // Extract the dictionary from the sendable wrapper
         let inputDict = inputs.value
-        let result: [String: Any]
-        switch node.type {
+        let result: [String: Any] = switch node.type {
         case .input:
-            result = inputDict
+            inputDict
 
         case .output:
-            result = inputDict
+            inputDict
 
         case .aiInference:
-            result = try await executeAIInference(node, inputs: inputDict)
+            try await executeAIInference(node, inputs: inputDict)
 
         case .toolExecution:
-            result = try await executeToolNode(node, inputs: inputDict)
+            try await executeToolNode(node, inputs: inputDict)
 
         case .conditional:
-            result = executeConditional(node, inputs: inputDict)
+            executeConditional(node, inputs: inputDict)
 
         case .loop:
-            result = try await executeLoop(node, inputs: inputDict, workflow: workflow)
+            try await executeLoop(node, inputs: inputDict, workflow: workflow)
 
         case .variable:
-            result = executeVariable(node, inputs: inputDict)
+            executeVariable(node, inputs: inputDict)
 
         case .transformation:
-            result = executeTransformation(node, inputs: inputDict)
+            executeTransformation(node, inputs: inputDict)
 
         case .merge:
-            result = executeMerge(node, inputs: inputDict)
+            executeMerge(node, inputs: inputDict)
 
         case .split:
-            result = executeSplit(node, inputs: inputDict)
+            executeSplit(node, inputs: inputDict)
         }
         return SendableDict(result)
     }
@@ -429,7 +434,7 @@ final class WorkflowBuilder {
             throw WorkflowError.invalidNodeInput
         }
 
-        let provider = await ProviderRegistry.shared.getProvider(id: await SettingsManager.shared.defaultProvider)!
+        let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)!
         let model = node.config["model"] as? String ?? "gpt-4o"
 
         let message = AIMessage(
@@ -446,11 +451,11 @@ final class WorkflowBuilder {
 
         for try await chunk in stream {
             switch chunk.type {
-            case .delta(let text):
+            case let .delta(text):
                 result += text
             case .complete:
                 break
-            case .error(let error):
+            case let .error(error):
                 throw error
             }
         }
@@ -466,8 +471,8 @@ final class WorkflowBuilder {
             throw WorkflowError.invalidNodeConfig
         }
 
-        let toolFramework = await ToolFramework.shared
-        guard let tool = await toolFramework.registeredTools.first(where: { $0.name == toolName }) else {
+        let toolFramework = ToolFramework.shared
+        guard let tool = toolFramework.registeredTools.first(where: { $0.name == toolName }) else {
             throw WorkflowError.toolNotFound
         }
 
@@ -493,7 +498,7 @@ final class WorkflowBuilder {
     private func executeLoop(
         _ node: WorkflowNode,
         inputs: [String: Any],
-        workflow: Workflow
+        workflow _: Workflow
     ) async throws -> [String: Any] {
         guard let iterations = node.config["iterations"] as? Int else {
             throw WorkflowError.invalidNodeConfig
@@ -501,7 +506,7 @@ final class WorkflowBuilder {
 
         var results: [[String: Any]] = []
 
-        for i in 0..<iterations {
+        for i in 0 ..< iterations {
             var loopInputs = inputs
             loopInputs["iteration"] = i
 
@@ -547,7 +552,8 @@ final class WorkflowBuilder {
         case "json_parse":
             if let jsonString = inputs["input"] as? String,
                let data = jsonString.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data) {
+               let json = try? JSONSerialization.jsonObject(with: data)
+            {
                 return ["output": json]
             }
         default:
@@ -558,7 +564,7 @@ final class WorkflowBuilder {
     }
 
     private func executeMerge(
-        _ node: WorkflowNode,
+        _: WorkflowNode,
         inputs: [String: Any]
     ) -> [String: Any] {
         // Merge all inputs into single output
@@ -566,7 +572,7 @@ final class WorkflowBuilder {
     }
 
     private func executeSplit(
-        _ node: WorkflowNode,
+        _: WorkflowNode,
         inputs: [String: Any]
     ) -> [String: Any] {
         // Split input into multiple outputs
@@ -595,7 +601,8 @@ final class WorkflowBuilder {
 
         for edge in incomingEdges {
             if let sourceOutputs = outputs[edge.sourceNodeId],
-               let value = sourceOutputs[edge.sourcePort] {
+               let value = sourceOutputs[edge.sourcePort]
+            {
                 inputs[edge.targetPort] = value
             }
         }
@@ -690,7 +697,7 @@ final class WorkflowBuilder {
             }
 
             let outgoing = workflow.edges.filter { $0.sourceNodeId == currentId }
-            queue.append(contentsOf: outgoing.map { $0.targetNodeId })
+            queue.append(contentsOf: outgoing.map(\.targetNodeId))
         }
 
         return false
@@ -706,7 +713,8 @@ final class WorkflowBuilder {
             let parts = condition.split(separator: ">").map { $0.trimmingCharacters(in: .whitespaces) }
             if parts.count == 2,
                let lhs = inputs[parts[0]] as? Int,
-               let rhs = Int(parts[1]) {
+               let rhs = Int(parts[1])
+            {
                 return lhs > rhs
             }
         }
@@ -941,27 +949,27 @@ enum WorkflowError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .workflowNotFound:
-            return "Workflow not found"
+            "Workflow not found"
         case .workflowActive:
-            return "Cannot modify active workflow"
+            "Cannot modify active workflow"
         case .nodeNotFound:
-            return "Node not found"
+            "Node not found"
         case .invalidConnection:
-            return "Invalid node connection"
+            "Invalid node connection"
         case .cyclicConnection:
-            return "Connection would create a cycle"
+            "Connection would create a cycle"
         case .emptyWorkflow:
-            return "Workflow has no nodes"
+            "Workflow has no nodes"
         case .missingStartNode:
-            return "Workflow must have an input node"
+            "Workflow must have an input node"
         case .orphanedNode:
-            return "Workflow has orphaned nodes"
+            "Workflow has orphaned nodes"
         case .invalidNodeInput:
-            return "Invalid node input"
+            "Invalid node input"
         case .invalidNodeConfig:
-            return "Invalid node configuration"
+            "Invalid node configuration"
         case .toolNotFound:
-            return "Tool not found"
+            "Tool not found"
         }
     }
 }

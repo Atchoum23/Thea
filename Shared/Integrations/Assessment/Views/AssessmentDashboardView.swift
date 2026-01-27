@@ -188,7 +188,7 @@ private struct AssessmentTakingView: View {
                         .padding()
 
                     VStack(spacing: 12) {
-                        ForEach(0..<question.scaleType.options.count, id: \.self) { index in
+                        ForEach(0 ..< question.scaleType.options.count, id: \.self) { index in
                             Button {
                                 selectedValue = index + 1
                             } label: {
@@ -214,7 +214,8 @@ private struct AssessmentTakingView: View {
 
                     Button {
                         if let value = selectedValue,
-                           let progress = viewModel.currentProgress {
+                           let progress = viewModel.currentProgress
+                        {
                             Task {
                                 await viewModel.submitResponse(
                                     assessmentID: progress.id,

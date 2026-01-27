@@ -1,9 +1,12 @@
 // MultiModalCoordinator.swift
 // Coordinates multi-modal AI inputs (text, voice, vision, documents)
 
+import Combine
 import Foundation
 import OSLog
-import Combine
+#if canImport(UIKit)
+    import UIKit
+#endif
 
 // MARK: - Multi-Modal Coordinator
 
@@ -41,7 +44,7 @@ public final class MultiModalCoordinator: ObservableObject {
         // Listen for speech recognition results
         speech.$recognizedText
             .sink { [weak self] text in
-                if let text = text, !text.isEmpty {
+                if !text.isEmpty {
                     self?.contextBuilder.addVoiceInput(text)
                 }
             }
@@ -78,10 +81,10 @@ public final class MultiModalCoordinator: ObservableObject {
     }
 
     /// Disable a modality
-    public func disableModality(_ modality: Modality) async {
+    public func disableModality(_ modality: Modality) {
         switch modality {
         case .voice:
-            await speech.stopRecognition()
+            speech.stopRecognition()
         default:
             break
         }
@@ -117,11 +120,11 @@ public final class MultiModalCoordinator: ObservableObject {
                 let analysis = try await vision.analyzeForAI(imageData: imageData)
                 processedComponents.append(ProcessedComponent(
                     type: .image,
-                    content: analysis.description,
-                    confidence: analysis.confidence,
+                    content: analysis.summary,
+                    confidence: 1.0,
                     metadata: [
-                        "text": analysis.extractedText ?? "",
-                        "objectCount": String(analysis.objectCount)
+                        "text": analysis.text?.text ?? "",
+                        "objectCount": String(analysis.objects.count)
                     ]
                 ))
             } catch {
@@ -138,9 +141,9 @@ public final class MultiModalCoordinator: ObservableObject {
                     content: analysis.summary,
                     confidence: 1.0,
                     metadata: [
-                        "title": analysis.title ?? "",
-                        "wordCount": String(analysis.wordCount),
-                        "keyTopics": analysis.keyTopics.joined(separator: ", ")
+                        "title": analysis.metadata.title ?? "",
+                        "wordCount": String(analysis.text.split(separator: " ").count),
+                        "keyTopics": analysis.keywords.joined(separator: ", ")
                     ]
                 ))
             } catch {
@@ -152,13 +155,16 @@ public final class MultiModalCoordinator: ObservableObject {
         if let voiceData = input.voiceData {
             do {
                 let transcription = try await speech.transcribe(audioData: voiceData)
+                // Calculate average confidence and total duration from segments
+                let avgConfidence = transcription.segments.isEmpty ? 1.0 : Double(transcription.segments.map(\.confidence).reduce(0, +)) / Double(transcription.segments.count)
+                let totalDuration = transcription.segments.map(\.duration).reduce(0, +)
                 processedComponents.append(ProcessedComponent(
                     type: .voice,
                     content: transcription.text,
-                    confidence: transcription.confidence,
+                    confidence: avgConfidence,
                     metadata: [
-                        "duration": String(format: "%.1f", transcription.duration),
-                        "language": transcription.language ?? "unknown"
+                        "duration": String(format: "%.1f", totalDuration),
+                        "language": "auto"
                     ]
                 ))
             } catch {
@@ -186,14 +192,14 @@ public final class MultiModalCoordinator: ObservableObject {
         // Add text components first
         let textComponents = components.filter { $0.type == .text }
         if !textComponents.isEmpty {
-            prompt += textComponents.map { $0.content }.joined(separator: "\n")
+            prompt += textComponents.map(\.content).joined(separator: "\n")
         }
 
         // Add voice transcription
         let voiceComponents = components.filter { $0.type == .voice }
         if !voiceComponents.isEmpty {
             if !prompt.isEmpty { prompt += "\n\n" }
-            prompt += "[Voice input]: " + voiceComponents.map { $0.content }.joined(separator: " ")
+            prompt += "[Voice input]: " + voiceComponents.map(\.content).joined(separator: " ")
         }
 
         // Add image descriptions
@@ -230,7 +236,7 @@ public final class MultiModalCoordinator: ObservableObject {
             hasDocuments: components.contains { $0.type == .document },
             hasVoice: components.contains { $0.type == .voice },
             componentCount: components.count,
-            averageConfidence: components.map { $0.confidence }.reduce(0, +) / Double(max(components.count, 1)),
+            averageConfidence: components.map(\.confidence).reduce(0, +) / Double(max(components.count, 1)),
             timestamp: Date()
         )
     }
@@ -265,13 +271,13 @@ public final class MultiModalCoordinator: ObservableObject {
     public func analyzeScreen(question: String? = nil) async throws -> ProcessedInput {
         // Capture screen
         #if os(macOS)
-        // Screen capture implementation for macOS
-        let screenData = Data() // Placeholder
+            // Screen capture implementation for macOS
+            let screenData = Data() // Placeholder
         #elseif os(iOS)
-        // Screen capture implementation for iOS
-        let screenData = Data() // Placeholder
+            // Screen capture implementation for iOS
+            let screenData = Data() // Placeholder
         #else
-        let screenData = Data()
+            let screenData = Data()
         #endif
 
         let input = MultiModalInput(
@@ -292,13 +298,13 @@ public final class MultiModalCoordinator: ObservableObject {
             try await enableModality(modality)
         }
 
-        logger.info("Started continuous capture with modalities: \(modalities.map { $0.rawValue })")
+        logger.info("Started continuous capture with modalities: \(modalities.map(\.rawValue))")
     }
 
     /// Stop continuous capture
-    public func stopContinuousCapture() async {
+    public func stopContinuousCapture() {
         for modality in activeModalities {
-            await disableModality(modality)
+            disableModality(modality)
         }
 
         logger.info("Stopped continuous capture")
@@ -423,6 +429,42 @@ public struct MultiModalContext {
     public let timestamp: Date
 }
 
+// MARK: - Supporting Types for Context Awareness
+
+public enum TimeOfDay: String, Sendable {
+    case morning
+    case afternoon
+    case evening
+    case night
+}
+
+public struct SimpleLocationContext: Sendable {
+    public let isHome: Bool
+    public let isWork: Bool
+    public let city: String?
+    public let country: String?
+}
+
+public enum UserActivityState: String, Sendable {
+    case idle
+    case working
+    case browsing
+    case coding
+}
+
+public struct ProactiveSuggestion: Identifiable, Sendable {
+    public let id: String
+    public let title: String
+    public let description: String
+    public let action: SuggestionAction
+
+    public enum SuggestionAction: Sendable {
+        case aiPrompt(String)
+        case navigate(String)
+        case shortcut(String)
+    }
+}
+
 // MARK: - Context Awareness Service
 
 /// Provides environmental and contextual awareness for AI interactions
@@ -437,7 +479,7 @@ public final class ContextAwarenessService: ObservableObject {
     @Published public private(set) var currentContext: EnvironmentalContext?
     @Published public private(set) var userActivity: UserActivityState = .idle
     @Published public private(set) var timeContext: TimeContext?
-    @Published public private(set) var locationContext: LocationContext?
+    @Published public private(set) var locationContext: SimpleLocationContext?
 
     // MARK: - Initialization
 
@@ -469,12 +511,11 @@ public final class ContextAwarenessService: ObservableObject {
         let hour = calendar.component(.hour, from: now)
         let weekday = calendar.component(.weekday, from: now)
 
-        let timeOfDay: TimeOfDay
-        switch hour {
-        case 5..<12: timeOfDay = .morning
-        case 12..<17: timeOfDay = .afternoon
-        case 17..<21: timeOfDay = .evening
-        default: timeOfDay = .night
+        let timeOfDay: TimeOfDay = switch hour {
+        case 5 ..< 12: .morning
+        case 12 ..< 17: .afternoon
+        case 17 ..< 21: .evening
+        default: .night
         }
 
         let isWeekend = weekday == 1 || weekday == 7
@@ -484,18 +525,18 @@ public final class ContextAwarenessService: ObservableObject {
             timeOfDay: timeOfDay,
             hour: hour,
             isWeekend: isWeekend,
-            isWorkHours: !isWeekend && (9..<18).contains(hour)
+            isWorkHours: !isWeekend && (9 ..< 18).contains(hour)
         )
     }
 
     private func updateEnvironmentalContext() {
         #if os(iOS)
-        // Check device orientation, battery, etc.
-        let batteryLevel = UIDevice.current.batteryLevel
-        let isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
+            // Check device orientation, battery, etc.
+            let batteryLevel = UIDevice.current.batteryLevel
+            let isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
         #else
-        let batteryLevel: Float = 1.0
-        let isLowPower = false
+            let batteryLevel: Float = 1.0
+            let isLowPower = false
         #endif
 
         currentContext = EnvironmentalContext(
@@ -564,7 +605,7 @@ public final class ContextAwarenessService: ObservableObject {
 
         // Time-based suggestions
         if let time = timeContext {
-            if time.timeOfDay == .morning && !time.isWeekend {
+            if time.timeOfDay == .morning, !time.isWeekend {
                 suggestions.append(ProactiveSuggestion(
                     id: "morning-briefing",
                     title: "Morning Briefing",
@@ -630,38 +671,4 @@ public struct TimeContext {
     public let hour: Int
     public let isWeekend: Bool
     public let isWorkHours: Bool
-}
-
-public enum TimeOfDay: String {
-    case morning
-    case afternoon
-    case evening
-    case night
-}
-
-public struct LocationContext {
-    public let isHome: Bool
-    public let isWork: Bool
-    public let city: String?
-    public let country: String?
-}
-
-public enum UserActivityState: String {
-    case idle
-    case working
-    case browsing
-    case coding
-}
-
-public struct ProactiveSuggestion: Identifiable {
-    public let id: String
-    public let title: String
-    public let description: String
-    public let action: SuggestionAction
-
-    public enum SuggestionAction {
-        case aiPrompt(String)
-        case navigate(String)
-        case shortcut(String)
-    }
 }

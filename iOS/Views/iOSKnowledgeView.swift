@@ -5,13 +5,13 @@ struct iOSKnowledgeView: View {
 
     @State private var searchQuery = ""
     @State private var showingScanner = false
-    @State private var searchResults: [SearchResult] = []
+    @State private var searchResults: [IndexedFile] = []
 
     var body: some View {
         VStack(spacing: 0) {
             searchBar
 
-            if $knowledgeManager.isScanning {
+            if knowledgeManager.isIndexing {
                 scanningView
             } else if knowledgeManager.indexedFiles.isEmpty {
                 emptyStateView
@@ -144,8 +144,8 @@ struct iOSKnowledgeView: View {
                 )
 
                 StatItem(
-                    value: "\(uniqueLanguages)",
-                    label: "Languages",
+                    value: "\(uniqueFileTypes)",
+                    label: "File Types",
                     icon: "text.bubble.fill"
                 )
             }
@@ -187,8 +187,8 @@ struct iOSKnowledgeView: View {
                 .padding(.top, 64)
             } else {
                 LazyVStack(spacing: 16) {
-                    ForEach(searchResults) { result in
-                        SearchResultRow(result: result)
+                    ForEach(searchResults) { file in
+                        SearchResultRow(file: file)
                     }
                 }
                 .padding()
@@ -196,12 +196,12 @@ struct iOSKnowledgeView: View {
         }
     }
 
-    private var totalSize: Int {
-        Int(knowledgeManager.indexedFiles.reduce(0) { $0 + $1.size })
+    private var totalSize: Int64 {
+        knowledgeManager.indexedFiles.reduce(0) { $0 + $1.size }
     }
 
-    private var uniqueLanguages: Int {
-        Set(knowledgeManager.indexedFiles.map { $0.language }).count
+    private var uniqueFileTypes: Int {
+        Set(knowledgeManager.indexedFiles.map(\.fileType)).count
     }
 
     private func performSearch(_ query: String) {
@@ -210,13 +210,13 @@ struct iOSKnowledgeView: View {
             return
         }
 
-        searchResults = (knowledgeManager.search(query: query) as? [SearchResult]) ?? []
+        searchResults = knowledgeManager.search(query: query)
     }
 
-    private func formatBytes(_ bytes: Int) -> String {
+    private func formatBytes(_ bytes: Int64) -> String {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
-        return formatter.string(fromByteCount: Int64(bytes))
+        return formatter.string(fromByteCount: bytes)
     }
 }
 
@@ -247,7 +247,7 @@ struct FileRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: iconForLanguage(file.language))
+            Image(systemName: iconForFileType(file.fileType))
                 .font(.title3)
                 .foregroundStyle(.theaPrimary)
                 .frame(width: 32)
@@ -274,25 +274,25 @@ struct FileRow: View {
         .background(Color(uiColor: .systemBackground))
     }
 
-    private func iconForLanguage(_ language: String) -> String {
-        switch language.lowercased() {
-        case "swift": return "swift"
-        case "python": return "terminal.fill"
-        case "javascript", "typescript": return "curlybraces"
-        case "markdown": return "doc.text.fill"
-        default: return "doc.fill"
+    private func iconForFileType(_ fileType: String) -> String {
+        switch fileType.lowercased() {
+        case "swift": "swift"
+        case "py": "terminal.fill"
+        case "js", "ts": "curlybraces"
+        case "md": "doc.text.fill"
+        default: "doc.fill"
         }
     }
 
-    private func formatBytes(_ bytes: Int) -> String {
+    private func formatBytes(_ bytes: Int64) -> String {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
-        return formatter.string(fromByteCount: Int64(bytes))
+        return formatter.string(fromByteCount: bytes)
     }
 }
 
 struct SearchResultRow: View {
-    let result: SearchResult
+    let file: IndexedFile
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -300,13 +300,13 @@ struct SearchResultRow: View {
                 Image(systemName: "doc.text.fill")
                     .foregroundStyle(.theaPrimary)
 
-                Text(result.file.name)
+                Text(file.name)
                     .font(.headline)
                     .lineLimit(1)
 
                 Spacer()
 
-                Text("\(Int(result.relevanceScore * 100))%")
+                Text(file.fileType.uppercased())
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -314,27 +314,33 @@ struct SearchResultRow: View {
                     .clipShape(Capsule())
             }
 
-            Text(result.file.path)
+            Text(file.path)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
 
-            if !result.matchedSnippets.isEmpty {
-                ForEach(result.matchedSnippets.prefix(2), id: \.self) { snippet in
-                    Text(snippet)
-                        .font(.caption)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(uiColor: .systemGray6))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
+            HStack {
+                Label(formatBytes(file.size), systemImage: "doc")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+
+                Spacer()
+
+                Text(file.indexedAt, style: .relative)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
         }
         .padding()
         .background(Color(uiColor: .systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
+    }
+
+    private func formatBytes(_ bytes: Int64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: bytes)
     }
 }
 
@@ -346,7 +352,6 @@ struct iOSKnowledgeScannerView: View {
 
     @State private var selectedPath: URL?
     @State private var isScanning = false
-    @State private var scanProgress: ScanProgress?
 
     var body: some View {
         NavigationStack {
@@ -368,25 +373,18 @@ struct iOSKnowledgeScannerView: View {
                     Text("Choose a directory to scan for knowledge. All supported files will be indexed.")
                 }
 
-                if let progress = scanProgress {
+                if isScanning || knowledgeManager.isIndexing {
                     Section("Scanning Progress") {
                         VStack(spacing: 12) {
-                            ProgressView(value: Double(progress.filesProcessed), total: Double(progress.totalFiles))
+                            ProgressView(value: knowledgeManager.indexProgress)
 
                             HStack {
-                                Text("\(progress.filesProcessed) / \(progress.totalFiles) files")
+                                Text("Indexing files...")
                                     .font(.caption)
                                 Spacer()
-                                Text("\(Int(progress.percentage))%")
+                                Text("\(Int(knowledgeManager.indexProgress * 100))%")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-                            }
-
-                            if let currentFile = progress.currentFile {
-                                Text(currentFile)
-                                    .font(.caption2)
-                                    .foregroundStyle(.tertiary)
-                                    .lineLimit(1)
                             }
                         }
                     }
@@ -403,14 +401,10 @@ struct iOSKnowledgeScannerView: View {
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isScanning ? "Stop" : "Start") {
-                        if isScanning {
-                            stopScanning()
-                        } else {
-                            startScanning()
-                        }
+                    Button(isScanning ? "Scanning..." : "Start") {
+                        startScanning()
                     }
-                    .disabled(!isScanning && selectedPath == nil)
+                    .disabled(isScanning || selectedPath == nil)
                 }
             }
         }
@@ -429,9 +423,14 @@ struct iOSKnowledgeScannerView: View {
 
         Task {
             do {
-                try await $knowledgeManager.scanDirectory(path) { progress in
-                    scanProgress = progress
+                // Get all files from the directory
+                let fileManager = FileManager.default
+                let contents = try fileManager.contentsOfDirectory(at: path, includingPropertiesForKeys: [.isRegularFileKey])
+                let files = contents.filter { url in
+                    (try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true
                 }
+
+                try await knowledgeManager.startIndexing(paths: files)
                 isScanning = false
                 dismiss()
             } catch {
@@ -439,9 +438,5 @@ struct iOSKnowledgeScannerView: View {
                 print("Scan failed: \(error)")
             }
         }
-    }
-
-    private func stopScanning() {
-        isScanning = false
     }
 }

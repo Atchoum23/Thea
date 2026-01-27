@@ -1,9 +1,9 @@
 // BrowserAutomation.swift
 // AI-powered browser automation and web scraping
 
+import Combine
 import Foundation
 import OSLog
-import Combine
 
 // MARK: - Browser Automation Engine
 
@@ -40,8 +40,8 @@ public final class BrowserAutomationEngine: ObservableObject {
             "localhost",
             "127.0.0.1",
             "0.0.0.0",
-            "169.254.169.254",  // AWS metadata
-            "metadata.google.internal",  // GCP metadata
+            "169.254.169.254", // AWS metadata
+            "metadata.google.internal", // GCP metadata
             "internal",
             ".local"
         ]
@@ -53,7 +53,7 @@ public final class BrowserAutomationEngine: ObservableObject {
     public func executeTask(_ task: BrowserTask) async throws -> BrowserTaskResult {
         // Security check
         guard await validateTaskSecurity(task) else {
-            throw BrowserAutomationError.securityViolation("Task failed security validation")
+            throw AIBrowserError.securityViolation("Task failed security validation")
         }
 
         isRunning = true
@@ -66,26 +66,24 @@ public final class BrowserAutomationEngine: ObservableObject {
 
         logger.info("Executing browser task: \(task.name)")
 
-        let result: BrowserTaskResult
+        let result: BrowserTaskResult = switch task.type {
+        case let .scrape(config):
+            try await executeScrapeTask(task, config: config)
 
-        switch task.type {
-        case .scrape(let config):
-            result = try await executeScrapeTask(task, config: config)
+        case let .fill(config):
+            try await executeFillTask(task, config: config)
 
-        case .fill(let config):
-            result = try await executeFillTask(task, config: config)
+        case let .click(config):
+            try await executeClickTask(task, config: config)
 
-        case .click(let config):
-            result = try await executeClickTask(task, config: config)
+        case let .screenshot(config):
+            try await executeScreenshotTask(task, config: config)
 
-        case .screenshot(let config):
-            result = try await executeScreenshotTask(task, config: config)
+        case let .navigate(config):
+            try await executeNavigateTask(task, config: config)
 
-        case .navigate(let config):
-            result = try await executeNavigateTask(task, config: config)
-
-        case .custom(let steps):
-            result = try await executeCustomTask(task, steps: steps)
+        case let .custom(steps):
+            try await executeCustomTask(task, steps: steps)
         }
 
         taskHistory.append(result)
@@ -97,8 +95,9 @@ public final class BrowserAutomationEngine: ObservableObject {
     private func executeScrapeTask(_ task: BrowserTask, config: ScrapeConfig) async throws -> BrowserTaskResult {
         // Validate URL
         guard let url = URL(string: config.url),
-              !isBlockedDomain(url.host ?? "") else {
-            throw BrowserAutomationError.blockedDomain(config.url)
+              !isBlockedDomain(url.host ?? "")
+        else {
+            throw AIBrowserError.blockedDomain(config.url)
         }
 
         // Fetch page
@@ -109,12 +108,13 @@ public final class BrowserAutomationEngine: ObservableObject {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw BrowserAutomationError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+              (200 ... 299).contains(httpResponse.statusCode)
+        else {
+            throw AIBrowserError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
         }
 
         guard let html = String(data: data, encoding: .utf8) else {
-            throw BrowserAutomationError.invalidResponse("Could not decode HTML")
+            throw AIBrowserError.invalidResponse("Could not decode HTML")
         }
 
         // Extract data using selectors
@@ -145,14 +145,14 @@ public final class BrowserAutomationEngine: ObservableObject {
         let sensitiveFields = ["password", "ssn", "credit_card", "cvv", "pin"]
         for (field, _) in config.fields {
             if sensitiveFields.contains(where: { field.lowercased().contains($0) }) {
-                throw BrowserAutomationError.securityViolation("Cannot fill sensitive field: \(field)")
+                throw AIBrowserError.securityViolation("Cannot fill sensitive field: \(field)")
             }
         }
 
         return BrowserTaskResult(
             taskId: task.id,
             success: true,
-            data: ["filled": config.fields.keys.map { $0 }],
+            data: ["filled": config.fields.keys.map(\.self)],
             screenshot: nil,
             duration: 0,
             timestamp: Date()
@@ -174,8 +174,9 @@ public final class BrowserAutomationEngine: ObservableObject {
 
     private func executeScreenshotTask(_ task: BrowserTask, config: ScreenshotConfig) async throws -> BrowserTaskResult {
         guard let url = URL(string: config.url),
-              !isBlockedDomain(url.host ?? "") else {
-            throw BrowserAutomationError.blockedDomain(config.url)
+              !isBlockedDomain(url.host ?? "")
+        else {
+            throw AIBrowserError.blockedDomain(config.url)
         }
 
         logger.info("Screenshot task for: \(config.url)")
@@ -195,8 +196,9 @@ public final class BrowserAutomationEngine: ObservableObject {
 
     private func executeNavigateTask(_ task: BrowserTask, config: NavigateConfig) async throws -> BrowserTaskResult {
         guard let url = URL(string: config.url),
-              !isBlockedDomain(url.host ?? "") else {
-            throw BrowserAutomationError.blockedDomain(config.url)
+              !isBlockedDomain(url.host ?? "")
+        else {
+            throw AIBrowserError.blockedDomain(config.url)
         }
 
         logger.info("Navigate task to: \(config.url)")
@@ -211,7 +213,7 @@ public final class BrowserAutomationEngine: ObservableObject {
 
         return BrowserTaskResult(
             taskId: task.id,
-            success: (200...299).contains(statusCode),
+            success: (200 ... 299).contains(statusCode),
             data: ["statusCode": statusCode, "url": config.url],
             screenshot: nil,
             duration: 0,
@@ -235,7 +237,8 @@ public final class BrowserAutomationEngine: ObservableObject {
 
             case "scrape":
                 if let url = step.parameters["url"] as? String,
-                   let selectors = step.parameters["selectors"] as? [String: String] {
+                   let selectors = step.parameters["selectors"] as? [String: String]
+                {
                     let config = ScrapeConfig(url: url, selectors: selectors, waitForSelector: nil)
                     let result = try await executeScrapeTask(task, config: config)
                     results.append(result.data)
@@ -265,22 +268,38 @@ public final class BrowserAutomationEngine: ObservableObject {
 
     private func validateTaskSecurity(_ task: BrowserTask) async -> Bool {
         // Check with AgentSec
-        let action = AgentSecAction(
-            type: .networkRequest,
-            target: task.name,
-            parameters: ["taskType": String(describing: task.type)]
-        )
+        // Get URL from task type
+        let urlString: String
+        switch task.type {
+        case let .scrape(config):
+            urlString = config.url
+        case let .fill(config):
+            urlString = config.url
+        case let .click(config):
+            urlString = config.url
+        case let .screenshot(config):
+            urlString = config.url
+        case let .navigate(config):
+            urlString = config.url
+        case .custom:
+            return true // Custom tasks are validated per-step
+        }
 
-        let decision = await securityEnforcer.evaluate(action: action)
+        guard let url = URL(string: urlString) else {
+            logger.warning("Task has invalid URL")
+            return false
+        }
 
-        switch decision {
-        case .allow:
+        let result = securityEnforcer.validateNetworkRequest(url: url, method: "GET")
+
+        switch result {
+        case .allowed:
             return true
-        case .deny(let reason):
+        case let .denied(reason):
             logger.warning("Task denied: \(reason)")
             return false
-        case .requireApproval:
-            // Would need to request user approval
+        case let .requiresApproval(reason):
+            logger.warning("Task requires approval: \(reason)")
             return false
         }
     }
@@ -365,7 +384,7 @@ public final class AIWebScraper: ObservableObject {
     // MARK: - Smart Scraping
 
     /// Intelligently scrape a webpage using AI to identify content
-    public func smartScrape(url: String, intent: String) async throws -> ScrapedContent {
+    public func smartScrape(url: String, intent _: String) async throws -> ScrapedContent {
         // First, fetch the page
         let task = BrowserTask(
             name: "Smart scrape: \(url)",
@@ -612,7 +631,7 @@ public class MonitorSession {
     }
 }
 
-public enum BrowserAutomationError: Error, LocalizedError {
+public enum AIBrowserError: Error, LocalizedError {
     case securityViolation(String)
     case blockedDomain(String)
     case httpError(Int)
@@ -622,18 +641,18 @@ public enum BrowserAutomationError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .securityViolation(let reason):
-            return "Security violation: \(reason)"
-        case .blockedDomain(let domain):
-            return "Blocked domain: \(domain)"
-        case .httpError(let code):
-            return "HTTP error: \(code)"
-        case .invalidResponse(let reason):
-            return "Invalid response: \(reason)"
+        case let .securityViolation(reason):
+            "Security violation: \(reason)"
+        case let .blockedDomain(domain):
+            "Blocked domain: \(domain)"
+        case let .httpError(code):
+            "HTTP error: \(code)"
+        case let .invalidResponse(reason):
+            "Invalid response: \(reason)"
         case .timeout:
-            return "Request timed out"
-        case .elementNotFound(let selector):
-            return "Element not found: \(selector)"
+            "Request timed out"
+        case let .elementNotFound(selector):
+            "Element not found: \(selector)"
         }
     }
 }
