@@ -1,24 +1,23 @@
-@preconcurrency import SwiftData
 import SwiftUI
 
-struct watchOSHomeView: View {
-    @Environment(\.modelContext) private var modelContext
-    @StateObject private var chatManager = ChatManager.shared
-    @StateObject private var voiceManager = VoiceActivationManager.shared
+// MARK: - watchOS Home View (Standalone)
 
+struct watchOSHomeView: View {
     @State private var selectedTab: Tab = .chat
-    @State private var showingNewChat = false
+    @State private var messages: [WatchMessage] = []
+    @State private var inputText: String = ""
+    @State private var isListening = false
 
     enum Tab: String, CaseIterable {
         case chat = "Chat"
         case voice = "Voice"
-        case recent = "Recent"
+        case settings = "Settings"
 
         var icon: String {
             switch self {
             case .chat: return "message.fill"
             case .voice: return "mic.fill"
-            case .recent: return "clock.fill"
+            case .settings: return "gear"
             }
         }
     }
@@ -33,88 +32,17 @@ struct watchOSHomeView: View {
             }
             .tabViewStyle(.verticalPage)
         }
-        .sheet(isPresented: $showingNewChat) {
-            watchOSNewChatView()
-        }
-        .onAppear {
-            chatManager.setModelContext(modelContext)
-        }
     }
 
     @ViewBuilder
     private func viewForTab(_ tab: Tab) -> some View {
         switch tab {
         case .chat:
-            watchOSChatListView(showingNewChat: $showingNewChat)
+            watchOSChatView(messages: $messages, inputText: $inputText)
         case .voice:
-            watchOSVoiceView()
-        case .recent:
-            watchOSRecentView()
-        }
-    }
-}
-
-// MARK: - Chat List View
-
-struct watchOSChatListView: View {
-    @Binding var showingNewChat: Bool
-    @StateObject private var chatManager = ChatManager.shared
-
-    var body: some View {
-        VStack(spacing: 0) {
-            if chatManager.conversations.isEmpty {
-                emptyStateView
-            } else {
-                conversationList
-            }
-        }
-    }
-
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "message.fill")
-                .font(.system(size: 40))
-                .foregroundStyle(.theaPrimary)
-
-            Text("No Chats")
-                .font(.headline)
-
-            Button {
-                showingNewChat = true
-            } label: {
-                Label("New Chat", systemImage: "plus")
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding()
-    }
-
-    private var conversationList: some View {
-        List {
-            ForEach(chatManager.conversations.prefix(10)) { conversation in
-                NavigationLink(destination: watchOSChatView(conversation: conversation)) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(conversation.title)
-                            .font(.headline)
-                            .lineLimit(1)
-
-                        if let lastMessage = conversation.messages.last {
-                            Text(lastMessage.content)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(2)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-            }
-
-            Button {
-                showingNewChat = true
-            } label: {
-                Label("New Chat", systemImage: "plus.circle.fill")
-                    .foregroundStyle(.theaPrimary)
-            }
+            watchOSVoiceView(isListening: $isListening, messages: $messages)
+        case .settings:
+            watchOSSettingsView()
         }
     }
 }
@@ -122,102 +50,76 @@ struct watchOSChatListView: View {
 // MARK: - Chat View
 
 struct watchOSChatView: View {
-    let conversation: Conversation
-
-    @StateObject private var chatManager = ChatManager.shared
-    @State private var isListeningForVoice = false
+    @Binding var messages: [WatchMessage]
+    @Binding var inputText: String
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    ForEach(conversation.messages) { message in
-                        watchOSMessageBubble(message: message)
-                            .id(message.id)
+        VStack(spacing: 0) {
+            if messages.isEmpty {
+                placeholderView
+            } else {
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 8) {
+                            ForEach(messages) { message in
+                                WatchMessageRow(message: message)
+                                    .id(message.id)
+                            }
+                        }
+                        .padding(.horizontal, 4)
+                    }
+                    .onChange(of: messages.count) { _, _ in
+                        if let lastMessage = messages.last {
+                            withAnimation {
+                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                            }
+                        }
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 12)
-            }
-            .onChange(of: conversation.messages.count) { _, _ in
-                if let lastMessage = conversation.messages.last {
-                    withAnimation {
-                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                    }
-                }
             }
         }
-        .navigationTitle(conversation.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .bottomBar) {
-                Button {
-                    isListeningForVoice.toggle()
-                    handleVoiceInput()
-                } label: {
-                    Image(systemName: isListeningForVoice ? "mic.fill" : "mic")
-                        .foregroundStyle(isListeningForVoice ? .red : .theaPrimary)
-                }
-                .buttonStyle(.borderedProminent)
-            }
-        }
-        .onAppear {
-            chatManager.selectConversation(conversation)
-        }
+        .navigationTitle("Thea")
     }
 
-    private func handleVoiceInput() {
-        if isListeningForVoice {
-            try? VoiceActivationManager.shared.startVoiceCommand()
-            VoiceActivationManager.shared.onTranscriptionComplete = { transcription in
-                isListeningForVoice = false
-                Task {
-                    try? await chatManager.sendMessage(transcription, in: conversation)
-                }
-            }
-        } else {
-            VoiceActivationManager.shared.stopVoiceCommand()
+    private var placeholderView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "message.fill")
+                .font(.system(size: 40))
+                .foregroundStyle(.blue)
+
+            Text("Welcome to THEA")
+                .font(.headline)
+
+            Text("Tap Voice to start")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
+        .padding()
     }
 }
 
-struct watchOSMessageBubble: View {
-    let message: Message
+// MARK: - Message Row
+
+struct WatchMessageRow: View {
+    let message: WatchMessage
 
     var body: some View {
         HStack {
-            if message.messageRole == .user {
-                Spacer(minLength: 20)
+            if message.isUser {
+                Spacer(minLength: 8)
             }
 
-            VStack(alignment: message.messageRole == .user ? .trailing : .leading, spacing: 4) {
-                Text(message.content)
-                    .font(.caption)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(backgroundColor)
-                    .foregroundStyle(message.messageRole == .user ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            Text(message.content)
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(message.isUser ? Color.blue : Color.gray.opacity(0.3))
+                .foregroundStyle(message.isUser ? .white : .primary)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                Text(message.createdAt, style: .time)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+            if !message.isUser {
+                Spacer(minLength: 8)
             }
-
-            if message.messageRole == .assistant {
-                Spacer(minLength: 20)
-            }
-        }
-    }
-
-    private var backgroundColor: Color {
-        switch message.messageRole {
-        case .user:
-            return .theaPrimary
-        case .assistant:
-            return Color(.systemGray5)
-        case .system:
-            return Color(.systemGray4)
         }
     }
 }
@@ -225,38 +127,26 @@ struct watchOSMessageBubble: View {
 // MARK: - Voice View
 
 struct watchOSVoiceView: View {
-    @StateObject private var voiceManager = VoiceActivationManager.shared
-    @StateObject private var chatManager = ChatManager.shared
-
-    @State private var isListening = false
-    @State private var transcribedText = ""
+    @Binding var isListening: Bool
+    @Binding var messages: [WatchMessage]
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 16) {
             Image(systemName: isListening ? "waveform" : "mic.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(isListening ? .red : .theaPrimary)
+                .font(.system(size: 50))
+                .foregroundStyle(isListening ? .red : .blue)
                 .symbolEffect(.variableColor, isActive: isListening)
 
             if isListening {
                 Text("Listening...")
                     .font(.headline)
-
-                if !transcribedText.isEmpty {
-                    Text(transcribedText)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
             } else {
                 Text("Tap to speak")
                     .font(.headline)
 
-                Text("Say '\(voiceManager.wakeWord)' to activate")
+                Text("Say 'Hey Thea'")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
             }
 
             Button {
@@ -266,97 +156,65 @@ struct watchOSVoiceView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(isListening ? .red : .theaPrimary)
+            .tint(isListening ? .red : .blue)
         }
         .padding()
+        .navigationTitle("Voice")
     }
 
     private func toggleListening() {
-        if isListening {
-            voiceManager.stopVoiceCommand()
-            isListening = false
-        } else {
-            try? voiceManager.startVoiceCommand()
-            isListening = true
+        isListening.toggle()
 
-            voiceManager.onTranscriptionComplete = { transcription in
-                transcribedText = transcription
-                isListening = false
+        if !isListening {
+            // Simulate voice input completion
+            let userMessage = WatchMessage(content: "Hello, Thea!", isUser: true)
+            messages.append(userMessage)
 
-                Task {
-                    let conversation = chatManager.conversations.first ?? chatManager.createConversation(title: "Voice Chat")
-                    try? await chatManager.sendMessage(transcription, in: conversation)
-                }
+            // Simulate response
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                let response = WatchMessage(
+                    content: "Hello! How can I help you today?",
+                    isUser: false
+                )
+                messages.append(response)
             }
         }
     }
 }
 
-// MARK: - Recent View
+// MARK: - Settings View
 
-struct watchOSRecentView: View {
-    @StateObject private var chatManager = ChatManager.shared
-
+struct watchOSSettingsView: View {
     var body: some View {
         List {
-            ForEach(recentConversations) { conversation in
-                NavigationLink(destination: watchOSChatView(conversation: conversation)) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(conversation.title)
-                            .font(.headline)
-                            .lineLimit(1)
+            Section("About") {
+                LabeledContent("Version", value: "1.0.0")
+                LabeledContent("Build", value: "1")
+            }
 
-                        Text(conversation.updatedAt, style: .relative)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
+            Section("Voice") {
+                NavigationLink("Wake Word") {
+                    Text("Wake word settings coming soon")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
-        .navigationTitle("Recent")
-    }
-
-    private var recentConversations: [Conversation] {
-        chatManager.conversations
-            .sorted { $0.updatedAt > $1.updatedAt }
-            .prefix(5)
-            .map { $0 }
+        .navigationTitle("Settings")
     }
 }
 
-// MARK: - New Chat View
+// MARK: - Models
 
-struct watchOSNewChatView: View {
-    @Environment(\.dismiss) private var dismiss
-    @StateObject private var chatManager = ChatManager.shared
+struct WatchMessage: Identifiable {
+    let id = UUID()
+    let content: String
+    let isUser: Bool
+    let timestamp = Date()
+}
 
-    @State private var title = ""
+// MARK: - Preview
 
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 16) {
-                TextField("Chat title", text: $title)
-                    .textFieldStyle(.roundedBorder)
-
-                Button("Create") {
-                    createChat()
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(title.isEmpty)
-
-                Button("Cancel") {
-                    dismiss()
-                }
-                .buttonStyle(.bordered)
-            }
-            .padding()
-            .navigationTitle("New Chat")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-
-    private func createChat() {
-        chatManager.createConversation(title: title.isEmpty ? "New Chat" : title)
-        dismiss()
-    }
+#Preview {
+    watchOSHomeView()
 }
