@@ -125,6 +125,12 @@ public final class UnifiedContextEngine: ObservableObject {
         currentSnapshot
     }
 
+    /// Capture a fresh context snapshot
+    public func captureSnapshot() async -> ContextSnapshot {
+        await refresh()
+        return currentSnapshot
+    }
+
     /// Get context summary for AI injection
     public func getContextSummary(maxLength: Int = 500) -> String {
         currentSnapshot.summary(maxLength: maxLength)
@@ -309,7 +315,7 @@ public final class UnifiedContextEngine: ObservableObject {
 
     private func analyzeForInsights() async {
         // Detect patterns and generate insights
-        let insights = await InsightEngine.shared.analyze(
+        let insights = await ContextInsightEngine.shared.analyze(
             currentSnapshot: currentSnapshot,
             history: snapshotHistory
         )
@@ -385,8 +391,8 @@ public struct ContextInsight: Identifiable, Sendable {
 // MARK: - Insight Engine
 
 /// Analyzes context to generate proactive insights
-public actor InsightEngine {
-    public static let shared = InsightEngine()
+public actor ContextInsightEngine {
+    public static let shared = ContextInsightEngine()
 
     private var patterns: [String: PatternData] = [:]
     private var lastInsightTime: [String: Date] = [:]

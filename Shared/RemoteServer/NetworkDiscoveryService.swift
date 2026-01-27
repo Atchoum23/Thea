@@ -60,9 +60,9 @@ public class NetworkDiscoveryService: ObservableObject {
 
         // Set TXT record with device info
         let txtData: [String: Data] = [
-            "version": "1.0".data(using: .utf8)!,
-            "platform": getPlatform().data(using: .utf8)!,
-            "deviceId": getDeviceId().data(using: .utf8)!
+            "version": Data("1.0".utf8),
+            "platform": Data(getPlatform().utf8),
+            "deviceId": Data(getDeviceId().utf8)
         ]
 
         service.setTXTRecord(NetService.data(fromTXTRecord: txtData))

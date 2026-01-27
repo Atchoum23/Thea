@@ -91,9 +91,7 @@ public final class FocusOrchestrator: ObservableObject {
             logger.info("Triggering focus mode shortcut for: \(mode.name)")
 
             // Use Shortcuts to change focus
-            await MainActor.run {
-                ShortcutsOrchestrator.shared.runShortcut(named: "Set Focus to \(mode.name)")
-            }
+            try await ShortcutsOrchestrator.shared.runShortcut(named: "Set Focus to \(mode.name)")
         #elseif os(macOS)
             // On macOS, use Focus status center or AppleScript
             // Note: Direct API access is limited, may need Shortcuts
@@ -104,9 +102,7 @@ public final class FocusOrchestrator: ObservableObject {
     private func clearFocus() async throws {
         #if os(iOS)
             logger.info("Clearing iOS focus")
-            await MainActor.run {
-                _ = ShortcutsOrchestrator.shared.runShortcut(named: "Turn Off Focus")
-            }
+            try await ShortcutsOrchestrator.shared.runShortcut(named: "Turn Off Focus")
         #endif
     }
 
@@ -129,7 +125,7 @@ public final class FocusOrchestrator: ObservableObject {
     // MARK: - Automatic Switching
 
     /// Evaluate rules and suggest focus change
-    public func evaluateContext(_ context: FocusContext) async {
+    public func evaluateContext(_ context: OrchestratorFocusContext) async {
         guard isAutomationEnabled else { return }
 
         var suggestedFocus: FocusMode?
@@ -297,7 +293,7 @@ public final class FocusOrchestrator: ObservableObject {
         )
     }
 
-    public enum TimePeriod {
+    public enum TimePeriod: Sendable {
         case day, week, month
     }
 
@@ -359,7 +355,7 @@ public struct FocusMode: Identifiable, Codable, Sendable, Equatable {
     }
 }
 
-public struct FocusContext: Sendable {
+public struct OrchestratorFocusContext: Sendable {
     public let location: String?
     public let weekday: Int
     public let frontmostApp: String?

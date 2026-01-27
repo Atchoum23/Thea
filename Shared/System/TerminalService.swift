@@ -14,7 +14,7 @@ public actor TerminalService {
 
     // MARK: - Public Types
 
-    public struct CommandResult: Sendable {
+    public struct TerminalResult: Sendable {
         public let exitCode: Int32
         public let stdout: String
         public let stderr: String
@@ -72,7 +72,7 @@ public actor TerminalService {
         arguments: [String] = [],
         workingDirectory: String? = nil,
         timeout: TimeInterval = 60.0
-    ) async throws -> CommandResult {
+    ) async throws -> TerminalResult {
         logger.info("Running command: \(command) \(arguments.joined(separator: " "))")
 
         let startTime = Date()
@@ -128,7 +128,7 @@ public actor TerminalService {
 
         logger.info("Command completed with exit code \(process.terminationStatus) in \(String(format: "%.2f", duration))s")
 
-        return CommandResult(
+        return TerminalResult(
             exitCode: process.terminationStatus,
             stdout: stdout,
             stderr: stderr,
@@ -142,7 +142,7 @@ public actor TerminalService {
         _ script: String,
         workingDirectory: String? = nil,
         timeout: TimeInterval = 60.0
-    ) async throws -> CommandResult {
+    ) async throws -> TerminalResult {
         logger.info("Running shell script")
 
         let startTime = Date()
@@ -198,7 +198,7 @@ public actor TerminalService {
 
         logger.info("Shell script completed with exit code \(process.terminationStatus) in \(String(format: "%.2f", duration))s")
 
-        return CommandResult(
+        return TerminalResult(
             exitCode: process.terminationStatus,
             stdout: stdout,
             stderr: stderr,
@@ -212,7 +212,7 @@ public actor TerminalService {
         arguments: [String],
         workingDirectory: String? = nil,
         timeout: TimeInterval = 60.0
-    ) async throws -> CommandResult {
+    ) async throws -> TerminalResult {
         try await run(
             command: "/usr/bin/swift",
             arguments: arguments,
@@ -225,7 +225,7 @@ public actor TerminalService {
         arguments: [String],
         workingDirectory: String? = nil,
         timeout: TimeInterval = 60.0
-    ) async throws -> CommandResult {
+    ) async throws -> TerminalResult {
         try await run(
             command: "/usr/bin/git",
             arguments: arguments,

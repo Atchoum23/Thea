@@ -303,8 +303,8 @@ public final class ConversationIntelligenceService: ObservableObject {
 
     // MARK: - Action Item Extraction
 
-    private func extractActionItems(from messages: [ConversationMessage]) -> [ActionItem] {
-        var actionItems: [ActionItem] = []
+    private func extractActionItems(from messages: [ConversationMessage]) -> [ConversationActionItem] {
+        var actionItems: [ConversationActionItem] = []
 
         let actionPatterns = [
             "i will", "i'll", "let me", "i should", "i need to",
@@ -323,7 +323,7 @@ public final class ConversationIntelligenceService: ObservableObject {
                         if sentence.lowercased().contains(pattern) {
                             let trimmed = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
                             if trimmed.count > 10, trimmed.count < 200 {
-                                actionItems.append(ActionItem(
+                                actionItems.append(ConversationActionItem(
                                     text: trimmed,
                                     source: message.role == .user ? .user : .assistant,
                                     priority: determinePriority(text: trimmed)
@@ -533,7 +533,7 @@ public struct ConversationAnalysis {
     public let complexity: ComplexityMetrics
     public let conversationType: ConversationType
     public let summary: String
-    public let actionItems: [ActionItem]
+    public let actionItems: [ConversationActionItem]
     public let engagement: EngagementMetrics
     public let timestamp: Date
 }
@@ -587,7 +587,7 @@ public enum ConversationType {
     case general
 }
 
-public struct ActionItem: Identifiable {
+public struct ConversationActionItem: Identifiable {
     public let id = UUID()
     public let text: String
     public let source: ActionSource

@@ -39,7 +39,9 @@ public final class MeetingIntelligence: ObservableObject {
 
     #if canImport(AVFoundation)
         private var audioEngine: AVAudioEngine?
-        private var audioSession: AVAudioSession?
+        #if os(iOS) || os(watchOS) || os(tvOS)
+            private var audioSession: AVAudioSession?
+        #endif
     #endif
 
     #if canImport(Speech)
@@ -359,7 +361,11 @@ public final class MeetingIntelligence: ObservableObject {
 
     private func requestPermissions() async throws {
         #if canImport(Speech)
-            let authStatus = await SFSpeechRecognizer.requestAuthorization()
+            let authStatus = await withCheckedContinuation { continuation in
+                SFSpeechRecognizer.requestAuthorization { status in
+                    continuation.resume(returning: status)
+                }
+            }
             guard authStatus == .authorized else {
                 throw MeetingError.speechRecognitionDenied
             }

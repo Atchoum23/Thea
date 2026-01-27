@@ -36,7 +36,7 @@ public final class CrossDeviceNotificationRouter: ObservableObject {
     // MARK: - Configuration
 
     public var presenceTimeout: TimeInterval = 300 // 5 minutes
-    public var priorityThreshold: NotificationPriority = .normal
+    public var priorityThreshold: CrossDeviceNotificationPriority = .normal
 
     // MARK: - Initialization
 
@@ -79,7 +79,7 @@ public final class CrossDeviceNotificationRouter: ObservableObject {
             devicePresence[device.id] = device.lastSeen
         }
 
-        logger.debug("Active device: \(activeDevice?.name ?? "None")")
+        logger.debug("Active device: \(self.activeDevice?.name ?? "None")")
     }
 
     /// Report activity from current device
@@ -284,7 +284,7 @@ public struct TheaNotification: Identifiable, Sendable {
     public let title: String
     public let body: String
     public let subtitle: String?
-    public let priority: NotificationPriority
+    public let priority: CrossDeviceNotificationPriority
     public let categoryIdentifier: String?
     public let threadIdentifier: String?
     public let targetDeviceId: String?
@@ -297,7 +297,7 @@ public struct TheaNotification: Identifiable, Sendable {
         title: String,
         body: String,
         subtitle: String? = nil,
-        priority: NotificationPriority = .normal,
+        priority: CrossDeviceNotificationPriority = .normal,
         categoryIdentifier: String? = nil,
         threadIdentifier: String? = nil,
         targetDeviceId: String? = nil,
@@ -322,7 +322,7 @@ public struct TheaNotification: Identifiable, Sendable {
         title = record["title"] as? String ?? ""
         body = record["body"] as? String ?? ""
         subtitle = record["subtitle"] as? String
-        priority = NotificationPriority(rawValue: record["priority"] as? String ?? "normal") ?? .normal
+        priority = CrossDeviceNotificationPriority(rawValue: record["priority"] as? String ?? "normal") ?? .normal
         categoryIdentifier = record["categoryIdentifier"] as? String
         threadIdentifier = record["threadIdentifier"] as? String
         targetDeviceId = record["targetDeviceId"] as? String
@@ -342,7 +342,7 @@ public struct TheaNotification: Identifiable, Sendable {
 
 // MARK: - Notification Priority
 
-public enum NotificationPriority: String, Codable, Sendable, CaseIterable {
+public enum CrossDeviceNotificationPriority: String, Codable, Sendable, CaseIterable {
     case low
     case normal
     case high

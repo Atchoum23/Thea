@@ -6,7 +6,7 @@
 //  Created: January 23, 2026
 //
 
-@testable import Thea
+@testable import TheaCore
 import XCTest
 
 /// Security tests to verify all 15 audit findings have been properly remediated

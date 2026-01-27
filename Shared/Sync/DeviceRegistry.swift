@@ -217,12 +217,14 @@ public enum DeviceType: String, Codable, Sendable, CaseIterable {
     case iPhone
     case iPad
     case watch
+    case tv
     case vision
 
     public var displayName: String {
         switch self {
         case .mac: "Mac"
         case .iPhone: "iPhone"
+        case .tv: "Apple TV"
         case .iPad: "iPad"
         case .watch: "Apple Watch"
         case .vision: "Apple Vision"
@@ -235,6 +237,7 @@ public enum DeviceType: String, Codable, Sendable, CaseIterable {
         case .iPhone: "iphone"
         case .iPad: "ipad"
         case .watch: "applewatch"
+        case .tv: "appletv"
         case .vision: "visionpro"
         }
     }
@@ -250,13 +253,27 @@ public struct DeviceCapabilities: Codable, Sendable, Equatable {
     public let supportsCloudKit: Bool
     public let supportsLocalModels: Bool
 
+    // Hardware capabilities for task routing
+    public let hasNeuralEngine: Bool
+    public let hasGPU: Bool
+    public let hasCellular: Bool
+    public let hasWiFi: Bool
+    public let isPluggedIn: Bool
+    public let batteryLevel: Int
+
     public init(
         supportsVoice: Bool = true,
         supportsNotifications: Bool = true,
         supportsBackgroundTasks: Bool = true,
         supportsHandoff: Bool = true,
         supportsCloudKit: Bool = true,
-        supportsLocalModels: Bool = false
+        supportsLocalModels: Bool = false,
+        hasNeuralEngine: Bool = true,
+        hasGPU: Bool = true,
+        hasCellular: Bool = false,
+        hasWiFi: Bool = true,
+        isPluggedIn: Bool = true,
+        batteryLevel: Int = 100
     ) {
         self.supportsVoice = supportsVoice
         self.supportsNotifications = supportsNotifications
@@ -264,6 +281,12 @@ public struct DeviceCapabilities: Codable, Sendable, Equatable {
         self.supportsHandoff = supportsHandoff
         self.supportsCloudKit = supportsCloudKit
         self.supportsLocalModels = supportsLocalModels
+        self.hasNeuralEngine = hasNeuralEngine
+        self.hasGPU = hasGPU
+        self.hasCellular = hasCellular
+        self.hasWiFi = hasWiFi
+        self.isPluggedIn = isPluggedIn
+        self.batteryLevel = batteryLevel
     }
 
     public static var current: DeviceCapabilities {
@@ -274,7 +297,13 @@ public struct DeviceCapabilities: Codable, Sendable, Equatable {
                 supportsBackgroundTasks: true,
                 supportsHandoff: true,
                 supportsCloudKit: true,
-                supportsLocalModels: true
+                supportsLocalModels: true,
+                hasNeuralEngine: true,
+                hasGPU: true,
+                hasCellular: false,
+                hasWiFi: true,
+                isPluggedIn: true,
+                batteryLevel: 100
             )
         #else
             return DeviceCapabilities(
@@ -283,7 +312,13 @@ public struct DeviceCapabilities: Codable, Sendable, Equatable {
                 supportsBackgroundTasks: true,
                 supportsHandoff: true,
                 supportsCloudKit: true,
-                supportsLocalModels: false
+                supportsLocalModels: false,
+                hasNeuralEngine: true,
+                hasGPU: true,
+                hasCellular: true,
+                hasWiFi: true,
+                isPluggedIn: false,
+                batteryLevel: 50
             )
         #endif
     }

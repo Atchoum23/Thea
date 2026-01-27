@@ -168,7 +168,8 @@ public actor DistributedTaskExecutor {
         activeTasks[taskId] = task
 
         // Push update to CloudKit for remote tasks
-        if task.targetDeviceId != DeviceRegistry.shared.currentDevice.id {
+        let localDeviceId = await DeviceRegistry.shared.currentDevice.id
+        if task.targetDeviceId != localDeviceId {
             try? await pushTaskUpdate(task)
         }
 
@@ -350,7 +351,7 @@ public struct DistributedTask: Identifiable, Sendable {
     }
 
     /// Execute the task (called on the executing device)
-    func execute(progressHandler: @escaping (Double, String?) -> Void) async throws -> TaskResult {
+    func execute(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         switch taskType {
         case .aiQuery:
             try await executeAIQuery(progressHandler: progressHandler)
@@ -365,7 +366,7 @@ public struct DistributedTask: Identifiable, Sendable {
         }
     }
 
-    private func executeAIQuery(progressHandler: @escaping (Double, String?) -> Void) async throws -> TaskResult {
+    private func executeAIQuery(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.2, "Processing query...")
         // Simulated AI processing
         try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -374,7 +375,7 @@ public struct DistributedTask: Identifiable, Sendable {
         return TaskResult(success: true, data: ["response": "AI response"])
     }
 
-    private func executeSummarization(progressHandler: @escaping (Double, String?) -> Void) async throws -> TaskResult {
+    private func executeSummarization(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.3, "Analyzing text...")
         try await Task.sleep(nanoseconds: 1_000_000_000)
         progressHandler(0.7, "Generating summary...")
@@ -382,7 +383,7 @@ public struct DistributedTask: Identifiable, Sendable {
         return TaskResult(success: true, data: ["summary": "Text summary"])
     }
 
-    private func executeImageAnalysis(progressHandler: @escaping (Double, String?) -> Void) async throws -> TaskResult {
+    private func executeImageAnalysis(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.2, "Loading image...")
         try await Task.sleep(nanoseconds: 500_000_000)
         progressHandler(0.5, "Analyzing...")
@@ -390,7 +391,7 @@ public struct DistributedTask: Identifiable, Sendable {
         return TaskResult(success: true, data: ["analysis": "Image analysis result"])
     }
 
-    private func executeCodeGeneration(progressHandler: @escaping (Double, String?) -> Void) async throws -> TaskResult {
+    private func executeCodeGeneration(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.1, "Parsing requirements...")
         try await Task.sleep(nanoseconds: 500_000_000)
         progressHandler(0.5, "Generating code...")
@@ -398,7 +399,7 @@ public struct DistributedTask: Identifiable, Sendable {
         return TaskResult(success: true, data: ["code": "Generated code"])
     }
 
-    private func executeGeneric(progressHandler: @escaping (Double, String?) -> Void) async throws -> TaskResult {
+    private func executeGeneric(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.5, "Processing...")
         try await Task.sleep(nanoseconds: 1_000_000_000)
         return TaskResult(success: true, data: [:])

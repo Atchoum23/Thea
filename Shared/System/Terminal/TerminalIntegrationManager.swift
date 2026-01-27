@@ -139,7 +139,7 @@
 
         /// Execute a command based on current execution mode
         @discardableResult
-        func execute(_ command: String, workingDirectory: URL? = nil) async throws -> CommandResult {
+        func execute(_ command: String, workingDirectory: URL? = nil) async throws -> ShellCommandResult {
             // Validate against security policy
             let validation = securityPolicy.isAllowed(command)
             switch validation {
@@ -162,21 +162,21 @@
                 return try await executeDirect(command, workingDirectory: dir)
             case .terminalApp:
                 try await executeInTerminalApp(command)
-                return CommandResult(output: "", errorOutput: "", exitCode: 0, command: command, duration: 0)
+                return ShellCommandResult(output: "", errorOutput: "", exitCode: 0, command: command, duration: 0)
             case .both:
                 // Try direct first, fallback to Terminal.app for interactive
                 do {
                     return try await executeDirect(command, workingDirectory: dir)
                 } catch {
                     try await executeInTerminalApp(command)
-                    return CommandResult(output: "", errorOutput: "", exitCode: 0, command: command, duration: 0)
+                    return ShellCommandResult(output: "", errorOutput: "", exitCode: 0, command: command, duration: 0)
                 }
             }
         }
 
         /// Execute command directly (Process/NSTask)
         @discardableResult
-        func executeDirect(_ command: String, workingDirectory: URL? = nil) async throws -> CommandResult {
+        func executeDirect(_ command: String, workingDirectory: URL? = nil) async throws -> ShellCommandResult {
             let result = try await executor.executeDirect(command, workingDirectory: workingDirectory)
 
             // Process output
@@ -185,7 +185,7 @@
                 output = TerminalOutputParser.redactSensitive(output)
             }
 
-            let processedResult = CommandResult(
+            let processedResult = ShellCommandResult(
                 output: output,
                 errorOutput: result.errorOutput,
                 exitCode: result.exitCode,
@@ -232,7 +232,7 @@
         }
 
         /// Execute a sequence of commands
-        func executeSequence(_ commands: [String], stopOnError: Bool = true) async throws -> [CommandResult] {
+        func executeSequence(_ commands: [String], stopOnError: Bool = true) async throws -> [ShellCommandResult] {
             try await executor.executeSequence(commands, workingDirectory: currentSession?.workingDirectory, stopOnError: stopOnError)
         }
 
@@ -339,7 +339,7 @@
 
         // MARK: - Quick Commands
 
-        func executeQuickCommand(_ quickCommand: QuickCommand) async throws -> CommandResult {
+        func executeQuickCommand(_ quickCommand: QuickCommand) async throws -> ShellCommandResult {
             try await execute(quickCommand.command, workingDirectory: currentSession?.workingDirectory)
         }
 

@@ -363,9 +363,7 @@ import Foundation
             do {
                 let requestData = try JSONEncoder().encode(request)
                 pipes.input.fileHandleForWriting.write(requestData)
-                if let newlineData = "\n".data(using: .utf8) {
-                    pipes.input.fileHandleForWriting.write(newlineData)
-                }
+                pipes.input.fileHandleForWriting.write(Data("\n".utf8))
 
                 // Read response (simplified - real implementation would use async reading)
                 let responseData = pipes.output.fileHandleForReading.availableData
@@ -451,7 +449,7 @@ import Foundation
 
             let requestData = try JSONEncoder().encode(request)
             pipes.input.fileHandleForWriting.write(requestData)
-            pipes.input.fileHandleForWriting.write("\n".data(using: .utf8)!)
+            pipes.input.fileHandleForWriting.write(Data("\n".utf8))
 
             // Read response
             let responseData = pipes.output.fileHandleForReading.availableData

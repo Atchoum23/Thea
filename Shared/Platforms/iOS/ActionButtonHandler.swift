@@ -93,16 +93,16 @@
                 deviceModel.contains("iPhone17") || // iPhone 16 series
                 deviceModel.contains("iPhone18") // Future models
 
-            logger.info("Action Button available: \(isActionButtonAvailable), device: \(deviceModel)")
+            logger.info("Action Button available: \(self.isActionButtonAvailable), device: \(deviceModel)")
         }
 
         private func getDeviceModel() -> String {
             var systemInfo = utsname()
             uname(&systemInfo)
             let machineMirror = Mirror(reflecting: systemInfo.machine)
-            let identifier = machineMirror.children.reduce("") { identifier, element in
-                guard let value = element.value as? Int8, value != 0 else { return identifier }
-                return identifier + String(UnicodeScalar(UInt8(value)))
+            let identifier = machineMirror.children.reduce(into: "") { identifier, element in
+                guard let value = element.value as? Int8, value != 0 else { return }
+                identifier += String(UnicodeScalar(UInt8(value)))
             }
             return identifier
         }
@@ -133,7 +133,7 @@
 
         /// Called when the Action Button is pressed (via App Intent or URL scheme)
         public func handleActionButtonPress() {
-            logger.info("Action Button pressed, executing: \(configuredAction.rawValue)")
+            logger.info("Action Button pressed, executing: \(self.configuredAction.rawValue)")
 
             // Notify listeners
             onActionButtonPressed?(configuredAction)
@@ -221,10 +221,10 @@
     /// App Intent for Action Button integration
     @available(iOS 16.0, *)
     public struct TheaActionButtonIntent: AppIntent {
-        public static var title: LocalizedStringResource = "Thea Action"
-        public static var description = IntentDescription("Execute configured Thea action")
+        public static let title: LocalizedStringResource = "Thea Action"
+        public static let description = IntentDescription("Execute configured Thea action")
 
-        public static var openAppWhenRun: Bool = true
+        public static let openAppWhenRun: Bool = true
 
         public init() {}
 
@@ -235,20 +235,6 @@
         }
     }
 
-    /// App Shortcut for Action Button
-    @available(iOS 16.0, *)
-    public struct TheaActionButtonShortcuts: AppShortcutsProvider {
-        public static var appShortcuts: [AppShortcut] {
-            AppShortcut(
-                intent: TheaActionButtonIntent(),
-                phrases: [
-                    "Activate \(.applicationName)",
-                    "Ask \(.applicationName)",
-                    "Hey \(.applicationName)"
-                ],
-                shortTitle: "Thea Action",
-                systemImageName: "brain"
-            )
-        }
-    }
+    // NOTE: TheaActionButtonShortcuts removed - only one AppShortcutsProvider allowed per app
+    // See TheaAppIntents.swift for the canonical AppShortcutsProvider
 #endif

@@ -27,7 +27,7 @@ final class DeepAgentEngine {
 
     // MARK: - Task Execution
 
-    func executeTask(_ instruction: String, context: TaskContext = TaskContext()) async throws -> TaskResult {
+    func executeTask(_ instruction: String, context: TaskContext = TaskContext()) async throws -> DeepTaskResult {
         isProcessing = true
         defer { isProcessing = false }
 
@@ -74,7 +74,7 @@ final class DeepAgentEngine {
             // Record failure
             let completedTask = CompletedTask(
                 task: task,
-                result: TaskResult(
+                result: DeepTaskResult(
                     output: "",
                     success: false,
                     error: error.localizedDescription
@@ -398,14 +398,14 @@ final class DeepAgentEngine {
 
     // MARK: - Result Synthesis
 
-    private func synthesizeResults(_ results: [SubtaskResult], originalInstruction: String) async throws -> TaskResult {
+    private func synthesizeResults(_ results: [SubtaskResult], originalInstruction: String) async throws -> DeepTaskResult {
         // Combine all outputs intelligently
         let outputs = results.map(\.output)
 
         // Use reasoning to create coherent final result
         let synthesis = try await reasoningEngine.synthesize(outputs, instruction: originalInstruction)
 
-        return TaskResult(
+        return DeepTaskResult(
             output: synthesis,
             success: true,
             subtaskResults: results,
@@ -475,7 +475,7 @@ struct VerificationResult {
     let issues: [String]
 }
 
-struct TaskResult {
+struct DeepTaskResult {
     let output: String
     let success: Bool
     var error: String?
@@ -485,7 +485,7 @@ struct TaskResult {
 
 struct CompletedTask {
     let task: DeepTask
-    let result: TaskResult
+    let result: DeepTaskResult
     let endTime: Date
     let success: Bool
 }

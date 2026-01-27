@@ -250,7 +250,7 @@ public enum CircadianPhase: String, CaseIterable, Sendable, Codable {
 // MARK: - Focus Mode
 
 /// Focus mode type
-public enum FocusMode: String, Sendable, Codable, CaseIterable {
+public enum WellnessFocusMode: String, Sendable, Codable, CaseIterable {
     case work
     case study
     case creative
@@ -321,7 +321,7 @@ public enum FocusMode: String, Sendable, Codable, CaseIterable {
 /// Focus session record
 public struct FocusSession: Sendable, Codable, Identifiable {
     public let id: UUID
-    public let mode: FocusMode
+    public let mode: WellnessFocusMode
     public let startDate: Date
     public let endDate: Date?
     public let targetDuration: Int // minutes
@@ -331,7 +331,7 @@ public struct FocusSession: Sendable, Codable, Identifiable {
 
     public init(
         id: UUID = UUID(),
-        mode: FocusMode,
+        mode: WellnessFocusMode,
         startDate: Date,
         endDate: Date? = nil,
         targetDuration: Int,

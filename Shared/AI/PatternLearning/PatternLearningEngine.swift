@@ -22,7 +22,7 @@ public final class PatternLearningEngine: ObservableObject {
 
     @Published public private(set) var detectedPatterns: [LearnedPattern] = []
     @Published public private(set) var userProfile: UserBehaviorProfile = .init()
-    @Published public private(set) var predictions: [Prediction] = []
+    @Published public private(set) var predictions: [PatternPrediction] = []
     @Published public private(set) var isLearning = true
 
     // MARK: - Activity Log
@@ -227,8 +227,8 @@ public final class PatternLearningEngine: ObservableObject {
     // MARK: - Predictions
 
     /// Generate predictions based on current context
-    public func generatePredictions(context: PredictionContext) -> [Prediction] {
-        var newPredictions: [Prediction] = []
+    public func generatePredictions(context: PredictionContext) -> [PatternPrediction] {
+        var newPredictions: [PatternPrediction] = []
 
         let hour = Calendar.current.component(.hour, from: Date())
         let weekday = Calendar.current.component(.weekday, from: Date())
@@ -238,7 +238,7 @@ public final class PatternLearningEngine: ObservableObject {
             if case let .timeOfDay(patternHour, patternWeekday) = pattern.trigger {
                 // Predict within 1 hour window
                 if abs(patternHour - hour) <= 1, patternWeekday == weekday {
-                    let prediction = Prediction(
+                    let prediction = PatternPrediction(
                         type: .action,
                         content: "Based on your patterns, you usually \(pattern.name.lowercased()) around now",
                         confidence: pattern.confidence,
@@ -263,8 +263,8 @@ public final class PatternLearningEngine: ObservableObject {
         return newPredictions
     }
 
-    private func predictNextApp(after bundleId: String) -> [Prediction] {
-        var predictions: [Prediction] = []
+    private func predictNextApp(after bundleId: String) -> [PatternPrediction] {
+        var predictions: [PatternPrediction] = []
 
         // Find most common next apps
         let relevantSequences = userProfile.appSequences
@@ -277,7 +277,7 @@ public final class PatternLearningEngine: ObservableObject {
             let confidence = min(1.0, Double(count) / 20.0)
 
             if confidence >= patternConfidenceThreshold {
-                let prediction = Prediction(
+                let prediction = PatternPrediction(
                     type: .appLaunch,
                     content: "You often open \(nextApp) after this",
                     confidence: confidence,
@@ -290,20 +290,20 @@ public final class PatternLearningEngine: ObservableObject {
         return predictions
     }
 
-    private func suggestQueries(context _: PredictionContext) -> [Prediction] {
-        var predictions: [Prediction] = []
+    private func suggestQueries(context _: PredictionContext) -> [PatternPrediction] {
+        var predictions: [PatternPrediction] = []
 
         // Suggest based on time of day
         let hour = Calendar.current.component(.hour, from: Date())
 
         if hour >= 6, hour <= 9 {
-            predictions.append(Prediction(
+            predictions.append(PatternPrediction(
                 type: .query,
                 content: "Would you like your morning briefing?",
                 confidence: 0.8
             ))
         } else if hour >= 17, hour <= 19 {
-            predictions.append(Prediction(
+            predictions.append(PatternPrediction(
                 type: .query,
                 content: "Want to see your day summary?",
                 confidence: 0.7
@@ -317,7 +317,7 @@ public final class PatternLearningEngine: ObservableObject {
             .map(\.key)
 
         if !topKeywords.isEmpty {
-            predictions.append(Prediction(
+            predictions.append(PatternPrediction(
                 type: .query,
                 content: "You often ask about: \(topKeywords.joined(separator: ", "))",
                 confidence: 0.6
@@ -339,7 +339,7 @@ public final class PatternLearningEngine: ObservableObject {
                 type: .peakActivity,
                 title: "Peak Activity Time",
                 description: "You're most active around \(peakHour):00",
-                data: ["hour": peakHour]
+                data: ["hour": String(peakHour)]
             ))
         }
 
@@ -350,7 +350,7 @@ public final class PatternLearningEngine: ObservableObject {
                 type: .appUsage,
                 title: "Most Used App",
                 description: "\(topApp.key) - \(hours) hours total",
-                data: ["bundleId": topApp.key, "hours": hours]
+                data: ["bundleId": topApp.key, "hours": String(hours)]
             ))
         }
 
@@ -371,7 +371,7 @@ public final class PatternLearningEngine: ObservableObject {
                 type: .patternCount,
                 title: "Learned Patterns",
                 description: "\(strongPatterns.count) strong patterns detected",
-                data: ["count": strongPatterns.count]
+                data: ["count": String(strongPatterns.count)]
             ))
         }
 
@@ -524,7 +524,7 @@ public enum PatternTrigger: Codable, Sendable {
     case custom(identifier: String)
 }
 
-public struct Prediction: Identifiable, Sendable {
+public struct PatternPrediction: Identifiable, Sendable {
     public let id: String
     public let type: PredictionType
     public let content: String
@@ -583,7 +583,7 @@ public struct BehaviorInsight: Identifiable, Sendable {
     public let type: InsightType
     public let title: String
     public let description: String
-    public let data: [String: Any]
+    public let data: [String: String]
 
     public enum InsightType: String, Sendable {
         case peakActivity
@@ -598,7 +598,7 @@ public struct BehaviorInsight: Identifiable, Sendable {
         type: InsightType,
         title: String,
         description: String,
-        data: [String: Any] = [:]
+        data: [String: String] = [:]
     ) {
         self.id = id
         self.type = type

@@ -6,6 +6,7 @@
 //  Advanced HomeKit orchestration with predictive automation
 //
 
+#if canImport(HomeKit)
 import Foundation
 import HomeKit
 import os.log
@@ -68,7 +69,7 @@ public final class HomeKitOrchestrator: NSObject, ObservableObject {
         // Start automation engine
         startAutomationEngine()
 
-        logger.info("HomeKit orchestrator ready with \(homes.count) homes")
+        logger.info("HomeKit orchestrator ready with \(self.homes.count) homes")
     }
 
     // MARK: - Device State Management
@@ -83,7 +84,7 @@ public final class HomeKitOrchestrator: NSObject, ObservableObject {
             }
         }
 
-        logger.debug("Refreshed \(deviceStates.count) device states")
+        logger.debug("Refreshed \(self.deviceStates.count) device states")
     }
 
     private func captureDeviceState(service: HMService) async -> DeviceState {
@@ -557,3 +558,4 @@ public enum HomeKitOrchestratorError: Error, LocalizedError {
         }
     }
 }
+#endif

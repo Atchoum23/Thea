@@ -53,7 +53,7 @@ public struct UIRecommendations: Sendable, Codable {
 /// Protocol for focus mode management
 public protocol FocusModeServiceProtocol: Actor {
     /// Start a focus session
-    func startSession(mode: FocusMode, duration: Int) async throws -> FocusSession
+    func startSession(mode: WellnessFocusMode, duration: Int) async throws -> FocusSession
 
     /// End the active session
     func endSession(completed: Bool) async throws -> FocusSession

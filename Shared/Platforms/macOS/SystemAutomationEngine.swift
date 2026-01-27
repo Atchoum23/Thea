@@ -9,7 +9,7 @@
 
 #if os(macOS)
     import AppKit
-    import ApplicationServices
+    @preconcurrency import ApplicationServices
     import Foundation
     import os.log
 
@@ -49,7 +49,7 @@
         /// Move a window to a specific position
         public func moveWindow(of app: NSRunningApplication, to position: CGPoint) async throws {
             guard isAutomationEnabled else {
-                throw AutomationError.permissionDenied
+                throw SystemAutomationError.permissionDenied
             }
 
             let appElement = AXUIElementCreateApplication(app.processIdentifier)
@@ -58,14 +58,14 @@
             let result = AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &windowRef)
 
             guard result == .success, let window = windowRef else {
-                throw AutomationError.windowNotFound
+                throw SystemAutomationError.windowNotFound
             }
 
             var positionValue: CFTypeRef = AXValueCreate(.cgPoint, [position])!
             let setResult = AXUIElementSetAttributeValue(window as! AXUIElement, kAXPositionAttribute as CFString, positionValue)
 
             if setResult != .success {
-                throw AutomationError.operationFailed("Failed to move window")
+                throw SystemAutomationError.operationFailed("Failed to move window")
             }
 
             logger.info("Moved window to (\(position.x), \(position.y))")
@@ -74,7 +74,7 @@
         /// Resize a window
         public func resizeWindow(of app: NSRunningApplication, to size: CGSize) async throws {
             guard isAutomationEnabled else {
-                throw AutomationError.permissionDenied
+                throw SystemAutomationError.permissionDenied
             }
 
             let appElement = AXUIElementCreateApplication(app.processIdentifier)
@@ -83,14 +83,14 @@
             let result = AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &windowRef)
 
             guard result == .success, let window = windowRef else {
-                throw AutomationError.windowNotFound
+                throw SystemAutomationError.windowNotFound
             }
 
             var sizeValue: CFTypeRef = AXValueCreate(.cgSize, [size])!
             let setResult = AXUIElementSetAttributeValue(window as! AXUIElement, kAXSizeAttribute as CFString, sizeValue)
 
             if setResult != .success {
-                throw AutomationError.operationFailed("Failed to resize window")
+                throw SystemAutomationError.operationFailed("Failed to resize window")
             }
 
             logger.info("Resized window to (\(size.width), \(size.height))")
@@ -99,7 +99,7 @@
         /// Arrange windows in a grid
         public func arrangeWindows(layout: WindowLayout) async throws {
             guard isAutomationEnabled else {
-                throw AutomationError.permissionDenied
+                throw SystemAutomationError.permissionDenied
             }
 
             let windows = getVisibleWindows()
@@ -186,7 +186,7 @@
         /// Type text at the current cursor position
         public func typeText(_ text: String, delay: TimeInterval = 0.01) async throws {
             guard isAutomationEnabled else {
-                throw AutomationError.permissionDenied
+                throw SystemAutomationError.permissionDenied
             }
 
             for char in text {
@@ -213,7 +213,7 @@
         /// Press a keyboard shortcut
         public func pressKeyboardShortcut(key: CGKeyCode, modifiers: CGEventFlags) async throws {
             guard isAutomationEnabled else {
-                throw AutomationError.permissionDenied
+                throw SystemAutomationError.permissionDenied
             }
 
             // Press modifiers
@@ -260,7 +260,7 @@
         /// Move mouse to a position
         public func moveMouse(to point: CGPoint) async throws {
             guard isAutomationEnabled else {
-                throw AutomationError.permissionDenied
+                throw SystemAutomationError.permissionDenied
             }
 
             if let event = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: point, mouseButton: .left) {
@@ -271,7 +271,7 @@
         /// Click at a position
         public func click(at point: CGPoint, button: CGMouseButton = .left, clickCount: Int = 1) async throws {
             guard isAutomationEnabled else {
-                throw AutomationError.permissionDenied
+                throw SystemAutomationError.permissionDenied
             }
 
             // Move to position
@@ -298,7 +298,7 @@
         /// Launch an application
         public func launchApp(bundleIdentifier: String) async throws {
             guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) else {
-                throw AutomationError.appNotFound(bundleIdentifier)
+                throw SystemAutomationError.appNotFound(bundleIdentifier)
             }
 
             let config = NSWorkspace.OpenConfiguration()
@@ -312,7 +312,7 @@
         /// Activate (focus) an application
         public func activateApp(bundleIdentifier: String) async throws {
             guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first else {
-                throw AutomationError.appNotRunning(bundleIdentifier)
+                throw SystemAutomationError.appNotRunning(bundleIdentifier)
             }
 
             app.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
@@ -323,13 +323,13 @@
         /// Quit an application
         public func quitApp(bundleIdentifier: String, force: Bool = false) async throws {
             guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first else {
-                throw AutomationError.appNotRunning(bundleIdentifier)
+                throw SystemAutomationError.appNotRunning(bundleIdentifier)
             }
 
             let result = force ? app.forceTerminate() : app.terminate()
 
             if !result {
-                throw AutomationError.operationFailed("Failed to \(force ? "force quit" : "quit") app")
+                throw SystemAutomationError.operationFailed("Failed to \(force ? "force quit" : "quit") app")
             }
 
             logger.info("\(force ? "Force quit" : "Quit") app: \(bundleIdentifier)")
@@ -338,11 +338,11 @@
         /// Hide an application
         public func hideApp(bundleIdentifier: String) async throws {
             guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first else {
-                throw AutomationError.appNotRunning(bundleIdentifier)
+                throw SystemAutomationError.appNotRunning(bundleIdentifier)
             }
 
             if !app.hide() {
-                throw AutomationError.operationFailed("Failed to hide app")
+                throw SystemAutomationError.operationFailed("Failed to hide app")
             }
 
             logger.info("Hid app: \(bundleIdentifier)")
@@ -428,14 +428,14 @@
 
         public func runAppleScript(_ script: String) async throws {
             guard let appleScript = NSAppleScript(source: script) else {
-                throw AutomationError.invalidScript
+                throw SystemAutomationError.invalidScript
             }
 
             var error: NSDictionary?
             appleScript.executeAndReturnError(&error)
 
             if let error {
-                throw AutomationError.scriptError(error.description)
+                throw SystemAutomationError.scriptError(error.description)
             }
         }
 
@@ -538,7 +538,7 @@
         }
     }
 
-    public enum AutomationError: Error, LocalizedError {
+    public enum SystemAutomationError: Error, LocalizedError {
         case permissionDenied
         case windowNotFound
         case appNotFound(String)

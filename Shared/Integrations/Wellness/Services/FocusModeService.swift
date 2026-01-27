@@ -13,7 +13,7 @@ public actor FocusModeService: FocusModeServiceProtocol {
 
     // MARK: - Session Management
 
-    public func startSession(mode: FocusMode, duration: Int) async throws -> FocusSession {
+    public func startSession(mode: WellnessFocusMode, duration: Int) async throws -> FocusSession {
         guard activeSession == nil else {
             throw WellnessError.sessionAlreadyActive
         }
@@ -176,14 +176,14 @@ public struct SessionStats: Sendable, Codable {
     public let completedSessions: Int
     public let totalMinutes: Int
     public let completionRate: Double
-    public let modeBreakdown: [FocusMode: Int]
+    public let modeBreakdown: [WellnessFocusMode: Int]
 
     public init(
         totalSessions: Int,
         completedSessions: Int,
         totalMinutes: Int,
         completionRate: Double,
-        modeBreakdown: [FocusMode: Int]
+        modeBreakdown: [WellnessFocusMode: Int]
     ) {
         self.totalSessions = totalSessions
         self.completedSessions = completedSessions

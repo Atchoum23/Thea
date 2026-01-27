@@ -9,6 +9,14 @@
 import Foundation
 import os.log
 
+#if canImport(UIKit)
+    import UIKit
+#endif
+
+#if canImport(AppKit)
+    import AppKit
+#endif
+
 // MARK: - Insight Engine
 
 /// Generates proactive insights based on aggregated context
@@ -150,7 +158,7 @@ public final class InsightEngine: ObservableObject {
         case let .openApp(bundleId):
             #if os(macOS)
                 if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
-                    NSWorkspace.shared.openApplication(at: url, configuration: .init())
+                    try? await NSWorkspace.shared.openApplication(at: url, configuration: .init())
                 }
             #elseif os(iOS)
                 // Use URL schemes or shortcuts

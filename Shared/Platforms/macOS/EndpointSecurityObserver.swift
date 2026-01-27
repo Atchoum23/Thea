@@ -6,8 +6,12 @@
 //  Endpoint Security framework integration for deep system monitoring
 //  Requires Developer ID signing and com.apple.developer.endpoint-security.client entitlement
 //
+//  NOTE: This feature is disabled by default as it requires special entitlements from Apple.
+//  To enable, add ENABLE_ENDPOINT_SECURITY to your Swift compiler flags.
+//
 
-#if os(macOS)
+// swiftlint:disable large_tuple implicit_return
+#if os(macOS) && ENABLE_ENDPOINT_SECURITY
     import EndpointSecurity
     import Foundation
     import os.log
@@ -170,7 +174,7 @@
                 processPath: getString(exec.target.pointee.executable.pointee.path),
                 arguments: getArguments(exec),
                 environment: [:], // Can be extracted if needed
-                username: getString(process.effective_user.name),
+                username: getUsernameFromAuditToken(process.audit_token),
                 signingId: getString(process.signing_id),
                 teamId: getString(process.team_id),
                 isPlatformBinary: process.is_platform_binary
@@ -275,12 +279,23 @@
 
         private func handleMountEvent(_ msg: es_message_t) {
             let mount = msg.event.mount
+            let statfsPtr = mount.statfs
+
+            let mountPoint = withUnsafePointer(to: statfsPtr.pointee.f_mntonname) { ptr in
+                ptr.withMemoryRebound(to: CChar.self, capacity: Int(MAXPATHLEN)) { String(cString: $0) }
+            }
+            let volumeName = withUnsafePointer(to: statfsPtr.pointee.f_mntfromname) { ptr in
+                ptr.withMemoryRebound(to: CChar.self, capacity: Int(MAXPATHLEN)) { String(cString: $0) }
+            }
+            let fsType = withUnsafePointer(to: statfsPtr.pointee.f_fstypename) { ptr in
+                ptr.withMemoryRebound(to: CChar.self, capacity: Int(MFSNAMELEN)) { String(cString: $0) }
+            }
 
             let event = MountEvent(
                 timestamp: Date(),
-                mountPoint: getString(mount.statfs.pointee.f_mntonname),
-                volumeName: getString(mount.statfs.pointee.f_mntfromname),
-                fileSystemType: getString(mount.statfs.pointee.f_fstypename),
+                mountPoint: mountPoint,
+                volumeName: volumeName,
+                fileSystemType: fsType,
                 isMounting: true
             )
 
@@ -290,12 +305,23 @@
 
         private func handleUnmountEvent(_ msg: es_message_t) {
             let unmount = msg.event.unmount
+            let statfsPtr = unmount.statfs
+
+            let mountPoint = withUnsafePointer(to: statfsPtr.pointee.f_mntonname) { ptr in
+                ptr.withMemoryRebound(to: CChar.self, capacity: Int(MAXPATHLEN)) { String(cString: $0) }
+            }
+            let volumeName = withUnsafePointer(to: statfsPtr.pointee.f_mntfromname) { ptr in
+                ptr.withMemoryRebound(to: CChar.self, capacity: Int(MAXPATHLEN)) { String(cString: $0) }
+            }
+            let fsType = withUnsafePointer(to: statfsPtr.pointee.f_fstypename) { ptr in
+                ptr.withMemoryRebound(to: CChar.self, capacity: Int(MFSNAMELEN)) { String(cString: $0) }
+            }
 
             let event = MountEvent(
                 timestamp: Date(),
-                mountPoint: getString(unmount.statfs.pointee.f_mntonname),
-                volumeName: getString(unmount.statfs.pointee.f_mntfromname),
-                fileSystemType: getString(unmount.statfs.pointee.f_fstypename),
+                mountPoint: mountPoint,
+                volumeName: volumeName,
+                fileSystemType: fsType,
                 isMounting: false
             )
 
@@ -329,7 +355,145 @@
             return ""
         }
 
-        // swiftlint:disable:next large_tuple
+        private func getUsernameFromAuditToken(_ token: audit_token_t) -> String {
+            let uid = audit_token_to_euid(token)
+            if let pwd = getpwuid(uid) {
+                return String(cString: pwd.pointee.pw_name)
+            }
+            return "uid:\(uid)"
+        }
+
+        private func getStatfsString(_ array: inout (Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                       Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8)) -> String {
+            return withUnsafePointer(to: &array) { ptr in
+                ptr.withMemoryRebound(to: CChar.self, capacity: 1024) { cString in
+                    String(cString: cString)
+                }
+            }
+        }
+
         private func getString(_ tuple: (CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
                                          CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar)) -> String
         {
@@ -341,7 +505,6 @@
             }
         }
 
-        // swiftlint:disable:next large_tuple
         private func getString(_ array: (CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
                                          CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
                                          CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar,
@@ -417,14 +580,25 @@
 
         private func getArguments(_ exec: es_event_exec_t) -> [String] {
             var arguments: [String] = []
-            let argc = es_exec_arg_count(&exec)
+            var execCopy = exec
+            let argc = es_exec_arg_count(&execCopy)
 
             for i in 0 ..< argc {
-                let arg = es_exec_arg(&exec, i)
+                let arg = es_exec_arg(&execCopy, i)
                 arguments.append(getString(arg))
             }
 
             return arguments
+        }
+
+        // Helper for f_fstypename (MFSNAMELEN = 16)
+        private func getFsTypeString(_ array: inout (Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8,
+                                                      Int8, Int8, Int8, Int8, Int8, Int8, Int8, Int8)) -> String {
+            return withUnsafePointer(to: &array) { ptr in
+                ptr.withMemoryRebound(to: CChar.self, capacity: 16) { cString in
+                    String(cString: cString)
+                }
+            }
         }
 
         private func logClientCreationError(_ result: es_new_client_result_t) {
@@ -570,3 +744,4 @@
         }
     }
 #endif
+// swiftlint:enable large_tuple implicit_return

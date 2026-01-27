@@ -26,13 +26,13 @@ public actor RemoteCommandService {
     // MARK: - State
 
     private var pendingCommands: [String: RemoteCommand] = [:]
-    private var commandResults: [String: CommandResult] = [:]
+    private var commandResults: [String: RemoteCommandResult] = [:]
     private var isListening = false
 
     // MARK: - Callbacks
 
-    public var onCommandReceived: (@Sendable (RemoteCommand) async -> CommandResult)?
-    public var onCommandCompleted: (@Sendable (String, CommandResult) -> Void)?
+    public var onCommandReceived: (@Sendable (RemoteCommand) async -> RemoteCommandResult)?
+    public var onCommandCompleted: (@Sendable (String, RemoteCommandResult) -> Void)?
 
     // MARK: - Initialization
 
@@ -115,13 +115,13 @@ public actor RemoteCommandService {
     }
 
     /// Send a command and wait for result
-    public func sendCommandAndWait(_ command: RemoteCommand, timeout: TimeInterval = 30) async throws -> CommandResult {
+    public func sendCommandAndWait(_ command: RemoteCommand, timeout: TimeInterval = 30) async throws -> RemoteCommandResult {
         let commandId = try await sendCommand(command)
 
         // Poll for result
         let startTime = Date()
         while Date().timeIntervalSince(startTime) < timeout {
-            if let result = try await fetchCommandResult(commandId) {
+            if let result = try await fetchRemoteCommandResult(commandId) {
                 return result
             }
             try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
@@ -155,7 +155,7 @@ public actor RemoteCommandService {
         await updateCommandStatus(command.id, status: .running)
 
         // Execute command
-        let result: CommandResult = if let handler = onCommandReceived {
+        let result: RemoteCommandResult = if let handler = onCommandReceived {
             await handler(command)
         } else {
             await executeDefaultCommand(command)
@@ -165,7 +165,7 @@ public actor RemoteCommandService {
         commandResults[command.id] = result
 
         // Update record with result
-        await storeCommandResult(command.id, result: result)
+        await storeRemoteCommandResult(command.id, result: result)
 
         logger.info("Command \(command.id) completed with success: \(result.success)")
 
@@ -174,14 +174,14 @@ public actor RemoteCommandService {
         }
     }
 
-    private func executeDefaultCommand(_ command: RemoteCommand) async -> CommandResult {
+    private func executeDefaultCommand(_ command: RemoteCommand) async -> RemoteCommandResult {
         switch command.type {
         case .ping:
-            return CommandResult(success: true, data: ["pong": "true", "timestamp": ISO8601DateFormatter().string(from: Date())])
+            return RemoteCommandResult(success: true, data: ["pong": "true", "timestamp": ISO8601DateFormatter().string(from: Date())])
 
         case .getStatus:
             let deviceInfo = await MainActor.run { DeviceRegistry.shared.currentDevice }
-            return CommandResult(success: true, data: [
+            return RemoteCommandResult(success: true, data: [
                 "deviceName": deviceInfo.name,
                 "deviceType": deviceInfo.type.rawValue,
                 "online": "true"
@@ -190,48 +190,42 @@ public actor RemoteCommandService {
         case .runShortcut:
             if let shortcutName = command.parameters["shortcutName"] {
                 do {
-                    await MainActor.run {
-                        _ = ShortcutsOrchestrator.shared.runShortcut(named: shortcutName)
-                    }
-                    return CommandResult(success: true, data: ["shortcut": shortcutName])
+                    _ = try await ShortcutsOrchestrator.shared.runShortcut(named: shortcutName)
+                    return RemoteCommandResult(success: true, data: ["shortcut": shortcutName])
                 } catch {
-                    return CommandResult(success: false, error: error.localizedDescription)
+                    return RemoteCommandResult(success: false, error: error.localizedDescription)
                 }
             }
-            return CommandResult(success: false, error: "Missing shortcut name")
+            return RemoteCommandResult(success: false, error: "Missing shortcut name")
 
         case .setFocus:
             if let focusId = command.parameters["focusId"] {
                 // Would integrate with FocusOrchestrator
-                return CommandResult(success: true, data: ["focusId": focusId])
+                return RemoteCommandResult(success: true, data: ["focusId": focusId])
             }
-            return CommandResult(success: false, error: "Missing focus ID")
+            return RemoteCommandResult(success: false, error: "Missing focus ID")
 
         case .notify:
             if let title = command.parameters["title"], let body = command.parameters["body"] {
                 do {
-                    try await MainActor.run {
-                        Task {
-                            try await CrossDeviceNotificationRouter.shared.sendNotification(title: title, body: body)
-                        }
-                    }
-                    return CommandResult(success: true, data: ["notified": "true"])
+                    try await CrossDeviceNotificationRouter.shared.sendNotification(title: title, body: body)
+                    return RemoteCommandResult(success: true, data: ["notified": "true"])
                 } catch {
-                    return CommandResult(success: false, error: error.localizedDescription)
+                    return RemoteCommandResult(success: false, error: error.localizedDescription)
                 }
             }
-            return CommandResult(success: false, error: "Missing title or body")
+            return RemoteCommandResult(success: false, error: "Missing title or body")
 
         case .homeKit:
             if let action = command.parameters["action"], let accessoryId = command.parameters["accessoryId"] {
                 // Would integrate with HomeKitService
-                return CommandResult(success: true, data: ["action": action, "accessoryId": accessoryId])
+                return RemoteCommandResult(success: true, data: ["action": action, "accessoryId": accessoryId])
             }
-            return CommandResult(success: false, error: "Missing HomeKit parameters")
+            return RemoteCommandResult(success: false, error: "Missing HomeKit parameters")
 
         case .custom:
             // Custom commands handled by the app
-            return CommandResult(success: false, error: "Custom command not handled")
+            return RemoteCommandResult(success: false, error: "Custom command not handled")
         }
     }
 
@@ -250,7 +244,7 @@ public actor RemoteCommandService {
         }
     }
 
-    private func storeCommandResult(_ commandId: String, result: CommandResult) async {
+    private func storeRemoteCommandResult(_ commandId: String, result: RemoteCommandResult) async {
         let recordId = CKRecord.ID(recordName: commandId)
 
         do {
@@ -270,7 +264,7 @@ public actor RemoteCommandService {
         }
     }
 
-    private func fetchCommandResult(_ commandId: String) async throws -> CommandResult? {
+    private func fetchRemoteCommandResult(_ commandId: String) async throws -> RemoteCommandResult? {
         let recordId = CKRecord.ID(recordName: commandId)
 
         do {
@@ -288,7 +282,7 @@ public actor RemoteCommandService {
                 data = (try? JSONDecoder().decode([String: String].self, from: resultData)) ?? [:]
             }
 
-            return CommandResult(success: success, data: data, error: error)
+            return RemoteCommandResult(success: success, data: data, error: error)
         } catch {
             return nil
         }
@@ -423,7 +417,7 @@ public enum CommandStatus: String, Codable, Sendable {
     case cancelled
 }
 
-public struct CommandResult: Sendable {
+public struct RemoteCommandResult: Sendable {
     public let success: Bool
     public let data: [String: String]
     public let error: String?

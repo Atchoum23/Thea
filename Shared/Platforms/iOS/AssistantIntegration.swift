@@ -426,9 +426,9 @@
     import AppIntents
 
     @available(iOS 16.0, *)
-    struct AskTheaIntent: AppIntent {
-        static var title: LocalizedStringResource = "Ask Thea"
-        static var description = IntentDescription("Ask Thea a question")
+    struct AssistantAskTheaIntent: AppIntent {
+        static let title: LocalizedStringResource = "Ask Thea"
+        static let description = IntentDescription("Ask Thea a question")
 
         @Parameter(title: "Question")
         var question: String
@@ -439,16 +439,17 @@
 
         func perform() async throws -> some IntentResult & ReturnsValue<String> {
             await AssistantIntegration.shared.processQuery(question)
-            return .result(value: AssistantIntegration.shared.lastResponse ?? "Processing...")
+            let response = await AssistantIntegration.shared.lastResponse ?? "Processing..."
+            return .result(value: response)
         }
     }
 
     @available(iOS 16.0, *)
     struct TheaVoiceCommandIntent: AppIntent {
-        static var title: LocalizedStringResource = "Thea Voice Command"
-        static var description = IntentDescription("Start listening for a voice command")
+        static let title: LocalizedStringResource = "Thea Voice Command"
+        static let description = IntentDescription("Start listening for a voice command")
 
-        static var openAppWhenRun: Bool = true
+        static let openAppWhenRun: Bool = true
 
         func perform() async throws -> some IntentResult {
             try await AssistantIntegration.shared.startListening()
@@ -456,30 +457,6 @@
         }
     }
 
-    @available(iOS 16.0, *)
-    struct TheaAssistantShortcuts: AppShortcutsProvider {
-        static var appShortcuts: [AppShortcut] {
-            AppShortcut(
-                intent: AskTheaIntent(),
-                phrases: [
-                    "Ask \(.applicationName)",
-                    "Hey \(.applicationName)",
-                    "Talk to \(.applicationName)"
-                ],
-                shortTitle: "Ask Thea",
-                systemImageName: "sparkles"
-            )
-
-            AppShortcut(
-                intent: TheaVoiceCommandIntent(),
-                phrases: [
-                    "Start \(.applicationName)",
-                    "Listen \(.applicationName)",
-                    "\(.applicationName) voice"
-                ],
-                shortTitle: "Voice Command",
-                systemImageName: "mic.fill"
-            )
-        }
-    }
+    // NOTE: TheaAssistantShortcuts removed - only one AppShortcutsProvider allowed per app
+    // See TheaAppIntents.swift for the canonical AppShortcutsProvider
 #endif
