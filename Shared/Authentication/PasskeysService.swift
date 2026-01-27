@@ -279,15 +279,9 @@ extension PasskeysService: ASAuthorizationControllerDelegate {
                     .notInteractive
                 case .matchedExcludedCredential:
                     .credentialAlreadyExists
-                case .credentialImport:
-                    .from(error)
-                case .credentialExport:
-                    .from(error)
-                case .preferSignInWithApple:
-                    .preferSignInWithApple
-                case .deviceNotConfiguredForPasskeyCreation:
-                    .deviceNotConfigured
-                @unknown default:
+                default:
+                    // Handles newer cases like credentialImport, credentialExport,
+                    // preferSignInWithApple, deviceNotConfiguredForPasskeyCreation
                     .from(error)
                 }
             } else {
