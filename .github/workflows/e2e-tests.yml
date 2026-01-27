@@ -76,6 +76,8 @@ jobs:
             MARKETING_VERSION="1.5.0" \
             CURRENT_PROJECT_VERSION="15" \
             SWIFT_STRICT_CONCURRENCY=minimal \
+            GENERATE_INFOPLIST_FILE=NO \
+            INFOPLIST_FILE=iOS/Info.plist \
             2>&1 | tee build-simulator.log
 
       - name: Verify Build Output
