@@ -175,7 +175,7 @@ public final class AppClipManager: ObservableObject {
 
     #if canImport(AppClip)
         /// Verify user location for physical App Clip codes
-        public func verifyLocation(for activity: NSUserActivity) async -> LocationVerificationResult {
+        nonisolated public func verifyLocation(for activity: NSUserActivity) async -> LocationVerificationResult {
             guard let payload = activity.appClipActivationPayload else {
                 return LocationVerificationResult(verified: false, reason: "No activation payload")
             }
