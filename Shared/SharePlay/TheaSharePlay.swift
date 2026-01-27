@@ -193,7 +193,7 @@ public class TheaSharePlayManager: ObservableObject {
     // MARK: - Activity Observer
 
     nonisolated private func setupGroupActivityObserver() {
-        Task { [weak self] in
+        Task { @MainActor [weak self] in
             for await session in TheaGroupActivity.sessions() {
                 await self?.configureGroupSession(session)
             }
