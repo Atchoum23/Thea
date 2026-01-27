@@ -112,7 +112,7 @@ public final class HomeKitOrchestrator: NSObject, ObservableObject {
     public func controlDevice(
         serviceId: String,
         characteristic: String,
-        value: Any
+        value: sending Any
     ) async throws {
         guard let home = primaryHome else {
             throw HomeKitOrchestratorError.noHomeConfigured
