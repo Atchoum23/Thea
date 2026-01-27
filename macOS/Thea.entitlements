@@ -2,15 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- ================================ -->
-	<!-- Push Notifications               -->
-	<!-- ================================ -->
 	<key>com.apple.developer.aps-environment</key>
 	<string>development</string>
-
-	<!-- ================================ -->
-	<!-- iCloud Services                  -->
-	<!-- ================================ -->
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
 		<string>iCloud.app.theathe</string>
@@ -22,36 +15,16 @@
 	</array>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)app.theathe</string>
-
-	<!-- ================================ -->
-	<!-- App Groups                       -->
-	<!-- ================================ -->
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>group.app.theathe</string>
 	</array>
-
-	<!-- ================================ -->
-	<!-- File Access                      -->
-	<!-- ================================ -->
 	<key>com.apple.security.files.bookmarks.app-scope</key>
 	<true/>
 	<key>com.apple.security.files.bookmarks.document-scope</key>
 	<true/>
-	<key>com.apple.security.temporary-exception.files.home-relative-path.read-only</key>
-	<array>
-		<string>/Library/</string>
-	</array>
-
-	<!-- ================================ -->
-	<!-- Speech Recognition               -->
-	<!-- ================================ -->
 	<key>com.apple.security.personal-information.speech-recognition</key>
 	<true/>
-
-	<!-- ================================ -->
-	<!-- Scripting Targets                -->
-	<!-- ================================ -->
 	<key>com.apple.security.scripting-targets</key>
 	<dict>
 		<key>com.apple.Notes</key>
@@ -83,41 +56,9 @@
 			<string>com.apple.systemevents.processes</string>
 		</array>
 	</dict>
-
-	<!-- ================================ -->
-	<!-- Accessibility (Automation)       -->
-	<!-- ================================ -->
-	<key>com.apple.security.automation.apple-events</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Hardened Runtime Exceptions      -->
-	<!-- ================================ -->
-	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
-	<true/>
-	<key>com.apple.security.cs.disable-library-validation</key>
-	<true/>
-
-	<!-- ======================================================== -->
-	<!-- RESTRICTED ENTITLEMENTS - Uncomment after Apple approval -->
-	<!-- Request at: https://developer.apple.com/contact/request/network-extension -->
-	<!-- ======================================================== -->
-	<!--
-	<key>com.apple.developer.networking.networkextension</key>
+	<key>com.apple.security.temporary-exception.files.home-relative-path.read-only</key>
 	<array>
-		<string>content-filter-provider</string>
-		<string>content-filter-provider-system</string>
-		<string>packet-tunnel-provider</string>
-		<string>packet-tunnel-provider-system</string>
-		<string>dns-proxy</string>
-		<string>dns-settings</string>
+		<string>/Library/</string>
 	</array>
-
-	<key>com.apple.developer.endpoint-security.client</key>
-	<true/>
-
-	<key>com.apple.developer.system-extension.install</key>
-	<true/>
-	-->
 </dict>
 </plist>
