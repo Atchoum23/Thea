@@ -460,8 +460,9 @@ public extension Notification.Name {
             }
         }
 
-        private func handleTextItem(_ provider: NSItemProvider) async {
+        nonisolated private func handleTextItem(_ provider: NSItemProvider) async {
             do {
+                // NSItemProvider.loadItem returns non-Sendable NSSecureCoding
                 let text = try await provider.loadItem(forTypeIdentifier: "public.plain-text") as? String
                 let content = SharedContent(type: .text, text: text)
                 ShareExtensionManager.addSharedContent(content)
@@ -470,7 +471,7 @@ public extension Notification.Name {
             }
         }
 
-        private func handleURLItem(_ provider: NSItemProvider) async {
+        nonisolated private func handleURLItem(_ provider: NSItemProvider) async {
             do {
                 let url = try await provider.loadItem(forTypeIdentifier: "public.url") as? URL
                 let content = SharedContent(type: .url, url: url?.absoluteString)
@@ -480,7 +481,7 @@ public extension Notification.Name {
             }
         }
 
-        private func handleImageItem(_ provider: NSItemProvider) async {
+        nonisolated private func handleImageItem(_ provider: NSItemProvider) async {
             do {
                 if let image = try await provider.loadItem(forTypeIdentifier: "public.image") as? UIImage,
                    let data = image.jpegData(compressionQuality: 0.8)
@@ -493,7 +494,7 @@ public extension Notification.Name {
             }
         }
 
-        private func handlePDFItem(_ provider: NSItemProvider) async {
+        nonisolated private func handlePDFItem(_ provider: NSItemProvider) async {
             do {
                 if let url = try await provider.loadItem(forTypeIdentifier: "com.adobe.pdf") as? URL {
                     let data = try Data(contentsOf: url)
@@ -505,7 +506,7 @@ public extension Notification.Name {
             }
         }
 
-        private func handleFileItem(_ provider: NSItemProvider) async {
+        nonisolated private func handleFileItem(_ provider: NSItemProvider) async {
             do {
                 if let url = try await provider.loadItem(forTypeIdentifier: "public.data") as? URL {
                     let data = try Data(contentsOf: url)
