@@ -97,8 +97,7 @@ public final class SpotlightIntegration: ObservableObject {
             defer { isIndexing = false }
 
             let domain = conversationDomain
-            let index = searchableIndex
-            let count = await Self.performBatchIndexing(conversations: conversations, domain: domain, index: index)
+            let count = await Self.performBatchIndexing(conversations: conversations, domain: domain)
 
             // swiftlint:disable:next empty_count
             guard count > 0 else { return }
@@ -112,8 +111,7 @@ public final class SpotlightIntegration: ObservableObject {
     /// Perform the actual indexing in a static context to avoid Sendable issues
     nonisolated private static func performBatchIndexing(
         conversations: [IndexableConversation],
-        domain: String,
-        index: CSSearchableIndex
+        domain: String
     ) async -> Int {
         let items = conversations.map { conversation -> CSSearchableItem in
             let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
@@ -133,7 +131,7 @@ public final class SpotlightIntegration: ObservableObject {
         }
 
         do {
-            try await index.indexSearchableItems(items)
+            try await CSSearchableIndex.default().indexSearchableItems(items)
             return items.count
         } catch {
             return 0
