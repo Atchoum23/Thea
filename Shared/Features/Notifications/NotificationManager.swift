@@ -86,10 +86,12 @@ public final class NotificationManager: ObservableObject {
 
     /// Check current authorization status
     public func checkAuthorizationStatus() async {
-        let settings = await center.notificationSettings()
-        authorizationStatus = settings.authorizationStatus
-        isAuthorized = settings.authorizationStatus == .authorized ||
-            settings.authorizationStatus == .provisional
+        // Extract values in nonisolated context to avoid Sendable issues
+        let status = await { @Sendable in
+            await center.notificationSettings().authorizationStatus
+        }()
+        authorizationStatus = status
+        isAuthorized = status == .authorized || status == .provisional
     }
 
     // MARK: - Category Setup
@@ -384,10 +386,13 @@ public final class NotificationManager: ObservableObject {
     /// Cancel all notifications for a thread
     public func cancelNotifications(forThread threadId: String) {
         Task {
-            let delivered = await center.deliveredNotifications()
-            let toRemove = delivered
-                .filter { $0.request.content.threadIdentifier == threadId }
-                .map(\.request.identifier)
+            // Extract identifiers in nonisolated context to avoid Sendable issues
+            let toRemove = await { @Sendable [center] in
+                let delivered = await center.deliveredNotifications()
+                return delivered
+                    .filter { $0.request.content.threadIdentifier == threadId }
+                    .map(\.request.identifier)
+            }()
             center.removeDeliveredNotifications(withIdentifiers: toRemove)
         }
     }

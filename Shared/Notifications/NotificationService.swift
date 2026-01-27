@@ -83,9 +83,12 @@ public class NotificationService: ObservableObject {
     }
 
     private func checkAuthorization() async {
-        let settings = await UNUserNotificationCenter.current().notificationSettings()
-        authorizationStatus = settings.authorizationStatus
-        isAuthorized = settings.authorizationStatus == .authorized
+        // Extract value in nonisolated context to avoid Sendable issues with UNNotificationSettings
+        let status = await { @Sendable in
+            await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        }()
+        authorizationStatus = status
+        isAuthorized = status == .authorized
     }
 
     // MARK: - Category Registration
@@ -280,11 +283,19 @@ public class NotificationService: ObservableObject {
     // MARK: - Notification Management
 
     public func updatePendingNotifications() async {
-        pendingNotifications = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        // UNNotificationRequest is not Sendable, so we need to copy in nonisolated context
+        let requests = await { @Sendable in
+            await UNUserNotificationCenter.current().pendingNotificationRequests()
+        }()
+        pendingNotifications = requests
     }
 
     public func updateDeliveredNotifications() async {
-        deliveredNotifications = await UNUserNotificationCenter.current().deliveredNotifications()
+        // UNNotification is not Sendable, so we need to copy in nonisolated context
+        let notifications = await { @Sendable in
+            await UNUserNotificationCenter.current().deliveredNotifications()
+        }()
+        deliveredNotifications = notifications
     }
 
     public func cancelNotification(identifier: String) {
