@@ -28,7 +28,7 @@
         @Published public private(set) var lastAutomationResult: AutomationResult?
 
         private init() {
-            checkAccessibilityPermission()
+            _ = checkAccessibilityPermission()
         }
 
         // MARK: - Permissions
@@ -61,7 +61,7 @@
                 throw SystemAutomationError.windowNotFound
             }
 
-            var positionValue: CFTypeRef = AXValueCreate(.cgPoint, [position])!
+            let positionValue: CFTypeRef = AXValueCreate(.cgPoint, [position])!
             let setResult = AXUIElementSetAttributeValue(window as! AXUIElement, kAXPositionAttribute as CFString, positionValue)
 
             if setResult != .success {
@@ -86,7 +86,7 @@
                 throw SystemAutomationError.windowNotFound
             }
 
-            var sizeValue: CFTypeRef = AXValueCreate(.cgSize, [size])!
+            let sizeValue: CFTypeRef = AXValueCreate(.cgSize, [size])!
             let setResult = AXUIElementSetAttributeValue(window as! AXUIElement, kAXSizeAttribute as CFString, sizeValue)
 
             if setResult != .success {
@@ -155,8 +155,8 @@
         }
 
         private func positionWindow(_ window: AXUIElement, at position: CGPoint, size: CGSize) async throws {
-            var positionValue: CFTypeRef = AXValueCreate(.cgPoint, [position])!
-            var sizeValue: CFTypeRef = AXValueCreate(.cgSize, [size])!
+            let positionValue: CFTypeRef = AXValueCreate(.cgPoint, [position])!
+            let sizeValue: CFTypeRef = AXValueCreate(.cgSize, [size])!
 
             AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, positionValue)
             AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, sizeValue)
@@ -315,7 +315,7 @@
                 throw SystemAutomationError.appNotRunning(bundleIdentifier)
             }
 
-            app.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
+            app.activate()
 
             logger.info("Activated app: \(bundleIdentifier)")
         }
@@ -412,14 +412,12 @@
             // Brightness control requires IOKit or private APIs
             // Using AppleScript as a workaround where possible
 
-            let script = """
-            tell application "System Events"
-                key code 145 -- Brightness up
-            end tell
-            """
-
-            // This is a simplified version; proper brightness control
-            // would require IOKit frameworks
+            // Note: Proper brightness control would require IOKit frameworks
+            // let script = """
+            // tell application "System Events"
+            //     key code 145 -- Brightness up
+            // end tell
+            // """
 
             logger.info("Brightness control requested (level: \(level))")
         }

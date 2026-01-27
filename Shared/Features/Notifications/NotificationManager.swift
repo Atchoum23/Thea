@@ -14,7 +14,6 @@ public final class NotificationManager: ObservableObject {
     public static let shared = NotificationManager()
 
     private let logger = Logger(subsystem: "com.thea.app", category: "Notifications")
-    private let center = UNUserNotificationCenter.current()
 
     // MARK: - Published State
 
@@ -72,7 +71,7 @@ public final class NotificationManager: ObservableObject {
     public func requestAuthorization() async -> Bool {
         do {
             let options: UNAuthorizationOptions = [.alert, .sound, .badge, .provisional]
-            let granted = try await center.requestAuthorization(options: options)
+            let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: options)
             isAuthorized = granted
             await checkAuthorizationStatus()
 
@@ -165,7 +164,7 @@ public final class NotificationManager: ObservableObject {
             options: []
         )
 
-        center.setNotificationCategories([
+        UNUserNotificationCenter.current().setNotificationCategories([
             conversationCategory,
             agentCategory,
             reminderCategory,
@@ -208,11 +207,42 @@ public final class NotificationManager: ObservableObject {
         )
 
         do {
-            try await center.add(request)
+            try await Self.addNotificationRequest(request)
             logger.info("Sent conversation notification: \(conversationId)")
         } catch {
             logger.error("Failed to send notification: \(error.localizedDescription)")
         }
+    }
+
+    /// Helper to add notification request without crossing actor boundaries
+    nonisolated private static func addNotificationRequest(_ request: UNNotificationRequest) async throws {
+        try await UNUserNotificationCenter.current().add(request)
+    }
+
+    /// Helper to snooze a notification without crossing actor boundaries
+    /// Parameters must be Sendable (String values only)
+    nonisolated private static func snoozeNotification(
+        originalIdentifier: String,
+        title: String,
+        body: String,
+        categoryIdentifier: String,
+        threadIdentifier: String,
+        userInfoStrings: [String: String]
+    ) async {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.categoryIdentifier = categoryIdentifier
+        content.threadIdentifier = threadIdentifier
+        content.userInfo = userInfoStrings
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 900, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: originalIdentifier + "-snoozed",
+            content: content,
+            trigger: trigger
+        )
+        try? await UNUserNotificationCenter.current().add(request)
     }
 
     /// Send an agent notification
@@ -246,7 +276,7 @@ public final class NotificationManager: ObservableObject {
         )
 
         do {
-            try await center.add(request)
+            try await Self.addNotificationRequest(request)
             logger.info("Sent agent notification: \(agentName)")
         } catch {
             logger.error("Failed to send notification: \(error.localizedDescription)")
@@ -284,7 +314,7 @@ public final class NotificationManager: ObservableObject {
         )
 
         do {
-            try await center.add(request)
+            try await Self.addNotificationRequest(request)
         } catch {
             logger.error("Failed to send mission notification: \(error.localizedDescription)")
         }
@@ -323,7 +353,7 @@ public final class NotificationManager: ObservableObject {
         )
 
         do {
-            try await center.add(request)
+            try await Self.addNotificationRequest(request)
             logger.info("Scheduled reminder: \(id) for \(date)")
         } catch {
             logger.error("Failed to schedule reminder: \(error.localizedDescription)")
@@ -369,7 +399,7 @@ public final class NotificationManager: ObservableObject {
         )
 
         do {
-            try await center.add(request)
+            try await Self.addNotificationRequest(request)
         } catch {
             logger.error("Failed to send system notification: \(error.localizedDescription)")
         }
@@ -379,8 +409,8 @@ public final class NotificationManager: ObservableObject {
 
     /// Cancel a notification
     public func cancelNotification(identifier: String) {
-        center.removePendingNotificationRequests(withIdentifiers: [identifier])
-        center.removeDeliveredNotifications(withIdentifiers: [identifier])
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
     }
 
     /// Cancel all notifications for a thread
@@ -393,20 +423,20 @@ public final class NotificationManager: ObservableObject {
                     .filter { $0.request.content.threadIdentifier == threadId }
                     .map(\.request.identifier)
             }()
-            center.removeDeliveredNotifications(withIdentifiers: toRemove)
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: toRemove)
         }
     }
 
     /// Cancel all notifications
     public func cancelAllNotifications() {
-        center.removeAllPendingNotificationRequests()
-        center.removeAllDeliveredNotifications()
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }
 
     /// Update badge count
     public func updateBadgeCount(_ count: Int) async {
         do {
-            try await center.setBadgeCount(count)
+            try await UNUserNotificationCenter.current().setBadgeCount(count)
         } catch {
             logger.error("Failed to update badge: \(error.localizedDescription)")
         }
@@ -447,16 +477,23 @@ public final class NotificationManager: ObservableObject {
             }
 
         case Action.snooze.rawValue:
-            // Reschedule notification for 15 minutes later
-            // swiftlint:disable:next force_cast
-            let content = notification.request.content.mutableCopy() as! UNMutableNotificationContent
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 900, repeats: false)
-            let request = UNNotificationRequest(
-                identifier: notification.request.identifier + "-snoozed",
-                content: content,
-                trigger: trigger
+            // Reschedule notification for 15 minutes later - extract Sendable data first
+            let originalContent = notification.request.content
+            // Extract only string key-value pairs for Sendable compliance
+            var userInfoStrings: [String: String] = [:]
+            for (key, value) in originalContent.userInfo {
+                if let stringKey = key as? String, let stringValue = value as? String {
+                    userInfoStrings[stringKey] = stringValue
+                }
+            }
+            await Self.snoozeNotification(
+                originalIdentifier: notification.request.identifier,
+                title: originalContent.title,
+                body: originalContent.body,
+                categoryIdentifier: originalContent.categoryIdentifier,
+                threadIdentifier: originalContent.threadIdentifier,
+                userInfoStrings: userInfoStrings
             )
-            try? await center.add(request)
             return .snoozed(minutes: 15)
 
         case Action.stop.rawValue:

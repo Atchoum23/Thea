@@ -14,7 +14,7 @@
     class FinderSync: FIFinderSync {
         // MARK: - Properties
 
-        private let appGroupID = "group.app.thea"
+        private let appGroupID = "group.app.theathe"
 
         // Watched folders
         private var monitoredDirectories: Set<URL> = []

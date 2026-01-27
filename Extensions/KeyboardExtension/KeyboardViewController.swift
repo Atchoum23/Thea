@@ -16,7 +16,7 @@ class KeyboardViewController: UIInputViewController {
     private var suggestions: [String] = []
 
     // App Group for shared data
-    private let appGroupID = "group.app.thea"
+    private let appGroupID = "group.app.theathe"
 
     // UI Elements
     private var suggestionBar: UIStackView!
@@ -28,11 +28,6 @@ class KeyboardViewController: UIInputViewController {
         super.viewDidLoad()
         setupKeyboard()
         loadUserPreferences()
-    }
-
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        // Adjust layout for different orientations
     }
 
     override func textWillChange(_: UITextInput?) {

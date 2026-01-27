@@ -237,7 +237,7 @@ class FilterDataProvider: NEFilterDataProvider {
 
     private func loadConfiguration() {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return }
 
         let configURL = containerURL.appendingPathComponent("network_filter_config.json")
@@ -262,7 +262,7 @@ class FilterDataProvider: NEFilterDataProvider {
 
     private func saveTrafficLog() {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return }
 
         let logURL = containerURL.appendingPathComponent("network_traffic_log.json")

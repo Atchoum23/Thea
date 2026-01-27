@@ -155,7 +155,7 @@ public final class PredictiveEngine: ObservableObject {
         var predictions: [Prediction] = []
 
         let currentHour = Calendar.current.component(.hour, from: Date())
-        let currentApp = context.metadata["focusedAppBundleId"] as? String ?? "unknown"
+        let currentApp = context.metadata["focusedAppBundleId"] ?? "unknown"
 
         // Time-based prediction
         if let hourPatterns = timeBasedPatterns[currentHour] {
@@ -247,9 +247,10 @@ public final class PredictiveEngine: ObservableObject {
         var predictions: [Prediction] = []
 
         // Battery prediction
-        if let batteryLevel = context.metadata["batteryLevel"] as? Int,
-           let isCharging = context.metadata["isCharging"] as? Bool,
-           !isCharging, batteryLevel < 30
+        if let batteryLevelStr = context.metadata["batteryLevel"],
+           let batteryLevel = Int(batteryLevelStr),
+           let isChargingStr = context.metadata["isCharging"],
+           isChargingStr != "true", batteryLevel < 30
         {
             let urgency = batteryLevel < 15 ? 0.9 : 0.7
             predictions.append(Prediction(
@@ -263,7 +264,8 @@ public final class PredictiveEngine: ObservableObject {
         }
 
         // Storage prediction
-        if let freeSpace = context.metadata["freeStorageGB"] as? Double,
+        if let freeSpaceStr = context.metadata["freeStorageGB"],
+           let freeSpace = Double(freeSpaceStr),
            freeSpace < 10
         {
             predictions.append(Prediction(
@@ -277,8 +279,9 @@ public final class PredictiveEngine: ObservableObject {
         }
 
         // Meeting preparation
-        if let nextEvent = context.metadata["nextCalendarEvent"] as? String,
-           let minutesUntil = context.metadata["minutesUntilNextEvent"] as? Int,
+        if let nextEvent = context.metadata["nextCalendarEvent"],
+           let minutesUntilStr = context.metadata["minutesUntilNextEvent"],
+           let minutesUntil = Int(minutesUntilStr),
            minutesUntil > 5, minutesUntil <= 30
         {
             predictions.append(Prediction(
@@ -312,7 +315,7 @@ public final class PredictiveEngine: ObservableObject {
 
     private func loadHistoricalData() {
         let fileManager = FileManager.default
-        guard let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.app.thea") else {
+        guard let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") else {
             return
         }
 
@@ -332,7 +335,7 @@ public final class PredictiveEngine: ObservableObject {
 
     private func saveHistoricalData() {
         let fileManager = FileManager.default
-        guard let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.app.thea") else {
+        guard let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") else {
             return
         }
 

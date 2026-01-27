@@ -73,6 +73,7 @@ public actor RemoteCommandService {
         let subscription = CKQuerySubscription(
             recordType: "RemoteCommand",
             predicate: predicate,
+            subscriptionID: "remote-command-\(deviceId)",
             options: [.firesOnRecordCreation]
         )
 

@@ -16,7 +16,7 @@
         nonisolated static let _qlPreviewingControllerConformance = true
 
         private let logger = Logger(subsystem: "app.thea.quicklook", category: "Preview")
-        private let appGroupID = "group.app.thea"
+        private let appGroupID = "group.app.theathe"
 
         // UI Elements
         private var scrollView: NSScrollView!

@@ -183,7 +183,7 @@
 
         private func saveRequest(type: String, messageId: String? = nil, content: String? = nil) {
             guard let containerURL = FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier: "group.app.thea"
+                forSecurityApplicationGroupIdentifier: "group.app.theathe"
             ) else { return }
 
             let request = MailRequest(

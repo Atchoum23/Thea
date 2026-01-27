@@ -283,8 +283,11 @@ extension PasskeysService: ASAuthorizationControllerDelegate {
                     .from(error)
                 case .credentialExport:
                     .from(error)
+                case .preferSignInWithApple:
+                    .preferSignInWithApple
+                case .deviceNotConfiguredForPasskeyCreation:
+                    .deviceNotConfigured
                 @unknown default:
-                    // Handles iOS 18+ cases like preferSignInWithApple and deviceNotConfiguredForPasskeyCreation
                     .from(error)
                 }
             } else {
@@ -355,6 +358,8 @@ public enum PasskeyError: Error, LocalizedError, @unchecked Sendable {
     case notInteractive
     case credentialAlreadyExists
     case biometricsUnavailable
+    case preferSignInWithApple
+    case deviceNotConfigured
     case unknown(String)
 
     public var errorDescription: String? {
@@ -373,6 +378,10 @@ public enum PasskeyError: Error, LocalizedError, @unchecked Sendable {
             "This passkey already exists"
         case .biometricsUnavailable:
             "Biometric authentication unavailable"
+        case .preferSignInWithApple:
+            "Sign in with Apple is preferred"
+        case .deviceNotConfigured:
+            "Device is not configured for passkey creation"
         case let .unknown(message):
             "Authentication error: \(message)"
         }

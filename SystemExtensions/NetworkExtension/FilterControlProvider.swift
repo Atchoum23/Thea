@@ -103,7 +103,7 @@ class FilterControlProvider: NEFilterControlProvider {
 
     private func loadConfiguration() {
         guard let containerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.thea"
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
         ) else { return }
 
         let configURL = containerURL.appendingPathComponent("network_filter_config.json")

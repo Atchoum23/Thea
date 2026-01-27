@@ -253,7 +253,7 @@ public final class CrossDeviceNotificationRouter: ObservableObject {
 
         let results = try await database.records(matching: query)
 
-        for (recordId, result) in results.matchResults {
+        for (_, result) in results.matchResults {
             if case let .success(record) = result {
                 // Deliver the notification
                 let notification = TheaNotification(from: record)
