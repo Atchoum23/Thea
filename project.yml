@@ -19,6 +19,13 @@ options:
   transitivelyLinkDependencies: true
 
 # ============================================
+# Build Configurations
+# ============================================
+configs:
+  Debug: debug
+  Release: release
+
+# ============================================
 # Project-Level Build Settings
 # ============================================
 settings:
@@ -56,9 +63,6 @@ settings:
     # Asset Catalog
     ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
 
-    # Architectures
-    ONLY_ACTIVE_ARCH: NO
-
     # Warnings
     CLANG_ANALYZER_NONNULL: YES
     CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION: YES_AGGRESSIVE
@@ -74,39 +78,36 @@ settings:
     # Security
     ENABLE_NS_ASSERTIONS: NO
 
-  debug:
-    ONLY_ACTIVE_ARCH: YES
-    SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
-    SWIFT_OPTIMIZATION_LEVEL: "-Onone"
-    SWIFT_COMPILATION_MODE: singlefile
-    DEBUG_INFORMATION_FORMAT: dwarf
-    GCC_OPTIMIZATION_LEVEL: "0"
-    ENABLE_TESTABILITY: YES
-    ENABLE_NS_ASSERTIONS: YES
-    MTL_ENABLE_DEBUG_INFO: INCLUDE_SOURCE
-    COPY_PHASE_STRIP: NO
-    GCC_DYNAMIC_NO_PIC: NO
-    GCC_PREPROCESSOR_DEFINITIONS:
-      - "$(inherited)"
-      - "DEBUG=1"
-
-  release:
-    SWIFT_OPTIMIZATION_LEVEL: "-O"
-    SWIFT_COMPILATION_MODE: wholemodule
-    DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
-    COPY_PHASE_STRIP: NO
-    ENABLE_NS_ASSERTIONS: NO
-    MTL_FAST_MATH: YES
-    VALIDATE_PRODUCT: YES
-
-    # Link Time Optimization
-    LLVM_LTO: YES_THIN
-
-    # Strip Symbols
-    STRIP_INSTALLED_PRODUCT: YES
-    STRIP_STYLE: all
-    STRIP_SWIFT_SYMBOLS: YES
-    DEPLOYMENT_POSTPROCESSING: YES
+  configs:
+    Debug:
+      ONLY_ACTIVE_ARCH: YES
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+      SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+      SWIFT_COMPILATION_MODE: singlefile
+      DEBUG_INFORMATION_FORMAT: dwarf
+      GCC_OPTIMIZATION_LEVEL: "0"
+      ENABLE_TESTABILITY: YES
+      ENABLE_NS_ASSERTIONS: YES
+      MTL_ENABLE_DEBUG_INFO: INCLUDE_SOURCE
+      COPY_PHASE_STRIP: NO
+      GCC_DYNAMIC_NO_PIC: NO
+      GCC_PREPROCESSOR_DEFINITIONS:
+        - "$(inherited)"
+        - "DEBUG=1"
+    Release:
+      ONLY_ACTIVE_ARCH: NO
+      SWIFT_OPTIMIZATION_LEVEL: "-O"
+      SWIFT_COMPILATION_MODE: wholemodule
+      DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
+      COPY_PHASE_STRIP: NO
+      ENABLE_NS_ASSERTIONS: NO
+      MTL_FAST_MATH: YES
+      VALIDATE_PRODUCT: YES
+      LLVM_LTO: YES_THIN
+      STRIP_INSTALLED_PRODUCT: YES
+      STRIP_STYLE: all
+      STRIP_SWIFT_SYMBOLS: YES
+      DEPLOYMENT_POSTPROCESSING: YES
 
 # ============================================
 # Package Dependencies
@@ -294,9 +295,6 @@ targets:
     deploymentTarget: "10.0"
     sources:
       - path: watchOS
-        excludes:
-          - "**/WatchFeatures/**"
-          - "**/Views/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.watchos
