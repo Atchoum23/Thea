@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-import GroupActivities
+@preconcurrency import GroupActivities
 #if canImport(UIKit)
     import UIKit
 #endif
@@ -195,7 +195,7 @@ public class TheaSharePlayManager: ObservableObject {
     private func setupGroupActivityObserver() {
         Task {
             for await session in TheaGroupActivity.sessions() {
-                configureGroupSession(session)
+                await configureGroupSession(session)
             }
         }
     }
