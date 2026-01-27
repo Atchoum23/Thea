@@ -10,7 +10,7 @@ public actor CalendarContextProvider: ContextProvider {
     public let displayName = "Calendar"
 
     private let logger = Logger(subsystem: "app.thea", category: "CalendarProvider")
-    private let eventStore = EKEventStore()
+    nonisolated(unsafe) private let eventStore = EKEventStore()
 
     private var state: ContextProviderState = .idle
     private var continuation: AsyncStream<ContextUpdate>.Continuation?
