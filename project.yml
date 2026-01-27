@@ -104,9 +104,6 @@ settings:
       MTL_FAST_MATH: YES
       VALIDATE_PRODUCT: YES
       LLVM_LTO: YES_THIN
-      STRIP_INSTALLED_PRODUCT: YES
-      STRIP_STYLE: all
-      STRIP_SWIFT_SYMBOLS: YES
       DEPLOYMENT_POSTPROCESSING: YES
 
 # ============================================
