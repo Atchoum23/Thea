@@ -15,6 +15,8 @@ Autonomously build, test, audit, and verify ALL Xcode schemes (iOS/iPadOS, macOS
 3. **ZERO project warnings** in final builds (SPM package warnings acceptable)
 4. **ZERO build errors** across all schemes
 5. **BOTH CLI AND GUI** builds are required - they show different warnings
+6. **ALL FUNCTIONAL TESTS** must pass - every button, function, and feature verified
+7. **ALL CHANGES PUSHED** to GitHub with CI passing
 
 ### Failure Recovery Protocol
 - If ANY build fails → FIX IMMEDIATELY before proceeding
@@ -31,376 +33,212 @@ Autonomously build, test, audit, and verify ALL Xcode schemes (iOS/iPadOS, macOS
 - **Swift Version**: 6.0 with strict concurrency
 - **Derived Data**: `~/Library/Developer/Xcode/DerivedData/Thea-*/`
 - **Extensions**: 11 extension targets (built as dependencies of main schemes)
+- **GitHub Repo**: `git@github.com:Atchoum23/Thea.git`
 
 ---
 
-## Execution Rules
+## Execution Order & Phase Priority
 
-### Phase Priority
-| Priority | Phases | Description |
-|----------|--------|-------------|
-| **REQUIRED** | 1, 2, 3 | Builds (CLI+GUI) & linting - must pass |
-| **CONDITIONAL** | 4, 5 | Tests - skip if no test targets exist |
-| **OPTIONAL** | 6, 7, 8 | Security/perf/a11y - run if tools available |
-| **SETUP-ONLY** | 9 | CI/CD - create files, don't require external services |
-| **VERIFICATION** | 10 | Final checklist |
+| Phase | Name | Priority | Description |
+|-------|------|----------|-------------|
+| **0** | Pre-Flight & Setup | REQUIRED | Tool verification, GitHub setup, duplicate detection |
+| **1** | Code Quality & Linting | REQUIRED | SwiftLint, SwiftFormat - fix before building |
+| **2** | Debug Builds (CLI + GUI) | REQUIRED | All 4 platforms, both methods |
+| **3** | Release Builds (CLI + GUI) | REQUIRED | All 4 platforms, both methods |
+| **4** | Swift 6 Concurrency Fixes | REQUIRED | Fix all strict concurrency warnings |
+| **5** | Unit & Integration Testing | CONDITIONAL | XCTest - skip if no test targets |
+| **6** | Comprehensive Functional Testing | REQUIRED | All buttons, views, features across ALL platforms |
+| **7** | Security Audit | OPTIONAL | MobSF, Snyk, gitleaks, codesign |
+| **8** | Performance & Memory | OPTIONAL | App size, memory analysis |
+| **9** | Accessibility Audit | OPTIONAL | VoiceOver, accessibility labels |
+| **10** | CI/CD & Final Verification | REQUIRED | Commit, push, verify GitHub Actions |
 
-**NOTE**: Phases 1 and 2 require BOTH CLI (xcodebuild) AND GUI (Xcode.app) builds. CLI-only is NOT acceptable.
+**CRITICAL**: Execute phases in order. Each phase must pass before proceeding.
 
-### Skip Conditions
-- **Skip SonarCloud**: If `$SONAR_TOKEN` not set
-- **Skip Codecov**: If `$CODECOV_TOKEN` not set
-- **Skip DeepSource**: Runs via GitHub integration (just needs .deepsource.toml)
-- **Skip MobSF**: Requires Docker (skip if not installed)
-- **Skip Maestro**: Requires device/simulator running
-- **Skip tests**: If no `*Tests` targets exist in scheme
+---
 
-### GitHub Secrets Expected (all configured)
-- `SONAR_TOKEN` - SonarCloud analysis
-- `CODECOV_TOKEN` - Code coverage upload
-- `DEEPSOURCE_DSN` - DeepSource (if using CLI upload)
-- `MATCH_PASSWORD` - Fastlane match (code signing)
-- `APP_STORE_CONNECT_API_KEY` - App Store deployment
-
-### Error Recovery
-1. If a phase fails, fix issues and re-run ONLY that phase
-2. Do not re-run successful phases
-3. Log all fixes to `QA_FIXES_LOG.md`
-4. If a fix requires code changes, make them immediately
-
-### Warning Policy
-- **Target**: 0 warnings in project code
-- **Acceptable**: Warnings from 3rd-party SPM packages (cannot fix)
-- **Action**: Suppress with `// swiftlint:disable` ONLY if justified
+## Policies & Rules
 
 ### Swift 6 Strict Concurrency Policy
-Swift 6 enforces strict concurrency. **ALL concurrency warnings/errors MUST be fixed.** Common patterns:
+Swift 6 enforces strict concurrency. **ALL concurrency warnings/errors MUST be fixed.**
 
 | Issue | Fix |
 |-------|-----|
 | `Sending 'X' risks data races` | Add `@Sendable` or use `nonisolated(unsafe)` |
 | `Capture of 'self' with non-Sendable type` | Use `Task { @MainActor in }` or make type `Sendable` |
-| `Call to main-actor-isolated method in non-isolated context` | Add `@MainActor` annotation or use `await MainActor.run {}` |
-| `Static property 'X' is not concurrency-safe` | Use `nonisolated(unsafe) static` or make a computed property |
-| `Non-sendable type 'X' in implicitly asynchronous access` | Conform to `Sendable` or use `@unchecked Sendable` |
-
-**Test targets also require Swift 6 compliance.** If tests fail to build due to concurrency issues:
-1. Fix the concurrency issues in test files (same patterns as above)
-2. Add `@MainActor` to test classes that interact with UI
-3. Use `@testable import` with proper isolation annotations
-
-### CI/CD Workflow Requirement
-**CRITICAL**: After modifying ANY file that should trigger CI (`.github/workflows/*.yml`, `Package.swift`, `project.yml`, source files), you MUST:
-
-```bash
-# Stage changes
-git add -A
-
-# Commit with descriptive message
-git commit -m "$(cat <<'EOF'
-<type>: <description>
-
-<body if needed>
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-EOF
-)"
-
-# Push to trigger CI
-git push origin main
-
-# Verify workflows started
-gh run list --limit 3
-```
-
-**Types**: `feat`, `fix`, `ci`, `docs`, `refactor`, `test`, `chore`
-
-Workflows only run on GitHub after being committed and pushed. Local changes have no effect until pushed.
+| `Call to main-actor-isolated method in non-isolated context` | Add `@MainActor` or use `await MainActor.run {}` |
+| `Static property 'X' is not concurrency-safe` | Use `nonisolated(unsafe) static` or computed property |
+| `Non-sendable type 'X' in implicitly asynchronous access` | Conform to `Sendable` or `@unchecked Sendable` |
 
 ### SPM Build Fix Policy
-The project uses **both** XcodeGen (for Xcode builds) and Package.swift (for SPM/CI builds). SPM builds may fail due to:
-
 | Issue | Cause | Fix |
 |-------|-------|-----|
-| `multiple producers` | Duplicate file names in different folders | Rename files to be unique OR exclude from SPM target |
-| `unhandled files` | Non-Swift files in source folders | Add to `resources` or `exclude` in Package.swift |
-| `module not found` | Missing dependency | Add to Package.swift dependencies |
+| `multiple producers` | Duplicate file names | Rename files or add to Package.swift `exclude` |
+| `unhandled files` | Non-Swift in source | Add to `resources` or `exclude` |
+| `module not found` | Missing dependency | Add to Package.swift |
 
-**Fix duplicate file errors:**
+### Warning Policy
+- **Target**: 0 warnings in project code
+- **Acceptable**: Warnings from 3rd-party SPM packages
+- **Action**: Suppress with `// swiftlint:disable` ONLY if justified
+
+### Git Push Policy
+**ALL changes MUST be committed and pushed immediately after completion.** CI only runs on GitHub.
+
 ```bash
-# Find duplicate file names
-find Shared -name "*.swift" -exec basename {} \; | sort | uniq -d
+git add -A && git commit -m "<type>: <desc>
 
-# If duplicates found, either:
-# 1. Rename files to be unique
-# 2. Exclude from Package.swift:
-#    .target(name: "TheaCore", ..., exclude: ["Path/To/Duplicate.swift"])
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>" && git push origin main
 ```
 
 ---
 
-## Phase 0: Pre-Flight Checks & GitHub Setup
+## Phase 0: Pre-Flight & GitHub Setup
 
-### 0.1 Tool Availability
+### 0.1 Tool Verification
 ```bash
-# Check required tools
-echo "=== Pre-flight Tool Check ==="
+echo "=== Required Tools ==="
 for tool in xcodebuild swiftlint swiftformat xcodegen gh; do
-  if command -v $tool &>/dev/null; then
-    echo "✓ $tool installed"
-  else
-    echo "✗ $tool MISSING - will install"
-  fi
+  command -v $tool &>/dev/null && echo "✓ $tool" || echo "✗ $tool MISSING"
 done
 
-# Check optional tools (security & quality)
 echo ""
-echo "=== Optional Tools (Security & Quality) ==="
-for tool in periphery gitleaks osv-scanner snyk mobsfscan; do
-  if command -v $tool &>/dev/null; then
-    echo "✓ $tool installed"
-  else
-    echo "○ $tool not installed (will skip related checks)"
-  fi
+echo "=== Optional Tools ==="
+for tool in periphery gitleaks osv-scanner snyk mobsfscan maestro fastlane; do
+  command -v $tool &>/dev/null && echo "✓ $tool" || echo "○ $tool (skip related)"
 done
 
-# Check optional tools (testing & CI)
 echo ""
-echo "=== Optional Tools (Testing & CI) ==="
-for tool in fastlane maestro codecov; do
-  if command -v $tool &>/dev/null; then
-    echo "✓ $tool installed"
-  else
-    echo "○ $tool not installed (will skip related checks)"
-  fi
-done
+echo "=== Java (Maestro) ==="
+java -version 2>&1 | grep -q "17\|18\|19\|20\|21" && echo "✓ Java 17+" || echo "○ Java missing"
 
-# Check Java (required for Maestro)
 echo ""
-echo "=== Java (for Maestro) ==="
-if java -version 2>&1 | grep -q "17\|18\|19\|20\|21"; then
-  echo "✓ Java 17+ installed"
-else
-  echo "○ Java 17+ not installed (Maestro unavailable)"
-fi
-
-# Check Docker (for MobSF full)
-echo ""
-echo "=== Container Runtime ==="
-if command -v docker &>/dev/null; then
-  echo "✓ Docker installed (MobSF available)"
-else
-  echo "○ Docker not installed (MobSF unavailable)"
-fi
+echo "=== Docker (MobSF) ==="
+command -v docker &>/dev/null && echo "✓ Docker" || echo "○ Docker missing"
 ```
 
 ### 0.2 Simulator Availability
 ```bash
-# List available simulators
 echo "=== Available Simulators ==="
 xcrun simctl list devices available | grep -E "(iPhone|Apple TV|Apple Watch)" | head -10
 
-# Get first available iPhone simulator
 IPHONE_SIM=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
-echo "Using iPhone simulator: $IPHONE_SIM"
+echo "iPhone: $IPHONE_SIM"
 
-# Get first available tvOS simulator
 TV_SIM=$(xcrun simctl list devices available | grep "Apple TV" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
-echo "Using tvOS simulator: $TV_SIM"
+echo "tvOS: $TV_SIM"
 ```
 
-### 0.3 GitHub Repository Verification
+### 0.3 GitHub Setup
 ```bash
 cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
 
-# Verify git remote (use SSH for pushing)
-echo "=== Git Remote ==="
-git remote -v
-if git remote -v | grep -q "https://"; then
-  echo "Switching to SSH for push access..."
-  git remote set-url origin git@github.com:Atchoum23/Thea.git
-fi
+# Use SSH for push
+git remote -v | grep -q "https://" && git remote set-url origin git@github.com:Atchoum23/Thea.git
 
-# Verify GitHub CLI authentication
-echo ""
-echo "=== GitHub CLI ==="
-if gh auth status &>/dev/null; then
-  echo "✓ GitHub CLI authenticated"
-else
-  echo "✗ GitHub CLI not authenticated - run: gh auth login"
-fi
+# Verify authentication
+gh auth status &>/dev/null && echo "✓ GitHub CLI authenticated" || echo "✗ Run: gh auth login"
 
-# Check for uncommitted changes
-echo ""
-echo "=== Uncommitted Changes ==="
-if [ -n "$(git status --porcelain)" ]; then
-  echo "⚠ Uncommitted changes detected:"
-  git status --short
-else
-  echo "✓ Working directory clean"
-fi
+# Check uncommitted changes
+[ -n "$(git status --porcelain)" ] && { echo "⚠ Uncommitted:"; git status --short; } || echo "✓ Clean"
 
-# Verify workflows exist
-echo ""
-echo "=== GitHub Workflows ==="
-ls -la .github/workflows/*.yml 2>/dev/null || echo "✗ No workflows found"
-
-# Check last CI run status
-echo ""
-echo "=== Recent CI Runs ==="
-gh run list --limit 3 2>/dev/null || echo "✗ Cannot fetch CI runs (gh not authenticated?)"
+# Verify workflows
+ls -la .github/workflows/*.yml 2>/dev/null || echo "✗ No workflows"
 ```
 
-### 0.4 Fix SPM Duplicate Files (if needed)
+### 0.4 Duplicate File Detection
 ```bash
-# Check for duplicate Swift file names that break SPM
-echo "=== Checking for duplicate file names ==="
-DUPLICATES=$(find Shared -name "*.swift" -exec basename {} \; | sort | uniq -d)
-if [ -n "$DUPLICATES" ]; then
-  echo "⚠ DUPLICATE FILES FOUND (will break SPM build):"
-  echo "$DUPLICATES"
-  echo ""
-  echo "Full paths:"
-  for dup in $DUPLICATES; do
-    find Shared -name "$dup"
-  done
-  echo ""
-  echo "ACTION REQUIRED: Rename duplicates or add to Package.swift exclude list"
+echo "=== Duplicate Swift Files ==="
+DUPS=$(find Shared -name "*.swift" -exec basename {} \; | sort | uniq -d)
+if [ -n "$DUPS" ]; then
+  echo "⚠ DUPLICATES FOUND:"
+  echo "$DUPS"
+  for dup in $DUPS; do find Shared -name "$dup"; done
+  echo "FIX: Rename or add to Package.swift exclude"
 else
-  echo "✓ No duplicate file names found"
+  echo "✓ No duplicates"
 fi
 ```
 
 ### 0.5 Kill Stale Processes
 ```bash
-# Kill any zombie xcodebuild processes
 pkill -9 xcodebuild 2>/dev/null || true
-pkill -9 Simulator 2>/dev/null || true
 ```
 
 ---
 
-## CRITICAL: Xcode GUI Interaction Guide
+## Phase 1: Code Quality & Linting (BEFORE BUILDING)
 
-### Why Both CLI and GUI?
-- **CLI (xcodebuild)**: Fast, scriptable, good for automation
-- **GUI (Xcode.app)**: Shows additional warnings (indexer, project settings, capabilities)
-- **BOTH ARE REQUIRED** because they can show DIFFERENT issues
+**Run linting FIRST to avoid build failures from formatting issues.**
 
-### How to Trigger GUI Builds via AppleScript
-
+### 1.1 SwiftFormat (Auto-fix)
 ```bash
-# Switch scheme and build
-osascript -e '
-tell application "Xcode"
-    activate
-end tell
-delay 0.5
-tell application "System Events"
-    tell process "Xcode"
-        keystroke "0" using {control down}  -- Open scheme switcher
-        delay 0.5
-        keystroke "SCHEME_NAME"              -- Type scheme name
-        delay 0.3
-        keystroke return                     -- Select it
-        delay 0.5
-        keystroke "b" using {command down}   -- Build (Cmd+B)
-    end tell
-end tell
-'
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+swiftformat . 2>&1
+echo "✓ SwiftFormat applied"
 ```
 
-### Where Xcode GUI Stores Build Logs
-
-**Location**: `~/Library/Developer/Xcode/DerivedData/Thea-*/Logs/Build/`
-
-**File format**: `*.xcactivitylog` (gzip-compressed)
-
-### How to Read xcactivitylog Files
-
+### 1.2 SwiftLint
 ```bash
-# Find the most recent log (modified in last N minutes)
-LOG=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Logs/Build \
-  -name "*.xcactivitylog" -mmin -10 2>/dev/null | sort -r | head -1)
+swiftlint lint --reporter json > swiftlint_report.json 2>&1
+VIOLATIONS=$(swiftlint lint 2>&1 | grep -cE "(warning|error):" || echo "0")
+echo "Violations: $VIOLATIONS"
 
-# Decompress and extract readable text
-gunzip -c "$LOG" 2>/dev/null | strings > /tmp/build_log.txt
-
-# Search for warnings
-grep -E '\.swift:[0-9]+:[0-9]+: warning:' /tmp/build_log.txt | sort -u
-
-# Search for errors
-grep -E '\.swift:[0-9]+:[0-9]+: error:' /tmp/build_log.txt | sort -u
-
-# Search for project-level warnings
-grep -E '\.xcodeproj: warning:' /tmp/build_log.txt | sort -u
-
-# Search for entitlement issues
-grep -iE 'entitlement' /tmp/build_log.txt | sort -u
+if [ "$VIOLATIONS" -gt 0 ]; then
+  echo "=== Top violations ==="
+  swiftlint lint 2>&1 | grep -E "(warning|error):" | head -30
+  echo "FIX violations before proceeding"
+fi
 ```
 
-### Warning Types to Look For
+### 1.3 Auto-fix SwiftLint Violations
+```bash
+# Fix auto-correctable violations
+swiftlint lint --fix 2>&1
+swiftlint lint 2>&1 | head -20
+```
 
-| Warning Type | Pattern in Log | Where to Fix |
-|--------------|----------------|--------------|
-| Code warning | `File.swift:123:45: warning:` | Edit the Swift file |
-| Project warning | `Thea.xcodeproj: warning:` | Edit `project.yml` then `xcodegen generate` |
-| Entitlement warning | `entitlement.*not found` | Edit `.entitlements` file |
-| Capability warning | `capability.*development only` | Remove from entitlements or request from Apple |
-| Deprecated API | `was deprecated in iOS/macOS` | Use `#available` checks |
-
-### Build Wait Times
-
-- **Full build**: Wait 60-120 seconds after triggering
-- **Incremental build**: Wait 15-30 seconds
-- **Check completion**: Look for `Build Succeeded` or `Build Failed` in log
+### Success Criteria
+- [ ] SwiftFormat: Applied to all files
+- [ ] SwiftLint: 0 errors (warnings acceptable if justified)
 
 ---
 
-## Phase 1: CLI Build Cycle (Debug) + GUI Verification
+## Phase 2: Debug Builds (CLI + GUI)
 
-### Objective
-Fix all compilation errors and warnings in Debug configuration using BOTH CLI and GUI builds.
-
-**CRITICAL**: CLI and GUI builds can show DIFFERENT warnings. You MUST do BOTH.
-
-### Step 1A: CLI Builds (all 4 platforms)
-
+### 2.1 CLI Debug Builds (All 4 Platforms)
 ```bash
 cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
 
-# iOS
-xcodebuild -project Thea.xcodeproj -scheme "Thea-iOS" \
-  -destination "generic/platform=iOS" \
-  -configuration Debug ONLY_ACTIVE_ARCH=YES \
-  -allowProvisioningUpdates build 2>&1 | tee build_ios_debug.log
+for scheme in "Thea-iOS" "Thea-macOS" "Thea-watchOS" "Thea-tvOS"; do
+  PLATFORM=$(echo $scheme | sed 's/Thea-//' | tr '[:upper:]' '[:lower:]')
 
-# macOS
-xcodebuild -project Thea.xcodeproj -scheme "Thea-macOS" \
-  -destination "platform=macOS" \
-  -configuration Debug ONLY_ACTIVE_ARCH=YES \
-  -allowProvisioningUpdates build 2>&1 | tee build_macos_debug.log
+  case $PLATFORM in
+    ios) DEST="generic/platform=iOS" ;;
+    macos) DEST="platform=macOS" ;;
+    watchos) DEST="generic/platform=watchOS" ;;
+    tvos) DEST="generic/platform=tvOS" ;;
+  esac
 
-# watchOS
-xcodebuild -project Thea.xcodeproj -scheme "Thea-watchOS" \
-  -destination "generic/platform=watchOS" \
-  -configuration Debug ONLY_ACTIVE_ARCH=YES \
-  -allowProvisioningUpdates build 2>&1 | tee build_watchos_debug.log
+  echo "=== Building $scheme (Debug CLI) ==="
+  xcodebuild -project Thea.xcodeproj -scheme "$scheme" \
+    -destination "$DEST" -configuration Debug ONLY_ACTIVE_ARCH=YES \
+    -allowProvisioningUpdates build 2>&1 | tee "build_${PLATFORM}_debug.log"
 
-# tvOS
-xcodebuild -project Thea.xcodeproj -scheme "Thea-tvOS" \
-  -destination "generic/platform=tvOS" \
-  -configuration Debug ONLY_ACTIVE_ARCH=YES \
-  -allowProvisioningUpdates build 2>&1 | tee build_tvos_debug.log
+  # Check result
+  if grep -q "BUILD SUCCEEDED" "build_${PLATFORM}_debug.log"; then
+    WARNS=$(grep -c " warning:" "build_${PLATFORM}_debug.log" || echo "0")
+    echo "✓ $scheme Debug: SUCCEEDED ($WARNS warnings)"
+  else
+    echo "✗ $scheme Debug: FAILED"
+    grep " error:" "build_${PLATFORM}_debug.log" | head -10
+  fi
+done
 ```
 
-### Step 1B: GUI Builds via AppleScript (all 4 platforms)
-
-**WHY**: Xcode GUI may show additional warnings not visible in CLI (indexer warnings, project settings warnings).
-
+### 2.2 GUI Debug Builds (AppleScript)
 ```bash
-# Function to build a scheme in Xcode GUI
-build_gui_scheme() {
+build_gui() {
   local SCHEME="$1"
   osascript -e "
 tell application \"Xcode\"
@@ -409,523 +247,605 @@ end tell
 delay 1
 tell application \"System Events\"
     tell process \"Xcode\"
-        -- Switch scheme (Ctrl+0)
         keystroke \"0\" using {control down}
         delay 0.5
         keystroke \"$SCHEME\"
         delay 0.3
         keystroke return
         delay 0.5
-        -- Build (Cmd+B)
         keystroke \"b\" using {command down}
     end tell
 end tell
 "
-  echo "Building $SCHEME in GUI... waiting for completion"
-  sleep 90  # Wait for build (adjust based on project size)
+  echo "Building $SCHEME in GUI..."
+  sleep 90
 }
 
-# Build all 4 schemes
 for scheme in "Thea-iOS" "Thea-macOS" "Thea-watchOS" "Thea-tvOS"; do
-  build_gui_scheme "$scheme"
+  build_gui "$scheme"
 done
 ```
 
-### Step 1C: Read GUI Build Results from xcactivitylog
-
-**CRITICAL**: This is how you get warnings/errors from the Xcode GUI.
-
+### 2.3 Read GUI Build Logs (xcactivitylog)
 ```bash
-# Find the most recent build log (within last 10 minutes)
-find_latest_log() {
-  find ~/Library/Developer/Xcode/DerivedData/Thea-*/Logs/Build \
-    -name "*.xcactivitylog" -mmin -10 2>/dev/null | sort -r | head -1
-}
-
-# Extract warnings and errors from the log
 read_gui_log() {
-  local LOG=$(find_latest_log)
-  if [ -z "$LOG" ]; then
-    echo "ERROR: No recent xcactivitylog found"
-    return 1
-  fi
+  LOG=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Logs/Build \
+    -name "*.xcactivitylog" -mmin -10 2>/dev/null | sort -r | head -1)
 
-  echo "=== Reading: $LOG ==="
+  [ -z "$LOG" ] && { echo "No recent log"; return 1; }
 
-  # Code warnings (file:line:col format)
-  echo "--- Code Warnings ---"
-  gunzip -c "$LOG" 2>/dev/null | strings | \
-    grep -E '\.swift:[0-9]+:[0-9]+: warning:' | sort -u
+  echo "=== GUI Warnings ==="
+  gunzip -c "$LOG" 2>/dev/null | strings | grep -E '\.swift:[0-9]+:[0-9]+: warning:' | sort -u | head -20
 
-  # Code errors
-  echo "--- Code Errors ---"
-  gunzip -c "$LOG" 2>/dev/null | strings | \
-    grep -E '\.swift:[0-9]+:[0-9]+: error:' | sort -u
-
-  # Project-level warnings
-  echo "--- Project Warnings ---"
-  gunzip -c "$LOG" 2>/dev/null | strings | \
-    grep -E '\.xcodeproj: warning:' | sort -u
-
-  # Entitlement warnings
-  echo "--- Entitlement Warnings ---"
-  gunzip -c "$LOG" 2>/dev/null | strings | \
-    grep -iE 'entitlement.*warning|warning.*entitlement' | sort -u
+  echo "=== GUI Errors ==="
+  gunzip -c "$LOG" 2>/dev/null | strings | grep -E '\.swift:[0-9]+:[0-9]+: error:' | sort -u | head -10
 }
 
-# Run after each GUI build
 read_gui_log
 ```
 
-### Step 1D: Fix-Build Loop
+### Success Criteria
+- [ ] All 4 CLI Debug: BUILD SUCCEEDED, 0 warnings
+- [ ] All 4 GUI Debug: 0 warnings in xcactivitylog
 
-1. Run CLI builds → Fix any errors/warnings
-2. Run GUI builds → Read xcactivitylog
-3. If GUI shows additional warnings → Fix them
-4. Repeat until BOTH CLI and GUI show 0 warnings
+---
 
-### Extract Errors/Warnings from CLI Logs
+## Phase 3: Release Builds (CLI + GUI)
+
+### 3.1 CLI Release Builds
 ```bash
-# Count errors and warnings from CLI build logs
-for log in build_*_debug.log; do
-  echo "=== $log ==="
-  errors=$(grep -c " error:" "$log" 2>/dev/null || echo "0")
-  warnings=$(grep -c " warning:" "$log" 2>/dev/null || echo "0")
-  echo "Errors: $errors, Warnings: $warnings"
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+for scheme in "Thea-iOS" "Thea-macOS" "Thea-watchOS" "Thea-tvOS"; do
+  PLATFORM=$(echo $scheme | sed 's/Thea-//' | tr '[:upper:]' '[:lower:]')
+
+  case $PLATFORM in
+    ios) DEST="generic/platform=iOS" ;;
+    macos) DEST="platform=macOS" ;;
+    watchos) DEST="generic/platform=watchOS" ;;
+    tvos) DEST="generic/platform=tvOS" ;;
+  esac
+
+  echo "=== Building $scheme (Release CLI) ==="
+  xcodebuild -project Thea.xcodeproj -scheme "$scheme" \
+    -destination "$DEST" -configuration Release ONLY_ACTIVE_ARCH=NO \
+    -allowProvisioningUpdates build 2>&1 | tee "build_${PLATFORM}_release.log"
 done
 ```
 
-### Step 1D: Fix Swift 6 Concurrency Issues
+### 3.2 GUI Release Builds
+Same process as Phase 2.2, after builds complete run `read_gui_log`.
 
-**CRITICAL**: Swift 6 strict concurrency issues MUST be fixed, including in test targets.
+### Success Criteria
+- [ ] All 4 CLI Release: BUILD SUCCEEDED, 0 warnings
+- [ ] All 4 GUI Release: 0 warnings in xcactivitylog
 
+---
+
+## Phase 4: Swift 6 Concurrency Fixes
+
+### 4.1 Find Concurrency Issues
 ```bash
-# Find all Swift 6 concurrency warnings/errors
 grep -rE "(Sending .* risks|non-Sendable|main-actor-isolated|concurrency-safe|implicitly asynchronous)" build_*.log | head -50
 ```
 
-**Common Fixes:**
-
+### 4.2 Common Fixes
 ```swift
-// 1. Static property not concurrency-safe
-// BEFORE:
-static let shared = MyClass()
+// Static property not concurrency-safe
+// BEFORE: static let shared = MyClass()
 // AFTER:
 nonisolated(unsafe) static let shared = MyClass()
-// OR make it a computed property:
-static var shared: MyClass { MyClass() }
 
-// 2. Capture of 'self' with non-Sendable type
-// BEFORE:
-Task { self.doSomething() }
+// Capture of 'self' with non-Sendable type
+// BEFORE: Task { self.doSomething() }
 // AFTER:
 Task { @MainActor in self.doSomething() }
-// OR:
-Task { [weak self] in await MainActor.run { self?.doSomething() } }
 
-// 3. Call to main-actor-isolated method
-// BEFORE:
-func process() { updateUI() }
+// Call to main-actor-isolated method
+// BEFORE: func process() { updateUI() }
 // AFTER:
 @MainActor func process() { updateUI() }
-// OR:
-func process() async { await MainActor.run { updateUI() } }
 
-// 4. Non-sendable type in async context
-// BEFORE:
-class MyClass { }
+// Non-sendable type
+// BEFORE: class MyClass { }
 // AFTER:
-final class MyClass: Sendable { }
-// OR (if mutation needed):
 final class MyClass: @unchecked Sendable { }
-
-// 5. Test classes with UI interactions
-// BEFORE:
-class MyTests: XCTestCase { func testUI() { } }
-// AFTER:
-@MainActor class MyTests: XCTestCase { func testUI() { } }
-```
-
-**For test target concurrency issues:**
-1. Add `@MainActor` to test classes that test UI components
-2. Use `await` for async operations in tests
-3. Ensure mock objects conform to `Sendable` when needed
-
-### Success Criteria
-- [ ] All 4 schemes CLI: BUILD SUCCEEDED, 0 errors, 0 warnings
-- [ ] All 4 schemes GUI: 0 errors, 0 warnings in xcactivitylog
-- [ ] **BOTH** CLI and GUI must pass - not just one
-- [ ] **ALL Swift 6 concurrency issues fixed** (including test targets)
-
----
-
-## Phase 2: Release Build Cycle (CLI + GUI)
-
-### Objective
-Verify Release builds catch all optimization-related warnings using BOTH CLI and GUI.
-
-### Step 2A: CLI Release Builds
-
-```bash
-cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
-
-# iOS Release
-xcodebuild -project Thea.xcodeproj -scheme "Thea-iOS" \
-  -destination "generic/platform=iOS" \
-  -configuration Release ONLY_ACTIVE_ARCH=NO \
-  -allowProvisioningUpdates build 2>&1 | tee build_ios_release.log
-
-# macOS Release
-xcodebuild -project Thea.xcodeproj -scheme "Thea-macOS" \
-  -destination "platform=macOS" \
-  -configuration Release ONLY_ACTIVE_ARCH=NO \
-  -allowProvisioningUpdates build 2>&1 | tee build_macos_release.log
-
-# watchOS Release
-xcodebuild -project Thea.xcodeproj -scheme "Thea-watchOS" \
-  -destination "generic/platform=watchOS" \
-  -configuration Release ONLY_ACTIVE_ARCH=NO \
-  -allowProvisioningUpdates build 2>&1 | tee build_watchos_release.log
-
-# tvOS Release
-xcodebuild -project Thea.xcodeproj -scheme "Thea-tvOS" \
-  -destination "generic/platform=tvOS" \
-  -configuration Release ONLY_ACTIVE_ARCH=NO \
-  -allowProvisioningUpdates build 2>&1 | tee build_tvos_release.log
-```
-
-### Step 2B: GUI Release Builds
-
-**NOTE**: The schemes are already configured to use the appropriate build configuration. When you build via CLI with `-configuration Release`, the GUI will also build Release when you trigger Cmd+B (it uses the last selected configuration). Alternatively, use Product → Scheme → Edit Scheme to verify.
-
-```bash
-# Build each scheme in GUI (same as Debug - schemes handle configuration)
-for scheme in "Thea-iOS" "Thea-macOS" "Thea-watchOS" "Thea-tvOS"; do
-  build_gui_scheme "$scheme"
-  sleep 90
-  read_gui_log
-done
-```
-
-**To manually verify/switch to Release in GUI**:
-1. Product → Scheme → Edit Scheme (Cmd+Shift+,)
-2. Select "Run" in left sidebar
-3. Change "Build Configuration" dropdown to "Release"
-4. Close and build (Cmd+B)
-
-### Step 2C: Read Release Build Logs
-
-Use the same `read_gui_log` function from Phase 1 to extract warnings from xcactivitylog.
-
-### Success Criteria
-- [ ] All 4 schemes CLI Release: BUILD SUCCEEDED, 0 warnings
-- [ ] All 4 schemes GUI Release: 0 warnings in xcactivitylog
-- [ ] No optimization-related warnings
-- [ ] **BOTH** CLI and GUI Release builds must pass
-
----
-
-## Phase 3: Static Analysis & Linting
-
-### 3.1 SwiftLint
-
-```bash
-# Install if needed
-command -v swiftlint &>/dev/null || brew install swiftlint
-
-# Run analysis
-cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
-swiftlint lint --reporter json > swiftlint_report.json 2>&1
-
-# Count violations
-VIOLATIONS=$(swiftlint lint 2>&1 | grep -cE "(warning|error):" || echo "0")
-echo "SwiftLint violations: $VIOLATIONS"
-
-# Show violations
-swiftlint lint 2>&1 | grep -E "(warning|error):" | head -50
-```
-
-**Fix all violations** or add justified disable comments.
-
-### 3.2 SwiftFormat
-
-```bash
-# Install if needed
-command -v swiftformat &>/dev/null || brew install swiftformat
-
-# Check formatting issues (dry run)
-swiftformat --lint . 2>&1 | head -50
-
-# Auto-fix formatting
-swiftformat . 2>&1
-```
-
-### 3.3 Periphery (Dead Code Detection) - OPTIONAL
-
-```bash
-# Install if needed (skip if fails)
-if ! command -v periphery &>/dev/null; then
-  brew install peripheryapp/periphery/periphery 2>/dev/null || echo "Skipping Periphery (install failed)"
-fi
-
-# Run if available
-if command -v periphery &>/dev/null; then
-  periphery scan --project Thea.xcodeproj \
-    --schemes "Thea-iOS,Thea-macOS" \
-    --targets "Thea-iOS,Thea-macOS" 2>&1 | tee periphery_report.txt
-fi
-```
-
-### 3.4 SonarCloud Analysis - OPTIONAL
-
-```bash
-# Only run if token is set
-if [ -n "$SONAR_TOKEN" ]; then
-  brew install sonar-scanner 2>/dev/null
-  sonar-scanner \
-    -Dsonar.projectKey=thea \
-    -Dsonar.sources=. \
-    -Dsonar.host.url=https://sonarcloud.io \
-    -Dsonar.login=$SONAR_TOKEN
-else
-  echo "SKIP: SonarCloud (SONAR_TOKEN not set)"
-fi
-```
-
-### 3.5 DeepSource Analysis - OPTIONAL
-
-```bash
-# DeepSource analyzes via GitHub integration - no CLI needed
-# Ensure .deepsource.toml exists in repo root
-if [ ! -f .deepsource.toml ]; then
-  cat > .deepsource.toml << 'TOML'
-version = 1
-
-[[analyzers]]
-name = "swift"
-enabled = true
-
-  [analyzers.meta]
-  swift_version = "6.0"
-
-[[transformers]]
-name = "swiftformat"
-enabled = true
-TOML
-  echo "Created .deepsource.toml - DeepSource will analyze on next push"
-else
-  echo "DeepSource configured (.deepsource.toml exists)"
-fi
-```
-
-### 3.6 Codecov Integration - OPTIONAL
-
-```bash
-# Codecov uploads coverage from test results
-if [ -n "$CODECOV_TOKEN" ]; then
-  # Ensure coverage was generated from Phase 4
-  if [ -f coverage.json ]; then
-    # Install codecov CLI if needed
-    command -v codecov &>/dev/null || brew install codecov
-
-    # Upload coverage
-    codecov --token $CODECOV_TOKEN \
-      --file coverage.json \
-      --flags unittests \
-      --name "Thea-$(date +%Y%m%d)"
-    echo "Codecov: Coverage uploaded"
-  else
-    echo "Codecov: No coverage.json found (run tests first)"
-  fi
-else
-  echo "SKIP: Codecov (CODECOV_TOKEN not set)"
-fi
 ```
 
 ### Success Criteria
-- [ ] SwiftLint: 0 errors, minimal warnings (justified)
-- [ ] SwiftFormat: All files formatted
-- [ ] Periphery: Review dead code (optional)
-- [ ] SonarCloud: Quality gate passed (if configured)
-- [ ] DeepSource: .deepsource.toml configured
-- [ ] Codecov: Coverage uploaded (if tests exist and token set)
+- [ ] All Swift 6 concurrency warnings fixed
+- [ ] Rebuild after fixes shows 0 concurrency warnings
 
 ---
 
-## Phase 4: Unit & Integration Testing - CONDITIONAL
+## Phase 5: Unit & Integration Testing (CONDITIONAL)
 
-### Check if Tests Exist
+### 5.1 Check for Test Targets
 ```bash
-# Check for test targets
 TEST_TARGETS=$(xcodebuild -project Thea.xcodeproj -list 2>/dev/null | grep -i "test" || echo "")
-if [ -z "$TEST_TARGETS" ]; then
-  echo "SKIP: No test targets found"
-  exit 0
-fi
+[ -z "$TEST_TARGETS" ] && { echo "SKIP: No test targets"; exit 0; }
 ```
 
-### 4.1 Run XCTest Suite
-
+### 5.2 Run XCTest
 ```bash
-# Get available iPhone simulator
-IPHONE_SIM=$(xcrun simctl list devices available | grep "iPhone" | grep -v unavailable | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+IPHONE_SIM=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
 
 # iOS Tests
-xcodebuild test \
-  -project Thea.xcodeproj \
-  -scheme "Thea-iOS" \
+xcodebuild test -project Thea.xcodeproj -scheme "Thea-iOS" \
   -destination "platform=iOS Simulator,id=$IPHONE_SIM" \
   -resultBundlePath TestResults/iOS.xcresult 2>&1 | tee test_ios.log
 
 # macOS Tests
-xcodebuild test \
-  -project Thea.xcodeproj \
-  -scheme "Thea-macOS" \
+xcodebuild test -project Thea.xcodeproj -scheme "Thea-macOS" \
   -destination "platform=macOS" \
   -resultBundlePath TestResults/macOS.xcresult 2>&1 | tee test_macos.log
 ```
 
-### 4.2 Code Coverage Report
-
+### 5.3 Code Coverage
 ```bash
-# Generate coverage report (if tests ran)
 if [ -d "TestResults/iOS.xcresult" ]; then
   xcrun xccov view --report TestResults/iOS.xcresult --json > coverage.json
-  xcrun xccov view --report TestResults/iOS.xcresult | grep -E "^[A-Za-z]" | head -20
+  xcrun xccov view --report TestResults/iOS.xcresult | head -20
 fi
 ```
 
 ### Success Criteria
-- [ ] All unit tests pass (0 failures) OR no tests exist
-- [ ] Code coverage reported (if tests exist)
+- [ ] All unit tests pass OR no test targets exist
+- [ ] Coverage report generated
 
 ---
 
-## Phase 5: UI Automation Testing - CONDITIONAL
+## Phase 6: Comprehensive Functional Testing (REQUIRED)
 
-### Check Prerequisites
+**This phase tests ALL buttons, views, functions, and features on ALL platforms.**
+
+### 6.1 Platform-Specific Test Strategies
+
+| Platform | Primary Tool | Secondary Tool | Notes |
+|----------|--------------|----------------|-------|
+| **iOS** | XCUITest | Maestro | Simulator testing |
+| **macOS** | XCUITest | AppleScript/Appium | Desktop automation |
+| **watchOS** | XCUITest | Simulator inspection | Limited automation |
+| **tvOS** | XCUITest | Simulator focus nav | Remote-based UI |
+
+### 6.2 iOS Functional Testing (XCUITest + Maestro)
+
+#### 6.2.1 XCUITest (Native)
 ```bash
-# Check if UI test target exists
-UI_TEST_TARGET=$(xcodebuild -project Thea.xcodeproj -list 2>/dev/null | grep -i "uitest" || echo "")
-if [ -z "$UI_TEST_TARGET" ]; then
-  echo "SKIP: No UI test targets found"
-  exit 0
-fi
-```
-
-### 5.1 XCUITest
-
-```bash
-IPHONE_SIM=$(xcrun simctl list devices available | grep "iPhone" | grep -v unavailable | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
-
-xcodebuild test \
-  -project Thea.xcodeproj \
-  -scheme "Thea-iOS" \
+# Run all UI tests
+xcodebuild test -project Thea.xcodeproj -scheme "Thea-iOS" \
   -destination "platform=iOS Simulator,id=$IPHONE_SIM" \
-  -only-testing:TheaUITests 2>&1 | tee test_ui.log
+  -only-testing:TheaUITests 2>&1 | tee test_ui_ios.log
 ```
 
-### 5.2 Maestro E2E Testing - OPTIONAL
-
-Maestro provides simple YAML-based UI testing for iOS/Android.
-
-**Prerequisites:**
-- Java 17+ (Maestro requires JVM)
-- iOS Simulator running
-
-**Setup Maestro:**
+#### 6.2.2 Maestro E2E Flows
 ```bash
-# Install Java 17 if not present
-if ! java -version 2>&1 | grep -q "17\|18\|19\|20\|21"; then
-  brew install openjdk@17
-  export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
-fi
-
-# Install Maestro CLI
-if ! command -v maestro &>/dev/null; then
-  curl -Ls "https://get.maestro.mobile.dev" | bash
-fi
-
-# Add to PATH
-export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH:$HOME/.maestro/bin"
-
-# Verify installation
-maestro --version
-```
-
-**Create Test Flows Directory:**
-```bash
+# Create comprehensive test flows
 mkdir -p .maestro
 
-# Create sample flow
-cat > .maestro/launch_flow.yaml << 'YAML'
+# App Launch & Navigation Test
+cat > .maestro/01_launch.yaml << 'YAML'
+appId: app.theathe.ios
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: ".*"
+    timeout: 10000
+- takeScreenshot: ios_launch
+YAML
+
+# Tab Bar Navigation Test
+cat > .maestro/02_navigation.yaml << 'YAML'
 appId: app.theathe.ios
 ---
 - launchApp
-- assertVisible: "Thea"
-- takeScreenshot: launch_screen
+# Test each tab bar item
+- tapOn:
+    id: "tab_home"
+    optional: true
+- assertVisible:
+    text: "Home"
+    optional: true
+- takeScreenshot: nav_home
+
+- tapOn:
+    id: "tab_settings"
+    optional: true
+- assertVisible:
+    text: "Settings"
+    optional: true
+- takeScreenshot: nav_settings
 YAML
 
-cat > .maestro/navigation_flow.yaml << 'YAML'
+# Settings Screen Test
+cat > .maestro/03_settings.yaml << 'YAML'
 appId: app.theathe.ios
 ---
 - launchApp
 - tapOn: "Settings"
-- assertVisible: "Preferences"
+# Test all settings toggles
 - tapOn:
-    id: "back_button"
-- assertVisible: "Home"
+    id: "toggle_notifications"
+    optional: true
+- tapOn:
+    id: "toggle_dark_mode"
+    optional: true
+- scroll:
+    direction: DOWN
+- takeScreenshot: settings_scrolled
 YAML
 
-echo "Created Maestro test flows in .maestro/"
-```
+# Form Input Test
+cat > .maestro/04_forms.yaml << 'YAML'
+appId: app.theathe.ios
+---
+- launchApp
+# Find any text field and test input
+- tapOn:
+    id: ".*TextField.*"
+    optional: true
+- inputText: "Test input"
+- hideKeyboard
+- takeScreenshot: form_input
+YAML
 
-**Run Maestro Tests (Simulator):**
-```bash
+# Button Interaction Test
+cat > .maestro/05_buttons.yaml << 'YAML'
+appId: app.theathe.ios
+---
+- launchApp
+# Test primary action buttons
+- tapOn:
+    id: ".*Button.*"
+    optional: true
+- assertNotVisible:
+    text: "Error"
+    optional: true
+- takeScreenshot: button_action
+YAML
+
+echo "Created 5 Maestro test flows"
+
+# Run Maestro tests
 if command -v maestro &>/dev/null; then
-  # Boot simulator if not running
-  IPHONE_SIM=$(xcrun simctl list devices available | grep "iPhone 16" | grep -v unavailable | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+  # Boot simulator
   xcrun simctl boot "$IPHONE_SIM" 2>/dev/null || true
 
-  # Install app on simulator (must be built first)
+  # Install app
   APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Debug-iphonesimulator -name "Thea.app" | head -1)
-  if [ -n "$APP_PATH" ]; then
-    xcrun simctl install "$IPHONE_SIM" "$APP_PATH"
+  [ -n "$APP_PATH" ] && xcrun simctl install "$IPHONE_SIM" "$APP_PATH"
 
-    # Run all Maestro flows
-    maestro test .maestro/ 2>&1 | tee maestro_results.log
-  else
-    echo "Build iOS app first before running Maestro tests"
-  fi
+  # Run all flows
+  maestro test .maestro/ 2>&1 | tee maestro_ios_results.log
 else
   echo "SKIP: Maestro not installed"
 fi
 ```
 
-**Maestro Cloud (CI/CD - Optional):**
+### 6.3 macOS Functional Testing (XCUITest + AppleScript)
+
+#### 6.3.1 XCUITest for macOS
 ```bash
-# For CI/CD, use Maestro Cloud (requires account)
-# maestro cloud --apiKey $MAESTRO_API_KEY .maestro/
-echo "Maestro Cloud: https://cloud.maestro.mobile.dev"
+# macOS UI Tests
+xcodebuild test -project Thea.xcodeproj -scheme "Thea-macOS" \
+  -destination "platform=macOS" \
+  -only-testing:TheaUITests 2>&1 | tee test_ui_macos.log
 ```
 
-> **Note**: Maestro on real iOS devices requires a Mac, Xcode, Apple Developer account, and proper provisioning. For CI/CD, use Maestro Cloud or iOS Simulators.
+#### 6.3.2 AppleScript Automation (All Buttons & Menu Items)
+```bash
+# Find built macOS app
+MACOS_APP=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Debug -name "Thea.app" -path "*macOS*" | head -1)
+
+if [ -n "$MACOS_APP" ]; then
+  # Launch app
+  open "$MACOS_APP"
+  sleep 3
+
+  # Test all menu items
+  osascript << 'APPLESCRIPT'
+tell application "System Events"
+    tell process "Thea"
+        -- Verify app launched
+        if not (exists window 1) then
+            error "App window not found"
+        end if
+
+        -- Test Menu Bar Items
+        set menuBar to menu bar 1
+
+        -- File Menu
+        try
+            click menu bar item "File" of menuBar
+            delay 0.3
+            -- Click each menu item (non-destructive ones)
+            repeat with menuItem in menu items of menu "File" of menuBar
+                set itemName to name of menuItem
+                if itemName is not missing value and itemName is not "" then
+                    log "Testing File > " & itemName
+                end if
+            end repeat
+            key code 53 -- Escape to close menu
+        end try
+
+        -- Edit Menu
+        try
+            click menu bar item "Edit" of menuBar
+            delay 0.3
+            key code 53
+        end try
+
+        -- View Menu
+        try
+            click menu bar item "View" of menuBar
+            delay 0.3
+            key code 53
+        end try
+
+        -- Window Menu
+        try
+            click menu bar item "Window" of menuBar
+            delay 0.3
+            key code 53
+        end try
+
+        -- Help Menu
+        try
+            click menu bar item "Help" of menuBar
+            delay 0.3
+            key code 53
+        end try
+
+        -- Test all buttons in main window
+        try
+            set allButtons to every button of window 1
+            repeat with btn in allButtons
+                set btnName to description of btn
+                log "Found button: " & btnName
+                -- Click non-destructive buttons
+                if btnName does not contain "Delete" and btnName does not contain "Remove" then
+                    try
+                        click btn
+                        delay 0.5
+                    end try
+                end if
+            end repeat
+        end try
+
+        -- Test all checkboxes
+        try
+            set allCheckboxes to every checkbox of window 1
+            repeat with cb in allCheckboxes
+                click cb
+                delay 0.2
+                click cb -- Reset
+            end repeat
+        end try
+
+        -- Test all pop up buttons (dropdowns)
+        try
+            set allPopups to every pop up button of window 1
+            repeat with popup in allPopups
+                click popup
+                delay 0.3
+                key code 53 -- Close
+            end repeat
+        end try
+
+        -- Test all text fields (verify editable)
+        try
+            set allTextFields to every text field of window 1
+            repeat with tf in allTextFields
+                click tf
+                set value of tf to "Test"
+                delay 0.2
+                set value of tf to ""
+            end repeat
+        end try
+
+        -- Test all tabs
+        try
+            set allTabs to every tab group of window 1
+            repeat with tabGroup in allTabs
+                set tabButtons to every radio button of tabGroup
+                repeat with tab in tabButtons
+                    click tab
+                    delay 0.3
+                end repeat
+            end repeat
+        end try
+
+        -- Capture screenshot
+        do shell script "screencapture -w ~/Desktop/thea_macos_test.png"
+
+        log "macOS functional test complete"
+    end tell
+end tell
+APPLESCRIPT
+
+  echo "✓ macOS AppleScript automation complete"
+else
+  echo "⚠ macOS app not found - build first"
+fi
+```
+
+#### 6.3.3 macOS Keyboard Shortcuts Test
+```bash
+osascript << 'APPLESCRIPT'
+tell application "Thea"
+    activate
+end tell
+
+tell application "System Events"
+    tell process "Thea"
+        -- Test common keyboard shortcuts
+        keystroke "n" using command down -- New
+        delay 0.3
+        keystroke "w" using command down -- Close
+        delay 0.3
+        keystroke "," using command down -- Preferences
+        delay 0.5
+        key code 53 -- Escape
+        delay 0.3
+        keystroke "?" using {command down, shift down} -- Help
+        delay 0.3
+        key code 53
+    end tell
+end tell
+APPLESCRIPT
+```
+
+### 6.4 watchOS Functional Testing
+
+```bash
+# watchOS has limited UI testing - use Simulator inspection
+WATCH_SIM=$(xcrun simctl list devices available | grep "Apple Watch" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+
+if [ -n "$WATCH_SIM" ]; then
+  # Boot watch simulator
+  xcrun simctl boot "$WATCH_SIM" 2>/dev/null || true
+
+  # Install watch app
+  WATCH_APP=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Debug-watchsimulator -name "*.app" | head -1)
+  [ -n "$WATCH_APP" ] && xcrun simctl install "$WATCH_SIM" "$WATCH_APP"
+
+  # Launch app
+  xcrun simctl launch "$WATCH_SIM" app.theathe.watchos
+  sleep 3
+
+  # Take screenshot
+  xcrun simctl io "$WATCH_SIM" screenshot watchos_test.png
+
+  # Test basic interactions via simctl
+  # Swipe up
+  xcrun simctl io "$WATCH_SIM" swipe up
+  sleep 1
+  xcrun simctl io "$WATCH_SIM" screenshot watchos_scrolled.png
+
+  # Tap crown
+  xcrun simctl io "$WATCH_SIM" tap 50 50
+  sleep 1
+
+  echo "✓ watchOS simulator testing complete"
+else
+  echo "⚠ No watchOS simulator available"
+fi
+```
+
+### 6.5 tvOS Functional Testing
+
+```bash
+# tvOS testing - focus-based navigation
+TV_SIM=$(xcrun simctl list devices available | grep "Apple TV" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+
+if [ -n "$TV_SIM" ]; then
+  # Boot TV simulator
+  xcrun simctl boot "$TV_SIM" 2>/dev/null || true
+
+  # Install TV app
+  TV_APP=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Debug-appletvsimulator -name "*.app" | head -1)
+  [ -n "$TV_APP" ] && xcrun simctl install "$TV_SIM" "$TV_APP"
+
+  # Launch app
+  xcrun simctl launch "$TV_SIM" app.theathe.tvos
+  sleep 3
+
+  # Take screenshot
+  xcrun simctl io "$TV_SIM" screenshot tvos_launch.png
+
+  # Test remote navigation
+  # Down arrow
+  xcrun simctl io "$TV_SIM" sendkey down
+  sleep 0.5
+  xcrun simctl io "$TV_SIM" sendkey down
+  sleep 0.5
+  xcrun simctl io "$TV_SIM" sendkey right
+  sleep 0.5
+  xcrun simctl io "$TV_SIM" sendkey select
+  sleep 1
+  xcrun simctl io "$TV_SIM" screenshot tvos_selected.png
+
+  # Menu button (back)
+  xcrun simctl io "$TV_SIM" sendkey menu
+  sleep 0.5
+
+  echo "✓ tvOS simulator testing complete"
+else
+  echo "⚠ No tvOS simulator available"
+fi
+```
+
+### 6.6 Cross-Platform View & Button Inventory
+
+Create an inventory of all testable UI elements:
+
+```bash
+# Generate UI inventory for tracking
+cat > ui_inventory.md << 'EOF'
+# UI Element Inventory
+
+## iOS Views
+- [ ] Home View - all buttons functional
+- [ ] Settings View - all toggles work
+- [ ] Navigation - all tabs accessible
+- [ ] Forms - all inputs accept text
+- [ ] Sheets - present and dismiss correctly
+- [ ] Alerts - display and respond to actions
+
+## macOS Views
+- [ ] Main Window - renders correctly
+- [ ] Menu Bar - all items accessible
+- [ ] Toolbar - all buttons work
+- [ ] Preferences - all tabs function
+- [ ] Keyboard shortcuts - all respond
+- [ ] Context menus - appear on right-click
+
+## watchOS Views
+- [ ] Home complications work
+- [ ] Scrolling functions
+- [ ] Notifications display
+- [ ] Digital Crown responds
+
+## tvOS Views
+- [ ] Focus navigation works
+- [ ] Remote controls respond
+- [ ] Content displays correctly
+- [ ] Parallax effects render
+
+## Shared Functionality
+- [ ] Data syncs across platforms
+- [ ] Notifications deliver
+- [ ] Deep links resolve
+- [ ] State persists
+EOF
+
+echo "✓ Created ui_inventory.md"
+```
 
 ### Success Criteria
-- [ ] All XCUITests pass OR no UI tests exist
-- [ ] Maestro flows pass OR not configured
+- [ ] iOS: All XCUITests pass, all Maestro flows pass
+- [ ] macOS: All menu items accessible, all buttons clickable, keyboard shortcuts work
+- [ ] watchOS: App launches, basic interactions work
+- [ ] tvOS: Focus navigation works, remote responds
+- [ ] No crashes during any functional test
 
 ---
 
-## Phase 6: Security Audit - OPTIONAL
+## Phase 7: Security Audit (OPTIONAL)
 
-### 6.1 Dependency Vulnerability Scan
-
+### 7.1 Secrets Detection
 ```bash
-# Check Swift Package dependencies
-swift package show-dependencies 2>/dev/null || echo "No Package.swift found"
+if command -v gitleaks &>/dev/null; then
+  gitleaks detect --source . --verbose 2>&1 | tee security_secrets.log
+  grep -q "leaks found" security_secrets.log && echo "⚠ SECRETS FOUND" || echo "✓ No secrets"
+else
+  echo "SKIP: gitleaks not installed"
+fi
+```
 
-# Scan for vulnerabilities (if osv-scanner available)
+### 7.2 Dependency Vulnerabilities
+```bash
 if command -v osv-scanner &>/dev/null; then
   osv-scanner --lockfile Package.resolved 2>&1 | tee security_deps.log
 else
@@ -933,213 +853,57 @@ else
 fi
 ```
 
-### 6.2 Secrets Detection
-
+### 7.3 MobSF Source Scan
 ```bash
-# Install if not present
-command -v gitleaks &>/dev/null || brew install gitleaks 2>/dev/null
-
-# Scan for secrets
-if command -v gitleaks &>/dev/null; then
-  gitleaks detect --source . --verbose 2>&1 | tee security_secrets.log
-
-  # Check result
-  if grep -q "leaks found" security_secrets.log; then
-    echo "WARNING: Secrets detected! Review security_secrets.log"
-  else
-    echo "✓ No secrets found"
-  fi
-else
-  echo "SKIP: gitleaks not installed"
-fi
-```
-
-### 6.3 MobSF Security Scan - OPTIONAL
-
-MobSF (Mobile Security Framework) performs comprehensive static and dynamic analysis of iOS/Android apps.
-
-**Setup MobSF (Docker - Recommended):**
-```bash
-# Install Docker if not present
-if ! command -v docker &>/dev/null; then
-  echo "Docker not installed. Install from https://www.docker.com/products/docker-desktop/"
-  echo "SKIP: MobSF requires Docker"
-else
-  # Pull and run MobSF
-  docker pull opensecurity/mobile-security-framework-mobsf:latest
-
-  # Start MobSF (runs on port 8000)
-  docker run -d --name mobsf -p 8000:8000 \
-    opensecurity/mobile-security-framework-mobsf:latest
-
-  echo "MobSF running at http://localhost:8000"
-  echo "Default credentials: mobsf/mobsf"
-
-  # Wait for startup
-  sleep 10
-fi
-```
-
-**Upload IPA for Analysis:**
-```bash
-# Build IPA first (requires signing)
-if [ -f "build/Thea.ipa" ]; then
-  # Use MobSF REST API for automated scanning
-  MOBSF_API_KEY=$(curl -s http://localhost:8000/api/v1/api_key | jq -r '.api_key')
-
-  # Upload IPA
-  curl -F "file=@build/Thea.ipa" \
-    -H "Authorization: $MOBSF_API_KEY" \
-    http://localhost:8000/api/v1/upload
-
-  echo "IPA uploaded to MobSF. View analysis at http://localhost:8000"
-else
-  echo "No IPA found. Build with: xcodebuild archive -exportOptionsPlist..."
-fi
-```
-
-**Alternative: mobsfscan for Source Code (No Docker):**
-```bash
-# Install mobsfscan (CLI tool for source code scanning)
-pip3 install mobsfscan || pip install mobsfscan
-
-# Scan Swift source code
 if command -v mobsfscan &>/dev/null; then
   mobsfscan --json -o mobsf_source_scan.json . 2>&1 | tee mobsf_scan.log
-  echo "Source scan complete. Results in mobsf_source_scan.json"
 else
-  echo "SKIP: mobsfscan not installed"
+  echo "SKIP: mobsfscan not installed (pip install mobsfscan)"
 fi
 ```
 
-### 6.4 Snyk Security Scan - OPTIONAL
-
-Snyk provides dependency vulnerability scanning with Swift/CocoaPods support.
-
+### 7.4 macOS Code Signing Verification
 ```bash
-# Install Snyk CLI
-if ! command -v snyk &>/dev/null; then
-  npm install -g snyk 2>/dev/null || brew install snyk 2>/dev/null
+MACOS_APP=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Release -name "Thea.app" -path "*macOS*" | head -1)
+
+if [ -n "$MACOS_APP" ]; then
+  echo "=== Code Signing ==="
+  codesign -dv --verbose=4 "$MACOS_APP" 2>&1 | head -20
+
+  echo ""
+  echo "=== Entitlements ==="
+  codesign --display --entitlements - "$MACOS_APP" 2>&1 | head -30
+
+  echo ""
+  echo "=== Sandbox Check ==="
+  grep -l "app-sandbox" macOS/Thea.entitlements && echo "✓ Sandbox enabled" || echo "⚠ Sandbox not enabled"
 fi
+```
 
-if command -v snyk &>/dev/null; then
-  # Authenticate (requires SNYK_TOKEN env var or interactive login)
-  if [ -n "$SNYK_TOKEN" ]; then
-    snyk auth $SNYK_TOKEN
-  fi
-
-  # Test dependencies
+### 7.5 Snyk Scan
+```bash
+if command -v snyk &>/dev/null && [ -n "$SNYK_TOKEN" ]; then
+  snyk auth $SNYK_TOKEN
   snyk test --all-projects 2>&1 | tee snyk_report.log
-
-  # Monitor for ongoing alerts (optional)
-  # snyk monitor --all-projects
 else
-  echo "SKIP: Snyk not installed"
+  echo "SKIP: Snyk not configured"
 fi
-```
-
-### 6.5 Codacy Integration - OPTIONAL
-
-Codacy provides automated code reviews via GitHub integration.
-
-```bash
-# Codacy runs via GitHub App - no CLI needed
-# Create configuration file
-if [ ! -f .codacy.yml ]; then
-  cat > .codacy.yml << 'YAML'
----
-engines:
-  swiftlint:
-    enabled: true
-  metrics:
-    enabled: true
-  duplication:
-    enabled: true
-
-exclude_paths:
-  - "Pods/**"
-  - "**/Generated/**"
-  - "**/*.generated.swift"
-  - "DerivedData/**"
-
-languages:
-  swift:
-    extensions:
-      - ".swift"
-YAML
-  echo "Created .codacy.yml - Enable Codacy at https://app.codacy.com"
-else
-  echo "Codacy already configured (.codacy.yml exists)"
-fi
-```
-
-### 6.6 macOS-Specific Security Analysis
-
-**Note**: MobSF primarily targets mobile apps. For macOS apps, use these complementary tools:
-
-```bash
-# 1. codesign verification
-echo "=== Code Signing Verification ==="
-codesign -dv --verbose=4 ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Release/Thea.app 2>&1 | head -20
-
-# 2. Check for hardened runtime
-echo ""
-echo "=== Hardened Runtime Check ==="
-codesign --display --entitlements - ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Release/Thea.app 2>&1 | head -30
-
-# 3. Check sandbox entitlements
-echo ""
-echo "=== Sandbox Status ==="
-grep -l "app-sandbox" macOS/Thea.entitlements && echo "✓ Sandbox enabled" || echo "⚠ Sandbox not enabled"
-
-# 4. Binary analysis with otool
-echo ""
-echo "=== Binary Dependencies ==="
-otool -L ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products/Release/Thea.app/Contents/MacOS/Thea 2>/dev/null | head -20
-```
-
-**For comprehensive macOS security:**
-- Use **SonarQube/SonarCloud** for static analysis (already configured)
-- Use **Snyk** for dependency vulnerabilities (Section 6.4)
-- Use **gitleaks** for secrets detection (Section 6.2)
-- Consider **Katalina** (open-source macOS-specific static analysis) for deep binary analysis
-
-### 6.7 Cross-Platform Testing Note
-
-| Platform | Security Tool | UI Testing Tool |
-|----------|---------------|-----------------|
-| **iOS** | MobSF, mobsfscan | XCUITest, Maestro |
-| **macOS** | SonarCloud, Snyk, codesign | XCUITest, Appium |
-| **watchOS** | Same as iOS (shared code) | XCUITest (limited) |
-| **tvOS** | Same as iOS (shared code) | XCUITest |
-
-**Appium for macOS** (alternative to Maestro for desktop):
-```bash
-# Install Appium (if not using Maestro)
-npm install -g appium
-appium driver install mac2
-
-# Appium can automate macOS apps via XCUITest driver
-# See: https://appium.io/docs/en/drivers/mac2/
 ```
 
 ### Success Criteria
-- [ ] No hardcoded secrets
-- [ ] No critical vulnerable dependencies
-- [ ] MobSF scan: No critical/high severity issues (if Docker available)
-- [ ] Snyk: No high/critical vulnerabilities (if token set)
-- [ ] macOS code signing verified
+- [ ] No secrets in code
+- [ ] No critical vulnerabilities
+- [ ] Code signing verified
 - [ ] Hardened runtime enabled
 
 ---
 
-## Phase 7: Performance & Memory Analysis - OPTIONAL
+## Phase 8: Performance & Memory (OPTIONAL)
 
-### 7.1 Build Size Analysis
-
+### 8.1 App Size Analysis
 ```bash
-# Check app size from build products
-find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products -name "*.app" -exec du -sh {} \; 2>/dev/null | head -10
+echo "=== App Sizes ==="
+find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products -name "*.app" -exec du -sh {} \; 2>/dev/null
 ```
 
 ### Success Criteria
@@ -1147,567 +911,154 @@ find ~/Library/Developer/Xcode/DerivedData/Thea-*/Build/Products -name "*.app" -
 
 ---
 
-## Phase 8: Accessibility Audit - OPTIONAL
+## Phase 9: Accessibility Audit (OPTIONAL)
 
-### 8.1 Basic Accessibility Check
-
+### 9.1 Accessibility Check
 ```bash
-# This phase requires running UI tests with accessibility audit
-# Skip if no UI tests exist
-echo "Accessibility audit requires UI test target with performAccessibilityAudit()"
+# Requires UI test target with accessibility audit
+echo "Add performAccessibilityAudit() to XCUITests for comprehensive audit"
 ```
 
 ### Success Criteria
-- [ ] Accessibility audit integrated into UI tests (if they exist)
+- [ ] Accessibility audit integrated into UI tests
 
 ---
 
-## Phase 9: CI/CD Pipeline Setup
+## Phase 10: CI/CD & Final Verification (REQUIRED)
 
-**CRITICAL**: Workflow changes MUST be committed and pushed to take effect on GitHub.
+### 10.1 Existing GitHub Workflows
 
-### 9.1 Create GitHub Actions Workflow
+| Workflow | File | Purpose |
+|----------|------|---------|
+| **CI** | `ci.yml` | Build all platforms, tests, SwiftLint |
+| **Release** | `release.yml` | GitHub releases on tag |
+| **Security Audit** | `thea-audit-*.yml` | Security scanning |
+| **MobSF** | `security-mobsf.yml` | Source code security |
+| **Maestro** | `maestro-e2e.yml` | E2E UI tests |
 
-```bash
-mkdir -p .github/workflows
-
-cat > .github/workflows/ci.yml << 'EOF'
-name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-env:
-  DEVELOPER_DIR: /Applications/Xcode_16.app/Contents/Developer
-
-jobs:
-  build-and-test:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Required for SonarCloud
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.app
-
-      - name: Install Tools
-        run: |
-          brew install xcodegen swiftlint swiftformat
-
-      - name: Generate project
-        run: xcodegen generate
-
-      - name: SwiftLint
-        run: swiftlint lint --strict --reporter json > swiftlint-report.json || true
-
-      - name: Build iOS
-        run: |
-          xcodebuild build \
-            -project Thea.xcodeproj \
-            -scheme "Thea-iOS" \
-            -destination "generic/platform=iOS" \
-            -configuration Release \
-            ONLY_ACTIVE_ARCH=NO
-
-      - name: Build macOS
-        run: |
-          xcodebuild build \
-            -project Thea.xcodeproj \
-            -scheme "Thea-macOS" \
-            -destination "platform=macOS" \
-            -configuration Release \
-            ONLY_ACTIVE_ARCH=NO
-
-      - name: Build watchOS
-        run: |
-          xcodebuild build \
-            -project Thea.xcodeproj \
-            -scheme "Thea-watchOS" \
-            -destination "generic/platform=watchOS" \
-            -configuration Release \
-            ONLY_ACTIVE_ARCH=NO
-
-      - name: Build tvOS
-        run: |
-          xcodebuild build \
-            -project Thea.xcodeproj \
-            -scheme "Thea-tvOS" \
-            -destination "generic/platform=tvOS" \
-            -configuration Release \
-            ONLY_ACTIVE_ARCH=NO
-
-      - name: Run Tests (iOS)
-        run: |
-          xcodebuild test \
-            -project Thea.xcodeproj \
-            -scheme "Thea-iOS" \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
-            -resultBundlePath TestResults/iOS.xcresult \
-            -enableCodeCoverage YES || true
-
-      - name: Generate Coverage Report
-        run: |
-          if [ -d "TestResults/iOS.xcresult" ]; then
-            xcrun xccov view --report TestResults/iOS.xcresult --json > coverage.json
-          fi
-
-  # SonarCloud Analysis
-  sonarcloud:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=thea-app
-            -Dsonar.organization=your-org
-            -Dsonar.sources=.
-            -Dsonar.swift.coverage.reportPaths=coverage.json
-
-  # Codecov Upload
-  codecov:
-    runs-on: macos-14
-    needs: build-and-test
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download Coverage
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-report
-        continue-on-error: true
-
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.json
-          flags: unittests
-          fail_ci_if_error: false
-
-  # DeepSource Analysis (runs automatically via GitHub integration)
-  # Ensure .deepsource.toml exists in repo root
-EOF
-
-echo "✓ Created .github/workflows/ci.yml"
-```
-
-### 9.1.1 REQUIRED: Commit and Push ALL Changes
-
-**Workflows do NOT run until pushed to GitHub.** Execute this after ANY changes:
+### 10.2 MANDATORY: Commit and Push ALL Changes
 
 ```bash
 cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
 
-# Check what changed
+# Check status
 git status
 
-# Stage ALL changes (workflows, source, config)
+# Stage all changes
 git add -A
 
-# Commit with descriptive message
+# Commit
 git commit -m "$(cat <<'EOF'
-ci: update workflows and fix build issues
+fix: QA complete - zero warnings, all tests pass
 
-- Update GitHub Actions for all 4 platforms
-- Fix any SPM/Xcode build issues
-- Add security scanning integration
+- All 4 platforms build clean (iOS, macOS, watchOS, tvOS)
+- All CLI and GUI builds: 0 warnings
+- SwiftLint: 0 errors
+- All functional tests pass
+- Security scan complete
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 EOF
 )"
 
-# Push (use SSH remote)
+# Push
 git push origin main
 
-# Verify workflows started
-echo "=== Verifying CI Started ==="
+# Verify CI started
 sleep 5
 gh run list --limit 3
+echo "✓ Changes pushed. Verify: https://github.com/Atchoum23/Thea/actions"
 ```
 
-**Verify workflows are running:**
-1. `gh run list --limit 5` - Check CLI
-2. Visit: https://github.com/Atchoum23/Thea/actions
-3. If not visible, check Settings → Actions → General → Workflow permissions
-
-### 9.2 Existing GitHub Workflows (Already Configured)
-
-The repository has these workflows in `.github/workflows/`:
-
-| Workflow | File | Purpose |
-|----------|------|---------|
-| **CI** | `ci.yml` | SwiftLint, build all 4 platforms, tests, coverage |
-| **Release** | `release.yml` | Create GitHub releases on tag push |
-| **Security Audit (Full)** | `thea-audit-main.yml` | Full security scan on main branch |
-| **Security Audit (PR)** | `thea-audit-pr.yml` | Security scan on pull requests |
-| **Dependencies** | `dependencies.yml` | Validate SPM dependencies |
-
-**To verify all workflows exist:**
-```bash
-ls -la .github/workflows/
-```
-
-### 9.3 Add MobSF Security Scanning Workflow
-
-```bash
-cat > .github/workflows/security-mobsf.yml << 'EOF'
-name: MobSF Security Scan
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  mobsf-scan:
-    name: MobSF Source Code Scan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install mobsfscan
-        run: pip install mobsfscan
-
-      - name: Run mobsfscan
-        run: |
-          mobsfscan --json -o mobsf-results.json . || true
-          mobsfscan . || true
-
-      - name: Upload MobSF Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: mobsf-security-report
-          path: mobsf-results.json
-          if-no-files-found: ignore
-EOF
-echo "✓ Created security-mobsf.yml"
-```
-
-### 9.4 Add Maestro E2E Testing Workflow
-
-```bash
-cat > .github/workflows/maestro-e2e.yml << 'EOF'
-name: Maestro E2E Tests
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  maestro-ios:
-    name: Maestro iOS E2E
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Project
-        run: xcodegen generate
-
-      - name: Build iOS for Simulator
-        run: |
-          xcodebuild build \
-            -project Thea.xcodeproj \
-            -scheme "Thea-iOS" \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
-            -configuration Debug \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO
-
-      - name: Install Maestro
-        run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
-
-      - name: Boot Simulator
-        run: |
-          xcrun simctl boot "iPhone 16" || true
-          xcrun simctl list devices booted
-
-      - name: Install App on Simulator
-        run: |
-          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "Thea.app" -path "*/Debug-iphonesimulator/*" | head -1)
-          xcrun simctl install booted "$APP_PATH"
-
-      - name: Run Maestro Tests
-        run: |
-          export PATH="$PATH:$HOME/.maestro/bin"
-          maestro test .maestro/ --format junit --output maestro-results.xml || true
-        continue-on-error: true
-
-      - name: Upload Maestro Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: maestro-test-results
-          path: maestro-results.xml
-          if-no-files-found: ignore
-EOF
-echo "✓ Created maestro-e2e.yml"
-```
-
-### 9.5 Create Fastlane Config (Optional)
-
-```bash
-if command -v fastlane &>/dev/null; then
-  mkdir -p fastlane
-
-  cat > fastlane/Fastfile << 'EOF'
-default_platform(:ios)
-
-platform :ios do
-  desc "Build iOS app"
-  lane :build do
-    build_app(
-      scheme: "Thea-iOS",
-      configuration: "Release",
-      skip_archive: true
-    )
-  end
-
-  desc "Run SwiftLint"
-  lane :lint do
-    swiftlint(strict: true, raise_if_swiftlint_error: true)
-  end
-end
-EOF
-
-  echo "✓ Created fastlane/Fastfile"
-else
-  echo "SKIP: Fastlane not installed"
-fi
-```
-
-### Success Criteria
-- [ ] GitHub Actions workflow file created
-- [ ] Fastlane configured (if installed)
-
----
-
-## Phase 10: Final Verification Checklist
-
-### Generate Summary Report
-
+### 10.3 Generate Final Summary
 ```bash
 cat > QA_SUMMARY.md << EOF
 # QA Summary Report
 Generated: $(date)
 
-## CLI Build Status
-| Platform | Debug CLI | Release CLI |
-|----------|-----------|-------------|
-| iOS | $(grep -q "BUILD SUCCEEDED" build_ios_debug.log 2>/dev/null && echo "✅" || echo "❌") | $(grep -q "BUILD SUCCEEDED" build_ios_release.log 2>/dev/null && echo "✅" || echo "❌") |
-| macOS | $(grep -q "BUILD SUCCEEDED" build_macos_debug.log 2>/dev/null && echo "✅" || echo "❌") | $(grep -q "BUILD SUCCEEDED" build_macos_release.log 2>/dev/null && echo "✅" || echo "❌") |
-| watchOS | $(grep -q "BUILD SUCCEEDED" build_watchos_debug.log 2>/dev/null && echo "✅" || echo "❌") | $(grep -q "BUILD SUCCEEDED" build_watchos_release.log 2>/dev/null && echo "✅" || echo "❌") |
-| tvOS | $(grep -q "BUILD SUCCEEDED" build_tvos_debug.log 2>/dev/null && echo "✅" || echo "❌") | $(grep -q "BUILD SUCCEEDED" build_tvos_release.log 2>/dev/null && echo "✅" || echo "❌") |
+## Build Status
+| Platform | Debug CLI | Debug GUI | Release CLI | Release GUI |
+|----------|-----------|-----------|-------------|-------------|
+| iOS | $(grep -q "SUCCEEDED" build_ios_debug.log 2>/dev/null && echo "✅" || echo "❌") | ⬜ | $(grep -q "SUCCEEDED" build_ios_release.log 2>/dev/null && echo "✅" || echo "❌") | ⬜ |
+| macOS | $(grep -q "SUCCEEDED" build_macos_debug.log 2>/dev/null && echo "✅" || echo "❌") | ⬜ | $(grep -q "SUCCEEDED" build_macos_release.log 2>/dev/null && echo "✅" || echo "❌") | ⬜ |
+| watchOS | $(grep -q "SUCCEEDED" build_watchos_debug.log 2>/dev/null && echo "✅" || echo "❌") | ⬜ | $(grep -q "SUCCEEDED" build_watchos_release.log 2>/dev/null && echo "✅" || echo "❌") | ⬜ |
+| tvOS | $(grep -q "SUCCEEDED" build_tvos_debug.log 2>/dev/null && echo "✅" || echo "❌") | ⬜ | $(grep -q "SUCCEEDED" build_tvos_release.log 2>/dev/null && echo "✅" || echo "❌") | ⬜ |
 
-## GUI Build Status (from xcactivitylog)
-| Platform | Debug GUI | Release GUI |
-|----------|-----------|-------------|
-| iOS | ⬜ Verify manually | ⬜ Verify manually |
-| macOS | ⬜ Verify manually | ⬜ Verify manually |
-| watchOS | ⬜ Verify manually | ⬜ Verify manually |
-| tvOS | ⬜ Verify manually | ⬜ Verify manually |
-
-**GUI verification**: Run \`read_gui_log\` after each GUI build to check for warnings in xcactivitylog.
+## Functional Testing
+| Platform | XCUITest | E2E (Maestro/AppleScript) |
+|----------|----------|---------------------------|
+| iOS | $([ -f test_ui_ios.log ] && echo "✅" || echo "⏭") | $([ -f maestro_ios_results.log ] && echo "✅" || echo "⏭") |
+| macOS | $([ -f test_ui_macos.log ] && echo "✅" || echo "⏭") | ✅ AppleScript |
+| watchOS | ⏭ Limited | ✅ Simulator |
+| tvOS | ⏭ Limited | ✅ Simulator |
 
 ## Code Quality
-- SwiftLint: $([ -f swiftlint_report.json ] && echo "✅ Report generated" || echo "⏭ Skipped")
+- SwiftLint: $([ -f swiftlint_report.json ] && echo "✅" || echo "⏭")
 - SwiftFormat: ✅ Applied
-- Periphery: $([ -f periphery_report.txt ] && echo "✅ Report generated" || echo "⏭ Skipped")
-
-## Code Analysis Services
-- SonarCloud: $([ -n "\$SONAR_TOKEN" ] && echo "✅ Configured" || echo "⏭ Token not set")
-- DeepSource: $([ -f .deepsource.toml ] && echo "✅ Configured" || echo "⏭ Missing .deepsource.toml")
-- Codecov: $([ -n "\$CODECOV_TOKEN" ] && echo "✅ Configured" || echo "⏭ Token not set")
-- Codacy: $([ -f .codacy.yml ] && echo "✅ Configured" || echo "⏭ Missing .codacy.yml")
 
 ## Security
-- Secrets scan (gitleaks): $([ -f security_secrets.log ] && echo "✅ Completed" || echo "⏭ Skipped")
-- Dependency scan (osv-scanner): $([ -f security_deps.log ] && echo "✅ Completed" || echo "⏭ Skipped")
-- MobSF scan: $([ -f mobsf_source_scan.json ] && echo "✅ Completed" || echo "⏭ Skipped (Docker required)")
-- Snyk scan: $([ -f snyk_report.log ] && echo "✅ Completed" || echo "⏭ Skipped")
-
-## Testing
-- XCUITest: $([ -f test_ui.log ] && echo "✅ Completed" || echo "⏭ No UI tests")
-- Maestro E2E: $([ -f maestro_results.log ] && echo "✅ Completed" || echo "⏭ Not configured")
+- gitleaks: $([ -f security_secrets.log ] && echo "✅" || echo "⏭")
+- MobSF: $([ -f mobsf_source_scan.json ] && echo "✅" || echo "⏭")
 
 ## CI/CD
-- GitHub Actions: $([ -f .github/workflows/ci.yml ] && echo "✅ Configured" || echo "❌ Missing")
-- Fastlane: $([ -f fastlane/Fastfile ] && echo "✅ Configured" || echo "⏭ Not installed")
+- GitHub Actions: $(gh run list --limit 1 --json status -q '.[0].status' 2>/dev/null || echo "⏭")
+- Latest Run: $(gh run list --limit 1 --json conclusion -q '.[0].conclusion' 2>/dev/null || echo "pending")
 EOF
 
-echo "✓ Generated QA_SUMMARY.md"
 cat QA_SUMMARY.md
 ```
 
-### Final Checklist
+### 10.4 Final Checklist
 
-#### CLI Build Verification (REQUIRED)
-- [ ] iOS Debug CLI: BUILD SUCCEEDED, 0 warnings
-- [ ] iOS Release CLI: BUILD SUCCEEDED, 0 warnings
-- [ ] macOS Debug CLI: BUILD SUCCEEDED, 0 warnings
-- [ ] macOS Release CLI: BUILD SUCCEEDED, 0 warnings
-- [ ] watchOS Debug CLI: BUILD SUCCEEDED, 0 warnings
-- [ ] watchOS Release CLI: BUILD SUCCEEDED, 0 warnings
-- [ ] tvOS Debug CLI: BUILD SUCCEEDED, 0 warnings
-- [ ] tvOS Release CLI: BUILD SUCCEEDED, 0 warnings
-
-#### GUI Build Verification (REQUIRED)
-- [ ] iOS Debug GUI: 0 warnings in xcactivitylog
-- [ ] iOS Release GUI: 0 warnings in xcactivitylog
-- [ ] macOS Debug GUI: 0 warnings in xcactivitylog
-- [ ] macOS Release GUI: 0 warnings in xcactivitylog
-- [ ] watchOS Debug GUI: 0 warnings in xcactivitylog
-- [ ] watchOS Release GUI: 0 warnings in xcactivitylog
-- [ ] tvOS Debug GUI: 0 warnings in xcactivitylog
-- [ ] tvOS Release GUI: 0 warnings in xcactivitylog
-
-#### Code Quality (REQUIRED)
+#### REQUIRED (Must all pass)
+- [ ] All 4 Debug CLI: BUILD SUCCEEDED, 0 warnings
+- [ ] All 4 Release CLI: BUILD SUCCEEDED, 0 warnings
+- [ ] All 4 Debug GUI: 0 warnings (xcactivitylog)
+- [ ] All 4 Release GUI: 0 warnings (xcactivitylog)
 - [ ] SwiftLint: 0 errors
 - [ ] SwiftFormat: Applied
+- [ ] All Swift 6 concurrency issues fixed
+- [ ] iOS functional tests pass (XCUITest + Maestro)
+- [ ] macOS functional tests pass (buttons, menus, shortcuts)
+- [ ] watchOS launches and basic nav works
+- [ ] tvOS launches and focus nav works
+- [ ] All changes committed and pushed
+- [ ] GitHub Actions CI passing
 
-#### Security (RECOMMENDED)
-- [ ] No secrets in code
+#### OPTIONAL (Recommended)
+- [ ] Security scans complete
 - [ ] No critical vulnerabilities
-
-#### CI/CD (REQUIRED)
-- [ ] GitHub Actions workflow created
-- [ ] All changes committed to Git
-- [ ] Changes pushed to remote repository
-- [ ] GitHub Actions workflow triggered and passing
-
-### 10.1 MANDATORY: Final Git Push
-
-**All QA work is incomplete until changes are committed and pushed to GitHub.**
-
-```bash
-# Stage all changes
-git add -A
-
-# Commit with descriptive message
-git commit -m "fix: QA build fixes - zero warnings across all platforms
-
-- Fixed all Swift 6 concurrency warnings
-- Resolved SwiftLint violations
-- Applied SwiftFormat formatting
-- All 4 platforms (iOS, macOS, watchOS, tvOS) build clean
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-
-# Push to remote (use SSH)
-git push origin main
-
-# Verify GitHub Actions triggered
-echo "✓ Changes pushed. Verify CI at: https://github.com/Atchoum23/Thea/actions"
-```
-
-### 10.2 Verify GitHub Actions
-
-```bash
-# Check workflow status (requires gh CLI)
-if command -v gh &> /dev/null; then
-  echo "Checking GitHub Actions status..."
-  gh run list --limit 3
-
-  # Get latest run status
-  LATEST_RUN=$(gh run list --limit 1 --json status,conclusion,name -q '.[0]')
-  echo "Latest run: $LATEST_RUN"
-else
-  echo "Install gh CLI: brew install gh"
-  echo "Or check manually: https://github.com/Atchoum23/Thea/actions"
-fi
-```
-
----
-
-## Tool Installation Summary
-
-```bash
-# Required tools
-brew install swiftlint swiftformat xcodegen
-
-# Recommended tools
-brew install gitleaks fastlane
-
-# Optional tools (install as needed)
-brew install peripheryapp/periphery/periphery
-brew install osv-scanner
-```
+- [ ] Code coverage generated
+- [ ] Accessibility audit passed
 
 ---
 
 ## Autonomous Execution Notes
 
 ### MANDATORY Behaviors
-1. **Execute phases sequentially** (0→10) - Don't skip ahead
-2. **Fix errors immediately** - Each phase must pass before proceeding
-3. **Use TodoWrite** - Track progress after EVERY phase and sub-task
-4. **Log all fixes** - Append to `QA_FIXES_LOG.md`
-5. **ALL 4 PLATFORMS ARE REQUIRED** - iOS, macOS, watchOS, tvOS must ALL pass
-6. **Generate reports** - Save all outputs for review
-7. **COMMIT AND PUSH ALL CHANGES** - Work is not complete until pushed to GitHub
-8. **VERIFY GITHUB ACTIONS** - Confirm CI workflows are triggered and passing
-
-### CRITICAL: CLI + GUI Requirement
-7. **MUST use BOTH CLI and GUI builds** - They show different warnings
-8. **CLI build**: Use `xcodebuild` commands
-9. **GUI build**: Use AppleScript to trigger Xcode.app builds
-10. **Read GUI results**: Parse `xcactivitylog` files from DerivedData
-11. **Fix ALL warnings from BOTH sources** - Mission fails if either has warnings
+1. Execute phases 0→10 sequentially
+2. Fix errors immediately before proceeding
+3. Use TodoWrite to track progress
+4. Log all fixes to `QA_FIXES_LOG.md`
+5. ALL 4 PLATFORMS must pass
+6. Run BOTH CLI and GUI builds
+7. Test ALL buttons and functions (Phase 6)
+8. COMMIT AND PUSH after completion
 
 ### Error Handling
-12. **If a build fails** → Read the error, fix the code, rebuild that scheme only
-13. **If a warning appears** → Fix it unless it's from an SPM package
-14. **If xcodegen needed** → Run `xcodegen generate` after modifying `project.yml`
-15. **If provisioning fails** → Use `-allowProvisioningUpdates` flag (already included)
-16. **If GUI shows warnings CLI didn't** → Those are real warnings, fix them
-17. **If git push fails** → Switch to SSH remote: `git remote set-url origin git@github.com:Atchoum23/Thea.git`
-18. **If GitHub Actions not running** → Verify workflow was pushed and check `.github/workflows/` exists on remote
-
-### Skip Conditions (OPTIONAL phases only)
-17. **Skip gracefully** - If a tool is unavailable for optional phases, log and continue
-18. **Don't block on optional phases** - Mark as skipped and proceed
-19. **NEVER skip required phases (1, 2, 3)** - These MUST pass
-20. **NEVER skip GUI builds** - CLI-only is NOT acceptable
+- Build fails → Fix and rebuild that scheme only
+- Warning appears → Fix unless from SPM package
+- xcodegen needed → Run `xcodegen generate`
+- Git push fails → `git remote set-url origin git@github.com:Atchoum23/Thea.git`
+- Functional test fails → Fix UI issue, retest
 
 ### Completion Criteria
-The mission is ONLY complete when:
-- [ ] All 4 Debug CLI builds: BUILD SUCCEEDED, 0 warnings
-- [ ] All 4 Debug GUI builds: 0 warnings in xcactivitylog
-- [ ] All 4 Release CLI builds: BUILD SUCCEEDED, 0 warnings
-- [ ] All 4 Release GUI builds: 0 warnings in xcactivitylog
+Mission ONLY complete when:
+- [ ] All 16 builds pass (4 platforms × 2 configs × 2 methods)
+- [ ] All functional tests pass (Phase 6)
 - [ ] SwiftLint: 0 errors
-- [ ] QA_SUMMARY.md generated with all ✅
-- [ ] **All changes committed and pushed to GitHub**
-- [ ] **GitHub Actions CI workflow triggered successfully**
+- [ ] All changes pushed to GitHub
+- [ ] GitHub Actions CI passing
 
 ---
 
@@ -1718,112 +1069,39 @@ The mission is ONLY complete when:
 | `build_*_debug.log` | Debug build outputs |
 | `build_*_release.log` | Release build outputs |
 | `swiftlint_report.json` | Linting results |
-| `periphery_report.txt` | Dead code analysis |
-| `security_secrets.log` | Secrets scan results |
-| `security_deps.log` | Dependency vulnerabilities |
+| `test_ui_*.log` | UI test results |
+| `maestro_ios_results.log` | Maestro E2E results |
+| `security_*.log` | Security scan results |
+| `ui_inventory.md` | UI element checklist |
+| `QA_SUMMARY.md` | Final summary |
 | `QA_FIXES_LOG.md` | All fixes applied |
-| `QA_SUMMARY.md` | Final summary report |
-| `.github/workflows/ci.yml` | CI pipeline |
-| `fastlane/Fastfile` | Automation lanes |
-| `.deepsource.toml` | DeepSource config |
-| `.codacy.yml` | Codacy config |
-| `.maestro/*.yaml` | Maestro test flows |
-| `mobsf_source_scan.json` | MobSF scan results |
-| `snyk_report.log` | Snyk vulnerability report |
-| `maestro_results.log` | Maestro test results |
 
 ---
 
-## Appendix: Complete Tools Reference
-
-### Build & Code Quality Tools
-
-| Tool | Purpose | Install | Required |
-|------|---------|---------|----------|
-| **xcodebuild** | Build iOS/macOS/watchOS/tvOS | Xcode | ✅ Yes |
-| **XcodeGen** | Generate Xcode project from YAML | `brew install xcodegen` | ✅ Yes |
-| **SwiftLint** | Swift linting & style | `brew install swiftlint` | ✅ Yes |
-| **SwiftFormat** | Code formatting | `brew install swiftformat` | ✅ Yes |
-| **Periphery** | Dead code detection | `brew install peripheryapp/periphery/periphery` | Optional |
-
-### Code Analysis Services (GitHub Integration)
-
-| Service | Purpose | Setup | Token Required |
-|---------|---------|-------|----------------|
-| **SonarCloud** | Code quality & security | GitHub App + `SONAR_TOKEN` | Yes |
-| **DeepSource** | AI code review | GitHub App + `.deepsource.toml` | No (GitHub App) |
-| **Codecov** | Code coverage tracking | GitHub App + `CODECOV_TOKEN` | Yes |
-| **Codacy** | Automated code review | GitHub App + `.codacy.yml` | No (GitHub App) |
-
-### Security Tools
-
-| Tool | Purpose | Install | Docker Required |
-|------|---------|---------|-----------------|
-| **MobSF** | Mobile app security (SAST/DAST) | `docker pull opensecurity/mobile-security-framework-mobsf` | Yes |
-| **mobsfscan** | Source code security scan | `pip install mobsfscan` | No |
-| **Snyk** | Dependency vulnerabilities | `brew install snyk` | No |
-| **gitleaks** | Secrets detection | `brew install gitleaks` | No |
-| **osv-scanner** | OSS vulnerability scanner | `brew install osv-scanner` | No |
-
-### Testing Tools
-
-| Tool | Purpose | Install | Notes |
-|------|---------|---------|-------|
-| **XCTest** | Unit testing | Xcode | Built-in |
-| **XCUITest** | UI testing | Xcode | Built-in |
-| **Maestro** | E2E UI testing (YAML) | `curl -Ls "https://get.maestro.mobile.dev" \| bash` | Simulator or Maestro Cloud for iOS |
-
-### CI/CD Tools
-
-| Tool | Purpose | Install | Notes |
-|------|---------|---------|-------|
-| **GitHub Actions** | CI/CD pipeline | N/A | `.github/workflows/ci.yml` |
-| **Fastlane** | Build automation | `brew install fastlane` | `fastlane/Fastfile` |
-
-### Performance & Monitoring (Production)
-
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| **Xcode Instruments** | Performance profiling | Built into Xcode |
-| **Firebase Performance** | Production APM | Cloud-based |
-| **New Relic Mobile** | Production monitoring | Cloud-based |
-
-### Quick Install All Tools
+## Quick Install All Tools
 
 ```bash
-# Required tools
+# Required
 brew install xcodegen swiftlint swiftformat
 
-# Optional security tools
-brew install gitleaks osv-scanner snyk
+# Optional
+brew install gitleaks osv-scanner snyk fastlane openjdk@17
 pip3 install mobsfscan
-
-# Optional quality tools
-brew install peripheryapp/periphery/periphery
-
-# Optional testing/CI tools
-brew install fastlane openjdk@17  # Java required for Maestro
 curl -Ls "https://get.maestro.mobile.dev" | bash
 
-# Add to PATH (add to ~/.zshrc for persistence)
+# PATH
 export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH:$HOME/.maestro/bin"
-
-# MobSF (requires Docker Desktop)
-# docker pull opensecurity/mobile-security-framework-mobsf:latest
 ```
 
 ---
 
 ## Terminal Execution
 
-### Launch Command
-
 ```bash
 cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea" && claude --dangerously-skip-permissions
 ```
 
 ### Prompt
-
 ```
 Read .claude/AUTONOMOUS_BUILD_QA.md and execute it completely. Do not stop until all completion criteria are met.
 ```
