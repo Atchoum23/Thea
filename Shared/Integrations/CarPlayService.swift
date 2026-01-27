@@ -340,16 +340,18 @@ import SwiftUI
 
     // MARK: - CPInterfaceControllerDelegate
 
-    extension CarPlayService: CPInterfaceControllerDelegate {
-        public func templateWillAppear(_ aTemplate: CPTemplate, animated _: Bool) {
-            currentTemplate = aTemplate
+    extension CarPlayService: @preconcurrency CPInterfaceControllerDelegate {
+        nonisolated public func templateWillAppear(_ aTemplate: CPTemplate, animated _: Bool) {
+            Task { @MainActor in
+                currentTemplate = aTemplate
+            }
         }
 
-        public func templateDidAppear(_: CPTemplate, animated _: Bool) {}
+        nonisolated public func templateDidAppear(_: CPTemplate, animated _: Bool) {}
 
-        public func templateWillDisappear(_: CPTemplate, animated _: Bool) {}
+        nonisolated public func templateWillDisappear(_: CPTemplate, animated _: Bool) {}
 
-        public func templateDidDisappear(_: CPTemplate, animated _: Bool) {}
+        nonisolated public func templateDidDisappear(_: CPTemplate, animated _: Bool) {}
     }
 
 #endif
