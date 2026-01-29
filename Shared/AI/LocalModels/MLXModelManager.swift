@@ -22,12 +22,20 @@ final class MLXModelManager {
 
     private let scanner = MLXModelScanner.shared
     private let defaults = UserDefaults.standard
+    private var scanTask: Task<Void, Never>?
+    private(set) var isScanComplete = false
 
     private init() {
         loadModelDirectories()
-        Task {
+        scanTask = Task {
             await refreshModels()
+            isScanComplete = true
         }
+    }
+
+    /// Wait for initial model scan to complete
+    func waitForScan() async {
+        await scanTask?.value
     }
 
     // MARK: - Directory Management

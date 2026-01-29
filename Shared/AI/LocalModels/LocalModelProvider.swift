@@ -1,4 +1,7 @@
 import Foundation
+#if os(macOS)
+import MLXLMCommon
+#endif
 
 // MARK: - Local Model Support
 
@@ -20,12 +23,21 @@ final class LocalModelManager {
         AppConfiguration.shared.localModelConfig
     }
 
+    private var discoveryTask: Task<Void, Never>?
+    private(set) var isDiscoveryComplete = false
+
     private init() {
         loadCustomPaths()
-        Task {
+        discoveryTask = Task {
             await detectRuntimes()
             await discoverModels()
+            isDiscoveryComplete = true
         }
+    }
+
+    /// Wait for initial model discovery to complete
+    func waitForDiscovery() async {
+        await discoveryTask?.value
     }
 
     // MARK: - Custom Paths Management
@@ -140,12 +152,13 @@ final class LocalModelManager {
             await discoverOllamaModels()
         }
 
-        if isMLXInstalled {
-            await discoverMLXModels()
-        }
+        // Always discover MLX models from SharedLLMs (don't require mlx CLI)
+        await discoverMLXModels()
 
         // Discover GGUF models in standard locations
         await discoverGGUFModels()
+
+        print("📊 LocalModelManager discovered \(availableModels.count) models")
     }
 
     private func discoverOllamaModels() async {
@@ -194,39 +207,181 @@ final class LocalModelManager {
 
     private func discoverMLXModels() async {
         #if os(macOS)
-            // MLX models are typically in ~/mlx-models
-            let mlxPath = FileManager.default.homeDirectoryForCurrentUser
-                .appendingPathComponent(config.mlxModelsDirectory)
+            // Check multiple locations for MLX models
+            let mlxPaths = [
+                // SharedLLMs models-mlx (primary location with HuggingFace Hub structure)
+                FileManager.default.homeDirectoryForCurrentUser
+                    .appendingPathComponent(config.sharedLLMsDirectory)
+                    .appendingPathComponent("models-mlx"),
+                // Legacy mlx-models directory
+                FileManager.default.homeDirectoryForCurrentUser
+                    .appendingPathComponent(config.mlxModelsDirectory)
+            ]
 
-            guard FileManager.default.fileExists(atPath: mlxPath.path) else { return }
+            print("🔍 Searching for MLX models in paths:")
+            for path in mlxPaths {
+                print("  📁 \(path.path) - exists: \(FileManager.default.fileExists(atPath: path.path))")
+            }
 
-            do {
-                let models = try FileManager.default.contentsOfDirectory(at: mlxPath, includingPropertiesForKeys: [.isDirectoryKey])
-
-                for modelDir in models {
-                    let modelName = modelDir.lastPathComponent
-
-                    let model = LocalModel(
-                        id: UUID(),
-                        name: modelName,
-                        path: modelDir,
-                        type: .mlx,
-                        format: "MLX",
-                        sizeInBytes: nil,
-                        runtime: .mlx,
-                        size: 0,
-                        parameters: config.defaultParameters,
-                        quantization: "4bit"
-                    )
-
-                    availableModels.append(model)
+            for mlxPath in mlxPaths {
+                guard FileManager.default.fileExists(atPath: mlxPath.path) else {
+                    print("⚠️ Path does not exist: \(mlxPath.path)")
+                    continue
                 }
-            } catch {
-                print("Failed to discover MLX models: \(error)")
+                print("✅ Scanning path: \(mlxPath.path)")
+
+                do {
+                    // Handle HuggingFace Hub structure: models-mlx/hub/models--org--name/snapshots/hash/
+                    let hubPath = mlxPath.appendingPathComponent("hub")
+                    if FileManager.default.fileExists(atPath: hubPath.path) {
+                        let modelDirs = try FileManager.default.contentsOfDirectory(at: hubPath, includingPropertiesForKeys: [.isDirectoryKey])
+
+                        for modelDir in modelDirs {
+                            // Skip hidden files
+                            guard !modelDir.lastPathComponent.hasPrefix(".") else { continue }
+
+                            // Find the snapshot directory
+                            let snapshotsPath = modelDir.appendingPathComponent("snapshots")
+                            guard FileManager.default.fileExists(atPath: snapshotsPath.path) else { continue }
+
+                            let snapshots = try FileManager.default.contentsOfDirectory(at: snapshotsPath, includingPropertiesForKeys: [.isDirectoryKey])
+
+                            // Use the first (typically only) snapshot
+                            guard let snapshotDir = snapshots.first else { continue }
+
+                            // Verify it's a valid MLX model directory
+                            let configPath = snapshotDir.appendingPathComponent("config.json")
+                            guard FileManager.default.fileExists(atPath: configPath.path) else { continue }
+
+                            // Check for weights file
+                            let hasWeights = FileManager.default.fileExists(atPath: snapshotDir.appendingPathComponent("weights.safetensors").path) ||
+                                FileManager.default.fileExists(atPath: snapshotDir.appendingPathComponent("model.safetensors").path) ||
+                                FileManager.default.fileExists(atPath: snapshotDir.appendingPathComponent("tokenizer.json").path)
+
+                            guard hasWeights else { continue }
+
+                            // Extract friendly name from "models--mlx-community--ModelName-8bit"
+                            let dirName = modelDir.lastPathComponent
+                            let modelName = extractModelName(from: dirName)
+
+                            // Calculate directory size
+                            let size = calculateDirectorySize(snapshotDir)
+
+                            let model = LocalModel(
+                                id: UUID(),
+                                name: modelName,
+                                path: snapshotDir,
+                                type: .mlx,
+                                format: "MLX",
+                                sizeInBytes: Int(size),
+                                runtime: .mlx,
+                                size: size,
+                                parameters: extractParameters(from: modelName),
+                                quantization: extractQuantization(from: modelName)
+                            )
+
+                            availableModels.append(model)
+                            print("✅ Discovered MLX model: \(modelName)")
+                        }
+                    }
+
+                    // Also check for direct model directories (non-Hub structure)
+                    let directModels = try FileManager.default.contentsOfDirectory(at: mlxPath, includingPropertiesForKeys: [.isDirectoryKey])
+                    for modelDir in directModels {
+                        guard !modelDir.lastPathComponent.hasPrefix("."),
+                              modelDir.lastPathComponent != "hub" else { continue }
+
+                        let configPath = modelDir.appendingPathComponent("config.json")
+                        guard FileManager.default.fileExists(atPath: configPath.path) else { continue }
+
+                        let modelName = modelDir.lastPathComponent
+                        let size = calculateDirectorySize(modelDir)
+
+                        let model = LocalModel(
+                            id: UUID(),
+                            name: modelName,
+                            path: modelDir,
+                            type: .mlx,
+                            format: "MLX",
+                            sizeInBytes: Int(size),
+                            runtime: .mlx,
+                            size: size,
+                            parameters: extractParameters(from: modelName),
+                            quantization: extractQuantization(from: modelName)
+                        )
+
+                        availableModels.append(model)
+                        print("✅ Discovered MLX model: \(modelName)")
+                    }
+                } catch {
+                    print("Failed to discover MLX models in \(mlxPath.path): \(error)")
+                }
             }
         #else
             // iOS: MLX requires macOS - not available on iOS
         #endif
+    }
+
+    /// Extract friendly model name from HuggingFace Hub directory name
+    private func extractModelName(from dirName: String) -> String {
+        // "models--mlx-community--Qwen2.5-72B-Instruct-8bit" -> "Qwen2.5-72B-Instruct-8bit"
+        let parts = dirName.split(separator: "--")
+        if parts.count >= 3 {
+            return String(parts.dropFirst(2).joined(separator: "--"))
+        }
+        return dirName
+    }
+
+    /// Extract parameter size from model name (e.g., "7B", "70B")
+    private func extractParameters(from name: String) -> String {
+        let patterns = ["(\\d+\\.?\\d*)B", "(\\d+)b"]
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: name, range: NSRange(name.startIndex..., in: name)),
+               let range = Range(match.range(at: 1), in: name)
+            {
+                return String(name[range]) + "B"
+            }
+        }
+        return config.defaultParameters
+    }
+
+    /// Extract quantization from model name (e.g., "4bit", "8bit", "bf16")
+    private func extractQuantization(from name: String) -> String {
+        let lowercased = name.lowercased()
+        if lowercased.contains("4bit") || lowercased.contains("4-bit") || lowercased.contains("q4") {
+            return "4bit"
+        }
+        if lowercased.contains("8bit") || lowercased.contains("8-bit") || lowercased.contains("q8") {
+            return "8bit"
+        }
+        if lowercased.contains("bf16") || lowercased.contains("bfloat16") {
+            return "bf16"
+        }
+        if lowercased.contains("fp16") || lowercased.contains("float16") {
+            return "fp16"
+        }
+        if lowercased.contains("fp32") || lowercased.contains("float32") {
+            return "fp32"
+        }
+        return config.defaultQuantization
+    }
+
+    /// Calculate total size of a directory
+    private func calculateDirectorySize(_ url: URL) -> Int64 {
+        var totalSize: Int64 = 0
+        guard let enumerator = FileManager.default.enumerator(
+            at: url,
+            includingPropertiesForKeys: [.fileSizeKey],
+            options: [.skipsHiddenFiles]
+        ) else { return 0 }
+
+        for case let fileURL as URL in enumerator {
+            if let size = try? fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                totalSize += Int64(size)
+            }
+        }
+        return totalSize
     }
 
     private func discoverGGUFModels() async {
@@ -423,49 +578,47 @@ struct OllamaModelInstance: LocalModelInstance {
 
 struct MLXModelInstance: LocalModelInstance {
     let model: LocalModel
-    let mlxPath: String
-
-    init(model: LocalModel) {
-        self.model = model
-        // Capture config value at init time for Sendable compliance
-        mlxPath = LocalModelConfiguration().mlxExecutablePath
-    }
 
     func generate(prompt: String, maxTokens: Int) async throws -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
-            Task {
+        #if os(macOS)
+        // Use native MLX Swift inference engine (macOS 26 best practice)
+        // This uses unified memory and Metal acceleration for optimal performance
+        return AsyncThrowingStream { continuation in
+            Task { @MainActor in
                 do {
-                    #if os(macOS)
-                        // Call MLX generation
-                        let process = Process()
-                        process.executableURL = URL(fileURLWithPath: mlxPath)
-                        process.arguments = [
-                            "generate",
-                            "--model", model.name,
-                            "--prompt", prompt,
-                            "--max-tokens", String(maxTokens)
-                        ]
+                    let engine = MLXInferenceEngine.shared
 
-                        let pipe = Pipe()
-                        process.standardOutput = pipe
+                    // Load model if not already loaded
+                    if !engine.isModelLoaded(model.path.path) {
+                        _ = try await engine.loadLocalModel(path: model.path)
+                    }
 
-                        try process.run()
+                    // Generate with streaming using GenerateParameters
+                    // Parameter order: maxTokens first, then temperature, topP
+                    let params = GenerateParameters(
+                        maxTokens: maxTokens,
+                        temperature: 0.7,
+                        topP: 0.9
+                    )
 
-                        for try await line in pipe.fileHandleForReading.bytes.lines {
-                            continuation.yield(line)
-                        }
+                    let stream = try await engine.generate(prompt: prompt, parameters: params)
 
-                        process.waitUntilExit()
-                        continuation.finish()
-                    #else
-                        // iOS: MLX requires macOS - not available on iOS
-                        throw LocalModelError.notImplemented
-                    #endif
+                    for try await chunk in stream {
+                        continuation.yield(chunk)
+                    }
+
+                    continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)
                 }
             }
         }
+        #else
+        // iOS: MLX requires macOS - not available on iOS
+        return AsyncThrowingStream { continuation in
+            continuation.finish(throwing: LocalModelError.notImplemented)
+        }
+        #endif
     }
 }
 
@@ -538,15 +691,84 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
         model: String,
         stream _: Bool = false
     ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
-        // Convert messages to prompt
-        let prompt = messages.map { message in
-            "\(message.role.rawValue.capitalized): \(message.content.textValue)"
-        }.joined(separator: "\n\n")
+        // Get the conversation ID for chat session management
+        let conversationID = messages.first?.conversationID ?? UUID()
+
+        // Get only the latest user message - ChatSession maintains history via KV cache
+        guard let latestUserMessage = messages.last(where: { $0.role == .user }) else {
+            throw LocalModelError.modelNotFound // No user message to respond to
+        }
+
+        let userText = latestUserMessage.content.textValue
+
+        // Build history from all messages EXCEPT the current one
+        // This is used when the ChatSession doesn't have KV cache (new session or app restart)
+        let historyMessages = messages.dropLast().map { msg in
+            (role: msg.role.rawValue, content: msg.content.textValue)
+        }
 
         return AsyncThrowingStream { continuation in
-            Task {
+            Task { @MainActor in
                 do {
-                    let stream = try await instance.generate(prompt: prompt, maxTokens: 2048)
+                    #if os(macOS)
+                    // For MLX models, use ChatSession with proper chat templates
+                    // This prevents hallucination issues from raw prompt formatting
+                    if instance is MLXModelInstance {
+                        let engine = MLXInferenceEngine.shared
+
+                        // Ensure model is loaded
+                        if !engine.isModelLoaded(self.instance.model.path.path) {
+                            _ = try await engine.loadLocalModel(path: self.instance.model.path)
+                        }
+
+                        // Classify the task for dynamic system prompt
+                        // This ensures the model gets appropriate instructions based on the query type
+                        let classification = try? await TaskClassifier.shared.classify(userText)
+                        let taskType = classification?.primaryType
+                        let dynamicSystemPrompt = MLXInferenceEngine.systemPrompt(for: taskType)
+
+                        // Convert history to the format expected by MLXInferenceEngine
+                        let history: [MLXInferenceEngine.ChatHistoryMessage] = historyMessages.map {
+                            MLXInferenceEngine.ChatHistoryMessage(role: $0.role, content: $0.content)
+                        }
+
+                        // Use chat() which uses ChatSession for proper template handling
+                        // Pass history for context when session is new (no KV cache)
+                        // Pass dynamic system prompt based on task classification
+                        let stream = try await engine.chat(
+                            message: userText,
+                            conversationID: conversationID,
+                            history: history.isEmpty ? nil : history,
+                            systemPrompt: dynamicSystemPrompt
+                        )
+
+                        var fullText = ""
+                        for try await text in stream {
+                            fullText += text
+                            continuation.yield(.delta(text))
+                        }
+
+                        // Send complete message
+                        let completeMessage = AIMessage(
+                            id: UUID(),
+                            conversationID: conversationID,
+                            role: .assistant,
+                            content: .text(fullText),
+                            timestamp: Date(),
+                            model: model
+                        )
+                        continuation.yield(.complete(completeMessage))
+                        continuation.finish()
+                        return
+                    }
+                    #endif
+
+                    // Fallback for non-MLX models (Ollama, GGUF): use raw prompt
+                    let prompt = messages.map { message in
+                        "\(message.role.rawValue.capitalized): \(message.content.textValue)"
+                    }.joined(separator: "\n\n")
+
+                    let stream = try await self.instance.generate(prompt: prompt, maxTokens: 2048)
 
                     var fullText = ""
                     for try await text in stream {
@@ -557,7 +779,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
                     // Send complete message
                     let completeMessage = AIMessage(
                         id: UUID(),
-                        conversationID: messages.first?.conversationID ?? UUID(),
+                        conversationID: conversationID,
                         role: .assistant,
                         content: .text(fullText),
                         timestamp: Date(),
