@@ -162,7 +162,7 @@ enum StandByStatus: String {
 }
 
 struct StandByWidgetProvider: TimelineProvider {
-    func placeholder(in context: Context) -> StandByWidgetEntry {
+    func placeholder(in _: Context) -> StandByWidgetEntry {
         StandByWidgetEntry(
             date: Date(),
             isStandBy: false /* iOS 17.4+ */,
@@ -172,7 +172,7 @@ struct StandByWidgetProvider: TimelineProvider {
         )
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (StandByWidgetEntry) -> Void) {
+    func getSnapshot(in _: Context, completion: @escaping (StandByWidgetEntry) -> Void) {
         let entry = StandByWidgetEntry(
             date: Date(),
             isStandBy: false /* iOS 17.4+ */,
@@ -183,7 +183,7 @@ struct StandByWidgetProvider: TimelineProvider {
         completion(entry)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<StandByWidgetEntry>) -> Void) {
+    func getTimeline(in _: Context, completion: @escaping (Timeline<StandByWidgetEntry>) -> Void) {
         let defaults = UserDefaults(suiteName: "group.app.theathe")
 
         let status: StandByStatus = if defaults?.bool(forKey: "widget.hasNotification") == true {

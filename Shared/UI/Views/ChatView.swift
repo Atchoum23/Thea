@@ -122,28 +122,75 @@ struct ChatView: View {
     }
 
     private func setupProvider() async {
-        // Get OpenAI API key from Keychain
-        guard let apiKey = try? SecureStorage.shared.loadAPIKey(for: "openai") else {
-            showingAPIKeySetup = true
-            return
-        }
+        // The orchestrator handles provider selection automatically.
+        // Local models don't need API keys, so we only show the setup
+        // dialog if NO providers are available at all.
 
-        selectedProvider = OpenAIProvider(apiKey: apiKey)
+        // Check if we have any local models available
+        let hasLocalModels = !ProviderRegistry.shared.getAvailableLocalModels().isEmpty
+
+        // Try to get OpenAI API key from Keychain
+        if let apiKey = try? SecureStorage.shared.loadAPIKey(for: "openai") {
+            selectedProvider = OpenAIProvider(apiKey: apiKey)
+        } else if hasLocalModels {
+            // Local models available - no need for API key setup
+            // The orchestrator will route to local models
+            selectedProvider = ProviderRegistry.shared.getLocalProvider()
+        } else {
+            // No local models AND no cloud API key - prompt for setup
+            showingAPIKeySetup = true
+        }
     }
 
     private func sendMessage() {
-        guard !inputText.isEmpty, selectedProvider != nil else { return }
+        // Debug logging helper - platform-aware
+        func log(_ msg: String) {
+            #if os(macOS)
+            let logFile = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Desktop/thea_debug.log")
+            let timestamp = ISO8601DateFormatter().string(from: Date())
+            let line = "[\(timestamp)] [ChatView] \(msg)\n"
+            if let data = line.data(using: .utf8) {
+                if FileManager.default.fileExists(atPath: logFile.path) {
+                    if let handle = try? FileHandle(forUpdating: logFile) {
+                        _ = try? handle.seekToEnd()
+                        _ = try? handle.write(contentsOf: data)
+                        try? handle.close()
+                    }
+                } else {
+                    try? data.write(to: logFile)
+                }
+            }
+            #else
+            print("[ChatView] \(msg)")
+            #endif
+        }
+
+        log("📤 sendMessage() called, inputText='\(inputText.prefix(30))...'")
+
+        guard !inputText.isEmpty else {
+            log("⚠️ inputText is empty, returning early")
+            return
+        }
+
+        // Note: We no longer require selectedProvider to be set here.
+        // The orchestrator in ChatManager.sendMessage() handles provider selection,
+        // including routing to local MLX models when appropriate.
 
         let text = inputText
+        log("✅ Captured text, clearing inputText...")
         inputText = ""
 
         Task {
             do {
+                log("🔄 Starting chatManager.sendMessage...")
                 try await chatManager.sendMessage(
                     text,
                     in: conversation
                 )
+                log("✅ chatManager.sendMessage completed")
             } catch {
+                log("❌ Error: \(error)")
                 showingError = error
             }
         }

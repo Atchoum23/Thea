@@ -1,5 +1,29 @@
 import SwiftUI
 
+// Debug logging for ChatInputView
+private func inputLog(_ msg: String) {
+    #if os(macOS)
+    let logFile = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent("Desktop/thea_debug.log")
+    let timestamp = ISO8601DateFormatter().string(from: Date())
+    let line = "[\(timestamp)] [ChatInputView] \(msg)\n"
+    if let data = line.data(using: .utf8) {
+        if FileManager.default.fileExists(atPath: logFile.path) {
+            if let handle = try? FileHandle(forUpdating: logFile) {
+                _ = try? handle.seekToEnd()
+                _ = try? handle.write(contentsOf: data)
+                try? handle.close()
+            }
+        } else {
+            try? data.write(to: logFile)
+        }
+    }
+    #else
+    // On iOS/watchOS/tvOS, use os.log instead
+    print("[ChatInputView] \(msg)")
+    #endif
+}
+
 struct ChatInputView: View {
     @Binding var text: String
     let isStreaming: Bool
@@ -56,13 +80,16 @@ struct ChatInputView: View {
                     .focused($isFocused)
                     .disabled(isStreaming)
                     .onSubmit {
+                        inputLog("⏎ onSubmit triggered! text='\(text.prefix(30))...', isEmpty=\(text.isEmpty)")
                         if !text.isEmpty {
+                            inputLog("✅ Calling onSend from onSubmit")
                             onSend()
                         }
                     }
 
                 // Send button
                 Button {
+                    inputLog("🔘 Send button pressed! text='\(text.prefix(30))...', canSend=\(canSend), isStreaming=\(isStreaming)")
                     onSend()
                 } label: {
                     Image(systemName: isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
