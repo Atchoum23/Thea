@@ -1,5 +1,8 @@
 import Foundation
 import Observation
+import os.log
+
+private let registryLogger = Logger(subsystem: "ai.thea.app", category: "ProviderRegistry")
 
 @MainActor
 @Observable
@@ -8,9 +11,18 @@ final class ProviderRegistry {
 
     private(set) var availableProviders: [ProviderInfo] = []
     private var providers: [String: AIProvider] = [:]
+    private var localProviders: [String: AIProvider] = [:]
+
+    // Configuration accessor
+    private var orchestratorConfig: OrchestratorConfiguration {
+        AppConfiguration.shared.orchestratorConfig
+    }
 
     private init() {
+        debugLog("🚀 ProviderRegistry initializing...")
         setupBuiltInProviders()
+        setupLocalProviders()
+        debugLog("✅ ProviderRegistry init complete")
     }
 
     // MARK: - Provider Info
@@ -36,6 +48,8 @@ final class ProviderRegistry {
     // MARK: - Setup
 
     private func setupBuiltInProviders() {
+        debugLog("🔧 Setting up built-in providers...")
+
         let providerNames = [
             "openai": "OpenAI",
             "anthropic": "Anthropic",
@@ -45,8 +59,12 @@ final class ProviderRegistry {
             "groq": "Groq"
         ]
 
+        // Create provider instances without checking Keychain yet
+        // This avoids Keychain prompts blocking app startup
         for (id, _) in providerNames {
-            let isConfigured = SecureStorage.shared.hasAPIKey(for: id)
+            // Defer Keychain access - check lazily when provider is first used
+            let isConfigured = checkAPIKeyConfigured(for: id)
+            debugLog("  Provider \(id): isConfigured=\(isConfigured)")
 
             if let provider = createProvider(id: id) {
                 availableProviders.append(ProviderInfo(provider: provider, isConfigured: isConfigured))
@@ -55,6 +73,71 @@ final class ProviderRegistry {
                 }
             }
         }
+
+        debugLog("✅ Built-in providers setup complete: \(availableProviders.count) providers")
+    }
+
+    /// Check if API key is configured (already handles Keychain errors gracefully)
+    private func checkAPIKeyConfigured(for provider: String) -> Bool {
+        SecureStorage.shared.hasAPIKey(for: provider)
+    }
+
+    // MARK: - Local Model Setup
+
+    private func setupLocalProviders() {
+        // Discover and register local models from LocalModelManager
+        Task {
+            await refreshLocalProviders()
+        }
+    }
+
+    /// Refresh local model providers - call when local models change
+    func refreshLocalProviders() async {
+        localProviders.removeAll()
+
+        debugLog("🔄 Starting local model discovery...")
+
+        let localManager = LocalModelManager.shared
+        await localManager.discoverModels()
+
+        debugLog("📦 Found \(localManager.availableModels.count) local models to register")
+
+        for model in localManager.availableModels {
+            debugLog("📂 Attempting to load: \(model.name) at \(model.path.path)")
+            do {
+                let instance = try await localManager.loadModel(model)
+                let provider = LocalModelProvider(modelName: model.name, instance: instance)
+                localProviders["local:\(model.name)"] = provider
+                debugLog("✅ Registered local model: \(model.name)")
+                print("✅ Registered local model: \(model.name)")
+            } catch {
+                debugLog("⚠️ Failed to load local model \(model.name): \(error)")
+                print("⚠️ Failed to load local model \(model.name): \(error)")
+            }
+        }
+
+        debugLog("📊 Total local models registered: \(localProviders.count)")
+        print("📊 Total local models registered: \(localProviders.count)")
+    }
+
+    /// Write debug log using os_log (viewable in Console.app)
+    private func debugLog(_ message: String) {
+        registryLogger.info("\(message)")
+    }
+
+    /// Get all available local model names
+    func getAvailableLocalModels() -> [String] {
+        Array(localProviders.keys).map { $0.replacingOccurrences(of: "local:", with: "") }
+    }
+
+    /// Check if any local models are available
+    var hasLocalModels: Bool {
+        !localProviders.isEmpty
+    }
+
+    /// Get all providers that have API keys configured
+    var configuredProviders: [AIProvider] {
+        Array(providers.values)
     }
 
     // MARK: - Provider Creation
@@ -85,6 +168,12 @@ final class ProviderRegistry {
     // MARK: - Provider Access
 
     func getProvider(id: String) -> AIProvider? {
+        // Check for local model first (format: "local:modelname")
+        if id.hasPrefix("local:") {
+            return localProviders[id]
+        }
+
+        // Check cloud providers
         if let existing = providers[id] {
             return existing
         }
@@ -98,16 +187,89 @@ final class ProviderRegistry {
     }
 
     func getDefaultProvider() -> AIProvider? {
-        // Try OpenAI first, then Anthropic, then any available
+        // Check orchestrator configuration for local model preference
+        let preference = orchestratorConfig.localModelPreference
+
+        switch preference {
+        case .always:
+            // Only use local models, fail if none available
+            if let localProvider = localProviders.values.first {
+                return localProvider
+            }
+            return nil
+
+        case .prefer:
+            // Try local first, fallback to cloud
+            if let localProvider = localProviders.values.first {
+                return localProvider
+            }
+            return getCloudProvider()
+
+        case .balanced:
+            // Use local for simple tasks - for default provider, prefer cloud
+            // This is the entry point; routing happens elsewhere
+            return getCloudProvider() ?? localProviders.values.first
+
+        case .cloudFirst:
+            // Prefer cloud, use local only if no cloud available
+            return getCloudProvider() ?? localProviders.values.first
+        }
+    }
+
+    /// Get a cloud-based provider
+    func getCloudProvider() -> AIProvider? {
+        // Try user's default provider first
+        let defaultProviderID = SettingsManager.shared.defaultProvider
+        if let provider = getProvider(id: defaultProviderID) {
+            return provider
+        }
+
+        // Fallback order: OpenRouter → OpenAI → Anthropic → any
+        if let openRouter = getProvider(id: "openrouter") {
+            return openRouter
+        }
         if let openAI = getProvider(id: "openai") {
             return openAI
         }
-
         if let anthropic = getProvider(id: "anthropic") {
             return anthropic
         }
-
         return providers.values.first
+    }
+
+    /// Get a local model provider by name
+    func getLocalProvider(modelName: String? = nil) -> AIProvider? {
+        if let name = modelName {
+            return localProviders["local:\(name)"]
+        }
+        return localProviders.values.first
+    }
+
+    /// Get a provider based on task complexity (for orchestrator)
+    func getProviderForTask(complexity: QueryComplexity) -> AIProvider? {
+        let preference = orchestratorConfig.localModelPreference
+
+        switch (preference, complexity) {
+        case (.always, _):
+            // Always local
+            return localProviders.values.first
+
+        case (.prefer, _):
+            // Local first
+            return localProviders.values.first ?? getCloudProvider()
+
+        case (.balanced, .simple):
+            // Simple tasks → local if available
+            return localProviders.values.first ?? getCloudProvider()
+
+        case (.balanced, .moderate), (.balanced, .complex):
+            // Complex tasks → cloud preferred
+            return getCloudProvider() ?? localProviders.values.first
+
+        case (.cloudFirst, _):
+            // Cloud first
+            return getCloudProvider() ?? localProviders.values.first
+        }
     }
 
     // MARK: - Configuration

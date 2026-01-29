@@ -55,10 +55,55 @@ public final class ModelRouter {
 
     /// Check if a specific model is available
     public func isModelAvailable(_ modelID: String) async -> Bool {
-        // Check local models
+        // Check local models - support generic patterns like "local-7b" or specific names like "local-qwen2.5"
         if modelID.hasPrefix("local-") {
-            let localName = String(modelID.dropFirst(6)) // Remove "local-" prefix
-            return localModelManager.availableModels.contains { $0.name == localName }
+            let localSuffix = String(modelID.dropFirst(6)) // Remove "local-" prefix
+            let models = localModelManager.availableModels
+
+            // No local models available
+            guard !models.isEmpty else { return false }
+
+            // First try exact match
+            if models.contains(where: { $0.name == localSuffix }) {
+                return true
+            }
+
+            // Handle generic patterns
+            let pattern = localSuffix.lowercased()
+            switch pattern {
+            case "any", "default":
+                return true // Any local model will work
+
+            case "large":
+                // Check if we have a large model (>30B parameters)
+                return models.contains { extractModelSize($0.name) > 30 }
+
+            case "7b", "8b":
+                // Check if we have a model in the 6-10B range
+                return models.contains { size in
+                    let s = extractModelSize(size.name)
+                    return s >= 6 && s <= 10
+                }
+
+            case "code":
+                // Check for code-specialized models
+                return models.contains {
+                    $0.name.lowercased().contains("code") ||
+                    $0.name.lowercased().contains("deepseek") ||
+                    $0.name.lowercased().contains("coder")
+                } || !models.isEmpty // Fallback to any model
+
+            case "math":
+                // Check for math-specialized models
+                return models.contains {
+                    $0.name.lowercased().contains("math") ||
+                    $0.name.lowercased().contains("qwen")
+                } || !models.isEmpty // Fallback to any model
+
+            default:
+                // Try pattern matching
+                return models.contains { $0.name.lowercased().contains(pattern) }|| !models.isEmpty
+            }
         }
 
         // Check cloud providers
@@ -67,6 +112,83 @@ public final class ModelRouter {
 
         let providerID = String(parts[0])
         return providerRegistry.availableProviders.contains { $0.id == providerID && $0.isConfigured }
+    }
+
+    /// Get an actual local model name for a generic pattern
+    /// Supports patterns: local-any, local-7b, local-8b, local-large, local-code, local-math
+    public func resolveLocalModel(_ pattern: String) -> String? {
+        let suffix = pattern.hasPrefix("local-") ? String(pattern.dropFirst(6)) : pattern
+        let lowercased = suffix.lowercased()
+
+        let models = localModelManager.availableModels
+
+        // First try exact match
+        if let exact = models.first(where: { $0.name == suffix }) {
+            return exact.name
+        }
+
+        // Then try pattern matching
+        if let match = models.first(where: { $0.name.lowercased().contains(lowercased) }) {
+            return match.name
+        }
+
+        // Handle generic patterns with intelligent model selection
+        switch lowercased {
+        case "any", "default":
+            // Return any available model, preferring smaller ones for efficiency
+            return models.sorted { extractModelSize($0.name) < extractModelSize($1.name) }.first?.name
+
+        case "large":
+            // Return the largest model (72B, 70B, etc.) for complex tasks
+            return models.sorted { extractModelSize($0.name) > extractModelSize($1.name) }.first?.name
+
+        case "7b":
+            // Find a ~7B model
+            return models.first { name in
+                let size = extractModelSize(name.name)
+                return size >= 6 && size <= 8
+            }?.name ?? models.first?.name
+
+        case "8b":
+            // Find a ~8B model
+            return models.first { name in
+                let size = extractModelSize(name.name)
+                return size >= 7 && size <= 10
+            }?.name ?? models.first?.name
+
+        case "code":
+            // Prefer models with "code" in name, or DeepSeek, or Qwen
+            return models.first {
+                $0.name.lowercased().contains("code") ||
+                $0.name.lowercased().contains("deepseek") ||
+                $0.name.lowercased().contains("coder")
+            }?.name ?? models.first?.name
+
+        case "math":
+            // Prefer models with "math" in name, or Qwen (good at math)
+            return models.first {
+                $0.name.lowercased().contains("math") ||
+                $0.name.lowercased().contains("qwen")
+            }?.name ?? models.first?.name
+
+        default:
+            // Try to find a model containing the pattern
+            return models.first { $0.name.lowercased().contains(lowercased) }?.name ?? models.first?.name
+        }
+    }
+
+    /// Extract model size in billions from model name (e.g., "Qwen2.5-72B" -> 72)
+    private func extractModelSize(_ name: String) -> Double {
+        let patterns = ["(\\d+\\.?\\d*)b", "(\\d+\\.?\\d*)B"]
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: []),
+               let match = regex.firstMatch(in: name, range: NSRange(name.startIndex..., in: name)),
+               let range = Range(match.range(at: 1), in: name),
+               let size = Double(name[range]) {
+                return size
+            }
+        }
+        return 0 // Unknown size
     }
 
     /// Get estimated cost for using a model
@@ -198,16 +320,29 @@ public final class ModelRouter {
 
     private func createSelection(for modelID: String, reasoning: String) -> ModelSelection {
         let isLocal = modelID.hasPrefix("local-")
+
+        // For local models, resolve the pattern to an actual model name
+        let resolvedModelID: String
+        if isLocal {
+            if let actualName = resolveLocalModel(modelID) {
+                resolvedModelID = "local-\(actualName)"
+            } else {
+                resolvedModelID = modelID
+            }
+        } else {
+            resolvedModelID = modelID
+        }
+
         let providerID: String = if isLocal {
             "local"
         } else {
-            modelID.split(separator: "/").first.map(String.init) ?? "unknown"
+            resolvedModelID.split(separator: "/").first.map(String.init) ?? "unknown"
         }
 
-        let cost = estimatedCost(for: modelID, tokens: 1000)
+        let cost = estimatedCost(for: resolvedModelID, tokens: 1000)
 
         return ModelSelection(
-            modelID: modelID,
+            modelID: resolvedModelID,
             providerID: providerID,
             isLocal: isLocal,
             estimatedCost: cost,

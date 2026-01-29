@@ -8,7 +8,15 @@ import Speech
 final class VoiceActivationManager {
     static let shared = VoiceActivationManager()
 
-    var isEnabled: Bool = false
+    var isEnabled: Bool = false {
+        didSet {
+            if !isEnabled {
+                // Stop all audio when disabled
+                stopVoiceCommand()
+                stopWakeWordDetection()
+            }
+        }
+    }
     var isListening: Bool = false
     var transcriptionText: String = ""
     var wakeWord: String = "Hey Thea"
@@ -61,7 +69,16 @@ final class VoiceActivationManager {
     }
 
     func stopWakeWordDetection() {
-        // Stop wake word detection
+        // Stop any ongoing audio session
+        audioEngine?.stop()
+        audioEngine?.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        recognitionTask?.cancel()
+
+        audioEngine = nil
+        recognitionRequest = nil
+        recognitionTask = nil
+        isListening = false
     }
 
     // MARK: - Voice Commands

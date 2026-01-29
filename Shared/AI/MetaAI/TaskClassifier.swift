@@ -241,15 +241,137 @@ public final class TaskClassifier {
 
     // MARK: - AI-Based Classification
 
-    private func classifyWithAI(_: String, fallback: TaskClassification) async throws -> TaskClassification {
-        // TODO: Implement AI-based classification using a fast model
-        // For now, return the keyword-based fallback
-        // Future implementation:
-        // 1. Use a fast model (gpt-4o-mini or local 7B)
-        // 2. Prompt: "Classify this query into one of: [task types]. Return JSON with type and confidence."
-        // 3. Parse response and return TaskClassification
+    private func classifyWithAI(_ query: String, fallback: TaskClassification) async throws -> TaskClassification {
+        // Use a fast, cheap model for classification
+        // Priority: local model > gpt-4o-mini > fallback
 
-        fallback
+        // Try to get a fast provider
+        guard let provider = getClassificationProvider() else {
+            return fallback
+        }
+
+        let prompt = createClassificationPrompt(for: query)
+
+        do {
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: "classifier"
+            )
+
+            var response = ""
+            let stream = try await provider.chat(
+                messages: [message],
+                model: getClassificationModelID(for: provider),
+                stream: false
+            )
+
+            for try await chunk in stream {
+                if case .delta(let text) = chunk.type {
+                    response += text
+                }
+            }
+
+            // Parse the AI response
+            return try parseClassificationResponse(response, query: query, fallback: fallback)
+
+        } catch {
+            print("⚠️ AI classification failed: \(error), using keyword fallback")
+            return fallback
+        }
+    }
+
+    private func getClassificationProvider() -> AIProvider? {
+        // Prefer local models for classification (fast, free)
+        if let localProvider = ProviderRegistry.shared.getLocalProvider() {
+            return localProvider
+        }
+
+        // Fallback to cheap cloud model
+        if let openRouter = ProviderRegistry.shared.getProvider(id: "openrouter") {
+            return openRouter
+        }
+
+        if let openAI = ProviderRegistry.shared.getProvider(id: "openai") {
+            return openAI
+        }
+
+        return nil
+    }
+
+    private func getClassificationModelID(for provider: AIProvider) -> String {
+        if provider.metadata.name == "local" {
+            return provider.metadata.name
+        }
+        // Use cheapest/fastest model for classification
+        return "openai/gpt-4o-mini"
+    }
+
+    private func createClassificationPrompt(for query: String) -> String {
+        let taskTypes = TaskType.allCases.map { "\($0.rawValue): \($0.displayName)" }.joined(separator: "\n")
+
+        return """
+        Classify the following user query into the most appropriate task type.
+
+        Query: "\(query)"
+
+        Available task types:
+        \(taskTypes)
+
+        Respond with ONLY a JSON object (no markdown, no explanation):
+        {"taskType": "taskTypeRawValue", "confidence": 0.0-1.0, "reasoning": "brief explanation"}
+
+        Choose the single most appropriate task type. Be precise.
+        """
+    }
+
+    private func parseClassificationResponse(
+        _ response: String,
+        query: String,
+        fallback: TaskClassification
+    ) throws -> TaskClassification {
+        // Extract JSON from response
+        let jsonString = extractJSON(from: response)
+
+        guard let data = jsonString.data(using: .utf8) else {
+            return fallback
+        }
+
+        struct ClassificationResponse: Codable {
+            let taskType: String
+            let confidence: Double
+            let reasoning: String
+        }
+
+        do {
+            let decoded = try JSONDecoder().decode(ClassificationResponse.self, from: data)
+
+            guard let taskType = TaskType(rawValue: decoded.taskType) else {
+                return fallback
+            }
+
+            return TaskClassification(
+                primaryType: taskType,
+                secondaryTypes: [],
+                confidence: Float(decoded.confidence),
+                reasoning: decoded.reasoning
+            )
+        } catch {
+            print("⚠️ Failed to parse classification response: \(error)")
+            return fallback
+        }
+    }
+
+    private func extractJSON(from response: String) -> String {
+        // Try to find JSON object in response
+        if let startIndex = response.firstIndex(of: "{"),
+           let endIndex = response.lastIndex(of: "}") {
+            return String(response[startIndex...endIndex])
+        }
+        return response
     }
 }
 
