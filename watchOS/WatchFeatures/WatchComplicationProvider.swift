@@ -206,28 +206,9 @@ struct CornerComplicationView: View {
 
 // MARK: - Smart Stack Relevant Context
 
-enum TheaRelevantContext {
-    /// Define when Thea widget should appear in Smart Stack
-    static func getRelevantIntents() -> [RelevantIntent] {
-        var intents: [RelevantIntent] = []
-
-        // Morning context - show daily summary
-        let morningContext = RelevantContext.date(from: DateInterval(
-            start: Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date())!,
-            end: Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date())!
-        ))
-        intents.append(RelevantIntent(morningContext, widgetKind: "app.thea.complication"))
-
-        // Work hours - show productivity features
-        let workContext = RelevantContext.date(from: DateInterval(
-            start: Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date())!,
-            end: Calendar.current.date(bySettingHour: 17, minute: 0, second: 0, of: Date())!
-        ))
-        intents.append(RelevantIntent(workContext, widgetKind: "app.thea.complication"))
-
-        return intents
-    }
-}
+// Note: RelevantIntent/RelevantContext require AppIntents framework
+// and are available in iOS 17+/watchOS 10+. Implementation deferred
+// until full App Intents integration is complete.
 
 // MARK: - Double Tap Support
 
