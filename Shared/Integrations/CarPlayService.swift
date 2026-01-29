@@ -340,7 +340,7 @@ import SwiftUI
 
     // MARK: - CPInterfaceControllerDelegate
 
-    extension CarPlayService: @preconcurrency CPInterfaceControllerDelegate {
+    extension CarPlayService: CPInterfaceControllerDelegate {
         nonisolated public func templateWillAppear(_ aTemplate: CPTemplate, animated _: Bool) {
             Task { @MainActor in
                 currentTemplate = aTemplate

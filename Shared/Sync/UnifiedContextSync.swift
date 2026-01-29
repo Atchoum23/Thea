@@ -37,6 +37,7 @@ public actor UnifiedContextSync {
             from: data
         )
     }()
+
     private var pendingChanges: [ContextChange] = []
     private let tokenKey = "ContextSync.serverChangeToken"
 
@@ -54,7 +55,7 @@ public actor UnifiedContextSync {
     // MARK: - Initialization
 
     private init() {
-        container = CKContainer(identifier: "iCloud.app.thea")
+        container = CKContainer(identifier: "iCloud.app.theathe")
         database = container.privateCloudDatabase
         zoneID = CKRecordZone.ID(zoneName: "TheaContext", ownerName: CKCurrentUserDefaultName)
     }

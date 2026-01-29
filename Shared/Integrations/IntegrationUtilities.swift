@@ -16,7 +16,7 @@ public extension Double {
 
     /// Rounds to specified decimal places
     func rounded(toPlaces places: Int) -> Double {
-        let multiplier = pow(10.0, Double(places))
+        let multiplier = Foundation.pow(10.0, Double(places))
         return (self * multiplier).rounded() / multiplier
     }
 }

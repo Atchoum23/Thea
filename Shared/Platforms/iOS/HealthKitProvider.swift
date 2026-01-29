@@ -585,7 +585,15 @@
             startDate = workout.startDate
             endDate = workout.endDate
             duration = workout.duration
-            totalEnergyBurned = workout.totalEnergyBurned?.doubleValue(for: .kilocalorie())
+            // Use statistics API instead of deprecated totalEnergyBurned property
+            if let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
+               let stats = workout.statistics(for: energyType),
+               let sum = stats.sumQuantity()
+            {
+                totalEnergyBurned = sum.doubleValue(for: .kilocalorie())
+            } else {
+                totalEnergyBurned = nil
+            }
             totalDistance = workout.totalDistance?.doubleValue(for: .meter())
             averageHeartRate = nil // Would need separate query
         }
