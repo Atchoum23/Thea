@@ -5,7 +5,7 @@ import SwiftUI
 
 // MARK: - Local Models Settings View
 
-// Configure MLX model paths, browse for model directories, and view installed models
+// Configure MLX model paths, browse for model directories, download models, and manage resources
 
 struct LocalModelsSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
@@ -15,16 +15,28 @@ struct LocalModelsSettingsView: View {
     @State private var modelToDelete: ScannedModel?
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var showingModelConfig: ScannedModel?
+    @State private var showingDownloadManager = false
+
+    // Model configuration state
+    @State private var selectedQuantization: String = "Q4_K_M"
+    @State private var gpuLayers: Int = 32
+    @State private var contextSize: Int = 4096
 
     var body: some View {
         Form {
+            systemResourcesSection
             modelDirectoriesSection
+            downloadManagerSection
             ollamaConfigSection
             modelListSection
+            modelConfigurationSection
             statisticsSection
         }
         .formStyle(.grouped)
+        #if os(macOS)
         .padding()
+        #endif
         .alert("Error", isPresented: $showingError) {
             Button("OK") { showingError = false }
         } message: {
@@ -45,6 +57,72 @@ struct LocalModelsSettingsView: View {
             }
         } message: { model in
             Text("Are you sure you want to delete '\(model.name)'? This cannot be undone.")
+        }
+        .sheet(item: $showingModelConfig) { model in
+            modelConfigSheet(model)
+        }
+        .sheet(isPresented: $showingDownloadManager) {
+            downloadManagerSheet
+        }
+    }
+
+    // MARK: - System Resources Section
+
+    private var systemResourcesSection: some View {
+        Section("System Resources") {
+            VStack(alignment: .leading, spacing: 12) {
+                // Memory usage
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Available Memory")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Text(formatBytes(ProcessInfo.processInfo.physicalMemory))
+                            .font(.headline)
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text("Estimated VRAM")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Text(estimatedVRAM())
+                            .font(.headline)
+                            .foregroundStyle(.blue)
+                    }
+                }
+
+                Divider()
+
+                // Resource limits
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Memory Limit")
+                        Spacer()
+                        Picker("", selection: .constant("auto")) {
+                            Text("Auto").tag("auto")
+                            Text("4 GB").tag("4")
+                            Text("8 GB").tag("8")
+                            Text("16 GB").tag("16")
+                            Text("32 GB").tag("32")
+                        }
+                        .frame(width: 120)
+                    }
+
+                    Text("Maximum memory allocation for local model inference.")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+
+                Toggle("Preload Default Model", isOn: .constant(false))
+
+                Text("Keep the default local model loaded in memory for faster responses.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
         }
     }
 
@@ -105,32 +183,117 @@ struct LocalModelsSettingsView: View {
                     }
                 }
 
-                Button {
-                    Task {
-                        await createDefaultDirectory()
-                    }
-                } label: {
-                    Label("Create Default Directory", systemImage: "folder.badge.plus")
-                }
-                .buttonStyle(.bordered)
-
-                Button {
-                    Task {
-                        await modelManager.refreshModels()
-                    }
-                } label: {
-                    HStack {
-                        if modelManager.isScanning {
-                            ProgressView()
-                                .scaleEffect(0.8)
+                HStack(spacing: 12) {
+                    Button {
+                        Task {
+                            await createDefaultDirectory()
                         }
-                        Text(modelManager.isScanning ? "Scanning..." : "Refresh Models")
+                    } label: {
+                        Label("Create Default", systemImage: "folder.badge.plus")
                     }
+                    .buttonStyle(.bordered)
+
+                    Button {
+                        Task {
+                            await modelManager.refreshModels()
+                        }
+                    } label: {
+                        HStack {
+                            if modelManager.isScanning {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            }
+                            Text(modelManager.isScanning ? "Scanning..." : "Refresh")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(modelManager.isScanning)
                 }
-                .buttonStyle(.bordered)
-                .disabled(modelManager.isScanning)
             }
         }
+    }
+
+    // MARK: - Download Manager Section
+
+    private var downloadManagerSection: some View {
+        Section("Download Models") {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("HuggingFace Integration")
+                            .font(.headline)
+
+                        Text("Download optimized MLX models from HuggingFace Hub")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Button("Browse Models") {
+                        showingDownloadManager = true
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                // Quick download suggestions
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Recommended Models")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            quickDownloadCard(
+                                name: "Llama 3.2 1B",
+                                size: "2.3 GB",
+                                modelId: "mlx-community/Llama-3.2-1B-Instruct-4bit"
+                            )
+
+                            quickDownloadCard(
+                                name: "Qwen2.5 3B",
+                                size: "4.1 GB",
+                                modelId: "mlx-community/Qwen2.5-3B-Instruct-4bit"
+                            )
+
+                            quickDownloadCard(
+                                name: "Phi-3 Mini",
+                                size: "2.0 GB",
+                                modelId: "mlx-community/Phi-3.5-mini-instruct-4bit"
+                            )
+
+                            quickDownloadCard(
+                                name: "Mistral 7B",
+                                size: "4.4 GB",
+                                modelId: "mlx-community/Mistral-7B-Instruct-v0.3-4bit"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func quickDownloadCard(name: String, size: String, modelId: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(name)
+                .font(.caption)
+                .fontWeight(.medium)
+
+            Text(size)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            Button("Download") {
+                downloadModel(modelId)
+            }
+            .font(.caption2)
+            .buttonStyle(.bordered)
+        }
+        .padding(8)
+        .frame(width: 120)
+        .background(Color.secondary.opacity(0.1))
+        .cornerRadius(8)
     }
 
     // MARK: - Ollama Configuration Section
@@ -149,9 +312,19 @@ struct LocalModelsSettingsView: View {
                         TextField("http://localhost:11434", text: $settingsManager.ollamaURL)
                             .textFieldStyle(.roundedBorder)
 
-                        Text("Default: http://localhost:11434")
+                        HStack {
+                            Text("Default: http://localhost:11434")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+
+                            Spacer()
+
+                            Button("Test Connection") {
+                                testOllamaConnection()
+                            }
                             .font(.caption)
-                            .foregroundStyle(.tertiary)
+                            .buttonStyle(.bordered)
+                        }
                     }
                 }
             }
@@ -172,7 +345,7 @@ struct LocalModelsSettingsView: View {
                         .font(.headline)
                         .foregroundStyle(.secondary)
 
-                    Text("Add a model directory or place models in the default location")
+                    Text("Add a model directory or download models from HuggingFace")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                         .multilineTextAlignment(.center)
@@ -227,30 +400,124 @@ struct LocalModelsSettingsView: View {
 
             Spacer()
 
-            Menu {
+            HStack(spacing: 8) {
                 Button {
-                    modelManager.openModelLocation(model)
+                    showingModelConfig = model
                 } label: {
-                    Label("Show in Finder", systemImage: "folder")
+                    Image(systemName: "gearshape")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+
+                Menu {
+                    Button {
+                        modelManager.openModelLocation(model)
+                    } label: {
+                        Label("Show in Finder", systemImage: "folder")
+                    }
+
+                    Button {
+                        showingModelConfig = model
+                    } label: {
+                        Label("Configure", systemImage: "gearshape")
+                    }
+
+                    Divider()
+
+                    Button(role: .destructive) {
+                        modelToDelete = model
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .foregroundStyle(.secondary)
+                }
+                #if os(macOS)
+                .menuStyle(.borderlessButton)
+                #endif
+            }
+        }
+        .padding()
+        #if os(macOS)
+        .background(Color(.controlBackgroundColor))
+        #else
+        .background(Color.secondary.opacity(0.1))
+        #endif
+        .cornerRadius(8)
+    }
+
+    // MARK: - Model Configuration Section
+
+    private var modelConfigurationSection: some View {
+        Section("Default Configuration") {
+            VStack(alignment: .leading, spacing: 12) {
+                // Quantization
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Default Quantization")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Picker("", selection: $selectedQuantization) {
+                        Text("Q4_K_M (Recommended)").tag("Q4_K_M")
+                        Text("Q4_K_S (Smaller)").tag("Q4_K_S")
+                        Text("Q5_K_M (Better quality)").tag("Q5_K_M")
+                        Text("Q8_0 (High quality)").tag("Q8_0")
+                        Text("FP16 (Full precision)").tag("FP16")
+                    }
+                    .pickerStyle(.menu)
                 }
 
                 Divider()
 
-                Button(role: .destructive) {
-                    modelToDelete = model
-                    showingDeleteConfirmation = true
-                } label: {
-                    Label("Delete", systemImage: "trash")
+                // GPU Layers
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("GPU Layers")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Spacer()
+
+                        Text("\(gpuLayers)")
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                    }
+
+                    Slider(value: Binding(
+                        get: { Double(gpuLayers) },
+                        set: { gpuLayers = Int($0) }
+                    ), in: 0...64, step: 1)
+
+                    Text("More GPU layers = faster inference but more VRAM usage")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .foregroundStyle(.secondary)
+
+                Divider()
+
+                // Context size
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Default Context Size")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Picker("", selection: $contextSize) {
+                        Text("2048 tokens").tag(2048)
+                        Text("4096 tokens").tag(4096)
+                        Text("8192 tokens").tag(8192)
+                        Text("16384 tokens").tag(16384)
+                        Text("32768 tokens").tag(32768)
+                    }
+                    .pickerStyle(.menu)
+
+                    Text("Larger contexts use more memory but support longer conversations")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
             }
-            .menuStyle(.borderlessButton)
         }
-        .padding()
-        .background(Color(.controlBackgroundColor))
-        .cornerRadius(8)
     }
 
     // MARK: - Statistics Section
@@ -298,6 +565,194 @@ struct LocalModelsSettingsView: View {
         }
     }
 
+    // MARK: - Model Config Sheet
+
+    private func modelConfigSheet(_ model: ScannedModel) -> some View {
+        NavigationStack {
+            Form {
+                Section("Model Information") {
+                    HStack {
+                        Text("Name")
+                        Spacer()
+                        Text(model.displayName)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack {
+                        Text("Format")
+                        Spacer()
+                        Text(model.format.rawValue)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack {
+                        Text("Size")
+                        Spacer()
+                        Text(model.formattedSize)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let quant = model.quantization {
+                        HStack {
+                            Text("Quantization")
+                            Spacer()
+                            Text(quant)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Section("Path") {
+                    Text(model.path.path)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+
+                Section("Custom Configuration") {
+                    Text("Per-model configuration coming soon")
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .navigationTitle("Model Configuration")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showingModelConfig = nil
+                    }
+                }
+            }
+        }
+        #if os(macOS)
+        .frame(width: 450, height: 400)
+        #endif
+    }
+
+    // MARK: - Download Manager Sheet
+
+    private var downloadManagerSheet: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                // Search bar
+                TextField("Search HuggingFace models...", text: .constant(""))
+                    .textFieldStyle(.roundedBorder)
+                    .padding()
+
+                // Filter chips
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        filterChip("All", selected: true)
+                        filterChip("MLX", selected: false)
+                        filterChip("4-bit", selected: false)
+                        filterChip("8-bit", selected: false)
+                        filterChip("< 4GB", selected: false)
+                    }
+                    .padding(.horizontal)
+                }
+
+                Divider()
+                    .padding(.top, 8)
+
+                // Model list
+                List {
+                    downloadableModelRow(
+                        name: "Llama 3.2 1B Instruct",
+                        author: "mlx-community",
+                        size: "2.3 GB",
+                        downloads: "10.2K"
+                    )
+
+                    downloadableModelRow(
+                        name: "Qwen2.5 3B Instruct",
+                        author: "mlx-community",
+                        size: "4.1 GB",
+                        downloads: "8.5K"
+                    )
+
+                    downloadableModelRow(
+                        name: "Phi-3.5 Mini Instruct",
+                        author: "mlx-community",
+                        size: "2.0 GB",
+                        downloads: "15.3K"
+                    )
+
+                    downloadableModelRow(
+                        name: "Mistral 7B Instruct v0.3",
+                        author: "mlx-community",
+                        size: "4.4 GB",
+                        downloads: "22.1K"
+                    )
+
+                    downloadableModelRow(
+                        name: "Gemma 2 2B Instruct",
+                        author: "mlx-community",
+                        size: "2.8 GB",
+                        downloads: "6.7K"
+                    )
+                }
+            }
+            .navigationTitle("Download Models")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showingDownloadManager = false
+                    }
+                }
+            }
+        }
+        #if os(macOS)
+        .frame(width: 600, height: 500)
+        #endif
+    }
+
+    private func filterChip(_ label: String, selected: Bool) -> some View {
+        Text(label)
+            .font(.caption)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(selected ? Color.blue : Color.secondary.opacity(0.2))
+            .foregroundStyle(selected ? .white : .primary)
+            .cornerRadius(16)
+    }
+
+    private func downloadableModelRow(name: String, author: String, size: String, downloads: String) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(name)
+                    .font(.body)
+                    .fontWeight(.medium)
+
+                HStack(spacing: 12) {
+                    Text(author)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Label(size, systemImage: "internaldrive")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Label(downloads, systemImage: "arrow.down.circle")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+
+            Spacer()
+
+            Button("Download") {
+                // Trigger download
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding(.vertical, 4)
+    }
+
     // MARK: - Helper Functions
 
     private func iconForFormat(_ format: ModelFormat) -> String {
@@ -336,15 +791,15 @@ struct LocalModelsSettingsView: View {
             panel.canChooseFiles = false
             panel.canChooseDirectories = true
             panel.allowsMultipleSelection = false
-            panel.prompt = "Select Model Directory"
+            panel.prompt = "Select"
             panel.message = "Choose a directory containing MLX or GGUF models"
+            panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
 
-            panel.begin { response in
-                if response == .OK, let url = panel.url {
-                    settingsManager.mlxModelsPath = url.path
-                    Task {
-                        await modelManager.addModelDirectory(url)
-                    }
+            let response = panel.runModal()
+            if response == .OK, let url = panel.url {
+                settingsManager.mlxModelsPath = url.path
+                Task {
+                    await modelManager.addModelDirectory(url)
                 }
             }
         #endif
@@ -369,9 +824,43 @@ struct LocalModelsSettingsView: View {
         }
         modelToDelete = nil
     }
+
+    private func formatBytes(_ bytes: UInt64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .memory
+        return formatter.string(fromByteCount: Int64(bytes))
+    }
+
+    private func estimatedVRAM() -> String {
+        // Rough estimate based on system memory
+        let memory = ProcessInfo.processInfo.physicalMemory
+        let estimatedVram = memory / 2 // Unified memory can share ~50% for GPU
+        return formatBytes(estimatedVram)
+    }
+
+    private func downloadModel(_ modelId: String) {
+        // TODO: Implement actual download
+        print("Downloading model: \(modelId)")
+    }
+
+    func testOllamaConnection() {
+        // TODO: Implement connection test
+        print("Testing Ollama connection to: \(settingsManager.ollamaURL)")
+    }
 }
 
+// MARK: - Preview
+
+#if os(macOS)
 #Preview {
     LocalModelsSettingsView()
-        .frame(width: 600, height: 700)
+        .frame(width: 700, height: 800)
 }
+#else
+#Preview {
+    NavigationStack {
+        LocalModelsSettingsView()
+            .navigationTitle("Local Models")
+    }
+}
+#endif
