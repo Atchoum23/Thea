@@ -1,6 +1,34 @@
 import Combine
 import Foundation
+import os.log
 @preconcurrency import SwiftData
+
+private let chatLogger = Logger(subsystem: "ai.thea.app", category: "ChatManager")
+
+// File-based logging for debugging (writes to ~/Desktop/thea_debug.log on macOS)
+private func debugLog(_ message: String) {
+    #if os(macOS)
+    let logFile = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent("Desktop/thea_debug.log")
+    let timestamp = ISO8601DateFormatter().string(from: Date())
+    let line = "[\(timestamp)] [ChatManager] \(message)\n"
+
+    if let data = line.data(using: .utf8) {
+        if FileManager.default.fileExists(atPath: logFile.path) {
+            if let handle = try? FileHandle(forUpdating: logFile) {
+                _ = try? handle.seekToEnd()
+                _ = try? handle.write(contentsOf: data)
+                try? handle.close()
+            }
+        } else {
+            try? data.write(to: logFile)
+        }
+    }
+    #else
+    // On iOS/watchOS/tvOS, use os.log
+    chatLogger.debug("\(message)")
+    #endif
+}
 
 @MainActor
 final class ChatManager: ObservableObject {
@@ -86,16 +114,17 @@ final class ChatManager: ObservableObject {
     // MARK: - Message Management
 
     func sendMessage(_ text: String, in conversation: Conversation) async throws {
+        debugLog("📤 sendMessage: Starting with text '\(text.prefix(50))...'")
+
         guard let context = modelContext else {
+            debugLog("❌ No model context!")
             throw ChatError.noModelContext
         }
 
-        // Get active provider
-        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
-            throw ChatError.providerNotAvailable
-        }
-
-        let model = AppConfiguration.shared.providerConfig.defaultModel
+        // Use the orchestrator system: classify task → route to optimal model
+        debugLog("🔄 Selecting provider and model...")
+        let (provider, model) = try await selectProviderAndModel(for: text)
+        debugLog("✅ Selected provider '\(provider.metadata.name)' with model '\(model)'")
 
         // Calculate next order index for proper message ordering
         let existingIndices = conversation.messages.map(\.orderIndex)
@@ -147,17 +176,20 @@ final class ChatManager: ObservableObject {
         context.insert(assistantMessage)
 
         do {
+            debugLog("🔄 Starting chat stream...")
             let responseStream = try await provider.chat(
                 messages: apiMessages,
                 model: model,
                 stream: true
             )
+            debugLog("✅ Got response stream, iterating...")
 
             for try await chunk in responseStream {
                 switch chunk.type {
                 case let .delta(text):
                     streamingText += text
                     assistantMessage.contentData = try JSONEncoder().encode(MessageContent.text(streamingText))
+                    debugLog("📝 Received delta: '\(text.prefix(20))...'")
 
                 case let .complete(finalMessage):
                     assistantMessage.contentData = try JSONEncoder().encode(finalMessage.content)
@@ -165,15 +197,19 @@ final class ChatManager: ObservableObject {
                     if let metadata = finalMessage.metadata {
                         assistantMessage.metadataData = try? JSONEncoder().encode(metadata)
                     }
+                    debugLog("✅ Received complete message")
 
                 case let .error(error):
+                    debugLog("❌ Received error in stream: \(error)")
                     throw error
                 }
             }
 
             conversation.updatedAt = Date()
             try context.save()
+            debugLog("✅ Message saved successfully")
         } catch {
+            debugLog("❌ Error during chat: \(error)")
             context.delete(assistantMessage)
             conversation.messages.removeLast()
             throw error
@@ -203,6 +239,112 @@ final class ChatManager: ObservableObject {
         }
 
         try await sendMessage(lastUserMessage.content.textValue, in: conversation)
+    }
+
+    // MARK: - Orchestrator Integration
+
+    /// Use TaskClassifier and ModelRouter to select optimal provider and model
+    /// For complex queries, also supports query decomposition
+    private func selectProviderAndModel(for query: String) async throws -> (AIProvider, String) {
+        let orchestratorConfig = AppConfiguration.shared.orchestratorConfig
+
+        // Check if orchestrator is enabled
+        guard orchestratorConfig.orchestratorEnabled else {
+            // Orchestrator disabled - use default provider
+            return try getDefaultProviderAndModel()
+        }
+
+        // 1. Classify the task
+        let classification = try await TaskClassifier.shared.classify(query)
+        let complexity = TaskClassifier.shared.assessComplexity(query)
+
+        if orchestratorConfig.logModelRouting {
+            print("[ChatManager] Query classified as: \(classification.primaryType.displayName)")
+            print("[ChatManager] Complexity: \(complexity.description)")
+        }
+
+        // 2. For complex queries, check if decomposition is needed
+        // (This enables the SubAgentOrchestrator pattern for multi-step tasks)
+        if orchestratorConfig.shouldOrchestrate(complexity: complexity) && complexity == .complex {
+            // Log that we would decompose (full implementation would execute sub-queries)
+            if orchestratorConfig.showDecompositionDetails {
+                let decomposition = try? await QueryDecomposer.shared.decompose(query)
+                if let decomp = decomposition, decomp.subQueries.count > 1 {
+                    print("[ChatManager] Complex query detected - \(decomp.subQueries.count) sub-queries identified")
+                    for (index, subQuery) in decomp.subQueries.enumerated() {
+                        print("[ChatManager]   \(index + 1). [\(subQuery.taskType.rawValue)] \(subQuery.query.prefix(50))...")
+                    }
+                    // TODO: Execute sub-queries in parallel with appropriate models
+                    // For now, fall through to single model execution
+                }
+            }
+        }
+
+        // 2. Route to optimal model
+        do {
+            let selection = try await ModelRouter.shared.selectModel(for: classification)
+
+            if orchestratorConfig.logModelRouting {
+                print("[ChatManager] Model selected: \(selection.modelID)")
+                print("[ChatManager] Reasoning: \(selection.reasoning)")
+            }
+
+            // 3. Get the provider for the selected model
+            let provider: AIProvider
+            let model: String
+
+            if selection.isLocal {
+                // Local model selected
+                let localModelName = selection.modelID.replacingOccurrences(of: "local-", with: "")
+                if let localProvider = ProviderRegistry.shared.getLocalProvider(modelName: localModelName) {
+                    provider = localProvider
+                    model = localModelName
+                } else if let anyLocalProvider = ProviderRegistry.shared.getLocalProvider() {
+                    // Fallback to any available local provider
+                    provider = anyLocalProvider
+                    model = localModelName
+                } else {
+                    // No local provider available - fall back to cloud
+                    if orchestratorConfig.logModelRouting {
+                        print("[ChatManager] Local provider not loaded, falling back to cloud")
+                    }
+                    return try getDefaultProviderAndModel()
+                }
+            } else {
+                // Cloud model selected (format: "provider/model")
+                let parts = selection.modelID.split(separator: "/")
+                let providerID = parts.count >= 2 ? String(parts[0]) : "openai"
+                model = parts.count >= 2 ? String(parts[1]) : selection.modelID
+
+                if let cloudProvider = ProviderRegistry.shared.getProvider(id: providerID) {
+                    provider = cloudProvider
+                } else {
+                    // Provider not configured - fallback
+                    if orchestratorConfig.logModelRouting {
+                        print("[ChatManager] Provider \(providerID) not configured, falling back to default")
+                    }
+                    return try getDefaultProviderAndModel()
+                }
+            }
+
+            return (provider, model)
+
+        } catch {
+            // Model routing failed - fallback to default
+            if orchestratorConfig.logModelRouting {
+                print("[ChatManager] Model routing failed: \(error), falling back to default")
+            }
+            return try getDefaultProviderAndModel()
+        }
+    }
+
+    /// Fallback: get default provider and model (original behavior)
+    private func getDefaultProviderAndModel() throws -> (AIProvider, String) {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
+            throw ChatError.providerNotAvailable
+        }
+        let model = AppConfiguration.shared.providerConfig.defaultModel
+        return (provider, model)
     }
 }
 

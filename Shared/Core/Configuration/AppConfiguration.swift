@@ -661,6 +661,8 @@ struct MetaAIConfiguration: Codable, Sendable, Equatable {
     var trustedPluginSources: [String] = []
 
     // AI Models for Meta-AI Components
+    // These are default cloud models; the orchestrator will use local models
+    // when localModelPreference is set to prefer/always in OrchestratorConfiguration
     var orchestratorModel: String = "gpt-4o"
     var reflectionModel: String = "gpt-4o"
     var knowledgeGraphModel: String = "gpt-4o"
@@ -668,6 +670,9 @@ struct MetaAIConfiguration: Codable, Sendable, Equatable {
     var plannerModel: String = "gpt-4o"
     var validatorModel: String = "gpt-4o"
     var optimizerModel: String = "gpt-4o"
+    var coderModel: String = "gpt-4o"
+    var executorModel: String = "gpt-4o"
+    var integratorModel: String = "gpt-4o"
 }
 
 // MARK: - Prompt Engineering Configuration
@@ -717,7 +722,7 @@ struct LifeTrackingConfiguration: Codable, Sendable, Equatable {
 
 // MARK: - Execution Mode Configuration
 
-public struct ExecutionModeConfiguration: Codable, Sendable {
+public struct ExecutionModeConfiguration: Codable, Sendable, Equatable {
     public var mode: ExecutionMode = .normal
     public var requireApprovalForFileEdits: Bool = true
     public var requireApprovalForTerminalCommands: Bool = true

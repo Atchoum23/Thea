@@ -30,7 +30,7 @@ public class ArtifactManager: ObservableObject {
 
     // MARK: - CloudKit
 
-    private let container = CKContainer(identifier: "iCloud.app.thea.artifacts")
+    private let container = CKContainer(identifier: "iCloud.app.theathe")
     private lazy var privateDatabase = container.privateCloudDatabase
 
     // MARK: - Storage

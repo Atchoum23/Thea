@@ -51,6 +51,41 @@ final class SettingsManager: ObservableObject {
         didSet { UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled") }
     }
 
+    // Window Behavior Settings
+    @Published var windowFloatOnTop: Bool {
+        didSet { UserDefaults.standard.set(windowFloatOnTop, forKey: "windowFloatOnTop") }
+    }
+
+    @Published var rememberWindowPosition: Bool {
+        didSet { UserDefaults.standard.set(rememberWindowPosition, forKey: "rememberWindowPosition") }
+    }
+
+    @Published var defaultWindowSize: String {
+        didSet { UserDefaults.standard.set(defaultWindowSize, forKey: "defaultWindowSize") }
+    }
+
+    // Message Display Settings
+    @Published var messageDensity: String {
+        didSet { UserDefaults.standard.set(messageDensity, forKey: "messageDensity") }
+    }
+
+    @Published var timestampDisplay: String {
+        didSet { UserDefaults.standard.set(timestampDisplay, forKey: "timestampDisplay") }
+    }
+
+    @Published var autoScrollToBottom: Bool {
+        didSet { UserDefaults.standard.set(autoScrollToBottom, forKey: "autoScrollToBottom") }
+    }
+
+    // Startup Settings
+    @Published var showSidebarOnLaunch: Bool {
+        didSet { UserDefaults.standard.set(showSidebarOnLaunch, forKey: "showSidebarOnLaunch") }
+    }
+
+    @Published var restoreLastSession: Bool {
+        didSet { UserDefaults.standard.set(restoreLastSession, forKey: "restoreLastSession") }
+    }
+
     // Voice Settings
     @Published var readResponsesAloud: Bool {
         didSet { UserDefaults.standard.set(readResponsesAloud, forKey: "readResponsesAloud") }
@@ -127,6 +162,14 @@ final class SettingsManager: ObservableObject {
         didSet { UserDefaults.standard.set(maxConcurrentTasks, forKey: "maxConcurrentTasks") }
     }
 
+    // Favorite Models
+    @Published var favoriteModels: Set<String> {
+        didSet {
+            let array = Array(favoriteModels)
+            UserDefaults.standard.set(array, forKey: "favoriteModels")
+        }
+    }
+
     private init() {
         defaultProvider = UserDefaults.standard.string(forKey: "defaultProvider") ?? "openrouter"
         streamResponses = UserDefaults.standard.bool(forKey: "streamResponses")
@@ -140,6 +183,20 @@ final class SettingsManager: ObservableObject {
         launchAtLogin = UserDefaults.standard.bool(forKey: "launchAtLogin")
         showInMenuBar = UserDefaults.standard.bool(forKey: "showInMenuBar")
         notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+
+        // Window Behavior
+        windowFloatOnTop = UserDefaults.standard.bool(forKey: "windowFloatOnTop")
+        rememberWindowPosition = UserDefaults.standard.object(forKey: "rememberWindowPosition") as? Bool ?? true
+        defaultWindowSize = UserDefaults.standard.string(forKey: "defaultWindowSize") ?? "default"
+
+        // Message Display
+        messageDensity = UserDefaults.standard.string(forKey: "messageDensity") ?? "comfortable"
+        timestampDisplay = UserDefaults.standard.string(forKey: "timestampDisplay") ?? "relative"
+        autoScrollToBottom = UserDefaults.standard.object(forKey: "autoScrollToBottom") as? Bool ?? true
+
+        // Startup
+        showSidebarOnLaunch = UserDefaults.standard.object(forKey: "showSidebarOnLaunch") as? Bool ?? true
+        restoreLastSession = UserDefaults.standard.bool(forKey: "restoreLastSession")
 
         // Voice
         readResponsesAloud = UserDefaults.standard.bool(forKey: "readResponsesAloud")
@@ -166,6 +223,13 @@ final class SettingsManager: ObservableObject {
         createBackups = UserDefaults.standard.bool(forKey: "createBackups")
         preventSleepDuringExecution = UserDefaults.standard.bool(forKey: "preventSleepDuringExecution")
         maxConcurrentTasks = UserDefaults.standard.integer(forKey: "maxConcurrentTasks") != 0 ? UserDefaults.standard.integer(forKey: "maxConcurrentTasks") : 3
+
+        // Favorite Models
+        if let savedFavorites = UserDefaults.standard.array(forKey: "favoriteModels") as? [String] {
+            favoriteModels = Set(savedFavorites)
+        } else {
+            favoriteModels = []
+        }
     }
 
     // API Key Management - SECURITY: Uses Keychain via SecureStorage
@@ -245,6 +309,20 @@ final class SettingsManager: ObservableObject {
         launchAtLogin = false
         showInMenuBar = true
         notificationsEnabled = true
+
+        // Window Behavior
+        windowFloatOnTop = false
+        rememberWindowPosition = true
+        defaultWindowSize = "default"
+
+        // Message Display
+        messageDensity = "comfortable"
+        timestampDisplay = "relative"
+        autoScrollToBottom = true
+
+        // Startup
+        showSidebarOnLaunch = true
+        restoreLastSession = false
 
         readResponsesAloud = false
         selectedVoice = "default"

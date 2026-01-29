@@ -265,13 +265,16 @@ final class SubAgentOrchestrator {
         Format as JSON.
         """
 
-        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-            ProviderRegistry.shared.getProvider(id: "openai")
+        // Use orchestrator-aware provider selection (respects local model preference)
+        guard let provider = ProviderRegistry.shared.getProviderForTask(complexity: .moderate) ??
+            ProviderRegistry.shared.getDefaultProvider()
         else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
 
-        let planText = try await streamProviderResponse(provider: provider, prompt: prompt, model: config.plannerModel)
+        // Use provider's own model name for local models
+        let modelToUse = provider.metadata.name == "local" ? provider.metadata.name : config.plannerModel
+        let planText = try await streamProviderResponse(provider: provider, prompt: prompt, model: modelToUse)
 
         // Parse plan (simplified - should use proper JSON parsing)
         return TaskPlan(
@@ -366,8 +369,9 @@ final class SubAgentOrchestrator {
         let agent = assignment.agent
         let subTask = assignment.subTask
 
-        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-            ProviderRegistry.shared.getProvider(id: "openai")
+        // Use orchestrator-aware provider selection (respects local model preference)
+        guard let provider = ProviderRegistry.shared.getProviderForTask(complexity: .simple) ??
+            ProviderRegistry.shared.getDefaultProvider()
         else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
@@ -380,7 +384,9 @@ final class SubAgentOrchestrator {
         Execute this task and provide a detailed result.
         """
 
-        let output = try await streamProviderResponse(provider: provider, prompt: prompt, model: "gpt-4o")
+        // Use provider's own model name for local models, otherwise use config
+        let modelToUse = provider.metadata.name == "local" ? provider.metadata.name : config.executorModel
+        let output = try await streamProviderResponse(provider: provider, prompt: prompt, model: modelToUse)
 
         return SubTaskResult(
             subTask: subTask,
@@ -432,9 +438,9 @@ final class SubAgentOrchestrator {
             //     )
             // }
 
-            // 2. Generate code
-            guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-                ProviderRegistry.shared.getProvider(id: "openai")
+            // 2. Generate code - use orchestrator-aware provider selection
+            guard let provider = ProviderRegistry.shared.getProviderForTask(complexity: .moderate) ??
+                ProviderRegistry.shared.getDefaultProvider()
             else {
                 throw SubAgentOrchestratorError.noProviderAvailable
             }
@@ -447,7 +453,9 @@ final class SubAgentOrchestrator {
             Execute this task and provide a detailed result.
             """
 
-            let output = try await streamProviderResponse(provider: provider, prompt: prompt, model: "gpt-4o")
+            // Use provider's own model name for local models, otherwise use config
+            let coderModel = provider.metadata.name == "local" ? provider.metadata.name : config.coderModel
+            let output = try await streamProviderResponse(provider: provider, prompt: prompt, model: coderModel)
 
             // 3. Check if output contains Swift code
             // TODO: Re-enable Swift validation when SwiftValidator is available
@@ -537,8 +545,9 @@ final class SubAgentOrchestrator {
 
         let allOutputs = results.map { "[\($0.agent.type.rawValue)]: \($0.output)" }.joined(separator: "\n\n")
 
-        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-            ProviderRegistry.shared.getProvider(id: "openai")
+        // Use orchestrator-aware provider selection
+        guard let provider = ProviderRegistry.shared.getProviderForTask(complexity: .moderate) ??
+            ProviderRegistry.shared.getDefaultProvider()
         else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
@@ -553,7 +562,9 @@ final class SubAgentOrchestrator {
         Provide a unified, coherent response.
         """
 
-        return try await streamProviderResponse(provider: provider, prompt: prompt, model: "gpt-4o")
+        // Use provider's own model name for local models, otherwise use config
+        let integrationModel = provider.metadata.name == "local" ? provider.metadata.name : config.integratorModel
+        return try await streamProviderResponse(provider: provider, prompt: prompt, model: integrationModel)
     }
 
     // MARK: - Validation
@@ -561,8 +572,9 @@ final class SubAgentOrchestrator {
     private func validateResult(_ result: String) async throws -> String {
         let validator = getAgent(type: .validator)
 
-        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-            ProviderRegistry.shared.getProvider(id: "openai")
+        // Use orchestrator-aware provider selection
+        guard let provider = ProviderRegistry.shared.getProviderForTask(complexity: .simple) ??
+            ProviderRegistry.shared.getDefaultProvider()
         else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
@@ -577,7 +589,9 @@ final class SubAgentOrchestrator {
         If valid, return it as-is. If issues found, provide corrected version.
         """
 
-        return try await streamProviderResponse(provider: provider, prompt: prompt, model: "gpt-4o")
+        // Use provider's own model name for local models, otherwise use config
+        let validatorModel = provider.metadata.name == "local" ? provider.metadata.name : config.validatorModel
+        return try await streamProviderResponse(provider: provider, prompt: prompt, model: validatorModel)
     }
 
     // MARK: - Optimization
@@ -585,8 +599,9 @@ final class SubAgentOrchestrator {
     private func optimizeResult(_ result: String) async throws -> String {
         let optimizer = getAgent(type: .optimizer)
 
-        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
-            ProviderRegistry.shared.getProvider(id: "openai")
+        // Use orchestrator-aware provider selection
+        guard let provider = ProviderRegistry.shared.getProviderForTask(complexity: .simple) ??
+            ProviderRegistry.shared.getDefaultProvider()
         else {
             throw SubAgentOrchestratorError.noProviderAvailable
         }
@@ -599,7 +614,9 @@ final class SubAgentOrchestrator {
         \(result)
         """
 
-        return try await streamProviderResponse(provider: provider, prompt: prompt, model: "gpt-4o")
+        // Use provider's own model name for local models, otherwise use config
+        let optimizerModel = provider.metadata.name == "local" ? provider.metadata.name : config.optimizerModel
+        return try await streamProviderResponse(provider: provider, prompt: prompt, model: optimizerModel)
     }
 
     // MARK: - Helper Methods

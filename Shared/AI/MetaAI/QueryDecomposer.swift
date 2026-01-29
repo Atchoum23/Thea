@@ -75,25 +75,83 @@ public final class QueryDecomposer {
         _ query: String,
         complexity: QueryComplexity
     ) async throws -> QueryDecomposition {
-        // TODO: Implement AI-based decomposition
-        // For now, use simple heuristic-based decomposition
+        // Get a provider for decomposition
+        guard let provider = getDecompositionProvider() else {
+            // Fallback to simple decomposition
+            return try await createSimpleDecomposition(query, complexity: complexity)
+        }
 
-        let classification = try await classifier.classify(query)
+        let prompt = createDecompositionPrompt(query: query, complexity: complexity)
 
-        // Create simple sequential decomposition
-        let subQueries: [SubQuery] = [
-            SubQuery(
-                query: query,
-                taskType: classification.primaryType,
-                dependencies: [],
-                priority: 1
+        do {
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: "decomposer"
             )
-        ]
+
+            var response = ""
+            let stream = try await provider.chat(
+                messages: [message],
+                model: getDecompositionModelID(for: provider),
+                stream: false
+            )
+
+            for try await chunk in stream {
+                if case .delta(let text) = chunk.type {
+                    response += text
+                }
+            }
+
+            // Parse the AI response
+            return try parseDecompositionResponse(response, originalQuery: query, complexity: complexity)
+
+        } catch {
+            print("⚠️ AI decomposition failed: \(error), using simple decomposition")
+            return try await createSimpleDecomposition(query, complexity: complexity)
+        }
+    }
+
+    private func getDecompositionProvider() -> AIProvider? {
+        // Prefer a capable model for decomposition (needs reasoning)
+        if let openRouter = providerRegistry.getProvider(id: "openrouter") {
+            return openRouter
+        }
+        if let anthropic = providerRegistry.getProvider(id: "anthropic") {
+            return anthropic
+        }
+        if let openAI = providerRegistry.getProvider(id: "openai") {
+            return openAI
+        }
+        // Local model as last resort
+        return providerRegistry.getLocalProvider()
+    }
+
+    private func getDecompositionModelID(for provider: AIProvider) -> String {
+        if provider.metadata.name.lowercased().contains("local") {
+            return provider.metadata.name
+        }
+        // Use a fast, capable model for decomposition
+        return "anthropic/claude-3-haiku"
+    }
+
+    private func createSimpleDecomposition(_ query: String, complexity: QueryComplexity) async throws -> QueryDecomposition {
+        let classification = try await classifier.classify(query)
 
         return QueryDecomposition(
             originalQuery: query,
             complexity: complexity,
-            subQueries: subQueries,
+            subQueries: [
+                SubQuery(
+                    query: query,
+                    taskType: classification.primaryType,
+                    dependencies: [],
+                    priority: 1
+                )
+            ],
             executionPlan: .sequential
         )
     }

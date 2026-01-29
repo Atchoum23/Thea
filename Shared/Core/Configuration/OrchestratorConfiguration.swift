@@ -37,13 +37,39 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
     // MARK: - Task Routing Rules
 
     /// Default model preferences for each task type
+    /// Format: TaskType.rawValue -> [ordered list of model preferences]
+    /// - "local-*" patterns: local-7b, local-8b, local-large (72B+), local-any
+    /// - Cloud models: "provider/model-name"
     public var taskRoutingRules: [String: [String]] = [
-        "simpleQA": ["local-7b", "gpt-4o-mini"],
-        "codeGeneration": ["anthropic/claude-sonnet-4", "local-code"],
-        "complexReasoning": ["anthropic/claude-opus-4", "openai/o1"],
-        "creativeWriting": ["anthropic/claude-sonnet-4", "openai/gpt-4o"],
-        "mathLogic": ["openai/o1", "local-math"],
-        "summarization": ["local-7b", "gpt-4o-mini"]
+        // Simple tasks - prefer local, fallback to cheap cloud
+        "simpleQA": ["local-any", "openai/gpt-4o-mini", "google/gemini-flash-1.5"],
+        "factual": ["local-any", "openai/gpt-4o-mini", "google/gemini-flash-1.5"],
+        "summarization": ["local-any", "openai/gpt-4o-mini", "anthropic/claude-3-haiku"],
+
+        // Code tasks - prefer powerful models
+        "codeGeneration": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-large"],
+        "debugging": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-large"],
+
+        // Complex reasoning - use most capable models
+        "complexReasoning": ["anthropic/claude-opus-4", "openai/o1", "openai/gpt-4o"],
+        "analysis": ["anthropic/claude-opus-4", "openai/gpt-4o", "local-large"],
+        "planning": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-large"],
+
+        // Math and logic - specialized models
+        "mathLogic": ["openai/o1", "anthropic/claude-opus-4", "local-large"],
+
+        // Creative tasks - balanced approach
+        "creativeWriting": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-any"],
+
+        // Research tasks
+        "research": ["anthropic/claude-opus-4", "openai/gpt-4o", "perplexity/llama-3.1-sonar-large-128k-online"],
+        "informationRetrieval": ["local-any", "openai/gpt-4o-mini", "perplexity/llama-3.1-sonar-small-128k-online"],
+
+        // Content creation
+        "contentCreation": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-large"],
+
+        // General/default - balanced
+        "general": ["local-any", "anthropic/claude-sonnet-4", "openai/gpt-4o-mini"]
     ]
 
     /// Get preferred models for a task type
