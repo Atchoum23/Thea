@@ -24,7 +24,11 @@ let package = Package(
         .package(url: "https://github.com/gonzalezreal/swift-markdown-ui", from: "2.0.0"),
 
         // Syntax highlighting
-        .package(url: "https://github.com/raspu/Highlightr", from: "2.1.0")
+        .package(url: "https://github.com/raspu/Highlightr", from: "2.1.0"),
+
+        // MLX Swift for native on-device LLM inference (macOS 26+ best practices)
+        .package(url: "https://github.com/ml-explore/mlx-swift", from: "0.21.0"),
+        .package(url: "https://github.com/ml-explore/mlx-swift-lm", branch: "main")
     ],
     targets: [
         .target(

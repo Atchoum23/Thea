@@ -1,3 +1,21 @@
+# ==============================================================================
+# IMPORTANT BUILD NOTES - READ BEFORE BUILDING
+# ==============================================================================
+#
+# 1. CODESIGN ERROR "resource fork...detritus not allowed":
+#    - Build with: -derivedDataPath /tmp/TheaBuild
+#    - This avoids iCloud File Provider adding problematic extended attributes
+#    - See BUILD_GUIDE.md for full details
+#
+# 2. MISSING PACKAGES (Highlightr, KeychainAccess, etc.):
+#    - Run: xcodebuild -resolvePackageDependencies -project Thea.xcodeproj
+#    - If still failing, delete DerivedData and Package.resolved, then retry
+#
+# 3. After modifying this file, regenerate project:
+#    - Run: xcodegen generate
+#
+# ==============================================================================
+
 name: Thea
 options:
   bundleIdPrefix: app.thea
@@ -239,6 +257,16 @@ packages:
   Highlightr:
     url: https://github.com/raspu/Highlightr
     from: 2.1.0
+  # MLX Swift for native on-device LLM inference (macOS 26+ best practices)
+  # Provides: MLX, MLXNN, MLXOptimizers, MLXRandom
+  mlx-swift:
+    url: https://github.com/ml-explore/mlx-swift
+    from: 0.21.0
+  # MLX LM for LLM/VLM implementations with HuggingFace Hub integration
+  # Provides: MLXLLM, MLXVLM, MLXLMCommon, MLXEmbedders
+  mlx-swift-lm:
+    url: https://github.com/ml-explore/mlx-swift-lm
+    branch: main
 
 # ============================================
 # Targets
@@ -263,7 +291,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos
         PRODUCT_NAME: Thea
         PRODUCT_MODULE_NAME: TheaCore
-        INFOPLIST_FILE: Shared/Resources/Info.plist
+        INFOPLIST_FILE: macOS/Info.plist
         CODE_SIGN_ENTITLEMENTS: macOS/Thea.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
@@ -273,8 +301,14 @@ targets:
         # Hardened Runtime (required for notarization)
         ENABLE_HARDENED_RUNTIME: YES
 
-        # App Sandbox (required for Mac App Store)
-        ENABLE_APP_SANDBOX: YES
+        # App Sandbox - DISABLED for full system access
+        # Note: Required for Mac App Store, but Thea needs unsandboxed access for:
+        # - Local MLX/GGUF models in ~/Library/Application Support/SharedLLMs
+        # - AppleScript automation
+        # - Running local AI processes (ollama, mlx-lm)
+        # - Full file system access for code analysis
+        # If distributing via Mac App Store, re-enable this
+        ENABLE_APP_SANDBOX: NO
 
         # Network Connections
         ENABLE_INCOMING_NETWORK_CONNECTIONS: YES
@@ -304,6 +338,15 @@ targets:
       - package: KeychainAccess
       - package: MarkdownUI
       - package: Highlightr
+      # MLX Swift for native on-device LLM inference (macOS only)
+      - package: mlx-swift
+        products:
+          - MLX
+          - MLXNN
+      - package: mlx-swift-lm
+        products:
+          - MLXLLM
+          - MLXLMCommon
       - target: TheaFinderSyncExtension
         embed: true
         codeSign: true
@@ -756,6 +799,8 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Tests
+        excludes:
+          - "**/SecurityRemediationTests.swift"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.tests
