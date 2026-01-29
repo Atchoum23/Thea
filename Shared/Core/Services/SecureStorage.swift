@@ -8,9 +8,11 @@ final class SecureStorage {
     private let keychain: Keychain
 
     private init() {
+        // Use .whenUnlockedThisDeviceOnly to avoid iCloud sync issues
+        // and don't require user authentication for each access
         keychain = Keychain(service: "ai.thea.app")
             .synchronizable(false) // Don't sync via iCloud Keychain for security
-            .accessibility(.whenUnlocked)
+            .accessibility(.whenUnlockedThisDeviceOnly) // Only on this device
     }
 
     // MARK: - API Keys

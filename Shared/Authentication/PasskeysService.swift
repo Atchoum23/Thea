@@ -304,10 +304,19 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
         // Use MainActor.assumeIsolated since this is called on the main thread
         MainActor.assumeIsolated {
             #if os(iOS)
-                return UIApplication.shared.connectedScenes
-                    .compactMap { $0 as? UIWindowScene }
-                    .flatMap(\.windows)
-                    .first { $0.isKeyWindow } ?? UIWindow()
+                let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+                if let keyWindow = scenes.flatMap(\.windows).first(where: { $0.isKeyWindow }) {
+                    return keyWindow
+                }
+                // Fallback: create window with first available scene
+                if let scene = scenes.first {
+                    return UIWindow(windowScene: scene)
+                }
+                // Last resort: return any window from any scene
+                return scenes.first?.windows.first ?? scenes.first.map { UIWindow(windowScene: $0) } ?? {
+                    // Create a temporary window scene if none exists (edge case)
+                    fatalError("No window scene available for presentation anchor")
+                }()
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -450,10 +459,19 @@ public struct SignInWithAppleButton: View {
             }
 
             func presentationAnchor(for _: ASAuthorizationController) -> ASPresentationAnchor {
-                UIApplication.shared.connectedScenes
-                    .compactMap { $0 as? UIWindowScene }
-                    .flatMap(\.windows)
-                    .first { $0.isKeyWindow } ?? UIWindow()
+                let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+                if let keyWindow = scenes.flatMap(\.windows).first(where: { $0.isKeyWindow }) {
+                    return keyWindow
+                }
+                // Fallback: create window with first available scene
+                if let scene = scenes.first {
+                    return UIWindow(windowScene: scene)
+                }
+                // Last resort: return any window from any scene
+                return scenes.first?.windows.first ?? scenes.first.map { UIWindow(windowScene: $0) } ?? {
+                    // Create a temporary window scene if none exists (edge case)
+                    fatalError("No window scene available for presentation anchor")
+                }()
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {

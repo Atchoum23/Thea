@@ -37,7 +37,7 @@ public actor RemoteCommandService {
     // MARK: - Initialization
 
     private init() {
-        container = CKContainer(identifier: "iCloud.app.thea")
+        container = CKContainer(identifier: "iCloud.app.theathe")
         database = container.privateCloudDatabase
     }
 

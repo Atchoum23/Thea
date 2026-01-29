@@ -143,7 +143,17 @@ public actor DeviceStateContextProvider: ContextProvider {
                 default: .unknown
                 }
 
-                return (device.batteryLevel, batteryState, orientation, Float(UIScreen.main.brightness))
+                // Get brightness from the first connected scene's screen
+                let brightness: Float = {
+                    guard let windowScene = UIApplication.shared.connectedScenes
+                        .compactMap({ $0 as? UIWindowScene })
+                        .first
+                    else {
+                        return 0.5 // Default brightness if no scene available
+                    }
+                    return Float(windowScene.screen.brightness)
+                }()
+                return (device.batteryLevel, batteryState, orientation, brightness)
             }
 
             let thermalState: DeviceStateContext.ThermalState = {
