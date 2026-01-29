@@ -102,7 +102,7 @@ public final class ModelRouter {
 
             default:
                 // Try pattern matching
-                return models.contains { $0.name.lowercased().contains(pattern) }|| !models.isEmpty
+                return models.contains { $0.name.lowercased().contains(pattern) } || !models.isEmpty
             }
         }
 
