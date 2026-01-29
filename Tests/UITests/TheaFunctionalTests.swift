@@ -22,8 +22,9 @@ final class TheaFunctionalTests: XCTestCase {
             captureScreenshot(named: "FAILURE-\(name)")
         }
 
-        // Clean quit
+        // Clean quit - CRITICAL: Terminate to prevent memory accumulation
         app.terminate()
+        app = nil
     }
 
     // MARK: - Helper Methods
@@ -231,7 +232,8 @@ final class TheaFunctionalTests: XCTestCase {
         if !messageField.exists {
             // Try text views instead
             let textViews = app.textViews
-            if !textViews.isEmpty {
+            // swiftlint:disable:next empty_count - XCUIElementQuery doesn't have isEmpty
+            if textViews.count > 0 {
                 textViews.firstMatch.click()
                 textViews.firstMatch.typeText("Test message for verification")
             }
@@ -305,7 +307,8 @@ final class TheaFunctionalTests: XCTestCase {
 
         // Make a change - toggle something
         let toggles = app.switches
-        if !toggles.isEmpty {
+        // swiftlint:disable:next empty_count - XCUIElementQuery doesn't have isEmpty
+        if toggles.count > 0 {
             let firstToggle = toggles.firstMatch
             let initialValue = firstToggle.value as? String
             firstToggle.click()
@@ -347,7 +350,8 @@ final class TheaFunctionalTests: XCTestCase {
 
         // Make a change - toggle something
         let toggles = app.switches
-        if !toggles.isEmpty {
+        // swiftlint:disable:next empty_count - XCUIElementQuery doesn't have isEmpty
+        if toggles.count > 0 {
             let firstToggle = toggles.firstMatch
             let initialValue = firstToggle.value as? String
             firstToggle.click()
@@ -400,7 +404,8 @@ final class TheaFunctionalTests: XCTestCase {
 
         // Make a change
         let toggles = app.switches
-        if !toggles.isEmpty {
+        // swiftlint:disable:next empty_count - XCUIElementQuery doesn't have isEmpty
+        if toggles.count > 0 {
             toggles.firstMatch.click()
             Thread.sleep(forTimeInterval: 0.3)
 

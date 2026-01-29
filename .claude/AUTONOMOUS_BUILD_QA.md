@@ -97,6 +97,15 @@ done
 
 ### How to Read GUI Build Results from xcactivitylog
 
+**CRITICAL: Use XCLogParser for reliable parsing (install: `brew install xclogparser`)**
+
+The `gunzip | strings | grep` approach is **UNRELIABLE** and misses:
+- Project-level issues ("Missing package product")
+- Linker warnings
+- Structured diagnostic information
+
+**Always verify visually in Xcode GUI Issue Navigator (Cmd+5) for definitive issue count!**
+
 ```bash
 # Find the most recent build log
 find_latest_xcactivitylog() {
@@ -104,8 +113,8 @@ find_latest_xcactivitylog() {
     -name "*.xcactivitylog" -mmin -15 2>/dev/null | sort -r | head -1
 }
 
-# Extract warnings and errors from xcactivitylog
-read_gui_build_log() {
+# PREFERRED: Use XCLogParser for reliable parsing
+read_gui_build_log_xclogparser() {
   local LOG=$(find_latest_xcactivitylog)
 
   if [ -z "$LOG" ]; then
@@ -113,7 +122,48 @@ read_gui_build_log() {
     return 1
   fi
 
-  echo "=== Reading: $LOG ==="
+  echo "=== Reading with XCLogParser: $LOG ==="
+
+  # Generate JSON issues report
+  xclogparser parse --file "$LOG" --reporter issues --output /tmp/build_issues.json 2>/dev/null
+
+  if [ -f /tmp/build_issues.json ]; then
+    local ERROR_COUNT=$(cat /tmp/build_issues.json | jq '.errors | length' 2>/dev/null || echo "0")
+    local WARNING_COUNT=$(cat /tmp/build_issues.json | jq '.warnings | length' 2>/dev/null || echo "0")
+
+    echo "Found: $ERROR_COUNT errors, $WARNING_COUNT warnings"
+
+    if [ "$ERROR_COUNT" -gt 0 ]; then
+      echo ""
+      echo "=== ERRORS (MUST FIX) ==="
+      cat /tmp/build_issues.json | jq -r '.errors[] | "\(.documentURL):\(.startingLineNumber): \(.title)"' | head -30
+    fi
+
+    if [ "$WARNING_COUNT" -gt 0 ]; then
+      echo ""
+      echo "=== WARNINGS (MUST FIX) ==="
+      cat /tmp/build_issues.json | jq -r '.warnings[] | "\(.documentURL):\(.startingLineNumber): \(.title)"' | head -50
+    fi
+
+    rm -f /tmp/build_issues.json
+    [ "$WARNING_COUNT" -gt 0 ] || [ "$ERROR_COUNT" -gt 0 ] && return 1
+    return 0
+  else
+    echo "XCLogParser failed, falling back to gunzip method (LESS RELIABLE)"
+    read_gui_build_log_gunzip
+  fi
+}
+
+# FALLBACK (less reliable - misses project issues)
+read_gui_build_log_gunzip() {
+  local LOG=$(find_latest_xcactivitylog)
+
+  if [ -z "$LOG" ]; then
+    echo "ERROR: No recent xcactivitylog found!"
+    return 1
+  fi
+
+  echo "=== Reading (gunzip fallback - may miss issues): $LOG ==="
 
   local TEMP_LOG="/tmp/build_log_$(date +%s).txt"
   gunzip -c "$LOG" 2>/dev/null | strings > "$TEMP_LOG"
@@ -122,6 +172,7 @@ read_gui_build_log() {
   local ERROR_COUNT=$(grep -cE '\.swift:[0-9]+:[0-9]+: error:' "$TEMP_LOG" || echo "0")
 
   echo "Found: $ERROR_COUNT errors, $WARNING_COUNT warnings"
+  echo "⚠️  NOTE: This method may miss project-level issues! Check Xcode GUI Issue Navigator."
 
   if [ "$ERROR_COUNT" -gt 0 ]; then
     echo ""
@@ -140,6 +191,36 @@ read_gui_build_log() {
   [ "$WARNING_COUNT" -gt 0 ] || [ "$ERROR_COUNT" -gt 0 ] && return 1
   return 0
 }
+
+# Use the preferred method
+read_gui_build_log() {
+  read_gui_build_log_xclogparser
+}
+```
+
+### Additional Verification: Xcode Issue Navigator
+
+**ALWAYS verify in Xcode GUI Issue Navigator (Cmd+5) before declaring success!**
+
+The Issue Navigator shows ALL issues including:
+- "Missing package product" errors (often missed by log parsing)
+- Project configuration warnings
+- Capability/entitlement issues
+- Swift Package dependency problems
+
+```bash
+# Open Issue Navigator via AppleScript
+osascript -e '
+tell application "Xcode"
+    activate
+end tell
+delay 0.5
+tell application "System Events"
+    tell process "Xcode"
+        keystroke "5" using {command down}
+    end tell
+end tell
+'
 ```
 
 ---

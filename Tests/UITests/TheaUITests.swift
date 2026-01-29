@@ -6,6 +6,7 @@ final class TheaUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
+        app.launchArguments = ["--uitesting"]
         app.launch()
     }
     
@@ -18,6 +19,10 @@ final class TheaUITests: XCTestCase {
             attachment.name = "Failure-\(name)"
             add(attachment)
         }
+
+        // CRITICAL: Terminate the app to prevent memory accumulation
+        app.terminate()
+        app = nil
     }
     
     // MARK: - Lifecycle Tests (L01-L06)
