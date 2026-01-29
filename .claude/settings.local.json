@@ -1,6 +1,5 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "allow": [
       "Edit",
       "Write",
@@ -99,7 +98,10 @@
       "Bash(false:*)",
       "Bash(test:*)",
       "Bash([:*)",
-      "Bash(expr:*)"
-    ]
+      "Bash(expr:*)",
+      "mcp__Desktop_Commander__read_file",
+      "mcp__mac-ui__check_accessibility_permissions"
+    ],
+    "defaultMode": "bypassPermissions"
   }
 }
