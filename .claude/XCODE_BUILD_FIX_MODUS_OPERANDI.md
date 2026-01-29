@@ -210,6 +210,16 @@ sleep 90  # Full build: 60-120s, Incremental: 10-30s
 
 ### Step 3: Read GUI Build Results from Logs (BY TIMESTAMP!)
 
+**IMPORTANT: Use XCLogParser for reliable parsing!**
+
+The xcactivitylog format is a binary SLF (Serialized Log Format) that is gzip-compressed.
+Simple `gunzip | strings | grep` is **UNRELIABLE** and misses many issues including:
+- Project-level issues ("Missing package product")
+- Linker warnings
+- Structured diagnostic information
+
+**RECOMMENDED: XCLogParser (install: `brew install xclogparser`)**
+
 ```bash
 # Find the MOST RECENT build log by modification time
 LOG=$(ls -t ~/Library/Developer/Xcode/DerivedData/Thea-*/Logs/Build/*.xcactivitylog 2>/dev/null | head -1)
@@ -217,26 +227,38 @@ LOG=$(ls -t ~/Library/Developer/Xcode/DerivedData/Thea-*/Logs/Build/*.xcactivity
 echo "Reading log: $LOG"
 echo "Log timestamp: $(stat -f '%Sm' "$LOG")"
 
-# Extract ALL errors
+# PREFERRED: Use XCLogParser for structured JSON output
+xclogparser parse --file "$LOG" --reporter issues --output build_issues.json
+
+# View issues summary
+cat build_issues.json | jq '.errors | length' # error count
+cat build_issues.json | jq '.warnings | length' # warning count
+
+# Or get human-readable issues report
+xclogparser parse --file "$LOG" --reporter issues
+
+# ALTERNATIVE (less reliable, misses project issues): gunzip approach
 echo "=== ERRORS ==="
 gunzip -c "$LOG" 2>/dev/null | strings | \
   grep -E 'error:' | sort -u
 
-# Extract ALL warnings
 echo "=== WARNINGS ==="
 gunzip -c "$LOG" 2>/dev/null | strings | \
   grep -E 'warning:' | grep -v "^warning:" | sort -u
 
-# Extract project-level issues
-echo "=== PROJECT ISSUES ==="
+echo "=== PROJECT ISSUES (often missed by gunzip method!) ==="
 gunzip -c "$LOG" 2>/dev/null | strings | \
   grep -E '\.xcodeproj:.*(error|warning):' | sort -u
 
-# Check build result
 echo "=== BUILD RESULT ==="
 gunzip -c "$LOG" 2>/dev/null | strings | \
   grep -E 'Build (Succeeded|Failed)' | tail -1
 ```
+
+**For comprehensive build analysis, also check Xcode GUI Issue Navigator directly:**
+- The Issue Navigator (Cmd+5) shows ALL issues including project configuration problems
+- "Missing package product" errors appear there but may not be in xcactivitylog
+- Always visually verify 0 issues in Xcode GUI before declaring success
 
 ### Step 4: GUI Phase Loop
 

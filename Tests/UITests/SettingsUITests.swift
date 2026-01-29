@@ -6,6 +6,7 @@ final class SettingsUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
+        app.launchArguments = ["--uitesting"]
         app.launch()
         
         // Open settings via keyboard shortcut
@@ -16,13 +17,17 @@ final class SettingsUITests: XCTestCase {
     override func tearDownWithError() throws {
         // Close settings if open
         app.typeKey("w", modifierFlags: .command)
-        
+
         if testRun?.totalFailureCount ?? 0 > 0 {
             let screenshot = XCUIScreen.main.screenshot()
             let attachment = XCTAttachment(screenshot: screenshot)
             attachment.lifetime = .keepAlways
             add(attachment)
         }
+
+        // CRITICAL: Terminate the app to prevent memory accumulation
+        app.terminate()
+        app = nil
     }
     
     // MARK: - General Tab

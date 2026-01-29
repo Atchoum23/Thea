@@ -4,6 +4,11 @@ import SwiftUI
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "startup")
 
+/// Check if running in testing mode (skip heavy initialization)
+/// UI tests pass --uitesting flag, unit tests set XCTestConfigurationFilePath
+private let isUITesting = CommandLine.arguments.contains("--uitesting")
+private let isUnitTesting = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+
 @main
 struct TheamacOSApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -17,13 +22,18 @@ struct TheamacOSApp: App {
             // Configure for local-only storage (no CloudKit sync)
             // This avoids CloudKit requirements for relationships and unique constraints
             let schema = Schema([Conversation.self, Message.self, Project.self])
+            // Use in-memory storage during tests to speed up initialization
+            let useInMemory = isUITesting || isUnitTesting
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
-                isStoredInMemoryOnly: false,
+                isStoredInMemoryOnly: useInMemory,
                 cloudKitDatabase: .none // Disable CloudKit to avoid sync requirements
             )
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
             _modelContainer = State(initialValue: container)
+            if useInMemory {
+                print("⚡ Testing mode: Using in-memory storage")
+            }
         } catch {
             _storageError = State(initialValue: error)
             print("❌ Failed to initialize ModelContainer: \(error)")
@@ -115,6 +125,18 @@ struct TheamacOSApp: App {
         let timestamp = ISO8601DateFormatter().string(from: Date())
         try? "[\(timestamp)] setupManagers called\n".write(to: debugPath, atomically: true, encoding: .utf8)
 
+        // SKIP heavy initialization when running tests to prevent memory issues and timeouts
+        guard !isUITesting && !isUnitTesting else {
+            let mode = isUITesting ? "UI testing" : "unit testing"
+            let logMsg = "[\(ISO8601DateFormatter().string(from: Date()))] Skipping MLX/model initialization (\(mode) mode)\n"
+            if let handle = try? FileHandle(forWritingTo: debugPath) {
+                handle.seekToEndOfFile()
+                handle.write(logMsg.data(using: .utf8)!)
+                handle.closeFile()
+            }
+            return
+        }
+
         // PRIORITY: Initialize local model discovery FIRST (no Keychain required)
         // This ensures local models are available even if user hasn't approved Keychain access
         Task {
@@ -204,6 +226,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_: Notification) {
         log("🚀 applicationDidFinishLaunching called")
+
+        // SKIP heavy initialization when running tests to prevent memory issues and timeouts
+        guard !isUITesting && !isUnitTesting else {
+            log("⚡ Testing mode - skipping MLX/model initialization")
+            return
+        }
 
         // Initialize local model managers immediately (no Keychain needed)
         Task { @MainActor in
