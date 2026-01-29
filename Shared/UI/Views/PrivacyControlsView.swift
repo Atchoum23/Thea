@@ -151,7 +151,7 @@ public struct PrivacyControlsView: View {
 
 private struct PermissionRow: View {
     let permission: PrivacyPermission
-    let status: PermissionStatus
+    let status: PrivacyPermissionStatus
     let hasConsent: Bool
 
     var body: some View {
