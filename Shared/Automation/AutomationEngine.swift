@@ -253,34 +253,9 @@ public actor AutomationEngine {
                 }
 
                 return pngData
-            } else {
-                // Fallback for older macOS versions
-                guard let screen = NSScreen.main else {
-                    throw AutomationError.screenCaptureError
-                }
-
-                let rect = screen.frame
-                guard let cgImage = CGWindowListCreateImage(
-                    rect,
-                    .optionOnScreenOnly,
-                    kCGNullWindowID,
-                    .bestResolution
-                ) else {
-                    throw AutomationError.screenCaptureError
-                }
-
-                let image = NSImage(cgImage: cgImage, size: NSSize(width: rect.width, height: rect.height))
-
-                // Convert to PNG data
-                guard let tiffData = image.tiffRepresentation,
-                      let bitmap = NSBitmapImageRep(data: tiffData),
-                      let pngData = bitmap.representation(using: .png, properties: [:])
-                else {
-                    throw AutomationError.screenCaptureError
-                }
-
-                return pngData
             }
+        // Note: Fallback for pre-macOS 14.0 removed since deployment target is 14.0+
+        // CGWindowListCreateImage is unavailable in macOS 14+
         #else
             throw AutomationError.platformNotSupported
         #endif

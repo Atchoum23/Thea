@@ -362,50 +362,49 @@ public actor VisualAnalysisService {
     // MARK: - Screen Capture
 
     /// Capture the entire screen
+    /// Screen capture - requires ScreenCaptureKit for macOS 14+
+    /// TODO: Implement with ScreenCaptureKit
     public func captureScreen() async throws -> CGImage? {
         #if os(macOS)
             guard CGPreflightScreenCaptureAccess() else {
                 CGRequestScreenCaptureAccess()
                 throw IntegrationError.accessibilityNotGranted
             }
-
-            let displayId = CGMainDisplayID()
-            return CGDisplayCreateImage(displayId)
+            // CGDisplayCreateImage is unavailable in macOS 14+
+            // Requires ScreenCaptureKit migration
+            throw IntegrationError.notSupported
         #else
             throw IntegrationError.notSupported
         #endif
     }
 
-    /// Capture a specific region
+    /// Capture a specific region - requires ScreenCaptureKit for macOS 14+
+    /// TODO: Implement with ScreenCaptureKit
     public func captureRegion(_ rect: CGRect) async throws -> CGImage? {
         #if os(macOS)
             guard CGPreflightScreenCaptureAccess() else {
                 throw IntegrationError.accessibilityNotGranted
             }
-
-            let displayId = CGMainDisplayID()
-            return CGDisplayCreateImage(displayId, rect: rect)
+            // CGDisplayCreateImage is unavailable in macOS 14+
+            // Requires ScreenCaptureKit migration
+            _ = rect // silence unused warning
+            throw IntegrationError.notSupported
         #else
             throw IntegrationError.notSupported
         #endif
     }
 
-    /// Capture a specific window
-    @available(macOS, deprecated: 14.0, message: "Use ScreenCaptureKit for macOS 14+")
+    /// Capture a specific window - requires ScreenCaptureKit for macOS 14+
+    /// TODO: Implement with ScreenCaptureKit
     public func captureWindow(windowId: CGWindowID) async throws -> CGImage? {
         #if os(macOS)
             guard CGPreflightScreenCaptureAccess() else {
                 throw IntegrationError.accessibilityNotGranted
             }
-
-            // Note: CGWindowListCreateImage is deprecated in macOS 14.0
-            // TODO: Migrate to ScreenCaptureKit for macOS 14+
-            return CGWindowListCreateImage(
-                .null,
-                .optionIncludingWindow,
-                windowId,
-                [.boundsIgnoreFraming]
-            )
+            // CGWindowListCreateImage is unavailable in macOS 14+
+            // Requires ScreenCaptureKit migration
+            _ = windowId // silence unused warning
+            throw IntegrationError.notSupported
         #else
             throw IntegrationError.notSupported
         #endif

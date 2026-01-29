@@ -1,6 +1,26 @@
 @preconcurrency import CoreLocation
 import Foundation
+import MapKit
 import os.log
+
+// MARK: - Sendable Wrapper
+
+/// Wrapper to safely transfer non-Sendable types across isolation boundaries
+/// Use with caution - caller must ensure thread safety
+private struct UncheckedSendableWrapper<T>: @unchecked Sendable {
+    let value: T
+}
+
+// MARK: - Geocoded Location Info
+
+/// Holds geocoded location information extracted from MKMapItem
+private struct GeocodedLocationInfo: Sendable {
+    let name: String?
+    let address: String?
+    let locality: String?
+    let administrativeArea: String?
+    let country: String?
+}
 
 // MARK: - Location Context Provider
 
@@ -13,7 +33,7 @@ public actor LocationContextProvider: ContextProvider {
 
     private var state: ContextProviderState = .idle
     private var currentLocation: CLLocation?
-    private var currentPlacemark: CLPlacemark?
+    private var currentGeocodedInfo: GeocodedLocationInfo?
     private var continuation: AsyncStream<ContextUpdate>.Continuation?
     private var _updates: AsyncStream<ContextUpdate>?
 
@@ -128,13 +148,8 @@ public actor LocationContextProvider: ContextProvider {
     }
 
     private func reverseGeocode(_ location: CLLocation) async {
-        do {
-            let geocoder = CLGeocoder()
-            let placemarks = try await geocoder.reverseGeocodeLocation(location)
-            currentPlacemark = placemarks.first
-        } catch {
-            logger.error("Geocoding failed: \(error.localizedDescription)")
-        }
+        let result = await locationHelper?.reverseGeocode(location: location)
+        currentGeocodedInfo = result
     }
 
     private func buildLocationContext(from location: CLLocation) async -> LocationContext {
@@ -146,10 +161,10 @@ public actor LocationContextProvider: ContextProvider {
             longitude: location.coordinate.longitude,
             altitude: location.altitude,
             horizontalAccuracy: location.horizontalAccuracy,
-            placeName: currentPlacemark?.name,
-            locality: currentPlacemark?.locality,
-            administrativeArea: currentPlacemark?.administrativeArea,
-            country: currentPlacemark?.country,
+            placeName: currentGeocodedInfo?.name,
+            locality: currentGeocodedInfo?.locality,
+            administrativeArea: currentGeocodedInfo?.administrativeArea,
+            country: currentGeocodedInfo?.country,
             isHome: isHome,
             isWork: isWork,
             speed: location.speed >= 0 ? location.speed : nil,
@@ -220,6 +235,52 @@ private final class LocationManagerHelper: NSObject, CLLocationManagerDelegate {
         // Wait a moment for the permission dialog
         try? await Task.sleep(for: .seconds(1))
         return checkAuthorizationStatus()
+    }
+
+    func reverseGeocode(location: CLLocation) async -> GeocodedLocationInfo? {
+        guard let request = MKReverseGeocodingRequest(location: location) else {
+            return nil
+        }
+        do {
+            // Wrap the request to safely transfer across isolation boundaries
+            let wrapper = UncheckedSendableWrapper(value: request)
+            let geocodedInfo: GeocodedLocationInfo = try await withCheckedThrowingContinuation { continuation in
+                Task.detached {
+                    do {
+                        let items = try await wrapper.value.mapItems
+                        guard let mapItem = items.first else {
+                            // Return empty info if no results
+                            let emptyInfo = GeocodedLocationInfo(
+                                name: nil, address: nil, locality: nil,
+                                administrativeArea: nil, country: nil
+                            )
+                            continuation.resume(returning: emptyInfo)
+                            return
+                        }
+                        // Extract info from MKMapItem using new APIs
+                        // Use MKAddress for address information
+                        let mkAddress = mapItem.address
+                        let info = GeocodedLocationInfo(
+                            name: mapItem.name,
+                            address: mkAddress?.fullAddress,
+                            locality: nil,
+                            administrativeArea: nil,
+                            country: nil
+                        )
+                        continuation.resume(returning: info)
+                    } catch {
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+            // Return nil if all fields are nil
+            if geocodedInfo.name == nil, geocodedInfo.address == nil {
+                return nil
+            }
+            return geocodedInfo
+        } catch {
+            return nil
+        }
     }
 
     // MARK: - CLLocationManagerDelegate
