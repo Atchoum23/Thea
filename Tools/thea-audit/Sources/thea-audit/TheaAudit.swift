@@ -1,4 +1,4 @@
-// main.swift
+// TheaAudit.swift
 // thea-audit - Security scanner for Thea application
 // Part of AgentSec Strict Mode implementation
 
