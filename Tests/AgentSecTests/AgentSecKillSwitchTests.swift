@@ -107,7 +107,7 @@ final class AgentSecKillSwitchTests: XCTestCase {
         killSwitch.trigger(reason: "Critical violation")
 
         var wasHalted = false
-        let result: String? = await KillSwitchGuard.execute {
+        let result: String? = try await KillSwitchGuard.execute {
             "Operation completed"
         } onHalted: { _ in
             wasHalted = true
@@ -118,7 +118,7 @@ final class AgentSecKillSwitchTests: XCTestCase {
     }
 
     func testKillSwitchAllowsOperationsWhenNotTriggered() async throws {
-        let result: String? = await KillSwitchGuard.execute {
+        let result: String? = try await KillSwitchGuard.execute {
             "Operation completed"
         } onHalted: { _ in
             XCTFail("Should not halt")

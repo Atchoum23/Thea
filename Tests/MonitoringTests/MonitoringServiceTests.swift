@@ -21,12 +21,12 @@ final class MonitoringServiceTests: XCTestCase {
         XCTAssertEqual(MonitorType.idleTime.displayName, "Idle Time")
     }
 
-    // MARK: - ActivityType Tests
+    // MARK: - LoggingActivityType Tests
 
     func testActivityTypeIcons() {
-        XCTAssertEqual(ActivityType.appUsage.icon, "app")
-        XCTAssertEqual(ActivityType.idleStart.icon, "moon.zzz")
-        XCTAssertEqual(ActivityType.focusModeChange.icon, "moon")
+        XCTAssertEqual(LoggingActivityType.appUsage.icon, "app")
+        XCTAssertEqual(LoggingActivityType.idleStart.icon, "moon.zzz")
+        XCTAssertEqual(LoggingActivityType.focusModeChange.icon, "moon")
     }
 
     // MARK: - ActivityLogEntry Tests
@@ -36,7 +36,7 @@ final class MonitoringServiceTests: XCTestCase {
             type: .appUsage,
             timestamp: Date(),
             duration: 300,
-            metadata: ["app": "Safari"]
+            metadata: ["app": ActivityAnyCodable("Safari")]
         )
         XCTAssertEqual(entry.type, .appUsage)
         XCTAssertEqual(entry.duration, 300)
