@@ -3,31 +3,11 @@ import SwiftUI
 struct MacSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var settingsManager = SettingsManager.shared
+    @StateObject private var cloudKitService = CloudKitService.shared
     @State private var voiceManager = VoiceActivationManager.shared
+    @State private var handoffService = HandoffService.shared
 
     @State private var selectedTab: SettingsTab = .general
-
-    // Temporary state for Cancel/OK pattern
-    @State private var tempDefaultProvider: String = ""
-    @State private var tempStreamResponses: Bool = false
-    @State private var tempTheme: String = ""
-    @State private var tempFontSize: String = ""
-    @State private var tempLaunchAtLogin: Bool = false
-    @State private var tempShowInMenuBar: Bool = false
-    @State private var tempNotificationsEnabled: Bool = false
-    @State private var tempReadResponsesAloud: Bool = false
-    @State private var tempSelectedVoice: String = ""
-    @State private var tempiCloudSyncEnabled: Bool = false
-    @State private var tempHandoffEnabled: Bool = false
-    @State private var tempAnalyticsEnabled: Bool = false
-    @State private var tempDebugMode: Bool = false
-    @State private var tempShowPerformanceMetrics: Bool = false
-    @State private var tempBetaFeaturesEnabled: Bool = false
-
-    // API Keys (temporary)
-    @State private var tempAPIKeys: [String: String] = [:]
-
-    @State private var hasChanges: Bool = false
 
     enum SettingsTab: String, CaseIterable {
         case general = "General"
@@ -35,8 +15,11 @@ struct MacSettingsView: View {
         case models = "Models"
         case localModels = "Local Models"
         case orchestrator = "Orchestrator"
-        case selfExecution = "Self-Execution"
+        case memory = "Memory"
+        case integrations = "Integrations"
+        case automation = "Automation"
         case voice = "Voice"
+        case permissions = "Permissions"
         case sync = "Sync"
         case privacy = "Privacy"
         case advanced = "Advanced"
@@ -48,8 +31,11 @@ struct MacSettingsView: View {
             case .models: "cube.box"
             case .localModels: "cpu"
             case .orchestrator: "network"
-            case .selfExecution: "bolt.fill"
+            case .memory: "brain"
+            case .integrations: "square.grid.2x2"
+            case .automation: "gearshape.2"
             case .voice: "mic.fill"
+            case .permissions: "hand.raised.fill"
             case .sync: "icloud.fill"
             case .privacy: "lock.fill"
             case .advanced: "slider.horizontal.3"
@@ -58,106 +44,16 @@ struct MacSettingsView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            TabView(selection: $selectedTab) {
-                ForEach(SettingsTab.allCases, id: \.self) { tab in
-                    viewForTab(tab)
-                        .tabItem {
-                            Label(tab.rawValue, systemImage: tab.icon)
-                        }
-                        .tag(tab)
-                }
-            }
-
-            Divider()
-
-            // Bottom bar with Cancel/OK buttons
-            HStack {
-                if hasChanges {
-                    Text("You have unsaved changes")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Button("Cancel") {
-                    dismiss()
-                }
-                .keyboardShortcut(.escape, modifiers: [])
-
-                Button("OK") {
-                    saveAllSettings()
-                    dismiss()
-                }
-                .keyboardShortcut(.return, modifiers: [])
-                .buttonStyle(.borderedProminent)
-            }
-            .padding()
-        }
-        .frame(width: 650, height: 550)
-        .onAppear {
-            loadCurrentSettings()
-        }
-    }
-
-    // MARK: - Load/Save Settings
-
-    private func loadCurrentSettings() {
-        tempDefaultProvider = settingsManager.defaultProvider
-        tempStreamResponses = settingsManager.streamResponses
-        tempTheme = settingsManager.theme
-        tempFontSize = settingsManager.fontSize
-        tempLaunchAtLogin = settingsManager.launchAtLogin
-        tempShowInMenuBar = settingsManager.showInMenuBar
-        tempNotificationsEnabled = settingsManager.notificationsEnabled
-        tempReadResponsesAloud = settingsManager.readResponsesAloud
-        tempSelectedVoice = settingsManager.selectedVoice
-        tempiCloudSyncEnabled = settingsManager.iCloudSyncEnabled
-        tempHandoffEnabled = settingsManager.handoffEnabled
-        tempAnalyticsEnabled = settingsManager.analyticsEnabled
-        tempDebugMode = settingsManager.debugMode
-        tempShowPerformanceMetrics = settingsManager.showPerformanceMetrics
-        tempBetaFeaturesEnabled = settingsManager.betaFeaturesEnabled
-
-        // Load API keys
-        for provider in settingsManager.availableProviders {
-            tempAPIKeys[provider] = settingsManager.getAPIKey(for: provider) ?? ""
-        }
-
-        hasChanges = false
-    }
-
-    private func saveAllSettings() {
-        settingsManager.defaultProvider = tempDefaultProvider
-        settingsManager.streamResponses = tempStreamResponses
-        settingsManager.theme = tempTheme
-        settingsManager.fontSize = tempFontSize
-        settingsManager.launchAtLogin = tempLaunchAtLogin
-        settingsManager.showInMenuBar = tempShowInMenuBar
-        settingsManager.notificationsEnabled = tempNotificationsEnabled
-        settingsManager.readResponsesAloud = tempReadResponsesAloud
-        settingsManager.selectedVoice = tempSelectedVoice
-        settingsManager.iCloudSyncEnabled = tempiCloudSyncEnabled
-        settingsManager.handoffEnabled = tempHandoffEnabled
-        settingsManager.analyticsEnabled = tempAnalyticsEnabled
-        settingsManager.debugMode = tempDebugMode
-        settingsManager.showPerformanceMetrics = tempShowPerformanceMetrics
-        settingsManager.betaFeaturesEnabled = tempBetaFeaturesEnabled
-
-        // Save API keys
-        for (provider, key) in tempAPIKeys {
-            if !key.isEmpty {
-                settingsManager.setAPIKey(key, for: provider)
+        TabView(selection: $selectedTab) {
+            ForEach(SettingsTab.allCases, id: \.self) { tab in
+                viewForTab(tab)
+                    .tabItem {
+                        Label(tab.rawValue, systemImage: tab.icon)
+                    }
+                    .tag(tab)
             }
         }
-
-        UserDefaults.standard.synchronize()
-        print("✅ All settings saved")
-    }
-
-    private func markChanged() {
-        hasChanges = true
+        .frame(width: 800, height: 600)
     }
 
     @ViewBuilder
@@ -166,17 +62,23 @@ struct MacSettingsView: View {
         case .general:
             generalSettings
         case .aiProviders:
-            aiProviderSettings
+            AIProvidersSettingsView()
         case .models:
             ModelSettingsView()
         case .localModels:
             LocalModelsSettingsView()
         case .orchestrator:
             OrchestratorSettingsView()
-        case .selfExecution:
-            SelfExecutionView()
+        case .memory:
+            MemorySettingsView()
+        case .integrations:
+            IntegrationsSettingsView()
+        case .automation:
+            AutomationSettingsView()
         case .voice:
             voiceSettings
+        case .permissions:
+            PermissionsSettingsView()
         case .sync:
             syncSettings
         case .privacy:
@@ -191,30 +93,83 @@ struct MacSettingsView: View {
     private var generalSettings: some View {
         Form {
             Section("Appearance") {
-                Picker("Theme", selection: $tempTheme) {
-                    Text("System").tag("system")
-                    Text("Light").tag("light")
-                    Text("Dark").tag("dark")
+                LabeledContent("Theme") {
+                    Picker("Theme", selection: $settingsManager.theme) {
+                        Text("System").tag("system")
+                        Text("Light").tag("light")
+                        Text("Dark").tag("dark")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(maxWidth: 250)
                 }
-                .pickerStyle(.segmented)
-                .onChange(of: tempTheme) { _, _ in markChanged() }
 
-                Picker("Font Size", selection: $tempFontSize) {
-                    Text("Small").tag("small")
-                    Text("Medium").tag("medium")
-                    Text("Large").tag("large")
+                LabeledContent("Font Size") {
+                    Picker("Font Size", selection: $settingsManager.fontSize) {
+                        Text("Small").tag("small")
+                        Text("Medium").tag("medium")
+                        Text("Large").tag("large")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(maxWidth: 250)
                 }
-                .pickerStyle(.segmented)
-                .onChange(of: tempFontSize) { _, _ in markChanged() }
+
+                LabeledContent("Message Density") {
+                    Picker("Density", selection: $settingsManager.messageDensity) {
+                        Text("Compact").tag("compact")
+                        Text("Comfortable").tag("comfortable")
+                        Text("Spacious").tag("spacious")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(maxWidth: 250)
+                }
+
+                LabeledContent("Timestamps") {
+                    Picker("Timestamps", selection: $settingsManager.timestampDisplay) {
+                        Text("Relative").tag("relative")
+                        Text("Absolute").tag("absolute")
+                        Text("Hidden").tag("hidden")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(maxWidth: 250)
+                }
+            }
+
+            Section("Window Behavior") {
+                Toggle("Float Window on Top", isOn: $settingsManager.windowFloatOnTop)
+
+                Toggle("Remember Window Position", isOn: $settingsManager.rememberWindowPosition)
+
+                LabeledContent("Default Size") {
+                    Picker("Size", selection: $settingsManager.defaultWindowSize) {
+                        Text("Default").tag("default")
+                        Text("Compact").tag("compact")
+                        Text("Large").tag("large")
+                        Text("Fullscreen").tag("fullscreen")
+                    }
+                    .frame(maxWidth: 150)
+                }
             }
 
             Section("Behavior") {
-                Toggle("Launch at Login", isOn: $tempLaunchAtLogin)
-                    .onChange(of: tempLaunchAtLogin) { _, _ in markChanged() }
-                Toggle("Show in Menu Bar", isOn: $tempShowInMenuBar)
-                    .onChange(of: tempShowInMenuBar) { _, _ in markChanged() }
-                Toggle("Enable Notifications", isOn: $tempNotificationsEnabled)
-                    .onChange(of: tempNotificationsEnabled) { _, _ in markChanged() }
+                Toggle("Launch at Login", isOn: $settingsManager.launchAtLogin)
+                Toggle("Show in Menu Bar", isOn: $settingsManager.showInMenuBar)
+                Toggle("Enable Notifications", isOn: $settingsManager.notificationsEnabled)
+                Toggle("Auto-Scroll to Latest Message", isOn: $settingsManager.autoScrollToBottom)
+            }
+
+            Section("Startup") {
+                Toggle("Show Sidebar on Launch", isOn: $settingsManager.showSidebarOnLaunch)
+                Toggle("Restore Last Session", isOn: $settingsManager.restoreLastSession)
+            }
+
+            Section {
+                Text("Changes are saved automatically.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
         }
         .formStyle(.grouped)
@@ -223,48 +178,77 @@ struct MacSettingsView: View {
 
     // MARK: - AI Provider Settings
 
+    @State private var openAIKey: String = ""
+    @State private var anthropicKey: String = ""
+    @State private var googleKey: String = ""
+    @State private var perplexityKey: String = ""
+    @State private var groqKey: String = ""
+    @State private var openRouterKey: String = ""
+    @State private var apiKeysLoaded: Bool = false
+
+    private func loadAPIKeysIfNeeded() {
+        guard !apiKeysLoaded else { return }
+        apiKeysLoaded = true
+        openAIKey = settingsManager.getAPIKey(for: "openai") ?? ""
+        anthropicKey = settingsManager.getAPIKey(for: "anthropic") ?? ""
+        googleKey = settingsManager.getAPIKey(for: "google") ?? ""
+        perplexityKey = settingsManager.getAPIKey(for: "perplexity") ?? ""
+        groqKey = settingsManager.getAPIKey(for: "groq") ?? ""
+        openRouterKey = settingsManager.getAPIKey(for: "openrouter") ?? ""
+    }
+
+    private func saveAPIKey(_ key: String, for provider: String) {
+        if !key.isEmpty {
+            settingsManager.setAPIKey(key, for: provider)
+        }
+    }
+
     private var aiProviderSettings: some View {
         Form {
             Section("Default Provider") {
-                Picker("Provider", selection: $tempDefaultProvider) {
+                Picker("Provider", selection: $settingsManager.defaultProvider) {
                     ForEach(settingsManager.availableProviders, id: \.self) { provider in
                         Text(provider.capitalized).tag(provider)
                     }
                 }
-                .onChange(of: tempDefaultProvider) { _, _ in markChanged() }
 
-                Toggle("Stream Responses", isOn: $tempStreamResponses)
-                    .onChange(of: tempStreamResponses) { _, _ in markChanged() }
+                Toggle("Stream Responses", isOn: $settingsManager.streamResponses)
             }
 
             Section("API Keys") {
-                apiKeyField(provider: "OpenAI", key: "openai")
-                apiKeyField(provider: "Anthropic", key: "anthropic")
-                apiKeyField(provider: "Google AI", key: "google")
-                apiKeyField(provider: "Perplexity", key: "perplexity")
-                apiKeyField(provider: "Groq", key: "groq")
-                apiKeyField(provider: "OpenRouter", key: "openrouter")
+                apiKeyField(label: "OpenAI", key: $openAIKey, provider: "openai")
+                apiKeyField(label: "Anthropic", key: $anthropicKey, provider: "anthropic")
+                apiKeyField(label: "Google AI", key: $googleKey, provider: "google")
+                apiKeyField(label: "Perplexity", key: $perplexityKey, provider: "perplexity")
+                apiKeyField(label: "Groq", key: $groqKey, provider: "groq")
+                apiKeyField(label: "OpenRouter", key: $openRouterKey, provider: "openrouter")
+            }
+
+            Section {
+                Text("API keys are stored securely in your Keychain.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
         }
         .formStyle(.grouped)
         .padding()
+        .onAppear {
+            loadAPIKeysIfNeeded()
+        }
     }
 
-    private func apiKeyField(provider: String, key: String) -> some View {
+    private func apiKeyField(label: String, key: Binding<String>, provider: String) -> some View {
         HStack {
-            Text(provider)
+            Text(label)
                 .frame(width: 100, alignment: .leading)
 
-            SecureField("API Key", text: Binding(
-                get: { tempAPIKeys[key] ?? "" },
-                set: { newValue in
-                    tempAPIKeys[key] = newValue
-                    markChanged()
+            SecureField("API Key", text: key)
+                .textFieldStyle(.roundedBorder)
+                .onChange(of: key.wrappedValue) { _, newValue in
+                    saveAPIKey(newValue, for: provider)
                 }
-            ))
-            .textFieldStyle(.roundedBorder)
 
-            if let currentKey = tempAPIKeys[key], !currentKey.isEmpty {
+            if !key.wrappedValue.isEmpty {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
             }
@@ -277,6 +261,12 @@ struct MacSettingsView: View {
         Form {
             Section("Voice Activation") {
                 Toggle("Enable Voice Activation", isOn: $voiceManager.isEnabled)
+                    .onChange(of: voiceManager.isEnabled) { _, newValue in
+                        if !newValue {
+                            voiceManager.stopVoiceCommand()
+                            voiceManager.stopWakeWordDetection()
+                        }
+                    }
 
                 if voiceManager.isEnabled {
                     HStack {
@@ -287,8 +277,17 @@ struct MacSettingsView: View {
 
                     Toggle("Conversation Mode", isOn: $voiceManager.conversationMode)
 
-                    Button("Test Wake Word Detection") {
-                        try? voiceManager.startWakeWordDetection()
+                    HStack {
+                        Button("Test Wake Word Detection") {
+                            try? voiceManager.startWakeWordDetection()
+                        }
+
+                        if voiceManager.isListening {
+                            Button("Stop") {
+                                voiceManager.stopWakeWordDetection()
+                            }
+                            .foregroundStyle(.red)
+                        }
                     }
 
                     if voiceManager.isListening {
@@ -301,19 +300,21 @@ struct MacSettingsView: View {
                         }
                     }
                 }
+
+                Text("Note: Voice features require microphone permission. Disable to stop microphone access.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section("Text-to-Speech") {
-                Toggle("Read Responses Aloud", isOn: $tempReadResponsesAloud)
-                    .onChange(of: tempReadResponsesAloud) { _, _ in markChanged() }
+                Toggle("Read Responses Aloud", isOn: $settingsManager.readResponsesAloud)
 
-                if tempReadResponsesAloud {
-                    Picker("Voice", selection: $tempSelectedVoice) {
+                if settingsManager.readResponsesAloud {
+                    Picker("Voice", selection: $settingsManager.selectedVoice) {
                         Text("Default").tag("default")
                         Text("Samantha").tag("samantha")
                         Text("Alex").tag("alex")
                     }
-                    .onChange(of: tempSelectedVoice) { _, _ in markChanged() }
                 }
             }
         }
@@ -326,31 +327,130 @@ struct MacSettingsView: View {
     private var syncSettings: some View {
         Form {
             Section("iCloud Sync") {
-                Toggle("Enable iCloud Sync", isOn: $tempiCloudSyncEnabled)
-                    .onChange(of: tempiCloudSyncEnabled) { _, _ in markChanged() }
+                Toggle("Enable iCloud Sync", isOn: $settingsManager.iCloudSyncEnabled)
 
-                if tempiCloudSyncEnabled {
-                    Text("iCloud sync configuration requires CloudKit entitlements")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                if settingsManager.iCloudSyncEnabled {
+                    HStack {
+                        Text("iCloud Status:")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        if cloudKitService.iCloudAvailable {
+                            Label("Connected", systemImage: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.green)
+                        } else {
+                            Label("Not Available", systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    }
 
-                    Text("Status: Not configured")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
+                    HStack {
+                        Text("Sync Status:")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(cloudKitService.syncStatus.description)
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+
+                    if let lastSync = cloudKitService.lastSyncDate {
+                        HStack {
+                            Text("Last Sync:")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(lastSync, style: .relative)
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+
+                    Button("Sync Now") {
+                        Task {
+                            try? await cloudKitService.syncAll()
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(!cloudKitService.iCloudAvailable || cloudKitService.syncStatus == .syncing)
                 }
+
+                Text("Syncs conversations, settings, and knowledge across your Apple devices via iCloud.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section("Handoff") {
-                Toggle("Enable Handoff", isOn: $tempHandoffEnabled)
-                    .onChange(of: tempHandoffEnabled) { _, _ in markChanged() }
+                Toggle("Enable Handoff", isOn: $settingsManager.handoffEnabled)
 
-                Text("Continue conversations seamlessly across your Apple devices")
+                HStack {
+                    Text("Handoff Status:")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    if handoffService.isEnabled {
+                        Label("Active", systemImage: "hand.raised.fill")
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                    } else {
+                        Label("Disabled", systemImage: "hand.raised.slash")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Text("Continue conversations seamlessly across your Apple devices. Start on Mac, continue on iPhone or iPad.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                if handoffService.currentActivity != nil {
+                    HStack {
+                        Image(systemName: "arrow.left.arrow.right")
+                            .foregroundStyle(.blue)
+                        Text("Activity ready for handoff")
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                    }
+                }
+            }
+
+            Section("Requirements") {
+                VStack(alignment: .leading, spacing: 8) {
+                    requirementRow(
+                        icon: "icloud",
+                        title: "iCloud Account",
+                        status: cloudKitService.iCloudAvailable
+                    )
+                    requirementRow(
+                        icon: "wifi",
+                        title: "Same Wi-Fi Network (for Handoff)",
+                        status: true
+                    )
+                    requirementRow(
+                        icon: "bluetooth",
+                        title: "Bluetooth Enabled (for Handoff)",
+                        status: true
+                    )
+                }
             }
         }
         .formStyle(.grouped)
         .padding()
+    }
+
+    private func requirementRow(icon: String, title: String, status: Bool) -> some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundStyle(.secondary)
+                .frame(width: 20)
+            Text(title)
+                .font(.caption)
+            Spacer()
+            Image(systemName: status ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .foregroundStyle(status ? .green : .red)
+        }
     }
 
     // MARK: - Privacy Settings
@@ -358,8 +458,7 @@ struct MacSettingsView: View {
     private var privacySettings: some View {
         Form {
             Section("Data Collection") {
-                Toggle("Analytics", isOn: $tempAnalyticsEnabled)
-                    .onChange(of: tempAnalyticsEnabled) { _, _ in markChanged() }
+                Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
 
                 Text("Help improve THEA by sharing anonymous usage data")
                     .font(.caption)
@@ -392,15 +491,12 @@ struct MacSettingsView: View {
     private var advancedSettings: some View {
         Form {
             Section("Development") {
-                Toggle("Enable Debug Mode", isOn: $tempDebugMode)
-                    .onChange(of: tempDebugMode) { _, _ in markChanged() }
-                Toggle("Show Performance Metrics", isOn: $tempShowPerformanceMetrics)
-                    .onChange(of: tempShowPerformanceMetrics) { _, _ in markChanged() }
+                Toggle("Enable Debug Mode", isOn: $settingsManager.debugMode)
+                Toggle("Show Performance Metrics", isOn: $settingsManager.showPerformanceMetrics)
             }
 
             Section("Experimental Features") {
-                Toggle("Enable Beta Features", isOn: $tempBetaFeaturesEnabled)
-                    .onChange(of: tempBetaFeaturesEnabled) { _, _ in markChanged() }
+                Toggle("Enable Beta Features", isOn: $settingsManager.betaFeaturesEnabled)
 
                 Text("Beta features may be unstable and are subject to change")
                     .font(.caption)

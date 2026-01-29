@@ -20,7 +20,7 @@ struct SettingsView: View {
                     Label("Features", systemImage: "star")
                 }
 
-            AdvancedSettingsView()
+            ConfigurationAdvancedSettingsView()
                 .tabItem {
                     Label("Advanced", systemImage: "gearshape.2")
                 }
@@ -37,7 +37,7 @@ struct SettingsView: View {
                     }
             #endif
 
-            PrivacySettingsView()
+            ConfigurationPrivacySettingsView()
                 .tabItem {
                     Label("Privacy", systemImage: "lock.shield")
                 }
@@ -380,9 +380,9 @@ struct FeaturesSettingsView: View {
     }
 }
 
-// MARK: - Advanced Settings
+// MARK: - Advanced Settings (Configuration Navigation)
 
-struct AdvancedSettingsView: View {
+struct ConfigurationAdvancedSettingsView: View {
     var body: some View {
         Form {
             Section("Advanced Configuration") {
@@ -925,9 +925,9 @@ struct ThemeConfigurationView: View {
     }
 }
 
-// MARK: - Privacy Settings
+// MARK: - Privacy Settings (Configuration Summary)
 
-struct PrivacySettingsView: View {
+struct ConfigurationPrivacySettingsView: View {
     @State private var showingExportDialog = false
     @State private var showingDeleteConfirmation = false
 

@@ -78,7 +78,7 @@ public struct DeviceSwitcherView: View {
             await refreshDevices()
         }
         .sheet(isPresented: $showSyncSettings) {
-            SyncSettingsView()
+            DeviceSyncSettingsSheet()
         }
     }
 
@@ -227,9 +227,9 @@ private struct SyncStatusRow: View {
     }
 }
 
-// MARK: - Sync Settings View
+// MARK: - Device Sync Settings Sheet
 
-private struct SyncSettingsView: View {
+private struct DeviceSyncSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var config = CrossDeviceSyncConfiguration()
     @State private var handoffConfig = HandoffConfiguration()
