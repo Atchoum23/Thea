@@ -26,7 +26,7 @@ public class CloudKitService: ObservableObject {
 
     // MARK: - CloudKit Configuration
 
-    private let containerIdentifier = "iCloud.app.thea"
+    private let containerIdentifier = "iCloud.app.theathe"
     private let privateDatabase: CKDatabase
     private let sharedDatabase: CKDatabase
     private let publicDatabase: CKDatabase
@@ -54,9 +54,28 @@ public class CloudKitService: ObservableObject {
         sharedDatabase = container.sharedCloudDatabase
         publicDatabase = container.publicCloudDatabase
 
+        // Load initial sync state from SettingsManager
+        syncEnabled = SettingsManager.shared.iCloudSyncEnabled
+
         Task {
             await checkiCloudStatus()
             await setupSubscriptions()
+        }
+
+        // Observe settings changes
+        setupSettingsObserver()
+    }
+
+    private func setupSettingsObserver() {
+        // Watch for changes to iCloudSyncEnabled
+        NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.syncEnabled = SettingsManager.shared.iCloudSyncEnabled
+            }
         }
     }
 
@@ -513,11 +532,24 @@ public struct CloudProject: Identifiable, Sendable {
 
 // MARK: - Sync Status
 
-public enum CloudSyncStatus: Sendable {
+public enum CloudSyncStatus: Sendable, Equatable {
     case idle
     case syncing
     case error(String)
     case offline
+
+    public var description: String {
+        switch self {
+        case .idle:
+            return "Ready"
+        case .syncing:
+            return "Syncing..."
+        case .error(let message):
+            return "Error: \(message)"
+        case .offline:
+            return "Offline"
+        }
+    }
 }
 
 // MARK: - Errors

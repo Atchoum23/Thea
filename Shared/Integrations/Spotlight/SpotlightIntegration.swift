@@ -108,35 +108,35 @@ public final class SpotlightIntegration: ObservableObject {
     }
 
     #if canImport(CoreSpotlight)
-    /// Perform the actual indexing in a static context to avoid Sendable issues
-    nonisolated private static func performBatchIndexing(
-        conversations: [IndexableConversation],
-        domain: String
-    ) async -> Int {
-        let items = conversations.map { conversation -> CSSearchableItem in
-            let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
-            attributeSet.title = conversation.title
-            attributeSet.contentDescription = conversation.preview
-            attributeSet.textContent = conversation.content
-            attributeSet.contentCreationDate = conversation.createdAt
-            attributeSet.contentModificationDate = conversation.modifiedAt
-            attributeSet.keywords = conversation.keywords + ["conversation", "chat", "ai"]
-            attributeSet.domainIdentifier = domain
+        /// Perform the actual indexing in a static context to avoid Sendable issues
+        nonisolated private static func performBatchIndexing(
+            conversations: [IndexableConversation],
+            domain: String
+        ) async -> Int {
+            let items = conversations.map { conversation -> CSSearchableItem in
+                let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+                attributeSet.title = conversation.title
+                attributeSet.contentDescription = conversation.preview
+                attributeSet.textContent = conversation.content
+                attributeSet.contentCreationDate = conversation.createdAt
+                attributeSet.contentModificationDate = conversation.modifiedAt
+                attributeSet.keywords = conversation.keywords + ["conversation", "chat", "ai"]
+                attributeSet.domainIdentifier = domain
 
-            return CSSearchableItem(
-                uniqueIdentifier: "conversation:\(conversation.id)",
-                domainIdentifier: domain,
-                attributeSet: attributeSet
-            )
-        }
+                return CSSearchableItem(
+                    uniqueIdentifier: "conversation:\(conversation.id)",
+                    domainIdentifier: domain,
+                    attributeSet: attributeSet
+                )
+            }
 
-        do {
-            try await CSSearchableIndex.default().indexSearchableItems(items)
-            return items.count
-        } catch {
-            return 0
+            do {
+                try await CSSearchableIndex.default().indexSearchableItems(items)
+                return items.count
+            } catch {
+                return 0
+            }
         }
-    }
     #endif
 
     // MARK: - Index Artifacts

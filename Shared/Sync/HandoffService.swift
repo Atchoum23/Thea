@@ -43,10 +43,28 @@ public final class HandoffService {
 
     private init() {
         configuration = HandoffConfiguration.load()
+
+        // Load initial state from SettingsManager
+        isEnabled = SettingsManager.shared.handoffEnabled
+
         setupNotifications()
+        setupSettingsObserver()
     }
 
     // MARK: - Setup
+
+    private func setupSettingsObserver() {
+        // Watch for changes to handoffEnabled
+        NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.isEnabled = SettingsManager.shared.handoffEnabled
+            }
+        }
+    }
 
     private func setupNotifications() {
         #if os(macOS)

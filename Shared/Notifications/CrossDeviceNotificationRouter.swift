@@ -41,7 +41,7 @@ public final class CrossDeviceNotificationRouter: ObservableObject {
     // MARK: - Initialization
 
     private init() {
-        container = CKContainer(identifier: "iCloud.app.thea")
+        container = CKContainer(identifier: "iCloud.app.theathe")
         database = container.privateCloudDatabase
 
         updateActiveDevice()

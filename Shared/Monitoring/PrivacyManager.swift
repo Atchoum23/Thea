@@ -20,7 +20,7 @@ public actor PrivacyManager {
 
     // MARK: - State
 
-    private var permissionStatus: [PrivacyPermission: PermissionStatus] = [:]
+    private var permissionStatus: [PrivacyPermission: PrivacyPermissionStatus] = [:]
     private var consentGiven: Set<PrivacyPermission> = []
     private var isInitialized = false
 
@@ -70,11 +70,11 @@ public actor PrivacyManager {
     }
 
     /// Check a specific permission
-    public func checkPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
+    public func checkPermission(_ permission: PrivacyPermission) async -> PrivacyPermissionStatus {
         #if os(macOS)
             let status = checkMacOSPermission(permission)
         #else
-            let status: PermissionStatus = .unknown
+            let status: PrivacyPermissionStatus = .unknown
         #endif
 
         permissionStatus[permission] = status
@@ -82,7 +82,7 @@ public actor PrivacyManager {
     }
 
     #if os(macOS)
-        private func checkMacOSPermission(_ permission: PrivacyPermission) -> PermissionStatus {
+        private func checkMacOSPermission(_ permission: PrivacyPermission) -> PrivacyPermissionStatus {
             switch permission {
             case .accessibility:
                 let trusted = AXIsProcessTrusted()
@@ -123,7 +123,7 @@ public actor PrivacyManager {
     // MARK: - Permission Requests
 
     /// Request a specific permission
-    public func requestPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
+    public func requestPermission(_ permission: PrivacyPermission) async -> PrivacyPermissionStatus {
         #if os(macOS)
             await requestMacOSPermission(permission)
         #else
@@ -133,7 +133,7 @@ public actor PrivacyManager {
 
     #if os(macOS)
         // swiftlint:disable:next modifier_order
-        private nonisolated func requestMacOSPermission(_ permission: PrivacyPermission) async -> PermissionStatus {
+        private nonisolated func requestMacOSPermission(_ permission: PrivacyPermission) async -> PrivacyPermissionStatus {
             switch permission {
             case .accessibility, .inputMonitoring:
                 // Open System Settings to Accessibility
@@ -209,7 +209,7 @@ public actor PrivacyManager {
 
     /// Get overall privacy status
     public func getPrivacyStatus() async -> PrivacyStatus {
-        var statuses: [PrivacyPermission: PermissionStatus] = [:]
+        var statuses: [PrivacyPermission: PrivacyPermissionStatus] = [:]
 
         for permission in PrivacyPermission.allCases {
             statuses[permission] = await checkPermission(permission)
@@ -294,9 +294,11 @@ public enum PrivacyPermission: String, Codable, Sendable, CaseIterable {
     }
 }
 
-// MARK: - Permission Status
+// MARK: - Privacy Permission Status
 
-public enum PermissionStatus: String, Codable, Sendable {
+/// Status of privacy permissions specific to PrivacyManager
+/// Note: This is separate from the comprehensive PermissionStatus in PermissionsManager
+public enum PrivacyPermissionStatus: String, Codable, Sendable {
     case granted
     case denied
     case notDetermined
@@ -337,7 +339,7 @@ public enum PermissionStatus: String, Codable, Sendable {
 // MARK: - Privacy Status
 
 public struct PrivacyStatus: Sendable {
-    public let permissionStatuses: [PrivacyPermission: PermissionStatus]
+    public let permissionStatuses: [PrivacyPermission: PrivacyPermissionStatus]
     public let consentGiven: Set<PrivacyPermission>
     public let allPermissionsGranted: Bool
 
