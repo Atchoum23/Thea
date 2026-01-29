@@ -5,6 +5,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var chatManager = ChatManager.shared
     @StateObject private var projectManager = ProjectManager.shared
+    @StateObject private var settingsManager = SettingsManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
 
     @State private var selectedItem: NavigationItem? = .chat
@@ -46,18 +47,12 @@ struct ContentView: View {
             detailContent
         }
         .navigationSplitViewStyle(.balanced)
+        .preferredColorScheme(colorSchemeForTheme)
+        .dynamicTypeSize(dynamicTypeSizeForFontSize)
         .onAppear {
             setupManagers()
         }
-        .toolbar {
-            ToolbarItem(placement: .navigation) {
-                Button {
-                    toggleSidebar()
-                } label: {
-                    Image(systemName: "sidebar.left")
-                }
-            }
-        }
+        // NOTE: Removed custom sidebar toggle button - NavigationSplitView provides native toggle
     }
 
     private var sidebarContent: some View {
@@ -185,8 +180,24 @@ struct ContentView: View {
         selectedProject = project
     }
 
-    private func toggleSidebar() {
-        NSApp.keyWindow?.contentViewController?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
+    // Sidebar toggle is now handled directly via columnVisibility binding
+
+    // Convert theme setting to ColorScheme
+    private var colorSchemeForTheme: ColorScheme? {
+        switch settingsManager.theme {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil  // "system" uses nil to follow system setting
+        }
+    }
+
+    // Convert font size setting to DynamicTypeSize
+    private var dynamicTypeSizeForFontSize: DynamicTypeSize {
+        switch settingsManager.fontSize {
+        case "small": return .small
+        case "large": return .xxxLarge
+        default: return .medium  // "medium"
+        }
     }
 
     private func setupManagers() {
@@ -308,10 +319,13 @@ struct macOSChatDetailView: View {
                 .lineLimit(1 ... 8)
                 .focused($isInputFocused)
                 .disabled(chatManager.isStreaming)
-                .onSubmit {
+                .onKeyPress(.return) {
+                    // Send on Return (without Shift)
                     if !messageText.isEmpty, !chatManager.isStreaming {
                         sendMessage()
+                        return .handled
                     }
+                    return .ignored
                 }
 
             Button {

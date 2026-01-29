@@ -236,7 +236,7 @@ struct OnboardingPermissionRow: View {
     let icon: String
     let title: String
     let description: String
-    let status: PermissionsManager.PermissionStatus
+    let status: PermissionStatus
     let isRequired: Bool
 
     var body: some View {
@@ -283,7 +283,11 @@ struct OnboardingPermissionRow: View {
             .red
         case .restricted:
             .orange
-        case .notDetermined:
+        case .limited:
+            .yellow
+        case .provisional:
+            .blue
+        case .notDetermined, .notAvailable:
             .gray
         }
     }
@@ -300,7 +304,13 @@ struct OnboardingPermissionRow: View {
         case .restricted:
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
-        case .notDetermined:
+        case .limited:
+            Image(systemName: "checkmark.circle.badge.questionmark")
+                .foregroundStyle(.yellow)
+        case .provisional:
+            Image(systemName: "checkmark.circle")
+                .foregroundStyle(.blue)
+        case .notDetermined, .notAvailable:
             Image(systemName: "circle")
                 .foregroundStyle(.gray)
         }
