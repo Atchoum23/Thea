@@ -2,43 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- ================================ -->
-	<!-- App Sandbox (Required for MAS)   -->
-	<!-- ================================ -->
-	<key>com.apple.security.app-sandbox</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Hardened Runtime                 -->
-	<!-- ================================ -->
-	<key>com.apple.security.get-task-allow</key>
-	<false/>
-
-	<!-- ================================ -->
-	<!-- Network Access                   -->
-	<!-- ================================ -->
-	<key>com.apple.security.network.client</key>
-	<true/>
-	<key>com.apple.security.network.server</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- App Groups                       -->
-	<!-- ================================ -->
-	<key>com.apple.security.application-groups</key>
-	<array>
-		<string>group.app.theathe</string>
-	</array>
-
-	<!-- ================================ -->
-	<!-- Push Notifications               -->
-	<!-- ================================ -->
 	<key>com.apple.developer.aps-environment</key>
 	<string>development</string>
-
-	<!-- ================================ -->
-	<!-- iCloud Services                  -->
-	<!-- ================================ -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:theathe.app</string>
+		<string>webcredentials:theathe.app</string>
+		<string>activitycontinuation:theathe.app</string>
+	</array>
+	<key>com.apple.developer.default-data-protection</key>
+	<string>NSFileProtectionComplete</string>
+	<key>com.apple.developer.group-session</key>
+	<true/>
+	<key>com.apple.developer.homekit</key>
+	<true/>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
 		<string>iCloud.app.theathe</string>
@@ -48,55 +25,21 @@
 		<string>CloudDocuments</string>
 		<string>CloudKit</string>
 	</array>
+	<key>com.apple.developer.siri</key>
+	<true/>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)app.theathe</string>
-
-	<!-- ================================ -->
-	<!-- File Access                      -->
-	<!-- ================================ -->
-	<key>com.apple.security.files.user-selected.read-write</key>
-	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.app.theathe</string>
+	</array>
 	<key>com.apple.security.files.bookmarks.app-scope</key>
 	<true/>
 	<key>com.apple.security.files.bookmarks.document-scope</key>
 	<true/>
-	<key>com.apple.security.files.downloads.read-write</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Camera & Microphone              -->
-	<!-- ================================ -->
-	<key>com.apple.security.device.camera</key>
-	<true/>
-	<key>com.apple.security.device.audio-input</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Speech Recognition               -->
-	<!-- ================================ -->
+	<key>com.apple.security.get-task-allow</key>
+	<false/>
 	<key>com.apple.security.personal-information.speech-recognition</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Location Services                -->
-	<!-- ================================ -->
-	<key>com.apple.security.personal-information.location</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Contacts, Calendars, Photos      -->
-	<!-- ================================ -->
-	<key>com.apple.security.personal-information.addressbook</key>
-	<true/>
-	<key>com.apple.security.personal-information.calendars</key>
-	<true/>
-	<key>com.apple.security.personal-information.photos-library</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Apple Events (Automation)        -->
-	<!-- ================================ -->
-	<key>com.apple.security.automation.apple-events</key>
 	<true/>
 	<key>com.apple.security.scripting-targets</key>
 	<dict>
@@ -129,66 +72,10 @@
 			<string>com.apple.systemevents.processes</string>
 		</array>
 	</dict>
-
-	<!-- ================================ -->
-	<!-- Printing                         -->
-	<!-- ================================ -->
-	<key>com.apple.security.print</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Bluetooth                        -->
-	<!-- ================================ -->
-	<key>com.apple.security.device.bluetooth</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- USB                              -->
-	<!-- ================================ -->
-	<key>com.apple.security.device.usb</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Siri & Shortcuts                 -->
-	<!-- ================================ -->
-	<key>com.apple.developer.siri</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- HomeKit                          -->
-	<!-- ================================ -->
-	<key>com.apple.developer.homekit</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Associated Domains               -->
-	<!-- ================================ -->
-	<key>com.apple.developer.associated-domains</key>
-	<array>
-		<string>applinks:theathe.app</string>
-		<string>webcredentials:theathe.app</string>
-		<string>activitycontinuation:theathe.app</string>
-	</array>
-
-	<!-- ================================ -->
-	<!-- Group Activities (SharePlay)     -->
-	<!-- ================================ -->
-	<key>com.apple.developer.group-session</key>
-	<true/>
-
-	<!-- ================================ -->
-	<!-- Keychain Sharing                 -->
-	<!-- ================================ -->
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)app.thea.macos</string>
 		<string>$(AppIdentifierPrefix)group.app.theathe</string>
 	</array>
-
-	<!-- ================================ -->
-	<!-- Default Data Protection          -->
-	<!-- ================================ -->
-	<key>com.apple.developer.default-data-protection</key>
-	<string>NSFileProtectionComplete</string>
 </dict>
 </plist>

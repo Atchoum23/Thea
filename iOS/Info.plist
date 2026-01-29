@@ -25,6 +25,12 @@
 	<string>15</string>
 
 	<!-- ================================ -->
+	<!-- App Store Category               -->
+	<!-- ================================ -->
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+
+	<!-- ================================ -->
 	<!-- iOS UI Configuration             -->
 	<!-- ================================ -->
 	<key>UILaunchScreen</key>
@@ -34,8 +40,6 @@
 		<key>UIImageName</key>
 		<string>LaunchIcon</string>
 	</dict>
-	<key>UIRequiresFullScreen</key>
-	<false/>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleDefault</string>
 	<key>UIUserInterfaceStyle</key>

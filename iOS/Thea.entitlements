@@ -120,9 +120,13 @@
 
 	<!-- ================================ -->
 	<!-- Family Controls / Screen Time    -->
+	<!-- Requires Apple approval - uncomment after approval        -->
+	<!-- Request at: https://developer.apple.com/contact/request/family-controls -->
 	<!-- ================================ -->
+	<!--
 	<key>com.apple.developer.family-controls</key>
 	<true/>
+	-->
 
 	<!-- ======================================================== -->
 	<!-- RESTRICTED ENTITLEMENTS - Uncomment after Apple approval -->

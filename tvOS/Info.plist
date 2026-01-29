@@ -25,6 +25,12 @@
 	<string>15</string>
 
 	<!-- ================================ -->
+	<!-- App Store Category               -->
+	<!-- ================================ -->
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+
+	<!-- ================================ -->
 	<!-- tvOS UI Configuration            -->
 	<!-- ================================ -->
 	<key>UILaunchScreen</key>
