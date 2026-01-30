@@ -1,311 +1,553 @@
 # Thea UI/UX Implementation Plan
 
 **Created:** January 30, 2026
+**Updated:** January 30, 2026
 **Based on:** Research of Claude Desktop, Cursor.app, ChatGPT, and AI chat best practices 2025-2026
 
 ---
 
 ## Executive Summary
 
-This plan outlines UI/UX improvements for Thea based on research of leading AI assistants. The improvements are prioritized by impact and implementation complexity.
+This plan outlines UI/UX improvements for Thea based on research of leading AI assistants. The improvements are prioritized by impact and implementation complexity. **Version 2.0** adds comprehensive view-by-view enhancement proposals with platform adaptation strategies.
+
+---
+
+## Table of Contents
+
+1. [Current State Analysis](#current-state-analysis)
+2. [View-by-View Enhancement Proposals (macOS)](#view-by-view-enhancement-proposals-macos)
+3. [Cross-Platform Adaptation](#cross-platform-adaptation)
+4. [Implementation Phases](#implementation-phases)
+5. [Technical Decisions](#technical-decisions)
+6. [Design System](#design-system)
+7. [Success Metrics](#success-metrics)
 
 ---
 
 ## Current State Analysis
 
 ### Strengths
-- Clean MVVM architecture with SwiftUI
+- Clean MVVM architecture with SwiftUI + SwiftData
 - Working streaming implementation via ChatManager
 - Multi-platform support (macOS, iOS, watchOS, tvOS)
 - Good separation of concerns (Managers, Views, Components)
+- 80+ views already implemented
 
 ### Gaps Identified
-1. **No markdown rendering** - Messages display as plain text
-2. **No code syntax highlighting** - Code blocks lack formatting
-3. **No rich content support** - Images, artifacts not rendered
-4. **Basic streaming display** - Just text accumulation, no thinking indicators
-5. **No conversation branching** - Can't fork or edit messages
+1. **No markdown rendering** ✅ Fixed - Messages now use MarkdownUI
+2. **No code syntax highlighting** ✅ Fixed - Highlightr integration added
+3. **Basic streaming display** ✅ Improved - StreamingIndicator.swift added
+4. **No conversation branching** - Can't fork or edit messages
+5. **No artifacts panel** - No dual-panel layout for generated content
 6. **Limited input tools** - No @ mentions, limited attachment options
 7. **No task/plan visualization** - Multi-step operations not shown
 
 ---
 
+## View-by-View Enhancement Proposals (macOS)
+
+### 1. ContentView.swift (Main Layout)
+
+**Current:** NavigationSplitView with 3-column layout (sidebar, list, detail)
+
+**Proposed Enhancements (Based on Claude Desktop):**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Artifacts panel | None | Add 4th column for artifacts/generated content | High |
+| Quick Entry | None | Double-tap Option key to open quick entry from anywhere | High |
+| Keyboard navigation | Basic | Full Cmd+K command palette | Medium |
+| Window memory | None | Remember window position/size per project | Low |
+
+**Implementation Notes:**
+- Use `HSplitView` for resizable artifacts panel
+- Register global keyboard shortcut for Quick Entry via NSEvent.addGlobalMonitorForEvents
+- Store window state in UserDefaults keyed by project ID
+
+**Suggested Additions:**
+- Command palette (Cmd+K) for quick actions like Claude Desktop
+- Project switcher in toolbar
+- "Focus mode" that hides sidebar/list
+
+---
+
+### 2. macOSChatDetailView (Chat Conversation)
+
+**Current:** Simple message list with input area at bottom
+
+**Proposed Enhancements (Based on Claude Desktop):**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Message branching | None | Edit user message → creates branch, navigate between branches | High |
+| Extended thinking | Basic indicator | Expandable "Thinking" section showing thought process | High |
+| Message actions | Copy only | Copy, Edit, Regenerate, Fork as hover actions | Medium |
+| Scroll behavior | Jump to bottom | Smart scroll: auto-follow during streaming, pause on user scroll | Medium |
+| Read aloud | None | TTS button on assistant messages | Low |
+
+**Implementation Notes:**
+- Add `parentMessageId: UUID?` and `branchIndex: Int` to Message model
+- Show branch navigation UI when message has siblings
+- Extended thinking requires API support for streaming thought tokens
+
+**Suggested Additions:**
+- "Continue" button when response is cut off
+- Inline reactions (thumbs up/down for feedback)
+- Share conversation button
+
+---
+
+### 3. ChatInputView (Message Input)
+
+**Current:** TextField with model selector and send button
+
+**Proposed Enhancements (Based on Claude Desktop + ChatGPT):**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| @ Mentions | None | @file: @web: @project: with autocomplete | High |
+| Drag-drop files | Image only | PDF, DOCX, CSV, code files (30MB limit) | High |
+| Screenshot capture | macOS only | "Drag to screenshot" like Claude Quick Entry | Medium |
+| Voice input toggle | Button | Caps Lock toggle with visual feedback | Medium |
+| Slash commands | None | /clear /branch /export etc. | Medium |
+| Templates | None | Saved prompt templates | Low |
+
+**Implementation Notes:**
+- Parse input for @ triggers, show autocomplete popover
+- Use NSFilePromiseReceiver for drag-drop
+- Integrate with VoiceActivationManager for voice toggle
+
+**Suggested Additions:**
+- Token counter showing context usage
+- "Attach from project" quick picker
+- Recent files/attachments chip bar
+
+---
+
+### 4. SidebarView (Conversation List)
+
+**Current:** List with pinned/recent sections, search
+
+**Proposed Enhancements (Based on Claude Desktop):**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Search across conversations | Title only | Full-text search of message content | High |
+| Projects section | Via navigation | Inline project folders in sidebar | Medium |
+| Recent models | None | Show which model was used per conversation | Low |
+| Conversation preview | None | First few words of last message | Low |
+
+**Implementation Notes:**
+- Implement FTS using SwiftData's `.contains()` or add dedicated search index
+- Group conversations by project with disclosure triangles
+
+**Suggested Additions:**
+- "Today", "Yesterday", "This Week" temporal grouping
+- Bulk selection for archive/delete
+- Conversation tags/labels
+
+---
+
+### 5. MessageBubble.swift (Message Display)
+
+**Current:** Markdown rendering with code highlighting, hover actions
+
+**Proposed Enhancements:**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Image display | None | Inline image rendering from attachments | High |
+| Artifact extraction | None | Detect code blocks → "Open in Artifact Panel" | High |
+| File cards | None | Show attached files as inline cards | Medium |
+| Thought blocks | None | Collapsible "Thinking" section for extended thinking | Medium |
+| Citations | None | Numbered citations with hover preview | Low |
+
+**Implementation Notes:**
+- Parse message for `![image](url)` patterns
+- Detect ```language blocks and offer extraction
+- Use DisclosureGroup for collapsible thought sections
+
+**Suggested Additions:**
+- Diff view for code modifications
+- Mermaid diagram rendering
+- LaTeX math equation support
+
+---
+
+### 6. StreamingIndicator.swift (Progress Display)
+
+**Current:** Thinking/generating states with shimmer animation
+
+**Proposed Enhancements (Based on Claude Desktop):**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Thinking timer | None | Show elapsed time during thinking | High |
+| Tool usage display | Status text | Show active tool with icon | Medium |
+| Cancel with feedback | Stop button | Cancel + show partial response | Medium |
+| Multi-step progress | None | Numbered steps for complex tasks | Medium |
+
+**Implementation Notes:**
+- Add `startTime: Date` to track elapsed thinking time
+- Create `ToolUsageView` component for displaying active tools
+
+**Suggested Additions:**
+- Progress percentage for known-length tasks
+- Estimated time remaining
+
+---
+
+### 7. MacSettingsView.swift (Settings)
+
+**Current:** 13 tabbed sections with form-based inputs
+
+**Proposed Enhancements (Based on Claude Desktop):**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Styles/presets | None | Create custom response styles (Formal, Concise, etc.) | High |
+| MCP Extensions | Basic | One-click install from curated gallery | High |
+| Personalization | None | "About me" context that persists across chats | Medium |
+| Sync indicator | None | Show iCloud sync status in real-time | Low |
+
+**Implementation Notes:**
+- Styles stored as JSON with custom instructions
+- MCP gallery fetches from central registry
+- Personalization stored in UserDefaults with opt-in
+
+**Suggested Additions:**
+- Settings search/filter
+- "Reset to defaults" per section
+- Import/export settings
+
+---
+
+### 8. TerminalView.swift (Terminal Emulator)
+
+**Current:** HSplitView with output, history, windows tabs
+
+**Proposed Enhancements (Based on Cursor.app):**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Inline suggestions | None | Ghost text for command completion | High |
+| AI command help | None | "Explain this command" button | Medium |
+| Session persistence | Manual | Auto-save/restore terminal sessions | Medium |
+| Split panes | None | Horizontal/vertical terminal splits | Low |
+
+**Implementation Notes:**
+- Use Shell GPT or similar for command suggestions
+- Persist session state to UserDefaults
+
+**Suggested Additions:**
+- Command history search (Ctrl+R style)
+- Clickable file paths
+- Error detection with "Fix with AI" button
+
+---
+
+### 9. CoworkView.swift (Agentic Assistant)
+
+**Current:** HSplitView with 5 tabs (Progress, Artifacts, Context, Queue, Skills)
+
+**Proposed Enhancements (Based on Claude Cowork):**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Plan preview | Sheet | Inline plan display with edit capability | High |
+| Folder picker | Basic | Recent folders + favorites | Medium |
+| Parallel tasks | Queue | Visual task dependency graph | Medium |
+| Approval workflow | None | "Approve before executing" toggle | High |
+
+**Implementation Notes:**
+- Plan displayed as editable checklist
+- Approval gate before destructive operations
+- Show task dependencies as mini-DAG
+
+**Suggested Additions:**
+- "Rollback to checkpoint" button
+- Time estimate per step
+- Resource usage monitoring (CPU, disk)
+
+---
+
+### 10. UnifiedDashboardView.swift (Integration Hub)
+
+**Current:** Module sidebar with status indicators
+
+**Proposed Enhancements:**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Quick glance cards | List only | Grid of module summary cards | Medium |
+| Health check | None | System-wide integration status | Medium |
+| Onboarding flow | None | Guided setup for each module | Low |
+
+**Implementation Notes:**
+- Create `ModuleCard` component showing key metrics
+- Health check pings each integration service
+
+---
+
+### 11. Health/Financial/Career Dashboard Views
+
+**Current:** Basic placeholder or simple lists
+
+**Proposed Enhancements:**
+
+| Feature | Current | Proposed | Priority |
+|---------|---------|----------|----------|
+| Charts | None | Swift Charts for trends and metrics | High |
+| AI insights | None | AI-generated summaries and recommendations | High |
+| Goal tracking | Basic | Visual progress bars with milestones | Medium |
+| Export | None | PDF/CSV export of data | Low |
+
+**Implementation Notes:**
+- Use Swift Charts for data visualization
+- Generate insights via ChatManager.sendMessage with context
+- Create reusable `MetricCard` component
+
+---
+
+## Cross-Platform Adaptation
+
+### Design Philosophy
+
+**Shared (100%):**
+- Color palette and brand identity
+- Typography hierarchy (relative)
+- Data models and business logic
+- API communication layer
+
+**Platform-Adaptive:**
+- Navigation patterns
+- Input mechanisms
+- Information density
+- Gesture interactions
+
+### iOS Adaptation
+
+| macOS Feature | iOS Equivalent |
+|---------------|----------------|
+| Sidebar | Tab bar + Navigation stack |
+| Toolbar actions | Navigation bar buttons |
+| Right-click menus | Long-press context menus |
+| Keyboard shortcuts | None (remove) |
+| Hover actions | Swipe actions |
+| Multi-column | Single column with drill-down |
+| Artifacts panel | Modal sheet or tab |
+
+**iOS-Specific Additions:**
+- Haptic feedback on actions
+- Pull-to-refresh on conversation list
+- Share sheet integration
+- Widget for quick questions
+- Siri Shortcuts integration
+
+### watchOS Adaptation
+
+**What to Include:**
+- Voice input (primary)
+- Last response display (2-3 lines)
+- Quick reply suggestions
+- Complication for quick access
+- Haptic alerts for responses
+
+**What to Exclude:**
+- Long conversations
+- Code display
+- File attachments
+- Complex settings
+- Multi-step workflows
+
+**watchOS-Specific View:**
+```swift
+struct TheaWatchView: View {
+    var body: some View {
+        VStack {
+            // Latest AI response (truncated)
+            Text(lastResponse)
+                .lineLimit(3)
+
+            // Voice input button (prominent)
+            Button("Ask THEA") {
+                startVoiceInput()
+            }
+            .font(.headline)
+
+            // Quick suggestions
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(suggestions) { suggestion in
+                        Button(suggestion.short) { ... }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### tvOS Adaptation
+
+**Design for 10-foot Experience:**
+- Minimum 40pt font size
+- Voice as primary input (Siri Remote)
+- Focus-based navigation
+- Card-based response display
+- Large, clear action buttons
+
+**tvOS-Specific Features:**
+- "Hey Siri, ask THEA" integration
+- Ambient mode with contextual suggestions
+- Media-focused queries (finding content)
+- Smart home integration
+
+**What to Exclude:**
+- Complex text input
+- Code editing
+- File management
+- Terminal/cowork features
+
+---
+
 ## Implementation Phases
 
-### Phase 1: Enhanced Message Rendering (HIGH PRIORITY)
-**Estimated effort:** 2-3 days
+### Phase 1: Core Chat Enhancements (Week 1-2)
+- [x] Markdown rendering
+- [x] Code syntax highlighting
+- [x] Streaming indicators
+- [x] Welcome placeholder
+- [ ] Message branching
+- [ ] Extended thinking UI
+- [ ] @ mentions system
 
-#### 1.1 Markdown Rendering
-- Integrate a SwiftUI markdown renderer (e.g., `swift-markdown-ui`)
-- Support: Headers, bold, italic, lists, blockquotes, links
-- Handle streaming markdown gracefully (incomplete syntax)
+### Phase 2: Input & Navigation (Week 2-3)
+- [ ] File drag-drop improvements
+- [ ] Command palette (Cmd+K)
+- [ ] Quick Entry (Option+Option)
+- [ ] Full-text conversation search
+- [ ] Keyboard shortcuts guide
 
-#### 1.2 Code Block Syntax Highlighting
-- Use Shiki-style highlighting via native Swift highlighter
-- Support 20+ common languages (Swift, Python, JS, etc.)
-- Add copy button with accessibility label
-- Show language indicator on code blocks
+### Phase 3: Artifacts Panel (Week 3-4)
+- [ ] 4th column layout for artifacts
+- [ ] Code block extraction
+- [ ] Version history in artifacts
+- [ ] Export/save artifacts
 
-#### 1.3 Message Actions
-- Add hover actions: Copy, Regenerate, Edit (user messages only)
-- Show "Regenerate" button on assistant messages
-- Copy full message or just code blocks
+### Phase 4: Advanced Features (Week 4-5)
+- [ ] Response styles
+- [ ] MCP Extensions gallery
+- [ ] Personalization system
+- [ ] Plan preview in Cowork
 
-**Files to modify:**
-- `Shared/UI/Components/MessageBubble.swift` - Add markdown/code rendering
-- Create `Shared/UI/Components/CodeBlockView.swift` - Syntax highlighting
-- Create `Shared/UI/Components/MarkdownRenderer.swift` - Markdown parsing
+### Phase 5: Cross-Platform Polish (Week 5-6)
+- [ ] iOS view adaptation
+- [ ] watchOS minimal interface
+- [ ] tvOS voice-first design
+- [ ] Shared design system components
 
----
-
-### Phase 2: Streaming & Progress Indicators (HIGH PRIORITY)
-**Estimated effort:** 1-2 days
-
-#### 2.1 Thinking Indicators
-- Show contextual status: "Thinking...", "Searching...", "Planning..."
-- Add subtle shimmer animation (like Claude Code)
-- Display current tool/action when applicable
-
-#### 2.2 Enhanced Streaming Display
-- Show cursor/typing indicator at end of streaming text
-- Progressive disclosure for long responses
-- Cancel button during generation
-
-#### 2.3 Task Progress Visualization
-- For multi-step tasks, show numbered progress
-- Expandable/collapsible step details
-- Completion checkmarks
-
-**Files to modify:**
-- `Shared/UI/Views/ChatView.swift` - Add progress indicators
-- `Shared/Core/Managers/ChatManager.swift` - Add status states
-- Create `Shared/UI/Components/StreamingIndicator.swift`
-- Create `Shared/UI/Components/TaskProgressView.swift`
+### Phase 6: Accessibility & QA (Ongoing)
+- [ ] VoiceOver full support
+- [ ] Reduce Motion compliance
+- [ ] High contrast mode
+- [ ] Keyboard navigation audit
 
 ---
 
-### Phase 3: Input Field Enhancements (MEDIUM PRIORITY)
-**Estimated effort:** 2-3 days
+## Design System
 
-#### 3.1 @ Mentions System
-- `@file:` - Reference files from projects
-- `@web:` - Trigger web search
-- Support autocomplete dropdown for mentions
+### Colors (Semantic)
+```swift
+extension Color {
+    // Primary brand colors
+    static let theaPrimary = Color("TheaPrimary")
+    static let theaSecondary = Color("TheaSecondary")
 
-#### 3.2 Attachment Improvements
-- Drag-and-drop files into input
-- Support images, PDFs, documents
-- Show attachment previews/chips
+    // Message bubbles
+    static let userBubble = Color.theaPrimary
+    static let assistantBubble = Color(nsColor: .controlBackgroundColor)
 
-#### 3.3 Input Field Polish
-- Auto-expanding multi-line input (1-10 lines)
-- Better keyboard shortcuts (Cmd+Enter to send)
-- Voice input button (use existing iOS/macOS speech recognition)
-
-**Files to modify:**
-- `Shared/UI/Components/ChatInputView.swift` - Add mentions, attachments
-- Create `Shared/UI/Components/MentionAutocomplete.swift`
-- Create `Shared/UI/Components/AttachmentChip.swift`
-
----
-
-### Phase 4: Conversation Management (MEDIUM PRIORITY)
-**Estimated effort:** 2-3 days
-
-#### 4.1 Conversation Branching
-- Edit user messages to create forks
-- Show branch indicator/navigation
-- Support viewing/switching between branches
-
-#### 4.2 Enhanced Sidebar
-- Search within conversations
-- Pinned conversations section (already exists)
-- Recently used models section
-- Better visual hierarchy
-
-#### 4.3 New Conversation Behavior
-- New windows open directly to new conversation (per user request)
-- **Updated:** Welcome placeholder appears ABOVE the input field (not replacing the chat view)
-- Input field always visible at bottom, ready for typing
-- Welcome content shows when conversation has no messages
-- Quick conversation creation keyboard shortcut
-- Template conversations for common tasks
-
-**Files to modify:**
-- `Shared/Core/Models/Message.swift` - Add branch support
-- `Shared/UI/Views/SidebarView.swift` - Add search, branches
-- `macOS/Views/ContentView.swift` - New window behavior
-- `macOS/TheamacOSApp.swift` - Window initialization
-
----
-
-### Phase 5: Artifacts Panel (LOWER PRIORITY)
-**Estimated effort:** 3-4 days
-
-#### 5.1 Dual-Panel Layout
-- Main chat on left, artifacts on right
-- Collapsible/resizable panels
-- Auto-show when artifacts are generated
-
-#### 5.2 Artifact Types
-- Code with editing capability
-- Documents with inline editing
-- Visualizations (charts, diagrams)
-- Interactive components (if WebView supported)
-
-#### 5.3 Artifact Actions
-- Save to file
-- Copy to clipboard
-- Open in external editor
-- Version history
-
-**Files to create:**
-- `Shared/UI/Views/ArtifactPanel.swift`
-- `Shared/UI/Components/ArtifactCard.swift`
-- `Shared/Core/Models/Artifact.swift`
-
----
-
-### Phase 6: Accessibility (ONGOING)
-**Estimated effort:** 1-2 days (initial), ongoing
-
-#### 6.1 Screen Reader Support
-- ARIA-equivalent labels on all interactive elements
-- Proper focus management
-- Announce new messages and streaming updates
-
-#### 6.2 Reduced Motion Support
-- Respect `accessibilityReduceMotion` preference
-- Replace scale/offset animations with opacity
-- Disable shimmer effects when reduced motion enabled
-
-#### 6.3 Color Contrast
-- Ensure 4.5:1 contrast ratio for text
-- Avoid pure black in dark mode (use #1E1E1E)
-- Don't rely on color alone for meaning
-
-**Files to modify:**
-- All UI components - Add accessibility modifiers
-- Theme/color definitions - Verify contrast
-
----
-
-## Implementation Order (Optimal)
-
-Based on user request and impact analysis:
-
+    // Status colors
+    static let thinking = Color.orange
+    static let generating = Color.blue
+    static let error = Color.red
+    static let success = Color.green
+}
 ```
-Week 1:
-├── Phase 1.1: Markdown rendering (highest impact)
-├── Phase 1.2: Code syntax highlighting
-└── Phase 2.1: Thinking indicators
 
-Week 2:
-├── Phase 2.2: Enhanced streaming display
-├── Phase 4.3: New conversation behavior (user requested)
-├── Phase 1.3: Message actions
-└── Phase 3.2: Attachment improvements
-
-Week 3:
-├── Phase 4.1: Conversation branching
-├── Phase 3.1: @ Mentions system
-└── Phase 4.2: Enhanced sidebar
-
-Week 4:
-├── Phase 5: Artifacts panel (if time permits)
-└── Phase 6: Accessibility audit
+### Typography
+```swift
+extension Font {
+    static let theaHeadline = Font.headline
+    static let theaBody = Font.body
+    static let theaCaption = Font.caption
+    static let theaCode = Font.system(.body, design: .monospaced)
+}
 ```
+
+### Spacing
+```swift
+enum Spacing {
+    static let xxs: CGFloat = 4
+    static let xs: CGFloat = 8
+    static let sm: CGFloat = 12
+    static let md: CGFloat = 16
+    static let lg: CGFloat = 24
+    static let xl: CGFloat = 32
+}
+```
+
+### Component Library
+- `MessageBubble` - Message display with markdown
+- `StreamingIndicator` - Progress feedback
+- `CodeBlockView` - Syntax-highlighted code
+- `SuggestionChip` - Quick action buttons
+- `MetricCard` - Dashboard metric display
+- `FileCard` - Attachment preview
+- `BranchNavigator` - Conversation branch UI
 
 ---
 
 ## Technical Decisions
 
 ### Markdown Rendering
-**Recommended:** Use `swift-markdown-ui` or `MarkdownKit`
-- Both support streaming updates
-- Customizable styling
-- SwiftUI native
+**Chosen:** `swift-markdown-ui` (MarkdownUI)
+- Native SwiftUI
+- Customizable themes
+- Handles streaming gracefully
 
 ### Syntax Highlighting
-**Recommended:** Build custom using `Splash` or `Highlightr`
-- Splash is Swift-native, lightweight
-- Highlightr uses highlight.js themes (more languages)
-- Include 10-15 themes (dracula, github-dark, monokai, nord, etc.)
+**Chosen:** `Highlightr` (highlight.js wrapper)
+- 180+ languages
+- Multiple themes
+- Good performance
 
-### Conversation Branching Data Model
-```swift
-// Add to Message model
-var parentMessageId: UUID? // For branching
-var branchIndex: Int = 0   // Which branch (0 = main)
-var isEdited: Bool = false // Was this message edited
+### Charts
+**Recommended:** Swift Charts (Apple native)
+- Built into SwiftUI
+- Consistent with platform
+- Accessible by default
 
-// Add computed property
-var hasBranches: Bool {
-    // Query for sibling messages with same parent
-}
-```
-
-### Streaming Status States
-```swift
-enum StreamingStatus: Equatable {
-    case idle
-    case thinking
-    case searching(query: String)
-    case generating
-    case usingTool(name: String)
-    case complete
-    case error(String)
-}
-```
-
----
-
-## Dependencies to Add
-
-```swift
-// Package.swift additions
-.package(url: "https://github.com/gonzalezreal/swift-markdown-ui", from: "2.0.0"),
-.package(url: "https://github.com/JohnSundell/Splash", from: "0.16.0"),
-```
-
----
-
-## Key UI Patterns from Research
-
-### From Claude Desktop
-- Dual-panel: chat left, artifacts right
-- Quick Entry via double-tap Option key
-- Files created appear in Artifacts pane
-- MCP integration for external services
-
-### From Cursor.app
-- Plan Mode: separate planning from execution
-- Aggregated diff view for multi-file changes
-- Checkpoint/rollback UI for safety
-- Tiered autonomy (manual/agent/YOLO)
-
-### From ChatGPT
-- Dedicated spaces for specialized contexts (Health)
-- Canvas for side-by-side document editing
-- Memory with two tiers (explicit vs inferred)
-- Project folders with custom instructions
-
-### Best Practices
-- Conversation branching like version control
-- Copy button on code blocks (accessibility required)
-- Respect Reduce Motion preference
-- Stream markdown gracefully
+### State Management
+**Pattern:** ObservableObject managers with @StateObject
+- Already established in codebase
+- Works well with SwiftUI
+- Testable
 
 ---
 
 ## Success Metrics
 
-1. **Message rendering** - All markdown renders correctly including during streaming
-2. **Code blocks** - Syntax highlighted with working copy button
-3. **Streaming** - Shows current status, no flickering, cancel works
-4. **Branching** - Can edit messages and create/navigate forks
-5. **Accessibility** - Passes basic VoiceOver testing
-6. **New window** - Opens directly to new conversation
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| macOS build | 0 errors, 0 warnings | CI/CD |
+| iOS build | 0 errors, 0 warnings | CI/CD |
+| Test pass rate | 100% | swift test |
+| VoiceOver audit | No issues | Manual testing |
+| Message render time | < 100ms | Instruments |
+| App launch time | < 2s | Time to first interaction |
+| User satisfaction | 4+ stars | App Store reviews |
 
 ---
 
@@ -313,9 +555,11 @@ enum StreamingStatus: Equatable {
 
 - Keep changes incremental and testable
 - Run QA phases after each major change
-- Document any new patterns in CLAUDE.md
-- Ensure all 4 platform schemes still build
+- Document new patterns in CLAUDE.md
+- Ensure all 4 platform schemes build
+- Commit after each completed phase
 
 ---
 
 *Last Updated: January 30, 2026*
+*Version: 2.0*
