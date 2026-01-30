@@ -419,16 +419,16 @@ EOF
 
 ---
 
-## Phase 9: Commit Changes (Final Step)
+## Phase 9: Commit & Sync Changes (Final Step)
 
-**Purpose:** Ensure all changes are committed so no work is lost.
+**Purpose:** Ensure all changes are committed AND synced to remote so no work is lost.
 
 ```bash
 cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
 
-echo "=== Phase 9: Commit Changes ==="
+echo "=== Phase 9: Commit & Sync Changes ==="
 
-# Check for uncommitted changes
+# Step 1: Check for uncommitted changes
 CHANGES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
 
 if [ "$CHANGES" = "0" ]; then
@@ -464,10 +464,30 @@ COMMIT_EOF
   fi
 fi
 
+# Step 2: Sync to remote
+echo ""
+echo "Checking remote sync status..."
+AHEAD=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo "0")
+
+if [ "$AHEAD" = "0" ]; then
+  echo "✓ Already in sync with remote"
+else
+  echo "Local is $AHEAD commits ahead of origin/main"
+  echo "Pushing to remote..."
+
+  if git push origin main; then
+    echo "✓ Successfully pushed to origin/main"
+  else
+    echo "⚠ Push failed - check remote access"
+    echo "  Manual sync required: git push origin main"
+  fi
+fi
+
+echo ""
 echo "✓ Phase 9 PASSED"
 ```
 
-**Gate:** All changes committed (or working directory already clean).
+**Gate:** All changes committed AND synced to remote (or already in sync).
 
 ---
 
