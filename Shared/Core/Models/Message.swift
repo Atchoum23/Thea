@@ -17,6 +17,20 @@ final class Message {
     /// timestamps might be identical (e.g., rapid message creation)
     var orderIndex: Int = 0
 
+    // MARK: - Branching Support
+
+    /// ID of the parent message this was branched from (nil for original messages)
+    var parentMessageId: UUID?
+
+    /// Branch index (0 = original/main branch, 1+ = alternative branches)
+    var branchIndex: Int = 0
+
+    /// Whether this message was edited to create a branch
+    var isEdited: Bool = false
+
+    /// Original content before editing (for showing "edited" indicator)
+    var originalContentData: Data?
+
     @Relationship var conversation: Conversation?
 
     init(
@@ -28,7 +42,9 @@ final class Message {
         model: String? = nil,
         tokenCount: Int? = nil,
         metadata: MessageMetadata? = nil,
-        orderIndex: Int = 0
+        orderIndex: Int = 0,
+        parentMessageId: UUID? = nil,
+        branchIndex: Int = 0
     ) {
         self.id = id
         self.conversationID = conversationID
@@ -39,6 +55,8 @@ final class Message {
         self.tokenCount = tokenCount
         metadataData = metadata.flatMap { try? JSONEncoder().encode($0) }
         self.orderIndex = orderIndex
+        self.parentMessageId = parentMessageId
+        self.branchIndex = branchIndex
     }
 
     // Computed properties for easy access
@@ -53,6 +71,30 @@ final class Message {
     var metadata: MessageMetadata? {
         guard let data = metadataData else { return nil }
         return try? JSONDecoder().decode(MessageMetadata.self, from: data)
+    }
+
+    /// Original content if this message was edited
+    var originalContent: MessageContent? {
+        guard let data = originalContentData else { return nil }
+        return try? JSONDecoder().decode(MessageContent.self, from: data)
+    }
+
+    /// Create an edited version of this message (for branching)
+    func createBranch(newContent: MessageContent, branchIndex: Int) -> Message {
+        let branchedMessage = Message(
+            conversationID: conversationID,
+            role: messageRole,
+            content: newContent,
+            model: model,
+            tokenCount: nil,
+            metadata: nil,
+            orderIndex: orderIndex,
+            parentMessageId: id,
+            branchIndex: branchIndex
+        )
+        branchedMessage.isEdited = true
+        branchedMessage.originalContentData = contentData
+        return branchedMessage
     }
 }
 
