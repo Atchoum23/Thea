@@ -11,19 +11,16 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_PATH="/Users/alexis/Documents/IT & Tech/MyApps/Thea/Thea.xcodeproj"
 WAIT_TIME="${1:-120}"  # Seconds to wait per build
-
-SCHEMES=("Thea-iOS" "Thea-macOS" "Thea-watchOS" "Thea-tvOS")
-RESULTS=()
 
 echo "=============================================="
 echo "  Xcode GUI Build - All Platforms"
 echo "=============================================="
 echo ""
 echo "Wait time per build: ${WAIT_TIME}s"
-echo "Schemes: ${SCHEMES[*]}"
+echo "Schemes: Thea-iOS Thea-macOS Thea-watchOS Thea-tvOS"
 echo ""
 
 # Ensure Xcode is open with the project
@@ -33,8 +30,11 @@ if ! pgrep -x "Xcode" > /dev/null; then
     sleep 5
 fi
 
+# Track results
+FAILED=0
+
 # Build each scheme
-for SCHEME in "${SCHEMES[@]}"; do
+for SCHEME in Thea-iOS Thea-macOS Thea-watchOS Thea-tvOS; do
     echo ""
     echo "=============================================="
     echo "  Building: $SCHEME"
@@ -42,9 +42,10 @@ for SCHEME in "${SCHEMES[@]}"; do
     echo ""
 
     if "$SCRIPT_DIR/xcode-gui-build.sh" "$SCHEME" "Debug" "$WAIT_TIME"; then
-        RESULTS+=("$SCHEME: PASSED")
+        echo "  [OK] $SCHEME: PASSED"
     else
-        RESULTS+=("$SCHEME: FAILED")
+        echo "  [X] $SCHEME: FAILED"
+        FAILED=1
     fi
 
     # Small delay between builds
@@ -56,18 +57,6 @@ echo ""
 echo "=============================================="
 echo "  Build Summary"
 echo "=============================================="
-echo ""
-
-FAILED=0
-for RESULT in "${RESULTS[@]}"; do
-    if [[ "$RESULT" == *"FAILED"* ]]; then
-        echo "  [X] $RESULT"
-        FAILED=1
-    else
-        echo "  [OK] $RESULT"
-    fi
-done
-
 echo ""
 
 if [ "$FAILED" -eq 1 ]; then
