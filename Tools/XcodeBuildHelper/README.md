@@ -1,109 +1,78 @@
 # XcodeBuildHelper
 
-A standalone AppleScript application for triggering Xcode GUI builds programmatically.
+Scripts for Xcode GUI build automation from the command line.
 
 ## The Problem
 
-When running AppleScript via `osascript` from a CLI tool (like Claude Code), the script inherits the Accessibility permissions of the parent process, not the terminal app itself. This causes "osascript is not allowed to send keystrokes" errors even when Terminal.app or Claude.app has Accessibility permissions.
+When building Xcode projects, CLI builds (`xcodebuild`) and Xcode GUI builds can show **different warnings**:
+- Indexer warnings not visible in CLI
+- Project settings warnings
+- Capability/entitlement warnings
+- Additional static analysis
 
 ## The Solution
 
-This standalone AppleScript application can be granted its own Accessibility permissions, allowing it to control Xcode reliably regardless of how it's invoked.
-
-## Setup
-
-### 1. Compile the AppleScript (if not already done)
-
-```bash
-cd Tools/XcodeBuildHelper
-osacompile -o XcodeBuildHelper.app XcodeBuildHelper.applescript
-```
-
-### 2. Grant Accessibility Permission
-
-1. Open **System Settings** > **Privacy & Security** > **Accessibility**
-2. Click the **+** button
-3. Navigate to `Tools/XcodeBuildHelper/XcodeBuildHelper.app`
-4. Add it and ensure the toggle is **ON**
-
-### 3. Test It
-
-```bash
-./xcode-gui-build.sh Thea-macOS Debug
-```
+Use `xcode-cli-with-gui-log.sh` - a hybrid approach that:
+1. Runs `xcodebuild` CLI (no Accessibility permissions needed)
+2. Writes to default DerivedData (Xcode GUI reads this)
+3. Parses build logs automatically
+4. Allows you to verify in Xcode's Issue Navigator
 
 ## Usage
 
-### Single Build
+### Single Scheme Build
 
 ```bash
-# Build a specific scheme
-./xcode-gui-build.sh Thea-iOS Debug
+# Ensure Xcode is open with the project first
+open "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Thea.xcodeproj"
 
-# With custom wait time (seconds)
-./xcode-gui-build.sh Thea-macOS Debug 90
+# Build macOS Debug
+./Tools/XcodeBuildHelper/xcode-cli-with-gui-log.sh Thea-macOS Debug
+
+# Build iOS Release
+./Tools/XcodeBuildHelper/xcode-cli-with-gui-log.sh Thea-iOS Release
 ```
 
-### All Platforms
+### All Platforms Build
 
 ```bash
-# Build all 4 platforms via GUI
-./build-all-gui.sh
-
-# With custom wait time
-./build-all-gui.sh 90
+# Build all 4 platforms
+for scheme in Thea-iOS Thea-macOS Thea-watchOS Thea-tvOS; do
+    ./Tools/XcodeBuildHelper/xcode-cli-with-gui-log.sh "$scheme" Debug
+done
 ```
 
-### Direct App Usage
+### Verify in Xcode GUI
 
-```bash
-# Open the app directly with arguments
-open -a XcodeBuildHelper.app --args "Thea-iOS" "Debug"
-```
+After builds complete, open Xcode and press `Cmd+5` to view the Issue Navigator.
+This shows any GUI-specific warnings that CLI may have missed.
 
 ## Files
 
-| File | Description |
-|------|-------------|
-| `XcodeBuildHelper.applescript` | Source AppleScript code |
-| `XcodeBuildHelper.app` | Compiled standalone app |
-| `xcode-gui-build.sh` | CLI wrapper for single builds |
-| `build-all-gui.sh` | CLI wrapper for all platforms |
+| File | Purpose |
+|------|---------|
+| `xcode-cli-with-gui-log.sh` | **Main tool** - CLI build with GUI log viewing |
+| `run-build-via-script-editor.sh` | Alternative for manual AppleScript testing |
 
-## Troubleshooting
+## Why Not AppleScript Automation?
 
-### "Not allowed to send keystrokes"
+AppleScript-based automation (osascript, AppleScript apps) fails when run from CLI tools
+like Claude Code due to macOS Accessibility permission model:
 
-The app doesn't have Accessibility permission. Follow Setup step 2.
+- **Error 1002**: "osascript is not allowed to send keystrokes"
+- The Accessibility permission must be on the **calling process**, not just Terminal.app
+- Subprocesses don't inherit Accessibility permissions from parent apps
 
-### Build log not found
+The CLI approach used here avoids these issues entirely.
 
-The build may still be in progress. Increase the wait time:
+## Supported Schemes
 
-```bash
-./xcode-gui-build.sh Thea-iOS Debug 180  # 3 minutes
-```
+- `Thea-iOS` - iOS platform
+- `Thea-macOS` - macOS platform
+- `Thea-watchOS` - watchOS platform
+- `Thea-tvOS` - tvOS platform
 
-### Wrong scheme selected
+## Configurations
 
-Ensure Xcode has the project open and the scheme exists. The script types the scheme name, so it must match exactly.
-
-## How It Works
-
-1. The shell script calls `open -a XcodeBuildHelper.app --args <scheme> <config>`
-2. XcodeBuildHelper.app activates Xcode and sends keystrokes:
-   - `Ctrl+0` to open scheme chooser
-   - Types the scheme name
-   - `Return` to select
-   - `Cmd+B` to build
-3. The shell script waits and then parses the build log
-
-## Integration with Claude Code
-
-Add to your `.claude/AUTONOMOUS_BUILD_QA.md`:
-
-```bash
-# GUI builds using XcodeBuildHelper
-cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
-./Tools/XcodeBuildHelper/build-all-gui.sh 120
-```
+- `Debug` - Development build with debug symbols
+- `Release` - Optimized release build
