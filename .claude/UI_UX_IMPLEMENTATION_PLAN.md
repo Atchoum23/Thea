@@ -418,22 +418,22 @@ struct TheaWatchView: View {
 - [x] Code syntax highlighting
 - [x] Streaming indicators
 - [x] Welcome placeholder
-- [ ] Message branching
-- [ ] Extended thinking UI
-- [ ] @ mentions system
+- [x] Message branching (BranchNavigator.swift, Message model updated)
+- [x] Extended thinking UI (ExtendedThinkingView.swift)
+- [x] @ mentions system (MentionAutocomplete.swift)
 
 ### Phase 2: Input & Navigation (Week 2-3)
 - [ ] File drag-drop improvements
-- [ ] Command palette (Cmd+K)
-- [ ] Quick Entry (Option+Option)
+- [x] Command palette (Cmd+K) - CommandPalette.swift
+- [x] Quick Entry (Option+Option) - QuickEntryWindow.swift
 - [ ] Full-text conversation search
 - [ ] Keyboard shortcuts guide
 
 ### Phase 3: Artifacts Panel (Week 3-4)
-- [ ] 4th column layout for artifacts
-- [ ] Code block extraction
-- [ ] Version history in artifacts
-- [ ] Export/save artifacts
+- [x] 4th column layout for artifacts (ArtifactPanel.swift)
+- [x] Code block extraction (ArtifactExtractor utility)
+- [x] Version history in artifacts
+- [x] Export/save artifacts
 
 ### Phase 4: Advanced Features (Week 4-5)
 - [ ] Response styles
@@ -562,4 +562,4 @@ enum Spacing {
 ---
 
 *Last Updated: January 30, 2026*
-*Version: 2.0*
+*Version: 2.1 - Phase 1-3 components implemented*
