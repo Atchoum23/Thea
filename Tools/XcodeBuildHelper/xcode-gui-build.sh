@@ -15,7 +15,12 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_PATH="$SCRIPT_DIR/XcodeBuildHelper.app"
+# Prefer /Applications version if installed, fallback to local
+if [ -d "/Applications/XcodeBuildHelper.app" ]; then
+    APP_PATH="/Applications/XcodeBuildHelper.app"
+else
+    APP_PATH="$SCRIPT_DIR/XcodeBuildHelper.app"
+fi
 PROJECT_PATH="/Users/alexis/Documents/IT & Tech/MyApps/Thea/Thea.xcodeproj"
 
 SCHEME="${1:-Thea-macOS}"
