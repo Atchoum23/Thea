@@ -52,18 +52,15 @@ public class OnDeviceAIService: ObservableObject {
     /// Check if on-device AI is available (requires Apple Intelligence enabled)
     public func checkAvailability() async {
         #if canImport(FoundationModels)
-            do {
-                // Check if the default model is available
-                let model = SystemLanguageModel.default
-                let availability = model.availability
-                isAvailable = (availability == .available)
+            // Check if the default model is available
+            let model = SystemLanguageModel.default
+            let availability = model.availability
+            isAvailable = (availability == .available)
 
-                if isAvailable {
-                    // Pre-create session for faster first response
-                    session = LanguageModelSession()
-                }
-            } catch {
-                isAvailable = false
+            if isAvailable {
+                // Pre-create session for faster first response
+                session = LanguageModelSession()
+            } else {
                 lastError = .notAvailable
             }
         #else

@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var selectedConversation: Conversation?
     @State private var selectedProject: Project?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    @State private var hasAutoCreatedConversation = false
 
     enum NavigationItem: String, CaseIterable, Identifiable {
         case chat = "Chat"
@@ -51,6 +52,8 @@ struct ContentView: View {
         .dynamicTypeSize(dynamicTypeSizeForFontSize)
         .onAppear {
             setupManagers()
+            // Auto-create a new conversation when window opens (per user request)
+            autoCreateConversationIfNeeded()
         }
         // NOTE: Removed custom sidebar toggle button - NavigationSplitView provides native toggle
     }
@@ -211,6 +214,23 @@ struct ContentView: View {
             }
         }
     }
+
+    /// Auto-create a new conversation when window opens directly to chat
+    /// This implements the user-requested behavior: "New Thea windows open directly to new conversation view"
+    private func autoCreateConversationIfNeeded() {
+        // Only auto-create once per window and only if in chat mode with no selection
+        guard !hasAutoCreatedConversation,
+              selectedItem == .chat,
+              selectedConversation == nil else { return }
+
+        // Small delay to ensure managers are initialized
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if selectedConversation == nil {
+                hasAutoCreatedConversation = true
+                createNewConversation()
+            }
+        }
+    }
 }
 
 // MARK: - Chat Detail View
@@ -269,25 +289,27 @@ struct macOSChatDetailView: View {
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 16) {
-                    ForEach(messages) { message in
-                        MessageBubble(message: message)
-                            .id(message.id)
-                    }
-
-                    // Show streaming text as it comes in
-                    if chatManager.isStreaming, !chatManager.streamingText.isEmpty {
-                        HStack {
-                            Text(chatManager.streamingText)
-                                .padding(12)
-                                .background(Color(nsColor: .controlBackgroundColor))
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                            Spacer()
+                if messages.isEmpty && !chatManager.isStreaming {
+                    // Welcome placeholder shown when conversation is empty
+                    welcomePlaceholder
+                } else {
+                    LazyVStack(spacing: 16) {
+                        ForEach(messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
                         }
-                        .id("streaming")
+
+                        // Show streaming response with indicator
+                        if chatManager.isStreaming {
+                            StreamingMessageView(
+                                streamingText: chatManager.streamingText,
+                                status: chatManager.streamingText.isEmpty ? .thinking : .generating
+                            )
+                            .id("streaming")
+                        }
                     }
+                    .padding(20)
                 }
-                .padding(20)
             }
             .onChange(of: messages.count) { _, _ in
                 scrollToBottom(proxy: proxy)
@@ -296,6 +318,43 @@ struct macOSChatDetailView: View {
                 scrollToBottom(proxy: proxy)
             }
         }
+    }
+
+    /// Welcome placeholder displayed above the input field when conversation has no messages
+    private var welcomePlaceholder: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: "brain.head.profile")
+                .font(.system(size: 64))
+                .foregroundStyle(Color.theaPrimaryDefault)
+
+            VStack(spacing: 8) {
+                Text("Welcome to THEA")
+                    .font(.title)
+                    .fontWeight(.bold)
+
+                Text("Your AI Life Companion")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+            }
+
+            Text("Ask me anything, or try one of these:")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .padding(.top, 8)
+
+            // Suggestion chips
+            HStack(spacing: 12) {
+                SuggestionChip(text: "Help me plan my day", icon: "calendar")
+                SuggestionChip(text: "Explain a concept", icon: "lightbulb")
+                SuggestionChip(text: "Write some code", icon: "chevron.left.forwardslash.chevron.right")
+            }
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(40)
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
@@ -542,5 +601,39 @@ struct ContentProjectRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Suggestion Chip
+
+/// A tappable suggestion chip for the welcome placeholder
+struct SuggestionChip: View {
+    let text: String
+    let icon: String
+
+    @State private var isHovering = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+
+            Text(text)
+                .font(.callout)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(isHovering ? Color.theaPrimaryDefault.opacity(0.15) : Color(nsColor: .controlBackgroundColor))
+        .foregroundStyle(isHovering ? Color.theaPrimaryDefault : .primary)
+        .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(Color.theaPrimaryDefault.opacity(isHovering ? 0.5 : 0.2), lineWidth: 1)
+        )
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovering = hovering
+            }
+        }
     }
 }

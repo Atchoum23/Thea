@@ -594,6 +594,7 @@
 		9A06FCF42B71B3C2D7CBCF26 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 55ED60A26645151D1B26BE21 /* popup.js */; };
 		9A61F2CB3BF6DC68D0ADE117 /* WellnessViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081CC3DBD0AE36EAD887D490 /* WellnessViewModel.swift */; };
 		9B0D3ABBD3CF4DDA64C58E2C /* TaskClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C073055CA3B54601DAA60B82 /* TaskClassifier.swift */; };
+		9B0F85A5213130B4FEA9406C /* StreamingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F31B883CFBAD460B87029FB6 /* StreamingIndicator.swift */; };
 		9BAF2F6907A4CB79F554ED3F /* DisplayProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E38CA55E7F4FD63FF4AE8E /* DisplayProtocols.swift */; };
 		9BBFAFC49C58D4D0C22570CB /* MemorySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DB63898CAA005F46BE1F89 /* MemorySettingsView.swift */; };
 		9BDD16930AB0A61ADE7E19C3 /* SpeechIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = F986AEBE7FF75D00C39B08A7 /* SpeechIntelligence.swift */; };
@@ -975,6 +976,7 @@
 		FD64653F0C8C599AD0666611 /* CoworkProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20139D179BC17752B359CC7C /* CoworkProgressView.swift */; };
 		FD6C766236484C795EDB4869 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 5909E7EB51E6633C5691F827 /* background.js */; };
 		FD782C3C5445A5E37034EAC3 /* HDKnowledgeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3151C1AA921620527D16FC69 /* HDKnowledgeScanner.swift */; };
+		FDA5E5A2D2A7C40A6295D24A /* StreamingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F31B883CFBAD460B87029FB6 /* StreamingIndicator.swift */; };
 		FDC257B734A47C4249CFB767 /* MissionOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A712C3E48FB1FACB36F858BF /* MissionOrchestrator.swift */; };
 		FDEB75D9C0575EBF7AA09AB5 /* ContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE45FE9B289218509A56ACB3 /* ContextProvider.swift */; };
 		FE1326B363CF02C6DD2DDB0C /* AutonomousBuildLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48911F4D7298A5C6E2E9D006 /* AutonomousBuildLoop.swift */; };
@@ -1661,6 +1663,7 @@
 		F12F9218D8C2853E64AB8AAC /* BackupSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSettingsView.swift; sourceTree = "<group>"; };
 		F1CDFF9FEBDA6E7A15B3DDFA /* HandoffManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandoffManager.swift; sourceTree = "<group>"; };
 		F20A063E894C82ACA2BE58D6 /* WorkflowBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowBuilderTests.swift; sourceTree = "<group>"; };
+		F31B883CFBAD460B87029FB6 /* StreamingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingIndicator.swift; sourceTree = "<group>"; };
 		F33EC2C30CECD2A8D1B4672E /* PredictiveEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictiveEngine.swift; sourceTree = "<group>"; };
 		F35519F94D40A16C90380619 /* ToolCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolCall.swift; sourceTree = "<group>"; };
 		F3F022A5E096D79D240A108D /* PowerStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerStateManager.swift; sourceTree = "<group>"; };
@@ -2835,6 +2838,7 @@
 				89ADBB04DD5856B19A5115C3 /* HelpButton.swift */,
 				E14F8A7E506BDB64D5D2B5DF /* MessageBubble.swift */,
 				3A31D5A95202A25306AF85DA /* ModelSelectorView.swift */,
+				F31B883CFBAD460B87029FB6 /* StreamingIndicator.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -4889,6 +4893,7 @@
 				C37E3CAAFA1952EE9C6F2CF3 /* SpotlightIntegration.swift in Sources */,
 				8333A0B42749C6385E53808A /* SpotlightService.swift in Sources */,
 				48E0CA4E38A86C24CEB5D5B4 /* StoreKitService.swift in Sources */,
+				9B0F85A5213130B4FEA9406C /* StreamingIndicator.swift in Sources */,
 				E7560272CDB008E66F3FA92A /* SubAgentOrchestrator.swift in Sources */,
 				8043264EC82F7DB7D9BF47E0 /* SwiftBestPracticesLibrary.swift in Sources */,
 				5A9F81ED010E3E3332AD56F1 /* SwiftDataHelpers.swift in Sources */,
@@ -5463,6 +5468,7 @@
 				10F288E9FA42ACDCE381FC97 /* SpotlightIntegration.swift in Sources */,
 				7733D9841A266D53FDBC7242 /* SpotlightService.swift in Sources */,
 				D78C34241F5E2DCB9C1CE24D /* StoreKitService.swift in Sources */,
+				FDA5E5A2D2A7C40A6295D24A /* StreamingIndicator.swift in Sources */,
 				38B93917B413FE87AC27A49A /* SubAgentOrchestrator.swift in Sources */,
 				B3C180ABE78BCA534A00F602 /* SwiftBestPracticesLibrary.swift in Sources */,
 				25A66C36F211D76DECC2BCBA /* SwiftDataHelpers.swift in Sources */,
