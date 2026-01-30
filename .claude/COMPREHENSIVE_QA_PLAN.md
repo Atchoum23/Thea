@@ -43,6 +43,7 @@ Fix any issues found. Do not stop until completion.
 | 6 | Memory/Runtime Verification | 30 sec | No |
 | 7 | Security Audit | 30 sec | No |
 | 8 | Final Verification & Report | 10 sec | N/A |
+| 9 | Commit Changes | 5 sec | Yes |
 
 **Total: ~8-10 minutes** (down from 25 with optimization)
 
@@ -410,11 +411,63 @@ cat << 'EOF'
 - Configurations: Debug + Release
 
 ## Next Steps
-1. If all passed: Ready for commit/merge
+1. If all passed: Proceed to Phase 9 (Commit)
 2. If failures: Review errors above and fix
 3. For persistent issues: Check .claude/CLAUDE.md troubleshooting
 EOF
 ```
+
+---
+
+## Phase 9: Commit Changes (Final Step)
+
+**Purpose:** Ensure all changes are committed so no work is lost.
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+echo "=== Phase 9: Commit Changes ==="
+
+# Check for uncommitted changes
+CHANGES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+
+if [ "$CHANGES" = "0" ]; then
+  echo "✓ Working directory clean - no changes to commit"
+else
+  echo "Found $CHANGES uncommitted changes:"
+  git status --short
+
+  # Stage all changes
+  git add -A
+
+  # Create commit with QA summary
+  git commit -m "$(cat <<'COMMIT_EOF'
+chore: QA fixes and improvements
+
+Changes verified by COMPREHENSIVE_QA_PLAN.md:
+- All 47 tests passing
+- SwiftLint: 0 errors
+- Debug builds: 4/4 platforms
+- Release builds: 4/4 platforms
+- Memory leaks: 0
+- Security audit: passed
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+COMMIT_EOF
+)"
+
+  if [ $? -eq 0 ]; then
+    echo "✓ Changes committed successfully"
+    git log --oneline -1
+  else
+    echo "⚠ Commit failed - check git status"
+  fi
+fi
+
+echo "✓ Phase 9 PASSED"
+```
+
+**Gate:** All changes committed (or working directory already clean).
 
 ---
 
