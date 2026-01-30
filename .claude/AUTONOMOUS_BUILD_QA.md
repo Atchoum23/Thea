@@ -53,86 +53,53 @@ CLI builds (`xcodebuild`) and Xcode GUI builds show **DIFFERENT warnings**. The 
 
 ### How to Trigger GUI Builds
 
-#### Option 1: XcodeBuildHelper App (RECOMMENDED for Automation)
+#### RECOMMENDED: CLI Build with GUI Log Viewing
 
-A standalone AppleScript app that can be granted its own Accessibility permissions:
-
-```bash
-# First-time setup: Grant Accessibility permission to the helper app
-# 1. System Settings > Privacy & Security > Accessibility
-# 2. Add: Tools/XcodeBuildHelper/XcodeBuildHelper.app
-
-# Build single scheme
-./Tools/XcodeBuildHelper/xcode-gui-build.sh Thea-macOS Debug 120
-
-# Build all 4 platforms
-./Tools/XcodeBuildHelper/build-all-gui.sh 120
-```
-
-#### Option 2: CLI Build with GUI Log Viewing
-
-Use xcodebuild but have Xcode open to view the Issue Navigator:
+**This is the most reliable method for automation.** It uses `xcodebuild` CLI but writes to
+the same DerivedData location that Xcode GUI reads from, so build results appear in Xcode's
+Issue Navigator. No Accessibility permissions required.
 
 ```bash
-# This builds via CLI but lets you see results in Xcode GUI
+# Build single scheme (Xcode must be open)
 ./Tools/XcodeBuildHelper/xcode-cli-with-gui-log.sh Thea-macOS Debug
 
-# Then open Xcode Issue Navigator (Cmd+5) to check for GUI-only warnings
-```
-
-#### Option 3: Direct osascript (Requires Manual Permission Setup)
-
-**NOTE:** This often fails with "not allowed to send keystrokes" unless Terminal/Claude has explicit Accessibility permission. Use Option 1 instead.
-
-```bash
-# Open project in Xcode
-open "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Thea.xcodeproj"
-sleep 3
-
-# Function to build a scheme via GUI
-build_gui_scheme() {
-  local SCHEME="$1"
-  echo "=== Building $SCHEME via Xcode GUI ==="
-
-  osascript << EOF
-tell application "Xcode"
-    activate
-end tell
-delay 1
-tell application "System Events"
-    tell process "Xcode"
-        -- Open scheme chooser (Ctrl+0)
-        keystroke "0" using {control down}
-        delay 0.5
-        -- Type scheme name
-        keystroke "$SCHEME"
-        delay 0.3
-        -- Select it
-        keystroke return
-        delay 0.5
-        -- Build (Cmd+B)
-        keystroke "b" using {command down}
-    end tell
-end tell
-EOF
-
-  echo "Waiting for GUI build to complete..."
-  sleep 120  # Wait 2 minutes for build
-}
-
-# Build ALL 4 schemes via GUI
-for scheme in "Thea-iOS" "Thea-macOS" "Thea-watchOS" "Thea-tvOS"; do
-  build_gui_scheme "$scheme"
+# Build all 4 platforms
+for scheme in Thea-iOS Thea-macOS Thea-watchOS Thea-tvOS; do
+    ./Tools/XcodeBuildHelper/xcode-cli-with-gui-log.sh "$scheme" Debug
 done
+
+# After builds complete, check Xcode Issue Navigator (Cmd+5) for GUI-only warnings
 ```
 
-### Accessibility Permission Troubleshooting
+**How it works:**
+1. Opens Xcode project if not already open
+2. Runs `xcodebuild` which writes to default DerivedData
+3. Xcode GUI automatically sees the build results
+4. Script parses build log and reports errors/warnings
+5. You can verify in Xcode's Issue Navigator for any GUI-specific warnings
 
-If GUI automation fails with "not allowed to send keystrokes":
+**Why this is best:**
+- No Accessibility permissions needed
+- Works reliably from any CLI context (Terminal, Claude Code, scripts)
+- Build logs are parsed automatically
+- Xcode GUI stays in sync with build state
 
-1. **For XcodeBuildHelper.app:** Add it to System Settings > Privacy & Security > Accessibility
-2. **For osascript:** The parent process (Terminal, Claude, etc.) needs Accessibility permission
-3. **Alternative:** Use the CLI build with GUI log viewing (Option 2) which doesn't require Accessibility
+#### Alternative: Direct osascript (NOT RECOMMENDED)
+
+**NOTE:** This approach fails with "osascript is not allowed to send keystrokes" (error 1002)
+when run from CLI tools like Claude Code. The Accessibility permission must be on the
+**calling process**, not just the terminal app. AppleScript apps also cannot be reliably
+automated from subprocesses.
+
+If you must use osascript for manual testing, see the script at `Tools/XcodeBuildHelper/run-build-via-script-editor.sh`.
+
+### Accessibility Permission Notes
+
+**For automated builds (Claude Code, scripts):** Use the CLI method above. Accessibility permissions
+don't help because they apply to the terminal app, not the subprocess running the script.
+
+**For manual GUI automation:** If you want to run AppleScript manually from Script Editor or
+Automator, ensure those apps have Accessibility permission in System Settings.
 
 ### How to Read GUI Build Results from xcactivitylog
 
