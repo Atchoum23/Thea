@@ -161,8 +161,9 @@ public class CloudKitService: ObservableObject {
         // Use CKFetchRecordZoneChangesOperation for delta sync
         let operation = CKFetchRecordZoneChangesOperation()
 
-        var zoneConfig = CKFetchRecordZoneChangesOperation.ZoneConfiguration()
-        zoneConfig.previousServerChangeToken = previousToken
+        let zoneConfig = CKFetchRecordZoneChangesOperation.ZoneConfiguration(
+            previousServerChangeToken: previousToken
+        )
 
         operation.configurationsByRecordZoneID = [zoneID: zoneConfig]
 
