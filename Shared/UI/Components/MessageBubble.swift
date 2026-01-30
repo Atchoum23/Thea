@@ -18,9 +18,25 @@ import SwiftUI
 struct MessageBubble: View {
     let message: Message
 
+    /// Callback when user wants to edit this message (creates a branch)
+    var onEdit: ((Message) -> Void)?
+
+    /// Callback when user wants to regenerate this response
+    var onRegenerate: ((Message) -> Void)?
+
+    /// Branch navigation info (nil if no branches exist)
+    var branchInfo: BranchInfo?
+
     @State private var isHovering = false
     @State private var showCopiedFeedback = false
     @Environment(\.colorScheme) private var colorScheme
+
+    /// Info about branches for this message position
+    struct BranchInfo {
+        let currentIndex: Int
+        let totalCount: Int
+        let onNavigate: (Int) -> Void
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -29,6 +45,16 @@ struct MessageBubble: View {
             }
 
             VStack(alignment: message.messageRole == .user ? .trailing : .leading, spacing: 6) {
+                // Branch navigator (if multiple branches exist)
+                if let branchInfo, branchInfo.totalCount > 1 {
+                    BranchNavigator(
+                        currentBranchIndex: branchInfo.currentIndex,
+                        totalBranches: branchInfo.totalCount,
+                        onPrevious: { branchInfo.onNavigate(branchInfo.currentIndex - 1) },
+                        onNext: { branchInfo.onNavigate(branchInfo.currentIndex + 1) }
+                    )
+                }
+
                 // Main content with markdown or plain text
                 messageContent
                     .padding(.horizontal, 16)
@@ -37,7 +63,7 @@ struct MessageBubble: View {
                     .foregroundStyle(foregroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
 
-                // Metadata row
+                // Metadata row with branch info
                 metadataRow
             }
 
@@ -86,6 +112,11 @@ struct MessageBubble: View {
 
     private var metadataRow: some View {
         HStack(spacing: 8) {
+            // Show edited badge if message was edited
+            if message.isEdited || message.branchIndex > 0 {
+                BranchInfoBadge(isEdited: message.isEdited, branchIndex: message.branchIndex)
+            }
+
             if let model = message.model {
                 Text(model)
                     .font(.theaCaption2)
@@ -119,10 +150,31 @@ struct MessageBubble: View {
                 .help("Copy message")
                 .accessibilityLabel("Copy message to clipboard")
 
+                // Edit button (user messages only - creates a branch)
+                if message.messageRole == .user, let onEdit {
+                    Button {
+                        onEdit(message)
+                    } label: {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24)
+                            .background(.ultraThinMaterial)
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Edit message (creates a branch)")
+                    .accessibilityLabel("Edit message to create a new branch")
+                }
+
                 // Regenerate button (assistant messages only)
                 if message.messageRole == .assistant {
                     Button {
-                        regenerateMessage()
+                        if let onRegenerate {
+                            onRegenerate(message)
+                        } else {
+                            regenerateMessage()
+                        }
                     } label: {
                         Image(systemName: "arrow.clockwise")
                             .font(.system(size: 12))
