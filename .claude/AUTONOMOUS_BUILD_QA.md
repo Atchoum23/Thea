@@ -51,7 +51,38 @@ CLI builds (`xcodebuild`) and Xcode GUI builds show **DIFFERENT warnings**. The 
 
 **YOU MUST USE BOTH CLI AND GUI BUILDS. CLI-ONLY IS NOT ACCEPTABLE.**
 
-### How to Trigger GUI Builds via AppleScript
+### How to Trigger GUI Builds
+
+#### Option 1: XcodeBuildHelper App (RECOMMENDED for Automation)
+
+A standalone AppleScript app that can be granted its own Accessibility permissions:
+
+```bash
+# First-time setup: Grant Accessibility permission to the helper app
+# 1. System Settings > Privacy & Security > Accessibility
+# 2. Add: Tools/XcodeBuildHelper/XcodeBuildHelper.app
+
+# Build single scheme
+./Tools/XcodeBuildHelper/xcode-gui-build.sh Thea-macOS Debug 120
+
+# Build all 4 platforms
+./Tools/XcodeBuildHelper/build-all-gui.sh 120
+```
+
+#### Option 2: CLI Build with GUI Log Viewing
+
+Use xcodebuild but have Xcode open to view the Issue Navigator:
+
+```bash
+# This builds via CLI but lets you see results in Xcode GUI
+./Tools/XcodeBuildHelper/xcode-cli-with-gui-log.sh Thea-macOS Debug
+
+# Then open Xcode Issue Navigator (Cmd+5) to check for GUI-only warnings
+```
+
+#### Option 3: Direct osascript (Requires Manual Permission Setup)
+
+**NOTE:** This often fails with "not allowed to send keystrokes" unless Terminal/Claude has explicit Accessibility permission. Use Option 1 instead.
 
 ```bash
 # Open project in Xcode
@@ -94,6 +125,14 @@ for scheme in "Thea-iOS" "Thea-macOS" "Thea-watchOS" "Thea-tvOS"; do
   build_gui_scheme "$scheme"
 done
 ```
+
+### Accessibility Permission Troubleshooting
+
+If GUI automation fails with "not allowed to send keystrokes":
+
+1. **For XcodeBuildHelper.app:** Add it to System Settings > Privacy & Security > Accessibility
+2. **For osascript:** The parent process (Terminal, Claude, etc.) needs Accessibility permission
+3. **Alternative:** Use the CLI build with GUI log viewing (Option 2) which doesn't require Accessibility
 
 ### How to Read GUI Build Results from xcactivitylog
 
