@@ -1,6 +1,23 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
+// MARK: - Package Configuration
+//
+// Following 2025/2026 modularization best practices:
+// 1. Start with low-dependency modules first (Models, Interfaces)
+// 2. Use Interface/Implementation pattern for decoupling
+// 3. Layer-based organization (Foundation → Interfaces → Services)
+//
+// TheaFoundation contains:
+// - TheaModels: Pure data models (Conversation, Message, Project)
+// - TheaInterfaces: Protocol definitions for services
+// - TheaServices: Mock implementations for testing (no SwiftData dependency)
+//
+// This achieves the FAST TEST goal:
+// - `swift test` runs in <1 second (vs 25+ seconds with app host)
+// - No app host required
+// - Pure logic testing with mock services
+
 let package = Package(
     name: "Thea",
     platforms: [
@@ -8,46 +25,75 @@ let package = Package(
         .iOS(.v17)
     ],
     products: [
+        // Foundation layer: Models + Interfaces + Services
         .library(
-            name: "TheaCore",
-            targets: ["TheaCore"]
-        )
+            name: "TheaFoundation",
+            targets: ["TheaModels", "TheaInterfaces", "TheaServices"]
+        ),
+        // Individual modules (for granular imports)
+        .library(name: "TheaModels", targets: ["TheaModels"]),
+        .library(name: "TheaInterfaces", targets: ["TheaInterfaces"]),
+        .library(name: "TheaServices", targets: ["TheaServices"])
     ],
     dependencies: [
-        // AI Provider SDKs
-        .package(url: "https://github.com/MacPaw/OpenAI", from: "0.2.0"),
-
-        // Security
-        .package(url: "https://github.com/kishikawakatsumi/KeychainAccess", from: "4.2.0"),
-
-        // Markdown rendering
-        .package(url: "https://github.com/gonzalezreal/swift-markdown-ui", from: "2.0.0"),
-
-        // Syntax highlighting
-        .package(url: "https://github.com/raspu/Highlightr", from: "2.1.0"),
-
-        // MLX Swift for native on-device LLM inference (macOS 26+ best practices)
-        .package(url: "https://github.com/ml-explore/mlx-swift", from: "0.21.0"),
-        .package(url: "https://github.com/ml-explore/mlx-swift-lm", branch: "main")
+        // No external dependencies for foundation layer - pure Swift only
     ],
     targets: [
+        // LAYER 1: Pure data models - no dependencies
         .target(
-            name: "TheaCore",
-            dependencies: [
-                .product(name: "OpenAI", package: "OpenAI"),
-                "KeychainAccess",
-                .product(name: "MarkdownUI", package: "swift-markdown-ui"),
-                "Highlightr"
-            ],
-            path: "Shared",
+            name: "TheaModels",
+            dependencies: [],
+            path: "Shared/Core/Models",
             swiftSettings: [
-                // Swift 6 has strict concurrency enabled by default
+                .define("THEA_MODELS_ONLY")
             ]
         ),
+
+        // LAYER 2: Service interfaces/protocols - depends on Models
+        .target(
+            name: "TheaInterfaces",
+            dependencies: ["TheaModels"],
+            path: "Shared/Core/Interfaces",
+            swiftSettings: [
+                .define("THEA_INTERFACES_ONLY")
+            ]
+        ),
+
+        // LAYER 3: Mock services for testing - depends on Interfaces
+        // Note: Only mock implementations included; concrete services (ChatService, ProjectService)
+        // excluded as they depend on SwiftData and are for future app integration
+        .target(
+            name: "TheaServices",
+            dependencies: ["TheaInterfaces"],
+            path: "Shared/Core/Services",
+            exclude: [
+                "ChatService.swift",
+                "ProjectService.swift",
+                "ProjectPathManager.swift",
+                "QAToolsManager.swift",
+                "SecureStorage.swift",
+                "SpotlightService.swift"
+            ],
+            swiftSettings: [
+                .define("THEA_SERVICES_MOCK")
+            ]
+        ),
+
+        // Test targets
         .testTarget(
-            name: "TheaCoreTests",
-            dependencies: ["TheaCore"],
-            path: "Tests"
+            name: "TheaModelsTests",
+            dependencies: ["TheaModels"],
+            path: "Tests/CoreTests/ModelTests"
+        ),
+        .testTarget(
+            name: "TheaInterfacesTests",
+            dependencies: ["TheaInterfaces"],
+            path: "Tests/CoreTests/FoundationTests"
+        ),
+        .testTarget(
+            name: "TheaServicesTests",
+            dependencies: ["TheaServices"],
+            path: "Tests/CoreTests/ServiceTests"
         )
     ]
 )

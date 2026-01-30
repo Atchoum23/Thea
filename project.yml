@@ -284,6 +284,10 @@ targets:
           - "**/*watchOS*"
           - "**/*tvOS*"
           - "**/*.md"
+          - "**/Core/Interfaces/**"
+          - "**/Core/Services/Mock*.swift"
+          - "**/Core/Services/ChatService.swift"
+          - "**/Core/Services/ProjectService.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
@@ -369,6 +373,10 @@ targets:
           - "**/*watchOS*"
           - "**/*tvOS*"
           - "**/*.md"
+          - "**/Core/Interfaces/**"
+          - "**/Core/Services/Mock*.swift"
+          - "**/Core/Services/ChatService.swift"
+          - "**/Core/Services/ProjectService.swift"
           - "**/Terminal/**"
           - "**/ScreenCapture.swift"
           - "**/InputTrackingManager.swift"
