@@ -937,6 +937,7 @@ private struct AdvancedSettingsConfiguration: Equatable, Codable {
 
     private static let storageKey = "com.thea.advancedConfiguration"
 
+    @MainActor
     static func load() -> AdvancedSettingsConfiguration {
         var config: AdvancedSettingsConfiguration
         if let data = UserDefaults.standard.data(forKey: storageKey),
