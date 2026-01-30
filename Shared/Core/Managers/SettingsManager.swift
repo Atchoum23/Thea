@@ -172,17 +172,18 @@ final class SettingsManager: ObservableObject {
 
     private init() {
         defaultProvider = UserDefaults.standard.string(forKey: "defaultProvider") ?? "openrouter"
-        streamResponses = UserDefaults.standard.bool(forKey: "streamResponses")
+        // Use object(forKey:) to distinguish between "never set" (nil) and "set to false"
+        streamResponses = UserDefaults.standard.object(forKey: "streamResponses") as? Bool ?? true
         theme = UserDefaults.standard.string(forKey: "theme") ?? "system"
         fontSize = UserDefaults.standard.string(forKey: "fontSize") ?? "medium"
-        iCloudSyncEnabled = UserDefaults.standard.bool(forKey: "iCloudSyncEnabled")
+        iCloudSyncEnabled = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
         analyticsEnabled = UserDefaults.standard.bool(forKey: "analyticsEnabled")
-        handoffEnabled = UserDefaults.standard.bool(forKey: "handoffEnabled")
+        handoffEnabled = UserDefaults.standard.object(forKey: "handoffEnabled") as? Bool ?? true
 
         // Behavior
         launchAtLogin = UserDefaults.standard.bool(forKey: "launchAtLogin")
-        showInMenuBar = UserDefaults.standard.bool(forKey: "showInMenuBar")
-        notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+        showInMenuBar = UserDefaults.standard.object(forKey: "showInMenuBar") as? Bool ?? true
+        notificationsEnabled = UserDefaults.standard.object(forKey: "notificationsEnabled") as? Bool ?? true
 
         // Window Behavior
         windowFloatOnTop = UserDefaults.standard.bool(forKey: "windowFloatOnTop")
@@ -218,10 +219,10 @@ final class SettingsManager: ObservableObject {
         allowFileEditing = UserDefaults.standard.bool(forKey: "allowFileEditing")
         allowCodeExecution = UserDefaults.standard.bool(forKey: "allowCodeExecution")
         allowExternalAPICalls = UserDefaults.standard.bool(forKey: "allowExternalAPICalls")
-        requireDestructiveApproval = UserDefaults.standard.bool(forKey: "requireDestructiveApproval")
-        enableRollback = UserDefaults.standard.bool(forKey: "enableRollback")
-        createBackups = UserDefaults.standard.bool(forKey: "createBackups")
-        preventSleepDuringExecution = UserDefaults.standard.bool(forKey: "preventSleepDuringExecution")
+        requireDestructiveApproval = UserDefaults.standard.object(forKey: "requireDestructiveApproval") as? Bool ?? true
+        enableRollback = UserDefaults.standard.object(forKey: "enableRollback") as? Bool ?? true
+        createBackups = UserDefaults.standard.object(forKey: "createBackups") as? Bool ?? true
+        preventSleepDuringExecution = UserDefaults.standard.object(forKey: "preventSleepDuringExecution") as? Bool ?? true
         maxConcurrentTasks = UserDefaults.standard.integer(forKey: "maxConcurrentTasks") != 0 ? UserDefaults.standard.integer(forKey: "maxConcurrentTasks") : 3
 
         // Favorite Models

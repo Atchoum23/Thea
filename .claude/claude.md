@@ -1,60 +1,58 @@
-# THEA Project Guidelines
+# THEA Project
 
-## Critical: Issue Resolution Policy
+## Quick Reference
 
-**All issues encountered must be fixed systematically.** When working on any task:
+| Command | Description |
+|---------|-------------|
+| `xcodegen generate` | Regenerate Xcode project from project.yml |
+| `swift test` | Run all 47 tests (~1 second) |
+| `swift build` | Build Swift packages |
+| `swiftlint lint` | Check code style |
 
-1. **Fix discovered issues immediately** - Any errors, warnings, bugs, or inconsistencies found during work (even if unrelated to the current task) must be addressed before completing the task
-2. **No "pre-existing" excuses** - Issues cannot be dismissed as "pre-existing" or "unrelated to current changes"
-3. **Follow best practices** - All fixes must follow current year's best practices (verify online when needed)
-4. **Prevent new issues** - Ensure fixes don't introduce new problems
-5. **Verify fixes** - After fixing, rebuild and verify the issue is resolved
+## Build Commands
 
-This applies to: compilation errors, runtime errors, warnings, linter issues, deprecated APIs, missing dependencies, configuration problems, and any other code quality issues.
+```bash
+# macOS
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -destination "platform=macOS" build
 
-## Development Standards
+# iOS
+xcodebuild -project Thea.xcodeproj -scheme Thea-iOS -destination "generic/platform=iOS" build
 
-### Research Before Implementation
-Before modifying any code, **always verify online the latest best practices** for:
-- Swift and SwiftUI (current year standards)
-- macOS/iOS native app development patterns
-- MLX and on-device ML frameworks (Apple Silicon optimization)
-- Relevant platform-specific APIs and conventions
+# All platforms (Debug)
+for scheme in Thea-macOS Thea-iOS Thea-watchOS Thea-tvOS; do
+  xcodebuild -project Thea.xcodeproj -scheme "$scheme" -configuration Debug build
+done
+```
 
-This ensures code quality, performance, and compatibility with the latest platform capabilities.
+## Project Facts
 
-### Code Quality Requirements
-- Follow Apple's Human Interface Guidelines
-- Use modern Swift concurrency (async/await, actors)
-- Implement proper error handling with descriptive messages
-- Write self-documenting code with meaningful names
-- Add comments only for complex logic or non-obvious decisions
+- **Swift 6.0** with strict concurrency (actors, async/await)
+- **XcodeGen** generates project from `project.yml`
+- **Schemes**: Thea-macOS, Thea-iOS, Thea-watchOS, Thea-tvOS
+- **Local models**: `~/.cache/huggingface/hub/`
+- **Architecture**: MVVM with SwiftUI + SwiftData
 
-### Architecture Principles
-- Maintain separation of concerns (MVVM pattern)
-- Use dependency injection for testability
-- Prefer composition over inheritance
-- Keep files focused and modular (<500 lines when practical)
+## Orchestrator System
 
-### Testing Standards
-- Write unit tests for business logic
-- Test edge cases and error conditions
-- Verify UI behavior on different screen sizes
+- **TaskClassifier**: Classifies queries (code, math, creative, etc.)
+- **ModelRouter**: Routes to optimal model based on task
+- **QueryDecomposer**: Breaks complex queries into sub-tasks
 
-## Project-Specific Notes
+## MLX Integration
 
-### MLX Integration
-- Use mlx-swift and mlx-swift-lm for on-device inference
-- Leverage ChatSession for multi-turn conversations with KV cache
-- Apply proper chat templates via ChatSession (never raw prompts)
+- Use `mlx-swift` and `mlx-swift-lm` for on-device inference
+- Use `ChatSession` for multi-turn conversations (has KV cache)
+- IMPORTANT: Never use raw prompts - always apply chat templates via ChatSession
 
-### Orchestrator System
-- TaskClassifier: Classifies queries by type (code, math, creative, etc.)
-- ModelRouter: Routes to optimal model based on task and preferences
-- QueryDecomposer: Breaks complex queries into sub-tasks
-- All components should log decisions when debugging is enabled
+## Gotchas
 
-### Local Models
-- Located in ~/.cache/huggingface/hub/
-- Use ModelConfiguration(directory:) for local paths
-- Support dynamic model selection based on task complexity
+- IMPORTANT: Run `xcodegen generate` after ANY change to `project.yml`
+- IMPORTANT: All 4 platform schemes must build with 0 errors, 0 warnings
+- Swift Package tests are 60x faster than Xcode tests - prefer `swift test`
+- App groups must use `group.app.thea` consistently across all targets
+
+## QA After Major Changes
+
+Execute: `Read .claude/COMPREHENSIVE_QA_PLAN.md and run all phases`
+
+See @.claude/COMPREHENSIVE_QA_PLAN.md for the full checklist.

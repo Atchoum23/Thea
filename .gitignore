@@ -39,9 +39,20 @@ dmg-staging/
 *.backup2
 .backup-*
 
-# Python scripts (temporary)
+# Python
 *.pyc
 __pycache__/
+.venv/
+venv/
+*.egg-info/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary Python scripts
 fix_*.py
 add_*.py
 *.txt

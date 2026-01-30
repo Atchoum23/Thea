@@ -133,7 +133,7 @@ public final class ExtensionSyncBridge: ObservableObject {
     private var heartbeatTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
 
-    private let appGroupIdentifier = "group.com.thea.app"
+    private let appGroupIdentifier = "group.app.theathe"
     private let webSocketPort: UInt16 = 9876
 
     // MARK: - Initialization
