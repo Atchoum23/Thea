@@ -1,228 +1,410 @@
-# Quick Reference - All Commands
+# 📋 Quick Reference - Complete Commands for Thea Project
 
-Full path: `/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development`
-
-## 🚀 Make Commands
-
-| Command | What It Does | When to Use |
-|---------|--------------|-------------|
-| `make help` | Show all commands | First time setup |
-| `make check` | Full error scan (SwiftLint + build) | Before commits |
-| `make summary` | Quick error statistics | Daily status check |
-| `make lint` | Run SwiftLint only | Quick code quality check |
-| `make watch` | Start file watcher | Active development |
-| `make install` | Run full installer | Initial setup |
-| `make xcode` | Configure Xcode settings | One-time setup |
-| `make hooks` | Install Git hooks | One-time setup |
-| `make clean` | Clean build artifacts | Troubleshooting |
-
-## 📜 Direct Script Commands
-
-### Automatic Scripts
+## 📁 Project Directory
 ```bash
-# These run automatically - no need to call directly
-
-# Runs on every Xcode build
-./Scripts/auto-build-check.sh
-
-# Runs on every Git commit
-# (installed at .git/hooks/pre-commit)
+/Users/alexis/Documents/IT\ &\ Tech/MyApps/Thea
 ```
 
-### Manual Scripts
+---
+
+## 🚀 Initial Setup (Run Once)
+
+### Navigate to Project
 ```bash
-# Full comprehensive scan
-./Scripts/build-with-all-errors.sh
-
-# Quick error summary
-./Scripts/error-summary.sh
-
-# Continuous file monitoring
-./Scripts/watch-and-check.sh
-
-# Configure Xcode (run once)
-./Scripts/configure-xcode.sh
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
 ```
 
-## 🔧 SwiftLint Commands
-
+### Run Automatic Installer
 ```bash
-# Run on all files
-swiftlint
-
-# Run with config
-swiftlint lint --config .swiftlint.yml
-
-# Auto-fix issues
-swiftlint --fix
-
-# Check specific file
-swiftlint lint --path Shared/SomeFile.swift
-
-# Quiet mode (errors only)
-swiftlint lint --quiet
-```
-
-## 📊 Verification Commands
-
-```bash
-# Check if SwiftLint is installed
-which swiftlint
-swiftlint version
-
-# Check if fswatch is installed
-which fswatch
-fswatch --version
-
-# Check Xcode settings
-defaults read com.apple.dt.Xcode ShowLiveIssues
-defaults read com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks
-
-# Check Git hook
-ls -la .git/hooks/pre-commit
-
-# Count Swift files
-find . -name "*.swift" | wc -l
-```
-
-## 🎯 Git Commands
-
-```bash
-# Commit with validation
-git commit -m "message"
-# → Runs pre-commit checks automatically
-
-# Skip validation (not recommended)
-git commit --no-verify -m "message"
-
-# Check what will be validated
-git diff --cached --name-only | grep ".swift$"
-```
-
-## 🛠️ Troubleshooting Commands
-
-```bash
-# Reinstall everything
+chmod +x install-automatic-checks.sh
 ./install-automatic-checks.sh
-
-# Just check prerequisites
-./setup.sh
-
-# Reconfigure Xcode
-./Scripts/configure-xcode.sh
-killall Xcode
-open Thea.xcodeproj
-
-# Reinstall Git hook
-make hooks
-
-# Clean and rebuild
-make clean
-xcodebuild clean build -project Thea.xcodeproj -scheme Thea-macOS
 ```
 
-## 📱 Xcode Settings Commands
+Or using Make:
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+make setup-auto
+```
+
+---
+
+## 📋 Xcode Build Phase Snippet
+
+### Copy to Clipboard (macOS)
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+cat xcode-build-phase-snippet.txt | pbcopy
+```
+
+### Or Copy Manually
+```bash
+# Auto Error Detection
+if [ -f "${SRCROOT}/Scripts/auto-build-check.sh" ]; then
+    "${SRCROOT}/Scripts/auto-build-check.sh"
+fi
+```
+
+### Where to Paste
+1. Open Xcode
+2. Select Project "Thea" → Target "Thea"
+3. Build Phases tab
+4. Click `+` → "New Run Script Phase"
+5. Drag ABOVE "Compile Sources"
+6. Paste the snippet above
+
+---
+
+## 🛠️ Daily Commands
+
+All commands should be run from the project directory:
 
 ```bash
-# Enable live issues
-defaults write com.apple.dt.Xcode ShowLiveIssues -bool YES
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+```
 
-# Enable parallel builds
-defaults write com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks -int 8
+### Check All Errors
+```bash
+make check
+```
 
-# Show build times
-defaults write com.apple.dt.Xcode ShowBuildOperationDuration -bool YES
+Or directly:
+```bash
+./Scripts/build-with-all-errors.sh
+```
 
-# Reset Xcode settings
+### Quick Error Summary
+```bash
+make summary
+```
+
+Or directly:
+```bash
+./Scripts/error-summary.sh
+```
+
+### Start Background Watcher
+```bash
+make watch
+```
+
+Or directly:
+```bash
+./Scripts/watch-and-check.sh
+```
+
+### Run SwiftLint Only
+```bash
+make lint
+```
+
+Or directly:
+```bash
+swiftlint
+```
+
+### Auto-fix SwiftLint Issues
+```bash
+make fix-lint
+```
+
+Or directly:
+```bash
+swiftlint --fix
+```
+
+---
+
+## 🔧 Script Paths (Full Paths)
+
+### Make Scripts Executable
+```bash
+chmod +x '/Users/alexis/Documents/IT & Tech/MyApps/Thea/Scripts'/*.sh
+chmod +x '/Users/alexis/Documents/IT & Tech/MyApps/Thea/Scripts/pre-commit'
+```
+
+### Individual Scripts
+```bash
+# Configure Xcode
+'/Users/alexis/Documents/IT & Tech/MyApps/Thea/Scripts/configure-xcode.sh'
+
+# Full error check
+'/Users/alexis/Documents/IT & Tech/MyApps/Thea/Scripts/build-with-all-errors.sh'
+
+# Error summary
+'/Users/alexis/Documents/IT & Tech/MyApps/Thea/Scripts/error-summary.sh'
+
+# Background watcher
+'/Users/alexis/Documents/IT & Tech/MyApps/Thea/Scripts/watch-and-check.sh'
+
+# Auto build check (used by Xcode)
+'/Users/alexis/Documents/IT & Tech/MyApps/Thea/Scripts/auto-build-check.sh'
+```
+
+---
+
+## 🪝 Git Hooks
+
+### Install Pre-commit Hook
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+cp Scripts/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+### Test Pre-commit Hook
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+git add .
+git commit -m "test"
+```
+
+### Bypass Pre-commit Hook (if needed)
+```bash
+git commit --no-verify -m "your message"
+```
+
+---
+
+## 📊 View Error Reports
+
+### Latest Error Report
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+ls -lt build-errors-*.txt | head -1
+```
+
+### View Latest Report
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+cat "$(ls -t build-errors-*.txt | head -1)"
+```
+
+### Clean Old Reports
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+make clean
+```
+
+Or directly:
+```bash
+rm '/Users/alexis/Documents/IT & Tech/MyApps/Thea/build-errors-'*.txt
+```
+
+---
+
+## 🎯 Background Watcher (Advanced)
+
+### Start in tmux Session
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+tmux new-session -d -s thea-watcher "make watch"
+```
+
+### Attach to Watch Session
+```bash
+tmux attach -t thea-watcher
+```
+
+### Detach from Session
+Press: `Ctrl+B` then `D`
+
+### Kill Watch Session
+```bash
+tmux kill-session -t thea-watcher
+```
+
+### Start Without tmux (Background)
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+nohup make watch > /tmp/thea-watch.log 2>&1 &
+```
+
+### View Background Watcher Logs
+```bash
+tail -f /tmp/thea-watch.log
+```
+
+### Stop Background Watcher
+```bash
+pkill -f 'watch-and-check.sh'
+```
+
+---
+
+## 🔍 Configuration Files
+
+### SwiftLint Configuration
+```bash
+open -e '/Users/alexis/Documents/IT & Tech/MyApps/Thea/.swiftlint.yml'
+```
+
+### Makefile
+```bash
+open -e '/Users/alexis/Documents/IT & Tech/MyApps/Thea/Makefile'
+```
+
+### VS Code Tasks
+```bash
+open -e '/Users/alexis/Documents/IT & Tech/MyApps/Thea/.vscode/tasks.json'
+```
+
+---
+
+## 🆘 Troubleshooting
+
+### Reset Xcode Preferences
+```bash
 defaults delete com.apple.dt.Xcode
 ```
 
-## 🔄 File Watcher Commands
+### Reconfigure Xcode
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+./Scripts/configure-xcode.sh
+```
+
+### Reinstall Everything
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+./install-automatic-checks.sh
+```
+
+### Check Script Permissions
+```bash
+ls -la '/Users/alexis/Documents/IT & Tech/MyApps/Thea/Scripts'
+```
+
+### Make All Scripts Executable
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+chmod +x Scripts/*.sh Scripts/pre-commit setup.sh install-automatic-checks.sh
+```
+
+---
+
+## 📱 Xcode Commands
+
+### Build from Terminal
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+xcodebuild -scheme Thea -configuration Debug build
+```
+
+### Clean Build
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+xcodebuild -scheme Thea clean
+```
+
+### Show Build Settings
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+xcodebuild -scheme Thea -showBuildSettings
+```
+
+---
+
+## 🔗 Useful Aliases (Optional)
+
+Add these to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-# Start watcher (foreground)
+# Thea project shortcuts
+alias thea-cd="cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'"
+alias thea-check="cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea' && make check"
+alias thea-watch="cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea' && make watch"
+alias thea-summary="cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea' && make summary"
+alias thea-lint="cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea' && make lint"
+```
+
+After adding, reload:
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+Then use:
+```bash
+thea-cd       # Navigate to project
+thea-check    # Check all errors
+thea-watch    # Start watcher
+thea-summary  # Quick summary
+thea-lint     # Run SwiftLint
+```
+
+---
+
+## 📚 Documentation Files
+
+### Open Documentation
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+
+# Main guide
+open AUTO-ERROR-DETECTION-COMPLETE-GUIDE.md
+
+# Quick reference
+open QUICK-REFERENCE.md
+
+# Xcode guide
+open XCODE-BUILD-PHASE-GUIDE.md
+
+# Scripts documentation
+open Scripts/README.md
+```
+
+---
+
+## ✅ Verification Commands
+
+### Check Everything is Installed
+```bash
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+
+# Check Homebrew tools
+command -v swiftlint && echo "✅ SwiftLint installed" || echo "❌ SwiftLint missing"
+command -v fswatch && echo "✅ fswatch installed" || echo "❌ fswatch missing"
+command -v tmux && echo "✅ tmux installed" || echo "❌ tmux missing (optional)"
+
+# Check scripts
+[ -x Scripts/configure-xcode.sh ] && echo "✅ configure-xcode.sh executable" || echo "❌ Not executable"
+[ -x Scripts/build-with-all-errors.sh ] && echo "✅ build-with-all-errors.sh executable" || echo "❌ Not executable"
+[ -x Scripts/auto-build-check.sh ] && echo "✅ auto-build-check.sh executable" || echo "❌ Not executable"
+
+# Check git hook
+[ -x .git/hooks/pre-commit ] && echo "✅ Pre-commit hook installed" || echo "❌ Pre-commit hook missing"
+
+# Check configuration files
+[ -f .swiftlint.yml ] && echo "✅ SwiftLint config exists" || echo "❌ SwiftLint config missing"
+[ -f Makefile ] && echo "✅ Makefile exists" || echo "❌ Makefile missing"
+```
+
+---
+
+## 🎯 Most Common Commands
+
+### Daily Workflow
+```bash
+# 1. Navigate to project
+cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea'
+
+# 2. Check for errors before starting work
+make check
+
+# 3. Start background watcher (optional)
 make watch
 
-# Start with tmux (background, persistent)
-tmux new-session -d -s thea-watcher "cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development' && make watch"
+# 4. Code in Xcode normally
+# Live issues will show errors as you type
 
-# Attach to watcher session
-tmux attach -t thea-watcher
-
-# Detach from tmux
-# Press: Ctrl+B, then D
-
-# Stop watcher
-# Press: Ctrl+C (if in foreground)
-# Or: tmux kill-session -t thea-watcher
+# 5. Before committing
+make check
+git add .
+git commit -m "your message"
+# Pre-commit hook runs automatically
 ```
 
-## 📦 Installation Commands
+---
 
-```bash
-# Install Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+**Save this file for quick reference!**
 
-# Install SwiftLint
-brew install swiftlint
-
-# Install fswatch
-brew install fswatch
-
-# Install tmux (optional)
-brew install tmux
-```
-
-## 🎨 Output Examples
-
-### Success
-```
-🔍 Running automatic error detection...
-Running SwiftLint...
-✅ Automatic checks passed
-```
-
-### With Errors
-```
-🔍 Running automatic error detection...
-Running SwiftLint...
-❌ SwiftLint found issues
-UserDirectivesView.swift:106:1: error: Editor placeholder
-```
-
-### Summary Output
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Code Quality Summary
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📄 Swift Files: 127
-
-Running SwiftLint analysis...
-
-❌ Errors:   2
-⚠️  Warnings: 15
-
-⚠️  Code Quality: Fair (warnings present)
-```
-
-## 📝 Notes
-
-- All commands assume you're in: `/Users/alexis/Documents/IT & Tech/MyApps/Thea/Development`
-- Scripts must be executable: `chmod +x Scripts/*.sh`
-- Xcode must be restarted after configuration changes
-- Git hooks only work in git repositories
-- File watcher requires `fswatch` to be installed
-
-## 🆘 Quick Help
-
-```bash
-# Forgot a command?
-make help
-
-# Need details on scripts?
-cat Scripts/README.md
-
-# Full documentation?
-cat AUTO-ERROR-DETECTION-COMPLETE-GUIDE.md
-```
+Location: `/Users/alexis/Documents/IT & Tech/MyApps/Thea/QUICK-REFERENCE.md`

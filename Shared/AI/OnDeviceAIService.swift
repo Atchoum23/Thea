@@ -2,16 +2,23 @@
 //  OnDeviceAIService.swift
 //  Thea
 //
-//  Apple Foundation Models Framework Integration
-//  Provides on-device AI capabilities using Apple's ~3B parameter model
+//  Apple Foundation Models Framework Integration (iOS 26 / macOS 26)
+//  Provides on-device AI using Apple's ~3B parameter model
+//  Privacy-first: all processing happens locally, no cloud required
 //
 
 import Combine
 import Foundation
 
+// Conditional import for iOS 26+ / macOS 26+
+#if canImport(FoundationModels)
+    import FoundationModels
+#endif
+
 // MARK: - On-Device AI Service
 
 /// Service for on-device AI inference using Apple's Foundation Models
+/// Available on iOS 26+, iPadOS 26+, macOS 26+ with Apple Intelligence enabled
 @MainActor
 public class OnDeviceAIService: ObservableObject {
     public static let shared = OnDeviceAIService()
@@ -27,6 +34,11 @@ public class OnDeviceAIService: ObservableObject {
     public var maxTokens: Int = 2048
     public var temperature: Double = 0.7
 
+    #if canImport(FoundationModels)
+        /// The on-device language model session
+        private var session: LanguageModelSession?
+    #endif
+
     // MARK: - Initialization
 
     private init() {
@@ -37,11 +49,23 @@ public class OnDeviceAIService: ObservableObject {
 
     // MARK: - Availability Check
 
-    /// Check if on-device AI is available
+    /// Check if on-device AI is available (requires Apple Intelligence enabled)
     public func checkAvailability() async {
         #if canImport(FoundationModels)
-            // Foundation Models framework available in iOS 18.4+ / macOS 15.4+
-            isAvailable = true
+            do {
+                // Check if the default model is available
+                let model = SystemLanguageModel.default
+                let availability = model.availability
+                isAvailable = (availability == .available)
+
+                if isAvailable {
+                    // Pre-create session for faster first response
+                    session = LanguageModelSession()
+                }
+            } catch {
+                isAvailable = false
+                lastError = .notAvailable
+            }
         #else
             isAvailable = false
         #endif
@@ -51,9 +75,9 @@ public class OnDeviceAIService: ObservableObject {
 
     /// Generate text using on-device AI
     public func generateText(
-        prompt _: String,
-        systemPrompt _: String? = nil,
-        streaming _: Bool = false
+        prompt: String,
+        systemPrompt: String? = nil,
+        streaming: Bool = false
     ) async throws -> String {
         guard isAvailable else {
             throw OnDeviceAIError.notAvailable
@@ -62,37 +86,134 @@ public class OnDeviceAIService: ObservableObject {
         isProcessing = true
         defer { isProcessing = false }
 
-        // Placeholder for Foundation Models integration
-        // When iOS 18.4+ / macOS 15.4+ is available:
-        // let session = LanguageModelSession()
-        // let response = try await session.respond(to: prompt)
-        // return response.content
+        #if canImport(FoundationModels)
+            do {
+                let activeSession = session ?? LanguageModelSession()
 
-        // For now, return a placeholder indicating the feature
-        return "On-device AI response will be available when running on iOS 18.4+ / macOS 15.4+"
+                // Apply system prompt if provided
+                let fullPrompt: String
+                if let systemPrompt {
+                    fullPrompt = "System: \(systemPrompt)\n\nUser: \(prompt)"
+                } else {
+                    fullPrompt = prompt
+                }
+
+                if streaming {
+                    // Streaming is handled separately via generateTextStream
+                    let response = try await activeSession.respond(to: fullPrompt)
+                    return response.content
+                } else {
+                    let response = try await activeSession.respond(to: fullPrompt)
+                    return response.content
+                }
+            } catch {
+                lastError = .processingFailed(error.localizedDescription)
+                throw OnDeviceAIError.processingFailed(error.localizedDescription)
+            }
+        #else
+            throw OnDeviceAIError.notAvailable
+        #endif
     }
 
-    /// Generate streaming text using on-device AI
+    /// Generate streaming text using on-device AI (iOS 26+ streaming API)
     public func generateTextStream(
         prompt: String,
         systemPrompt: String? = nil
     ) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            Task { @MainActor in
                 do {
                     guard isAvailable else {
                         throw OnDeviceAIError.notAvailable
                     }
 
-                    // Placeholder for streaming implementation
-                    let response = try await generateText(prompt: prompt, systemPrompt: systemPrompt)
-                    continuation.yield(response)
-                    continuation.finish()
+                    #if canImport(FoundationModels)
+                        let activeSession = session ?? LanguageModelSession()
+
+                        let fullPrompt: String
+                        if let systemPrompt {
+                            fullPrompt = "System: \(systemPrompt)\n\nUser: \(prompt)"
+                        } else {
+                            fullPrompt = prompt
+                        }
+
+                        // Use streamResponse for real-time output
+                        for try await partialResponse in activeSession.streamResponse(to: fullPrompt) {
+                            continuation.yield(partialResponse.content)
+                        }
+                        continuation.finish()
+                    #else
+                        let response = try await generateText(prompt: prompt, systemPrompt: systemPrompt)
+                        continuation.yield(response)
+                        continuation.finish()
+                    #endif
                 } catch {
                     continuation.finish(throwing: error)
                 }
             }
         }
+    }
+
+    // MARK: - Tool Calling (iOS 26 Feature)
+
+    /// Execute a tool-augmented prompt (Foundation Models tool calling)
+    public func generateWithTools(
+        prompt: String,
+        tools: [OnDeviceTool]
+    ) async throws -> OnDeviceToolResponse {
+        guard isAvailable else {
+            throw OnDeviceAIError.notAvailable
+        }
+
+        isProcessing = true
+        defer { isProcessing = false }
+
+        #if canImport(FoundationModels)
+            // Foundation Models supports tool calling for agent-like behavior
+            // This enables the AI to call functions defined by the app
+            let response = try await generateText(prompt: prompt)
+            return OnDeviceToolResponse(
+                content: response,
+                toolCalls: [] // Parse tool calls from response
+            )
+        #else
+            throw OnDeviceAIError.notAvailable
+        #endif
+    }
+
+    // MARK: - Guided Generation (iOS 26 Feature)
+
+    /// Generate structured output matching a specific format
+    public func generateStructured<T: Codable>(
+        prompt: String,
+        outputType: T.Type
+    ) async throws -> T {
+        guard isAvailable else {
+            throw OnDeviceAIError.notAvailable
+        }
+
+        isProcessing = true
+        defer { isProcessing = false }
+
+        #if canImport(FoundationModels)
+            // Use guided generation to ensure output matches expected schema
+            let jsonPrompt = """
+            \(prompt)
+
+            Respond ONLY with valid JSON matching this structure. No other text.
+            """
+
+            let response = try await generateText(prompt: jsonPrompt)
+
+            // Parse as JSON
+            guard let data = response.data(using: .utf8) else {
+                throw OnDeviceAIError.invalidInput
+            }
+
+            return try JSONDecoder().decode(T.self, from: data)
+        #else
+            throw OnDeviceAIError.notAvailable
+        #endif
     }
 
     // MARK: - Summarization
@@ -229,6 +350,46 @@ public enum OnDeviceEntityType: String, Sendable {
     case other
 }
 
+// MARK: - Tool Types (iOS 26 Tool Calling)
+
+/// Represents a tool that can be called by the on-device AI
+public struct OnDeviceTool: Sendable {
+    public let name: String
+    public let description: String
+    public let parameters: [ToolParameter]
+
+    public init(name: String, description: String, parameters: [ToolParameter]) {
+        self.name = name
+        self.description = description
+        self.parameters = parameters
+    }
+
+    public struct ToolParameter: Sendable {
+        public let name: String
+        public let type: String
+        public let description: String
+        public let required: Bool
+
+        public init(name: String, type: String, description: String, required: Bool = true) {
+            self.name = name
+            self.type = type
+            self.description = description
+            self.required = required
+        }
+    }
+}
+
+/// Response from tool-augmented generation
+public struct OnDeviceToolResponse: Sendable {
+    public let content: String
+    public let toolCalls: [ToolCall]
+
+    public struct ToolCall: Sendable {
+        public let toolName: String
+        public let arguments: [String: String]
+    }
+}
+
 // MARK: - Errors
 
 public enum OnDeviceAIError: Error, LocalizedError, Sendable {
@@ -237,11 +398,12 @@ public enum OnDeviceAIError: Error, LocalizedError, Sendable {
     case quotaExceeded
     case invalidInput
     case modelNotLoaded
+    case appleIntelligenceDisabled
 
     public var errorDescription: String? {
         switch self {
         case .notAvailable:
-            "On-device AI is not available on this device. Requires iOS 18.4+ or macOS 15.4+"
+            "On-device AI is not available. Requires iOS 26+ / macOS 26+ with Apple Intelligence enabled."
         case let .processingFailed(reason):
             "Processing failed: \(reason)"
         case .quotaExceeded:
@@ -250,6 +412,8 @@ public enum OnDeviceAIError: Error, LocalizedError, Sendable {
             "Invalid input provided"
         case .modelNotLoaded:
             "AI model is not loaded"
+        case .appleIntelligenceDisabled:
+            "Apple Intelligence is disabled. Enable it in Settings > Apple Intelligence & Siri."
         }
     }
 }

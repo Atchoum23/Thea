@@ -46,6 +46,11 @@ public class CloudKitService: ObservableObject {
 
     private var subscriptions: Set<CKSubscription.ID> = []
 
+    // MARK: - Change Tokens (for Delta Sync)
+
+    private let changeTokenKey = "CloudKitChangeTokens"
+    private var changeTokens: [String: CKServerChangeToken] = [:]
+
     // MARK: - Initialization
 
     private init() {
@@ -57,6 +62,9 @@ public class CloudKitService: ObservableObject {
         // Load initial sync state from SettingsManager
         syncEnabled = SettingsManager.shared.iCloudSyncEnabled
 
+        // Load saved change tokens for delta sync
+        loadChangeTokens()
+
         Task {
             await checkiCloudStatus()
             await setupSubscriptions()
@@ -64,6 +72,35 @@ public class CloudKitService: ObservableObject {
 
         // Observe settings changes
         setupSettingsObserver()
+    }
+
+    // MARK: - Change Token Persistence
+
+    private func loadChangeTokens() {
+        guard let data = UserDefaults.standard.data(forKey: changeTokenKey),
+              let tokens = try? NSKeyedUnarchiver.unarchivedObject(
+                  ofClasses: [NSDictionary.self, NSString.self, CKServerChangeToken.self],
+                  from: data
+              ) as? [String: CKServerChangeToken]
+        else { return }
+        changeTokens = tokens
+    }
+
+    private func saveChangeTokens() {
+        guard let data = try? NSKeyedArchiver.archivedData(
+            withRootObject: changeTokens as NSDictionary,
+            requiringSecureCoding: true
+        ) else { return }
+        UserDefaults.standard.set(data, forKey: changeTokenKey)
+    }
+
+    private func getChangeToken(for zoneID: CKRecordZone.ID) -> CKServerChangeToken? {
+        changeTokens[zoneID.zoneName]
+    }
+
+    private func setChangeToken(_ token: CKServerChangeToken?, for zoneID: CKRecordZone.ID) {
+        changeTokens[zoneID.zoneName] = token
+        saveChangeTokens()
     }
 
     private func setupSettingsObserver() {
@@ -92,20 +129,183 @@ public class CloudKitService: ObservableObject {
 
     // MARK: - Sync Operations
 
-    /// Sync all data
+    /// Sync all data using delta sync (only fetches changes since last sync)
     public func syncAll() async throws {
         guard syncEnabled, iCloudAvailable else { return }
 
         syncStatus = .syncing
         defer { syncStatus = .idle }
 
-        // Sync in order of priority
-        try await syncSettings()
-        try await syncConversations()
-        try await syncKnowledge()
-        try await syncProjects()
+        // Use delta sync for efficiency (only fetches changes since last token)
+        try await performDeltaSync()
 
         lastSyncDate = Date()
+    }
+
+    /// Perform delta sync using CKServerChangeToken
+    /// This only fetches records that have changed since the last sync
+    private func performDeltaSync() async throws {
+        let zoneID = CKRecordZone.ID(zoneName: "TheaZone", ownerName: CKCurrentUserDefaultName)
+
+        // Ensure the zone exists
+        try await ensureZoneExists(zoneID)
+
+        // Configure the fetch with our saved change token
+        let previousToken = getChangeToken(for: zoneID)
+
+        // Collect changed and deleted records
+        var changedRecords: [CKRecord] = []
+        var deletedRecordIDs: [CKRecord.ID] = []
+        var newToken: CKServerChangeToken?
+
+        // Use CKFetchRecordZoneChangesOperation for delta sync
+        let operation = CKFetchRecordZoneChangesOperation()
+
+        var zoneConfig = CKFetchRecordZoneChangesOperation.ZoneConfiguration()
+        zoneConfig.previousServerChangeToken = previousToken
+
+        operation.configurationsByRecordZoneID = [zoneID: zoneConfig]
+
+        operation.recordWasChangedBlock = { _, result in
+            switch result {
+            case let .success(record):
+                changedRecords.append(record)
+            case .failure:
+                break
+            }
+        }
+
+        operation.recordWithIDWasDeletedBlock = { recordID, _ in
+            deletedRecordIDs.append(recordID)
+        }
+
+        operation.recordZoneChangeTokensUpdatedBlock = { _, token, _ in
+            newToken = token
+        }
+
+        operation.recordZoneFetchResultBlock = { _, result in
+            switch result {
+            case let .success((serverToken, _, _)):
+                newToken = serverToken
+            case .failure:
+                break
+            }
+        }
+
+        // Execute and wait
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            operation.fetchRecordZoneChangesResultBlock = { result in
+                switch result {
+                case .success:
+                    continuation.resume()
+                case let .failure(error):
+                    // If token expired, we'll handle it after
+                    if let ckError = error as? CKError, ckError.code == .changeTokenExpired {
+                        continuation.resume()
+                    } else {
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+            privateDatabase.add(operation)
+        }
+
+        // Save the new token
+        if let token = newToken {
+            setChangeToken(token, for: zoneID)
+        }
+
+        // Process changes
+        pendingChanges = changedRecords.count + deletedRecordIDs.count
+
+        for record in changedRecords {
+            await processChangedRecord(record)
+            pendingChanges = max(0, pendingChanges - 1)
+        }
+
+        for recordID in deletedRecordIDs {
+            await processDeletedRecord(recordID)
+            pendingChanges = max(0, pendingChanges - 1)
+        }
+    }
+
+    /// Ensure the custom record zone exists
+    private func ensureZoneExists(_ zoneID: CKRecordZone.ID) async throws {
+        let zone = CKRecordZone(zoneID: zoneID)
+        do {
+            _ = try await privateDatabase.save(zone)
+        } catch let error as CKError where error.code == .serverRecordChanged {
+            // Zone already exists, this is fine
+        }
+    }
+
+    /// Process a changed record from delta sync
+    private func processChangedRecord(_ record: CKRecord) async {
+        switch record.recordType {
+        case RecordType.conversation.rawValue:
+            let conversation = CloudConversation(from: record)
+            await mergeConversation(conversation)
+        case RecordType.knowledge.rawValue:
+            let item = CloudKnowledgeItem(from: record)
+            await mergeKnowledgeItem(item)
+        case RecordType.project.rawValue:
+            let project = CloudProject(from: record)
+            await mergeProject(project)
+        case RecordType.settings.rawValue:
+            let settings = CloudSettings(from: record)
+            await applySettings(settings)
+        default:
+            break
+        }
+    }
+
+    /// Process a deleted record from delta sync
+    private func processDeletedRecord(_ recordID: CKRecord.ID) async {
+        // Extract UUID from record name (format: "type-uuid")
+        let components = recordID.recordName.split(separator: "-", maxSplits: 1)
+        guard components.count == 2,
+              let uuid = UUID(uuidString: String(components[1]))
+        else { return }
+
+        let recordType = String(components[0])
+        switch recordType {
+        case "conversation":
+            await deleteLocalConversation(uuid)
+        case "knowledge":
+            await deleteLocalKnowledgeItem(uuid)
+        case "project":
+            await deleteLocalProject(uuid)
+        default:
+            break
+        }
+    }
+
+    /// Delete a local conversation that was deleted remotely
+    private func deleteLocalConversation(_ id: UUID) async {
+        // Notify the app to remove this conversation from local storage
+        NotificationCenter.default.post(
+            name: .cloudKitConversationDeleted,
+            object: nil,
+            userInfo: ["id": id]
+        )
+    }
+
+    /// Delete a local knowledge item that was deleted remotely
+    private func deleteLocalKnowledgeItem(_ id: UUID) async {
+        NotificationCenter.default.post(
+            name: .cloudKitKnowledgeItemDeleted,
+            object: nil,
+            userInfo: ["id": id]
+        )
+    }
+
+    /// Delete a local project that was deleted remotely
+    private func deleteLocalProject(_ id: UUID) async {
+        NotificationCenter.default.post(
+            name: .cloudKitProjectDeleted,
+            object: nil,
+            userInfo: ["id": id]
+        )
     }
 
     /// Sync conversations
@@ -281,22 +481,130 @@ public class CloudKitService: ObservableObject {
 
     // MARK: - Merge Operations
 
-    private func mergeConversation(_: CloudConversation) async {
-        // Implement conflict resolution
-        // Compare modifiedAt timestamps
-        // Keep newer version or merge intelligently
+    /// Merge a remote conversation with local data
+    private func mergeConversation(_ remote: CloudConversation) async {
+        // Check if we have a local version
+        let localConversation = await getLocalConversation(remote.id)
+
+        if let local = localConversation {
+            // Compare timestamps for conflict resolution
+            if remote.modifiedAt > local.modifiedAt {
+                // Remote is newer - use remote but preserve any local-only messages
+                var merged = remote
+                let localOnlyMessages = local.messages.filter { localMsg in
+                    !remote.messages.contains { $0.id == localMsg.id }
+                }
+                merged.messages = (remote.messages + localOnlyMessages)
+                    .sorted { $0.timestamp < $1.timestamp }
+                await saveLocalConversation(merged)
+            } else if local.modifiedAt > remote.modifiedAt {
+                // Local is newer - push to cloud
+                try? await saveConversation(local)
+            }
+            // If equal, no action needed
+        } else {
+            // No local version - save the remote
+            await saveLocalConversation(remote)
+        }
     }
 
-    private func mergeKnowledgeItem(_: CloudKnowledgeItem) async {
-        // Merge knowledge items
+    /// Merge a remote knowledge item with local data
+    private func mergeKnowledgeItem(_ remote: CloudKnowledgeItem) async {
+        let localItem = await getLocalKnowledgeItem(remote.id)
+
+        if let local = localItem {
+            // Use Last-Write-Wins strategy based on createdAt (knowledge items are immutable after creation)
+            if remote.createdAt > local.createdAt {
+                await saveLocalKnowledgeItem(remote)
+            } else if local.createdAt > remote.createdAt {
+                try? await saveKnowledgeItem(local)
+            }
+        } else {
+            await saveLocalKnowledgeItem(remote)
+        }
     }
 
-    private func mergeProject(_: CloudProject) async {
-        // Merge project data
+    /// Merge a remote project with local data
+    private func mergeProject(_ remote: CloudProject) async {
+        let localProject = await getLocalProject(remote.id)
+
+        if let local = localProject {
+            // Use Last-Write-Wins strategy based on lastModified
+            if remote.lastModified > local.lastModified {
+                await saveLocalProject(remote)
+            } else if local.lastModified > remote.lastModified {
+                try? await saveProject(local)
+            }
+            // If equal timestamps, no action needed
+        } else {
+            await saveLocalProject(remote)
+        }
     }
 
-    private func applySettings(_: CloudSettings) async {
-        // Apply synced settings to local storage
+    /// Apply synced settings to local storage
+    private func applySettings(_ remote: CloudSettings) async {
+        // Apply remote settings - the CloudSettings struct handles the merge
+        // Use Last-Write-Wins based on modifiedAt timestamp
+        let localLastSync = lastSyncDate ?? .distantPast
+
+        if remote.modifiedAt > localLastSync {
+            // Apply settings via notification
+            NotificationCenter.default.post(
+                name: .cloudKitApplySettings,
+                object: nil,
+                userInfo: ["settings": remote]
+            )
+        }
+    }
+
+    // MARK: - Local Storage Helpers
+
+    private func getLocalConversation(_ id: UUID) async -> CloudConversation? {
+        // Fetch from local storage via notification
+        await withCheckedContinuation { continuation in
+            NotificationCenter.default.post(
+                name: .cloudKitRequestLocalConversation,
+                object: nil,
+                userInfo: ["id": id, "continuation": continuation]
+            )
+            // If no response within 100ms, return nil
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                continuation.resume(returning: nil)
+            }
+        }
+    }
+
+    private func saveLocalConversation(_ conversation: CloudConversation) async {
+        NotificationCenter.default.post(
+            name: .cloudKitSaveLocalConversation,
+            object: nil,
+            userInfo: ["conversation": conversation]
+        )
+    }
+
+    private func getLocalKnowledgeItem(_ id: UUID) async -> CloudKnowledgeItem? {
+        // Similar pattern as conversation
+        nil // Placeholder - implement based on local storage
+    }
+
+    private func saveLocalKnowledgeItem(_ item: CloudKnowledgeItem) async {
+        NotificationCenter.default.post(
+            name: .cloudKitSaveLocalKnowledgeItem,
+            object: nil,
+            userInfo: ["item": item]
+        )
+    }
+
+    private func getLocalProject(_ id: UUID) async -> CloudProject? {
+        nil // Placeholder - implement based on local storage
+    }
+
+    private func saveLocalProject(_ project: CloudProject) async {
+        NotificationCenter.default.post(
+            name: .cloudKitSaveLocalProject,
+            object: nil,
+            userInfo: ["project": project]
+        )
     }
 
     // MARK: - Conflict Resolution
@@ -572,4 +880,38 @@ public enum CloudKitError: Error, LocalizedError, Sendable {
         case .conflictDetected: "Sync conflict detected"
         }
     }
+}
+
+// MARK: - CloudKit Sync Notifications
+
+public extension Notification.Name {
+    /// Posted when a conversation is deleted remotely
+    static let cloudKitConversationDeleted = Notification.Name("cloudKitConversationDeleted")
+
+    /// Posted when a knowledge item is deleted remotely
+    static let cloudKitKnowledgeItemDeleted = Notification.Name("cloudKitKnowledgeItemDeleted")
+
+    /// Posted when a project is deleted remotely
+    static let cloudKitProjectDeleted = Notification.Name("cloudKitProjectDeleted")
+
+    /// Posted to request a local conversation for merge
+    static let cloudKitRequestLocalConversation = Notification.Name("cloudKitRequestLocalConversation")
+
+    /// Posted to save a merged conversation locally
+    static let cloudKitSaveLocalConversation = Notification.Name("cloudKitSaveLocalConversation")
+
+    /// Posted to save a merged knowledge item locally
+    static let cloudKitSaveLocalKnowledgeItem = Notification.Name("cloudKitSaveLocalKnowledgeItem")
+
+    /// Posted to save a merged project locally
+    static let cloudKitSaveLocalProject = Notification.Name("cloudKitSaveLocalProject")
+
+    /// Posted when sync completes successfully
+    static let cloudKitSyncCompleted = Notification.Name("cloudKitSyncCompleted")
+
+    /// Posted when sync fails
+    static let cloudKitSyncFailed = Notification.Name("cloudKitSyncFailed")
+
+    /// Posted to apply synced settings
+    static let cloudKitApplySettings = Notification.Name("cloudKitApplySettings")
 }
