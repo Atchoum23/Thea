@@ -16,19 +16,22 @@ SCHEME="${1:-Thea-macOS}"
 CONFIG="${2:-Debug}"
 PROJECT_PATH="/Users/alexis/Documents/IT & Tech/MyApps/Thea/Thea.xcodeproj"
 
-# Destinations for each platform
-declare -A DESTINATIONS=(
-    ["Thea-iOS"]="generic/platform=iOS"
-    ["Thea-macOS"]="platform=macOS"
-    ["Thea-watchOS"]="generic/platform=watchOS"
-    ["Thea-tvOS"]="generic/platform=tvOS"
-)
+# Get destination for scheme (bash 3 compatible)
+get_destination() {
+    case "$1" in
+        Thea-iOS)    echo "generic/platform=iOS" ;;
+        Thea-macOS)  echo "platform=macOS" ;;
+        Thea-watchOS) echo "generic/platform=watchOS" ;;
+        Thea-tvOS)   echo "generic/platform=tvOS" ;;
+        *)           echo "" ;;
+    esac
+}
 
-DEST="${DESTINATIONS[$SCHEME]}"
+DEST=$(get_destination "$SCHEME")
 
 if [ -z "$DEST" ]; then
     echo "ERROR: Unknown scheme $SCHEME"
-    echo "Valid schemes: ${!DESTINATIONS[@]}"
+    echo "Valid schemes: Thea-iOS, Thea-macOS, Thea-watchOS, Thea-tvOS"
     exit 1
 fi
 
