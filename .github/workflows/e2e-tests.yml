@@ -1,6 +1,6 @@
 # Thea E2E Tests Workflow
-# Version: 1.1.0 - Maestro-based end-to-end testing with pinned actions
-# Last Updated: January 27, 2026
+# Version: 1.2.0 - Improved Maestro setup with timeout handling and idb-companion
+# Last Updated: January 31, 2026
 
 name: E2E Tests
 
@@ -10,10 +10,14 @@ on:
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
+  schedule:
+    # Run nightly at 3 AM UTC for regression testing
+    - cron: '0 3 * * *'
 
 env:
   XCODE_VERSION: '16.2'
   DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
+  MAESTRO_DRIVER_STARTUP_TIMEOUT: 240000  # 4 minutes for driver startup
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,7 +40,7 @@ jobs:
 
       - name: Cache XcodeGen
         id: xcodegen-cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: /opt/homebrew/Cellar/xcodegen
           key: ${{ runner.os }}-xcodegen-2.42.0
@@ -49,7 +53,7 @@ jobs:
           command -v xcodegen || brew install xcodegen
 
       - name: Cache SPM Dependencies
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.1.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             ~/Library/Caches/org.swift.swiftpm
@@ -66,7 +70,7 @@ jobs:
           xcodebuild build \
             -project Thea.xcodeproj \
             -scheme Thea-iOS \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
             -configuration Debug \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \
@@ -179,9 +183,10 @@ jobs:
       - name: Boot Simulator
         id: simulator
         run: |
-          # Get available iPhone 16 simulator - extract UUID from format: "iPhone 16 (UUID) (State)"
-          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16" | head -1 | grep -oE '[A-F0-9-]{36}')
+          # Get available iPhone 15 Pro simulator - extract UUID from format: "iPhone 15 Pro (UUID) (State)"
+          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro" | head -1 | grep -oE '[A-F0-9-]{36}')
           if [ -z "$DEVICE_ID" ]; then
+            # Fallback to any available iPhone
             DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
           fi
 
@@ -201,10 +206,16 @@ jobs:
           xcrun simctl bootstatus "$DEVICE_ID" -b
 
       - name: Cache Maestro
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.1.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.maestro
           key: ${{ runner.os }}-maestro-1.38.1
+
+      - name: Install idb-companion (Recommended for iOS)
+        run: |
+          # idb-companion improves simulator interaction reliability
+          brew tap facebook/fb 2>/dev/null || true
+          brew install facebook/fb/idb-companion 2>/dev/null || echo "idb-companion already installed or not available"
 
       - name: Install Maestro
         run: |
@@ -212,6 +223,12 @@ jobs:
             curl -Ls "https://get.maestro.mobile.dev" | bash
           fi
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Verify Maestro Installation
+        run: |
+          export PATH="$HOME/.maestro/bin:$PATH"
+          maestro --version
+          echo "Maestro driver startup timeout: $MAESTRO_DRIVER_STARTUP_TIMEOUT ms"
 
       - name: Install App on Simulator
         run: |
