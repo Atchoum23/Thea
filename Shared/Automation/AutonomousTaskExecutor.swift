@@ -1,6 +1,7 @@
 import Foundation
 #if os(macOS)
 import AppKit
+import IOKit
 #elseif os(iOS)
 import UIKit
 import BackgroundTasks
