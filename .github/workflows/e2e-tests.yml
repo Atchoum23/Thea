@@ -65,12 +65,18 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
+      - name: List Available Simulators
+        run: |
+          echo "Available iOS Simulators:"
+          xcrun simctl list devices available | grep -E "iPhone|iPad" | head -20
+
       - name: Build for Simulator
         run: |
+          # Use generic iOS Simulator destination - xcodebuild will pick available simulator
           xcodebuild build \
             -project Thea.xcodeproj \
             -scheme Thea-iOS \
-            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+            -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \
