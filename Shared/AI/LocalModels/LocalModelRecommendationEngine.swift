@@ -1,7 +1,13 @@
 // LocalModelRecommendationEngine.swift
 // AI-powered local model monitoring, discovery, and recommendation system
+// Features system-aware intelligent defaults based on hardware capabilities
 
 import Foundation
+#if os(macOS)
+import IOKit.ps
+#elseif os(iOS) || os(watchOS) || os(tvOS)
+import UIKit
+#endif
 
 // MARK: - Local Model Recommendation Engine
 
@@ -19,18 +25,57 @@ final class LocalModelRecommendationEngine {
     private(set) var lastScanDate: Date?
     private(set) var userProfile = UserUsageProfile()
 
-    // Configuration
+    // Configuration - AI-powered with system-aware defaults
     struct Configuration: Codable, Sendable {
         var enableAutoDiscovery = true
         var scanIntervalHours: Int = 24
         var enableProactiveRecommendations = true
         var maxRecommendations = 5
         var preferredQuantization: String = "4bit"
-        var maxModelSizeGB: Double = 8.0
+        var maxModelSizeGB: Double = 8.0 // Will be overridden by system-aware calculation
         var preferredSources: [String] = ["mlx-community", "huggingface"]
+        var enableAIPoweredScoring = true
+        var autoAdjustToSystemCapabilities = true
+        var performanceTier: PerformanceTier = .auto
+
+        /// Model performance tiers based on system capabilities
+        enum PerformanceTier: String, Codable, Sendable, CaseIterable {
+            case auto          // AI determines best tier
+            case ultralight    // 1-3GB models (8GB RAM systems)
+            case light         // 3-5GB models (16GB RAM systems)
+            case standard      // 5-10GB models (32GB RAM systems)
+            case performance   // 10-20GB models (64GB RAM systems)
+            case extreme       // 20-50GB+ models (128GB+ RAM systems)
+            case unlimited     // No size restrictions (256GB+ systems)
+
+            var displayName: String {
+                switch self {
+                case .auto: "Auto (AI-Selected)"
+                case .ultralight: "Ultra Light (1-3GB)"
+                case .light: "Light (3-5GB)"
+                case .standard: "Standard (5-10GB)"
+                case .performance: "Performance (10-20GB)"
+                case .extreme: "Extreme (20-50GB)"
+                case .unlimited: "Unlimited (50GB+)"
+                }
+            }
+
+            var maxModelSizeGB: Double {
+                switch self {
+                case .auto: 0 // Calculated dynamically
+                case .ultralight: 3.0
+                case .light: 5.0
+                case .standard: 10.0
+                case .performance: 20.0
+                case .extreme: 50.0
+                case .unlimited: 200.0
+                }
+            }
+        }
     }
 
     private(set) var configuration = Configuration()
+    private(set) var systemProfile: SystemHardwareProfile?
 
     // MARK: - Initialization
 
@@ -38,9 +83,230 @@ final class LocalModelRecommendationEngine {
         loadConfiguration()
         loadUserProfile()
         Task {
+            await detectSystemHardware()
+            await applySystemAwareDefaults()
             await initialScan()
             startMonitoring()
         }
+    }
+
+    // MARK: - System Hardware Detection (AI-Powered)
+
+    /// Detect and profile the system hardware for optimal model recommendations
+    private func detectSystemHardware() async {
+        let memory = ProcessInfo.processInfo.physicalMemory
+        let memoryGB = Double(memory) / 1_073_741_824
+        let cpuCores = ProcessInfo.processInfo.processorCount
+
+        // Detect Apple Silicon chip type
+        let chipType = detectAppleSiliconChip()
+
+        // Estimate Neural Engine and GPU capabilities
+        let neuralEngineCapability = estimateNeuralEngineCapability(chip: chipType)
+        let gpuCores = estimateGPUCores(chip: chipType)
+
+        systemProfile = SystemHardwareProfile(
+            totalMemoryGB: memoryGB,
+            cpuCores: cpuCores,
+            chipType: chipType,
+            gpuCores: gpuCores,
+            neuralEngineCapability: neuralEngineCapability,
+            thermalState: .nominal as LocalThermalState,
+            batteryPowered: detectBatteryPower()
+        )
+
+        print("[LocalModelRecommendationEngine] System profile: \(memoryGB)GB RAM, \(chipType.rawValue), \(gpuCores) GPU cores, Neural Engine: \(neuralEngineCapability.rawValue)")
+    }
+
+    /// Apply AI-powered defaults based on detected system capabilities
+    private func applySystemAwareDefaults() async {
+        guard configuration.autoAdjustToSystemCapabilities,
+              let profile = systemProfile else { return }
+
+        // Calculate optimal max model size based on available RAM
+        // Reserve ~30% of RAM for system and ~20% for app overhead
+        // Only ~50% of RAM should be used for model weights
+        let effectiveRAM = profile.totalMemoryGB * 0.5
+
+        let tier: Configuration.PerformanceTier
+        let maxSize: Double
+
+        switch profile.totalMemoryGB {
+        case 0..<12:
+            tier = .ultralight
+            maxSize = min(effectiveRAM, 3.0)
+        case 12..<24:
+            tier = .light
+            maxSize = min(effectiveRAM, 5.0)
+        case 24..<48:
+            tier = .standard
+            maxSize = min(effectiveRAM, 10.0)
+        case 48..<96:
+            tier = .performance
+            maxSize = min(effectiveRAM, 20.0)
+        case 96..<192:
+            tier = .extreme
+            maxSize = min(effectiveRAM, 50.0)
+        default:
+            tier = .unlimited
+            maxSize = min(effectiveRAM, 100.0)
+        }
+
+        // Apply the calculated defaults if not manually overridden
+        if configuration.performanceTier == .auto {
+            configuration.maxModelSizeGB = maxSize
+            print("[LocalModelRecommendationEngine] AI-selected tier: \(tier.displayName), max model size: \(String(format: "%.1f", maxSize))GB")
+        } else {
+            // User has manually selected a tier
+            configuration.maxModelSizeGB = configuration.performanceTier.maxModelSizeGB
+        }
+
+        // Adjust quantization preference based on memory
+        if profile.totalMemoryGB < 16 {
+            configuration.preferredQuantization = "4bit"
+        } else if profile.totalMemoryGB < 64 {
+            configuration.preferredQuantization = "4bit" // Still prefer 4bit for efficiency
+        } else {
+            configuration.preferredQuantization = "8bit" // Can afford higher precision
+        }
+
+        saveConfiguration()
+    }
+
+    private func detectAppleSiliconChip() -> AppleSiliconChip {
+        #if os(macOS)
+        var size = 0
+        sysctlbyname("machdep.cpu.brand_string", nil, &size, nil, 0)
+        var brand = [CChar](repeating: 0, count: size)
+        sysctlbyname("machdep.cpu.brand_string", &brand, &size, nil, 0)
+        let cpuBrand = String(cString: brand).lowercased()
+
+        if cpuBrand.contains("m4 ultra") { return .m4Ultra }
+        if cpuBrand.contains("m4 max") { return .m4Max }
+        if cpuBrand.contains("m4 pro") { return .m4Pro }
+        if cpuBrand.contains("m4") { return .m4 }
+        if cpuBrand.contains("m3 ultra") { return .m3Ultra }
+        if cpuBrand.contains("m3 max") { return .m3Max }
+        if cpuBrand.contains("m3 pro") { return .m3Pro }
+        if cpuBrand.contains("m3") { return .m3 }
+        if cpuBrand.contains("m2 ultra") { return .m2Ultra }
+        if cpuBrand.contains("m2 max") { return .m2Max }
+        if cpuBrand.contains("m2 pro") { return .m2Pro }
+        if cpuBrand.contains("m2") { return .m2 }
+        if cpuBrand.contains("m1 ultra") { return .m1Ultra }
+        if cpuBrand.contains("m1 max") { return .m1Max }
+        if cpuBrand.contains("m1 pro") { return .m1Pro }
+        if cpuBrand.contains("m1") { return .m1 }
+        return .unknown
+        #elseif os(iOS)
+        // iOS device detection via memory and CPU core count
+        return detectIOSChip()
+        #elseif os(watchOS)
+        return .unknown // watchOS chips are different (S-series)
+        #elseif os(tvOS)
+        return detectTVOSChip()
+        #else
+        return .unknown
+        #endif
+    }
+
+    #if os(iOS)
+    private func detectIOSChip() -> AppleSiliconChip {
+        // Detect A-series and M-series chips in iPads/iPhones via RAM + cores
+        let memoryGB = Double(ProcessInfo.processInfo.physicalMemory) / 1_073_741_824
+        let cores = ProcessInfo.processInfo.processorCount
+
+        // iPad Pro M4 (2024): 8GB-16GB RAM, 9-10 cores
+        // iPad Pro M2 (2022): 8GB-16GB RAM, 8 cores
+        // iPad Pro M1 (2021): 8GB-16GB RAM, 8 cores
+        // iPhone 16 Pro: A18 Pro, 8GB RAM, 6 cores
+        // iPhone 15 Pro: A17 Pro, 8GB RAM, 6 cores
+
+        if memoryGB >= 12 && cores >= 9 { return .m4 }
+        if memoryGB >= 8 && cores >= 8 { return .m2 }
+        if memoryGB >= 6 && cores >= 6 { return .a17Pro }
+        if memoryGB >= 6 { return .a16 }
+        return .unknown
+    }
+    #endif
+
+    #if os(tvOS)
+    private func detectTVOSChip() -> AppleSiliconChip {
+        // Apple TV chips
+        let cores = ProcessInfo.processInfo.processorCount
+        if cores >= 6 { return .a15 }
+        return .unknown
+    }
+    #endif
+
+    private func estimateNeuralEngineCapability(chip: AppleSiliconChip) -> NeuralEngineCapability {
+        switch chip {
+        case .m4Ultra, .m4Max, .m4Pro, .m4, .a18Pro, .a18:
+            .generation5 // 38 TOPS (M4), 35 TOPS (A18)
+        case .m3Ultra, .m3Max, .m3Pro, .m3, .a17Pro:
+            .generation4 // 18 TOPS (M3), 35 TOPS (A17 Pro)
+        case .m2Ultra, .m2Max, .m2Pro, .m2, .a16:
+            .generation3 // 15.8 TOPS
+        case .m1Ultra, .m1Max, .m1Pro, .m1, .a15:
+            .generation2 // 11 TOPS (M1), 15.8 TOPS (A15)
+        case .a14:
+            .generation2 // 11 TOPS
+        case .s9, .s10:
+            .generation4 // S9/S10 have capable Neural Engines
+        case .unknown:
+            .unknown
+        }
+    }
+
+    private func estimateGPUCores(chip: AppleSiliconChip) -> Int {
+        switch chip {
+        // M-series (Mac)
+        case .m4Ultra: 80
+        case .m4Max: 40
+        case .m4Pro: 20
+        case .m4: 10
+        case .m3Ultra: 76
+        case .m3Max: 40
+        case .m3Pro: 18
+        case .m3: 10
+        case .m2Ultra: 76
+        case .m2Max: 38
+        case .m2Pro: 19
+        case .m2: 10
+        case .m1Ultra: 64
+        case .m1Max: 32
+        case .m1Pro: 16
+        case .m1: 8
+        // A-series (iPhone/iPad)
+        case .a18Pro: 6
+        case .a18: 5
+        case .a17Pro: 6
+        case .a16: 5
+        case .a15: 5
+        case .a14: 4
+        // S-series (Watch)
+        case .s9, .s10: 4
+        case .unknown: 4
+        }
+    }
+
+    private func detectBatteryPower() -> Bool {
+        #if os(macOS)
+        // Check if running on battery
+        let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue()
+        let sources = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef]
+        guard let firstSource = sources?.first else { return false }
+        let description = IOPSGetPowerSourceDescription(snapshot, firstSource)?.takeUnretainedValue() as? [String: Any]
+        return description?[kIOPSPowerSourceStateKey as String] as? String == kIOPSBatteryPowerValue
+        #elseif os(iOS) || os(watchOS)
+        // iOS/watchOS devices are always battery-powered unless plugged in
+        // UIDevice.current.batteryState requires monitoring
+        return true // Conservative assumption
+        #elseif os(tvOS)
+        return false // Apple TV is always plugged in
+        #else
+        return true
+        #endif
     }
 
     // MARK: - Scanning & Discovery
@@ -331,14 +597,87 @@ final class LocalModelRecommendationEngine {
     }
 
     private func analyzeSystemCapabilities() -> SystemCapabilities {
-        let memory = ProcessInfo.processInfo.physicalMemory
-        let memoryGB = Double(memory) / 1_073_741_824
+        guard let profile = systemProfile else {
+            // Fallback if profile not yet initialized
+            let memory = ProcessInfo.processInfo.physicalMemory
+            let memoryGB = Double(memory) / 1_073_741_824
+            return SystemCapabilities(
+                totalMemoryGB: memoryGB,
+                availableMemoryGB: memoryGB * 0.5,
+                hasGPU: true,
+                isAppleSilicon: true,
+                gpuCores: 10,
+                neuralEngineTOPS: 15.0,
+                recommendedMaxModelGB: min(memoryGB * 0.5, 8.0)
+            )
+        }
+
+        // AI-powered calculation based on hardware profile
+        let neuralEngineTOPS: Double = switch profile.neuralEngineCapability {
+        case .generation5: 38.0
+        case .generation4: 18.0
+        case .generation3: 15.8
+        case .generation2: 11.0
+        case .unknown: 10.0
+        }
+
+        // Calculate recommended max model size based on:
+        // - Total RAM (50% rule)
+        // - Whether on battery (reduce by 30% on battery)
+        // - Thermal state
+        var recommendedMax = profile.totalMemoryGB * 0.5
+
+        if profile.batteryPowered {
+            recommendedMax *= 0.7 // Reduce for battery efficiency
+        }
+
+        if profile.thermalState == .serious || profile.thermalState == .critical {
+            recommendedMax *= 0.5 // Reduce for thermal management
+        }
 
         return SystemCapabilities(
-            totalMemoryGB: memoryGB,
-            availableMemoryGB: memoryGB * 0.7, // Estimate 70% available
-            hasGPU: true, // Apple Silicon always has GPU
-            isAppleSilicon: true
+            totalMemoryGB: profile.totalMemoryGB,
+            availableMemoryGB: profile.totalMemoryGB * 0.5,
+            hasGPU: true,
+            isAppleSilicon: profile.chipType != .unknown,
+            gpuCores: profile.gpuCores,
+            neuralEngineTOPS: neuralEngineTOPS,
+            recommendedMaxModelGB: recommendedMax
+        )
+    }
+
+    /// Get AI-powered recommendation for optimal model based on current system state
+    func getOptimalModelRecommendation() -> ModelRecommendation? {
+        recommendations.first
+    }
+
+    /// Get system capability summary for UI display
+    func getSystemCapabilitySummary() -> SystemCapabilitySummary {
+        let caps = analyzeSystemCapabilities()
+        guard let profile = systemProfile else {
+            return SystemCapabilitySummary(
+                tierName: configuration.performanceTier.displayName,
+                maxModelSize: "\(Int(configuration.maxModelSizeGB))GB",
+                chipDescription: "Unknown",
+                memoryDescription: "\(Int(caps.totalMemoryGB))GB Unified Memory",
+                recommendation: "Install models up to \(Int(configuration.maxModelSizeGB))GB"
+            )
+        }
+
+        let tierDescription = switch profile.totalMemoryGB {
+        case 0..<16: "Entry-level - Best for small models"
+        case 16..<32: "Standard - Good for 7B parameter models"
+        case 32..<64: "Professional - Great for 13B models"
+        case 64..<128: "High-end - Excellent for 30B+ models"
+        default: "Extreme - Run any model efficiently"
+        }
+
+        return SystemCapabilitySummary(
+            tierName: configuration.performanceTier.displayName,
+            maxModelSize: "\(Int(configuration.maxModelSizeGB))GB",
+            chipDescription: profile.chipType.displayName,
+            memoryDescription: "\(Int(profile.totalMemoryGB))GB Unified Memory",
+            recommendation: tierDescription
         )
     }
 
@@ -699,6 +1038,127 @@ struct SystemCapabilities: Sendable {
     let availableMemoryGB: Double
     let hasGPU: Bool
     let isAppleSilicon: Bool
+    let gpuCores: Int
+    let neuralEngineTOPS: Double
+    let recommendedMaxModelGB: Double
+}
+
+// MARK: - System Hardware Profile
+
+struct SystemHardwareProfile: Sendable {
+    let totalMemoryGB: Double
+    let cpuCores: Int
+    let chipType: AppleSiliconChip
+    let gpuCores: Int
+    let neuralEngineCapability: NeuralEngineCapability
+    let thermalState: LocalThermalState
+    let batteryPowered: Bool
+}
+
+enum AppleSiliconChip: String, Codable, Sendable {
+    // M-series (Mac/iPad Pro)
+    case m1 = "M1"
+    case m1Pro = "M1 Pro"
+    case m1Max = "M1 Max"
+    case m1Ultra = "M1 Ultra"
+    case m2 = "M2"
+    case m2Pro = "M2 Pro"
+    case m2Max = "M2 Max"
+    case m2Ultra = "M2 Ultra"
+    case m3 = "M3"
+    case m3Pro = "M3 Pro"
+    case m3Max = "M3 Max"
+    case m3Ultra = "M3 Ultra"
+    case m4 = "M4"
+    case m4Pro = "M4 Pro"
+    case m4Max = "M4 Max"
+    case m4Ultra = "M4 Ultra"
+    // A-series (iPhone/iPad/Apple TV)
+    case a14 = "A14 Bionic"
+    case a15 = "A15 Bionic"
+    case a16 = "A16 Bionic"
+    case a17Pro = "A17 Pro"
+    case a18 = "A18"
+    case a18Pro = "A18 Pro"
+    // S-series (Apple Watch)
+    case s9 = "S9"
+    case s10 = "S10"
+    case unknown = "Unknown"
+
+    var displayName: String { rawValue }
+
+    var generation: Int {
+        switch self {
+        case .m1, .m1Pro, .m1Max, .m1Ultra: 1
+        case .m2, .m2Pro, .m2Max, .m2Ultra: 2
+        case .m3, .m3Pro, .m3Max, .m3Ultra: 3
+        case .m4, .m4Pro, .m4Max, .m4Ultra: 4
+        case .a14, .a15, .a16: 0 // A-series uses different numbering
+        case .a17Pro, .a18, .a18Pro: 0
+        case .s9, .s10: 0
+        case .unknown: 0
+        }
+    }
+
+    /// Whether this chip supports on-device AI models
+    var supportsLocalModels: Bool {
+        switch self {
+        case .m1, .m1Pro, .m1Max, .m1Ultra,
+             .m2, .m2Pro, .m2Max, .m2Ultra,
+             .m3, .m3Pro, .m3Max, .m3Ultra,
+             .m4, .m4Pro, .m4Max, .m4Ultra:
+            true // All M-series support local models
+        case .a17Pro, .a18, .a18Pro:
+            true // A17 Pro+ supports on-device LLMs
+        case .a14, .a15, .a16:
+            false // Older A-series: limited to Core ML
+        case .s9, .s10:
+            false // Apple Watch: too constrained
+        case .unknown:
+            false
+        }
+    }
+
+    /// Maximum recommended model size for this chip (in GB)
+    var maxRecommendedModelSizeGB: Double {
+        switch self {
+        case .m4Ultra: 100.0
+        case .m4Max, .m3Ultra: 50.0
+        case .m4Pro, .m3Max, .m2Ultra: 30.0
+        case .m4, .m3Pro, .m2Max, .m1Ultra: 20.0
+        case .m3, .m2Pro, .m1Max: 15.0
+        case .m2, .m1Pro: 10.0
+        case .m1: 8.0
+        case .a18Pro, .a18: 4.0 // iPhone 16 Pro
+        case .a17Pro: 3.0 // iPhone 15 Pro
+        case .a14, .a15, .a16: 1.0 // Limited Core ML only
+        case .s9, .s10: 0.0 // Not suitable for LLMs
+        case .unknown: 4.0
+        }
+    }
+}
+
+enum NeuralEngineCapability: String, Codable, Sendable {
+    case generation2 = "Gen 2 (11 TOPS)"
+    case generation3 = "Gen 3 (15.8 TOPS)"
+    case generation4 = "Gen 4 (18 TOPS)"
+    case generation5 = "Gen 5 (38 TOPS)"
+    case unknown = "Unknown"
+}
+
+enum LocalThermalState: String, Codable, Sendable {
+    case nominal
+    case fair
+    case serious
+    case critical
+}
+
+struct SystemCapabilitySummary: Sendable {
+    let tierName: String
+    let maxModelSize: String
+    let chipDescription: String
+    let memoryDescription: String
+    let recommendation: String
 }
 
 enum LocalModelSource: String, Codable, Sendable {
