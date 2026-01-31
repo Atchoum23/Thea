@@ -68,7 +68,7 @@ final class LocalModelRecommendationEngine {
                 case .standard: 10.0
                 case .performance: 20.0
                 case .extreme: 50.0
-                case .unlimited: 200.0
+                case .unlimited: Double.greatestFiniteMagnitude // No limit
                 }
             }
         }
@@ -147,9 +147,18 @@ final class LocalModelRecommendationEngine {
         case 96..<192:
             tier = .extreme
             maxSize = min(effectiveRAM, 50.0)
-        default:
+        case 192..<384:
+            // 192GB-384GB RAM systems (e.g., M2 Ultra, M3 Ultra, M4 Ultra with 192GB)
             tier = .unlimited
-            maxSize = min(effectiveRAM, 100.0)
+            maxSize = min(effectiveRAM, 150.0)
+        case 384..<768:
+            // 384GB-768GB RAM systems (future high-end workstations)
+            tier = .unlimited
+            maxSize = min(effectiveRAM, 300.0)
+        default:
+            // 768GB+ RAM systems (future extreme systems)
+            tier = .unlimited
+            maxSize = effectiveRAM // No cap - use all available
         }
 
         // Apply the calculated defaults if not manually overridden
