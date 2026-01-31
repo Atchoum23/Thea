@@ -314,7 +314,7 @@ public final class PlatformFeaturesHub: ObservableObject {
 
 // MARK: - Platform Enum
 
-public enum Platform: String, CaseIterable {
+public enum Platform: String, CaseIterable, Sendable {
     case macOS
     case iOS
     case iPadOS

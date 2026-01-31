@@ -2,10 +2,19 @@
 
 ## Goal
 
-**100% autonomous execution in successive loops to:**
-1. **DETECT** - Identify absolutely everything that needs fixing (errors, warnings, bugs, issues)
-2. **FIX** - Repair everything identified using optimal 2026 best practices without introducing new issues
-3. **VERIFY** - Confirm successful outcome with zero regressions
+**100% autonomous execution in successive loops to achieve ZERO TOLERANCE for issues:**
+1. **DETECT** - Identify absolutely everything that needs fixing (errors, warnings, bugs, issues, style violations)
+2. **FIX** - Repair **EVERYTHING** identified - no "minor" exceptions, no "pre-existing" excuses
+3. **VERIFY** - Confirm successful outcome with **0 errors AND 0 warnings**
+
+### Zero Tolerance Policy
+- **0 errors** - Non-negotiable
+- **0 warnings** - All warnings must be fixed, including:
+  - SwiftLint style warnings (implicit_return, redundant_type_annotation, etc.)
+  - Compiler deprecation warnings
+  - Build warnings of any kind
+- **0 TODOs in production code** - Either fix them or track in issues
+- **0 disabled tests** - Either fix or remove
 
 This plan follows the CLAUDE.md principles: Fix issues immediately, no "pre-existing" excuses, verify fixes.
 
@@ -90,37 +99,58 @@ echo "✓ All tools available"
 
 ---
 
-## Phase 1: Static Analysis (AUTO-FIX ENABLED)
+## Phase 1: Static Analysis (AUTO-FIX ENABLED) - ZERO TOLERANCE
 
 ```bash
 cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
 
-echo "=== Phase 1: Static Analysis ==="
+echo "=== Phase 1: Static Analysis (ZERO TOLERANCE) ==="
 
 # Step 1: Regenerate Xcode project (prevents stale state)
 echo "Regenerating Xcode project..."
 xcodegen generate 2>&1 | tail -3
 
-# Step 2: Auto-fix linting issues
-echo "Running SwiftLint with auto-fix..."
-swiftlint lint --fix --quiet 2>&1 | tail -5
+# Step 2: Auto-fix ALL linting issues (run multiple times for cascading fixes)
+echo "Running SwiftLint with auto-fix (pass 1)..."
+swiftlint lint --fix --quiet 2>&1
 
-# Step 3: Verify 0 errors remain
-LINT_ERRORS=$(swiftlint lint 2>&1 | grep -c "error:" || echo "0")
-LINT_WARNINGS=$(swiftlint lint 2>&1 | grep -c "warning:" || echo "0")
+echo "Running SwiftLint with auto-fix (pass 2)..."
+swiftlint lint --fix --quiet 2>&1
+
+# Step 3: Verify 0 errors AND 0 warnings remain
+LINT_OUTPUT=$(swiftlint lint 2>&1)
+LINT_ERRORS=$(echo "$LINT_OUTPUT" | grep -c "error:" || echo "0")
+LINT_WARNINGS=$(echo "$LINT_OUTPUT" | grep -c "warning:" || echo "0")
 
 echo "SwiftLint: $LINT_ERRORS errors, $LINT_WARNINGS warnings"
 
-if [ "$LINT_ERRORS" -gt 0 ]; then
-  echo "✗ FAILED - Errors remain after auto-fix:"
-  swiftlint lint 2>&1 | grep "error:" | head -10
-  # Loop: Try fix again (max 2 iterations)
+if [ "$LINT_ERRORS" -gt 0 ] || [ "$LINT_WARNINGS" -gt 0 ]; then
+  echo "✗ FAILED - Issues remain after auto-fix:"
+  echo "$LINT_OUTPUT" | grep -E "(error:|warning:)" | head -20
+  echo ""
+  echo "Manual fixes required for these patterns:"
+  echo "  - implicit_return: Remove 'return' keyword from single-expression closures/getters"
+  echo "  - redundant_type_annotation: Remove type when it can be inferred"
+  echo "  - is_disjoint: Use Set.isDisjoint(with:) instead of intersection(_:).isEmpty"
+  echo ""
+  # Exit with failure - ZERO TOLERANCE means we don't proceed
+  exit 1
 else
-  echo "✓ Phase 1 PASSED"
+  echo "✓ Phase 1 PASSED - ZERO warnings, ZERO errors"
 fi
 ```
 
-**Gate:** 0 SwiftLint errors. Auto-fix with `swiftlint lint --fix`.
+**Gate:** 0 SwiftLint errors AND 0 SwiftLint warnings. No exceptions.
+
+### Common Manual Fixes (when auto-fix cannot resolve)
+
+| Rule | Problem | Fix |
+|------|---------|-----|
+| `implicit_return` | Explicit `return` in single-expression | Remove `return` keyword |
+| `redundant_type_annotation` | `var x: Type = Type()` | Change to `var x = Type()` |
+| `is_disjoint` | `set1.intersection(set2).isEmpty` | Use `set1.isDisjoint(with: set2)` |
+| `trailing_closure` | `.map({ $0 })` | Use `.map { $0 }` |
+| `unused_closure_parameter` | `{ arg in ... }` (arg unused) | Use `{ _ in ... }` |
 
 ---
 
@@ -236,7 +266,18 @@ else
 fi
 ```
 
-**Gate:** All 4 platforms build with 0 errors. Auto-fix available for common issues.
+**Gate:** All 4 platforms build with 0 errors AND 0 warnings. Auto-fix available for common issues.
+
+### Handling Build Warnings (ZERO TOLERANCE)
+When warnings are found, they MUST be fixed before proceeding:
+
+| Warning Type | Fix Strategy |
+|--------------|--------------|
+| Deprecation (`was deprecated in`) | Update to modern API or suppress with `@available` |
+| Unused variable | Remove or prefix with `_` |
+| Immutable captured value | Change `var` to `let` |
+| Result unused | Assign to `_` or use `@discardableResult` |
+| Sendable conformance | Add explicit `Sendable` conformance |
 
 ---
 
@@ -296,7 +337,7 @@ else
 fi
 ```
 
-**Gate:** All 4 platforms build with 0 errors in Release.
+**Gate:** All 4 platforms build with 0 errors AND 0 warnings in Release.
 
 ---
 
@@ -632,6 +673,167 @@ When a phase fails, apply this fix loop (max 3 iterations):
 
 ---
 
+---
+
+## Phase 11: CI/CD Fix Loop (Post-Sync Verification)
+
+**Purpose:** After pushing to remote, monitor GitHub Actions and systematically fix any CI/CD failures in a loop until all workflows pass.
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+echo "=== Phase 11: CI/CD Fix Loop ==="
+
+MAX_ITERATIONS=5
+ITERATION=0
+
+while [ $ITERATION -lt $MAX_ITERATIONS ]; do
+  ((ITERATION++))
+  echo ""
+  echo "--- CI/CD Fix Iteration $ITERATION of $MAX_ITERATIONS ---"
+
+  # Wait for CI to start (give GitHub time to trigger)
+  echo "Waiting for CI workflows to trigger..."
+  sleep 30
+
+  # Check workflow status using gh CLI
+  if command -v gh &>/dev/null; then
+    echo "Checking GitHub Actions status..."
+
+    # Get latest workflow runs
+    RUNS=$(gh run list --limit 5 --json name,status,conclusion,headSha 2>/dev/null)
+
+    if [ -z "$RUNS" ]; then
+      echo "⚠ Could not fetch workflow runs (check gh auth)"
+      break
+    fi
+
+    # Check for any failures
+    FAILED=$(echo "$RUNS" | jq -r '.[] | select(.conclusion == "failure") | .name' 2>/dev/null | head -3)
+    IN_PROGRESS=$(echo "$RUNS" | jq -r '.[] | select(.status == "in_progress") | .name' 2>/dev/null | head -3)
+
+    if [ -n "$IN_PROGRESS" ]; then
+      echo "Workflows still running:"
+      echo "$IN_PROGRESS"
+      echo "Waiting for completion..."
+      sleep 60
+      continue
+    fi
+
+    if [ -z "$FAILED" ]; then
+      echo "✓ All CI workflows passed!"
+      echo "✓ Phase 11 PASSED"
+      break
+    fi
+
+    echo "✗ Failed workflows detected:"
+    echo "$FAILED"
+
+    # Get failure details
+    for WORKFLOW in $FAILED; do
+      echo ""
+      echo "Analyzing failure: $WORKFLOW"
+
+      # Get the run ID for this workflow
+      RUN_ID=$(gh run list --workflow "$WORKFLOW" --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null)
+
+      if [ -n "$RUN_ID" ]; then
+        echo "Fetching logs for run $RUN_ID..."
+        gh run view "$RUN_ID" --log-failed 2>/dev/null | tail -50 > /tmp/ci_failure_$RUN_ID.log
+
+        # Parse common error patterns
+        if grep -q "error:" /tmp/ci_failure_$RUN_ID.log 2>/dev/null; then
+          echo "Errors found:"
+          grep "error:" /tmp/ci_failure_$RUN_ID.log | head -10
+        fi
+
+        if grep -q "SwiftLint" /tmp/ci_failure_$RUN_ID.log 2>/dev/null; then
+          echo "SwiftLint issues detected - running auto-fix..."
+          swiftlint lint --fix --quiet
+          git add -A && git commit -m "fix: auto-fix SwiftLint issues from CI
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>" && git push origin main
+        fi
+
+        if grep -q "xcodebuild" /tmp/ci_failure_$RUN_ID.log 2>/dev/null && grep -q "error:" /tmp/ci_failure_$RUN_ID.log 2>/dev/null; then
+          echo "Build errors detected - regenerating project..."
+          xcodegen generate
+
+          # Attempt local build to verify fix
+          xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -destination "platform=macOS" build -quiet 2>&1 | tail -5
+
+          if [ $? -eq 0 ]; then
+            git add -A && git commit -m "fix: resolve CI build errors
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>" && git push origin main
+          fi
+        fi
+
+        if grep -q "test" /tmp/ci_failure_$RUN_ID.log 2>/dev/null && grep -q "failed" /tmp/ci_failure_$RUN_ID.log 2>/dev/null; then
+          echo "Test failures detected - running local tests..."
+          swift test 2>&1 | tail -20
+
+          if [ $? -ne 0 ]; then
+            echo "Local tests also failing - requires manual intervention"
+          fi
+        fi
+      fi
+    done
+
+    # Wait before next iteration
+    if [ $ITERATION -lt $MAX_ITERATIONS ]; then
+      echo ""
+      echo "Waiting 60s before next check..."
+      sleep 60
+    fi
+
+  else
+    echo "⚠ GitHub CLI (gh) not installed - cannot monitor CI"
+    echo "Install with: brew install gh && gh auth login"
+    break
+  fi
+done
+
+if [ $ITERATION -ge $MAX_ITERATIONS ]; then
+  echo "⚠ Reached max iterations ($MAX_ITERATIONS) - manual review required"
+  echo "Check: https://github.com/Atchoum23/Thea/actions"
+fi
+```
+
+**Gate:** All GitHub Actions workflows pass, or escalate after 5 iterations.
+
+**Auto-Fix Strategies:**
+| CI Failure Type | Auto-Fix Action |
+|-----------------|-----------------|
+| SwiftLint | `swiftlint lint --fix` |
+| Build errors | `xcodegen generate` + rebuild |
+| Test failures | Run locally, diagnose |
+| Dependency issues | `swift package resolve` |
+| Timeout | Retry (transient) |
+
+---
+
+## Phase Execution Summary (Complete)
+
+| Phase | What | Time | Auto-Fix? |
+|-------|------|------|-----------|
+| 0 | Environment Gate | 5 sec | No |
+| 1 | Static Analysis (SwiftLint) | 10 sec | Yes |
+| 2 | Swift Package Tests | 1 sec | Retry |
+| 3 | Sanitizers (ASan/TSan) | 30 sec | No |
+| 4 | Debug Builds (All 4 Platforms) | 2 min | Yes |
+| 5 | Release Builds (All 4 Platforms) | 3 min | Yes |
+| 6 | Memory/Runtime Verification | 30 sec | No |
+| 7 | Security Audit | 30 sec | No |
+| 8 | Final Verification & Report | 10 sec | N/A |
+| 9 | Commit & Sync Changes | 5 sec | Yes |
+| 10 | Update Documentation | 2 min | Yes |
+| **11** | **CI/CD Fix Loop** | **5-15 min** | **Yes** |
+
+**Total: ~15-20 minutes** (with CI monitoring)
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
@@ -639,3 +841,5 @@ When a phase fails, apply this fix loop (max 3 iterations):
 | 1.0 | Jan 28, 2026 | Initial plan |
 | 2.0 | Jan 30, 2026 | Added autonomous loops, Debug+Release builds, shift-left ordering |
 | 2.1 | Jan 30, 2026 | Added Phase 9 (Commit & Sync) and Phase 10 (Update Documentation) |
+| 2.2 | Jan 31, 2026 | Added Phase 11 (CI/CD Fix Loop) for post-push verification |
+| 2.3 | Jan 31, 2026 | **ZERO TOLERANCE policy** - 0 errors AND 0 warnings required for all phases |

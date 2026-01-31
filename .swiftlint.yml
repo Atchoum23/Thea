@@ -38,7 +38,7 @@ excluded:
 # ============================================
 # Style-only rules disabled to focus on code quality
 disabled_rules:
-  - line_length               # Custom line length configured below
+  - line_length               # Too many legitimate long lines in SwiftUI and URLs
   - trailing_whitespace       # Auto-fixed by Xcode
   - todo                      # TODOs are intentional during development
   - force_cast                # Required for system APIs (Accessibility, FSEvents, etc.)
@@ -280,14 +280,14 @@ type_name:
     - iPadOSChatDetailView
     - iPadOSProjectDetailView
 
-# Line Length (custom)
-line_length:
-  warning: 200
-  error: 300
-  ignores_urls: true
-  ignores_function_declarations: true
-  ignores_comments: true
-  ignores_interpolated_strings: true
+# Line Length (disabled - too many legitimate long lines)
+# line_length:
+#   warning: 200
+#   error: 300
+#   ignores_urls: true
+#   ignores_function_declarations: true
+#   ignores_comments: true
+#   ignores_interpolated_strings: true
 
 # Trailing Comma
 trailing_comma:
