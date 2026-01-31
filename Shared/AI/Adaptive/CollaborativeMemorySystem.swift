@@ -195,15 +195,13 @@ final class CollaborativeMemorySystem {
             importance: importance
         )
 
-        // Check for similar memories and create associations
-        let similar = await findSimilar(to: content, limit: 5)
-        var updatedFragment = fragment
-        // Note: associations is let, would need mutable design in production
+        // Check for similar memories (future: use for associations)
+        _ = await findSimilar(to: content, limit: 5)
 
-        shortTermMemory.append(updatedFragment)
+        shortTermMemory.append(fragment)
 
         // Update context memory
-        updateContextMemory(with: updatedFragment)
+        updateContextMemory(with: fragment)
 
         // Check if short-term memory needs consolidation
         if shortTermMemory.count > configuration.shortTermCapacity {
@@ -212,7 +210,7 @@ final class CollaborativeMemorySystem {
 
         // Update semantic index
         if configuration.enableSemanticIndexing {
-            semanticIndex.index(updatedFragment)
+            semanticIndex.index(fragment)
         }
 
         updateMemoryHealth()
