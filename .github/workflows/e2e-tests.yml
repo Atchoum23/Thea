@@ -1,5 +1,5 @@
 # Thea E2E Tests Workflow
-# Version: 1.2.0 - Improved Maestro setup with timeout handling and idb-companion
+# Version: 1.3.0 - Fixed arm64 build target and added install retry logic
 # Last Updated: January 31, 2026
 
 name: E2E Tests
@@ -72,13 +72,15 @@ jobs:
 
       - name: Build for Simulator
         run: |
-          # Use generic iOS Simulator destination - xcodebuild will pick available simulator
+          # Build for arm64 simulator explicitly (GitHub macos-14 runners are arm64)
+          # This avoids "Failed to get FD to bundle executable" errors
           xcodebuild build \
             -project Thea.xcodeproj \
             -scheme Thea-iOS \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
             -configuration Debug \
             -derivedDataPath build \
+            -arch arm64 \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -238,7 +240,38 @@ jobs:
 
       - name: Install App on Simulator
         run: |
-          xcrun simctl install "${{ steps.simulator.outputs.device_id }}" app/Thea.app
+          # Verify app bundle has executable before installing
+          if [ ! -f "app/Thea.app/Thea" ]; then
+            echo "::error::Executable not found in app bundle"
+            ls -la app/Thea.app/
+            exit 1
+          fi
+
+          # Verify architecture is correct (should be arm64 for M1 runners)
+          ARCH=$(lipo -info app/Thea.app/Thea 2>&1 || echo "unknown")
+          echo "App architecture: $ARCH"
+
+          # Install with retry logic for transient failures
+          for attempt in 1 2 3; do
+            echo "Install attempt $attempt..."
+            if xcrun simctl install "${{ steps.simulator.outputs.device_id }}" app/Thea.app 2>&1; then
+              echo "App installed successfully"
+              break
+            else
+              if [ $attempt -lt 3 ]; then
+                echo "Install failed, waiting before retry..."
+                sleep 5
+                # Reboot simulator and try again
+                xcrun simctl shutdown "${{ steps.simulator.outputs.device_id }}" 2>/dev/null || true
+                sleep 2
+                xcrun simctl boot "${{ steps.simulator.outputs.device_id }}" 2>/dev/null || true
+                xcrun simctl bootstatus "${{ steps.simulator.outputs.device_id }}" -b
+              else
+                echo "::error::Failed to install app after 3 attempts"
+                exit 1
+              fi
+            fi
+          done
 
       - name: Run Maestro Tests
         id: maestro

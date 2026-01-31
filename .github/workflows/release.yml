@@ -1,6 +1,6 @@
 # Thea Release Workflow
-# Version: 2.1.0 - Uses XcodeGen + xcodebuild, pinned actions, optimized structure
-# Last Updated: January 27, 2026
+# Version: 2.2.0 - Added watchOS/tvOS builds, updated action versions, improved DMG
+# Last Updated: January 31, 2026
 
 name: Release
 
@@ -43,6 +43,14 @@ jobs:
             scheme: Thea-iOS
             destination: 'generic/platform=iOS'
             artifact_path: 'build/Build/Products/Release-iphoneos/Thea.app'
+          - platform: watchOS
+            scheme: Thea-watchOS
+            destination: 'generic/platform=watchOS'
+            artifact_path: 'build/Build/Products/Release-watchos/Thea Watch.app'
+          - platform: tvOS
+            scheme: Thea-tvOS
+            destination: 'generic/platform=tvOS'
+            artifact_path: 'build/Build/Products/Release-appletvos/Thea.app'
 
     steps:
       - name: Checkout
@@ -53,7 +61,7 @@ jobs:
 
       - name: Cache XcodeGen
         id: xcodegen-cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: /opt/homebrew/Cellar/xcodegen
           key: ${{ runner.os }}-xcodegen-2.42.0
@@ -66,7 +74,7 @@ jobs:
           command -v xcodegen || brew install xcodegen
 
       - name: Cache SPM Dependencies
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.1.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             ~/Library/Caches/org.swift.swiftpm
