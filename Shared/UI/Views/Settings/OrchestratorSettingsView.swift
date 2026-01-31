@@ -6,7 +6,6 @@ import SwiftUI
 // MARK: - Orchestrator Settings View
 
 #if os(macOS)
-// swiftlint:disable type_body_length
 struct OrchestratorSettingsView: View {
     @State private var config = OrchestratorConfiguration.load()
     @State private var showingSaveConfirmation = false
@@ -1074,7 +1073,6 @@ struct OrchestratorSettingsView: View {
         saveConfig()
     }
 }
-// swiftlint:enable type_body_length
 
 // MARK: - Supporting Types
 

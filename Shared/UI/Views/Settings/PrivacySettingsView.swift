@@ -9,9 +9,13 @@ import LocalAuthentication
 struct PrivacySettingsView: View {
     @State private var settingsManager = SettingsManager.shared
     @State private var privacyConfig = PrivacySettingsConfiguration.load()
+    @State private var sanitizer = PIISanitizer.shared
+    @State private var conversationMemory = ConversationMemory.shared
     @State private var showingExportOptions = false
     @State private var showingDeleteConfirmation = false
     @State private var showingAuditLog = false
+    @State private var showingCustomPatternSheet = false
+    @State private var showingClearMemoryConfirmation = false
     @State private var isExporting = false
     @State private var exportProgress: Double = 0
     @State private var biometricsAvailable = false
@@ -23,6 +27,12 @@ struct PrivacySettingsView: View {
             Section("Privacy Overview") {
                 privacyOverview
             }
+
+            // MARK: - PII Protection
+            piiProtectionSection
+
+            // MARK: - AI Memory
+            aiMemorySection
 
             // MARK: - Data Collection
             Section("Data Collection") {
@@ -77,6 +87,20 @@ struct PrivacySettingsView: View {
         .sheet(isPresented: $showingAuditLog) {
             auditLogSheet
         }
+        .sheet(isPresented: $showingCustomPatternSheet) {
+            customPatternEditorSheet
+        }
+        .confirmationDialog(
+            "Clear AI Memory",
+            isPresented: $showingClearMemoryConfirmation
+        ) {
+            Button("Clear Everything", role: .destructive) {
+                conversationMemory.clearAllMemory()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will delete all learned facts, conversation summaries, and preferences. This cannot be undone.")
+        }
         .alert("Delete All Data?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Delete Everything", role: .destructive) {
@@ -85,6 +109,189 @@ struct PrivacySettingsView: View {
         } message: {
             Text("This will permanently delete all your conversations, settings, and data. This action cannot be undone.")
         }
+    }
+
+    // MARK: - PII Protection Section
+
+    private var piiProtectionSection: some View {
+        Section {
+            Toggle("Enable PII Protection", isOn: Binding(
+                get: { sanitizer.configuration.enablePIISanitization },
+                set: { newValue in
+                    var config = sanitizer.configuration
+                    config.enablePIISanitization = newValue
+                    sanitizer.updateConfiguration(config)
+                }
+            ))
+
+            if sanitizer.configuration.enablePIISanitization {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Automatically mask sensitive data before sending to AI")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Divider()
+
+                    piiToggle("Email Addresses", keyPath: \.maskEmails)
+                    piiToggle("Phone Numbers", keyPath: \.maskPhoneNumbers)
+                    piiToggle("Credit Cards", keyPath: \.maskCreditCards)
+                    piiToggle("Social Security Numbers", keyPath: \.maskSSNs)
+                    piiToggle("IP Addresses", keyPath: \.maskIPAddresses)
+
+                    Divider()
+
+                    // Custom Patterns
+                    HStack {
+                        Text("Custom Patterns")
+                            .font(.caption)
+                        Spacer()
+                        Text("\(sanitizer.configuration.customPatterns.count)")
+                            .foregroundStyle(.secondary)
+                        Button {
+                            showingCustomPatternSheet = true
+                        } label: {
+                            Image(systemName: "plus.circle")
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    // Stats
+                    let stats = sanitizer.getStatistics()
+                    if stats.totalDetections > 0 {
+                        Text("\(stats.totalDetections) items redacted")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            }
+        } header: {
+            HStack {
+                Label("PII Protection", systemImage: "shield.lefthalf.filled")
+                Spacer()
+                if sanitizer.configuration.enablePIISanitization {
+                    Text("Active")
+                        .font(.caption2)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.green.opacity(0.2))
+                        .foregroundStyle(.green)
+                        .cornerRadius(4)
+                }
+            }
+        }
+    }
+
+    private func piiToggle(_ label: String, keyPath: WritableKeyPath<PIISanitizer.Configuration, Bool>) -> some View {
+        Toggle(label, isOn: Binding(
+            get: { sanitizer.configuration[keyPath: keyPath] },
+            set: { newValue in
+                var config = sanitizer.configuration
+                config[keyPath: keyPath] = newValue
+                sanitizer.updateConfiguration(config)
+            }
+        ))
+        .font(.callout)
+    }
+
+    // MARK: - AI Memory Section
+
+    private var aiMemorySection: some View {
+        Section {
+            Toggle("Long-Term Memory", isOn: Binding(
+                get: { conversationMemory.configuration.enableLongTermMemory },
+                set: { newValue in
+                    var config = conversationMemory.configuration
+                    config.enableLongTermMemory = newValue
+                    conversationMemory.updateConfiguration(config)
+                }
+            ))
+
+            if conversationMemory.configuration.enableLongTermMemory {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Remember facts and preferences across conversations")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    let stats = conversationMemory.getStatistics()
+                    HStack(spacing: 16) {
+                        VStack {
+                            Text("\(stats.totalFacts)")
+                                .font(.headline)
+                            Text("Facts")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        VStack {
+                            Text("\(stats.totalSummaries)")
+                                .font(.headline)
+                            Text("Summaries")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        VStack {
+                            Text("\(stats.preferencesCount)")
+                                .font(.headline)
+                            Text("Preferences")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    Button(role: .destructive) {
+                        showingClearMemoryConfirmation = true
+                    } label: {
+                        Label("Clear Memory", systemImage: "trash")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+        } header: {
+            Label("AI Memory", systemImage: "brain")
+        }
+    }
+
+    // MARK: - Custom Pattern Editor Sheet
+
+    private var customPatternEditorSheet: some View {
+        NavigationStack {
+            Form {
+                Section("Add Custom Pattern") {
+                    Text("Define regex patterns to detect and mask custom sensitive data")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    // Placeholder - full implementation in PIISanitizer
+                    Text("Coming soon: Custom pattern editor")
+                        .foregroundStyle(.tertiary)
+                }
+
+                Section("Example Patterns") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("• API Key: [A-Za-z0-9]{32,}")
+                        Text("• JWT Token: eyJ[A-Za-z0-9_-]+")
+                        Text("• UUID: [0-9a-f]{8}-...")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Custom Patterns")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showingCustomPatternSheet = false
+                    }
+                }
+            }
+        }
+        #if os(macOS)
+        .frame(width: 400, height: 300)
+        #endif
     }
 
     // MARK: - Privacy Overview
