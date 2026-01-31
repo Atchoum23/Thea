@@ -321,7 +321,7 @@ struct VoiceSettingsView: View {
         engine.speak("Hello! I am \(voice.name), your voice assistant.", language: voice.language)
     }
 
-    private func testMicrophone() {
+    func testMicrophone() {
         if isTestingMic {
             engine.stopListening()
             isTestingMic = false
@@ -341,7 +341,7 @@ struct VoiceSettingsView: View {
         }
     }
 
-    private func testVoice() {
+    func testVoice() {
         if isTestingVoice {
             engine.stopSpeaking()
             isTestingVoice = false
