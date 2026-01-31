@@ -44,6 +44,7 @@ Fix any issues found. Do not stop until completion.
 | Phase | What | Time | Auto-Fix? |
 |-------|------|------|-----------|
 | 0 | Environment Gate | 5 sec | No |
+| 0.5 | Pre-Build Cleanup (DB Lock Prevention) | 10 sec | Yes |
 | 1 | Static Analysis (SwiftLint) | 10 sec | Yes |
 | 2 | Swift Package Tests | 1 sec | Retry |
 | 3 | Sanitizers (ASan/TSan) | 30 sec | No |
@@ -96,6 +97,74 @@ echo "✓ All tools available"
 ```
 
 **Gate:** All tools must exist. No auto-fix (escalate immediately).
+
+---
+
+## Phase 0.5: Pre-Build Cleanup (Database Lock Prevention)
+
+**Purpose:** Prevent "database is locked" errors from Xcode's build system by cleaning stale DerivedData and ensuring no concurrent Xcode processes are accessing the project.
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+echo "=== Phase 0.5: Pre-Build Cleanup ==="
+
+# Step 1: Kill any Xcode processes that might be locking the database
+echo "Checking for Xcode processes..."
+XCODE_PIDS=$(pgrep -x Xcode 2>/dev/null || true)
+if [ -n "$XCODE_PIDS" ]; then
+  echo "⚠ Xcode is running (PIDs: $XCODE_PIDS)"
+  echo "  Closing Xcode to prevent database locks..."
+  osascript -e 'tell application "Xcode" to quit' 2>/dev/null || true
+  sleep 2
+fi
+
+# Step 2: Kill any xcodebuild processes
+XCODEBUILD_PIDS=$(pgrep -x xcodebuild 2>/dev/null || true)
+if [ -n "$XCODEBUILD_PIDS" ]; then
+  echo "⚠ xcodebuild processes running - waiting for completion..."
+  sleep 5
+  # Force kill if still running
+  pkill -9 xcodebuild 2>/dev/null || true
+fi
+
+# Step 3: Clear Thea-specific DerivedData to prevent stale locks
+echo "Clearing Thea DerivedData..."
+rm -rf ~/Library/Developer/Xcode/DerivedData/Thea-* 2>/dev/null || true
+rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/* 2>/dev/null || true
+
+# Step 4: Clear package caches if corrupted
+if [ -d ".build" ]; then
+  echo "Checking Swift build cache..."
+  if ! swift package describe >/dev/null 2>&1; then
+    echo "  Corrupted package cache detected - cleaning..."
+    rm -rf .build
+    swift package resolve
+  fi
+fi
+
+# Step 5: Verify no database locks remain
+echo "Verifying clean state..."
+if lsof 2>/dev/null | grep -q "DerivedData/Thea.*db"; then
+  echo "✗ FATAL: Database still locked by another process"
+  lsof 2>/dev/null | grep "DerivedData/Thea.*db" | head -5
+  echo "  Manual intervention required: close all Xcode instances and retry"
+  exit 1
+fi
+
+echo "✓ Phase 0.5 PASSED - Build environment clean"
+```
+
+**Gate:** No stale DerivedData locks, no concurrent Xcode processes accessing project.
+
+**Why This Phase Exists:**
+The "unable to attach DB: database is locked" error occurs when:
+1. Multiple Xcode/xcodebuild processes access the same DerivedData simultaneously
+2. Xcode GUI is open while CLI builds are running
+3. A previous build crashed and left the SQLite database locked
+4. Stale .db files from crashed processes remain in DerivedData
+
+This phase runs before any builds to ensure a clean slate.
 
 ---
 
@@ -671,6 +740,26 @@ When a phase fails, apply this fix loop (max 3 iterations):
 - Check for retain cycles in closures
 - Verify `[weak self]` in async contexts
 
+### Database Lock Errors ("unable to attach DB: database is locked")
+This error occurs when Xcode's SQLite build database is locked by another process.
+
+**Causes:**
+1. Xcode GUI open while running CLI builds (`xcodebuild`)
+2. Multiple simultaneous `xcodebuild` processes
+3. Crashed build process left database locked
+4. Stale DerivedData from previous sessions
+
+**Fixes:**
+1. Close Xcode GUI: `osascript -e 'quit app "Xcode"'`
+2. Kill xcodebuild processes: `pkill xcodebuild`
+3. Clear DerivedData: `rm -rf ~/Library/Developer/Xcode/DerivedData/Thea-*`
+4. Run Phase 0.5 before builds (automatic in QA Plan)
+
+**Prevention:**
+- Always run Phase 0.5 before any build phase
+- Don't open Xcode GUI while QA Plan is running
+- Use single-threaded builds when troubleshooting
+
 ---
 
 ---
@@ -818,6 +907,7 @@ fi
 | Phase | What | Time | Auto-Fix? |
 |-------|------|------|-----------|
 | 0 | Environment Gate | 5 sec | No |
+| 0.5 | Pre-Build Cleanup (DB Lock Prevention) | 10 sec | Yes |
 | 1 | Static Analysis (SwiftLint) | 10 sec | Yes |
 | 2 | Swift Package Tests | 1 sec | Retry |
 | 3 | Sanitizers (ASan/TSan) | 30 sec | No |
@@ -843,3 +933,4 @@ fi
 | 2.1 | Jan 30, 2026 | Added Phase 9 (Commit & Sync) and Phase 10 (Update Documentation) |
 | 2.2 | Jan 31, 2026 | Added Phase 11 (CI/CD Fix Loop) for post-push verification |
 | 2.3 | Jan 31, 2026 | **ZERO TOLERANCE policy** - 0 errors AND 0 warnings required for all phases |
+| 2.4 | Jan 31, 2026 | Added Phase 0.5 (Pre-Build Cleanup) to prevent Xcode database lock errors |
