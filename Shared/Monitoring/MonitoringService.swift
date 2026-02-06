@@ -99,7 +99,7 @@ public actor MonitoringService {
         case .screenTime:
             ScreenTimeMonitor(logger: activityLogger)
         case .inputActivity:
-            InputActivityMonitor(logger: activityLogger)
+            SystemInputActivityMonitor(logger: activityLogger)
         }
     }
 
@@ -525,7 +525,7 @@ public actor ScreenTimeMonitor: ActivityMonitor {
 }
 
 /// Monitors input activity (keyboard/mouse patterns)
-public actor InputActivityMonitor: ActivityMonitor {
+public actor SystemInputActivityMonitor: ActivityMonitor {
     public let type: MonitorType = .inputActivity
     public private(set) var isActive = false
 
