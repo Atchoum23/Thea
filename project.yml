@@ -383,6 +383,8 @@ targets:
           - "**/LifeMonitoring/**"
           - "**/Search/SemanticSearchService.swift"
           - "**/Components/QuerySuggestionOverlay.swift"
+          - "**/Settings/AIFeaturesSettingsView.swift"
+          - "**/Memory/ActiveMemoryRetrieval.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
