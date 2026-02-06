@@ -192,6 +192,10 @@ struct TheamacOSApp: App {
         if let window = NSApp.windows.first {
             window.titlebarAppearsTransparent = true
             window.styleMask.insert(.fullSizeContentView)
+            // Remove titlebar separator for seamless glass integration
+            if #available(macOS 26, *) {
+                window.titlebarSeparatorStyle = .none
+            }
         }
     }
 }
