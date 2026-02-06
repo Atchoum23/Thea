@@ -27,7 +27,7 @@ public final class CommunicationAssistant: ObservableObject {
     // MARK: - Configuration
 
     public var defaultTone: CommunicationTone = .professional
-    public var defaultLength: ResponseLength = .concise
+    public var defaultLength: CommunicationResponseLength = .concise
     public var includeGreeting = true
     public var includeSignature = true
     public var signatureName = ""
@@ -205,7 +205,7 @@ public final class CommunicationAssistant: ObservableObject {
         }
     }
 
-    private func adjustLength(_ text: String, to length: ResponseLength) -> String {
+    private func adjustLength(_ text: String, to length: CommunicationResponseLength) -> String {
         // Simplified length adjustment
         // In production, would use AI to properly summarize or expand
         switch length {
@@ -396,7 +396,7 @@ public final class CommunicationAssistant: ObservableObject {
         }
 
         if let lengthName = UserDefaults.standard.string(forKey: "thea.comm.defaultLength"),
-           let length = ResponseLength(rawValue: lengthName)
+           let length = CommunicationResponseLength(rawValue: lengthName)
         {
             defaultLength = length
         }
@@ -474,7 +474,7 @@ public struct EmailDraftRequest: Sendable {
     public let recipientName: String?
     public let intent: EmailIntent
     public let tone: CommunicationTone?
-    public let length: ResponseLength?
+    public let length: CommunicationResponseLength?
 
     public init(
         recipients: [String] = [],
@@ -484,7 +484,7 @@ public struct EmailDraftRequest: Sendable {
         recipientName: String? = nil,
         intent: EmailIntent = .custom,
         tone: CommunicationTone? = nil,
-        length: ResponseLength? = nil
+        length: CommunicationResponseLength? = nil
     ) {
         self.recipients = recipients
         self.cc = cc
@@ -565,7 +565,7 @@ public enum CommunicationTone: String, Codable, Sendable, CaseIterable {
     }
 }
 
-public enum ResponseLength: String, Codable, Sendable, CaseIterable {
+public enum CommunicationResponseLength: String, Codable, Sendable, CaseIterable {
     case brief
     case concise
     case detailed

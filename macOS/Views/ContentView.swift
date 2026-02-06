@@ -346,9 +346,9 @@ struct macOSChatDetailView: View {
 
             // Suggestion chips
             HStack(spacing: 12) {
-                SuggestionChip(text: "Help me plan my day", icon: "calendar")
-                SuggestionChip(text: "Explain a concept", icon: "lightbulb")
-                SuggestionChip(text: "Write some code", icon: "chevron.left.forwardslash.chevron.right")
+                WelcomeSuggestionChip(text: "Help me plan my day", icon: "calendar")
+                WelcomeSuggestionChip(text: "Explain a concept", icon: "lightbulb")
+                WelcomeSuggestionChip(text: "Write some code", icon: "chevron.left.forwardslash.chevron.right")
             }
 
             Spacer()
@@ -607,7 +607,7 @@ struct ContentProjectRow: View {
 // MARK: - Suggestion Chip
 
 /// A tappable suggestion chip for the welcome placeholder
-struct SuggestionChip: View {
+struct WelcomeSuggestionChip: View {
     let text: String
     let icon: String
 
