@@ -367,6 +367,8 @@ targets:
           - "**/LocalModels/ProactiveModelManager.swift"
           - "**/LocalModels/LocalModelRecommendationEngine.swift"
           - "**/AI/Proactive/ProactivityEngine.swift"
+          - "**/Settings/AutonomousSettingsView.swift"
+          - "**/Settings/LocalModels/**"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
