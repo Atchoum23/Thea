@@ -340,6 +340,7 @@ targets:
           - "**/Managers/ResponseNotificationHandler.swift"
           - "**/DistributedTaskExecutor.swift"
           - "**/LifeMonitoring/RelationshipIntelligence.swift"
+          - "**/Managers/PermissionsTypes.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
