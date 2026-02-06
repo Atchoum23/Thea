@@ -273,7 +273,7 @@ public struct ReflexionCalibrationBucket: Codable, Sendable {
     }
 
     public var actualAccuracy: Float {
-        guard !isEmpty else { return rangeStart + 0.05 }
+        guard count > 0 else { return rangeStart + 0.05 }
         return Float(correct) / Float(count)
     }
 

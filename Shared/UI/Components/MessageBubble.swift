@@ -39,13 +39,19 @@ struct MessageBubble: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            if message.messageRole == .user {
-                Spacer(minLength: 60)
+        HStack(alignment: .top, spacing: TheaSpacing.md) {
+            if message.messageRole == .assistant {
+                Image(systemName: "sparkles")
+                    .font(.system(size: TheaSize.iconSmall, weight: .medium))
+                    .foregroundStyle(Color.theaPrimaryDefault)
+                    .frame(width: TheaSize.messageAvatarSize, height: TheaSize.messageAvatarSize)
             }
 
-            VStack(alignment: message.messageRole == .user ? .trailing : .leading, spacing: 6) {
-                // Branch navigator (if multiple branches exist)
+            if message.messageRole == .user {
+                Spacer(minLength: TheaSpacing.jumbo)
+            }
+
+            VStack(alignment: message.messageRole == .user ? .trailing : .leading, spacing: TheaSpacing.xs) {
                 if let branchInfo, branchInfo.totalCount > 1 {
                     BranchNavigator(
                         currentBranchIndex: branchInfo.currentIndex,
@@ -55,20 +61,19 @@ struct MessageBubble: View {
                     )
                 }
 
-                // Main content with markdown or plain text
                 messageContent
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, TheaSpacing.lg)
+                    .padding(.vertical, TheaSpacing.md)
                     .background(backgroundColor)
                     .foregroundStyle(foregroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
 
-                // Metadata row with branch info
                 metadataRow
             }
+            .frame(maxWidth: TheaSize.messageMaxWidth, alignment: message.messageRole == .user ? .trailing : .leading)
 
             if message.messageRole == .assistant {
-                Spacer(minLength: 60)
+                Spacer(minLength: TheaSpacing.jumbo)
             }
         }
         .onHover { hovering in
@@ -223,19 +228,11 @@ struct MessageBubble: View {
     private var backgroundColor: Color {
         switch message.messageRole {
         case .user:
-            return .theaPrimary
+            return .theaUserBubble
         case .assistant:
-            #if os(macOS)
-                return Color(nsColor: .controlBackgroundColor)
-            #else
-                return Color(uiColor: .secondarySystemBackground)
-            #endif
+            return .theaAssistantBubble
         case .system:
-            #if os(macOS)
-                return Color(nsColor: .systemGray).opacity(0.3)
-            #else
-                return Color(uiColor: .systemGray5)
-            #endif
+            return .theaSurface
         }
     }
 

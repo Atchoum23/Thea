@@ -54,10 +54,10 @@ public final class PredictiveJourneyMapper {
     // MARK: - Public API
 
     /// Record a user action
-    public func recordAction(_ action: AnticipatedUserAction) {
+    public func recordAction(_ action: UserAction) {
         let journeyAction = JourneyAction(
             type: action.type,
-            details: action.details,
+            details: action.metadata["details"] ?? "",
             timestamp: action.timestamp
         )
 

@@ -195,41 +195,36 @@ struct StreamingMessageView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 8) {
-                // Status indicator
+        HStack(alignment: .top, spacing: TheaSpacing.md) {
+            // Assistant avatar
+            Image(systemName: "sparkles")
+                .font(.system(size: TheaSize.iconSmall, weight: .medium))
+                .foregroundStyle(Color.theaPrimaryDefault)
+                .frame(width: TheaSize.messageAvatarSize, height: TheaSize.messageAvatarSize)
+
+            VStack(alignment: .leading, spacing: TheaSpacing.sm) {
                 StreamingIndicatorView(status: status)
 
-                // Partial content (if any)
                 if !streamingText.isEmpty {
                     Text(streamingText)
                         .font(.theaBody)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(backgroundColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .textSelection(.enabled)
+                        .padding(.horizontal, TheaSpacing.lg)
+                        .padding(.vertical, TheaSpacing.md)
+                        .background(Color.theaAssistantBubble)
+                        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
                         .overlay(alignment: .bottomTrailing) {
-                            // Blinking cursor
                             BlinkingCursor()
-                                .padding(.trailing, 8)
-                                .padding(.bottom, 8)
+                                .padding(.trailing, TheaSpacing.sm)
+                                .padding(.bottom, TheaSpacing.sm)
                         }
                 } else if status == .thinking || status == .generating {
-                    // Show typing indicator when no text yet
                     TypingIndicator()
                 }
             }
 
-            Spacer(minLength: 60)
+            Spacer(minLength: TheaSpacing.jumbo)
         }
-    }
-
-    private var backgroundColor: Color {
-        #if os(macOS)
-            Color(nsColor: .controlBackgroundColor)
-        #else
-            Color(uiColor: .secondarySystemBackground)
-        #endif
     }
 }
 
