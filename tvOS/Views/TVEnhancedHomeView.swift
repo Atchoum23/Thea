@@ -1,6 +1,5 @@
 import SwiftUI
 
-
 // MARK: - Enhanced tvOS Home View
 // Main navigation hub with all features from Tizen app ported to tvOS
 
