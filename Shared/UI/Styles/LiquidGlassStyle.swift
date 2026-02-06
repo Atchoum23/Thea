@@ -172,43 +172,4 @@ extension View {
     }
 }
 
-// MARK: - Preview
-
-#Preview("Liquid Glass Examples") {
-    VStack(spacing: 20) {
-        Button("Capsule Glass") {}
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
-            .liquidGlass()
-
-        VStack {
-            Text("Rounded Card")
-                .padding()
-        }
-        .frame(width: 200, height: 80)
-        .liquidGlassRounded(cornerRadius: TheaCornerRadius.xl)
-
-        Image(systemName: "sparkles")
-            .font(.title)
-            .padding(20)
-            .liquidGlassCircle()
-
-        VStack(alignment: .leading, spacing: TheaSpacing.sm) {
-            Text("Glass Card")
-                .font(.headline)
-            Text("With concentric radius")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .frame(width: 240)
-        .liquidGlassCard()
-    }
-    .padding()
-    .background(
-        LinearGradient(
-            colors: [.blue, .purple, .pink],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    )
-}
+// Preview moved to separate file to avoid macro conflicts
