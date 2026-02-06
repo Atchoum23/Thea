@@ -147,7 +147,7 @@ public class PhotosMonitor: NSObject, ObservableObject {
 
             let newAssets = PHAsset.fetchAssets(with: .image, options: fetchOptions)
 
-            if newAssets.count > 0 {
+            if !newAssets.isEmpty {
                 newAssets.enumerateObjects { [weak self] asset, _, _ in
                     guard let self = self else { return }
 

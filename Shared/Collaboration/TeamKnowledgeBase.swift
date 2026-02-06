@@ -52,7 +52,7 @@ public actor TeamKnowledgeBase {
 
     // MARK: - Configuration
 
-    public var configuration: Configuration = Configuration()
+    public var configuration = Configuration()
 
     public struct Configuration: Sendable {
         /// Auto-sync interval (seconds)
@@ -140,7 +140,7 @@ public actor TeamKnowledgeBase {
         return items.filter { item in
             // Check content
             let contentWords = Set(item.content.lowercased().split(separator: " ").map(String.init))
-            if !queryWords.intersection(contentWords).isEmpty {
+            if !queryWords.isDisjoint(with: contentWords) {
                 return true
             }
 
@@ -192,7 +192,7 @@ public actor TeamKnowledgeBase {
     public func getUserTeams() async -> [String] {
         // This would integrate with team management
         // For now, return known teams from cache
-        return Array(teamKnowledge.keys)
+        Array(teamKnowledge.keys)
     }
 
     // MARK: - Private CloudKit Operations

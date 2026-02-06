@@ -54,7 +54,7 @@ public actor AutonomousMaintenanceService {
         public init() {}
     }
 
-    public var configuration: Configuration = Configuration() {
+    public var configuration = Configuration() {
         didSet {
             saveConfiguration()
         }
@@ -68,7 +68,7 @@ public actor AutonomousMaintenanceService {
     private var lastDraftCleanup: Date?
 
     /// Maintenance status
-    public private(set) var status: MaintenanceStatus = MaintenanceStatus()
+    public private(set) var status = MaintenanceStatus()
 
     /// Active maintenance task
     private var maintenanceTask: Task<Void, Never>?

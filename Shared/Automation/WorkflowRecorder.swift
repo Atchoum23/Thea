@@ -46,7 +46,7 @@ public final class WorkflowRecorder {
 
     // MARK: - Configuration
 
-    public var configuration: Configuration = Configuration() {
+    public var configuration = Configuration() {
         didSet { saveConfiguration() }
     }
 
@@ -398,12 +398,12 @@ public struct RecordedUserAction: Codable, Sendable {
     }
 
     public enum ActionType: String, Codable, Sendable {
-        case chat = "chat"
-        case navigate = "navigate"
-        case shortcut = "shortcut"
-        case setting = "setting"
-        case automation = "automation"
-        case custom = "custom"
+        case chat
+        case navigate
+        case shortcut
+        case setting
+        case automation
+        case custom
     }
 }
 

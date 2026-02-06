@@ -20,7 +20,7 @@ public final class AnticipatoryIntelligenceCore {
 
     // MARK: - Configuration
 
-    public var configuration: AnticipatoryConfiguration = AnticipatoryConfiguration()
+    public var configuration = AnticipatoryConfiguration()
 
     // MARK: - State
 
@@ -34,7 +34,7 @@ public final class AnticipatoryIntelligenceCore {
     public private(set) var pendingInterventions: [ProactiveIntervention] = []
 
     /// Current user mental model
-    public private(set) var mentalModel: MentalWorldModel = MentalWorldModel()
+    public private(set) var mentalModel = MentalWorldModel()
 
     // MARK: - Subsystems
 

@@ -287,7 +287,7 @@ public struct DisambiguationResult: Sendable {
 
 /// Main engine for intent disambiguation
 @MainActor
-public final class IntentDisambiguator: ObservableObject, Sendable {
+public final class IntentDisambiguator: ObservableObject {
     public static let shared = IntentDisambiguator()
 
     private let logger = Logger(subsystem: "com.thea.intent", category: "Disambiguator")
@@ -597,7 +597,7 @@ public final class IntentDisambiguator: ObservableObject, Sendable {
 
         // For missing file target
         if intent.primaryIntent == .codeModification &&
-           intent.extractedEntities.first(where: { $0.type == .fileName }) == nil {
+           !intent.extractedEntities.contains { $0.type == .fileName } {
             questions.append(ClarifyingQuestion(
                 question: "Which file should I modify?",
                 context: "Please specify the target file",
@@ -623,7 +623,7 @@ public final class IntentDisambiguator: ObservableObject, Sendable {
             actions.append(IntentConfirmation.PlannedAction(
                 description: "Modify code based on request",
                 type: .modify,
-                target: intent.extractedEntities.first(where: { $0.type == .fileName })?.value ?? "target file",
+                target: intent.extractedEntities.first { $0.type == .fileName }?.value ?? "target file",
                 isReversible: true
             ))
         case .fileOperation:

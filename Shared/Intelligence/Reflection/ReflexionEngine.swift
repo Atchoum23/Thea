@@ -273,7 +273,7 @@ public struct ReflexionCalibrationBucket: Codable, Sendable {
     }
 
     public var actualAccuracy: Float {
-        guard count > 0 else { return rangeStart + 0.05 }
+        guard !isEmpty else { return rangeStart + 0.05 }
         return Float(correct) / Float(count)
     }
 
@@ -289,7 +289,7 @@ public struct ReflexionCalibrationBucket: Codable, Sendable {
 
 /// Main engine for self-reflection and improvement
 @MainActor
-public final class ReflexionEngine: ObservableObject, Sendable {
+public final class ReflexionEngine: ObservableObject {
     public static let shared = ReflexionEngine()
 
     private let logger = Logger(subsystem: "com.thea.reflection", category: "Engine")
@@ -298,7 +298,7 @@ public final class ReflexionEngine: ObservableObject, Sendable {
     @Published public private(set) var recentCycles: [ReflexionCycle] = []
     @Published public private(set) var failureAnalyses: [FailureAnalysis] = []
     @Published public private(set) var strategies: [LearnedStrategy] = []
-    @Published public private(set) var calibration: ConfidenceCalibration = ConfidenceCalibration()
+    @Published public private(set) var calibration = ConfidenceCalibration()
     @Published public private(set) var isReflecting: Bool = false
 
     // Configuration

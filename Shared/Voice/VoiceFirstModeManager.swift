@@ -47,12 +47,12 @@ public final class VoiceFirstModeManager {
     public private(set) var errorMessage: String?
 
     /// Statistics for voice interactions
-    public private(set) var stats: VoiceStats = VoiceStats()
+    public private(set) var stats = VoiceStats()
 
     // MARK: - Configuration
 
     /// Voice-first mode configuration
-    public var configuration: Configuration = Configuration() {
+    public var configuration = Configuration() {
         didSet {
             applyConfiguration()
         }
@@ -485,4 +485,3 @@ extension VoiceInteractionEngine {
         // Would configure voice selection
     }
 }
-

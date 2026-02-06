@@ -31,7 +31,7 @@ public actor LifeIntelligenceCoordinator {
     // MARK: - State
 
     private var isRunning = false
-    private var currentContext: LifeContext = LifeContext()
+    private var currentContext = LifeContext()
     private var pendingDecisions: [PendingDecision] = []
     private var dailyDigest: DailyDigest?
 
@@ -49,7 +49,7 @@ public actor LifeIntelligenceCoordinator {
         public var missedCallsCount: Int = 0
         public var batteryLevel: Int = 100
         public var isConnectedToNetwork: Bool = true
-        public var lastUpdated: Date = Date()
+        public var lastUpdated = Date()
 
         public enum UserActivity: String, Sendable {
             case sleeping, exercising, driving, inMeeting, working, relaxing, available
@@ -292,7 +292,7 @@ public actor LifeIntelligenceCoordinator {
 
     private func generateAutoReply(for contactId: String?, platform: String) -> String {
         // Would be more sophisticated with templates
-        return "I'm currently focused on something. I'll get back to you soon."
+        "I'm currently focused on something. I'll get back to you soon."
     }
 
     // MARK: - Cross-System Event Handlers
@@ -454,23 +454,20 @@ public actor LifeIntelligenceCoordinator {
 
     private func calculateFocusTimeToday() -> Int? {
         // Would track Focus Mode duration
-        return nil
+        nil
     }
 
     private func calculateProductivityScore(for digest: DailyDigest) -> Double {
         var score: Double = 0.5
 
         // More completed tasks = higher score
-        if digest.tasksCompleted > 5 { score += 0.2 }
-        else if digest.tasksCompleted > 2 { score += 0.1 }
+        if digest.tasksCompleted > 5 { score += 0.2 } else if digest.tasksCompleted > 2 { score += 0.1 }
 
         // Fewer overdue = higher score
-        if digest.overdueTasksAtEndOfDay == 0 { score += 0.2 }
-        else if digest.overdueTasksAtEndOfDay > 5 { score -= 0.2 }
+        if digest.overdueTasksAtEndOfDay == 0 { score += 0.2 } else if digest.overdueTasksAtEndOfDay > 5 { score -= 0.2 }
 
         // More focus time = higher score
-        if digest.focusTimeMinutes > 180 { score += 0.2 }
-        else if digest.focusTimeMinutes > 60 { score += 0.1 }
+        if digest.focusTimeMinutes > 180 { score += 0.2 } else if digest.focusTimeMinutes > 60 { score += 0.1 }
 
         return min(1.0, max(0.0, score))
     }
@@ -488,11 +485,11 @@ public actor LifeIntelligenceCoordinator {
     // MARK: - Public Queries
 
     public func getCurrentContext() -> LifeContext {
-        return currentContext
+        currentContext
     }
 
     public func getDailyDigest() -> DailyDigest? {
-        return dailyDigest
+        dailyDigest
     }
 
     public func getUrgentItems() async -> UrgentItemsSummary {

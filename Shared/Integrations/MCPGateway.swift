@@ -479,7 +479,7 @@ public struct MCPError: Error, Sendable {
 
 /// Central gateway for all MCP operations
 @MainActor
-public final class MCPGateway: ObservableObject, Sendable {
+public final class MCPGateway: ObservableObject {
     public static let shared = MCPGateway()
 
     private let logger = Logger(subsystem: "com.thea.mcp", category: "Gateway")

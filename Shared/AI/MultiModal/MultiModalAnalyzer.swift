@@ -59,7 +59,7 @@ public actor MultiModalAnalyzer {
         public init() {}
     }
 
-    public var configuration: Configuration = Configuration()
+    public var configuration = Configuration()
 
     // MARK: - Cache
 

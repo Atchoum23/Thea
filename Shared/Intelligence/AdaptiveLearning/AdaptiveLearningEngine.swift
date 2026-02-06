@@ -19,7 +19,7 @@ public final class AdaptiveLearningEngine: ObservableObject {
 
     // MARK: - State
 
-    @Published public private(set) var learningProfile: LearningProfile = LearningProfile()
+    @Published public private(set) var learningProfile = LearningProfile()
     @Published public private(set) var skillLevels: [SkillDomain: SkillLevel] = [:]
     @Published public private(set) var currentLearningRate: Float = 0.1
 

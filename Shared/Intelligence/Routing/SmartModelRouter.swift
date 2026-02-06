@@ -263,7 +263,7 @@ public struct ModelUsage: Codable, Sendable {
 
 /// Intelligent model routing engine
 @MainActor
-public final class SmartModelRouter: ObservableObject, Sendable {
+public final class SmartModelRouter: ObservableObject {
     public static let shared = SmartModelRouter()
 
     private let logger = Logger(subsystem: "com.thea.routing", category: "SmartRouter")
