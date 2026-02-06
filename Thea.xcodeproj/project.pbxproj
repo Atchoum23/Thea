@@ -582,7 +582,6 @@
 		70D5F7B1324EE68D09CBBCB8 /* MetaLearningController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B1908E447558D5D7BDC19A8 /* MetaLearningController.swift */; };
 		70FFF51E690E0514376DB6EF /* SelfEvolutionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B369FB7197D1B5B8762E08 /* SelfEvolutionEngine.swift */; };
 		710FA99EAF9CC8EA26FC7DD9 /* TheaQuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C9C0E39E4F2B5E7B91E927AD /* TheaQuickLookExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		713B4032327C2A7FC06C7195 /* ChatManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028DE98F628A0F693BC65625 /* ChatManager.swift */; };
 		71571AEE00C1513B5E42866A /* MessageRegeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78B278CF94AE39A10D05321 /* MessageRegeneration.swift */; };
 		7179A14E7F40B5FF16E8C236 /* RealFunctionalTestPlan.md in Resources */ = {isa = PBXBuildFile; fileRef = D048DBA179ABE3C2DE61D862 /* RealFunctionalTestPlan.md */; };
 		71B108C84478FEBA1C36EBD0 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FACB88E06141C872453645 /* NotificationManager.swift */; };
@@ -836,7 +835,6 @@
 		A481C9E22A2A689F5E40F77E /* TaskEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7B318EBF8F4C781BCAE4C1 /* TaskEditorSheet.swift */; };
 		A48D3A3E4877A6DB0640B1DA /* MigrationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C23C2BCE70110E703E0F6E6 /* MigrationEngine.swift */; };
 		A4DC9B53DB5E4ED701218E7B /* AutonomousTaskExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8863A44812421D937B0B5469 /* AutonomousTaskExecutor.swift */; };
-		A4F5874A0B19ECF3BF2A0541 /* CodeExecutionVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83E6315354E6B9CB196EF63 /* CodeExecutionVerifier.swift */; };
 		A572697E1D5A72831D2918D9 /* TheaIntegrationHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAE0B231EF0B8100C70D9BB7 /* TheaIntegrationHub.swift */; };
 		A598667F3541593465DF1B31 /* ContextPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F7F861E7D781249B4AF7A6 /* ContextPredictor.swift */; };
 		A5A9D41578BCEFA36BF694FF /* MultiLanguageUtteranceBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0A36040953AA93C6956598 /* MultiLanguageUtteranceBuilder.swift */; };
@@ -885,7 +883,6 @@
 		ACDC0C0E9D4B4619621418C2 /* AgentCommunicationBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8714BF79EB3CEF3694A28693 /* AgentCommunicationBus.swift */; };
 		ACFFABA96C1BD3C4CABB0508 /* TipKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494E4D469F08A1B62549F29 /* TipKitService.swift */; };
 		AD25D2CF0EDA7120F80FAD39 /* AgentEnhancements.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8971C9CB1631EF6F27458F3 /* AgentEnhancements.swift */; };
-		AD2CE69360230B26645EB1F0 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652F0D07D0D33049CEB15B8C /* ChatViewModel.swift */; };
 		AD684D1AEFC854914DD16D72 /* ReActExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4795DAABD5943F096BA1CAEE /* ReActExecutorTests.swift */; };
 		AD8A3232272A23634A98405A /* PrivacyExportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFC6AA85C130E6DBF85E1C5 /* PrivacyExportSheet.swift */; };
 		ADA74DB0BCC1B583C85C7393 /* SecurityHardening.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5138888D101E482D329EEF8 /* SecurityHardening.swift */; };
@@ -952,7 +949,6 @@
 		BB5EBF80E211668B5F088F0D /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C28597903749D947CF54F1 /* HealthKitService.swift */; };
 		BB5F271124F49F98AA0B8BBF /* PreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B51525C80519DE6AA5F721E /* PreviewViewController.swift */; };
 		BBA1E9F9D43102FAB664D398 /* TheaUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D668DE7E9A1B18F49BD359F /* TheaUITests.swift */; };
-		BBBB408924B0C4F1BD6EA0F7 /* ChatInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E6B4F13AFFD1C1A5293E53 /* ChatInputView.swift */; };
 		BC57659FF0692741E4984CD7 /* BadgeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418E8673B0275094BFCAC501 /* BadgeManager.swift */; };
 		BCB9C77527513F7E895783D6 /* LocationTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E987E8F72EC93271972697 /* LocationTrackingManager.swift */; };
 		BCEE1BCCE0DDC92B06279A8B /* PermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2BFC6536B6A14AFE7DF537 /* PermissionManager.swift */; };
@@ -6588,10 +6584,7 @@
 				92D2B27AA81D872AE5B3EB12 /* CareerModels.swift in Sources */,
 				31A7C60A3D62D393342B0E6B /* CareerProtocols.swift in Sources */,
 				AFE69489A46D4331B4F0FC27 /* CareerService.swift in Sources */,
-				BBBB408924B0C4F1BD6EA0F7 /* ChatInputView.swift in Sources */,
-				713B4032327C2A7FC06C7195 /* ChatManager.swift in Sources */,
 				E57D19BE3955FE023E760A6F /* ChatView.swift in Sources */,
-				AD2CE69360230B26645EB1F0 /* ChatViewModel.swift in Sources */,
 				9E9F0834F68A87C11EADA47B /* CircadianEnhancementsView.swift in Sources */,
 				9D95938AC1FBE54D12D3CB98 /* CircadianService.swift in Sources */,
 				D24D10F914431A8B7481065A /* ClaudeAppBridge.swift in Sources */,
@@ -6601,7 +6594,6 @@
 				8162D211ECEF911409D411BB /* CloudKitService.swift in Sources */,
 				74A5F259A306CD29D4D9B592 /* CloudSyncManager.swift in Sources */,
 				89E760BEEAF826391CB95100 /* CodeExecutionManager.swift in Sources */,
-				A4F5874A0B19ECF3BF2A0541 /* CodeExecutionVerifier.swift in Sources */,
 				258213E1D2C95FF32D88F653 /* CodeIntelligenceManager.swift in Sources */,
 				77F7A40AA6CBBA58822BF161 /* CodebaseSearchEngine.swift in Sources */,
 				B0700972FE8564B5E54DC51C /* CognitiveAssistant.swift in Sources */,
