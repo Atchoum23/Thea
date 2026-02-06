@@ -102,7 +102,7 @@ public final class ProactiveErrorPrevention {
     }
 
     /// Validate user input proactively
-    public func validateInput(_ input: String, type: InputType) -> ValidationResult {
+    public func validateInput(_ input: String, type: InputType) -> InputValidationResult {
         var issues: [ValidationIssue] = []
 
         switch type {
@@ -118,7 +118,7 @@ public final class ProactiveErrorPrevention {
             break
         }
 
-        return ValidationResult(
+        return InputValidationResult(
             isValid: issues.filter { $0.severity >= .warning }.isEmpty,
             issues: issues
         )
@@ -489,7 +489,7 @@ public struct PreventionSuggestion: Identifiable, Sendable {
     public let autoPreventable: Bool
 }
 
-public struct ValidationResult: Sendable {
+public struct InputValidationResult: Sendable {
     public let isValid: Bool
     public let issues: [ValidationIssue]
 }

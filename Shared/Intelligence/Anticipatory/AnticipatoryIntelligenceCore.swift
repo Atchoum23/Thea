@@ -90,7 +90,7 @@ public final class AnticipatoryIntelligenceCore {
     }
 
     /// Record a user action for learning
-    public func recordUserAction(_ action: UserAction) {
+    public func recordUserAction(_ action: AnticipatedUserAction) {
         temporalEngine.recordAction(action)
         intentAnticipator.recordAction(action)
         ambientSystem.recordActivity(action)
@@ -172,7 +172,7 @@ public final class AnticipatoryIntelligenceCore {
         predictedIntents = intents
     }
 
-    private func updateMentalModel(from action: UserAction) {
+    private func updateMentalModel(from action: AnticipatedUserAction) {
         // Update focus level based on action frequency
         let actionRate = temporalEngine.currentActionRate
         let focusLevel = min(1.0, Double(actionRate) / 10.0)
@@ -313,7 +313,7 @@ public struct ProactiveSuggestion: Identifiable, Sendable {
     public let context: String
 }
 
-public struct UserAction: Sendable {
+public struct AnticipatedUserAction: Sendable {
     public let type: String
     public let details: String
     public let timestamp: Date
