@@ -318,7 +318,8 @@ public struct DeviceProfile: Codable, Identifiable, Sendable, Equatable {
         sysctlbyname("hw.model", nil, &size, nil, 0)
         var machine = [CChar](repeating: 0, count: size)
         sysctlbyname("hw.model", &machine, &size, nil, 0)
-        return String(cString: machine)
+        let bytes = machine.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }
+        return String(decoding: bytes, as: UTF8.self)
     }
     #endif
 
@@ -521,22 +522,21 @@ public final class PreferenceSyncEngine: ObservableObject {
             object: cloud,
             queue: .main
         ) { [weak self] notification in
+            // Extract values on the calling thread to avoid sending non-Sendable Notification
+            let reason = notification.userInfo?[NSUbiquitousKeyValueStoreChangeReasonKey] as? Int ?? -1
+            let changedKeys = notification.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] ?? []
+
             Task { @MainActor [weak self] in
                 guard let self else { return }
-
-                let reason = notification.userInfo?[NSUbiquitousKeyValueStoreChangeReasonKey] as? Int ?? -1
-                let changedKeys = notification.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] ?? []
 
                 switch reason {
                 case NSUbiquitousKeyValueStoreServerChange,
                      NSUbiquitousKeyValueStoreInitialSyncChange:
                     self.pullAll()
                 case NSUbiquitousKeyValueStoreAccountChange:
-                    // Account changed - full re-sync
                     self.checkCloudAvailability()
                     self.pullAll()
                 case NSUbiquitousKeyValueStoreQuotaViolationChange:
-                    // Over quota - trim least important keys
                     self.handleQuotaViolation(changedKeys: changedKeys)
                 default:
                     break
