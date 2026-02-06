@@ -320,10 +320,10 @@ private class SimplePhraseModel {
             return []
         }
 
-        return nextWords.sorted { $0.value > $1.value }.prefix(3).map { word, _ in
+        return nextWords.sorted { $0.value > $1.value }.prefix(3).map { word, wordCount in
             PhraseMatch(
                 text: text + " " + word,
-                confidence: min(1.0, Double(count) / 10.0)
+                confidence: min(1.0, Double(wordCount) / 10.0)
             )
         }
     }
