@@ -333,7 +333,7 @@ targets:
           - "**/Views/SelfExecutionView.swift"
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
-          - "**/Theme/DesignTokens.swift"
+          - "**/Styles/LiquidGlassStyle.swift"
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"
@@ -372,6 +372,7 @@ targets:
           - "**/Integrations/FinderIntegration.swift"
           - "**/LocalModels/**"
           - "**/Platforms/PlatformFeaturesHub.swift"
+          - "**/TextProcessing/LiveAutoCorrect.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
