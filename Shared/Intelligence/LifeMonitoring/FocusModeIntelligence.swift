@@ -2400,7 +2400,7 @@ public actor FocusModeIntelligence {
         // 3. Local network communication
 
         // For App Group sync (requires shared container)
-        if let defaults = UserDefaults(suiteName: "group.app.thea") {
+        if let defaults = UserDefaults(suiteName: "group.app.theathe") {
             defaults.set(active, forKey: "focusModeActive")
             defaults.set(mode.id, forKey: "currentFocusModeId")
             defaults.set(mode.name, forKey: "currentFocusModeName")
@@ -2411,7 +2411,7 @@ public actor FocusModeIntelligence {
 
     private func syncSettingsToiPhone() async {
         // Sync all settings to iPhone
-        if let defaults = UserDefaults(suiteName: "group.app.thea") {
+        if let defaults = UserDefaults(suiteName: "group.app.theathe") {
             if let encoded = try? JSONEncoder().encode(globalSettings) {
                 defaults.set(encoded, forKey: "focusModeGlobalSettings")
             }
@@ -2486,7 +2486,7 @@ public actor FocusModeIntelligence {
     // MARK: - Persistence
 
     private func loadSettings() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea"),
+        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let data = defaults.data(forKey: "focusModeGlobalSettings"),
            let settings = try? JSONDecoder().decode(FocusModeGlobalSettings.self, from: data) {
             self.globalSettings = settings
@@ -2495,7 +2495,7 @@ public actor FocusModeIntelligence {
     }
 
     private func saveSettings() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea"),
+        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let encoded = try? JSONEncoder().encode(globalSettings) {
             defaults.set(encoded, forKey: "focusModeGlobalSettings")
             defaults.synchronize()
@@ -2503,7 +2503,7 @@ public actor FocusModeIntelligence {
     }
 
     private func loadFocusModes() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea"),
+        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let data = defaults.data(forKey: "focusModeConfigurations"),
            let modes = try? JSONDecoder().decode([String: FocusModeConfiguration].self, from: data) {
             self.focusModes = modes
@@ -2511,7 +2511,7 @@ public actor FocusModeIntelligence {
     }
 
     private func loadContactLanguages() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea"),
+        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let data = defaults.data(forKey: "contactLanguages"),
            let languages = try? JSONDecoder().decode([String: ContactLanguageInfo].self, from: data) {
             self.contactLanguages = languages
@@ -2519,7 +2519,7 @@ public actor FocusModeIntelligence {
     }
 
     private func saveContactLanguages() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea"),
+        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let encoded = try? JSONEncoder().encode(contactLanguages) {
             defaults.set(encoded, forKey: "contactLanguages")
             defaults.synchronize()
@@ -2650,7 +2650,7 @@ public actor FocusModeIntelligence {
         // 3. Handoff/Continuity
 
         // Using App Group for now
-        if let defaults = UserDefaults(suiteName: "group.app.thea") {
+        if let defaults = UserDefaults(suiteName: "group.app.theathe") {
             defaults.set(code, forKey: "pendingCallForwardingCode")
             defaults.set(enable, forKey: "pendingCallForwardingEnable")
             defaults.set(Date(), forKey: "pendingCallForwardingTimestamp")
@@ -3339,7 +3339,7 @@ public actor FocusModeIntelligence {
     }
 
     private func saveAnalytics() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea"),
+        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let encoded = try? JSONEncoder().encode(historicalAnalytics) {
             defaults.set(encoded, forKey: "focusModeAnalytics")
             defaults.synchronize()
