@@ -50,7 +50,7 @@ public final class ProactiveNotificationIntelligence {
 
         // Check if user is in a state where interruption is inappropriate
         if context.isInMeeting && priority != .critical {
-            return .defer(until: estimateMeetingEnd(context: context))
+            return .postpone(until: estimateMeetingEnd(context: context))
         }
 
         if context.isResting && priority != .critical {
@@ -60,7 +60,7 @@ public final class ProactiveNotificationIntelligence {
         // Check notification frequency
         let recentCount = countRecentNotifications(ofType: type, within: .minutes(30))
         if recentCount >= configuration.maxNotificationsPerHalfHour {
-            return .defer(until: Date().addingTimeInterval(1800))
+            return .postpone(until: Date().addingTimeInterval(1800))
         }
 
         // Check effectiveness history
@@ -230,7 +230,7 @@ public enum NotificationPriority: String, Sendable, Comparable {
 
 public enum NotificationDecision: Sendable {
     case allow(method: DeliveryMethod)
-    case defer(until: Date)
+    case postpone(until: Date)
     case suppress(reason: String)
 
     public var shouldSend: Bool {
