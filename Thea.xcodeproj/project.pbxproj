@@ -571,6 +571,7 @@
 		6C8768337BDDE908291BEF07 /* TheaCredentialsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0064D91BA593024F28CFE249 /* TheaCredentialsExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6C8DA5DB23B37A56673677CF /* VisionIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2D478B467F0A89F2B424FC4 /* VisionIntelligence.swift */; };
 		6CADE9BDA8930E6766B75B67 /* WellnessModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784B813F3FAE2CE985E54ABC /* WellnessModels.swift */; };
+		6CD7BF05F5E46BDB922D869D /* IntentAnticipatorStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125A14D95D18B70BAFD04DC8 /* IntentAnticipatorStub.swift */; };
 		6CF208EE8AC77CAACF3A784D /* SkillsRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50298F368E9D88D39615881C /* SkillsRegistry.swift */; };
 		6D2269F073EA3DCB5F957C89 /* AutonomousAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50092464704D1A5143426EA5 /* AutonomousAgent.swift */; };
 		6D380A538948708FD2DB7A30 /* TheaIntegrationHub+NewFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA3C4A1884232212671F17EA /* TheaIntegrationHub+NewFeatures.swift */; };
@@ -636,6 +637,7 @@
 		78798723E32B981CEBE22EDC /* ExecutableCodeBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6521A7211CF1DA843D08C4C8 /* ExecutableCodeBlock.swift */; };
 		787C4AAB26ACE1C6FC20939D /* MediaContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B39A0163DC7AFE89CF85697 /* MediaContextProvider.swift */; };
 		789A9A0597FEFC5BAA6C402A /* AppClipManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC7E9582BEEC563F03773EF /* AppClipManager.swift */; };
+		78FD5B80CE674608B1557A1C /* IntentAnticipatorStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125A14D95D18B70BAFD04DC8 /* IntentAnticipatorStub.swift */; };
 		790F55D87D6FE7EABB087042 /* AgentResourcePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826AC9D7AE3F12A7C81ECD23 /* AgentResourcePool.swift */; };
 		791A1FA7DDD8F524B3F66428 /* APIGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E6203C2845080FEA998CD3 /* APIGenerator.swift */; };
 		79378658A84F2FA5368CC51A /* UnifiedLocalModelOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 739221B0831806D76541DF8B /* UnifiedLocalModelOrchestrator.swift */; };
@@ -1482,6 +1484,7 @@
 		11735366A6599014F09F411B /* SafetyGuardrails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetyGuardrails.swift; sourceTree = "<group>"; };
 		119E655F208CE7BAFF433FBC /* SiriShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriShortcuts.swift; sourceTree = "<group>"; };
 		11E5AC4907463FDE7AB36F48 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
+		125A14D95D18B70BAFD04DC8 /* IntentAnticipatorStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentAnticipatorStub.swift; sourceTree = "<group>"; };
 		12A0524C0078CC2979B4539A /* UnifiedDeviceAwareness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedDeviceAwareness.swift; sourceTree = "<group>"; };
 		12D843CD7F24B89C084064F2 /* iOSSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSettingsView.swift; sourceTree = "<group>"; };
 		12DB9E79785FE91D74B85AC4 /* PluginSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginSystemTests.swift; sourceTree = "<group>"; };
@@ -2600,6 +2603,7 @@
 				6696C9A8DA4563C00E97943E /* AnticipatoryIntelligenceCore.swift */,
 				C9F7F861E7D781249B4AF7A6 /* ContextPredictor.swift */,
 				372B4F0049D6FB7C93950371 /* IntentAnticipator.swift */,
+				125A14D95D18B70BAFD04DC8 /* IntentAnticipatorStub.swift */,
 				520122204AB7C7FDB6DCE80B /* InterventionScheduler.swift */,
 				85A4C64EF1EA8CF3569A0C64 /* MentalWorldModel.swift */,
 				69AE251446D24B99DC6D9EBC /* ProactiveNotificationIntelligence.swift */,
@@ -6066,6 +6070,7 @@
 				EE201BA26121C1D1F6C5E72C /* IntelligenceOrchestrator.swift in Sources */,
 				49E1A680AA8F0F7D56BDF21B /* IntelligentPrefetcher.swift in Sources */,
 				B51EA50E5C396C849D5EFB86 /* IntentAnticipator.swift in Sources */,
+				78FD5B80CE674608B1557A1C /* IntentAnticipatorStub.swift in Sources */,
 				8CCB799F63AA19C8B9AB7744 /* IntentDisambiguation.swift in Sources */,
 				F5D1D37BD0AE3A1C8F1AA6FE /* InteractionTracker.swift in Sources */,
 				7A39003F69010DA2A51B75FC /* InteractiveWidgets.swift in Sources */,
@@ -6802,6 +6807,7 @@
 				E64BD85B47BA0420D57ABA96 /* IntegrationsSettingsView.swift in Sources */,
 				83CE8BCD82BF11CD9E4CD684 /* IntelligenceOrchestrator.swift in Sources */,
 				467B9780AD85D2135D5DA5BD /* IntelligentPrefetcher.swift in Sources */,
+				6CD7BF05F5E46BDB922D869D /* IntentAnticipatorStub.swift in Sources */,
 				2C0CE26F89A75A196536C000 /* IntentDisambiguation.swift in Sources */,
 				46D77E7A28F4EE86F0382D4E /* InteractionTracker.swift in Sources */,
 				27DDCEA65DBF5559DD2CC9C7 /* InteractiveWidgets.swift in Sources */,
