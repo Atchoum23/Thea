@@ -591,7 +591,7 @@ public struct ProjectMemoryView: View {
     private var projectList: some View {
         List(selection: $selectedProject) {
             ForEach(filteredProjects) { project in
-                ProjectRow(project: project)
+                ProjectMemoryRow(project: project)
                     .tag(project)
             }
             .onDelete { indexSet in
@@ -622,9 +622,9 @@ public struct ProjectMemoryView: View {
     }
 }
 
-// MARK: - Project Row
+// MARK: - Project Memory Row
 
-private struct ProjectRow: View {
+private struct ProjectMemoryRow: View {
     let project: ProjectMemory
 
     var body: some View {

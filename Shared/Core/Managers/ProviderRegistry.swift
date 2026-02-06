@@ -85,14 +85,20 @@ final class ProviderRegistry {
     // MARK: - Local Model Setup
 
     private func setupLocalProviders() {
-        // Discover and register local models from LocalModelManager
+        #if os(macOS)
+        // Discover and register local models from LocalModelManager (macOS only)
         Task {
             await refreshLocalProviders()
         }
+        #else
+        // Local models not supported on iOS/watchOS/tvOS
+        debugLog("📱 Local models not available on this platform")
+        #endif
     }
 
     /// Refresh local model providers - call when local models change
     func refreshLocalProviders() async {
+        #if os(macOS)
         localProviders.removeAll()
 
         debugLog("🔄 Starting local model discovery...")
@@ -118,6 +124,10 @@ final class ProviderRegistry {
 
         debugLog("📊 Total local models registered: \(localProviders.count)")
         print("📊 Total local models registered: \(localProviders.count)")
+        #else
+        // Local models not available on iOS/watchOS/tvOS
+        debugLog("📱 Skipping local model refresh - not available on this platform")
+        #endif
     }
 
     /// Write debug log using os_log (viewable in Console.app)
