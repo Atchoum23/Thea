@@ -689,8 +689,10 @@ targets:
           - "**/LocalModels/**"
           - "**/Focus/FocusOrchestrator.swift"
           - "**/V1Parity/SiriIntegration.swift"
-          - "**/Design/TheaDesignSystem.swift"
+          # TheaDesignSystem.swift KEPT for iOS - contains design tokens
           - "**/Design/LiquidGlassDesign.swift"
+          # Exclude stubs since TheaDesignSystem is included
+          - "**/Design/DesignSystemStubs.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
     settings:
