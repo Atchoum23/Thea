@@ -57,7 +57,7 @@ export interface ContentStreamingInfo {
   lastUpdated: number;
 }
 
-// TMDB provider ID to our app ID mapping
+// TMDB provider ID to our app ID mapping (default/international)
 const PROVIDER_APP_MAP: Record<number, string> = {
   8: 'netflix',
   9: 'prime',
@@ -75,6 +75,52 @@ const PROVIDER_APP_MAP: Record<number, string> = {
   3: 'youtube', // Google Play Movies
   10: 'prime', // Amazon Video
 };
+
+// Switzerland-specific: Bundled services via Canal+ Switzerland (Swisscom TV subscription)
+const PROVIDER_APP_MAP_CH: Record<number, string> = {
+  ...PROVIDER_APP_MAP,
+  384: 'canal_ch',   // HBO Max → Canal+ Switzerland
+  1899: 'canal_ch',  // Max → Canal+ Switzerland
+  531: 'canal_ch',   // Paramount+ → Canal+ Switzerland
+  381: 'canal_ch',   // Canal+ → Canal+ Switzerland
+  1773: 'canal_ch',  // Canal+ Séries → Canal+ Switzerland
+};
+
+/**
+ * Switzerland bundled streaming services
+ * Via Swisscom TV subscription → Canal+ Switzerland → HBO Max & Paramount+ content
+ */
+interface BundledServiceInfo {
+  originalProviderId: number;
+  originalProviderName: string;
+  accessViaProviderId: number;
+  accessViaProviderName: string;
+  note: string;
+}
+
+const SWISS_BUNDLED_SERVICES: BundledServiceInfo[] = [
+  {
+    originalProviderId: 384,
+    originalProviderName: 'HBO Max',
+    accessViaProviderId: 381,
+    accessViaProviderName: 'Canal+ Switzerland',
+    note: 'Included with Canal+ Switzerland via Swisscom TV',
+  },
+  {
+    originalProviderId: 1899,
+    originalProviderName: 'Max',
+    accessViaProviderId: 381,
+    accessViaProviderName: 'Canal+ Switzerland',
+    note: 'Included with Canal+ Switzerland via Swisscom TV',
+  },
+  {
+    originalProviderId: 531,
+    originalProviderName: 'Paramount+',
+    accessViaProviderId: 381,
+    accessViaProviderName: 'Canal+ Switzerland',
+    note: 'Included with Canal+ Switzerland via Swisscom TV',
+  },
+];
 
 // Country code to name mapping
 const COUNTRY_NAMES: Record<string, string> = {
@@ -427,9 +473,30 @@ class TMDBStreamingService {
 
   /**
    * Get provider app ID from TMDB provider ID
+   * Uses region-specific mapping for bundled services
    */
-  getAppIdForProvider(providerId: number): string | undefined {
+  getAppIdForProvider(providerId: number, region: string = 'US'): string | undefined {
+    if (region === 'CH') {
+      return PROVIDER_APP_MAP_CH[providerId];
+    }
     return PROVIDER_APP_MAP[providerId];
+  }
+
+  /**
+   * Check if a provider is accessible via a bundled service in Switzerland
+   * E.g., HBO Max content is accessible via Canal+ Switzerland
+   */
+  getBundledServiceInfo(providerId: number, region: string = 'CH'): BundledServiceInfo | undefined {
+    if (region !== 'CH') return undefined;
+    return SWISS_BUNDLED_SERVICES.find(s => s.originalProviderId === providerId);
+  }
+
+  /**
+   * Get all bundled services for a region
+   */
+  getBundledServices(region: string = 'CH'): BundledServiceInfo[] {
+    if (region !== 'CH') return [];
+    return SWISS_BUNDLED_SERVICES;
   }
 
   /**

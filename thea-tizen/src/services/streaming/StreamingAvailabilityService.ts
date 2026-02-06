@@ -6,8 +6,21 @@
 
 export type StreamingAppId =
   | 'netflix' | 'prime' | 'disney' | 'apple' | 'hbo' | 'paramount'
-  | 'peacock' | 'hulu' | 'canal' | 'plex' | 'youtube' | 'crunchyroll'
-  | 'other';
+  | 'peacock' | 'hulu' | 'canal' | 'canal_ch' | 'plex' | 'youtube' | 'crunchyroll'
+  | 'swisscom' | 'other';
+
+/**
+ * Canal+ Switzerland bundled services
+ * Via Swisscom TV subscription → Canal+ Switzerland → Access to:
+ * - HBO Max content
+ * - Paramount+ content
+ * All accessible through the Canal+ app
+ */
+export interface BundledStreamingInfo {
+  mainProvider: StreamingAppId;      // canal_ch
+  accessedVia: 'swisscom';           // Subscription through Swisscom TV
+  includedServices: StreamingAppId[]; // hbo, paramount
+}
 
 export interface StreamingAccount {
   id: string;
