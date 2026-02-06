@@ -1,0 +1,21 @@
+name = "thea-sync-bridge"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# KV Namespace for session storage
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "your-kv-namespace-id"  # Replace after creating with: wrangler kv:namespace create SESSIONS
+
+# Environment variables (set via wrangler secret)
+# CLOUDKIT_CONTAINER = "iCloud.app.teathe.thea"
+# CLOUDKIT_API_TOKEN = "your-cloudkit-api-token"
+# CLOUDKIT_KEY_ID = "your-key-id"
+# TRANSMISSION_URL = "http://your-plex-server:9091"
+# TRANSMISSION_USER = "username"
+# TRANSMISSION_PASS = "password"
+# PROWLARR_URL = "http://your-prowlarr:9696"
+# PROWLARR_API_KEY = "your-api-key"
+
+[vars]
+ENVIRONMENT = "production"

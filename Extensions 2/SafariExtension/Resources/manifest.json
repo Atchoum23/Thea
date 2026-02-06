@@ -1,0 +1,61 @@
+{
+    "manifest_version": 3,
+    "name": "Thea - AI Life Companion",
+    "version": "2.0.0",
+    "description": "Your intelligent AI companion with comprehensive life monitoring",
+    "icons": {
+        "48": "icon-48.png",
+        "96": "icon-96.png",
+        "128": "icon-128.png"
+    },
+    "permissions": [
+        "activeTab",
+        "storage",
+        "contextMenus",
+        "webNavigation"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"],
+            "css": ["content.css"],
+            "run_at": "document_end"
+        },
+        {
+            "matches": ["<all_urls>"],
+            "js": ["life-monitor.js"],
+            "run_at": "document_idle"
+        }
+    ],
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_icon": {
+            "48": "icon-48.png",
+            "96": "icon-96.png"
+        },
+        "default_title": "Thea"
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+T",
+                "mac": "Command+Shift+T"
+            },
+            "description": "Open Thea popup"
+        },
+        "quick-action": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+A",
+                "mac": "Command+Shift+A"
+            },
+            "description": "Quick AI action on selection"
+        }
+    }
+}

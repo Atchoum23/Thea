@@ -1,0 +1,275 @@
+/* SmartDNS Status Widget - TV Optimized */
+
+.smartdns-widget {
+  background: #1a1a1a;
+  border-radius: 16px;
+  padding: 24px;
+  border: 2px solid #333;
+  transition: all 0.2s;
+}
+
+.smartdns-widget:focus-within {
+  border-color: #4687ff;
+}
+
+/* Status Colors */
+.smartdns-widget.status-active {
+  border-color: #2d5a2d;
+  background: linear-gradient(135deg, #1a2a1a 0%, #1a1a1a 100%);
+}
+
+.smartdns-widget.status-warning {
+  border-color: #5a4a2d;
+  background: linear-gradient(135deg, #2a2a1a 0%, #1a1a1a 100%);
+}
+
+.smartdns-widget.status-error {
+  border-color: #5a2d2d;
+  background: linear-gradient(135deg, #2a1a1a 0%, #1a1a1a 100%);
+}
+
+.smartdns-widget.status-disabled {
+  opacity: 0.6;
+}
+
+/* Header */
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.widget-header .status-icon {
+  font-size: 28px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #222;
+}
+
+.status-active .widget-header .status-icon {
+  background: #1a3a1a;
+  color: #4d9a4d;
+}
+
+.status-warning .widget-header .status-icon,
+.status-error .widget-header .status-icon {
+  background: #3a2a1a;
+  color: #cc9a4d;
+}
+
+.widget-header h3 {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.refresh-btn {
+  background: #222;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover,
+.refresh-btn:focus {
+  background: #333;
+  color: #fff;
+  outline: 2px solid #4687ff;
+}
+
+.refresh-btn:disabled {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Body */
+.widget-body {
+  margin-bottom: 16px;
+}
+
+.status-message {
+  font-size: 16px;
+  color: #ccc;
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.ip-info,
+.activated-ip {
+  font-size: 14px;
+  color: #888;
+  margin: 4px 0;
+}
+
+.ip-info code,
+.activated-ip code {
+  background: #222;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'SF Mono', Monaco, monospace;
+  color: #aaa;
+}
+
+/* Actions */
+.widget-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #4687ff 0%, #3366cc 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.action-btn.primary:hover,
+.action-btn.primary:focus {
+  background: linear-gradient(135deg, #5a9aff 0%, #4477dd 100%);
+  transform: scale(1.02);
+  outline: 3px solid #4687ff;
+  outline-offset: 2px;
+}
+
+.action-btn.secondary {
+  background: #222;
+  color: #888;
+  border: 2px solid #333;
+}
+
+.action-btn.secondary:hover,
+.action-btn.secondary:focus {
+  background: #333;
+  color: #fff;
+  outline: 2px solid #666;
+}
+
+/* Compact Mode */
+.smartdns-widget-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.smartdns-widget-compact:hover,
+.smartdns-widget-compact:focus {
+  background: #222;
+  outline: 2px solid #4687ff;
+}
+
+.smartdns-widget-compact.status-active {
+  border-color: #2d5a2d;
+}
+
+.smartdns-widget-compact.status-warning,
+.smartdns-widget-compact.status-error {
+  border-color: #5a4a2d;
+}
+
+.smartdns-widget-compact .status-icon {
+  font-size: 18px;
+}
+
+.smartdns-widget-compact .status-label {
+  font-size: 14px;
+  color: #888;
+}
+
+.smartdns-widget-compact.status-active .status-label {
+  color: #4d9a4d;
+}
+
+.smartdns-widget-compact.status-warning .status-label,
+.smartdns-widget-compact.status-error .status-label {
+  color: #cc9a4d;
+}
+
+/* Alert Modal */
+.alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.alert-modal {
+  background: #1a1a1a;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 600px;
+  width: 90%;
+  border: 2px solid #333;
+}
+
+.alert-modal h4 {
+  font-size: 24px;
+  margin: 0 0 20px;
+  color: #cc9a4d;
+}
+
+.alert-message {
+  background: #0a0a0a;
+  padding: 20px;
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  font-family: 'SF Mono', Monaco, monospace;
+  color: #ccc;
+  margin: 0 0 24px;
+}
+
+.alert-close {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  background: #333;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.alert-close:hover,
+.alert-close:focus {
+  background: #4687ff;
+  outline: 3px solid #4687ff;
+  outline-offset: 2px;
+}

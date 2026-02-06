@@ -73,6 +73,60 @@ extension Color {
         endPoint: .bottomTrailing
     )
 
+    // MARK: - Glass-Harmonized Colors
+
+    /// Subtle brand tint for Liquid Glass surfaces
+    static let theaGlassTint = Color(hex: "0066FF").opacity(0.3)
+
+    /// Subtle accent tint for Liquid Glass surfaces
+    static let theaGlassAccentTint = Color(hex: "00D4AA").opacity(0.25)
+
+    /// Platform-adaptive surface color for cards and containers
+    static var theaSurface: Color {
+        #if os(macOS)
+        Color(nsColor: .controlBackgroundColor)
+        #elseif os(watchOS) || os(tvOS)
+        Color.gray.opacity(0.15)
+        #else
+        Color(.secondarySystemGroupedBackground)
+        #endif
+    }
+
+    /// Elevated surface color for nested containers
+    static var theaSurfaceElevated: Color {
+        #if os(macOS)
+        Color(nsColor: .windowBackgroundColor)
+        #elseif os(watchOS) || os(tvOS)
+        Color.gray.opacity(0.2)
+        #else
+        Color(.tertiarySystemGroupedBackground)
+        #endif
+    }
+
+    /// User message bubble background
+    static let theaUserBubble = Color(hex: "0066FF")
+
+    /// Assistant message bubble background
+    static var theaAssistantBubble: Color {
+        #if os(macOS)
+        Color(nsColor: .controlBackgroundColor)
+        #elseif os(watchOS) || os(tvOS)
+        Color.gray.opacity(0.2)
+        #else
+        Color(.secondarySystemGroupedBackground)
+        #endif
+    }
+
+    /// Subtle brand gradient for glass tinting
+    static let theaGlassGradient = LinearGradient(
+        colors: [
+            Color(hex: "0066FF").opacity(0.08),
+            Color(hex: "00D4AA").opacity(0.06),
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
     // MARK: - Hex Initializer
 
     init(hex: String) {

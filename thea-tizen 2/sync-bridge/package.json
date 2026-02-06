@@ -1,0 +1,20 @@
+{
+  "name": "thea-sync-bridge",
+  "version": "1.0.0",
+  "description": "CloudKit sync bridge for Thea-Tizen",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "tldts": "^6.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.0.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
+  }
+}

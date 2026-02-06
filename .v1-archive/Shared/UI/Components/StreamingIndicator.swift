@@ -1,0 +1,283 @@
+//
+//  StreamingIndicator.swift
+//  Thea
+//
+//  Streaming response indicators based on 2026 AI chat UI best practices
+//  Includes thinking indicators, progress states, and animated feedback
+//
+
+import SwiftUI
+
+// MARK: - Streaming Status
+
+/// Represents the current state of AI response streaming
+public enum StreamingStatus: Equatable, Sendable {
+    case idle
+    case thinking
+    case searching(query: String)
+    case generating
+    case usingTool(name: String)
+    case complete
+    case error(String)
+
+    var displayText: String {
+        switch self {
+        case .idle:
+            return ""
+        case .thinking:
+            return "Thinking..."
+        case let .searching(query):
+            return "Searching \"\(query)\"..."
+        case .generating:
+            return "Generating..."
+        case let .usingTool(name):
+            return "Using \(name)..."
+        case .complete:
+            return "Done"
+        case let .error(message):
+            return "Error: \(message)"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .idle:
+            return ""
+        case .thinking:
+            return "brain"
+        case .searching:
+            return "magnifyingglass"
+        case .generating:
+            return "text.cursor"
+        case .usingTool:
+            return "wrench.and.screwdriver"
+        case .complete:
+            return "checkmark.circle"
+        case .error:
+            return "exclamationmark.triangle"
+        }
+    }
+}
+
+// MARK: - Streaming Indicator View
+
+/// Shows the current streaming status with animated indicator
+struct StreamingIndicatorView: View {
+    let status: StreamingStatus
+
+    @State private var shimmerOffset: CGFloat = -200
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        if status != .idle {
+            HStack(spacing: 8) {
+                // Animated icon
+                Image(systemName: status.icon)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion && isActive)
+
+                // Status text with shimmer effect
+                Text(status.displayText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .overlay {
+                        if !reduceMotion && isActive {
+                            shimmerOverlay
+                        }
+                    }
+                    .mask {
+                        Text(status.displayText)
+                            .font(.caption)
+                    }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(.ultraThinMaterial)
+            .clipShape(Capsule())
+            .transition(.scale.combined(with: .opacity))
+        }
+    }
+
+    private var isActive: Bool {
+        switch status {
+        case .idle, .complete, .error:
+            return false
+        default:
+            return true
+        }
+    }
+
+    private var shimmerOverlay: some View {
+        LinearGradient(
+            colors: [
+                .clear,
+                Color.white.opacity(0.4),
+                .clear
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        .frame(width: 50)
+        .offset(x: shimmerOffset)
+        .onAppear {
+            withAnimation(
+                .linear(duration: 1.5)
+                    .repeatForever(autoreverses: false)
+            ) {
+                shimmerOffset = 200
+            }
+        }
+    }
+}
+
+// MARK: - Typing Indicator
+
+/// Shows an animated typing indicator (three bouncing dots)
+struct TypingIndicator: View {
+    @State private var animationPhase = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(0 ..< 3, id: \.self) { index in
+                Circle()
+                    .fill(Color.secondary)
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(reduceMotion ? 1.0 : scale(for: index))
+                    .animation(
+                        reduceMotion ? nil :
+                            Animation.easeInOut(duration: 0.5)
+                                .repeatForever(autoreverses: true)
+                                .delay(Double(index) * 0.15),
+                        value: animationPhase
+                    )
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(backgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .onAppear {
+            animationPhase = 1
+        }
+    }
+
+    private func scale(for index: Int) -> CGFloat {
+        let base = 0.6
+        let peak = 1.0
+
+        // Create a wave effect - index determines animation delay (set in parent)
+        // Animation handles the actual scaling via repeatForever
+        _ = index // Used for animation delay in parent ForEach
+        if animationPhase == 0 {
+            return base
+        }
+        return peak
+    }
+
+    private var backgroundColor: Color {
+        #if os(macOS)
+            Color(nsColor: .controlBackgroundColor)
+        #else
+            Color(uiColor: .secondarySystemBackground)
+        #endif
+    }
+}
+
+// MARK: - Streaming Message View
+
+/// Complete streaming message view with indicator and partial content
+struct StreamingMessageView: View {
+    let streamingText: String
+    let status: StreamingStatus
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Status indicator
+                StreamingIndicatorView(status: status)
+
+                // Partial content (if any)
+                if !streamingText.isEmpty {
+                    Text(streamingText)
+                        .font(.theaBody)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(backgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(alignment: .bottomTrailing) {
+                            // Blinking cursor
+                            BlinkingCursor()
+                                .padding(.trailing, 8)
+                                .padding(.bottom, 8)
+                        }
+                } else if status == .thinking || status == .generating {
+                    // Show typing indicator when no text yet
+                    TypingIndicator()
+                }
+            }
+
+            Spacer(minLength: 60)
+        }
+    }
+
+    private var backgroundColor: Color {
+        #if os(macOS)
+            Color(nsColor: .controlBackgroundColor)
+        #else
+            Color(uiColor: .secondarySystemBackground)
+        #endif
+    }
+}
+
+// MARK: - Blinking Cursor
+
+/// A simple blinking cursor indicator
+struct BlinkingCursor: View {
+    @State private var isVisible = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        Rectangle()
+            .fill(Color.theaPrimary)
+            .frame(width: 2, height: 16)
+            .opacity(reduceMotion ? 1.0 : (isVisible ? 1.0 : 0.0))
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(
+                    .easeInOut(duration: 0.5)
+                        .repeatForever(autoreverses: true)
+                ) {
+                    isVisible.toggle()
+                }
+            }
+    }
+}
+
+// MARK: - Preview
+
+#Preview("Streaming Indicators") {
+    VStack(spacing: 24) {
+        StreamingIndicatorView(status: .thinking)
+        StreamingIndicatorView(status: .searching(query: "Swift concurrency"))
+        StreamingIndicatorView(status: .generating)
+        StreamingIndicatorView(status: .usingTool(name: "Web Search"))
+        StreamingIndicatorView(status: .complete)
+        StreamingIndicatorView(status: .error("Network timeout"))
+
+        Divider()
+
+        TypingIndicator()
+
+        Divider()
+
+        StreamingMessageView(
+            streamingText: "Here's how you can implement async/await in Swift...",
+            status: .generating
+        )
+    }
+    .padding()
+}
