@@ -357,6 +357,9 @@ targets:
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
           - "**/Anticipatory/IntentAnticipator.swift"
+          - "**/Classification/TaskClassifier.swift"
+          - "**/LifeMonitoring/TaskIntelligence.swift"
+          - "**/Integrations/TerminalIntegration.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
