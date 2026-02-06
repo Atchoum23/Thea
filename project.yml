@@ -362,6 +362,7 @@ targets:
           - "**/Integrations/TerminalIntegration.swift"
           - "**/Integrations/MusicIntegration.swift"
           - "**/Integrations/SystemIntegration.swift"
+          - "**/Verification/MultiModelConsensus.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
