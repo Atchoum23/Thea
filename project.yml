@@ -311,6 +311,22 @@ targets:
           # Exclude duplicate Settings views (use subfolder versions)
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
+          # Exclude MetaAI views that depend on excluded MetaAI folder
+          - "**/Views/MetaAI/**"
+          # Exclude views that depend on missing types
+          - "**/Settings/OrchestratorSettingsView.swift"
+          - "**/Settings/Orchestrator/**"
+          - "**/Settings/MemorySettingsView.swift"
+          - "**/Settings/PermissionsSettingsView.swift"
+          - "**/Settings/PrivacySettingsView.swift"
+          - "**/Settings/AdvancedSettingsView.swift"
+          - "**/Settings/AIProvidersSettingsView.swift"
+          # Exclude files with missing types
+          - "**/Intelligence/Verification/WebSearchVerifier.swift"
+          - "**/ResourceManagement/**"
+          - "**/Components/EnhancedMessageBubble.swift"
+          - "**/Components/ExecutableCodeBlock.swift"
+          - "**/Code/CodeIntelligence.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
