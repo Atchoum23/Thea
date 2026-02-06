@@ -350,6 +350,8 @@ targets:
           - "**/Views/PhaseProgressView.swift"
           - "**/LifeMonitoring/EfficiencySuggestionEngine.swift"
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
+          - "**/AgentMode/AgentEnhancements.swift"
+          - "**/Integrations/IntegrationModule.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
