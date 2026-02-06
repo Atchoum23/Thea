@@ -513,7 +513,6 @@
 		5ED9D1079793715E22E48B6D /* UnifiedFeedbackAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38A8ED40A815D29E999F2E7 /* UnifiedFeedbackAggregator.swift */; };
 		5EE977C4159911A3A8201542 /* PredictiveEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F33EC2C30CECD2A8D1B4672E /* PredictiveEngine.swift */; };
 		5FFDF9ED1182DB772A13FA08 /* AnthropicProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E03DAA3CB62633E37D786623 /* AnthropicProviderTests.swift */; };
-		60074F43122CA4462F11AF90 /* IntentAnticipator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372B4F0049D6FB7C93950371 /* IntentAnticipator.swift */; };
 		603317697ADC3440531CE9F2 /* UserFeedbackLearner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838C96947C9DBCA4BF256FDE /* UserFeedbackLearner.swift */; };
 		603B5B13636E87B583F72A0E /* SettingsCommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E49CC6B5F5DC4F4C7086D /* SettingsCommonTypes.swift */; };
 		605BF925CD86715EA49177EF /* FontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF60BA560FBA4895E380B63B /* FontManager.swift */; };
@@ -6803,7 +6802,6 @@
 				E64BD85B47BA0420D57ABA96 /* IntegrationsSettingsView.swift in Sources */,
 				83CE8BCD82BF11CD9E4CD684 /* IntelligenceOrchestrator.swift in Sources */,
 				467B9780AD85D2135D5DA5BD /* IntelligentPrefetcher.swift in Sources */,
-				60074F43122CA4462F11AF90 /* IntentAnticipator.swift in Sources */,
 				2C0CE26F89A75A196536C000 /* IntentDisambiguation.swift in Sources */,
 				46D77E7A28F4EE86F0382D4E /* InteractionTracker.swift in Sources */,
 				27DDCEA65DBF5559DD2CC9C7 /* InteractiveWidgets.swift in Sources */,
