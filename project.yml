@@ -377,12 +377,9 @@ targets:
           - "**/Settings/AutoCorrectSettingsView.swift"
           - "**/Integrations/SafariIntegration.swift"
           - "**/Verification/CodeExecutionVerifier.swift"
-          - "**/Managers/ChatManager.swift"
-          - "**/ViewModels/ChatViewModel.swift"
           - "**/Components/ChatInputView.swift"
           - "**/Providers/OpenRouterProvider.swift"
           - "**/Providers/PerplexityProvider.swift"
-          - "**/AIProviderProtocol.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
