@@ -361,6 +361,7 @@ targets:
           - "**/LifeMonitoring/TaskIntelligence.swift"
           - "**/Integrations/TerminalIntegration.swift"
           - "**/Integrations/MusicIntegration.swift"
+          - "**/Integrations/SystemIntegration.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:

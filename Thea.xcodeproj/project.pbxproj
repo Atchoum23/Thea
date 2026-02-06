@@ -1051,7 +1051,6 @@
 		CC2BB95E766BDADD54B629A4 /* WorkflowEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EDFB2508E0925D4D0FBAF7 /* WorkflowEngine.swift */; };
 		CCBB32448A649AD41D93C387 /* Scriptsconfigure-xcode.sh in Resources */ = {isa = PBXBuildFile; fileRef = C489DE8C2C91836682E9371C /* Scriptsconfigure-xcode.sh */; };
 		CCC30D075DF9C10753817E35 /* MemoryAugmentedChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 397050A201C8948FCEA7617B /* MemoryAugmentedChat.swift */; };
-		CCE67AA93440934A2ABFDB36 /* MusicIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99D4BDAB8149EC38260DA47 /* MusicIntegration.swift */; };
 		CDAF66E3ACA211DE6CDE56B9 /* MLXInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8A897B4585FD049A1A930F /* MLXInferenceTests.swift */; };
 		CDB40E88E0F25CA2C1A92FF5 /* APIGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A454502FAF449E1123FF30 /* APIGeneratorTests.swift */; };
 		CDD7CD77B236B01C41798D18 /* RemoteClientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8EFA3168C3B124902594976 /* RemoteClientView.swift */; };
@@ -6886,7 +6885,6 @@
 				890E3DA6E1B8E7C114FBA747 /* MultiAgentCollaborationView.swift in Sources */,
 				A5A9D41578BCEFA36BF694FF /* MultiLanguageUtteranceBuilder.swift in Sources */,
 				9B2DB343A2E998E625ACF815 /* MultiModelConsensus.swift in Sources */,
-				CCE67AA93440934A2ABFDB36 /* MusicIntegration.swift in Sources */,
 				5C2CAACB5A96B36BB709DE01 /* NetworkDiscoveryService.swift in Sources */,
 				F713790A3290F08CD429F923 /* NetworkManager.swift in Sources */,
 				FE57800F548BCBCA0DD2672F /* NetworkObserver.swift in Sources */,
