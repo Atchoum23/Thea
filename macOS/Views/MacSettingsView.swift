@@ -74,7 +74,7 @@ struct MacSettingsView: View {
         case .integrations:
             IntegrationsSettingsView()
         case .automation:
-            AutomationSettingsView()
+            comingSoonView("Automation")
         case .voice:
             voiceSettings
         case .permissions:

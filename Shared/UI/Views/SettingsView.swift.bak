@@ -26,12 +26,12 @@ struct SettingsView: View {
                 }
 
             #if os(macOS)
-                TerminalSettingsSectionView()
+                TerminalSettingsView()
                     .tabItem {
                         Label("Terminal", systemImage: "terminal")
                     }
 
-                CoworkSettingsSectionView()
+                CoworkSettingsView()
                     .tabItem {
                         Label("Cowork", systemImage: "person.2.badge.gearshape")
                     }
@@ -250,19 +250,19 @@ struct MetaAISettingsView: View {
 
             Section {
                 NavigationLink("Workflow Builder") {
-                    SettingsComingSoonView(feature: "Workflow Builder")
+                    WorkflowBuilderView()
                 }
 
                 NavigationLink("Plugin Manager") {
-                    SettingsComingSoonView(feature: "Plugin Manager")
+                    PluginManagerView()
                 }
 
                 NavigationLink("Knowledge Graph Viewer") {
-                    SettingsComingSoonView(feature: "Knowledge Graph")
+                    KnowledgeGraphViewer()
                 }
 
                 NavigationLink("Memory Inspector") {
-                    SettingsComingSoonView(feature: "Memory Inspector")
+                    MemoryInspectorView()
                 }
             }
 
@@ -308,13 +308,13 @@ struct FeaturesSettingsView: View {
 
             Section("Voice & Migration") {
                 NavigationLink {
-                    SettingsComingSoonView(feature: "Voice Activation")
+                    VoiceSettingsView()
                 } label: {
                     Label("Voice Activation", systemImage: "waveform")
                 }
 
                 NavigationLink {
-                    SettingsComingSoonView(feature: "Import from Other Apps")
+                    MigrationView()
                 } label: {
                     Label("Import from Other Apps", systemImage: "arrow.down.doc")
                 }
@@ -322,20 +322,20 @@ struct FeaturesSettingsView: View {
 
             Section("Knowledge & Code") {
                 NavigationLink {
-                    SettingsComingSoonView(feature: "Knowledge Base")
+                    KnowledgeManagementView()
                 } label: {
                     Label("Knowledge Base", systemImage: "folder.badge.questionmark")
                 }
 
                 #if os(macOS)
                     NavigationLink {
-                        SettingsComingSoonView(feature: "Code Intelligence")
+                        CodeProjectView()
                     } label: {
                         Label("Code Intelligence", systemImage: "chevron.left.forwardslash.chevron.right")
                     }
 
                     NavigationLink {
-                        SettingsComingSoonView(feature: "Local Models")
+                        LocalModelsView()
                     } label: {
                         Label("Local Models", systemImage: "cpu")
                     }
@@ -344,7 +344,7 @@ struct FeaturesSettingsView: View {
 
             Section("Financial") {
                 NavigationLink {
-                    SettingsComingSoonView(feature: "Financial Dashboard")
+                    FinancialDashboardView()
                 } label: {
                     Label("Financial Dashboard", systemImage: "dollarsign.circle")
                 }
@@ -352,25 +352,25 @@ struct FeaturesSettingsView: View {
 
             Section("Meta-AI Tools") {
                 NavigationLink {
-                    SettingsComingSoonView(feature: "Workflow Builder")
+                    WorkflowBuilderView()
                 } label: {
                     Label("Workflow Builder", systemImage: "flowchart")
                 }
 
                 NavigationLink {
-                    SettingsComingSoonView(feature: "Plugin Manager")
+                    PluginManagerView()
                 } label: {
                     Label("Plugin Manager", systemImage: "puzzlepiece.extension")
                 }
 
                 NavigationLink {
-                    SettingsComingSoonView(feature: "Knowledge Graph")
+                    KnowledgeGraphViewer()
                 } label: {
                     Label("Knowledge Graph", systemImage: "point.3.connected.trianglepath.dotted")
                 }
 
                 NavigationLink {
-                    SettingsComingSoonView(feature: "Memory Inspector")
+                    MemoryInspectorView()
                 } label: {
                     Label("Memory Inspector", systemImage: "brain.head.profile")
                 }
@@ -620,7 +620,7 @@ struct VoiceConfigurationView: View {
         .navigationTitle("Voice Configuration")
         .onChange(of: config) { _, newValue in
             AppConfiguration.shared.voiceConfig = newValue
-            // TODO: Restore VoiceActivationEngine.shared.updateConfiguration() when voice module is available
+            VoiceActivationEngine.shared.updateConfiguration()
         }
     }
 }
@@ -775,7 +775,7 @@ struct MemoryConfigurationView: View {
 
             Section {
                 Button("Reset to Defaults") {
-                    config = AppMemoryConfiguration()
+                    config = MemoryConfiguration()
                 }
                 .foregroundStyle(.red)
             }
@@ -1311,32 +1311,6 @@ struct CoworkSettingsSectionView: View {
             }
         }
         .formStyle(.grouped)
-    }
-}
-
-// MARK: - Coming Soon Placeholder View
-
-struct SettingsComingSoonView: View {
-    let feature: String
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 60))
-                .foregroundStyle(.secondary)
-
-            Text(feature)
-                .font(.title2.bold())
-
-            Text("This feature is coming soon!")
-                .foregroundStyle(.secondary)
-
-            Text("Stay tuned for updates.")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle(feature)
     }
 }
 

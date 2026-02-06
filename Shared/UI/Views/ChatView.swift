@@ -49,11 +49,20 @@ struct ChatView: View {
             Divider()
 
             // Input
-            ChatInputView(
-                text: $inputText,
-                isStreaming: chatManager.isStreaming,
-                onSend: sendMessage
-            )
+            HStack {
+                TextField("Type a message...", text: $inputText)
+                    .textFieldStyle(.plain)
+                    .padding(.horizontal)
+
+                Button(action: sendMessage) {
+                    Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "paperplane.fill")
+                        .foregroundStyle(inputText.isEmpty && !chatManager.isStreaming ? .secondary : .primary)
+                }
+                .buttonStyle(.borderless)
+                .disabled(inputText.isEmpty && !chatManager.isStreaming)
+            }
+            .padding()
+            .background(.bar)
         }
         .navigationTitle(conversation.title)
         #if os(macOS)

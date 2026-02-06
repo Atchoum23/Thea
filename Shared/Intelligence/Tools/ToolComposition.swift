@@ -557,12 +557,13 @@ public final class ToolCompositionEngine: ObservableObject, Sendable {
     }
 
     private func executeParallel(_ steps: [PipelineStep], context: inout ToolPipelineContext) async -> [StepResult] {
-        await withTaskGroup(of: StepResult.self) { group in
+        // Capture context as a copy before entering task group
+        let capturedContext = context
+        return await withTaskGroup(of: StepResult.self) { group in
             for step in steps {
                 group.addTask {
-                    // Note: We create a copy of context for parallel execution
-                    var localContext = context
-                    return await self.executeStepIsolated(step, context: localContext)
+                    // Use captured copy for parallel execution
+                    return await self.executeStepIsolated(step, context: capturedContext)
                 }
             }
 
