@@ -591,7 +591,7 @@ public struct AsanaBatchAction: Sendable {
 
 public struct AsanaBatchResult: Codable, Sendable {
     public let statusCode: Int
-    public let body: AnyCodable?
+    public let body: AsanaAnyCodable?
 
     enum CodingKeys: String, CodingKey {
         case statusCode = "status_code"
@@ -754,7 +754,7 @@ public struct AsanaMCPError: Decodable, Sendable {
 public struct AsanaMCPTool: Codable, Sendable {
     public let name: String
     public let description: String
-    public let inputSchema: AnyCodable?
+    public let inputSchema: AsanaAnyCodable?
 }
 
 public struct AsanaMCPToolResult: Codable, Sendable {
@@ -772,7 +772,7 @@ public struct AsanaMCPQueryResult: Codable, Sendable {
 
 // MARK: - Helper Types
 
-public struct AnyCodable: Codable, Sendable {
+public struct AsanaAnyCodable: Codable, Sendable {
     public let value: Any
 
     public init(_ value: Any) {
@@ -791,12 +791,12 @@ public struct AnyCodable: Codable, Sendable {
             value = double
         } else if let bool = try? container.decode(Bool.self) {
             value = bool
-        } else if let array = try? container.decode([AnyCodable].self) {
+        } else if let array = try? container.decode([AsanaAnyCodable].self) {
             value = array.map { $0.value }
         } else if let keyedContainer = try? decoder.container(keyedBy: DynamicCodingKey.self) {
             var dict: [String: Any] = [:]
             for key in keyedContainer.allKeys {
-                let nested = try keyedContainer.decode(AnyCodable.self, forKey: key)
+                let nested = try keyedContainer.decode(AsanaAnyCodable.self, forKey: key)
                 dict[key.stringValue] = nested.value
             }
             value = dict
@@ -824,9 +824,9 @@ public struct AnyCodable: Codable, Sendable {
         case let bool as Bool:
             try container.encode(bool)
         case let array as [Any]:
-            try container.encode(array.map { AnyCodable($0) })
+            try container.encode(array.map { AsanaAnyCodable($0) })
         case let dict as [String: Any]:
-            try container.encode(dict.mapValues { AnyCodable($0) })
+            try container.encode(dict.mapValues { AsanaAnyCodable($0) })
         default:
             try container.encodeNil()
         }

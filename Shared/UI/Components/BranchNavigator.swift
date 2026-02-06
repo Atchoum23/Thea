@@ -143,6 +143,15 @@ struct BranchInfoBadge: View {
         .padding(.vertical, 2)
         .background(.ultraThinMaterial)
         .clipShape(Capsule())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(badgeAccessibilityLabel)
+    }
+
+    private var badgeAccessibilityLabel: String {
+        var parts: [String] = []
+        if isEdited { parts.append("Edited") }
+        if branchIndex > 0 { parts.append("Branch \(branchIndex)") }
+        return parts.joined(separator: ", ")
     }
 }
 

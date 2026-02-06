@@ -85,6 +85,8 @@ struct SuggestionChipGrid: View {
                 }
             }
         }
+        .accessibilityLabel("Suggestions")
+        .accessibilityHint("Choose a suggestion to start a conversation")
     }
 }
 
