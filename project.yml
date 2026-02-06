@@ -311,11 +311,6 @@ targets:
           # Exclude duplicate Settings views (use subfolder versions)
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
-          # Exclude duplicate notification types (use CrossDeviceNotificationRouter)
-          - "**/Notifications/NotificationPayload.swift"
-          - "**/Notifications/NotificationPreferences.swift"
-          # Exclude duplicate ExtractedEntity (use ConversationIntelligence version)
-          - "**/ConversationIntelligence/**"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
@@ -442,9 +437,6 @@ targets:
           - "**/AI/Memory/**"
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
-          - "**/Notifications/NotificationPayload.swift"
-          - "**/Notifications/NotificationPreferences.swift"
-          - "**/ConversationIntelligence/**"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
     settings:

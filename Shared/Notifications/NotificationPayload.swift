@@ -15,7 +15,7 @@ import UIKit
 // MARK: - Cross-Device Notification Priority
 
 /// Priority level for cross-device notifications, affects delivery behavior and presentation
-public enum CrossDeviceNotificationPriority: Int, Codable, Sendable, CaseIterable, Comparable {
+public enum PayloadNotificationPriority: Int, Codable, Sendable, CaseIterable, Comparable {
     /// Low priority - silent, batched delivery
     case low = 0
     /// Normal priority - standard delivery
@@ -57,7 +57,7 @@ public enum CrossDeviceNotificationPriority: Int, Codable, Sendable, CaseIterabl
         }
     }
 
-    public static func < (lhs: CrossDeviceNotificationPriority, rhs: CrossDeviceNotificationPriority) -> Bool {
+    public static func < (lhs: PayloadNotificationPriority, rhs: PayloadNotificationPriority) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
 }
@@ -104,7 +104,7 @@ public enum CrossDeviceNotificationCategory: String, Codable, Sendable, CaseIter
         }
     }
 
-    public var defaultPriority: CrossDeviceNotificationPriority {
+    public var defaultPriority: PayloadNotificationPriority {
         switch self {
         case .passwordNeeded, .approvalRequired:
             .critical
@@ -390,7 +390,7 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
     public let category: CrossDeviceNotificationCategory
 
     /// Priority level
-    public let priority: CrossDeviceNotificationPriority
+    public let priority: PayloadNotificationPriority
 
     /// Notification title
     public let title: String
@@ -448,7 +448,7 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
     public init(
         id: UUID = UUID(),
         category: CrossDeviceNotificationCategory,
-        priority: CrossDeviceNotificationPriority? = nil,
+        priority: PayloadNotificationPriority? = nil,
         title: String,
         body: String,
         subtitle: String? = nil,
@@ -496,7 +496,7 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
         let categoryRaw = record["category"] as? String ?? ""
         category = CrossDeviceNotificationCategory(rawValue: categoryRaw) ?? .custom
 
-        priority = CrossDeviceNotificationPriority(rawValue: record["priority"] as? Int ?? 1) ?? .normal
+        priority = PayloadNotificationPriority(rawValue: record["priority"] as? Int ?? 1) ?? .normal
 
         title = record["title"] as? String ?? ""
         body = record["body"] as? String ?? ""
