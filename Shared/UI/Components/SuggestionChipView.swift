@@ -52,6 +52,8 @@ struct SuggestionChip: View {
             .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(item.text)
+        .accessibilityHint("Sends this suggestion as a message")
     }
 }
 
