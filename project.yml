@@ -337,6 +337,9 @@ targets:
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"
+          - "**/Managers/ResponseNotificationHandler.swift"
+          - "**/DistributedTaskExecutor.swift"
+          - "**/LifeMonitoring/RelationshipIntelligence.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
