@@ -360,6 +360,7 @@ targets:
           - "**/Classification/TaskClassifier.swift"
           - "**/LifeMonitoring/TaskIntelligence.swift"
           - "**/Integrations/TerminalIntegration.swift"
+          - "**/Integrations/MusicIntegration.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:

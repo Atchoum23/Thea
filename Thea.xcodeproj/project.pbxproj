@@ -207,7 +207,6 @@
 		270AAAC7A89AF0054E20132B /* ModelRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB9744B949BD7B4F272881A /* ModelRouter.swift */; };
 		27495E2305E59672DCC5DE66 /* FinancialModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4318671F8DE98472EC663FBF /* FinancialModels.swift */; };
 		27DDCEA65DBF5559DD2CC9C7 /* InteractiveWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CDA30CCCEF656B4AF20E68 /* InteractiveWidgets.swift */; };
-		28171F8F2E5304161C5C1AB5 /* TerminalIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5A73448A770BC37E987A7F /* TerminalIntegration.swift */; };
 		2859A26EBF963B47AAE2F78A /* BatteryOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDA0136BF5B66976C838A6C /* BatteryOptimizer.swift */; };
 		287986142E2D318B605BF0BB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E89F5D542A80CF44499FAD7A /* PrivacyInfo.xcprivacy */; };
 		288634C9E0F35F8B8D6EF5CF /* TerminalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E574911E64043E5E764786E2 /* TerminalService.swift */; };
@@ -288,7 +287,6 @@
 		361C1E1AAC0B4B336C1E9A9E /* AdvancedSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F44FB30A541E1F4C048941F /* AdvancedSettingsView.swift */; };
 		363A0B989CEA01B6931924C2 /* IntegrationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D872BAFDDE2885E56AB67AA /* IntegrationCoordinator.swift */; };
 		3696749AE6293DB177926A90 /* TheawatchOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D11B480BB553DA2E774778 /* TheawatchOSApp.swift */; };
-		36A08EF19100F799215CFF29 /* TaskClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DCFC6B41A251AAA329B764 /* TaskClassifier.swift */; };
 		36E37E807499AF9FFF5706C6 /* TheaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF5ECC67C0BCEAEC116491B /* TheaApp.swift */; };
 		36F502E01CAE2CAEE9EF7B52 /* CodeExecutionVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83E6315354E6B9CB196EF63 /* CodeExecutionVerifier.swift */; };
 		37128E917CFA7A933A97D126 /* TheatvOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4C1B2CC9F019DD2CB8E4CA /* TheatvOSApp.swift */; };
@@ -446,7 +444,6 @@
 		51B1F0F3023F6B34CE739523 /* APIGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E6203C2845080FEA998CD3 /* APIGenerator.swift */; };
 		51B22F52E363457E4269A5EE /* NotificationMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 930F8454D7A34E65B0F5934A /* NotificationMonitor.swift */; };
 		51D190A8068CD07CAF0843FC /* iPadHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C231965359E8B76509245861 /* iPadHomeView.swift */; };
-		51D2AC7EDD88472F359C31D6 /* TaskIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAFA1820C870CB82B3947A91 /* TaskIntelligence.swift */; };
 		51E95607B65C38684592B9A2 /* SkillsRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50298F368E9D88D39615881C /* SkillsRegistry.swift */; };
 		5216C14A999719550495DE3E /* AnthropicProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5028FD03DD32838DE36130A7 /* AnthropicProvider.swift */; };
 		5299974BDCCC717FFD7AC8A6 /* HomeKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4716380D345E63618BB0BAC9 /* HomeKitService.swift */; };
@@ -2105,7 +2102,6 @@
 		D9D990D1848AECFEA69EF44B /* InputTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTrackingManager.swift; sourceTree = "<group>"; };
 		DA442AE1630095516AB91743 /* AdaptiveOCREngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveOCREngine.swift; sourceTree = "<group>"; };
 		DA59F7DE23369BDDE886752E /* CoworkContextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkContextView.swift; sourceTree = "<group>"; };
-		DA5A73448A770BC37E987A7F /* TerminalIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalIntegration.swift; sourceTree = "<group>"; };
 		DAAA553464FE2769C111150E /* Thea.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Thea.entitlements; sourceTree = "<group>"; };
 		DB0A368EA23E4583FA5F6EC4 /* AgentSecEnforcerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSecEnforcerTests.swift; sourceTree = "<group>"; };
 		DB1942158A31A4A96EC101D1 /* IntegrationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTypes.swift; sourceTree = "<group>"; };
@@ -3219,7 +3215,6 @@
 				BEBD868FB2CC146CE1E9176D /* SafariIntegration.swift */,
 				C4006F1EE54F4D4022032B75 /* ShortcutsIntegration.swift */,
 				1366E73300D92AFFCD64C8BC /* SystemIntegration.swift */,
-				DA5A73448A770BC37E987A7F /* TerminalIntegration.swift */,
 				5880D4EE0852DB29F5FCDEBE /* XcodeIntegration.swift */,
 			);
 			path = Integrations;
@@ -7034,15 +7029,12 @@
 				5E42AD0FE968C85245C7B40A /* THEAMCPServer.swift in Sources */,
 				C7AFA5EC3B324AF8A26D70D5 /* TabManager.swift in Sources */,
 				AA21C6329C6770F328CC62F3 /* TaskBreakdownService.swift in Sources */,
-				36A08EF19100F799215CFF29 /* TaskClassifier.swift in Sources */,
 				A481C9E22A2A689F5E40F77E /* TaskEditorSheet.swift in Sources */,
-				51D2AC7EDD88472F359C31D6 /* TaskIntelligence.swift in Sources */,
 				839CB740BD3F7266AC86FEC4 /* TaskScheduler.swift in Sources */,
 				0FA55C147D022F74032766F4 /* TaskType.swift in Sources */,
 				DFD17ED6AE34784CA55D5EF3 /* TeamKnowledgeBase.swift in Sources */,
 				3F5B3E4534B78F1AB8C4103D /* TemporalPatternEngine.swift in Sources */,
 				503B622F21366F47D42EF43B /* TerminalCommandExecutor.swift in Sources */,
-				28171F8F2E5304161C5C1AB5 /* TerminalIntegration.swift in Sources */,
 				DAB90B63C1F530C8169D0741 /* TerminalIntegrationManager.swift in Sources */,
 				B0B481BAD213EA09D15F0D8A /* TerminalOutputParser.swift in Sources */,
 				4F1A7F8CE3E5DC41D08B385F /* TerminalSecurityPolicy.swift in Sources */,
