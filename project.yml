@@ -307,6 +307,8 @@ targets:
           - "**/Integrations/RemindersIntegration.swift"
           # Exclude duplicate Memory (use Memory folder not AI/Memory)
           - "**/AI/Memory/**"
+          # Exclude DesignTokens (duplicates TheaDesignSystem definitions)
+          - "**/Theme/DesignTokens.swift"
           # Exclude duplicate Settings views (use subfolder versions)
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
@@ -333,7 +335,7 @@ targets:
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
           - "**/Styles/LiquidGlassStyle.swift"
-          # DesignTokens.swift now needed by MessageBubble.swift — included on macOS
+          - "**/Theme/DesignTokens.swift"
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"

@@ -970,7 +970,6 @@
 		EFB2C3DE4AFFB656E9DA047D /* CodebaseSearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A07DB3FD30E3BF63305DC7 /* CodebaseSearchEngine.swift */; };
 		EFC2D372ED54A2F0053AC6D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94A8FD1062B3581F53181973 /* Assets.xcassets */; };
 		EFCC7D3B71A367A740DE6B2D /* KnowledgeGraphTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190F35F221DD541C53FDAF94 /* KnowledgeGraphTests.swift */; };
-		F0222871D1E4790E1DC38264 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E4FD46807A2F180317D5098 /* DesignTokens.swift */; };
 		F0E5ADAE72D1814038B2B8F4 /* APIBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9A602963894A83668CD0A8 /* APIBuilderView.swift */; };
 		F1CAE8DDFFFBEC915FD7EEA3 /* ActivityTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5450739121E31EE2C598325F /* ActivityTracker.swift */; };
 		F22357C857E0874AF9AA9976 /* ShareExtensionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D46B387F2A77E098EAD2011 /* ShareExtensionManager.swift */; };
@@ -5715,7 +5714,6 @@
 				2493B2009CA514EF17FAE191 /* CustomAgentBuilder.swift in Sources */,
 				C81E4CB90206D14E4187FDD1 /* DataStorageErrorView.swift in Sources */,
 				7BCED260C47AE1029C241DBF /* DeepLinkRouter.swift in Sources */,
-				F0222871D1E4790E1DC38264 /* DesignTokens.swift in Sources */,
 				7D7305563EDDDF1A33F025B7 /* DeviceDiscovery.swift in Sources */,
 				84C60AE678E2BB2FD8C4AF5B /* DeviceRegistry.swift in Sources */,
 				6FBCAFFE268AD341E4E8FAE7 /* DeviceStateContextProvider.swift in Sources */,

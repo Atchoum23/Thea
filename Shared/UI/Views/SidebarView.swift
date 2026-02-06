@@ -53,7 +53,6 @@ struct SidebarView: View {
                 }
             }
         }
-        .softEdges()
         .searchable(text: $searchText, prompt: "Search conversations")
         .navigationTitle("Conversations")
         .toolbar {
