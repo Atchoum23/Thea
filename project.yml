@@ -364,6 +364,9 @@ targets:
           - "**/Integrations/SystemIntegration.swift"
           - "**/Verification/MultiModelConsensus.swift"
           - "**/AI/Adaptive/AdaptivePromptEngine.swift"
+          - "**/LocalModels/ProactiveModelManager.swift"
+          - "**/LocalModels/LocalModelRecommendationEngine.swift"
+          - "**/AI/Proactive/ProactivityEngine.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
