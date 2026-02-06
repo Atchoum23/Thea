@@ -331,6 +331,8 @@ targets:
           - "**/Settings/Privacy/**"
           - "**/Settings/ResourceAllocationSettingsView.swift"
           - "**/Views/SelfExecutionView.swift"
+          - "**/AI/MultiModal/MultiModalCoordinator.swift"
+          - "**/AI/MultiModal/MultiModalAnalyzer.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
