@@ -650,7 +650,6 @@
 		7D0D59B512E6CE17A33A882A /* TheaLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA05A04C9029841AE749334A /* TheaLiveActivity.swift */; };
 		7D18A5D8B18DB65E989E7744 /* OnDeviceAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39037BEDEE29D1CE9E77BE5B /* OnDeviceAIService.swift */; };
 		7D5AE9EC46AC47857F47C35D /* AdvancedSheetsActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84818CD23A60E664EC76468D /* AdvancedSheetsActions.swift */; };
-		7D5EFE3F3054E52053A780BB /* SafariIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBD868FB2CC146CE1E9176D /* SafariIntegration.swift */; };
 		7D7305563EDDDF1A33F025B7 /* DeviceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE3F4288C165F9736A02094 /* DeviceDiscovery.swift */; };
 		7D9B68C626DB10420C00668D /* ContinuityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448A78CF8B99616DFED708D5 /* ContinuityService.swift */; };
 		7DBA2856BB9C754F46C4433C /* PhotosMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D08008696D9C86E40E2A018 /* PhotosMonitor.swift */; };
@@ -6887,7 +6886,6 @@
 				E73083D2669CD9316E00CDBE /* RemoteSessionManager.swift in Sources */,
 				A000187C072843E6636D7CDB /* RemoteSystemService.swift in Sources */,
 				478F902A4914293FA97C6C3B /* ResourceDiscoveryEngine.swift in Sources */,
-				7D5EFE3F3054E52053A780BB /* SafariIntegration.swift in Sources */,
 				20B85FD38BACD436DF81FCB8 /* SafetyGuardrails.swift in Sources */,
 				E5A60409D2E8868B59F269B1 /* ScreenCapture.swift in Sources */,
 				2898AA08DF6D1D391F6E26BD /* ScreenTimeTracker.swift in Sources */,

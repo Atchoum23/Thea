@@ -49,14 +49,14 @@ final class AppConfiguration {
 
     // MARK: - Memory System Configuration
 
-    var memoryConfig: MemoryConfiguration {
+    var memoryConfig: AppMemoryConfiguration {
         get {
             if let data = defaults.data(forKey: "AppConfiguration.memoryConfig"),
-               let config = try? JSONDecoder().decode(MemoryConfiguration.self, from: data)
+               let config = try? JSONDecoder().decode(AppMemoryConfiguration.self, from: data)
             {
                 return config
             }
-            return MemoryConfiguration()
+            return AppMemoryConfiguration()
         }
         set {
             if let data = try? JSONEncoder().encode(newValue) {
@@ -321,7 +321,7 @@ final class AppConfiguration {
 
     func resetAllToDefaults() {
         providerConfig = ProviderConfiguration()
-        memoryConfig = MemoryConfiguration()
+        memoryConfig = AppMemoryConfiguration()
         agentConfig = AgentConfiguration()
         localModelConfig = LocalModelConfiguration()
         themeConfig = ThemeConfiguration()
@@ -390,7 +390,7 @@ struct ProviderConfiguration: Codable, Sendable, Equatable {
 
 // MARK: - Memory Configuration
 
-struct MemoryConfiguration: Codable, Sendable, Equatable {
+struct AppMemoryConfiguration: Codable, Sendable, Equatable {
     // Capacity
     var shortTermCapacity: Int = 20
     var longTermMaxItems: Int = 10000
