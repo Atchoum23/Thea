@@ -412,7 +412,6 @@
 		4E2D9DC1A6B705492AF1D16B /* CareerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83034A1686EC312EF8EE3D1 /* CareerModels.swift */; };
 		4E507D1D6841E1E16F012E48 /* PredictivePreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C78730D32ADCBCBD4C2C99A /* PredictivePreloader.swift */; };
 		4E7F50942C6B275D18103A91 /* LifeAssistantService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B33E42E22678A226FE91E0 /* LifeAssistantService.swift */; };
-		4E8BBBC9C27858F4FE9F30A9 /* LifeMonitoringCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3940AC8AE9EBFA601406EFF /* LifeMonitoringCoordinator.swift */; };
 		4EA034DA51B79DC3B36F32CF /* XcodeBuildRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A929EC8E304E78BBAF968AD /* XcodeBuildRunner.swift */; };
 		4ED37CD41AF685E360C59591 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C70E3E87D9CAD29709F642A1 /* LiveActivityManager.swift */; };
 		4EDAB512EFB0C45B25B8B41E /* TheaSharePlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D263A49EDCC79B973E539D /* TheaSharePlay.swift */; };
@@ -6759,7 +6758,6 @@
 				56A85D28B5E8D3EED11A75EF /* LifeInsightsAnalyzer.swift in Sources */,
 				10FD15BBBD9C8FDAF8E34AAF /* LifeIntelligenceCoordinator.swift in Sources */,
 				20AFC3211EC74CB50A7ECE23 /* LifeMonitoringCloudSync.swift in Sources */,
-				4E8BBBC9C27858F4FE9F30A9 /* LifeMonitoringCoordinator.swift in Sources */,
 				C0A4954CA50D937248D2B272 /* LifeTrackingDashboardView.swift in Sources */,
 				4C9DAD361C93706421E9A89D /* LifeTrackingSettingsView.swift in Sources */,
 				C70F84E232F773BC08538991 /* LifeTrackingView.swift in Sources */,
