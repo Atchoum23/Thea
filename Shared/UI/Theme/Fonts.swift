@@ -18,20 +18,27 @@ extension Font {
         }
     }
 
-    // MARK: - Configurable Fonts (MainActor required)
+    // MARK: - Dynamic Type Scaling
 
-    // MARK: - Dynamic Type Scaling Helper
-
-    /// Creates a system font that scales with Dynamic Type relative to a text style.
-    /// Uses the custom size as the base at the default content size category.
+    /// Creates a system font at a custom base size that scales with Dynamic Type.
+    ///
+    /// On iOS/tvOS/watchOS, uses UIFontMetrics to scale the base size according
+    /// to the user's preferred content size category. On macOS, returns the
+    /// unscaled size (macOS handles text scaling at the system level).
     private static func scalableFont(
         size: CGFloat,
         weight: Font.Weight,
         design: Font.Design = .default,
         relativeTo textStyle: Font.TextStyle
     ) -> Font {
-        Font.system(size: size, weight: weight, design: design)
-            .leading(.standard)
+        #if canImport(UIKit) && !os(watchOS)
+            let uiTextStyle = textStyle.uiTextStyle
+            let metrics = UIFontMetrics(forTextStyle: uiTextStyle)
+            let scaledSize = metrics.scaledValue(for: size)
+            return Font.system(size: scaledSize, weight: weight, design: design)
+        #else
+            return Font.system(size: size, weight: weight, design: design)
+        #endif
     }
 
     // MARK: - Configurable Fonts (MainActor required)
@@ -158,6 +165,9 @@ extension Font {
     }
 
     // MARK: - Static Defaults (for non-MainActor contexts)
+    // Note: Static defaults use fixed sizes (no Dynamic Type scaling)
+    // to avoid UIKit dependency. Use the @MainActor computed properties
+    // in views for proper Dynamic Type support.
 
     static let theaDisplayDefault = Font.system(size: 34, weight: .bold, design: .rounded)
     static let theaTitle1Default = Font.system(size: 28, weight: .bold, design: .rounded)
@@ -174,3 +184,29 @@ extension Font {
     static let theaCodeDefault = Font.system(size: 14, weight: .regular, design: .monospaced)
     static let theaCodeInlineDefault = Font.system(size: 16, weight: .medium, design: .monospaced)
 }
+
+// MARK: - Font.TextStyle → UIFont.TextStyle Conversion
+
+#if canImport(UIKit) && !os(watchOS)
+    import UIKit
+
+    extension Font.TextStyle {
+        /// Converts SwiftUI Font.TextStyle to UIKit UIFont.TextStyle for UIFontMetrics.
+        var uiTextStyle: UIFont.TextStyle {
+            switch self {
+            case .largeTitle: .largeTitle
+            case .title: .title1
+            case .title2: .title2
+            case .title3: .title3
+            case .headline: .headline
+            case .body: .body
+            case .callout: .callout
+            case .subheadline: .subheadline
+            case .footnote: .footnote
+            case .caption: .caption1
+            case .caption2: .caption2
+            @unknown default: .body
+            }
+        }
+    }
+#endif
