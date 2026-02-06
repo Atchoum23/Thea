@@ -18,6 +18,8 @@ struct WelcomeView: View {
                     .foregroundStyle(.secondary)
             }
             .padding(.horizontal, TheaSpacing.xxl)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(Self.timeBasedGreeting()) How can I help you today?")
 
             // Suggestion chips
             SuggestionChipGrid { item in
