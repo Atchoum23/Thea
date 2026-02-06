@@ -96,6 +96,7 @@ struct StreamingIndicatorView: View {
             .background(.ultraThinMaterial)
             .clipShape(Capsule())
             .transition(.scale.combined(with: .opacity))
+            .accessibilityLabel(status.displayText)
         }
     }
 
@@ -161,6 +162,7 @@ struct TypingIndicator: View {
         .onAppear {
             animationPhase = 1
         }
+        .accessibilityLabel("Thea is typing")
     }
 
     private func scale(for index: Int) -> CGFloat {
@@ -224,6 +226,24 @@ struct StreamingMessageView: View {
             }
 
             Spacer(minLength: TheaSpacing.jumbo)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(streamingAccessibilityLabel)
+        .accessibilityValue(streamingText.isEmpty ? "Waiting for response" : streamingText)
+    }
+
+    private var streamingAccessibilityLabel: String {
+        switch status {
+        case .thinking:
+            return "Thea is thinking"
+        case .generating:
+            return "Thea is responding"
+        case let .searching(query):
+            return "Thea is searching for \(query)"
+        case let .usingTool(name):
+            return "Thea is using \(name)"
+        default:
+            return "Thea is processing"
         }
     }
 }
