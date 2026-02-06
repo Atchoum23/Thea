@@ -48,9 +48,10 @@ struct SuggestionChip: View {
             .padding(.horizontal, TheaSpacing.lg)
             .padding(.vertical, TheaSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
         }
         .buttonStyle(.plain)
-        .liquidGlassRounded(cornerRadius: TheaCornerRadius.lg)
     }
 }
 
