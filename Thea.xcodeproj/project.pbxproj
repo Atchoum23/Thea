@@ -802,7 +802,6 @@
 		993C93709F1452ABFEFD5821 /* AssessmentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8EBC4395600A00A6822B76 /* AssessmentService.swift */; };
 		99798F7DD53C64ADD0081A4E /* NotificationMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 930F8454D7A34E65B0F5934A /* NotificationMonitor.swift */; };
 		999B7C12EB7CC443948F946B /* AdaptiveGovernanceOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C024B1C0C732C6B62677534 /* AdaptiveGovernanceOrchestrator.swift */; };
-		999F56FCC32A8FDF8E865C2C /* PhaseProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0012677BEC689DDFE0F787 /* PhaseProgressView.swift */; };
 		99A742B47C698ECCCC5C45F3 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684629699F86D3CF574A670B /* ServiceContainer.swift */; };
 		99AA5508D0EBBC3F182AA2DC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5124AE6AF8345D2125711ED3 /* ContentView.swift */; };
 		9A06FCF42B71B3C2D7CBCF26 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 55ED60A26645151D1B26BE21 /* popup.js */; };
@@ -6934,7 +6933,6 @@
 				BDCAD18108E714006E11B24D /* PermissionsManager.swift in Sources */,
 				2ADFB1B273A889C9041CEF74 /* PerplexityProvider.swift in Sources */,
 				08AF7496FBA4D75C303FF0CD /* PersonalizedLearning.swift in Sources */,
-				999F56FCC32A8FDF8E865C2C /* PhaseProgressView.swift in Sources */,
 				4FB156D8EBE5FFECA73A3FE7 /* PhotosIntegration.swift in Sources */,
 				44FBDFC39B43ED30C7DC9BC4 /* PhotosMonitor.swift in Sources */,
 				1F4CFE5A1EDDCD3A5333B45A /* PlatformColors.swift in Sources */,

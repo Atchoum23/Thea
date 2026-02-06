@@ -104,7 +104,7 @@ public enum CrossDeviceNotificationCategory: String, Codable, Sendable, CaseIter
         }
     }
 
-    public var defaultPriority: PayloadNotificationPriority {
+    public var defaultPriority: CrossDeviceNotificationPriority {
         switch self {
         case .passwordNeeded, .approvalRequired:
             .critical

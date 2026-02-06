@@ -317,7 +317,7 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
 
     private func loadCategoryPriorities() -> [CrossDeviceNotificationCategory: CrossDeviceNotificationPriority] {
         guard let data = defaults.data(forKey: StorageKey.categoryPriorities),
-              let dict = try? JSONDecoder().decode([String: Int].self, from: data)
+              let dict = try? JSONDecoder().decode([String: String].self, from: data)
         else { return [:] }
 
         var result: [CrossDeviceNotificationCategory: CrossDeviceNotificationPriority] = [:]

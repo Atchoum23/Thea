@@ -348,6 +348,8 @@ targets:
           - "**/Settings/Advanced/**"
           - "**/Components/ConfidenceIndicatorViews.swift"
           - "**/Views/PhaseProgressView.swift"
+          - "**/LifeMonitoring/EfficiencySuggestionEngine.swift"
+          - "**/Managers/ErrorKnowledgeBaseManager.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
