@@ -2,7 +2,8 @@
 import SwiftUI
 
 /// iPad-optimized home view using three-column NavigationSplitView
-/// Provides a native iPad experience with sidebar navigation, list content, and detail view
+/// Uses shared components (WelcomeView, ChatInputView, StreamingMessageView, ConversationRow)
+/// and design tokens for consistent styling.
 @MainActor
 struct IPadHomeView: View {
     @Environment(\.modelContext) private var modelContext
@@ -19,7 +20,6 @@ struct IPadHomeView: View {
 
     @State private var showingNewConversation = false
     @State private var showingNewProject = false
-    @State private var showingVoiceSettings = false
 
     enum SidebarSection: String, CaseIterable, Identifiable {
         case chat = "Chat"
@@ -32,11 +32,11 @@ struct IPadHomeView: View {
 
         var icon: String {
             switch self {
-            case .chat: "message.fill"
+            case .chat: "bubble.left.and.bubble.right.fill"
             case .projects: "folder.fill"
-            case .knowledge: "brain.head.profile"
-            case .financial: "dollarsign.circle.fill"
-            case .settings: "gear"
+            case .knowledge: "books.vertical.fill"
+            case .financial: "chart.pie.fill"
+            case .settings: "gearshape"
             }
         }
 
@@ -60,15 +60,11 @@ struct IPadHomeView: View {
             detailContent
         }
         .navigationSplitViewStyle(.balanced)
-        .adaptiveToolbar()
         .sheet(isPresented: $showingNewConversation) {
             iOSNewConversationView()
         }
         .sheet(isPresented: $showingNewProject) {
             IPadNewProjectView()
-        }
-        .sheet(isPresented: $showingVoiceSettings) {
-            iOSVoiceSettingsView()
         }
         .onAppear {
             setupManagers()
@@ -82,11 +78,18 @@ struct IPadHomeView: View {
             NavigationLink(value: section) {
                 Label {
                     Text(section.rawValue)
+                        .font(.theaBody)
                 } icon: {
                     Image(systemName: section.icon)
                         .foregroundStyle(section.accentColor)
                 }
             }
+            .listRowInsets(EdgeInsets(
+                top: TheaSpacing.sm,
+                leading: TheaSpacing.md,
+                bottom: TheaSpacing.sm,
+                trailing: TheaSpacing.md
+            ))
         }
         .navigationTitle("THEA")
         .listStyle(.sidebar)
@@ -98,15 +101,18 @@ struct IPadHomeView: View {
     private var listContent: some View {
         switch selectedSection {
         case .chat:
-            chatListContent
+            iPadChatListContent
         case .projects:
-            projectsListContent
+            iPadProjectsListContent
         case .knowledge:
-            knowledgeListContent
+            iOSKnowledgeView()
+                .navigationTitle("Knowledge")
         case .financial:
-            financialListContent
+            iOSFinancialView()
+                .navigationTitle("Financial")
         case .settings:
-            settingsListContent
+            iOSSettingsView()
+                .navigationTitle("Settings")
         case .none:
             ContentUnavailableView(
                 "Select a Section",
@@ -116,11 +122,13 @@ struct IPadHomeView: View {
         }
     }
 
-    private var chatListContent: some View {
+    // MARK: - Chat List
+
+    private var iPadChatListContent: some View {
         Group {
             if chatManager.conversations.isEmpty {
                 ContentUnavailableView {
-                    Label("No Conversations", systemImage: "message")
+                    Label("No Conversations", systemImage: "bubble.left.and.bubble.right")
                 } description: {
                     Text("Start a new conversation with THEA")
                 } actions: {
@@ -134,27 +142,10 @@ struct IPadHomeView: View {
             } else {
                 List(chatManager.conversations, selection: $selectedConversation) { conversation in
                     NavigationLink(value: conversation) {
-                        IPadConversationRow(conversation: conversation)
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            chatManager.deleteConversation(conversation)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-                    .swipeActions(edge: .leading) {
-                        Button {
-                            chatManager.togglePin(conversation)
-                        } label: {
-                            Label(
-                                conversation.isPinned ? "Unpin" : "Pin",
-                                systemImage: conversation.isPinned ? "pin.slash" : "pin"
-                            )
-                        }
-                        .tint(.theaPrimary)
+                        ConversationRow(conversation: conversation)
                     }
                 }
+                .listStyle(.insetGrouped)
             }
         }
         .navigationTitle("Conversations")
@@ -165,11 +156,14 @@ struct IPadHomeView: View {
                 } label: {
                     Image(systemName: "square.and.pencil")
                 }
+                .keyboardShortcut("n", modifiers: .command)
             }
         }
     }
 
-    private var projectsListContent: some View {
+    // MARK: - Projects List
+
+    private var iPadProjectsListContent: some View {
         Group {
             if projectManager.projects.isEmpty {
                 ContentUnavailableView {
@@ -207,33 +201,9 @@ struct IPadHomeView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
+                .keyboardShortcut("n", modifiers: [.command, .shift])
             }
         }
-    }
-
-    private var knowledgeListContent: some View {
-        iOSKnowledgeView()
-            .navigationTitle("Knowledge")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingVoiceSettings = true
-                    } label: {
-                        Image(systemName: voiceManager.isEnabled ? "mic.fill" : "mic.slash.fill")
-                            .foregroundStyle(voiceManager.isEnabled ? .theaPrimary : .secondary)
-                    }
-                }
-            }
-    }
-
-    private var financialListContent: some View {
-        iOSFinancialView()
-            .navigationTitle("Financial")
-    }
-
-    private var settingsListContent: some View {
-        iOSSettingsView()
-            .navigationTitle("Settings")
     }
 
     // MARK: - Detail Content
@@ -245,107 +215,36 @@ struct IPadHomeView: View {
             if let conversation = selectedConversation {
                 IPadChatDetailView(conversation: conversation)
             } else {
-                chatPlaceholderView
+                WelcomeView { prompt in
+                    let conversation = chatManager.createConversation(title: "New Conversation")
+                    selectedConversation = conversation
+                    Task {
+                        try? await chatManager.sendMessage(prompt, in: conversation)
+                    }
+                }
             }
         case .projects:
             if let project = selectedProject {
                 IPadProjectDetailView(project: project)
             } else {
-                projectPlaceholderView
+                ContentUnavailableView(
+                    "Select a Project",
+                    systemImage: "folder",
+                    description: Text("Choose a project from the list")
+                )
             }
         case .knowledge, .financial, .settings:
-            // These sections don't have a detail view - content is in the list column
             EmptyView()
         case .none:
-            welcomePlaceholderView
+            WelcomeView { prompt in
+                selectedSection = .chat
+                let conversation = chatManager.createConversation(title: "New Conversation")
+                selectedConversation = conversation
+                Task {
+                    try? await chatManager.sendMessage(prompt, in: conversation)
+                }
+            }
         }
-    }
-
-    private var chatPlaceholderView: some View {
-        VStack(spacing: 32) {
-            Image(systemName: "message.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(.theaPrimary)
-
-            VStack(spacing: 12) {
-                Text("Select a Conversation")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-
-                Text("Or start a new one")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-            }
-
-            Button {
-                showingNewConversation = true
-            } label: {
-                Label("New Conversation", systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 14)
-                    .background(Color.theaPrimary)
-                    .liquidGlass()
-            }
-            .buttonStyle(.plain)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var projectPlaceholderView: some View {
-        VStack(spacing: 32) {
-            Image(systemName: "folder.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(.blue)
-
-            VStack(spacing: 12) {
-                Text("Select a Project")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-
-                Text("Or create a new one")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-            }
-
-            Button {
-                showingNewProject = true
-            } label: {
-                Label("New Project", systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 14)
-                    .background(Color.blue)
-                    .liquidGlass()
-            }
-            .buttonStyle(.plain)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var welcomePlaceholderView: some View {
-        VStack(spacing: 32) {
-            Image(systemName: "brain.head.profile")
-                .font(.system(size: 100))
-                .foregroundStyle(.theaPrimary)
-
-            VStack(spacing: 12) {
-                Text("Welcome to THEA")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-
-                Text("Your AI Life Companion")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-            }
-
-            Text("Select a section from the sidebar to get started")
-                .font(.body)
-                .foregroundStyle(.tertiary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Setup
@@ -365,85 +264,37 @@ struct IPadHomeView: View {
     }
 }
 
-// MARK: - iPad Conversation Row
-
-private struct IPadConversationRow: View {
-    let conversation: Conversation
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(conversation.title)
-                    .font(.headline)
-                    .lineLimit(1)
-
-                Spacer()
-
-                if conversation.isPinned {
-                    Image(systemName: "pin.fill")
-                        .font(.caption)
-                        .foregroundStyle(.theaPrimary)
-                }
-            }
-
-            if let lastMessage = conversation.messages.last {
-                Text(lastMessage.content.textValue)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-
-            HStack {
-                Text(conversation.updatedAt, style: .relative)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-
-                if !conversation.messages.isEmpty {
-                    Text("•")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-
-                    Text("\(conversation.messages.count) messages")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-            }
-        }
-        .padding(.vertical, 4)
-    }
-}
-
 // MARK: - iPad Project Row
 
 private struct IPadProjectRow: View {
     let project: Project
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: TheaSpacing.xs) {
             HStack {
                 Image(systemName: "folder.fill")
                     .foregroundStyle(.blue)
 
                 Text(project.title)
-                    .font(.headline)
+                    .font(.theaBody)
                     .lineLimit(1)
             }
 
-            HStack(spacing: 16) {
+            HStack(spacing: TheaSpacing.lg) {
                 Label("\(project.conversations.count)", systemImage: "message")
-                    .font(.caption)
+                    .font(.theaCaption2)
                     .foregroundStyle(.secondary)
 
                 Label("\(project.files.count)", systemImage: "doc")
-                    .font(.caption)
+                    .font(.theaCaption2)
                     .foregroundStyle(.secondary)
 
                 Text(project.updatedAt, style: .relative)
-                    .font(.caption)
+                    .font(.theaCaption2)
                     .foregroundStyle(.tertiary)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, TheaSpacing.xxs)
     }
 }
 
@@ -460,7 +311,6 @@ struct IPadChatDetailView: View {
 
     @State private var messageText = ""
     @State private var isListeningForVoice = false
-    @State private var showingAttachmentOptions = false
     @FocusState private var isInputFocused: Bool
 
     private var messages: [Message] {
@@ -477,40 +327,40 @@ struct IPadChatDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             messageList
-            Divider()
-            inputArea
+            chatInput
         }
         .navigationTitle(conversation.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                HStack(spacing: 16) {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button {
+                    isListeningForVoice.toggle()
+                    handleVoiceInput()
+                } label: {
+                    Image(systemName: isListeningForVoice ? "mic.fill" : "mic")
+                        .foregroundStyle(isListeningForVoice ? .red : .theaPrimary)
+                        .symbolEffect(.bounce, value: isListeningForVoice)
+                }
+                .help("Voice input")
+                .keyboardShortcut("d", modifiers: [.command, .shift])
+
+                Menu {
                     Button {
-                        isListeningForVoice.toggle()
-                        handleVoiceInput()
+                        chatManager.togglePin(conversation)
                     } label: {
-                        Image(systemName: isListeningForVoice ? "mic.fill" : "mic")
-                            .foregroundStyle(isListeningForVoice ? .red : .theaPrimary)
+                        Label(
+                            conversation.isPinned ? "Unpin" : "Pin",
+                            systemImage: conversation.isPinned ? "pin.slash" : "pin"
+                        )
                     }
 
-                    Menu {
-                        Button {
-                            chatManager.togglePin(conversation)
-                        } label: {
-                            Label(
-                                conversation.isPinned ? "Unpin" : "Pin",
-                                systemImage: conversation.isPinned ? "pin.slash" : "pin"
-                            )
-                        }
-
-                        Button(role: .destructive) {
-                            chatManager.deleteConversation(conversation)
-                        } label: {
-                            Label("Delete Conversation", systemImage: "trash")
-                        }
+                    Button(role: .destructive) {
+                        chatManager.deleteConversation(conversation)
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Label("Delete Conversation", systemImage: "trash")
                     }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
@@ -520,29 +370,40 @@ struct IPadChatDetailView: View {
         }
     }
 
+    // MARK: - Message List
+
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 16) {
-                    ForEach(messages) { message in
-                        MessageBubble(message: message)
-                            .id(message.id)
+                if messages.isEmpty && !chatManager.isStreaming {
+                    WelcomeView { prompt in
+                        messageText = prompt
+                        sendMessage()
                     }
-
-                    if chatManager.isStreaming, !chatManager.streamingText.isEmpty {
-                        HStack {
-                            Text(chatManager.streamingText)
-                                .padding(16)
-                                .background(Color(uiColor: .secondarySystemBackground))
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                            Spacer()
+                } else {
+                    LazyVStack(spacing: TheaSpacing.lg) {
+                        ForEach(messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .move(edge: .bottom)),
+                                    removal: .opacity
+                                ))
                         }
-                        .padding(.horizontal, 24)
-                        .id("streaming")
+
+                        if chatManager.isStreaming {
+                            StreamingMessageView(
+                                streamingText: chatManager.streamingText,
+                                status: chatManager.streamingText.isEmpty ? .thinking : .generating
+                            )
+                            .id("streaming")
+                        }
                     }
+                    .padding(.horizontal, TheaSpacing.xxl)
+                    .padding(.vertical, TheaSpacing.lg)
                 }
-                .padding(.vertical, 20)
             }
+            .scrollContentBackground(.hidden)
             .onChange(of: messages.count) { _, _ in
                 scrollToBottom(proxy: proxy)
             }
@@ -552,80 +413,31 @@ struct IPadChatDetailView: View {
         }
     }
 
+    // MARK: - Chat Input
+
+    private var chatInput: some View {
+        ChatInputView(
+            text: $messageText,
+            isStreaming: chatManager.isStreaming
+        ) {
+            if chatManager.isStreaming {
+                chatManager.cancelStreaming()
+            } else {
+                sendMessage()
+            }
+        }
+    }
+
+    // MARK: - Actions
+
     private func scrollToBottom(proxy: ScrollViewProxy) {
-        withAnimation(.easeOut(duration: 0.2)) {
+        withAnimation(TheaAnimation.smooth) {
             if chatManager.isStreaming {
                 proxy.scrollTo("streaming", anchor: .bottom)
             } else if let lastMessage = messages.last {
                 proxy.scrollTo(lastMessage.id, anchor: .bottom)
             }
         }
-    }
-
-    private var inputArea: some View {
-        HStack(alignment: .bottom, spacing: 16) {
-            // Attachment menu
-            Menu {
-                Button {
-                    // Photo library - placeholder for future implementation
-                } label: {
-                    Label("Photo Library", systemImage: "photo.on.rectangle")
-                }
-
-                Button {
-                    // Camera - placeholder for future implementation
-                } label: {
-                    Label("Camera", systemImage: "camera")
-                }
-
-                Button {
-                    // Files - placeholder for future implementation
-                } label: {
-                    Label("Files", systemImage: "folder")
-                }
-            } label: {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 28))
-                    .foregroundStyle(.secondary)
-            }
-
-            TextField("Message THEA...", text: $messageText, axis: .vertical)
-                .textFieldStyle(.plain)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 14)
-                .background(Color(uiColor: .secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 24))
-                .lineLimit(1 ... 8)
-                .focused($isInputFocused)
-                .disabled(chatManager.isStreaming)
-                .submitLabel(.send)
-                .onSubmit {
-                    if !messageText.isEmpty, !chatManager.isStreaming {
-                        sendMessage()
-                    }
-                }
-
-            Button {
-                if chatManager.isStreaming {
-                    chatManager.cancelStreaming()
-                } else {
-                    sendMessage()
-                }
-            } label: {
-                Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundStyle(
-                        messageText.isEmpty && !chatManager.isStreaming
-                            ? Color.secondary
-                            : Color.theaPrimary
-                    )
-            }
-            .disabled(messageText.isEmpty && !chatManager.isStreaming)
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
-        .liquidGlassRounded(cornerRadius: 0)
-        .background(Color(uiColor: .systemBackground).opacity(0.8))
     }
 
     private func sendMessage() {
@@ -647,7 +459,7 @@ struct IPadChatDetailView: View {
     private func handleVoiceInput() {
         if isListeningForVoice {
             try? voiceManager.startVoiceCommand()
-            voiceManager.onTranscriptionComplete = { transcription in
+            voiceManager.onTranscriptionComplete = { (transcription: String) in
                 messageText = transcription
                 isListeningForVoice = false
             }
@@ -697,9 +509,11 @@ struct IPadProjectDetailView: View {
                         .frame(minHeight: 150)
                 } else if project.customInstructions.isEmpty {
                     Text("No custom instructions")
+                        .font(.theaCaption1)
                         .foregroundStyle(.secondary)
                 } else {
                     Text(project.customInstructions)
+                        .font(.theaBody)
                 }
             }
 
@@ -707,7 +521,7 @@ struct IPadProjectDetailView: View {
                 Section("Conversations") {
                     ForEach(project.conversations) { conversation in
                         NavigationLink(destination: IPadChatDetailView(conversation: conversation)) {
-                            IPadConversationRow(conversation: conversation)
+                            ConversationRow(conversation: conversation)
                         }
                     }
                 }
@@ -720,12 +534,12 @@ struct IPadProjectDetailView: View {
                             Image(systemName: "doc.fill")
                                 .foregroundStyle(.blue)
 
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
                                 Text(file.name)
-                                    .font(.body)
+                                    .font(.theaBody)
 
                                 Text("\(file.size) bytes")
-                                    .font(.caption)
+                                    .font(.theaCaption2)
                                     .foregroundStyle(.secondary)
                             }
                         }
