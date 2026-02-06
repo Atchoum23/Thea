@@ -71,50 +71,45 @@ struct ChatInputView: View {
             .padding(.horizontal, 16)
 
             // Input row
-            HStack(alignment: .bottom, spacing: 12) {
+            HStack(alignment: .bottom, spacing: TheaSpacing.md) {
                 // Attach file button
                 Button(action: { showingFilePicker = true }) {
-                    Image(systemName: "paperclip")
-                        .font(.system(size: 20))
-                        .foregroundColor(.theaPrimary)
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: TheaSize.iconLarge))
+                        .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
                 .help("Attach Files")
                 .disabled(isStreaming)
 
-                // Screenshot button
                 #if os(macOS)
                     Button(action: captureScreenshot) {
                         Image(systemName: "camera.viewfinder")
-                            .font(.system(size: 20))
-                            .foregroundColor(.theaPrimary)
+                            .font(.system(size: TheaSize.iconMedium))
+                            .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
                     .help("Capture Screenshot")
                     .disabled(isStreaming)
                 #endif
 
-                // Text input with drop support
-                TextField("Message THEA...", text: $text, axis: .vertical)
-                    .textFieldStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                #if os(macOS)
-                    .background(dragOver ? Color.theaPrimary.opacity(0.2) : Color(nsColor: .systemGray))
-                #else
-                    .background(Color(uiColor: .systemGray6))
-                #endif
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .lineLimit(1 ... 10)
-                    .focused($isFocused)
-                    .disabled(isStreaming)
-                    .onSubmit {
-                        inputLog("⏎ onSubmit triggered! text='\(text.prefix(30))...', isEmpty=\(text.isEmpty)")
-                        if !text.isEmpty || !attachmentManager.attachments.isEmpty {
-                            inputLog("✅ Calling onSend from onSubmit")
-                            onSend()
+                // Glass-styled text input
+                HStack(alignment: .bottom, spacing: TheaSpacing.sm) {
+                    TextField("Message Thea...", text: $text, axis: .vertical)
+                        .textFieldStyle(.plain)
+                        .lineLimit(1 ... 8)
+                        .focused($isFocused)
+                        .disabled(isStreaming)
+                        .onSubmit {
+                            inputLog("onSubmit triggered")
+                            if !text.isEmpty || !attachmentManager.attachments.isEmpty {
+                                onSend()
+                            }
                         }
-                    }
+                }
+                .padding(.horizontal, TheaSpacing.lg)
+                .padding(.vertical, TheaSpacing.md)
+                .liquidGlassRounded(cornerRadius: TheaCornerRadius.xl)
                 #if os(macOS)
                     .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
                         handleDrop(providers: providers)
@@ -122,21 +117,22 @@ struct ChatInputView: View {
                     }
                 #endif
 
-                // Send button
+                // Send / Stop button
                 Button {
-                    inputLog("🔘 Send button pressed! text='\(text.prefix(30))...', canSend=\(canSend), isStreaming=\(isStreaming)")
+                    inputLog("Send button pressed")
                     onSend()
                 } label: {
                     Image(systemName: isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
                         .font(.system(size: 32))
-                        .foregroundStyle(canSend ? Color.theaPrimary : .secondary)
+                        .foregroundStyle(canSend || isStreaming ? Color.theaPrimaryDefault : .secondary)
+                        .contentTransition(.symbolEffect(.replace))
                 }
                 .buttonStyle(.plain)
                 .disabled(!canSend && !isStreaming)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, TheaSpacing.lg)
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, TheaSpacing.md)
         .fileImporter(
             isPresented: $showingFilePicker,
             allowedContentTypes: [.item], // Allow all file types
@@ -289,14 +285,10 @@ struct AttachmentChip: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        #if os(macOS)
-        .background(Color(nsColor: .systemGray).opacity(0.5))
-        #else
-        .background(Color(uiColor: .systemGray5))
-        #endif
-        .cornerRadius(8)
+        .padding(.horizontal, TheaSpacing.md)
+        .padding(.vertical, TheaSpacing.sm)
+        .background(Color.theaSurface)
+        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.sm))
     }
 }
 
