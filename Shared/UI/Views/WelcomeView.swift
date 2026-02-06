@@ -1,55 +1,54 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    @State private var showingSettings = false
+    var onSuggestionSelected: ((String) -> Void)?
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(alignment: .leading, spacing: TheaSpacing.xxxl) {
             Spacer()
 
-            // Logo/Icon
-            Image(systemName: "sparkles")
-                .font(.system(size: 80))
-                .foregroundStyle(Color.theaPrimaryGradient)
+            // Greeting
+            VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+                Text(Self.timeBasedGreeting())
+                    .font(.theaLargeDisplay)
+                    .foregroundStyle(Color.theaPrimaryGradientDefault)
 
-            // Title
-            Text("Welcome to THEA")
-                .font(.theaDisplay)
-
-            // Subtitle
-            Text("Your AI Life Companion")
-                .font(.theaTitle3)
-                .foregroundStyle(.secondary)
-
-            Spacer()
-
-            // Quick Actions
-            VStack(spacing: 12) {
-                Button {
-                    NotificationCenter.default.post(name: Notification.Name.newConversation, object: nil)
-                } label: {
-                    Label("New Conversation", systemImage: "plus.message")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-
-                Button {
-                    showingSettings = true
-                } label: {
-                    Label("Set Up Providers", systemImage: "network")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
+                Text("How can I help you today?")
+                    .font(.theaTitle2)
+                    .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: 300)
+            .padding(.horizontal, TheaSpacing.xxl)
 
+            // Suggestion chips
+            SuggestionChipGrid { item in
+                if let onSuggestionSelected {
+                    onSuggestionSelected(item.prompt)
+                } else {
+                    NotificationCenter.default.post(
+                        name: Notification.Name.newConversation,
+                        object: item.prompt
+                    )
+                }
+            }
+            .padding(.horizontal, TheaSpacing.xxl)
+
+            Spacer()
             Spacer()
         }
-        .padding()
-        .sheet(isPresented: $showingSettings) {
-            SettingsView()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    static func timeBasedGreeting() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:
+            return "Good morning."
+        case 12..<17:
+            return "Good afternoon."
+        case 17..<22:
+            return "Good evening."
+        default:
+            return "Hello."
         }
     }
 }
