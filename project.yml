@@ -301,6 +301,16 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
+          # Exclude duplicate MetaAI (use Intelligence folder versions)
+          - "**/AI/MetaAI/**"
+          # Exclude duplicate Integrations (use Apple subfolder)
+          - "**/Integrations/NotesIntegration.swift"
+          - "**/Integrations/RemindersIntegration.swift"
+          # Exclude duplicate Memory (use Memory folder not AI/Memory)
+          - "**/AI/Memory/**"
+          # Exclude duplicate Settings views (use subfolder versions)
+          - "**/Settings/LocalModelsSettingsView.swift"
+          - "**/Settings/AutonomousTaskSettingsView.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
@@ -421,6 +431,12 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
+          - "**/AI/MetaAI/**"
+          - "**/Integrations/NotesIntegration.swift"
+          - "**/Integrations/RemindersIntegration.swift"
+          - "**/AI/Memory/**"
+          - "**/Settings/LocalModelsSettingsView.swift"
+          - "**/Settings/AutonomousTaskSettingsView.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
     settings:
