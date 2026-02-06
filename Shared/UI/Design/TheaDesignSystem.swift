@@ -134,6 +134,39 @@ public enum TheaRadius {
     public static let pill: CGFloat = 999
 }
 
+/// Corner radius tokens (alias used by DesignTokens consumers on macOS)
+public enum TheaCornerRadius {
+    public static let sm: CGFloat = TheaRadius.sm
+    public static let md: CGFloat = TheaRadius.md
+    public static let lg: CGFloat = TheaRadius.lg
+    public static let xl: CGFloat = TheaRadius.xl
+    public static let card: CGFloat = 24
+    public static let capsule: CGFloat = .infinity
+
+    public static func concentric(outer: CGFloat, padding: CGFloat) -> CGFloat {
+        max(0, outer - padding)
+    }
+}
+
+/// Size tokens for consistent component dimensions
+public enum TheaSize {
+    public static let minTouchTarget: CGFloat = 44
+    public static let buttonHeight: CGFloat = 48
+    public static let capsuleButtonHeight: CGFloat = 56
+    public static let inputFieldMinHeight: CGFloat = 44
+    public static let inputFieldMaxHeight: CGFloat = 200
+    public static let sidebarMinWidth: CGFloat = 240
+    public static let sidebarIdealWidth: CGFloat = 280
+    public static let messageMaxWidth: CGFloat = 680
+    public static let messageAvatarSize: CGFloat = 28
+    public static let iconSmall: CGFloat = 16
+    public static let iconMedium: CGFloat = 20
+    public static let iconLarge: CGFloat = 24
+    public static let iconXLarge: CGFloat = 32
+    public static let tvMessageMaxWidth: CGFloat = 1000
+    public static let tvMinTouchTarget: CGFloat = 66
+}
+
 /// Shadow definitions for layered depth
 public enum TheaShadow {
     /// Subtle elevation for cards

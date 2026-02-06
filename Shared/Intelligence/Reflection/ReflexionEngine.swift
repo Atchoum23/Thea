@@ -249,7 +249,7 @@ public struct ConfidenceCalibration: Codable, Sendable {
         let bucketIndex = min(9, Int(rawConfidence * 10))
         let bucket = calibrationBuckets[bucketIndex]
 
-        guard bucket.count > 10 else {
+        guard bucket.sampleCount > 10 else {
             // Not enough data, return raw
             return rawConfidence
         }
