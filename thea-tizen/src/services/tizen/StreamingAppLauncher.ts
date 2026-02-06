@@ -89,10 +89,21 @@ const STREAMING_APPS: StreamingApp[] = [
     supportsDeepLink: false,
   },
   {
+    id: 'canal_ch',
+    name: 'Canal+ Switzerland',
+    // Canal+ Switzerland app - includes HBO Max & Paramount+ content
+    // Subscribed via Swisscom TV
+    tizenAppIds: ['3201807016582', '3201710015037', 'vNYy4oCLix.canalplus'],
+    supportsDeepLink: false,
+    // Note: HBO Max and Paramount+ content accessible through this single app
+    searchUrl: 'https://www.canalplus.ch/recherche/',
+  },
+  {
     id: 'swisscom',
     name: 'blue TV',
-    tizenAppIds: ['3201803015934'], // May need verification
+    tizenAppIds: ['3201803015934'], // Swisscom's own streaming
     supportsDeepLink: false,
+    searchUrl: 'https://www.blue.ch/tv/',
   },
 ];
 
@@ -173,8 +184,32 @@ class StreamingAppLauncher {
 
   /**
    * Get app by TMDB provider ID
+   * Note: For Switzerland, HBO Max (384/1899) and Paramount+ (531) are accessed
+   * through Canal+ Switzerland app via Swisscom TV subscription
    */
-  getAppByProviderId(providerId: number): StreamingApp | undefined {
+  getAppByProviderId(providerId: number, region: string = 'CH'): StreamingApp | undefined {
+    // Switzerland-specific: HBO Max & Paramount+ are bundled in Canal+ Switzerland
+    if (region === 'CH') {
+      const swissProviderMap: Record<number, string> = {
+        8: 'netflix',
+        9: 'prime',
+        10: 'prime',
+        337: 'disney',
+        2: 'apple',
+        350: 'apple',
+        192: 'youtube',
+        3: 'youtube',
+        384: 'canal_ch',   // HBO Max → Canal+ Switzerland
+        1899: 'canal_ch',  // Max → Canal+ Switzerland
+        531: 'canal_ch',   // Paramount+ → Canal+ Switzerland
+        381: 'canal_ch',   // Canal+ → Canal+ Switzerland
+        1773: 'canal_ch',  // Canal+ Séries → Canal+ Switzerland
+      };
+      const appId = swissProviderMap[providerId];
+      if (appId) return this.getApp(appId);
+    }
+
+    // Default provider mapping for other regions
     const providerMap: Record<number, string> = {
       8: 'netflix',
       9: 'prime',
@@ -192,6 +227,37 @@ class StreamingAppLauncher {
 
     const appId = providerMap[providerId];
     return appId ? this.getApp(appId) : undefined;
+  }
+
+  /**
+   * Check if content on a provider is accessible via bundled service
+   * E.g., HBO Max content in CH is accessible via Canal+ Switzerland
+   */
+  getBundledAccessInfo(providerId: number, region: string = 'CH'): {
+    accessible: boolean;
+    viaApp?: StreamingApp;
+    originalProvider: string;
+    note?: string;
+  } | null {
+    if (region !== 'CH') return null;
+
+    const bundledProviders: Record<number, { name: string; note: string }> = {
+      384: { name: 'HBO Max', note: 'Included with Canal+ Switzerland via Swisscom TV' },
+      1899: { name: 'Max', note: 'Included with Canal+ Switzerland via Swisscom TV' },
+      531: { name: 'Paramount+', note: 'Included with Canal+ Switzerland via Swisscom TV' },
+    };
+
+    const bundled = bundledProviders[providerId];
+    if (bundled) {
+      return {
+        accessible: true,
+        viaApp: this.getApp('canal_ch'),
+        originalProvider: bundled.name,
+        note: bundled.note,
+      };
+    }
+
+    return null;
   }
 
   /**
