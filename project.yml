@@ -382,6 +382,7 @@ targets:
           - "**/Providers/PerplexityProvider.swift"
           - "**/LifeMonitoring/**"
           - "**/Search/SemanticSearchService.swift"
+          - "**/Components/QuerySuggestionOverlay.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
