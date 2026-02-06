@@ -375,6 +375,7 @@ targets:
           - "**/Platforms/PlatformFeaturesHub.swift"
           - "**/TextProcessing/LiveAutoCorrect.swift"
           - "**/Settings/AutoCorrectSettingsView.swift"
+          - "**/Integrations/SafariIntegration.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
