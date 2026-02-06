@@ -743,7 +743,6 @@
 		98508BD231F97702FAF41D56 /* ContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE86E6C7C4A9B05B467349F5 /* ContextManager.swift */; };
 		985C52095D3744098DE9F77E /* WorkflowSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F38F8AACB3311713FA335FB /* WorkflowSettingsView.swift */; };
 		986994159BF620B47E57E889 /* ContextPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F7F861E7D781249B4AF7A6 /* ContextPredictor.swift */; };
-		9870B77D140BF19912DDD575 /* MemoryContextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95E5767E1A0383C10CDFAA4 /* MemoryContextView.swift */; };
 		98DCB9441F565FB4D667280B /* WorkflowBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D9C22B346042B7409F3461 /* WorkflowBuilderView.swift */; };
 		98DD1BB7EF1E6DB58A7FDB0B /* SubagentDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E5623FEB3E9B9505927826E /* SubagentDefinition.swift */; };
 		98E9FBC375FF2B281E6DE977 /* PrivacyPreservingAIRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55D01F902573C48ACF0FE738 /* PrivacyPreservingAIRouter.swift */; };
@@ -6720,7 +6719,6 @@
 				CC0E35A1AF7A6B4358FD1C89 /* MediaObserver.swift in Sources */,
 				BFA9A77E36D50053B536B557 /* MeetingIntelligence.swift in Sources */,
 				CCC30D075DF9C10753817E35 /* MemoryAugmentedChat.swift in Sources */,
-				9870B77D140BF19912DDD575 /* MemoryContextView.swift in Sources */,
 				EC6175AA942F4EC0ECD7A1F9 /* MemoryService.swift in Sources */,
 				686EA210154724022502D673 /* MentalWorldModel.swift in Sources */,
 				C50325A03692648069FE12F8 /* MentionAutocomplete.swift in Sources */,

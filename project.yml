@@ -386,6 +386,8 @@ targets:
           - "**/Settings/AIFeaturesSettingsView.swift"
           - "**/Memory/ActiveMemoryRetrieval.swift"
           - "**/Components/MemoryContextView.swift"
+          - "**/Components/StreamingTextView.swift"
+          - "**/MCP/THEAMCPServer.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
