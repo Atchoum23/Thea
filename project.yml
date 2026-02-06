@@ -385,6 +385,7 @@ targets:
           - "**/Components/QuerySuggestionOverlay.swift"
           - "**/Settings/AIFeaturesSettingsView.swift"
           - "**/Memory/ActiveMemoryRetrieval.swift"
+          - "**/Components/MemoryContextView.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
