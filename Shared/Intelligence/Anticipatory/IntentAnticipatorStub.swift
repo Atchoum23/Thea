@@ -66,26 +66,4 @@ public struct AnticipatedIntent: Identifiable, Sendable {
     }
 }
 
-/// Represents a predicted user intent with context
-public struct PredictedUserIntent: Identifiable, Sendable {
-    public let id: UUID
-    public let intent: String
-    public let confidence: Double
-    public let relatedPatterns: [UUID]
-    public let suggestedAction: String?
-    public let timestamp: Date
-
-    public init(
-        intent: String,
-        confidence: Double,
-        relatedPatterns: [UUID] = [],
-        suggestedAction: String? = nil
-    ) {
-        self.id = UUID()
-        self.intent = intent
-        self.confidence = confidence
-        self.relatedPatterns = relatedPatterns
-        self.suggestedAction = suggestedAction
-        self.timestamp = Date()
-    }
-}
+// PredictedUserIntent is defined in AnticipatoryIntelligenceCore.swift

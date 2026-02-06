@@ -682,7 +682,6 @@
 		7FC0931BB84FBF8394455F75 /* SiriShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119E655F208CE7BAFF433FBC /* SiriShortcuts.swift */; };
 		7FE5FD6066F13548043C0A50 /* NutritionDataImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8D18BE29EA58B17F342D35 /* NutritionDataImporter.swift */; };
 		8004155A3A4CC67BA11D6444 /* AppUsageMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5981EE45534F8BD517361F83 /* AppUsageMonitor.swift */; };
-		8039A0A11344819981E14259 /* AdaptivePromptEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5848F48A94E9F588E4F2D9F /* AdaptivePromptEngine.swift */; };
 		8043264EC82F7DB7D9BF47E0 /* SwiftBestPracticesLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA71D9A17E303BD39C81021B /* SwiftBestPracticesLibrary.swift */; };
 		8068FD874442CB3C6185F678 /* COMPLETE-CLAUDE-PROMPT.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9497367BEF7D80B80F4027F3 /* COMPLETE-CLAUDE-PROMPT.txt */; };
 		80B4A6528368C1F2AC6ABC22 /* ConvergenceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9B28E0923FBC9BBA77DADB /* ConvergenceDetector.swift */; };
@@ -6570,7 +6569,6 @@
 				AA4E196AB0F29BA9D111B20B /* AdaptiveIntervalScheduler.swift in Sources */,
 				E85FDB25E4BEE2FD97AFADFE /* AdaptiveLearningEngine.swift in Sources */,
 				29070BEE2878CA42CDEDDDD8 /* AdaptiveOCREngine.swift in Sources */,
-				8039A0A11344819981E14259 /* AdaptivePromptEngine.swift in Sources */,
 				E91956283681BD253ACE2394 /* AdaptiveUIEngine.swift in Sources */,
 				D0D9D0EB9218E38CF3644919 /* AdvancedPromptSettingsView.swift in Sources */,
 				ACDC0C0E9D4B4619621418C2 /* AgentCommunicationBus.swift in Sources */,
