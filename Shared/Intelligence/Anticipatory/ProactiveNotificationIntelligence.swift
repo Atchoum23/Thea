@@ -40,7 +40,7 @@ public final class ProactiveNotificationIntelligence {
     /// Determine if a notification should be sent
     public func shouldNotify(
         type: NotificationType,
-        priority: NotificationPriority,
+        priority: ProactiveNotificationPriority,
         context: AmbientContext
     ) -> NotificationDecision {
         // Check budget
@@ -78,7 +78,7 @@ public final class ProactiveNotificationIntelligence {
     /// Record that a notification was sent
     public func recordNotificationSent(
         type: NotificationType,
-        priority: NotificationPriority,
+        priority: ProactiveNotificationPriority,
         content: String
     ) {
         let notification = SentNotification(
@@ -149,7 +149,7 @@ public final class ProactiveNotificationIntelligence {
     }
 
     private func determineDeliveryMethod(
-        priority: NotificationPriority,
+        priority: ProactiveNotificationPriority,
         context: AmbientContext
     ) -> DeliveryMethod {
         switch priority {
@@ -214,14 +214,14 @@ public enum NotificationType: String, Sendable {
     case systemAlert = "system_alert"
 }
 
-public enum NotificationPriority: String, Sendable, Comparable {
+public enum ProactiveNotificationPriority: String, Sendable, Comparable {
     case low
     case normal
     case high
     case critical
 
-    public static func < (lhs: NotificationPriority, rhs: NotificationPriority) -> Bool {
-        let order: [NotificationPriority] = [.low, .normal, .high, .critical]
+    public static func < (lhs: ProactiveNotificationPriority, rhs: ProactiveNotificationPriority) -> Bool {
+        let order: [ProactiveNotificationPriority] = [.low, .normal, .high, .critical]
         guard let lhsIndex = order.firstIndex(of: lhs),
               let rhsIndex = order.firstIndex(of: rhs) else { return false }
         return lhsIndex < rhsIndex
@@ -249,11 +249,11 @@ public enum DeliveryMethod: String, Sendable {
 public struct SentNotification: Identifiable, Sendable {
     public let id: UUID
     public let type: NotificationType
-    public let priority: NotificationPriority
+    public let priority: ProactiveNotificationPriority
     public let content: String
     public let sentAt: Date
 
-    public init(type: NotificationType, priority: NotificationPriority, content: String, sentAt: Date) {
+    public init(type: NotificationType, priority: ProactiveNotificationPriority, content: String, sentAt: Date) {
         self.id = UUID()
         self.type = type
         self.priority = priority
