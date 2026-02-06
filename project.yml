@@ -371,6 +371,7 @@ targets:
           - "**/Settings/LocalModels/**"
           - "**/Integrations/FinderIntegration.swift"
           - "**/LocalModels/**"
+          - "**/Platforms/PlatformFeaturesHub.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
