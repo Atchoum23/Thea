@@ -259,6 +259,133 @@ async function handleMessage(message, sender) {
     case 'openPasswordManager':
       return await handleOpenPasswordManager();
 
+    // ========================================
+    // Video Controller Messages
+    // ========================================
+
+    case 'getVideoConfig':
+      return { success: true, data: state.videoConfig };
+
+    case 'saveVideoConfig':
+      state.videoConfig = { ...state.videoConfig, ...message.data };
+      await saveState();
+      return { success: true };
+
+    // ========================================
+    // Dark Mode Engine Messages
+    // ========================================
+
+    case 'getDarkModeConfig':
+      return { success: true, data: state.darkModeConfig };
+
+    case 'saveDarkModeConfig':
+      state.darkModeConfig = { ...state.darkModeConfig, ...message.data };
+      await saveState();
+      return { success: true };
+
+    // ========================================
+    // Privacy Shield Messages
+    // ========================================
+
+    case 'getPrivacyConfig':
+      return { success: true, data: state.privacyConfig };
+
+    case 'savePrivacyConfig':
+      state.privacyConfig = { ...state.privacyConfig, ...message.data };
+      await saveState();
+      return { success: true };
+
+    // ========================================
+    // Memory System Messages
+    // ========================================
+
+    case 'addMemory':
+      return await handleAddMemory(message.data);
+
+    case 'searchMemory':
+      return await handleSearchMemory(message.data);
+
+    case 'listMemories':
+      return await handleListMemories(message.data);
+
+    case 'deleteMemory':
+      return await handleDeleteMemory(message.data);
+
+    case 'deleteAllMemories':
+      return await handleDeleteAllMemories();
+
+    case 'archiveMemory':
+      return await handleArchiveMemory(message.data);
+
+    case 'updateMemory':
+      return await handleUpdateMemory(message.data);
+
+    case 'getMemoryStats':
+      return await handleGetMemoryStats();
+
+    case 'exportMemories':
+      return await handleExportMemories();
+
+    case 'importMemories':
+      return await handleImportMemories(message.data);
+
+    case 'saveToMemory':
+      return await handleAddMemory(message.data);
+
+    case 'capturePageMemory':
+      return await handleCapturePageMemory(message.data);
+
+    // ========================================
+    // AI Sidebar Messages
+    // ========================================
+
+    case 'toggleAISidebar': {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab) {
+        await chrome.tabs.sendMessage(tab.id, { type: 'toggleAISidebar' });
+      }
+      return { success: true };
+    }
+
+    // ========================================
+    // Print-Friendly Messages
+    // ========================================
+
+    case 'activatePrintFriendly': {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab) {
+        await chrome.tabs.sendMessage(tab.id, { type: 'activatePrintFriendly' });
+      }
+      return { success: true };
+    }
+
+    // ========================================
+    // Status & Getters
+    // ========================================
+
+    case 'getStatus':
+      return {
+        success: true,
+        data: {
+          ...state,
+          iCloudStatus: {
+            passwordsConnected: state.iCloudPasswordsConnected,
+            hideMyEmailConnected: state.iCloudHideMyEmailConnected
+          }
+        }
+      };
+
+    case 'getBlockedCount':
+      return {
+        success: true,
+        data: {
+          count: state.stats.adsBlocked + state.stats.trackersBlocked
+        }
+      };
+
+    case 'analyzeContent':
+      return await handleAnalyzeContent(message.data, sender);
+
     default:
       return { success: false, error: 'Unknown message type' };
   }
@@ -625,7 +752,7 @@ chrome.runtime.onInstalled.addListener(() => {
   // Create context menus
   chrome.contextMenus.create({
     id: 'thea-clean-page',
-    title: 'Clean Page for Printing',
+    title: 'Reader View (Print-Friendly)',
     contexts: ['page']
   });
 
@@ -642,9 +769,33 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 
   chrome.contextMenus.create({
+    id: 'thea-explain-ai',
+    title: 'Explain with Thea',
+    contexts: ['selection']
+  });
+
+  chrome.contextMenus.create({
+    id: 'thea-summarize-ai',
+    title: 'Summarize with Thea',
+    contexts: ['selection']
+  });
+
+  chrome.contextMenus.create({
     id: 'thea-save-password',
     title: 'Save Password',
     contexts: ['password']
+  });
+
+  chrome.contextMenus.create({
+    id: 'thea-save-memory',
+    title: 'Save to Thea Memory',
+    contexts: ['selection']
+  });
+
+  chrome.contextMenus.create({
+    id: 'thea-open-sidebar',
+    title: 'Open Thea AI Sidebar',
+    contexts: ['page']
   });
 });
 
@@ -692,24 +843,30 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 chrome.commands.onCommand.addListener(async (command) => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab) return;
 
   switch (command) {
     case 'toggle-dark-mode':
-      state.darkModeEnabled = !state.darkModeEnabled;
+      state.darkModeConfig.enabled = !state.darkModeConfig.enabled;
+      state.darkModeEnabled = state.darkModeConfig.enabled;
       state.stats.pagesDarkened++;
       await saveState();
       chrome.tabs.sendMessage(tab.id, {
-        type: 'toggleDarkMode',
-        enabled: state.darkModeEnabled
+        type: 'darkModeToggle',
+        enabled: state.darkModeConfig.enabled
       });
       break;
 
-    case 'quick-prompt':
-      chrome.tabs.sendMessage(tab.id, { type: 'showQuickPrompt' });
+    case 'toggle-ai-sidebar':
+      chrome.tabs.sendMessage(tab.id, { type: 'toggleAISidebar' });
       break;
 
     case 'clean-page':
-      chrome.tabs.sendMessage(tab.id, { type: 'cleanPage' });
+      chrome.tabs.sendMessage(tab.id, { type: 'activatePrintFriendly' });
+      break;
+
+    case 'toggle-video-speed':
+      chrome.tabs.sendMessage(tab.id, { type: 'toggleVideoController' });
       break;
   }
 });
@@ -1240,6 +1397,145 @@ async function handleOpenPasswordManager() {
     chrome.tabs.create({ url: 'https://www.icloud.com/passwords/' });
   }
   return { success: true };
+}
+
+// ============================================================================
+// Memory System Handlers
+// ============================================================================
+
+async function handleAddMemory(data) {
+  try {
+    const memory = await memorySystem.addMemory(data.text || data.content, {
+      type: data.type || 'semantic',
+      source: data.source || 'user',
+      url: data.url || '',
+      title: data.title || '',
+      tags: data.tags || []
+    });
+    state.stats.memoriesSaved++;
+    await saveState();
+    return { success: true, data: memory };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleSearchMemory(data) {
+  try {
+    const results = await memorySystem.searchMemory(data.query, data.limit || 10);
+    return { success: true, data: results };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleListMemories(data) {
+  try {
+    const result = await memorySystem.listMemories(data || {});
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleDeleteMemory(data) {
+  try {
+    await memorySystem.deleteMemory(data.id);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleDeleteAllMemories() {
+  try {
+    await memorySystem.deleteAllMemories();
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleArchiveMemory(data) {
+  try {
+    const memory = await memorySystem.archiveMemory(data.id);
+    return { success: true, data: memory };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleUpdateMemory(data) {
+  try {
+    const memory = await memorySystem.updateMemory(data.id, data.updates || data);
+    return { success: true, data: memory };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleGetMemoryStats() {
+  try {
+    const stats = await memorySystem.getStats();
+    return { success: true, data: stats };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleExportMemories() {
+  try {
+    const data = await memorySystem.exportMemories();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleImportMemories(data) {
+  try {
+    const result = await memorySystem.importMemories(data);
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleCapturePageMemory(data) {
+  try {
+    const memory = await memorySystem.capturePageVisit(data);
+    if (memory) {
+      state.stats.memoriesSaved++;
+      await saveState();
+    }
+    return { success: true, data: memory };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+// ============================================================================
+// Content Analysis (AI)
+// ============================================================================
+
+async function handleAnalyzeContent(data, sender) {
+  try {
+    const tab = sender.tab;
+    const pageInfo = {
+      url: tab?.url || data?.url || '',
+      title: tab?.title || data?.title || '',
+      content: data?.content || ''
+    };
+
+    const response = await askTheaAI(
+      `Analyze and summarize the following page content:\n\n${pageInfo.content?.substring(0, 5000)}`,
+      pageInfo
+    );
+
+    return { success: true, data: { response, pageInfo } };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 }
 
 // ============================================================================

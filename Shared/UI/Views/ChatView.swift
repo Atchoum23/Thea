@@ -1,72 +1,45 @@
 @preconcurrency import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 
+// MARK: - Unified Chat View
+
+/// Cross-platform chat view using shared components.
+/// Adapts horizontal padding via environment size class.
+/// Uses shared MessageBubble, ChatInputView, StreamingMessageView, and WelcomeView.
 struct ChatView: View {
     let conversation: Conversation
 
     @State private var chatManager = ChatManager.shared
     @State private var inputText = ""
     @State private var selectedProvider: AIProvider?
-    @State private var selectedModel = AppConfiguration.shared.providerConfig.defaultModel
     @State private var showingError: Error?
     @State private var showingRenameDialog = false
     @State private var showingExportDialog = false
     @State private var showingAPIKeySetup = false
     @State private var newTitle = ""
 
+    @Query private var allMessages: [Message]
+
+    private var messages: [Message] {
+        allMessages
+            .filter { $0.conversationID == conversation.id }
+            .sorted { $0.timestamp < $1.timestamp }
+    }
+
+    init(conversation: Conversation) {
+        self.conversation = conversation
+        _allMessages = Query(sort: \Message.timestamp)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // Messages
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(conversation.messages.sorted { $0.orderIndex < $1.orderIndex }) { message in
-                            MessageBubble(message: message)
-                                .id(message.id)
-                        }
-
-                        if chatManager.isStreaming {
-                            MessageBubble(
-                                message: Message(
-                                    conversationID: conversation.id,
-                                    role: .assistant,
-                                    content: .text(chatManager.streamingText)
-                                )
-                            )
-                            .id("streaming")
-                        }
-                    }
-                    .padding()
-                }
-                .onChange(of: conversation.messages.count) { _, _ in
-                    scrollToBottom(proxy: proxy)
-                }
-                .onChange(of: chatManager.isStreaming) { _, _ in
-                    scrollToBottom(proxy: proxy)
-                }
-            }
-
-            Divider()
-
-            // Input
-            HStack {
-                TextField("Type a message...", text: $inputText)
-                    .textFieldStyle(.plain)
-                    .padding(.horizontal)
-
-                Button(action: sendMessage) {
-                    Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "paperplane.fill")
-                        .foregroundStyle(inputText.isEmpty && !chatManager.isStreaming ? .secondary : .primary)
-                }
-                .buttonStyle(.borderless)
-                .disabled(inputText.isEmpty && !chatManager.isStreaming)
-            }
-            .padding()
-            .background(.bar)
+            messageList
+            chatInput
         }
         .navigationTitle(conversation.title)
         #if os(macOS)
-            .navigationSubtitle("\(conversation.messages.count) messages")
+            .navigationSubtitle("\(messages.count) messages")
         #endif
             .toolbar {
                 ToolbarItem {
@@ -118,97 +91,106 @@ struct ChatView: View {
             }
     }
 
-    private func scrollToBottom(proxy: ScrollViewProxy) {
-        if chatManager.isStreaming {
-            withAnimation {
-                proxy.scrollTo("streaming", anchor: .bottom)
+    // MARK: - Message List
+
+    private var messageList: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                if messages.isEmpty && !chatManager.isStreaming {
+                    WelcomeView { prompt in
+                        inputText = prompt
+                        sendMessage()
+                    }
+                } else {
+                    LazyVStack(spacing: TheaSpacing.lg) {
+                        ForEach(messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .move(edge: .bottom)),
+                                    removal: .opacity
+                                ))
+                        }
+
+                        if chatManager.isStreaming {
+                            StreamingMessageView(
+                                streamingText: chatManager.streamingText,
+                                status: chatManager.streamingText.isEmpty ? .thinking : .generating
+                            )
+                            .id("streaming")
+                        }
+                    }
+                    .padding(.horizontal, TheaSpacing.xxl)
+                    .padding(.vertical, TheaSpacing.lg)
+                }
             }
-        } else if let lastMessage = conversation.messages.last {
-            withAnimation {
+            .scrollContentBackground(.hidden)
+            .onChange(of: messages.count) { _, _ in
+                scrollToBottom(proxy: proxy)
+            }
+            .onChange(of: chatManager.streamingText) { _, _ in
+                scrollToBottom(proxy: proxy)
+            }
+        }
+    }
+
+    // MARK: - Chat Input
+
+    private var chatInput: some View {
+        ChatInputView(
+            text: $inputText,
+            isStreaming: chatManager.isStreaming
+        ) {
+            if chatManager.isStreaming {
+                chatManager.cancelStreaming()
+            } else {
+                sendMessage()
+            }
+        }
+    }
+
+    // MARK: - Actions
+
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        withAnimation(TheaAnimation.smooth) {
+            if chatManager.isStreaming {
+                proxy.scrollTo("streaming", anchor: .bottom)
+            } else if let lastMessage = messages.last {
                 proxy.scrollTo(lastMessage.id, anchor: .bottom)
             }
         }
     }
 
     private func setupProvider() async {
-        // The orchestrator handles provider selection automatically.
-        // Local models don't need API keys, so we only show the setup
-        // dialog if NO providers are available at all.
-
-        // Check if we have any local models available
         let hasLocalModels = !ProviderRegistry.shared.getAvailableLocalModels().isEmpty
 
-        // Try to get OpenAI API key from Keychain
         if let apiKey = try? SecureStorage.shared.loadAPIKey(for: "openai") {
             selectedProvider = OpenAIProvider(apiKey: apiKey)
         } else if hasLocalModels {
-            // Local models available - no need for API key setup
-            // The orchestrator will route to local models
             selectedProvider = ProviderRegistry.shared.getLocalProvider()
         } else {
-            // No local models AND no cloud API key - prompt for setup
             showingAPIKeySetup = true
         }
     }
 
     private func sendMessage() {
-        // Debug logging helper - platform-aware
-        func log(_ msg: String) {
-            #if os(macOS)
-            let logFile = FileManager.default.homeDirectoryForCurrentUser
-                .appendingPathComponent("Desktop/thea_debug.log")
-            let timestamp = ISO8601DateFormatter().string(from: Date())
-            let line = "[\(timestamp)] [ChatView] \(msg)\n"
-            if let data = line.data(using: .utf8) {
-                if FileManager.default.fileExists(atPath: logFile.path) {
-                    if let handle = try? FileHandle(forUpdating: logFile) {
-                        _ = try? handle.seekToEnd()
-                        _ = try? handle.write(contentsOf: data)
-                        try? handle.close()
-                    }
-                } else {
-                    try? data.write(to: logFile)
-                }
-            }
-            #else
-            print("[ChatView] \(msg)")
-            #endif
-        }
+        guard !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
-        log("📤 sendMessage() called, inputText='\(inputText.prefix(30))...'")
-
-        guard !inputText.isEmpty else {
-            log("⚠️ inputText is empty, returning early")
-            return
-        }
-
-        // Note: We no longer require selectedProvider to be set here.
-        // The orchestrator in ChatManager.sendMessage() handles provider selection,
-        // including routing to local MLX models when appropriate.
-
-        let text = inputText
-        log("✅ Captured text, clearing inputText...")
+        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         inputText = ""
 
         Task {
             do {
-                log("🔄 Starting chatManager.sendMessage...")
-                try await chatManager.sendMessage(
-                    text,
-                    in: conversation
-                )
-                log("✅ chatManager.sendMessage completed")
+                try await chatManager.sendMessage(text, in: conversation)
             } catch {
-                log("❌ Error: \(error)")
                 showingError = error
+                inputText = text
             }
         }
     }
 }
 
 // MARK: - Conversation Document
-
-import UniformTypeIdentifiers
 
 struct ConversationDocument: FileDocument, @unchecked Sendable {
     static var readableContentTypes: [UTType] { [.json] }
@@ -220,7 +202,6 @@ struct ConversationDocument: FileDocument, @unchecked Sendable {
     }
 
     init(configuration _: ReadConfiguration) throws {
-        // Reading from file not supported - this is an export-only document type
         throw CocoaError(.fileReadUnsupportedScheme, userInfo: [
             NSLocalizedDescriptionKey: "Reading conversation files is not supported. This document type is for export only."
         ])
@@ -271,7 +252,7 @@ struct APIKeySetupView: View {
             Form {
                 Section {
                     Text("To use THEA's chat features, you need to add an OpenAI API key.")
-                        .font(.caption)
+                        .font(.theaCaption1)
                         .foregroundStyle(.secondary)
                 }
 
@@ -280,7 +261,7 @@ struct APIKeySetupView: View {
 
                     if let url = URL(string: "https://platform.openai.com/api-keys") {
                         Link("Get API Key →", destination: url)
-                            .font(.caption)
+                            .font(.theaCaption1)
                     }
                 }
 
@@ -302,7 +283,9 @@ struct APIKeySetupView: View {
                 }
             }
         }
+        #if os(macOS)
         .frame(width: 450, height: 300)
+        #endif
     }
 
     private func saveAPIKey() {
