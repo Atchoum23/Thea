@@ -1,177 +1,145 @@
 // swiftlint:disable type_name
 import SwiftUI
 
-// MARK: - watchOS Home View (Standalone)
+// MARK: - watchOS Home View (Voice-First, Glanceable)
 
+/// Voice-first watchOS experience.
+/// Primary screen: large voice activation button.
+/// NavigationStack for recent conversations and settings.
 struct watchOSHomeView: View {
-    @State private var selectedTab: Tab = .chat
     @State private var messages: [WatchMessage] = []
-    @State private var inputText: String = ""
     @State private var isListening = false
-
-    enum Tab: String, CaseIterable {
-        case chat = "Chat"
-        case voice = "Voice"
-        case settings = "Settings"
-
-        var icon: String {
-            switch self {
-            case .chat: "message.fill"
-            case .voice: "mic.fill"
-            case .settings: "gear"
-            }
-        }
-    }
+    @State private var showingConversations = false
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationStack {
-            TabView(selection: $selectedTab) {
-                ForEach(Tab.allCases, id: \.self) { tab in
-                    viewForTab(tab)
-                        .tag(tab)
+            ScrollView {
+                VStack(spacing: TheaSpacing.lg) {
+                    voiceActivationCard
+                    recentConversationsSection
+                    quickActionsSection
                 }
+                .padding(.horizontal, TheaSpacing.sm)
             }
-            .tabViewStyle(.verticalPage)
-        }
-    }
-
-    @ViewBuilder
-    private func viewForTab(_ tab: Tab) -> some View {
-        switch tab {
-        case .chat:
-            watchOSChatView(messages: $messages, inputText: $inputText)
-        case .voice:
-            watchOSVoiceView(isListening: $isListening, messages: $messages)
-        case .settings:
-            watchOSSettingsView()
-        }
-    }
-}
-
-// MARK: - Chat View
-
-struct watchOSChatView: View {
-    @Binding var messages: [WatchMessage]
-    @Binding var inputText: String
-
-    var body: some View {
-        VStack(spacing: 0) {
-            if messages.isEmpty {
-                placeholderView
-            } else {
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(spacing: 8) {
-                            ForEach(messages) { message in
-                                WatchMessageRow(message: message)
-                                    .id(message.id)
-                            }
-                        }
-                        .padding(.horizontal, 4)
-                    }
-                    .onChange(of: messages.count) { _, _ in
-                        if let lastMessage = messages.last {
-                            withAnimation {
-                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                            }
-                        }
+            .navigationTitle("Thea")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        watchOSSettingsView()
+                    } label: {
+                        Image(systemName: "gearshape")
                     }
                 }
             }
         }
-        .navigationTitle("Thea")
     }
 
-    private var placeholderView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "message.fill")
-                .font(.system(size: 40))
-                .foregroundStyle(.blue)
+    // MARK: - Voice Activation Card
 
-            Text("Welcome to THEA")
-                .font(.headline)
+    private var voiceActivationCard: some View {
+        Button {
+            toggleListening()
+        } label: {
+            VStack(spacing: TheaSpacing.md) {
+                Image(systemName: isListening ? "waveform" : "mic.fill")
+                    .font(.system(size: 44, weight: .medium))
+                    .foregroundStyle(isListening ? .red : Color.theaPrimaryDefault)
+                    .symbolEffect(.variableColor, isActive: isListening)
+                    .frame(width: 70, height: 70)
 
-            Text("Tap Voice to start")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding()
-    }
-}
+                Text(isListening ? "Listening..." : "Tap to speak")
+                    .font(.body.bold())
 
-// MARK: - Message Row
-
-struct WatchMessageRow: View {
-    let message: WatchMessage
-
-    var body: some View {
-        HStack {
-            if message.isUser {
-                Spacer(minLength: 8)
+                if !isListening {
+                    Text("or say \"Hey Thea\"")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
-
-            Text(message.content)
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
-                .background(message.isUser ? Color.blue : Color.gray.opacity(0.3))
-                .foregroundStyle(message.isUser ? .white : .primary)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-
-            if !message.isUser {
-                Spacer(minLength: 8)
-            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, TheaSpacing.lg)
         }
+        .buttonStyle(.plain)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
     }
-}
 
-// MARK: - Voice View
+    // MARK: - Recent Conversations
 
-struct watchOSVoiceView: View {
-    @Binding var isListening: Bool
-    @Binding var messages: [WatchMessage]
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: isListening ? "waveform" : "mic.fill")
-                .font(.system(size: 50))
-                .foregroundStyle(isListening ? .red : .blue)
-                .symbolEffect(.variableColor, isActive: isListening)
-
-            if isListening {
-                Text("Listening...")
-                    .font(.headline)
-            } else {
-                Text("Tap to speak")
-                    .font(.headline)
-
-                Text("Say 'Hey Thea'")
-                    .font(.caption)
+    private var recentConversationsSection: some View {
+        VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+            if !messages.isEmpty {
+                Text("Recent")
+                    .font(.caption.bold())
                     .foregroundStyle(.secondary)
+                    .padding(.leading, TheaSpacing.xxs)
+
+                // Show last assistant message as a preview card
+                if let lastResponse = messages.last(where: { !$0.isUser }) {
+                    VStack(alignment: .leading, spacing: TheaSpacing.xs) {
+                        HStack(spacing: TheaSpacing.xs) {
+                            Image(systemName: "sparkles")
+                                .font(.caption)
+                                .foregroundStyle(Color.theaPrimaryDefault)
+                            Text("Thea")
+                                .font(.caption.bold())
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(lastResponse.timestamp, style: .relative)
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+
+                        Text(lastResponse.content)
+                            .font(.body)
+                            .lineLimit(3)
+
+                        // Quick reply chips
+                        HStack(spacing: TheaSpacing.xs) {
+                            WatchQuickReply(text: "Tell me more") {
+                                sendQuickReply("Tell me more")
+                            }
+                            WatchQuickReply(text: "Thanks") {
+                                sendQuickReply("Thanks")
+                            }
+                        }
+                    }
+                    .padding(TheaSpacing.md)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.md))
+                }
+            }
+        }
+    }
+
+    // MARK: - Quick Actions
+
+    private var quickActionsSection: some View {
+        VStack(spacing: TheaSpacing.sm) {
+            WatchActionRow(icon: "text.bubble", label: "Compose") {
+                sendQuickReply("Help me compose a message")
             }
 
-            Button {
-                toggleListening()
-            } label: {
-                Text(isListening ? "Stop" : "Start")
-                    .frame(maxWidth: .infinity)
+            WatchActionRow(icon: "lightbulb", label: "Ideas") {
+                sendQuickReply("Give me some ideas for today")
             }
-            .buttonStyle(.borderedProminent)
-            .tint(isListening ? .red : .blue)
+
+            WatchActionRow(icon: "checklist", label: "Tasks") {
+                sendQuickReply("What are my tasks for today?")
+            }
         }
-        .padding()
-        .navigationTitle("Voice")
     }
+
+    // MARK: - Actions
 
     private func toggleListening() {
         isListening.toggle()
 
         if !isListening {
-            // Simulate voice input completion
             let userMessage = WatchMessage(content: "Hello, Thea!", isUser: true)
             messages.append(userMessage)
 
-            // Simulate response
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 let response = WatchMessage(
                     content: "Hello! How can I help you today?",
@@ -180,6 +148,71 @@ struct watchOSVoiceView: View {
                 messages.append(response)
             }
         }
+    }
+
+    private func sendQuickReply(_ text: String) {
+        let userMessage = WatchMessage(content: text, isUser: true)
+        messages.append(userMessage)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            let response = WatchMessage(
+                content: "I'll help you with that right away.",
+                isUser: false
+            )
+            messages.append(response)
+        }
+    }
+}
+
+// MARK: - Quick Reply Button
+
+private struct WatchQuickReply: View {
+    let text: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(text)
+                .font(.caption2)
+                .padding(.horizontal, TheaSpacing.sm)
+                .padding(.vertical, TheaSpacing.xxs)
+                .background(.ultraThinMaterial)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Watch Action Row
+
+private struct WatchActionRow: View {
+    let icon: String
+    let label: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: TheaSpacing.sm) {
+                Image(systemName: icon)
+                    .font(.body)
+                    .foregroundStyle(Color.theaPrimaryDefault)
+                    .frame(width: 28)
+
+                Text(label)
+                    .font(.body)
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.vertical, TheaSpacing.sm)
+            .padding(.horizontal, TheaSpacing.md)
+        }
+        .buttonStyle(.plain)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.md))
     }
 }
 
@@ -190,7 +223,6 @@ struct watchOSSettingsView: View {
 
     var body: some View {
         List {
-            // MARK: - Voice Settings
             Section("Voice") {
                 NavigationLink {
                     watchOSVoiceSettingsView()
@@ -198,6 +230,7 @@ struct watchOSSettingsView: View {
                     Label {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Voice")
+                                .font(.body)
                             Text(config.voiceEnabled ? "Enabled" : "Disabled")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
@@ -209,7 +242,6 @@ struct watchOSSettingsView: View {
                 }
             }
 
-            // MARK: - Sync Settings
             Section("Sync") {
                 NavigationLink {
                     watchOSSyncSettingsView()
@@ -217,6 +249,7 @@ struct watchOSSettingsView: View {
                     Label {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("iCloud Sync")
+                                .font(.body)
                             Text(config.iCloudSyncEnabled ? "On" : "Off")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
@@ -228,19 +261,20 @@ struct watchOSSettingsView: View {
                 }
             }
 
-            // MARK: - Privacy Settings
             Section("Privacy") {
                 NavigationLink {
                     watchOSPrivacySettingsView()
                 } label: {
                     Label("Privacy", systemImage: "hand.raised.fill")
+                        .font(.body)
                 }
             }
 
-            // MARK: - About
             Section("About") {
                 LabeledContent("Version", value: "1.0.0")
-                LabeledContent("Build", value: "2026.01.29")
+                    .font(.body)
+                LabeledContent("Build", value: "2026.02")
+                    .font(.body)
             }
         }
         .navigationTitle("Settings")
@@ -256,6 +290,7 @@ struct watchOSVoiceSettingsView: View {
         List {
             Section {
                 Toggle("Voice Activation", isOn: $config.voiceEnabled)
+                    .font(.body)
                     .onChange(of: config.voiceEnabled) { _, _ in config.save() }
             } footer: {
                 Text("Use wake word to activate")
@@ -264,7 +299,7 @@ struct watchOSVoiceSettingsView: View {
             if config.voiceEnabled {
                 Section("Wake Word") {
                     Text(config.wakeWord)
-                        .font(.caption)
+                        .font(.body)
                         .foregroundStyle(.secondary)
 
                     Text("Say '\(config.wakeWord)' to start")
@@ -274,6 +309,7 @@ struct watchOSVoiceSettingsView: View {
 
                 Section("Mode") {
                     Toggle("Conversation Mode", isOn: $config.conversationMode)
+                        .font(.body)
                         .onChange(of: config.conversationMode) { _, _ in config.save() }
                 }
             }
@@ -291,6 +327,7 @@ struct watchOSSyncSettingsView: View {
         List {
             Section {
                 Toggle("iCloud Sync", isOn: $config.iCloudSyncEnabled)
+                    .font(.body)
                     .onChange(of: config.iCloudSyncEnabled) { _, _ in config.save() }
             } footer: {
                 Text("Sync with iPhone and Mac")
@@ -299,9 +336,11 @@ struct watchOSSyncSettingsView: View {
             if config.iCloudSyncEnabled {
                 Section("What to Sync") {
                     Toggle("Conversations", isOn: $config.syncConversations)
+                        .font(.body)
                         .onChange(of: config.syncConversations) { _, _ in config.save() }
 
                     Toggle("Settings", isOn: $config.syncSettings)
+                        .font(.body)
                         .onChange(of: config.syncSettings) { _, _ in config.save() }
                 }
 
@@ -309,6 +348,7 @@ struct watchOSSyncSettingsView: View {
                     Button("Sync Now") {
                         // Trigger sync
                     }
+                    .font(.body)
                 }
             }
         }
@@ -325,11 +365,13 @@ struct watchOSPrivacySettingsView: View {
         List {
             Section("Data") {
                 Toggle("Analytics", isOn: $config.analyticsEnabled)
+                    .font(.body)
                     .onChange(of: config.analyticsEnabled) { _, _ in config.save() }
             }
 
             Section("Security") {
                 Toggle("Passcode Lock", isOn: $config.requirePasscode)
+                    .font(.body)
                     .onChange(of: config.requirePasscode) { _, _ in config.save() }
             }
 
@@ -337,26 +379,24 @@ struct watchOSPrivacySettingsView: View {
                 Button("Clear Data", role: .destructive) {
                     // Clear data
                 }
+                .font(.body)
             }
         }
         .navigationTitle("Privacy")
     }
 }
 
-// MARK: - watchOS Configuration Type
+// MARK: - watchOS Configuration
 
 struct WatchOSSettingsConfig: Codable, Equatable {
-    // Voice
     var voiceEnabled: Bool = false
     var wakeWord: String = "Hey Thea"
     var conversationMode: Bool = false
 
-    // Sync
     var iCloudSyncEnabled: Bool = true
     var syncConversations: Bool = true
     var syncSettings: Bool = true
 
-    // Privacy
     var analyticsEnabled: Bool = false
     var requirePasscode: Bool = false
 
@@ -373,60 +413,6 @@ struct WatchOSSettingsConfig: Codable, Equatable {
     func save() {
         if let data = try? JSONEncoder().encode(self) {
             UserDefaults.standard.set(data, forKey: Self.storageKey)
-        }
-    }
-}
-
-// MARK: - watchOS Permissions View (Simplified for watchOS)
-
-struct watchOSPermissionsView: View {
-    var body: some View {
-        List {
-            Section {
-                Text("Manage permissions in the Watch app on your iPhone.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Required Permissions") {
-                watchOSSimplePermissionRow(name: "Microphone", icon: "mic.fill", description: "For voice input")
-                watchOSSimplePermissionRow(name: "Speech Recognition", icon: "waveform", description: "For voice commands")
-            }
-
-            Section("Optional Permissions") {
-                watchOSSimplePermissionRow(name: "Health", icon: "heart.fill", description: "For health data")
-                watchOSSimplePermissionRow(name: "Location", icon: "location.fill", description: "For location context")
-            }
-
-            Section {
-                Text("To change permissions, open Settings on your iPhone, then go to Privacy.")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .navigationTitle("Permissions")
-    }
-}
-
-private struct watchOSSimplePermissionRow: View {
-    let name: String
-    let icon: String
-    let description: String
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.caption)
-                .foregroundStyle(.blue)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(name)
-                    .font(.caption)
-
-                Text(description)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
         }
     }
 }
