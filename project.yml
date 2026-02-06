@@ -352,6 +352,9 @@ targets:
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/AgentMode/AgentEnhancements.swift"
           - "**/Integrations/IntegrationModule.swift"
+          - "**/Memory/LongTermMemoryManager.swift"
+          - "**/Integrations/MCPConnectionManager.swift"
+          - "**/Integrations/MCPGateway.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
