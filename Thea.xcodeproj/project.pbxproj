@@ -975,7 +975,6 @@
 		F8E337C6BD43B19EC7ACD1E9 /* MeetingIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98E15E0D71D6C0EF7C9806F3 /* MeetingIntelligence.swift */; };
 		F94EC8BC3D097BE033A34501 /* MentionAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07747EEA2FBE475441574C5D /* MentionAutocomplete.swift */; };
 		F95876D90A968D4631C68465 /* AllProvidersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85041AF083A269AEA2F7B4B1 /* AllProvidersTests.swift */; };
-		F959C3B26310BF87A8D8291B /* DesignSystemStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC87721E5039A297D1BB49F1 /* DesignSystemStubs.swift */; };
 		F9D81883464E8CF8A8747350 /* IndexedFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D135755814137B96503285B2 /* IndexedFile.swift */; };
 		F9DF531129B91E764D69F42E /* AutonomousAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50092464704D1A5143426EA5 /* AutonomousAgent.swift */; };
 		F9E68F2DA2256855D00240E9 /* HealthServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0936318FA09A7042DDAA2F2D /* HealthServiceTests.swift */; };
@@ -5605,7 +5604,6 @@
 				2493B2009CA514EF17FAE191 /* CustomAgentBuilder.swift in Sources */,
 				C81E4CB90206D14E4187FDD1 /* DataStorageErrorView.swift in Sources */,
 				7BCED260C47AE1029C241DBF /* DeepLinkRouter.swift in Sources */,
-				F959C3B26310BF87A8D8291B /* DesignSystemStubs.swift in Sources */,
 				7D7305563EDDDF1A33F025B7 /* DeviceDiscovery.swift in Sources */,
 				84C60AE678E2BB2FD8C4AF5B /* DeviceRegistry.swift in Sources */,
 				6FBCAFFE268AD341E4E8FAE7 /* DeviceStateContextProvider.swift in Sources */,
