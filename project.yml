@@ -356,6 +356,7 @@ targets:
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
+          - "**/Anticipatory/IntentAnticipator.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
