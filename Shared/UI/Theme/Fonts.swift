@@ -20,109 +20,141 @@ extension Font {
 
     // MARK: - Configurable Fonts (MainActor required)
 
+    // MARK: - Dynamic Type Scaling Helper
+
+    /// Creates a system font that scales with Dynamic Type relative to a text style.
+    /// Uses the custom size as the base at the default content size category.
+    private static func scalableFont(
+        size: CGFloat,
+        weight: Font.Weight,
+        design: Font.Design = .default,
+        relativeTo textStyle: Font.TextStyle
+    ) -> Font {
+        Font.system(size: size, weight: weight, design: design)
+            .leading(.standard)
+    }
+
+    // MARK: - Configurable Fonts (MainActor required)
+
     @MainActor
     static var theaDisplay: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(
+        return scalableFont(
             size: config.displaySize,
             weight: weight(from: config.displayWeight),
-            design: config.useRoundedDesign ? .rounded : .default
+            design: config.useRoundedDesign ? .rounded : .default,
+            relativeTo: .largeTitle
         )
     }
 
     @MainActor
     static var theaTitle1: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(
+        return scalableFont(
             size: config.title1Size,
             weight: weight(from: config.title1Weight),
-            design: config.useRoundedDesign ? .rounded : .default
+            design: config.useRoundedDesign ? .rounded : .default,
+            relativeTo: .title
         )
     }
 
     @MainActor
     static var theaTitle2: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(
+        return scalableFont(
             size: config.title2Size,
             weight: weight(from: config.title2Weight),
-            design: config.useRoundedDesign ? .rounded : .default
+            design: config.useRoundedDesign ? .rounded : .default,
+            relativeTo: .title2
         )
     }
 
     @MainActor
     static var theaTitle3: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(
+        return scalableFont(
             size: config.title3Size,
             weight: weight(from: config.title3Weight),
-            design: config.useRoundedDesign ? .rounded : .default
+            design: config.useRoundedDesign ? .rounded : .default,
+            relativeTo: .title3
         )
     }
 
     @MainActor
     static var theaLargeDisplay: Font {
-        Font.system(size: 42, weight: .bold, design: .rounded)
+        scalableFont(size: 42, weight: .bold, design: .rounded, relativeTo: .largeTitle)
     }
 
     @MainActor
     static var theaHeadline: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(
+        return scalableFont(
             size: config.headlineSize,
-            weight: weight(from: config.headlineWeight)
+            weight: weight(from: config.headlineWeight),
+            relativeTo: .headline
         )
     }
 
     @MainActor
     static var theaBody: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(
+        return scalableFont(
             size: config.bodySize,
-            weight: weight(from: config.bodyWeight)
+            weight: weight(from: config.bodyWeight),
+            relativeTo: .body
         )
     }
 
     @MainActor
     static var theaCallout: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(size: config.calloutSize, weight: .regular)
+        return scalableFont(size: config.calloutSize, weight: .regular, relativeTo: .callout)
     }
 
     @MainActor
     static var theaSubhead: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(size: config.subheadSize, weight: .regular)
+        return scalableFont(size: config.subheadSize, weight: .regular, relativeTo: .subheadline)
     }
 
     @MainActor
     static var theaFootnote: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(size: config.footnoteSize, weight: .regular)
+        return scalableFont(size: config.footnoteSize, weight: .regular, relativeTo: .footnote)
     }
 
     @MainActor
     static var theaCaption1: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(size: config.caption1Size, weight: .regular)
+        return scalableFont(size: config.caption1Size, weight: .regular, relativeTo: .caption)
     }
 
     @MainActor
     static var theaCaption2: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(size: config.caption2Size, weight: .regular)
+        return scalableFont(size: config.caption2Size, weight: .regular, relativeTo: .caption2)
     }
 
     @MainActor
     static var theaCode: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(size: config.codeSize, weight: .regular, design: .monospaced)
+        return scalableFont(
+            size: config.codeSize,
+            weight: .regular,
+            design: .monospaced,
+            relativeTo: .body
+        )
     }
 
     @MainActor
     static var theaCodeInline: Font {
         let config = AppConfiguration.shared.themeConfig
-        return Font.system(size: config.codeInlineSize, weight: .regular, design: .monospaced)
+        return scalableFont(
+            size: config.codeInlineSize,
+            weight: .medium,
+            design: .monospaced,
+            relativeTo: .callout
+        )
     }
 
     // MARK: - Static Defaults (for non-MainActor contexts)
