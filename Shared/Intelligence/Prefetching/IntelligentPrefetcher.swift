@@ -21,7 +21,7 @@ public final class IntelligentPrefetcher: ObservableObject {
 
     @Published public private(set) var prefetchedResources: [PrefetchedResource] = []
     @Published public private(set) var prefetchQueue: [PrefetchRequest] = []
-    @Published public private(set) var stats: PrefetchStats = PrefetchStats()
+    @Published public private(set) var stats = PrefetchStats()
 
     private var resourceCache: [String: CachedResource] = [:]
     private let maxCacheSize = 50
@@ -51,7 +51,7 @@ public final class IntelligentPrefetcher: ObservableObject {
         prefetchTask?.cancel()
     }
 
-    public func requestPrefetch(for predictions: [PredictedAction]) {
+    public func requestPrefetch(for predictions: [PrefetchPredictedAction]) {
         for prediction in predictions where prediction.confidence >= minConfidenceThreshold {
             let resources = determineResourcesNeeded(for: prediction)
             for resource in resources where !isResourceAvailable(resource.key) && !prefetchQueue.contains(where: { $0.key == resource.key }) {
@@ -65,7 +65,7 @@ public final class IntelligentPrefetcher: ObservableObject {
         prefetchQueue.sort { $0.priority > $1.priority }
     }
 
-    private func determineResourcesNeeded(for prediction: PredictedAction) -> [ResourceSpec] {
+    private func determineResourcesNeeded(for prediction: PrefetchPredictedAction) -> [ResourceSpec] {
         switch prediction.actionType {
         case .codeCompletion: return [ResourceSpec(key: "model:code-completion", type: PrefetchResourceType.model, priority: 0.9)]
         case .search: return [ResourceSpec(key: "api:search-ready", type: PrefetchResourceType.apiConnection, priority: 0.8)]
@@ -130,7 +130,7 @@ public final class IntelligentPrefetcher: ObservableObject {
 
 // MARK: - Supporting Types
 
-public struct PredictedAction: Sendable {
+public struct PrefetchPredictedAction: Sendable {
     public let actionType: ActionType
     public let confidence: Float
 
