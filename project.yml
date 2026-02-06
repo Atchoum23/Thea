@@ -440,6 +440,8 @@ targets:
           - "**/Anticipatory/AnticipatoryIntelligenceCore.swift"
           # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
           - "**/Design/DesignSystemStubs.swift"
+          # Exclude WidgetKit-dependent files (macOS main app doesn't use WidgetKit)
+          - "**/Widgets/**"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
