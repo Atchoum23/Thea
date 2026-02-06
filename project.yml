@@ -388,6 +388,8 @@ targets:
           - "**/Components/MemoryContextView.swift"
           - "**/Components/StreamingTextView.swift"
           - "**/MCP/THEAMCPServer.swift"
+          - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
+          - "**/Verification/UserFeedbackLearner.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
