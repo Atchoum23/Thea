@@ -390,6 +390,8 @@ targets:
           - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
           - "**/Verification/UserFeedbackLearner.swift"
+          - "**/Prediction/ModelPrewarmingService.swift"
+          - "**/Routing/ModelRouter.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
