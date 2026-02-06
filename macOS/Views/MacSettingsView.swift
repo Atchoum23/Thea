@@ -66,7 +66,7 @@ struct MacSettingsView: View {
         case .models:
             ModelSettingsView()
         case .localModels:
-            LocalModelsSettingsView()
+            comingSoonView("Local Models")
         case .orchestrator:
             comingSoonView("Orchestrator")
         case .memory:
