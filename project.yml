@@ -392,6 +392,13 @@ targets:
           - "**/Verification/UserFeedbackLearner.swift"
           - "**/Prediction/ModelPrewarmingService.swift"
           - "**/Routing/ModelRouter.swift"
+          - "**/Autonomous/BlueprintExecutor.swift"
+          - "**/Integrations/CalendarIntegration.swift"
+          - "**/Integrations/ShortcutsIntegration.swift"
+          - "**/Automation/ShortcutsOrchestrator.swift"
+          - "**/Settings/SettingsPrivacyAboutViews.swift"
+          - "**/Views/SettingsView.swift"
+          - "**/ViewModels/SettingsViewModel.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
