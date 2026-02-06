@@ -576,7 +576,6 @@
 		6BA1C7AE414808A4CB940A0E /* AdvancedPerfCacheSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4458C4571C0BCB48406F8CE9 /* AdvancedPerfCacheSections.swift */; };
 		6BB2A9C16B21D623A37DA1CA /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BDDCCBB3B72669B2C56E08E /* OnboardingView.swift */; };
 		6BC9AC4853B507BAB8BF43B3 /* ConditionPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7487777505B578C3E6DA4ED2 /* ConditionPickerSheet.swift */; };
-		6BCFFD0C8B35EC5C79653A8B /* MultiModalCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E58FF99D17021B04ECB5DD6 /* MultiModalCoordinator.swift */; };
 		6C1C00CB062D1ABA748F18BF /* CoworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA74874061E712A9AFEA8F5D /* CoworkView.swift */; };
 		6C27B22695336057FA2688DB /* CircadianEnhancementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6649FA0D7EB9BC0F2BA50AB /* CircadianEnhancementsView.swift */; };
 		6C823DC0C095FD12A48BD5F9 /* BrowserHistoryTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D8CBFF777323445DC88744 /* BrowserHistoryTracker.swift */; };
@@ -718,7 +717,6 @@
 		839CB740BD3F7266AC86FEC4 /* TaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0246474BE394BAC7D70F8D0F /* TaskScheduler.swift */; };
 		83CE8BCD82BF11CD9E4CD684 /* IntelligenceOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F96EF19C9806E7825C16053B /* IntelligenceOrchestrator.swift */; };
 		83DFD06CC7FF306B660AA40E /* ActivityTrendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030E9BDAC62F715DC991F8BE /* ActivityTrendsView.swift */; };
-		83E019D2AC5907D6A1D17304 /* MultiModalAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12DC909D5EBDD462BBBA96B9 /* MultiModalAnalyzer.swift */; };
 		83FAEA7871FCF7BB96327A25 /* IntegratedTestRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E411EF1662378EF17FDC7F /* IntegratedTestRunner.swift */; };
 		8420DB10936CD8DA1DDA82B9 /* WatchComplicationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD6635DED3AD58EE2F69EB6 /* WatchComplicationProvider.swift */; };
 		847C15325647EBCAA609E98C /* AssessmentDataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E07B93655FF8AAA4E0965339 /* AssessmentDataExporter.swift */; };
@@ -6944,8 +6942,6 @@
 				57F41F597DC422CF963605AB /* MonitoringSettingsView.swift in Sources */,
 				890E3DA6E1B8E7C114FBA747 /* MultiAgentCollaborationView.swift in Sources */,
 				A5A9D41578BCEFA36BF694FF /* MultiLanguageUtteranceBuilder.swift in Sources */,
-				83E019D2AC5907D6A1D17304 /* MultiModalAnalyzer.swift in Sources */,
-				6BCFFD0C8B35EC5C79653A8B /* MultiModalCoordinator.swift in Sources */,
 				9B2DB343A2E998E625ACF815 /* MultiModelConsensus.swift in Sources */,
 				CCE67AA93440934A2ABFDB36 /* MusicIntegration.swift in Sources */,
 				5C2CAACB5A96B36BB709DE01 /* NetworkDiscoveryService.swift in Sources */,
