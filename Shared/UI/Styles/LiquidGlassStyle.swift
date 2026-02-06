@@ -1,96 +1,136 @@
 import SwiftUI
 
 // MARK: - Liquid Glass Style Support for iOS 26+
-
 //
-// Apple's Liquid Glass design language was introduced in iOS 26 (2025).
-// This file provides conditional support for Liquid Glass effects while
-// maintaining backwards compatibility with older OS versions.
+// Apple's Liquid Glass design language (WWDC 2025).
+// Uses real .glassEffect() API on iOS 26+ with .ultraThinMaterial fallback.
 //
-// Note: The glassEffect API requires Xcode 16+ SDK. For older Xcode versions,
-// we fall back to material backgrounds.
-//
-// Reference: https://developer.apple.com/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views
+// IMPORTANT: Liquid Glass is for the NAVIGATION layer only.
+// Never apply it to content (lists, tables, media).
 
-// MARK: - Compile-time SDK check
+// MARK: - Capsule Glass Modifier
 
-// glassEffect API is only available in Xcode 16+ SDK (iOS 26+, macOS 26+)
-// We use compiler version check since the API doesn't exist in older SDKs
-
-#if compiler(>=6.0) && canImport(SwiftUI, _version: 6.0)
-    private let hasGlassEffectAPI = true
-#else
-    private let hasGlassEffectAPI = false
-#endif
-
-/// View modifier that conditionally applies Liquid Glass effect on iOS 26+
 struct LiquidGlassModifier: ViewModifier {
     var isInteractive: Bool = false
 
     func body(content: Content) -> some View {
-        // Always use fallback since glassEffect requires newer SDK
-        content
-            .background(.ultraThinMaterial)
-            .clipShape(Capsule())
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            content
+                .glassEffect(.regular.interactive(isInteractive))
+        } else {
+            content
+                .background(.ultraThinMaterial)
+                .clipShape(Capsule())
+        }
     }
 }
 
-/// View modifier for rounded rectangle glass effect
+// MARK: - Rounded Rectangle Glass Modifier
+
 struct RoundedGlassModifier: ViewModifier {
-    var cornerRadius: CGFloat = 16
+    var cornerRadius: CGFloat = TheaCornerRadius.lg
 
     func body(content: Content) -> some View {
-        // Always use fallback since glassEffect requires newer SDK
-        content
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            content
+                .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            content
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        }
     }
 }
 
-/// View modifier for circular glass effect
+// MARK: - Circular Glass Modifier
+
 struct CircularGlassModifier: ViewModifier {
     func body(content: Content) -> some View {
-        // Always use fallback since glassEffect requires newer SDK
-        content
-            .background(.ultraThinMaterial)
-            .clipShape(Circle())
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            content
+                .glassEffect(.regular, in: .circle)
+        } else {
+            content
+                .background(.ultraThinMaterial)
+                .clipShape(Circle())
+        }
+    }
+}
+
+// MARK: - Glass Card Modifier
+
+struct GlassCardModifier: ViewModifier {
+    var cornerRadius: CGFloat = TheaCornerRadius.card
+    var padding: CGFloat = TheaSpacing.lg
+
+    func body(content: Content) -> some View {
+        let innerRadius = TheaCornerRadius.concentric(outer: cornerRadius, padding: padding)
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            content
+                .padding(padding)
+                .glassEffect(.regular, in: .rect(cornerRadius: innerRadius))
+        } else {
+            content
+                .padding(padding)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: innerRadius))
+        }
+    }
+}
+
+// MARK: - Soft Edge Modifier
+
+struct SoftEdgeModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, macOS 26, *) {
+            content
+                .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
+        } else {
+            content
+        }
     }
 }
 
 // MARK: - View Extensions
 
 extension View {
-    /// Applies Liquid Glass effect with capsule shape on iOS 26+
-    /// Falls back to ultraThinMaterial on older versions
-    func liquidGlass() -> some View {
-        modifier(LiquidGlassModifier())
+    /// Applies Liquid Glass effect with capsule shape
+    func liquidGlass(interactive: Bool = false) -> some View {
+        modifier(LiquidGlassModifier(isInteractive: interactive))
     }
 
-    /// Applies Liquid Glass effect with rounded rectangle shape on iOS 26+
-    /// Falls back to ultraThinMaterial on older versions
-    func liquidGlassRounded(cornerRadius: CGFloat = 16) -> some View {
+    /// Applies Liquid Glass effect with rounded rectangle shape
+    func liquidGlassRounded(cornerRadius: CGFloat = TheaCornerRadius.lg) -> some View {
         modifier(RoundedGlassModifier(cornerRadius: cornerRadius))
     }
 
-    /// Applies Liquid Glass effect with circular shape on iOS 26+
-    /// Falls back to ultraThinMaterial on older versions
+    /// Applies Liquid Glass effect with circular shape
     func liquidGlassCircle() -> some View {
         modifier(CircularGlassModifier())
     }
 
-    /// Conditionally applies tint to Liquid Glass on iOS 26+
+    /// Applies Liquid Glass to a card with concentric radius
+    func liquidGlassCard(
+        cornerRadius: CGFloat = TheaCornerRadius.card,
+        padding: CGFloat = TheaSpacing.lg
+    ) -> some View {
+        modifier(GlassCardModifier(cornerRadius: cornerRadius, padding: padding))
+    }
+
+    /// Applies soft scroll-edge effects replacing hard dividers
+    func softEdges() -> some View {
+        modifier(SoftEdgeModifier())
+    }
+
+    /// Conditionally applies tint to Liquid Glass
     @ViewBuilder
     func liquidGlassTint(_ color: Color) -> some View {
-        // tint is always available, just apply it
-        tint(color)
+        self.tint(color)
     }
 }
 
 // MARK: - Glass Effect Container
 
-/// A container that groups multiple Liquid Glass elements together
-/// On iOS 26+, this ensures proper glass sampling behavior
-/// On older versions, this is a transparent passthrough
 struct GlassContainer<Content: View>: View {
     let content: () -> Content
 
@@ -99,33 +139,34 @@ struct GlassContainer<Content: View>: View {
     }
 
     var body: some View {
-        // GlassEffectContainer requires newer SDK, use passthrough
-        content()
+        if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
+            GlassEffectContainer {
+                content()
+            }
+        } else {
+            content()
+        }
     }
 }
 
 // MARK: - Adaptive Toolbar Style
 
-/// Toolbar style that adapts to Liquid Glass on iOS 26+
 struct AdaptiveToolbarStyle: ViewModifier {
     func body(content: Content) -> some View {
         #if os(iOS)
-            // toolbarBackgroundVisibility with .navigationBar requires iOS 18+
-            if #available(iOS 18.0, *) {
-                content
-                    .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
-            } else {
-                content
-            }
-        #else
-            // macOS doesn't have navigationBar toolbar placement
+        if #available(iOS 18.0, *) {
             content
+                .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
+        } else {
+            content
+        }
+        #else
+        content
         #endif
     }
 }
 
 extension View {
-    /// Applies adaptive toolbar styling for Liquid Glass
     func adaptiveToolbar() -> some View {
         modifier(AdaptiveToolbarStyle())
     }
@@ -135,25 +176,32 @@ extension View {
 
 #Preview("Liquid Glass Examples") {
     VStack(spacing: 20) {
-        // Capsule glass
-        Button("Capsule Glass Button") {}
+        Button("Capsule Glass") {}
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
             .liquidGlass()
 
-        // Rounded rectangle glass
         VStack {
-            Text("Card Content")
+            Text("Rounded Card")
                 .padding()
         }
-        .frame(width: 200, height: 100)
-        .liquidGlassRounded(cornerRadius: 20)
+        .frame(width: 200, height: 80)
+        .liquidGlassRounded(cornerRadius: TheaCornerRadius.xl)
 
-        // Circular glass
-        Image(systemName: "star.fill")
+        Image(systemName: "sparkles")
             .font(.title)
             .padding(20)
             .liquidGlassCircle()
+
+        VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+            Text("Glass Card")
+                .font(.headline)
+            Text("With concentric radius")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(width: 240)
+        .liquidGlassCard()
     }
     .padding()
     .background(

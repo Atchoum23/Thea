@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thea Settings</title>
+  <style>
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-tertiary: #0f3460;
+      --text-primary: #ffffff;
+      --text-secondary: #a0aec0;
+      --accent: #e94560;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    header img {
+      width: 48px;
+      height: 48px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .section {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .section h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+
+    .setting-info h3 {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .setting-info p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 28px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-tertiary);
+      border-radius: 28px;
+      transition: 0.3s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    input:checked + .slider {
+      background: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    input[type="text"], select {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: var(--text-primary);
+      font-size: 14px;
+      width: 200px;
+    }
+
+    input[type="text"]:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .saved-message {
+      display: none;
+      color: #38a169;
+      font-size: 14px;
+      margin-left: 16px;
+    }
+
+    .saved-message.show {
+      display: inline;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="../icons/icon48.png" alt="Thea">
+      <h1>Thea Settings</h1>
+    </header>
+
+    <div class="section">
+      <h2>Protection</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Ad Blocking</h3>
+          <p>Block advertisements and promotional content</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="ad-blocking" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Tracker Blocking</h3>
+          <p>Block third-party tracking scripts and cookies</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="tracker-blocking" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Cookie Consent Auto-Decline</h3>
+          <p>Automatically decline cookie consent popups</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="cookie-decline">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>AI Features</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Page Summarization</h3>
+          <p>Enable AI-powered page summarization</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="summarization" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Smart Form Filling</h3>
+          <p>Use Thea's memory for intelligent form completion</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="smart-forms" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Browsing Memory</h3>
+          <p>Save browsing context to Thea's memory system</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="browsing-memory">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Appearance</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Theme</h3>
+          <p>Choose extension color theme</p>
+        </div>
+        <select id="theme">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="system">System</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Popup Position</h3>
+          <p>Where to show Thea's quick actions</p>
+        </div>
+        <select id="popup-position">
+          <option value="top-right">Top Right</option>
+          <option value="bottom-right">Bottom Right</option>
+          <option value="bottom-left">Bottom Left</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Connection</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Native Messaging Host</h3>
+          <p>Path to Thea native messaging host</p>
+        </div>
+        <input type="text" id="native-host" placeholder="Auto-detected" readonly>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Connection Status</h3>
+          <p id="connection-status">Checking...</p>
+        </div>
+        <button class="btn btn-secondary" id="test-connection">Test Connection</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="save-btn">Save Settings</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset to Defaults</button>
+      <span class="saved-message" id="saved-message">Settings saved!</span>
+    </div>
+
+    <footer>
+      <p>Thea Browser Extension v1.0.0 | <a href="https://thea.app">thea.app</a></p>
+    </footer>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- ================================ -->
+	<!-- Bundle Information               -->
+	<!-- ================================ -->
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Thea</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Thea</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.5.0</string>
+	<key>CFBundleVersion</key>
+	<string>15</string>
+
+	<!-- ================================ -->
+	<!-- App Store Category               -->
+	<!-- ================================ -->
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+
+	<!-- ================================ -->
+	<!-- iOS UI Configuration             -->
+	<!-- ================================ -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>AccentColor</string>
+		<key>UIImageName</key>
+		<string>LaunchIcon</string>
+	</dict>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDefault</string>
+	<key>UIUserInterfaceStyle</key>
+	<string>Automatic</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+
+	<!-- Supported Orientations - iPhone -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<!-- Supported Orientations - iPad -->
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- iPad Multitasking -->
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Background Modes                 -->
+	<!-- ================================ -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>location</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+		<string>voip</string>
+		<string>external-accessory</string>
+	</array>
+
+	<!-- Background Task Identifiers -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>app.thea.ios.refresh</string>
+		<string>app.thea.ios.sync</string>
+		<string>app.thea.ios.cleanup</string>
+		<string>app.thea.ios.healthkit</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Privacy Usage Descriptions       -->
+	<!-- ================================ -->
+	<!-- Microphone -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Thea uses the microphone for voice conversations and commands.</string>
+
+	<!-- Camera -->
+	<key>NSCameraUsageDescription</key>
+	<string>Thea uses the camera for visual analysis and image capture.</string>
+
+	<!-- Speech Recognition -->
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Thea uses speech recognition to understand your voice commands.</string>
+
+	<!-- Location -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Thea uses your location for contextual assistance.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Thea uses your location to provide proactive assistance and location-based reminders.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Thea uses background location for location-based reminders and context.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>PreciseLocationForNavigation</key>
+		<string>Thea needs precise location for accurate navigation assistance.</string>
+	</dict>
+
+	<!-- Contacts -->
+	<key>NSContactsUsageDescription</key>
+	<string>Thea accesses your contacts to help you communicate and manage relationships.</string>
+
+	<!-- Calendars -->
+	<key>NSCalendarsUsageDescription</key>
+	<string>Thea reads and manages your calendar events for scheduling assistance.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Thea creates calendar events on your behalf.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Thea manages your calendar for comprehensive scheduling assistance.</string>
+
+	<!-- Reminders -->
+	<key>NSRemindersUsageDescription</key>
+	<string>Thea creates and manages reminders to help you stay organized.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Thea manages your reminders for comprehensive task assistance.</string>
+
+	<!-- Photos -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Thea accesses your photos for organization, search, and visual analysis.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Thea saves images and screenshots to your photo library.</string>
+
+	<!-- Health -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>Thea reads your health data to provide wellness insights and tracking.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Thea writes health data you authorize to support your wellness goals.</string>
+	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+	<string>Thea accesses clinical records to provide comprehensive health insights.</string>
+
+	<!-- HomeKit -->
+	<key>NSHomeKitUsageDescription</key>
+	<string>Thea controls your smart home devices and scenes.</string>
+
+	<!-- Apple Music -->
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Thea accesses your music library for playback control.</string>
+
+	<!-- Motion & Fitness -->
+	<key>NSMotionUsageDescription</key>
+	<string>Thea tracks your activity to provide fitness insights.</string>
+
+	<!-- Face ID -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Authenticate securely with Face ID.</string>
+
+	<!-- Bluetooth -->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Thea uses Bluetooth for device connectivity and continuity features.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Thea connects to Bluetooth devices for enhanced functionality.</string>
+
+	<!-- Local Network -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Thea uses the local network for device discovery and remote control features.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_thea._tcp</string>
+	</array>
+
+	<!-- Siri -->
+	<key>NSSiriUsageDescription</key>
+	<string>Enable Siri to interact with Thea using voice commands.</string>
+
+	<!-- ================================ -->
+	<!-- App Transport Security           -->
+	<!-- ================================ -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+
+	<!-- ================================ -->
+	<!-- Export Compliance                -->
+	<!-- ================================ -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!-- ================================ -->
+	<!-- URL Schemes                      -->
+	<!-- ================================ -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.thea.ios</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>thea</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Document Types                   -->
+	<!-- ================================ -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Thea Conversation</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>theaconv</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Device Capabilities              -->
+	<!-- ================================ -->
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Widgets                          -->
+	<!-- ================================ -->
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>app.thea.ios.conversation</string>
+		<string>app.thea.ios.query</string>
+		<string>app.thea.ios.widget</string>
+	</array>
+</dict>
+</plist>

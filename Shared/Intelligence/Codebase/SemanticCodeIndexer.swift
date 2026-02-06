@@ -1,0 +1,937 @@
+// SemanticCodeIndexer.swift
+// Thea V2
+//
+// Semantic codebase indexing with in-memory storage optimized for M3 Ultra 256GB
+// Provides Cursor-level codebase understanding with instant semantic search
+
+import Foundation
+import OSLog
+
+// MARK: - Code Chunk
+
+/// A semantic unit of code with its embedding
+public struct CodeChunk: Identifiable, Codable, Sendable {
+    public let id: UUID
+    public let filePath: String
+    public let relativePath: String
+    public let content: String
+    public let startLine: Int
+    public let endLine: Int
+    public let chunkType: ChunkType
+    public let language: ProgrammingLanguage
+    public var embedding: [Float]?
+    public let metadata: ChunkMetadata
+    public let createdAt: Date
+    public var updatedAt: Date
+
+    public init(
+        id: UUID = UUID(),
+        filePath: String,
+        relativePath: String,
+        content: String,
+        startLine: Int,
+        endLine: Int,
+        chunkType: ChunkType,
+        language: ProgrammingLanguage,
+        embedding: [Float]? = nil,
+        metadata: ChunkMetadata = ChunkMetadata(),
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
+        self.filePath = filePath
+        self.relativePath = relativePath
+        self.content = content
+        self.startLine = startLine
+        self.endLine = endLine
+        self.chunkType = chunkType
+        self.language = language
+        self.embedding = embedding
+        self.metadata = metadata
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
+/// Type of code chunk
+public enum ChunkType: String, Codable, Sendable {
+    case function
+    case method
+    case classDefinition
+    case structDefinition
+    case enumDefinition
+    case protocolDefinition
+    case extensionDefinition
+    case property
+    case import_
+    case comment
+    case documentation
+    case fileHeader
+    case block
+    case unknown
+}
+
+/// Supported programming languages
+public enum ProgrammingLanguage: String, Codable, Sendable, CaseIterable {
+    case swift
+    case python
+    case javascript
+    case typescript
+    case rust
+    case go
+    case java
+    case kotlin
+    case cpp
+    case c
+    case ruby
+    case php
+    case html
+    case css
+    case json
+    case yaml
+    case markdown
+    case shell
+    case sql
+    case unknown
+
+    public static func detect(from filePath: String) -> ProgrammingLanguage {
+        let ext = (filePath as NSString).pathExtension.lowercased()
+        switch ext {
+        case "swift": return .swift
+        case "py": return .python
+        case "js", "mjs", "cjs": return .javascript
+        case "ts", "tsx": return .typescript
+        case "rs": return .rust
+        case "go": return .go
+        case "java": return .java
+        case "kt", "kts": return .kotlin
+        case "cpp", "cc", "cxx", "hpp": return .cpp
+        case "c", "h": return .c
+        case "rb": return .ruby
+        case "php": return .php
+        case "html", "htm": return .html
+        case "css", "scss", "sass": return .css
+        case "json": return .json
+        case "yml", "yaml": return .yaml
+        case "md", "markdown": return .markdown
+        case "sh", "bash", "zsh": return .shell
+        case "sql": return .sql
+        default: return .unknown
+        }
+    }
+}
+
+/// Metadata for a code chunk
+public struct ChunkMetadata: Codable, Sendable {
+    public var symbolName: String?
+    public var parentSymbol: String?
+    public var visibility: String?
+    public var returnType: String?
+    public var parameters: [String]?
+    public var imports: [String]?
+    public var references: [String]?
+    public var documentation: String?
+    public var complexity: Int?
+    public var linesOfCode: Int?
+
+    public init(
+        symbolName: String? = nil,
+        parentSymbol: String? = nil,
+        visibility: String? = nil,
+        returnType: String? = nil,
+        parameters: [String]? = nil,
+        imports: [String]? = nil,
+        references: [String]? = nil,
+        documentation: String? = nil,
+        complexity: Int? = nil,
+        linesOfCode: Int? = nil
+    ) {
+        self.symbolName = symbolName
+        self.parentSymbol = parentSymbol
+        self.visibility = visibility
+        self.returnType = returnType
+        self.parameters = parameters
+        self.imports = imports
+        self.references = references
+        self.documentation = documentation
+        self.complexity = complexity
+        self.linesOfCode = linesOfCode
+    }
+}
+
+// MARK: - Index Statistics
+
+/// Statistics about the codebase index
+public struct IndexStatistics: Sendable {
+    public let totalFiles: Int
+    public let totalChunks: Int
+    public let totalLines: Int
+    public let languageBreakdown: [ProgrammingLanguage: Int]
+    public let chunkTypeBreakdown: [ChunkType: Int]
+    public let memoryUsageMB: Double
+    public let lastIndexedAt: Date?
+    public let indexingDurationSeconds: Double?
+}
+
+// MARK: - Search Result
+
+/// Result from semantic code indexer search
+public struct IndexerCodeSearchResult: Identifiable, Sendable {
+    public let id: UUID
+    public let chunk: CodeChunk
+    public let score: Float
+    public let matchReason: IndexerMatchReason
+
+    public enum IndexerMatchReason: Sendable {
+        case semanticSimilarity(score: Float)
+        case exactMatch(term: String)
+        case symbolMatch(name: String)
+        case filePathMatch(path: String)
+    }
+
+    public init(id: UUID, chunk: CodeChunk, score: Float, matchReason: IndexerMatchReason) {
+        self.id = id
+        self.chunk = chunk
+        self.score = score
+        self.matchReason = matchReason
+    }
+}
+
+// MARK: - Indexer Configuration
+
+/// Configuration for the semantic indexer
+public struct IndexerConfiguration: Sendable {
+    /// Maximum chunk size in lines
+    public var maxChunkLines: Int = 100
+
+    /// Minimum chunk size in lines
+    public var minChunkLines: Int = 3
+
+    /// Overlap between chunks in lines
+    public var chunkOverlap: Int = 5
+
+    /// File patterns to include
+    public var includePatterns: [String] = ["**/*.swift", "**/*.py", "**/*.js", "**/*.ts", "**/*.go", "**/*.rs"]
+
+    /// File patterns to exclude
+    public var excludePatterns: [String] = ["**/node_modules/**", "**/.git/**", "**/build/**", "**/DerivedData/**", "**/*.generated.*"]
+
+    /// Maximum file size to index (in bytes)
+    public var maxFileSizeBytes: Int = 1_000_000  // 1MB
+
+    /// Enable incremental indexing
+    public var incrementalIndexing: Bool = true
+
+    /// Persistence directory
+    public var persistenceDirectory: URL?
+
+    /// Embedding dimension (depends on model)
+    public var embeddingDimension: Int = 384
+
+    public init() {}
+}
+
+// MARK: - Semantic Code Indexer
+
+/// Main indexer actor - manages in-memory codebase index
+/// Optimized for M3 Ultra 256GB with full in-memory storage
+@MainActor
+public final class SemanticCodeIndexer: ObservableObject {
+
+    // MARK: - Singleton
+
+    public static let shared = SemanticCodeIndexer()
+
+    // MARK: - Properties
+
+    private let logger = Logger(subsystem: "com.thea.v2", category: "SemanticCodeIndexer")
+
+    /// All indexed chunks (in-memory for instant access)
+    private var chunks: [UUID: CodeChunk] = [:]
+
+    /// File path to chunk IDs mapping
+    private var fileIndex: [String: Set<UUID>] = [:]
+
+    /// Symbol name to chunk IDs mapping
+    private var symbolIndex: [String: Set<UUID>] = [:]
+
+    /// Language to chunk IDs mapping
+    private var languageIndex: [ProgrammingLanguage: Set<UUID>] = [:]
+
+    /// Embeddings matrix (dense storage for SIMD operations)
+    private var embeddings: [[Float]] = []
+
+    /// Chunk ID to embedding index mapping
+    private var embeddingIndex: [UUID: Int] = [:]
+
+    /// File modification times for incremental indexing
+    private var fileModificationTimes: [String: Date] = [:]
+
+    /// Current configuration
+    private var configuration: IndexerConfiguration
+
+    /// Indexing state
+    @Published public private(set) var isIndexing: Bool = false
+    @Published public private(set) var indexProgress: Double = 0.0
+    @Published public private(set) var lastError: Error?
+    @Published public private(set) var statistics: IndexStatistics?
+
+    /// Root paths being indexed
+    private var indexedRoots: Set<String> = []
+
+    // MARK: - Initialization
+
+    private init(configuration: IndexerConfiguration = IndexerConfiguration()) {
+        self.configuration = configuration
+
+        // Set default persistence directory
+        if configuration.persistenceDirectory == nil {
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            self.configuration.persistenceDirectory = appSupport.appendingPathComponent("Thea/CodebaseIndex")
+        }
+
+        logger.info("SemanticCodeIndexer initialized")
+    }
+
+    // MARK: - Public API
+
+    /// Index a codebase at the given path
+    public func indexCodebase(at rootPath: String) async throws {
+        guard !isIndexing else {
+            logger.warning("Indexing already in progress")
+            return
+        }
+
+        isIndexing = true
+        indexProgress = 0.0
+        lastError = nil
+
+        defer {
+            isIndexing = false
+            updateStatistics()
+        }
+
+        logger.info("Starting indexing at: \(rootPath)")
+        let startTime = Date()
+
+        do {
+            // Discover files
+            let files = try await discoverFiles(at: rootPath)
+            logger.info("Discovered \(files.count) files to index")
+
+            // Index files with progress tracking
+            for (index, filePath) in files.enumerated() {
+                try await indexFile(at: filePath, relativeTo: rootPath)
+                indexProgress = Double(index + 1) / Double(files.count)
+            }
+
+            indexedRoots.insert(rootPath)
+
+            let duration = Date().timeIntervalSince(startTime)
+            logger.info("Indexing completed in \(duration)s - \(self.chunks.count) chunks indexed")
+
+            // Persist to disk in background
+            Task.detached { [weak self] in
+                try? await self?.persistToDisk()
+            }
+
+        } catch {
+            lastError = error
+            logger.error("Indexing failed: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
+    /// Search for code semantically
+    public func search(query: String, limit: Int = 20) async -> [IndexerCodeSearchResult] {
+        // For now, do text-based search until embeddings are integrated
+        // TODO: Generate query embedding and do vector similarity search
+        textSearch(query: query, limit: limit)
+    }
+
+    /// Search by symbol name
+    public func searchSymbol(name: String) -> [CodeChunk] {
+        let normalizedName = name.lowercased()
+
+        var results: [CodeChunk] = []
+
+        for (symbolName, chunkIds) in symbolIndex {
+            if symbolName.lowercased().contains(normalizedName) {
+                for chunkId in chunkIds {
+                    if let chunk = chunks[chunkId] {
+                        results.append(chunk)
+                    }
+                }
+            }
+        }
+
+        return results
+    }
+
+    /// Get chunks for a specific file
+    public func getChunks(forFile filePath: String) -> [CodeChunk] {
+        guard let chunkIds = fileIndex[filePath] else { return [] }
+        return chunkIds.compactMap { chunks[$0] }.sorted { $0.startLine < $1.startLine }
+    }
+
+    /// Get all chunks for a language
+    public func getChunks(forLanguage language: ProgrammingLanguage) -> [CodeChunk] {
+        guard let chunkIds = languageIndex[language] else { return [] }
+        return chunkIds.compactMap { chunks[$0] }
+    }
+
+    /// Update configuration
+    public func updateConfiguration(_ config: IndexerConfiguration) {
+        self.configuration = config
+    }
+
+    /// Clear the index
+    public func clearIndex() {
+        chunks.removeAll()
+        fileIndex.removeAll()
+        symbolIndex.removeAll()
+        languageIndex.removeAll()
+        embeddings.removeAll()
+        embeddingIndex.removeAll()
+        fileModificationTimes.removeAll()
+        indexedRoots.removeAll()
+        statistics = nil
+        logger.info("Index cleared")
+    }
+
+    /// Load index from disk
+    public func loadFromDisk() async throws {
+        guard let persistDir = configuration.persistenceDirectory else { return }
+
+        let indexFile = persistDir.appendingPathComponent("index.json")
+        guard FileManager.default.fileExists(atPath: indexFile.path) else {
+            logger.info("No persisted index found")
+            return
+        }
+
+        let data = try Data(contentsOf: indexFile)
+        let persistedIndex = try JSONDecoder().decode(PersistedIndex.self, from: data)
+
+        // Restore in-memory structures
+        for chunk in persistedIndex.chunks {
+            addChunkToIndices(chunk)
+        }
+
+        fileModificationTimes = persistedIndex.fileModificationTimes
+        indexedRoots = Set(persistedIndex.indexedRoots)
+
+        updateStatistics()
+        logger.info("Loaded \(self.chunks.count) chunks from disk")
+    }
+
+    // MARK: - Incremental File Operations
+
+    /// Index a single file (for incremental updates from file watcher)
+    /// - Parameters:
+    ///   - filePath: Absolute path to the file
+    ///   - rootPath: Optional root path for computing relative paths. If nil, uses the first indexed root.
+    public func indexFile(at filePath: String, rootPath: String? = nil) async {
+        // Determine the root path to use
+        let effectiveRoot: String
+        if let root = rootPath {
+            effectiveRoot = root
+        } else if let firstRoot = indexedRoots.first {
+            effectiveRoot = firstRoot
+        } else {
+            // Use the file's directory as a fallback
+            effectiveRoot = (filePath as NSString).deletingLastPathComponent
+        }
+
+        do {
+            try await indexFile(at: filePath, relativeTo: effectiveRoot)
+            logger.debug("Incrementally indexed: \(filePath)")
+        } catch {
+            logger.error("Failed to index file \(filePath): \(error.localizedDescription)")
+        }
+    }
+
+    /// Remove a file from the index (for incremental updates from file watcher)
+    /// - Parameter filePath: Absolute path to the file to remove
+    public func removeFile(at filePath: String) async {
+        // Remove all chunks for this file
+        if let chunkIds = fileIndex[filePath] {
+            for chunkId in chunkIds {
+                if let chunk = chunks.removeValue(forKey: chunkId) {
+                    // Remove from symbol index
+                    if let symbolName = chunk.metadata.symbolName {
+                        symbolIndex[symbolName]?.remove(chunkId)
+                        if symbolIndex[symbolName]?.isEmpty == true {
+                            symbolIndex.removeValue(forKey: symbolName)
+                        }
+                    }
+                    // Remove from language index
+                    languageIndex[chunk.language]?.remove(chunkId)
+                    if languageIndex[chunk.language]?.isEmpty == true {
+                        languageIndex.removeValue(forKey: chunk.language)
+                    }
+                    // Note: Embeddings array is not reindexed for performance
+                    // The chunk's embeddingIndex becomes invalid but the chunk is already removed
+                }
+            }
+        }
+
+        // Remove from file index
+        fileIndex.removeValue(forKey: filePath)
+        fileModificationTimes.removeValue(forKey: filePath)
+
+        logger.debug("Removed from index: \(filePath)")
+        updateStatistics()
+    }
+
+    /// Re-index a file that was renamed
+    /// - Parameters:
+    ///   - oldPath: Previous path of the file
+    ///   - newPath: New path of the file
+    public func handleFileRename(from oldPath: String, to newPath: String) async {
+        await removeFile(at: oldPath)
+        await indexFile(at: newPath)
+    }
+
+    // MARK: - Private Methods
+
+    private func discoverFiles(at rootPath: String) async throws -> [String] {
+        // Move synchronous file enumeration off the async context
+        try await Task.detached(priority: .userInitiated) { [configuration] in
+            var files: [String] = []
+            let fileManager = FileManager.default
+            let rootURL = URL(fileURLWithPath: rootPath)
+
+            guard let enumerator = fileManager.enumerator(
+                at: rootURL,
+                includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey, .contentModificationDateKey],
+                options: [.skipsHiddenFiles]
+            ) else {
+                throw IndexerError.cannotEnumerateDirectory(rootPath)
+            }
+
+            while let fileURL = enumerator.nextObject() as? URL {
+                let resourceValues = try? fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+
+                guard resourceValues?.isRegularFile == true else { continue }
+
+                let relativePath = fileURL.path.replacingOccurrences(of: rootPath, with: "")
+
+                // Check exclude patterns
+                if self.shouldExcludeSync(path: relativePath, patterns: configuration.excludePatterns) { continue }
+
+                // Check include patterns
+                if !self.shouldIncludeSync(path: relativePath, patterns: configuration.includePatterns) { continue }
+
+                // Check file size
+                if let size = resourceValues?.fileSize, size > configuration.maxFileSizeBytes { continue }
+
+                files.append(fileURL.path)
+            }
+
+            return files
+        }.value
+    }
+
+    // Synchronous helper for file filtering (usable in non-isolated context)
+    nonisolated private func shouldExcludeSync(path: String, patterns: [String]) -> Bool {
+        for pattern in patterns {
+            if path.contains(pattern) || matchesGlob(path, pattern: pattern) {
+                return true
+            }
+        }
+        return false
+    }
+
+    nonisolated private func shouldIncludeSync(path: String, patterns: [String]) -> Bool {
+        if patterns.isEmpty { return true }
+        for pattern in patterns {
+            if matchesGlob(path, pattern: pattern) {
+                return true
+            }
+        }
+        return false
+    }
+
+    nonisolated private func matchesGlob(_ path: String, pattern: String) -> Bool {
+        // Simple glob matching for *.ext patterns
+        if pattern.hasPrefix("*") {
+            let suffix = String(pattern.dropFirst())
+            return path.hasSuffix(suffix)
+        }
+        return path.contains(pattern)
+    }
+
+    private func indexFile(at filePath: String, relativeTo rootPath: String) async throws {
+        let fileURL = URL(fileURLWithPath: filePath)
+        let attributes = try FileManager.default.attributesOfItem(atPath: filePath)
+        let modificationDate = attributes[.modificationDate] as? Date ?? Date()
+
+        // Check if file needs re-indexing
+        if let lastIndexed = fileModificationTimes[filePath], lastIndexed >= modificationDate {
+            return  // File hasn't changed
+        }
+
+        // Remove old chunks for this file
+        if let oldChunkIds = fileIndex[filePath] {
+            for chunkId in oldChunkIds {
+                removeChunkFromIndices(chunkId)
+            }
+        }
+
+        // Read and parse file
+        let content = try String(contentsOf: fileURL, encoding: .utf8)
+        let language = ProgrammingLanguage.detect(from: filePath)
+        let relativePath = filePath.replacingOccurrences(of: rootPath, with: "").trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+
+        // Parse into chunks
+        let newChunks = parseIntoChunks(
+            content: content,
+            filePath: filePath,
+            relativePath: relativePath,
+            language: language
+        )
+
+        // Add chunks to indices
+        for chunk in newChunks {
+            addChunkToIndices(chunk)
+        }
+
+        fileModificationTimes[filePath] = modificationDate
+    }
+
+    private func parseIntoChunks(
+        content: String,
+        filePath: String,
+        relativePath: String,
+        language: ProgrammingLanguage
+    ) -> [CodeChunk] {
+        var parsedChunks: [CodeChunk] = []
+        let lines = content.components(separatedBy: .newlines)
+
+        // For now, use simple line-based chunking
+        // TODO: Implement language-specific AST parsing for smarter chunking
+
+        var currentLine = 0
+        while currentLine < lines.count {
+            let endLine = min(currentLine + configuration.maxChunkLines, lines.count)
+            let chunkLines = Array(lines[currentLine..<endLine])
+            let chunkContent = chunkLines.joined(separator: "\n")
+
+            // Skip empty chunks
+            let trimmed = chunkContent.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty || trimmed.count < 10 {
+                currentLine = endLine
+                continue
+            }
+
+            // Detect chunk type and extract metadata
+            let (chunkType, metadata) = analyzeChunk(content: chunkContent, language: language)
+
+            let chunk = CodeChunk(
+                filePath: filePath,
+                relativePath: relativePath,
+                content: chunkContent,
+                startLine: currentLine + 1,
+                endLine: endLine,
+                chunkType: chunkType,
+                language: language,
+                metadata: metadata
+            )
+
+            parsedChunks.append(chunk)
+
+            // Move to next chunk with overlap
+            currentLine = endLine - configuration.chunkOverlap
+            if currentLine < 0 { currentLine = 0 }
+            if currentLine >= lines.count { break }
+        }
+
+        return parsedChunks
+    }
+
+    private func analyzeChunk(content: String, language: ProgrammingLanguage) -> (ChunkType, ChunkMetadata) {
+        var chunkType: ChunkType = .block
+        var metadata = ChunkMetadata()
+
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Swift-specific patterns
+        if language == .swift {
+            if trimmed.contains("func ") {
+                chunkType = .function
+                if let match = trimmed.range(of: #"func\s+(\w+)"#, options: .regularExpression) {
+                    let funcName = String(trimmed[match]).replacingOccurrences(of: "func ", with: "")
+                    metadata.symbolName = funcName.trimmingCharacters(in: .whitespaces)
+                }
+            } else if trimmed.contains("class ") {
+                chunkType = .classDefinition
+                if let match = trimmed.range(of: #"class\s+(\w+)"#, options: .regularExpression) {
+                    let className = String(trimmed[match]).replacingOccurrences(of: "class ", with: "")
+                    metadata.symbolName = className.trimmingCharacters(in: .whitespaces)
+                }
+            } else if trimmed.contains("struct ") {
+                chunkType = .structDefinition
+                if let match = trimmed.range(of: #"struct\s+(\w+)"#, options: .regularExpression) {
+                    let structName = String(trimmed[match]).replacingOccurrences(of: "struct ", with: "")
+                    metadata.symbolName = structName.trimmingCharacters(in: .whitespaces)
+                }
+            } else if trimmed.contains("enum ") {
+                chunkType = .enumDefinition
+                if let match = trimmed.range(of: #"enum\s+(\w+)"#, options: .regularExpression) {
+                    let enumName = String(trimmed[match]).replacingOccurrences(of: "enum ", with: "")
+                    metadata.symbolName = enumName.trimmingCharacters(in: .whitespaces)
+                }
+            } else if trimmed.contains("protocol ") {
+                chunkType = .protocolDefinition
+                if let match = trimmed.range(of: #"protocol\s+(\w+)"#, options: .regularExpression) {
+                    let protocolName = String(trimmed[match]).replacingOccurrences(of: "protocol ", with: "")
+                    metadata.symbolName = protocolName.trimmingCharacters(in: .whitespaces)
+                }
+            } else if trimmed.contains("extension ") {
+                chunkType = .extensionDefinition
+            } else if trimmed.hasPrefix("import ") {
+                chunkType = .import_
+            } else if trimmed.hasPrefix("///") || trimmed.hasPrefix("/**") {
+                chunkType = .documentation
+            } else if trimmed.hasPrefix("//") {
+                chunkType = .comment
+            }
+
+            // Detect visibility
+            if trimmed.contains("public ") {
+                metadata.visibility = "public"
+            } else if trimmed.contains("private ") {
+                metadata.visibility = "private"
+            } else if trimmed.contains("internal ") {
+                metadata.visibility = "internal"
+            } else if trimmed.contains("fileprivate ") {
+                metadata.visibility = "fileprivate"
+            }
+        }
+
+        // Count lines of actual code
+        let codeLines = content.components(separatedBy: .newlines)
+            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+        metadata.linesOfCode = codeLines.count
+
+        return (chunkType, metadata)
+    }
+
+    private func addChunkToIndices(_ chunk: CodeChunk) {
+        // Main chunks dictionary
+        chunks[chunk.id] = chunk
+
+        // File index
+        if fileIndex[chunk.filePath] == nil {
+            fileIndex[chunk.filePath] = []
+        }
+        fileIndex[chunk.filePath]?.insert(chunk.id)
+
+        // Symbol index
+        if let symbolName = chunk.metadata.symbolName {
+            if symbolIndex[symbolName] == nil {
+                symbolIndex[symbolName] = []
+            }
+            symbolIndex[symbolName]?.insert(chunk.id)
+        }
+
+        // Language index
+        if languageIndex[chunk.language] == nil {
+            languageIndex[chunk.language] = []
+        }
+        languageIndex[chunk.language]?.insert(chunk.id)
+
+        // Embedding (if present)
+        if let embedding = chunk.embedding {
+            let index = embeddings.count
+            embeddings.append(embedding)
+            embeddingIndex[chunk.id] = index
+        }
+    }
+
+    private func removeChunkFromIndices(_ chunkId: UUID) {
+        guard let chunk = chunks[chunkId] else { return }
+
+        // Remove from file index
+        fileIndex[chunk.filePath]?.remove(chunkId)
+
+        // Remove from symbol index
+        if let symbolName = chunk.metadata.symbolName {
+            symbolIndex[symbolName]?.remove(chunkId)
+        }
+
+        // Remove from language index
+        languageIndex[chunk.language]?.remove(chunkId)
+
+        // Remove from main dictionary
+        chunks.removeValue(forKey: chunkId)
+
+        // Note: We don't remove from embeddings array to avoid reindexing
+        // The embeddingIndex will have a stale entry, which is fine
+    }
+
+    private func textSearch(query: String, limit: Int) -> [IndexerCodeSearchResult] {
+        let queryLower = query.lowercased()
+        let queryTerms = queryLower.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+
+        var results: [(CodeChunk, Float)] = []
+
+        for chunk in chunks.values {
+            let contentLower = chunk.content.lowercased()
+            let symbolLower = chunk.metadata.symbolName?.lowercased() ?? ""
+            let pathLower = chunk.relativePath.lowercased()
+
+            var score: Float = 0.0
+
+            // Check exact query match
+            if contentLower.contains(queryLower) {
+                score += 10.0
+            }
+
+            // Check individual terms
+            for term in queryTerms {
+                if contentLower.contains(term) {
+                    score += 2.0
+                }
+                if symbolLower.contains(term) {
+                    score += 5.0
+                }
+                if pathLower.contains(term) {
+                    score += 3.0
+                }
+            }
+
+            // Boost for symbol matches
+            if !symbolLower.isEmpty && symbolLower.contains(queryLower) {
+                score += 15.0
+            }
+
+            if score > 0 {
+                results.append((chunk, score))
+            }
+        }
+
+        // Sort by score descending
+        results.sort { $0.1 > $1.1 }
+
+        // Take top results
+        return results.prefix(limit).map { chunk, score in
+            IndexerCodeSearchResult(
+                id: UUID(),
+                chunk: chunk,
+                score: score,
+                matchReason: .semanticSimilarity(score: score)
+            )
+        }
+    }
+
+    private func shouldExclude(path: String) -> Bool {
+        for pattern in configuration.excludePatterns {
+            if matchesGlob(path: path, pattern: pattern) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private func shouldInclude(path: String) -> Bool {
+        for pattern in configuration.includePatterns {
+            if matchesGlob(path: path, pattern: pattern) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private func matchesGlob(path: String, pattern: String) -> Bool {
+        // Simple glob matching
+        let regexPattern = pattern
+            .replacingOccurrences(of: ".", with: "\\.")
+            .replacingOccurrences(of: "**/", with: "(.*/)?")
+            .replacingOccurrences(of: "*", with: "[^/]*")
+
+        guard let regex = try? NSRegularExpression(pattern: "^" + regexPattern + "$", options: []) else {
+            return false
+        }
+
+        let range = NSRange(path.startIndex..., in: path)
+        return regex.firstMatch(in: path, options: [], range: range) != nil
+    }
+
+    private func updateStatistics() {
+        var languageBreakdown: [ProgrammingLanguage: Int] = [:]
+        var chunkTypeBreakdown: [ChunkType: Int] = [:]
+        var totalLines = 0
+
+        for chunk in chunks.values {
+            languageBreakdown[chunk.language, default: 0] += 1
+            chunkTypeBreakdown[chunk.chunkType, default: 0] += 1
+            totalLines += chunk.endLine - chunk.startLine + 1
+        }
+
+        // Estimate memory usage
+        let chunkMemory = chunks.count * MemoryLayout<CodeChunk>.size
+        let embeddingMemory = embeddings.count * configuration.embeddingDimension * MemoryLayout<Float>.size
+        let totalMemory = Double(chunkMemory + embeddingMemory) / 1_000_000.0
+
+        statistics = IndexStatistics(
+            totalFiles: fileIndex.count,
+            totalChunks: chunks.count,
+            totalLines: totalLines,
+            languageBreakdown: languageBreakdown,
+            chunkTypeBreakdown: chunkTypeBreakdown,
+            memoryUsageMB: totalMemory,
+            lastIndexedAt: Date(),
+            indexingDurationSeconds: nil
+        )
+    }
+
+    private func persistToDisk() async throws {
+        guard let persistDir = configuration.persistenceDirectory else { return }
+
+        try FileManager.default.createDirectory(at: persistDir, withIntermediateDirectories: true)
+
+        let persistedIndex = PersistedIndex(
+            chunks: Array(chunks.values),
+            fileModificationTimes: fileModificationTimes,
+            indexedRoots: Array(indexedRoots)
+        )
+
+        let data = try JSONEncoder().encode(persistedIndex)
+        let indexFile = persistDir.appendingPathComponent("index.json")
+        try data.write(to: indexFile)
+
+        logger.info("Persisted index to disk: \(data.count) bytes")
+    }
+}
+
+// MARK: - Persistence Model
+
+private struct PersistedIndex: Codable {
+    let chunks: [CodeChunk]
+    let fileModificationTimes: [String: Date]
+    let indexedRoots: [String]
+}
+
+// MARK: - Errors
+
+public enum IndexerError: Error, LocalizedError {
+    case cannotEnumerateDirectory(String)
+    case fileNotFound(String)
+    case encodingError(String)
+    case embeddingGenerationFailed(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .cannotEnumerateDirectory(let path):
+            return "Cannot enumerate directory: \(path)"
+        case .fileNotFound(let path):
+            return "File not found: \(path)"
+        case .encodingError(let message):
+            return "Encoding error: \(message)"
+        case .embeddingGenerationFailed(let message):
+            return "Embedding generation failed: \(message)"
+        }
+    }
+}

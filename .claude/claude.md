@@ -1,5 +1,53 @@
 # THEA Project
 
+## CRITICAL SAFETY RULES
+
+### ⚠️ MANDATORY: Commit After Every Edit
+
+**This rule is NON-NEGOTIABLE and must be followed WITHOUT EXCEPTION:**
+
+1. **After EVERY file edit** (create, modify, delete), immediately run:
+   ```bash
+   cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+   git add -A && git commit -m "Auto-save: <brief description of change>"
+   ```
+
+2. **Before ANY destructive command** (rm, clean, reset), ALWAYS commit first:
+   ```bash
+   git add -A && git commit -m "Checkpoint before cleanup"
+   ```
+
+3. **Push to remote regularly** (at minimum every 5 commits):
+   ```bash
+   git push origin main
+   ```
+
+### 🚫 FORBIDDEN Commands
+
+**NEVER execute these commands under ANY circumstances:**
+
+- `rm -rf` with wildcards (`*`) in ANY path
+- `rm -rf ~/` or `rm -rf /`
+- `rm -rf` on parent directories of the project
+- `git clean -fdx` without explicit user confirmation
+- `git reset --hard` without explicit user confirmation
+- Any command that could delete the project directory
+
+### ✅ Safe DerivedData Cleanup
+
+**When cleaning Xcode DerivedData, ONLY use this exact command:**
+```bash
+# First, commit current state
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea" && git add -A && git commit -m "Checkpoint before DerivedData cleanup" || true
+
+# Then clean ONLY Thea-specific DerivedData (safe pattern)
+find ~/Library/Developer/Xcode/DerivedData -maxdepth 1 -name "Thea-*" -type d -exec rm -rf {} + 2>/dev/null || true
+```
+
+**NEVER use:** `rm -rf ~/Library/Developer/Xcode/DerivedData/*`
+
+---
+
 ## AI Behavior Guidelines
 
 **IMPORTANT: For every task or instruction:**
@@ -41,6 +89,7 @@ done
 - **Schemes**: Thea-macOS, Thea-iOS, Thea-watchOS, Thea-tvOS
 - **Local models**: `~/.cache/huggingface/hub/`
 - **Architecture**: MVVM with SwiftUI + SwiftData
+- **Remote**: `https://github.com/Atchoum23/Thea.git`
 
 ## Orchestrator System
 

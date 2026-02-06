@@ -170,14 +170,15 @@ final class MCPToolRegistry {
 
         // Register each MCP tool as a standard tool
         for mcpTool in mcpTools {
+            let capturedTool = mcpTool
             let tool = Tool(
-                id: mcpTool.id,
-                name: mcpTool.name,
-                description: mcpTool.description,
-                parameters: mcpTool.parameters,
+                id: capturedTool.id,
+                name: capturedTool.name,
+                description: capturedTool.description,
+                parameters: capturedTool.parameters,
                 category: .api
-            ) { parameters in
-                try await mcpTool.execute(arguments: parameters).output ?? ""
+            ) { @MainActor parameters in
+                try await capturedTool.execute(arguments: parameters).output ?? ""
             }
 
             toolFramework.registerTool(tool)

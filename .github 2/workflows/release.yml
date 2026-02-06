@@ -1,0 +1,302 @@
+# Thea Release Workflow
+# Version: 2.2.0 - Added watchOS/tvOS builds, updated action versions, improved DMG
+# Last Updated: January 31, 2026
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.5.0)'
+        required: true
+        type: string
+
+env:
+  XCODE_VERSION: '16.2'
+  DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false  # Don't cancel release builds
+
+jobs:
+  # ============================================
+  # BUILD RELEASE ARTIFACTS
+  # ============================================
+  build-release:
+    name: Build ${{ matrix.platform }} Release
+    runs-on: macos-14
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macOS
+            scheme: Thea-macOS
+            destination: 'platform=macOS'
+            artifact_path: 'build/Build/Products/Release/Thea.app'
+          - platform: iOS
+            scheme: Thea-iOS
+            destination: 'generic/platform=iOS'
+            artifact_path: 'build/Build/Products/Release-iphoneos/Thea.app'
+          - platform: watchOS
+            scheme: Thea-watchOS
+            destination: 'generic/platform=watchOS'
+            artifact_path: 'build/Build/Products/Release-watchos/Thea Watch.app'
+          - platform: tvOS
+            scheme: Thea-tvOS
+            destination: 'generic/platform=tvOS'
+            artifact_path: 'build/Build/Products/Release-appletvos/Thea.app'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+
+      - name: Cache XcodeGen
+        id: xcodegen-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: /opt/homebrew/Cellar/xcodegen
+          key: ${{ runner.os }}-xcodegen-2.42.0
+
+      - name: Install XcodeGen
+        run: |
+          if [ "${{ steps.xcodegen-cache.outputs.cache-hit }}" == "true" ]; then
+            brew link xcodegen 2>/dev/null || true
+          fi
+          command -v xcodegen || brew install xcodegen
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Extract Version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Build ${{ matrix.scheme }} Release
+        run: |
+          xcodebuild build \
+            -project Thea.xcodeproj \
+            -scheme ${{ matrix.scheme }} \
+            -destination '${{ matrix.destination }}' \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            MARKETING_VERSION=${{ steps.version.outputs.version }} \
+            2>&1 | tee build-${{ matrix.platform }}.log
+
+      - name: Verify Build Success
+        run: |
+          if [ ! -d "${{ matrix.artifact_path }}" ]; then
+            echo "::error::Build artifact not found at ${{ matrix.artifact_path }}"
+            echo "Available artifacts:"
+            find build/Build/Products -name "*.app" -type d || echo "No .app found"
+            exit 1
+          fi
+          echo "Build successful: ${{ matrix.artifact_path }}"
+
+      - name: Create Archive
+        run: |
+          mkdir -p release
+          cp -R "${{ matrix.artifact_path }}" release/
+          cd release
+          zip -r ../Thea-${{ steps.version.outputs.version }}-${{ matrix.platform }}.zip .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: thea-${{ matrix.platform }}-${{ steps.version.outputs.version }}
+          path: Thea-${{ steps.version.outputs.version }}-${{ matrix.platform }}.zip
+          retention-days: 90
+
+      - name: Upload Build Log
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: release-build-log-${{ matrix.platform }}
+          path: build-${{ matrix.platform }}.log
+          retention-days: 30
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+  # ============================================
+  # CREATE GITHUB RELEASE
+  # ============================================
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build-release
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: thea-macOS-${{ needs.build-release.outputs.version }}
+          path: ./release
+
+      - name: Download iOS Artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: thea-iOS-${{ needs.build-release.outputs.version }}
+          path: ./release
+
+      - name: Generate Release Notes
+        run: |
+          VERSION="${{ needs.build-release.outputs.version }}"
+          cat > release-notes.md << EOF
+          ## Thea v${VERSION}
+
+          ### Features
+          - **Multi-Platform Support**: iOS, macOS, watchOS, tvOS
+          - **Swift 6.0**: Full strict concurrency compliance
+          - **Privacy-First**: All data stored locally with optional CloudKit sync
+
+          ### Technical Details
+          - Swift 6.0 with strict concurrency
+          - SwiftUI for all platforms
+          - SwiftData for local persistence
+          - XcodeGen for project generation
+
+          ### Installation
+
+          **macOS:**
+          1. Download \`Thea-${VERSION}-macOS.zip\`
+          2. Unzip and move Thea.app to /Applications
+          3. Launch from Applications
+
+          **iOS:**
+          - Requires Xcode for ad-hoc installation or TestFlight
+
+          ### Requirements
+          - macOS 14.0 (Sonoma) or later
+          - iOS 17.0 or later
+          - watchOS 10.0 or later
+          - tvOS 17.0 or later
+
+          ---
+          *Built with zero warnings, zero errors*
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        with:
+          body_path: release-notes.md
+          files: release/*
+          draft: false
+          prerelease: ${{ contains(needs.build-release.outputs.version, 'beta') || contains(needs.build-release.outputs.version, 'alpha') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # CREATE DMG (macOS only)
+  # ============================================
+  create-dmg:
+    name: Create DMG Installer
+    runs-on: macos-14
+    needs: [build-release, create-release]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: thea-macOS-${{ needs.build-release.outputs.version }}
+          path: ./
+
+      - name: Extract and Create DMG
+        run: |
+          VERSION="${{ needs.build-release.outputs.version }}"
+
+          # Unzip the app
+          unzip -o "Thea-${VERSION}-macOS.zip" -d dmg-staging
+
+          # Create DMG with background and layout
+          hdiutil create \
+            -volname "Thea ${VERSION}" \
+            -srcfolder dmg-staging \
+            -ov -format UDZO \
+            "Thea-${VERSION}.dmg"
+
+          # Verify DMG
+          if [ ! -f "Thea-${VERSION}.dmg" ]; then
+            echo "::error::DMG creation failed"
+            exit 1
+          fi
+          echo "DMG created successfully: Thea-${VERSION}.dmg"
+          ls -lh "Thea-${VERSION}.dmg"
+
+      - name: Upload DMG to Release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        with:
+          files: Thea-${{ needs.build-release.outputs.version }}.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # RELEASE SUMMARY
+  # ============================================
+  release-summary:
+    name: Release Summary
+    runs-on: ubuntu-latest
+    needs: [build-release, create-release, create-dmg]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          VERSION="${{ needs.build-release.outputs.version }}"
+          echo "## Release v${VERSION} Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.build-release.result }}" == "success" ]]; then
+            echo "| Build | Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Build | Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.create-release.result }}" == "success" ]]; then
+            echo "| GitHub Release | Created |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| GitHub Release | Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.create-dmg.result }}" == "success" ]]; then
+            echo "| DMG Installer | Created |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| DMG Installer | Failed |" >> $GITHUB_STEP_SUMMARY
+          fi

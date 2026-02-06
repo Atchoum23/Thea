@@ -193,7 +193,7 @@ struct FinancialDashboardView: View {
                     .padding()
             } else {
                 ForEach(financial.insights) { insight in
-                    InsightCard(insight: insight)
+                    FinancialInsightCard(insight: insight)
                 }
             }
         }
@@ -361,9 +361,9 @@ struct TransactionRow: View {
     }
 }
 
-// MARK: - Insight Card
+// MARK: - Financial Insight Card
 
-struct InsightCard: View {
+private struct FinancialInsightCard: View {
     let insight: FinancialInsight
 
     var body: some View {

@@ -56,8 +56,13 @@ extension Font {
         return Font.system(
             size: config.title3Size,
             weight: weight(from: config.title3Weight),
-            design: .default
+            design: config.useRoundedDesign ? .rounded : .default
         )
+    }
+
+    @MainActor
+    static var theaLargeDisplay: Font {
+        Font.system(size: 42, weight: .bold, design: .rounded)
     }
 
     @MainActor
@@ -125,7 +130,8 @@ extension Font {
     static let theaDisplayDefault = Font.system(size: 34, weight: .bold, design: .rounded)
     static let theaTitle1Default = Font.system(size: 28, weight: .bold, design: .rounded)
     static let theaTitle2Default = Font.system(size: 22, weight: .semibold, design: .rounded)
-    static let theaTitle3Default = Font.system(size: 20, weight: .semibold)
+    static let theaLargeDisplayDefault = Font.system(size: 42, weight: .bold, design: .rounded)
+    static let theaTitle3Default = Font.system(size: 20, weight: .semibold, design: .rounded)
     static let theaHeadlineDefault = Font.system(size: 17, weight: .semibold)
     static let theaBodyDefault = Font.system(size: 17, weight: .regular)
     static let theaCalloutDefault = Font.system(size: 16, weight: .regular)
@@ -134,5 +140,5 @@ extension Font {
     static let theaCaption1Default = Font.system(size: 12, weight: .regular)
     static let theaCaption2Default = Font.system(size: 11, weight: .regular)
     static let theaCodeDefault = Font.system(size: 14, weight: .regular, design: .monospaced)
-    static let theaCodeInlineDefault = Font.system(size: 16, weight: .regular, design: .monospaced)
+    static let theaCodeInlineDefault = Font.system(size: 16, weight: .medium, design: .monospaced)
 }
