@@ -121,6 +121,7 @@ public enum TheaSpacing {
     public static let xl: CGFloat = 24
     public static let xxl: CGFloat = 32
     public static let xxxl: CGFloat = 48
+    public static let jumbo: CGFloat = 48
 }
 
 /// Core corner radii

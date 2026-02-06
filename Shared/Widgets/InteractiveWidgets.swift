@@ -6,6 +6,7 @@
 //  iOS 17+ Interactive Widgets and StandBy Mode support
 //
 
+#if canImport(WidgetKit)
 import AppIntents
 import SwiftUI
 import WidgetKit
@@ -490,3 +491,4 @@ struct TheaInteractiveWidgetBundle: WidgetBundle {
         #endif
     }
 }
+#endif // canImport(WidgetKit)
