@@ -810,7 +810,7 @@ public struct LocationFocusBehavior: Codable, Sendable {
 
 // MARK: - Focus Mode Intelligence Actor
 
-/// Main intelligence system - runs on Mac, syncs with iPhone
+// Main intelligence system - runs on Mac, syncs with iPhone
 // swiftlint:disable:next type_body_length
 public actor FocusModeIntelligence {
     // MARK: - Singleton
