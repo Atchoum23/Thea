@@ -35,7 +35,7 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var analysisTimer: Timer?
     private var appSwitchHistory: [AppSwitchRecord] = []
-    private var actionSequences: [[UserAction]] = []
+    private var actionSequences: [[BehaviorUserAction]] = []
 
     // MARK: - Configuration
 
@@ -116,7 +116,7 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
         }
 
         // Convert events to user actions for sequence analysis
-        let action = UserAction(
+        let action = BehaviorUserAction(
             timestamp: event.timestamp,
             type: mapEventToActionType(event.type),
             appBundleId: event.data["bundleId"] ?? event.data["appBundleId"] ?? "",
@@ -201,7 +201,7 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
         var patterns: [BehaviorPattern] = []
 
         // Look for repeated action sequences
-        var sequenceCounts: [String: (count: Int, sequence: [UserAction])] = [:]
+        var sequenceCounts: [String: (count: Int, sequence: [BehaviorUserAction])] = [:]
 
         for sequence in actionSequences {
             guard sequence.count >= 3 else { continue }
@@ -404,7 +404,7 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
 
     // MARK: - Helpers
 
-    private func describeSequence(_ sequence: [UserAction]) -> String {
+    private func describeSequence(_ sequence: [BehaviorUserAction]) -> String {
         let actionDescriptions = sequence.prefix(4).map { action -> String in
             switch action.type {
             case .appSwitch: return "switch app"
@@ -519,7 +519,7 @@ struct AppSwitchRecord: Sendable {
 }
 
 /// A user action for sequence analysis
-struct UserAction: Sendable {
+struct BehaviorUserAction: Sendable {
     let timestamp: Date
     let type: UserActionType
     let appBundleId: String
