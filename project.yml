@@ -58,7 +58,7 @@ settings:
     # Swift Configuration
     # ===========================================
     SWIFT_VERSION: "6.0"
-    SWIFT_STRICT_CONCURRENCY: minimal
+    SWIFT_STRICT_CONCURRENCY: complete
     SWIFT_EMIT_MODULE_INTERFACE: NO
     BUILD_LIBRARY_FOR_DISTRIBUTION: NO
     SWIFT_ENFORCE_EXCLUSIVE_ACCESS: "full"
@@ -175,9 +175,8 @@ settings:
     CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY: YES
 
     # ===========================================
-    # Security
+    # Security (NS_ASSERTIONS set per-config: YES for Debug, NO for Release)
     # ===========================================
-    ENABLE_NS_ASSERTIONS: NO
 
   # ===========================================
   # Debug Configuration
