@@ -390,7 +390,7 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
     public let category: CrossDeviceNotificationCategory
 
     /// Priority level
-    public let priority: PayloadNotificationPriority
+    public let priority: CrossDeviceNotificationPriority
 
     /// Notification title
     public let title: String
@@ -448,7 +448,7 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
     public init(
         id: UUID = UUID(),
         category: CrossDeviceNotificationCategory,
-        priority: PayloadNotificationPriority? = nil,
+        priority: CrossDeviceNotificationPriority? = nil,
         title: String,
         body: String,
         subtitle: String? = nil,
