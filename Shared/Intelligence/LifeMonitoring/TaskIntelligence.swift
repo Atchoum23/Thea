@@ -785,7 +785,7 @@ public actor TaskIntelligence {
     // MARK: - Persistence
 
     private func saveTasks() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea"),
+        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let encoded = try? JSONEncoder().encode(Array(tasks.values)) {
             defaults.set(encoded, forKey: "theaTasks")
             defaults.synchronize()
@@ -793,7 +793,7 @@ public actor TaskIntelligence {
     }
 
     public func loadTasks() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea"),
+        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let data = defaults.data(forKey: "theaTasks"),
            let loadedTasks = try? JSONDecoder().decode([TheaTask].self, from: data) {
             for task in loadedTasks {

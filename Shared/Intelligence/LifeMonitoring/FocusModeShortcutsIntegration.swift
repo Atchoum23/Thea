@@ -363,7 +363,7 @@ public struct FocusStatusIntentSupport {
             let isFocused = intent.focusStatus?.isFocused ?? false
 
             // Notify main app via App Group shared container
-            let defaults = UserDefaults(suiteName: "group.app.thea")
+            let defaults = UserDefaults(suiteName: "group.app.theathe")
             defaults?.set(isFocused, forKey: "focusStatusActive")
             defaults?.set(Date(), forKey: "focusStatusTimestamp")
 

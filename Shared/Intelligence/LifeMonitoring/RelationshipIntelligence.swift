@@ -550,7 +550,7 @@ public actor RelationshipIntelligence {
     // MARK: - Persistence
 
     private func saveData() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea") {
+        if let defaults = UserDefaults(suiteName: "group.app.theathe") {
             if let encoded = try? JSONEncoder().encode(Array(relationships.values)) {
                 defaults.set(encoded, forKey: "contactRelationships")
             }
@@ -564,7 +564,7 @@ public actor RelationshipIntelligence {
     }
 
     public func loadData() async {
-        if let defaults = UserDefaults(suiteName: "group.app.thea") {
+        if let defaults = UserDefaults(suiteName: "group.app.theathe") {
             if let data = defaults.data(forKey: "contactRelationships"),
                let loaded = try? JSONDecoder().decode([ContactRelationship].self, from: data) {
                 for rel in loaded {
