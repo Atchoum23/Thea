@@ -65,7 +65,9 @@
         "content/video-controller.js",
         "content/print-friendly.js",
         "content/ai-sidebar.js",
-        "content/privacy-shield.js"
+        "content/privacy-shield.js",
+        "content/cosmetic-filter.js",
+        "content/password-enhancer.js"
       ],
       "css": ["content/content-styles.css"],
       "run_at": "document_start",
