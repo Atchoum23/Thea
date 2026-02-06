@@ -135,8 +135,8 @@ public final class ConversationIntelligenceService: ObservableObject {
 
     // MARK: - Entity Extraction
 
-    private func extractEntities(from text: String) -> [ExtractedEntity] {
-        var entities: [ExtractedEntity] = []
+    private func extractEntities(from text: String) -> [ConversationExtractedEntity] {
+        var entities: [ConversationExtractedEntity] = []
 
         tagger.string = text
         let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace]
@@ -154,7 +154,7 @@ public final class ConversationIntelligenceService: ObservableObject {
             if let type = entityType {
                 let value = String(text[range])
                 if !entities.contains(where: { $0.value == value }) {
-                    entities.append(ExtractedEntity(type: type, value: value))
+                    entities.append(ConversationExtractedEntity(type: type, value: value))
                 }
             }
 
@@ -640,7 +640,7 @@ public struct FollowUpSuggestion: Identifiable {
 // MARK: - Internal Helper Types
 
 /// Entity extraction result used internally
-public struct ExtractedEntity {
+public struct ConversationExtractedEntity {
     public let type: EntityType
     public let value: String
 }
