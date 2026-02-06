@@ -172,7 +172,7 @@ final class OpenRouterProvider: AIProvider, Sendable {
 
     // MARK: - Models
 
-    func listModels() async throws -> [AIModel] {
+    func listModels() async throws -> [ProviderAIModel] {
         guard let url = URL(string: "\(baseURL)/models") else {
             throw OpenRouterError.invalidResponse
         }
@@ -199,7 +199,7 @@ final class OpenRouterProvider: AIProvider, Sendable {
             let inputPrice = (pricing?["prompt"] as? String).flatMap { Double($0) }.map { Decimal($0) * 1_000_000 } ?? 0
             let outputPrice = (pricing?["completion"] as? String).flatMap { Double($0) }.map { Decimal($0) * 1_000_000 } ?? 0
 
-            return AIModel(
+            return ProviderAIModel(
                 id: id,
                 name: name,
                 description: modelData["description"] as? String,

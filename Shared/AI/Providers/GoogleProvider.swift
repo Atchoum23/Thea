@@ -164,9 +164,9 @@ final class GoogleProvider: AIProvider, Sendable {
 
     // MARK: - Models
 
-    func listModels() async throws -> [AIModel] {
+    func listModels() async throws -> [ProviderAIModel] {
         [
-            AIModel(
+            ProviderAIModel(
                 id: "gemini-2.0-flash-exp",
                 name: "Gemini 2.0 Flash",
                 description: "Experimental next-gen model",
@@ -177,7 +177,7 @@ final class GoogleProvider: AIProvider, Sendable {
                 supportsVision: true,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "gemini-1.5-pro",
                 name: "Gemini 1.5 Pro",
                 description: "Most capable Gemini model",
@@ -188,7 +188,7 @@ final class GoogleProvider: AIProvider, Sendable {
                 supportsVision: true,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "gemini-1.5-flash",
                 name: "Gemini 1.5 Flash",
                 description: "Fast and cost-effective",

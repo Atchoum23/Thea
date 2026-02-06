@@ -181,9 +181,9 @@ final class PerplexityProvider: AIProvider, Sendable {
 
     // MARK: - Models
 
-    func listModels() async throws -> [AIModel] {
+    func listModels() async throws -> [ProviderAIModel] {
         [
-            AIModel(
+            ProviderAIModel(
                 id: "llama-3.1-sonar-large-128k-online",
                 name: "Sonar Large (Online)",
                 description: "Most capable with web search",
@@ -194,7 +194,7 @@ final class PerplexityProvider: AIProvider, Sendable {
                 supportsVision: false,
                 supportsFunctionCalling: false
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "llama-3.1-sonar-small-128k-online",
                 name: "Sonar Small (Online)",
                 description: "Fast with web search",
@@ -205,7 +205,7 @@ final class PerplexityProvider: AIProvider, Sendable {
                 supportsVision: false,
                 supportsFunctionCalling: false
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "llama-3.1-8b-instruct",
                 name: "Llama 3.1 8B",
                 description: "Fast open-source model (no search)",
