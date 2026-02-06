@@ -7,6 +7,7 @@
 
 import icloudBridge from './icloud-bridge.js';
 import icloudClient from './icloud-client.js';
+import memorySystem from './memory-system.js';
 
 // ============================================================================
 // State Management
@@ -22,11 +23,40 @@ const defaultState = {
   printFriendlyEnabled: true,
   tabManagerEnabled: true,
   aiAssistantEnabled: true,
+  videoControllerEnabled: true,
+  memoryEnabled: true,
 
   // Dark mode settings
-  darkModeTheme: 'midnight',
-  darkModeFollowSystem: true,
-  darkModeSitePreferences: {},
+  darkModeConfig: {
+    enabled: false,
+    theme: 'midnight',
+    followSystem: true,
+    sitePrefs: {},
+    customThemes: {},
+    pausedUntil: null
+  },
+
+  // Video controller settings
+  videoConfig: {
+    enabled: true,
+    defaultSpeed: 1.0,
+    speedStep: 0.1,
+    showOverlay: true,
+    rememberSpeed: true,
+    siteSpeedPrefs: {},
+    autoSpeedRules: []
+  },
+
+  // Privacy config
+  privacyConfig: {
+    cookieAutoDecline: true,
+    fingerprintProtection: true,
+    referrerStripping: true,
+    linkUnshimming: true,
+    trackingParamRemoval: true,
+    socialWidgetBlocking: false,
+    webrtcProtection: false
+  },
 
   // Stats
   stats: {
@@ -36,7 +66,10 @@ const defaultState = {
     passwordsAutofilled: 0,
     pagesDarkened: 0,
     pagesCleaned: 0,
-    dataSaved: 0
+    dataSaved: 0,
+    cookiesDeclined: 0,
+    trackingParamsStripped: 0,
+    memoriesSaved: 0
   },
 
   // Whitelist
@@ -95,6 +128,8 @@ const ALLOWED_EXTERNAL_STATE_KEYS = new Set([
   'printFriendlyEnabled',
   'tabManagerEnabled',
   'aiAssistantEnabled',
+  'videoControllerEnabled',
+  'memoryEnabled',
   'darkModeTheme',
   'darkModeFollowSystem',
   'whitelist'
