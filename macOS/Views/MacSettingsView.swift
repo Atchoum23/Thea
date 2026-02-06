@@ -1,5 +1,9 @@
 import SwiftUI
 
+// MARK: - macOS Settings View
+
+/// Consolidated settings for macOS with progressive disclosure.
+/// Tabs: General, AI & Models, Voice & Input, Sync & Privacy, Advanced
 struct MacSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var settingsManager = SettingsManager.shared
@@ -11,33 +15,17 @@ struct MacSettingsView: View {
 
     enum SettingsTab: String, CaseIterable {
         case general = "General"
-        case aiProviders = "AI Providers"
-        case models = "Models"
-        case localModels = "Local Models"
-        case orchestrator = "Orchestrator"
-        case memory = "Memory"
-        case integrations = "Integrations"
-        case automation = "Automation"
-        case voice = "Voice"
-        case permissions = "Permissions"
-        case sync = "Sync"
-        case privacy = "Privacy"
+        case ai = "AI & Models"
+        case voice = "Voice & Input"
+        case syncPrivacy = "Sync & Privacy"
         case advanced = "Advanced"
 
         var icon: String {
             switch self {
             case .general: "gear"
-            case .aiProviders: "brain.head.profile"
-            case .models: "cube.box"
-            case .localModels: "cpu"
-            case .orchestrator: "network"
-            case .memory: "brain"
-            case .integrations: "square.grid.2x2"
-            case .automation: "gearshape.2"
+            case .ai: "brain.head.profile"
             case .voice: "mic.fill"
-            case .permissions: "hand.raised.fill"
-            case .sync: "icloud.fill"
-            case .privacy: "lock.fill"
+            case .syncPrivacy: "lock.icloud.fill"
             case .advanced: "slider.horizontal.3"
             }
         }
@@ -53,7 +41,7 @@ struct MacSettingsView: View {
                     .tag(tab)
             }
         }
-        .frame(width: 800, height: 600)
+        .frame(width: 680, height: 520)
     }
 
     @ViewBuilder
@@ -61,47 +49,15 @@ struct MacSettingsView: View {
         switch tab {
         case .general:
             generalSettings
-        case .aiProviders:
-            comingSoonView("AI Providers")
-        case .models:
-            ModelSettingsView()
-        case .localModels:
-            comingSoonView("Local Models")
-        case .orchestrator:
-            comingSoonView("Orchestrator")
-        case .memory:
-            comingSoonView("Memory")
-        case .integrations:
-            IntegrationsSettingsView()
-        case .automation:
-            comingSoonView("Automation")
+        case .ai:
+            aiSettings
         case .voice:
             voiceSettings
-        case .permissions:
-            comingSoonView("Permissions")
-        case .sync:
-            syncSettings
-        case .privacy:
-            privacySettings
+        case .syncPrivacy:
+            syncPrivacySettings
         case .advanced:
             advancedSettings
         }
-    }
-
-    // MARK: - Coming Soon Placeholder
-
-    private func comingSoonView(_ title: String) -> some View {
-        VStack(spacing: 20) {
-            Image(systemName: "hammer.fill")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-            Text("\(title) Settings")
-                .font(.title2)
-                .fontWeight(.semibold)
-            Text("Coming soon in a future update")
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - General Settings
@@ -154,45 +110,27 @@ struct MacSettingsView: View {
                 }
             }
 
-            Section("Window Behavior") {
+            Section("Window") {
                 Toggle("Float Window on Top", isOn: $settingsManager.windowFloatOnTop)
-
                 Toggle("Remember Window Position", isOn: $settingsManager.rememberWindowPosition)
-
-                LabeledContent("Default Size") {
-                    Picker("Size", selection: $settingsManager.defaultWindowSize) {
-                        Text("Default").tag("default")
-                        Text("Compact").tag("compact")
-                        Text("Large").tag("large")
-                        Text("Fullscreen").tag("fullscreen")
-                    }
-                    .frame(maxWidth: 150)
-                }
             }
 
             Section("Behavior") {
                 Toggle("Launch at Login", isOn: $settingsManager.launchAtLogin)
                 Toggle("Show in Menu Bar", isOn: $settingsManager.showInMenuBar)
                 Toggle("Enable Notifications", isOn: $settingsManager.notificationsEnabled)
-                Toggle("Auto-Scroll to Latest Message", isOn: $settingsManager.autoScrollToBottom)
-            }
-
-            Section("Startup") {
+                Toggle("Auto-Scroll to Latest", isOn: $settingsManager.autoScrollToBottom)
                 Toggle("Show Sidebar on Launch", isOn: $settingsManager.showSidebarOnLaunch)
                 Toggle("Restore Last Session", isOn: $settingsManager.restoreLastSession)
             }
 
-            Section {
-                Text("Changes are saved automatically.")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
+            settingsFooter
         }
         .formStyle(.grouped)
         .padding()
     }
 
-    // MARK: - AI Provider Settings
+    // MARK: - AI & Models Settings
 
     @State private var openAIKey: String = ""
     @State private var anthropicKey: String = ""
@@ -202,24 +140,7 @@ struct MacSettingsView: View {
     @State private var openRouterKey: String = ""
     @State private var apiKeysLoaded: Bool = false
 
-    private func loadAPIKeysIfNeeded() {
-        guard !apiKeysLoaded else { return }
-        apiKeysLoaded = true
-        openAIKey = settingsManager.getAPIKey(for: "openai") ?? ""
-        anthropicKey = settingsManager.getAPIKey(for: "anthropic") ?? ""
-        googleKey = settingsManager.getAPIKey(for: "google") ?? ""
-        perplexityKey = settingsManager.getAPIKey(for: "perplexity") ?? ""
-        groqKey = settingsManager.getAPIKey(for: "groq") ?? ""
-        openRouterKey = settingsManager.getAPIKey(for: "openrouter") ?? ""
-    }
-
-    private func saveAPIKey(_ key: String, for provider: String) {
-        if !key.isEmpty {
-            settingsManager.setAPIKey(key, for: provider)
-        }
-    }
-
-    private var aiProviderSettings: some View {
+    private var aiSettings: some View {
         Form {
             Section("Default Provider") {
                 Picker("Provider", selection: $settingsManager.defaultProvider) {
@@ -227,7 +148,6 @@ struct MacSettingsView: View {
                         Text(provider.capitalized).tag(provider)
                     }
                 }
-
                 Toggle("Stream Responses", isOn: $settingsManager.streamResponses)
             }
 
@@ -238,40 +158,28 @@ struct MacSettingsView: View {
                 apiKeyField(label: "Perplexity", key: $perplexityKey, provider: "perplexity")
                 apiKeyField(label: "Groq", key: $groqKey, provider: "groq")
                 apiKeyField(label: "OpenRouter", key: $openRouterKey, provider: "openrouter")
-            }
 
-            Section {
                 Text("API keys are stored securely in your Keychain.")
-                    .font(.caption)
+                    .font(.theaCaption2)
                     .foregroundStyle(.tertiary)
             }
+
+            Section("Models") {
+                ModelSettingsView()
+            }
+
+            Section("Integrations") {
+                IntegrationsSettingsView()
+            }
+
+            settingsFooter
         }
         .formStyle(.grouped)
         .padding()
-        .onAppear {
-            loadAPIKeysIfNeeded()
-        }
+        .onAppear { loadAPIKeysIfNeeded() }
     }
 
-    private func apiKeyField(label: String, key: Binding<String>, provider: String) -> some View {
-        HStack {
-            Text(label)
-                .frame(width: 100, alignment: .leading)
-
-            SecureField("API Key", text: key)
-                .textFieldStyle(.roundedBorder)
-                .onChange(of: key.wrappedValue) { _, newValue in
-                    saveAPIKey(newValue, for: provider)
-                }
-
-            if !key.wrappedValue.isEmpty {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-            }
-        }
-    }
-
-    // MARK: - Voice Settings
+    // MARK: - Voice & Input Settings
 
     private var voiceSettings: some View {
         Form {
@@ -294,7 +202,7 @@ struct MacSettingsView: View {
                     Toggle("Conversation Mode", isOn: $voiceManager.conversationMode)
 
                     HStack {
-                        Button("Test Wake Word Detection") {
+                        Button("Test Wake Word") {
                             try? voiceManager.startWakeWordDetection()
                         }
 
@@ -311,14 +219,14 @@ struct MacSettingsView: View {
                             ProgressView()
                                 .scaleEffect(0.8)
                             Text("Listening for '\(voiceManager.wakeWord)'...")
-                                .font(.caption)
+                                .font(.theaCaption1)
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
 
-                Text("Note: Voice features require microphone permission. Disable to stop microphone access.")
-                    .font(.caption)
+                Text("Voice features require microphone permission.")
+                    .font(.theaCaption2)
                     .foregroundStyle(.secondary)
             }
 
@@ -333,170 +241,87 @@ struct MacSettingsView: View {
                     }
                 }
             }
+
+            settingsFooter
         }
         .formStyle(.grouped)
         .padding()
     }
 
-    // MARK: - Sync Settings
+    // MARK: - Sync & Privacy Settings
 
-    private var syncSettings: some View {
+    private var syncPrivacySettings: some View {
         Form {
             Section("iCloud Sync") {
                 Toggle("Enable iCloud Sync", isOn: $settingsManager.iCloudSyncEnabled)
 
                 if settingsManager.iCloudSyncEnabled {
-                    HStack {
-                        Text("iCloud Status:")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        if cloudKitService.iCloudAvailable {
-                            Label("Connected", systemImage: "checkmark.circle.fill")
-                                .font(.caption)
-                                .foregroundStyle(.green)
-                        } else {
-                            Label("Not Available", systemImage: "exclamationmark.triangle.fill")
-                                .font(.caption)
-                                .foregroundStyle(.orange)
-                        }
-                    }
+                    syncStatusRow("iCloud Status",
+                                  isActive: cloudKitService.iCloudAvailable,
+                                  activeText: "Connected",
+                                  activeIcon: "checkmark.circle.fill",
+                                  inactiveText: "Not Available",
+                                  inactiveIcon: "exclamationmark.triangle.fill")
 
                     HStack {
                         Text("Sync Status:")
-                            .font(.caption)
+                            .font(.theaCaption1)
                             .foregroundStyle(.secondary)
                         Spacer()
                         Text(cloudKitService.syncStatus.description)
-                            .font(.caption)
+                            .font(.theaCaption1)
                             .foregroundStyle(.tertiary)
                     }
 
                     if let lastSync = cloudKitService.lastSyncDate {
                         HStack {
                             Text("Last Sync:")
-                                .font(.caption)
+                                .font(.theaCaption1)
                                 .foregroundStyle(.secondary)
                             Spacer()
                             Text(lastSync, style: .relative)
-                                .font(.caption)
+                                .font(.theaCaption1)
                                 .foregroundStyle(.tertiary)
                         }
                     }
 
                     Button("Sync Now") {
-                        Task {
-                            try? await cloudKitService.syncAll()
-                        }
+                        Task { try? await cloudKitService.syncAll() }
                     }
                     .buttonStyle(.bordered)
-                    .disabled(!cloudKitService.iCloudAvailable || cloudKitService.syncStatus == .syncing)
+                    .disabled(!cloudKitService.iCloudAvailable
+                        || cloudKitService.syncStatus == .syncing)
                 }
-
-                Text("Syncs conversations, settings, and knowledge across your Apple devices via iCloud.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Section("Handoff") {
                 Toggle("Enable Handoff", isOn: $settingsManager.handoffEnabled)
 
-                HStack {
-                    Text("Handoff Status:")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    if handoffService.isEnabled {
-                        Label("Active", systemImage: "hand.raised.fill")
-                            .font(.caption)
-                            .foregroundStyle(.blue)
-                    } else {
-                        Label("Disabled", systemImage: "hand.raised.slash")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
+                syncStatusRow("Handoff Status",
+                              isActive: handoffService.isEnabled,
+                              activeText: "Active",
+                              activeIcon: "hand.raised.fill",
+                              inactiveText: "Disabled",
+                              inactiveIcon: "hand.raised.slash")
 
-                Text("Continue conversations seamlessly across your Apple devices. Start on Mac, continue on iPhone or iPad.")
-                    .font(.caption)
+                Text("Continue conversations seamlessly across Apple devices.")
+                    .font(.theaCaption2)
                     .foregroundStyle(.secondary)
-
-                if handoffService.currentActivity != nil {
-                    HStack {
-                        Image(systemName: "arrow.left.arrow.right")
-                            .foregroundStyle(.blue)
-                        Text("Activity ready for handoff")
-                            .font(.caption)
-                            .foregroundStyle(.blue)
-                    }
-                }
             }
 
-            Section("Requirements") {
-                VStack(alignment: .leading, spacing: 8) {
-                    requirementRow(
-                        icon: "icloud",
-                        title: "iCloud Account",
-                        status: cloudKitService.iCloudAvailable
-                    )
-                    requirementRow(
-                        icon: "wifi",
-                        title: "Same Wi-Fi Network (for Handoff)",
-                        status: true
-                    )
-                    requirementRow(
-                        icon: "bluetooth",
-                        title: "Bluetooth Enabled (for Handoff)",
-                        status: true
-                    )
-                }
-            }
-        }
-        .formStyle(.grouped)
-        .padding()
-    }
-
-    private func requirementRow(icon: String, title: String, status: Bool) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundStyle(.secondary)
-                .frame(width: 20)
-            Text(title)
-                .font(.caption)
-            Spacer()
-            Image(systemName: status ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundStyle(status ? .green : .red)
-        }
-    }
-
-    // MARK: - Privacy Settings
-
-    private var privacySettings: some View {
-        Form {
-            Section("Data Collection") {
+            Section("Privacy") {
                 Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
-
-                Text("Help improve THEA by sharing anonymous usage data")
-                    .font(.caption)
+                Text("Help improve THEA by sharing anonymous usage data.")
+                    .font(.theaCaption2)
                     .foregroundStyle(.secondary)
             }
 
             Section("Data Management") {
-                Button("Export All Data") {
-                    exportAllData()
-                }
-
-                Button("Clear All Data") {
-                    clearAllData()
-                }
-                .foregroundStyle(.red)
+                Button("Export All Data") { exportAllData() }
+                Button("Clear All Data", role: .destructive) { clearAllData() }
             }
 
-            Section("Privacy Information") {
-                Text("Your conversations are stored locally on your device and synced via iCloud when enabled. All data is encrypted end-to-end.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            settingsFooter
         }
         .formStyle(.grouped)
         .padding()
@@ -511,11 +336,10 @@ struct MacSettingsView: View {
                 Toggle("Show Performance Metrics", isOn: $settingsManager.showPerformanceMetrics)
             }
 
-            Section("Experimental Features") {
+            Section("Experimental") {
                 Toggle("Enable Beta Features", isOn: $settingsManager.betaFeaturesEnabled)
-
-                Text("Beta features may be unstable and are subject to change")
-                    .font(.caption)
+                Text("Beta features may be unstable and are subject to change.")
+                    .font(.theaCaption2)
                     .foregroundStyle(.secondary)
             }
 
@@ -524,17 +348,81 @@ struct MacSettingsView: View {
                     Text("Cache Size")
                     Spacer()
                     Text("~50 MB")
-                        .font(.caption)
+                        .font(.theaCaption1)
                         .foregroundStyle(.secondary)
                 }
-
-                Button("Clear Cache") {
-                    clearCache()
-                }
+                Button("Clear Cache") { clearCache() }
             }
+
+            settingsFooter
         }
         .formStyle(.grouped)
         .padding()
+    }
+
+    // MARK: - Shared Components
+
+    private var settingsFooter: some View {
+        Section {
+            Text("Changes are saved automatically.")
+                .font(.theaCaption2)
+                .foregroundStyle(.quaternary)
+        }
+    }
+
+    private func syncStatusRow(
+        _ label: String,
+        isActive: Bool,
+        activeText: String,
+        activeIcon: String,
+        inactiveText: String,
+        inactiveIcon: String
+    ) -> some View {
+        HStack {
+            Text(label)
+                .font(.theaCaption1)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Label(
+                isActive ? activeText : inactiveText,
+                systemImage: isActive ? activeIcon : inactiveIcon
+            )
+            .font(.theaCaption1)
+            .foregroundStyle(isActive ? .green : .secondary)
+        }
+    }
+
+    // MARK: - API Key Helpers
+
+    private func loadAPIKeysIfNeeded() {
+        guard !apiKeysLoaded else { return }
+        apiKeysLoaded = true
+        openAIKey = settingsManager.getAPIKey(for: "openai") ?? ""
+        anthropicKey = settingsManager.getAPIKey(for: "anthropic") ?? ""
+        googleKey = settingsManager.getAPIKey(for: "google") ?? ""
+        perplexityKey = settingsManager.getAPIKey(for: "perplexity") ?? ""
+        groqKey = settingsManager.getAPIKey(for: "groq") ?? ""
+        openRouterKey = settingsManager.getAPIKey(for: "openrouter") ?? ""
+    }
+
+    private func apiKeyField(label: String, key: Binding<String>, provider: String) -> some View {
+        HStack {
+            Text(label)
+                .frame(width: 100, alignment: .leading)
+
+            SecureField("API Key", text: key)
+                .textFieldStyle(.roundedBorder)
+                .onChange(of: key.wrappedValue) { _, newValue in
+                    if !newValue.isEmpty {
+                        settingsManager.setAPIKey(newValue, for: provider)
+                    }
+                }
+
+            if !key.wrappedValue.isEmpty {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            }
+        }
     }
 
     // MARK: - Actions
