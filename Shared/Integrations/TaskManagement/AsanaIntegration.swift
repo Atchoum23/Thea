@@ -781,7 +781,9 @@ public struct AnyCodable: Codable, Sendable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let string = try? container.decode(String.self) {
+        if container.decodeNil() {
+            value = NSNull()
+        } else if let string = try? container.decode(String.self) {
             value = string
         } else if let int = try? container.decode(Int.self) {
             value = int
@@ -790,12 +792,24 @@ public struct AnyCodable: Codable, Sendable {
         } else if let bool = try? container.decode(Bool.self) {
             value = bool
         } else if let array = try? container.decode([AnyCodable].self) {
-            value = array.map(\.value)
-        } else if let dict = try? container.decode([String: AnyCodable].self) {
-            value = dict.mapValues(\.value)
+            value = array.map { $0.value }
+        } else if let keyedContainer = try? decoder.container(keyedBy: DynamicCodingKey.self) {
+            var dict: [String: Any] = [:]
+            for key in keyedContainer.allKeys {
+                let nested = try keyedContainer.decode(AnyCodable.self, forKey: key)
+                dict[key.stringValue] = nested.value
+            }
+            value = dict
         } else {
             value = NSNull()
         }
+    }
+
+    private struct DynamicCodingKey: CodingKey {
+        var stringValue: String
+        var intValue: Int?
+        init?(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { self.stringValue = String(intValue); self.intValue = intValue }
     }
 
     public func encode(to encoder: Encoder) throws {
