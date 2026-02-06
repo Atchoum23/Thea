@@ -981,7 +981,6 @@
 		BCB9C77527513F7E895783D6 /* LocationTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E987E8F72EC93271972697 /* LocationTrackingManager.swift */; };
 		BCEE1BCCE0DDC92B06279A8B /* PermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2BFC6536B6A14AFE7DF537 /* PermissionManager.swift */; };
 		BD0014C8C6D836B2DB07E952 /* AdvancedExpDiagSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A5B860E75CF5ECCAF651EA /* AdvancedExpDiagSections.swift */; };
-		BD016CB0BF63AE4964815C4E /* MailIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ABC241CE21587552DD0D256 /* MailIntegration.swift */; };
 		BD529296D2B7157FA33C3641 /* CareerGoalTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424E243166C605E6437EB8E4 /* CareerGoalTracker.swift */; };
 		BD5751B6F60B175AD82BDDC9 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 5909E7EB51E6633C5691F827 /* background.js */; };
 		BD7B75ABC1264ACE3D2ED8A1 /* AssessmentDataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E07B93655FF8AAA4E0965339 /* AssessmentDataExporter.swift */; };
@@ -6852,7 +6851,6 @@
 				E39165AE6D7C36F46FD2210F /* MLXModelScanner.swift in Sources */,
 				DD97385F9D8576815519D018 /* MacSettingsView.swift in Sources */,
 				2E2962F3E018A8026A9A3414 /* MacSystemObserver.swift in Sources */,
-				BD016CB0BF63AE4964815C4E /* MailIntegration.swift in Sources */,
 				0B81C531130F1A493C8AC86B /* MailMonitor.swift in Sources */,
 				4B1B92C6741D8907D1EFDE73 /* MapsIntegration.swift in Sources */,
 				787C4AAB26ACE1C6FC20939D /* MediaContextProvider.swift in Sources */,
