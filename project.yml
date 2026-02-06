@@ -334,6 +334,7 @@ targets:
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
           - "**/Styles/LiquidGlassStyle.swift"
+          - "**/Theme/DesignTokens.swift"
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"
@@ -373,6 +374,7 @@ targets:
           - "**/LocalModels/**"
           - "**/Platforms/PlatformFeaturesHub.swift"
           - "**/TextProcessing/LiveAutoCorrect.swift"
+          - "**/Settings/AutoCorrectSettingsView.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
