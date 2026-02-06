@@ -117,7 +117,7 @@ public struct TheaNotificationPayload: Identifiable, Codable, Sendable {
     public let body: String
     public var subtitle: String?
     public let category: TheaCrossDeviceNotificationCategory
-    public let priority: TheaNotificationPriority
+    public let priority: CrossDeviceNotificationPriority
     public var threadIdentifier: String?
     public var interruptionLevel: InterruptionLevel
     public var relevanceScore: Double
@@ -135,7 +135,7 @@ public struct TheaNotificationPayload: Identifiable, Codable, Sendable {
         body: String,
         subtitle: String? = nil,
         category: TheaCrossDeviceNotificationCategory = .custom,
-        priority: TheaNotificationPriority = .normal,
+        priority: CrossDeviceNotificationPriority = .normal,
         threadIdentifier: String? = nil,
         interruptionLevel: InterruptionLevel = .active,
         relevanceScore: Double = 0.5,
@@ -247,7 +247,4 @@ public struct TheaNotificationDelivery: Identifiable, Codable, Sendable {
 /// Categories of cross-device notifications (aliased from NotificationPayload)
 public typealias TheaCrossDeviceNotificationCategory = CrossDeviceNotificationCategory
 
-// MARK: - Notification Priority
-
-/// Priority for notifications (aliased from NotificationPayload)
-public typealias TheaNotificationPriority = CrossDeviceNotificationPriority
+// Note: CrossDeviceNotificationPriority is defined in UniversalNotificationService.swift
