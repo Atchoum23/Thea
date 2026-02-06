@@ -62,15 +62,15 @@ struct MacSettingsView: View {
         case .general:
             generalSettings
         case .aiProviders:
-            AIProvidersSettingsView()
+            comingSoonView("AI Providers")
         case .models:
             ModelSettingsView()
         case .localModels:
             LocalModelsSettingsView()
         case .orchestrator:
-            OrchestratorSettingsView()
+            comingSoonView("Orchestrator")
         case .memory:
-            MemorySettingsView()
+            comingSoonView("Memory")
         case .integrations:
             IntegrationsSettingsView()
         case .automation:
@@ -78,7 +78,7 @@ struct MacSettingsView: View {
         case .voice:
             voiceSettings
         case .permissions:
-            PermissionsSettingsView()
+            comingSoonView("Permissions")
         case .sync:
             syncSettings
         case .privacy:
@@ -86,6 +86,22 @@ struct MacSettingsView: View {
         case .advanced:
             advancedSettings
         }
+    }
+
+    // MARK: - Coming Soon Placeholder
+
+    private func comingSoonView(_ title: String) -> some View {
+        VStack(spacing: 20) {
+            Image(systemName: "hammer.fill")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+            Text("\(title) Settings")
+                .font(.title2)
+                .fontWeight(.semibold)
+            Text("Coming soon in a future update")
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - General Settings

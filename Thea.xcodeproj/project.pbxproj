@@ -312,7 +312,6 @@
 		3A508EED3AC7AF163574829B /* HealthIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F9CD7849F754B7FEC21512 /* HealthIntelligence.swift */; };
 		3A822FBF0C722F7796DFE3B4 /* CLAUDE-SIMPLE-PROMPT.txt in Resources */ = {isa = PBXBuildFile; fileRef = 10E7846AA742869FAB78A75E /* CLAUDE-SIMPLE-PROMPT.txt */; };
 		3A86A884CAB373A06BCA1A7B /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 399F1226D38F7DD7738EAE53 /* KeychainAccess */; };
-		3A8B003767A433BEF2B7D33F /* MCPGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA1E069EB5671CECF82B3DA /* MCPGateway.swift */; };
 		3AB43366E9927732431D3B9A /* CrossDeviceNotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6FEEED32D5EEE88C265811 /* CrossDeviceNotificationRouter.swift */; };
 		3AB673E6A3319DC6197C85DC /* CommunicationAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5168B495A348213F83F395E /* CommunicationAssistant.swift */; };
 		3ABB2D4C589F8CC5432709BD /* ScreenTimeObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B2722C6F799DAA9FAA8BF1 /* ScreenTimeObserver.swift */; };
@@ -1040,7 +1039,6 @@
 		C8538DFFF0F3BC600C5F4ABF /* EnvironmentContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95484AE590A78C67D57C125 /* EnvironmentContextProvider.swift */; };
 		C85FAB706D947B598869DEFD /* HealthProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0B9BBEDC21AF9C46770403 /* HealthProtocols.swift */; };
 		C87C6E2F4DEE1728B42907DC /* AdvancedPromptSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15232BD8D9E81B18A70E72E4 /* AdvancedPromptSettingsView.swift */; };
-		C8D3E25ED806601E714C7243 /* LongTermMemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61C0A0D3C9AF52BE8DB85849 /* LongTermMemoryManager.swift */; };
 		C922FDA3F3844F6F48EAB8EF /* AgentSecKillSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30C4EA8445522942279912B /* AgentSecKillSwitch.swift */; };
 		C94925D9673BDD6F4DCFA67A /* TheaControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149B9875C9ADDA752ACB41B4 /* TheaControls.swift */; };
 		C997540E53E693E67BA6A7FC /* CoworkQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96C18373CAC4FC5346195DA /* CoworkQueueView.swift */; };
@@ -1134,7 +1132,6 @@
 		DC1C1250A50231C3C59F7320 /* ActivityTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5450739121E31EE2C598325F /* ActivityTracker.swift */; };
 		DC274DC7263D6B1801EF2616 /* PredictiveEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F33EC2C30CECD2A8D1B4672E /* PredictiveEngine.swift */; };
 		DC37F7A213CB08AE40EF244E /* iOSSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D843CD7F24B89C084064F2 /* iOSSettingsView.swift */; };
-		DC8EE2AC4029620A358751B3 /* MCPConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D17D822D2653D52E8102CD /* MCPConnectionManager.swift */; };
 		DCB5C3F6E03FC8845EB00708 /* CommunicationAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5168B495A348213F83F395E /* CommunicationAssistant.swift */; };
 		DD5D3F34A361D37AD93B3A6B /* FocusForestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16E67A34622FD4131400956 /* FocusForestService.swift */; };
 		DD6C0EAEE1B9AD059CC07B4A /* ThrottlingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB879C3AB26803AC14A800C /* ThrottlingEngine.swift */; };
@@ -6847,10 +6844,7 @@
 				01849EADB67552298B0C7A24 /* LocalizationManager.swift in Sources */,
 				56B27E95A7B1BB4D8FC59EFD /* LocationContextProvider.swift in Sources */,
 				BCB9C77527513F7E895783D6 /* LocationTrackingManager.swift in Sources */,
-				C8D3E25ED806601E714C7243 /* LongTermMemoryManager.swift in Sources */,
 				74AF5FE60A086476B5098327 /* LongTermMemorySystem.swift in Sources */,
-				DC8EE2AC4029620A358751B3 /* MCPConnectionManager.swift in Sources */,
-				3A8B003767A433BEF2B7D33F /* MCPGateway.swift in Sources */,
 				87B83CE5D00F6F9B31397ABA /* MCPServerGenerator.swift in Sources */,
 				122311DEC2F9A9FC00E43517 /* MCPServerManager.swift in Sources */,
 				C6AE822F0C618320E3763C31 /* MLXInferenceEngine.swift in Sources */,
