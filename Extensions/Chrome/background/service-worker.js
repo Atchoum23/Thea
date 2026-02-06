@@ -802,10 +802,10 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   switch (info.menuItemId) {
     case 'thea-clean-page':
-      chrome.tabs.sendMessage(tab.id, { type: 'cleanPage' });
+      chrome.tabs.sendMessage(tab.id, { type: 'activatePrintFriendly' });
       break;
 
-    case 'thea-generate-alias':
+    case 'thea-generate-alias': {
       const url = new URL(tab.url);
       // Use iCloud Hide My Email if connected, otherwise fallback
       if (icloudClient.isAuthenticated) {
@@ -822,17 +822,51 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         chrome.tabs.sendMessage(tab.id, { type: 'insertAlias', alias: alias.alias });
       }
       break;
+    }
 
-    case 'thea-ask-ai':
+    case 'thea-ask-ai': {
       const response = await askTheaAI(
         `Explain: ${info.selectionText}`,
         { url: tab.url, title: tab.title }
       );
       chrome.tabs.sendMessage(tab.id, { type: 'showAIResponse', response });
       break;
+    }
+
+    case 'thea-explain-ai':
+      chrome.tabs.sendMessage(tab.id, {
+        type: 'openSidebarWithQuery',
+        query: `/explain ${info.selectionText}`
+      });
+      break;
+
+    case 'thea-summarize-ai':
+      chrome.tabs.sendMessage(tab.id, {
+        type: 'openSidebarWithQuery',
+        query: `/summarize ${info.selectionText}`
+      });
+      break;
 
     case 'thea-save-password':
       chrome.tabs.sendMessage(tab.id, { type: 'savePassword' });
+      break;
+
+    case 'thea-save-memory':
+      await handleAddMemory({
+        text: info.selectionText,
+        source: 'context-menu',
+        url: tab.url,
+        title: tab.title,
+        type: 'semantic'
+      });
+      chrome.tabs.sendMessage(tab.id, {
+        type: 'showNotification',
+        message: 'Saved to Thea Memory'
+      });
+      break;
+
+    case 'thea-open-sidebar':
+      chrome.tabs.sendMessage(tab.id, { type: 'toggleAISidebar' });
       break;
   }
 });
@@ -877,33 +911,32 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
-    // Inject protections
     try {
       const url = new URL(tab.url);
       const domain = url.hostname;
 
-      // Get dark mode CSS if enabled
-      if (state.darkModeEnabled) {
-        const css = await generateDarkModeCSS(domain);
-        if (css) {
-          await chrome.scripting.insertCSS({
-            target: { tabId },
-            css
-          });
-        }
-      }
-
-      // Notify content script
+      // Notify content script with full state
       chrome.tabs.sendMessage(tabId, {
         type: 'pageLoaded',
         domain,
         state: {
           adBlockerEnabled: state.adBlockerEnabled,
-          darkModeEnabled: state.darkModeEnabled,
+          darkModeEnabled: state.darkModeConfig.enabled,
           privacyProtectionEnabled: state.privacyProtectionEnabled,
+          videoControllerEnabled: state.videoControllerEnabled,
+          memoryEnabled: state.memoryEnabled,
           iCloudConnected: icloudClient.isAuthenticated
         }
-      });
+      }).catch(() => {});
+
+      // Auto-capture page visit for memory (if enabled)
+      if (state.memoryEnabled) {
+        memorySystem.capturePageVisit({
+          url: tab.url,
+          title: tab.title,
+          description: ''
+        }).catch(() => {});
+      }
     } catch (e) {
       // Tab might not support messaging
     }
@@ -917,6 +950,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.alarms.create('syncWithApp', { periodInMinutes: 5 });
 chrome.alarms.create('updateStats', { periodInMinutes: 1 });
 chrome.alarms.create('refreshiCloudAliases', { periodInMinutes: 30 });
+chrome.alarms.create('pruneMemories', { periodInMinutes: 1440 }); // Daily
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   switch (alarm.name) {
@@ -940,6 +974,11 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
           console.log('Failed to refresh aliases:', err.message);
         });
       }
+      break;
+
+    case 'pruneMemories':
+      // Clean up expired memories daily
+      memorySystem.pruneExpired();
       break;
   }
 });
@@ -1611,4 +1650,4 @@ loadState().then(async () => {
   }
 });
 
-console.log('Thea Extension Service Worker initialized with iCloud integration');
+console.log('Thea Extension v2.0 Service Worker initialized (iCloud, Memory, AI Sidebar, Dark Mode Engine, Video Controller, Privacy Shield)');
