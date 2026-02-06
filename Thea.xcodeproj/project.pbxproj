@@ -732,7 +732,6 @@
 		8A88EADF069669000A147DC9 /* VoiceProactivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 262EF5141C5F11FE2E7BD981 /* VoiceProactivity.swift */; };
 		8AD098C1F176D9FC181D427B /* AgentSecKillSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30C4EA8445522942279912B /* AgentSecKillSwitch.swift */; };
 		8AF3D530BA6A31CB3C970C09 /* BranchNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FFA2724F57F9B3A5C5502A6 /* BranchNavigator.swift */; };
-		8C32B3A63104F596567FE95E /* SystemIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1366E73300D92AFFCD64C8BC /* SystemIntegration.swift */; };
 		8C6DC708F7BE9DAA52639BA8 /* CoworkContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2462375E2C0637F6F13B2C /* CoworkContext.swift */; };
 		8C71E14032CC47504921AE29 /* HandoffService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7279FAB1D028DD8804694B21 /* HandoffService.swift */; };
 		8C9A2FC9A431F49E3ED527A2 /* SleepQualityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE93EA152443637809ABFF63 /* SleepQualityView.swift */; };
@@ -7021,7 +7020,6 @@
 				BDD9D97915B5F228F65F48D8 /* SyncSettingsView.swift in Sources */,
 				4202D9C510D0F0744E7A9875 /* SystemAudioMonitor.swift in Sources */,
 				BAA6D5CC522D271EF3BAC316 /* SystemAutomationEngine.swift in Sources */,
-				8C32B3A63104F596567FE95E /* SystemIntegration.swift in Sources */,
 				A68968CE519B969E6D948D88 /* SystemPromptConfiguration.swift in Sources */,
 				BFC31A6A566EC0E895347049 /* SystemPromptSettingsView.swift in Sources */,
 				5E42AD0FE968C85245C7B40A /* THEAMCPServer.swift in Sources */,
