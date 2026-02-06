@@ -341,6 +341,7 @@ targets:
           - "**/DistributedTaskExecutor.swift"
           - "**/LifeMonitoring/RelationshipIntelligence.swift"
           - "**/Managers/PermissionsTypes.swift"
+          - "**/PatternLearning/**"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
