@@ -197,7 +197,7 @@ public struct CausalInsight: Identifiable, Sendable {
 
 // MARK: - Event Timeline Entry
 
-public struct TimelineEntry: Identifiable, Sendable {
+public struct CausalTimelineEntry: Identifiable, Sendable {
     public let id: UUID
     public let timestamp: Date
     public let eventType: String
@@ -244,7 +244,7 @@ public final class CausalPatternAnalyzer {
 
     // MARK: - Timeline
 
-    private var eventTimeline: [TimelineEntry] = []
+    private var eventTimeline: [CausalTimelineEntry] = []
 
     // MARK: - Configuration
 
@@ -266,10 +266,10 @@ public final class CausalPatternAnalyzer {
     public func recordEvent(
         type: String,
         value: String,
-        category: TimelineEntry.EventCategory,
+        category: CausalTimelineEntry.EventCategory,
         metadata: [String: String] = [:]
     ) {
-        let entry = TimelineEntry(
+        let entry = CausalTimelineEntry(
             eventType: type,
             eventValue: value,
             category: category,

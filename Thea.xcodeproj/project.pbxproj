@@ -164,7 +164,6 @@
 		261C6BF95A49454CB4B891D4 /* UnifiedIntelligenceHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0269A46E02BD97A4CF52B0EA /* UnifiedIntelligenceHub.swift */; };
 		26D269B0A1EBE74CD50D5548 /* TheaFocusFilterExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DF41D7B50ADAD52B6CB74541 /* TheaFocusFilterExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		27495E2305E59672DCC5DE66 /* FinancialModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4318671F8DE98472EC663FBF /* FinancialModels.swift */; };
-		27DDCEA65DBF5559DD2CC9C7 /* InteractiveWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CDA30CCCEF656B4AF20E68 /* InteractiveWidgets.swift */; };
 		2859A26EBF963B47AAE2F78A /* BatteryOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDA0136BF5B66976C838A6C /* BatteryOptimizer.swift */; };
 		287986142E2D318B605BF0BB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E89F5D542A80CF44499FAD7A /* PrivacyInfo.xcprivacy */; };
 		288634C9E0F35F8B8D6EF5CF /* TerminalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E574911E64043E5E764786E2 /* TerminalService.swift */; };
@@ -523,7 +522,6 @@
 		7ED0AF00E42B94494BF0E3D1 /* SelfTuningEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E15C29769BAC69EA08BA5FE /* SelfTuningEngine.swift */; };
 		7F0486C9D1E4B9BB4A850AC2 /* UnifiedContextSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD68D6416E308F43865C790 /* UnifiedContextSync.swift */; };
 		7F3488945DF53D8C56DA50C1 /* DraftSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AB52A8EEE4C9B4152809DC0 /* DraftSyncManager.swift */; };
-		7F460B742518F7F8673CD0FC /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E4FD46807A2F180317D5098 /* DesignTokens.swift */; };
 		7FB9734EDA280D9CCE96CBE1 /* .vscodetasks.json in Resources */ = {isa = PBXBuildFile; fileRef = B672E60E1BDE705287E8B242 /* .vscodetasks.json */; };
 		7FC0931BB84FBF8394455F75 /* SiriShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119E655F208CE7BAFF433FBC /* SiriShortcuts.swift */; };
 		7FE5FD6066F13548043C0A50 /* NutritionDataImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8D18BE29EA58B17F342D35 /* NutritionDataImporter.swift */; };
@@ -694,7 +692,6 @@
 		AC1CCE5F6A90F076A78DAE11 /* PredictiveJourneyMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD143F72DBC69EBD427C138 /* PredictiveJourneyMapper.swift */; };
 		AC3795774AD417AF841C511F /* BatteryOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDA0136BF5B66976C838A6C /* BatteryOptimizer.swift */; };
 		AC3B640C8722D9523FBFD367 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C01C4C607C750D6280C839D /* SettingsView.swift */; };
-		AC6C3ACB60210AD628467D06 /* TheaWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADBFA4C4EE5C2B32A6710AA1 /* TheaWidgets.swift */; };
 		ACDC0C0E9D4B4619621418C2 /* AgentCommunicationBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8714BF79EB3CEF3694A28693 /* AgentCommunicationBus.swift */; };
 		ACFFABA96C1BD3C4CABB0508 /* TipKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494E4D469F08A1B62549F29 /* TipKitService.swift */; };
 		AD2CE69360230B26645EB1F0 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652F0D07D0D33049CEB15B8C /* ChatViewModel.swift */; };
@@ -1405,7 +1402,6 @@
 		5D1EB3C696B311023F8FFC0F /* ProactiveSuggestionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProactiveSuggestionEngine.swift; sourceTree = "<group>"; };
 		5D4E18673504BC98B9EE2601 /* TemporalPatternEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporalPatternEngine.swift; sourceTree = "<group>"; };
 		5DD143F72DBC69EBD427C138 /* PredictiveJourneyMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictiveJourneyMapper.swift; sourceTree = "<group>"; };
-		5E4FD46807A2F180317D5098 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		5E744DA1369765DAD7FF4EC9 /* AccessibilityObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityObserver.swift; sourceTree = "<group>"; };
 		5E91EEB1BBF14E9ECDD7995B /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		5EAA778FEC684A74BA8DF784 /* Scriptsxcode-build-phase.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "Scriptsxcode-build-phase.sh"; sourceTree = "<group>"; };
@@ -2704,7 +2700,6 @@
 			isa = PBXGroup;
 			children = (
 				B89C8E729F7046437DDE9E5C /* Colors.swift */,
-				5E4FD46807A2F180317D5098 /* DesignTokens.swift */,
 				EF60BA560FBA4895E380B63B /* FontManager.swift */,
 				1A373BF922E2CE1A1F95EFE1 /* Fonts.swift */,
 				6605B72FE8117798058EE77C /* PlatformColors.swift */,
@@ -5133,7 +5128,6 @@
 				FAEEB0BE0C7A34D90305EAEF /* DataStorageErrorView.swift in Sources */,
 				B1542D4CA0B86C37DCD3557B /* DeepLinkRouter.swift in Sources */,
 				101637C3F23CE0384C8AFC7D /* DesignSystemStubs.swift in Sources */,
-				7F460B742518F7F8673CD0FC /* DesignTokens.swift in Sources */,
 				A8DBD04BAF577EA23A8BFFBC /* DeviceDiscovery.swift in Sources */,
 				1DEE8754C3FF16BFC703EEA0 /* DeviceRegistry.swift in Sources */,
 				65424221B7F814BDE65609FB /* DeviceStateContextProvider.swift in Sources */,
@@ -5801,7 +5795,6 @@
 				467B9780AD85D2135D5DA5BD /* IntelligentPrefetcher.swift in Sources */,
 				6CD7BF05F5E46BDB922D869D /* IntentAnticipatorStub.swift in Sources */,
 				2C0CE26F89A75A196536C000 /* IntentDisambiguation.swift in Sources */,
-				27DDCEA65DBF5559DD2CC9C7 /* InteractiveWidgets.swift in Sources */,
 				95C530925CCDC2AFEB8FCB68 /* KeyboardShortcutsSystem.swift in Sources */,
 				91E6C18B652A2FDE46058915 /* KnowledgeManagementView.swift in Sources */,
 				B335BE04D5330578E5E74E66 /* KnowledgeManager.swift in Sources */,
@@ -5989,7 +5982,6 @@
 				E43684D4A779267E4D73AF97 /* TheaRemoteClient.swift in Sources */,
 				A692DBD96EAF604BD1752599 /* TheaRemoteServer.swift in Sources */,
 				4EDAB512EFB0C45B25B8B41E /* TheaSharePlay.swift in Sources */,
-				AC6C3ACB60210AD628467D06 /* TheaWidgets.swift in Sources */,
 				4A484892EB962D2E43291565 /* TheamacOSApp.swift in Sources */,
 				81434C460D610AF3A5F55744 /* ThrottlingEngine.swift in Sources */,
 				F8127B260FC38BC49EAE715E /* TipKitService.swift in Sources */,
