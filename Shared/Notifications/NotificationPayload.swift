@@ -496,7 +496,7 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
         let categoryRaw = record["category"] as? String ?? ""
         category = CrossDeviceNotificationCategory(rawValue: categoryRaw) ?? .custom
 
-        priority = PayloadNotificationPriority(rawValue: record["priority"] as? Int ?? 1) ?? .normal
+        priority = CrossDeviceNotificationPriority(rawValue: record["priority"] as? String ?? "normal") ?? .normal
 
         title = record["title"] as? String ?? ""
         body = record["body"] as? String ?? ""

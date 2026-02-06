@@ -365,6 +365,16 @@ public enum CrossDeviceNotificationPriority: String, Codable, Sendable, CaseIter
             false
         }
     }
+
+    /// UNNotificationInterruptionLevel equivalent
+    public var interruptionLevel: String {
+        switch self {
+        case .low: "passive"
+        case .normal: "active"
+        case .high: "time-sensitive"
+        case .critical: "critical"
+        }
+    }
 }
 
 // MARK: - Quick Notification Methods
