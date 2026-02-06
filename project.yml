@@ -333,7 +333,7 @@ targets:
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
           - "**/Styles/LiquidGlassStyle.swift"
-          - "**/Theme/DesignTokens.swift"
+          # DesignTokens.swift now needed by MessageBubble.swift — included on macOS
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"

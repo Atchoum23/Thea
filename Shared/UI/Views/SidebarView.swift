@@ -17,13 +17,43 @@ struct SidebarView: View {
                 }
             }
 
-            Section("Recent") {
-                ForEach(filteredConversations) { conversation in
-                    ConversationRow(conversation: conversation)
-                        .tag(conversation)
+            if !todayConversations.isEmpty {
+                Section("Today") {
+                    ForEach(todayConversations) { conversation in
+                        ConversationRow(conversation: conversation)
+                            .tag(conversation)
+                    }
+                }
+            }
+
+            if !yesterdayConversations.isEmpty {
+                Section("Yesterday") {
+                    ForEach(yesterdayConversations) { conversation in
+                        ConversationRow(conversation: conversation)
+                            .tag(conversation)
+                    }
+                }
+            }
+
+            if !thisWeekConversations.isEmpty {
+                Section("Previous 7 Days") {
+                    ForEach(thisWeekConversations) { conversation in
+                        ConversationRow(conversation: conversation)
+                            .tag(conversation)
+                    }
+                }
+            }
+
+            if !olderConversations.isEmpty {
+                Section("Older") {
+                    ForEach(olderConversations) { conversation in
+                        ConversationRow(conversation: conversation)
+                            .tag(conversation)
+                    }
                 }
             }
         }
+        .softEdges()
         .searchable(text: $searchText, prompt: "Search conversations")
         .navigationTitle("Conversations")
         .toolbar {
@@ -31,22 +61,53 @@ struct SidebarView: View {
                 Button {
                     createNewConversation()
                 } label: {
-                    Label("New Conversation", systemImage: "plus")
+                    Label("New Chat", systemImage: "plus")
                 }
                 .keyboardShortcut("n", modifiers: .command)
             }
         }
     }
 
+    // MARK: - Grouped Conversations
+
     private var pinnedConversations: [Conversation] {
-        conversations.filter(\.isPinned)
+        filteredConversations.filter(\.isPinned)
+    }
+
+    private var unpinnedConversations: [Conversation] {
+        filteredConversations.filter { !$0.isPinned }
+    }
+
+    private var todayConversations: [Conversation] {
+        unpinnedConversations.filter { Calendar.current.isDateInToday($0.updatedAt) }
+    }
+
+    private var yesterdayConversations: [Conversation] {
+        unpinnedConversations.filter { Calendar.current.isDateInYesterday($0.updatedAt) }
+    }
+
+    private var thisWeekConversations: [Conversation] {
+        let cal = Calendar.current
+        return unpinnedConversations.filter { conversation in
+            !cal.isDateInToday(conversation.updatedAt)
+                && !cal.isDateInYesterday(conversation.updatedAt)
+                && conversation.updatedAt > cal.date(byAdding: .day, value: -7, to: Date())!
+        }
+    }
+
+    private var olderConversations: [Conversation] {
+        let cal = Calendar.current
+        return unpinnedConversations.filter {
+            $0.updatedAt <= cal.date(byAdding: .day, value: -7, to: Date())!
+        }
     }
 
     private var filteredConversations: [Conversation] {
         if searchText.isEmpty {
-            conversations.filter { !$0.isPinned }
-        } else {
-            conversations.filter { !$0.isPinned && $0.title.localizedCaseInsensitiveContains(searchText) }
+            return conversations
+        }
+        return conversations.filter {
+            $0.title.localizedCaseInsensitiveContains(searchText)
         }
     }
 
@@ -62,8 +123,8 @@ struct ConversationRow: View {
     let conversation: Conversation
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: TheaSpacing.md) {
+            VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
                 Text(conversation.title)
                     .font(.theaBody)
                     .lineLimit(1)
@@ -78,10 +139,16 @@ struct ConversationRow: View {
 
             Spacer()
 
-            if conversation.isPinned {
-                Image(systemName: "pin.fill")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .trailing, spacing: TheaSpacing.xxs) {
+                Text(conversation.updatedAt, format: .dateTime.hour().minute())
+                    .font(.theaCaption2)
+                    .foregroundStyle(.tertiary)
+
+                if conversation.isPinned {
+                    Image(systemName: "pin.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .contextMenu {
@@ -94,11 +161,31 @@ struct ConversationRow: View {
                 )
             }
 
+            Divider()
+
             Button(role: .destructive) {
                 ChatManager.shared.deleteConversation(conversation)
             } label: {
                 Label("Delete", systemImage: "trash")
             }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                ChatManager.shared.deleteConversation(conversation)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            Button {
+                ChatManager.shared.togglePin(conversation)
+            } label: {
+                Label(
+                    conversation.isPinned ? "Unpin" : "Pin",
+                    systemImage: conversation.isPinned ? "pin.slash" : "pin"
+                )
+            }
+            .tint(.orange)
         }
     }
 }

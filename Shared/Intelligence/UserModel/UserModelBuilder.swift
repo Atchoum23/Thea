@@ -20,7 +20,7 @@ public struct UserProfile: Sendable {
     public var communicationStyle: CommunicationStyle
     public var technicalProfile: TechnicalProfile
     public var workHabits: WorkHabits
-    public var learningStyle: LearningStyle
+    public var learningStyle: UserLearningStyle
     public var preferences: UserPreferences
     public var stressIndicators: StressIndicators
     public var createdAt: Date
@@ -31,7 +31,7 @@ public struct UserProfile: Sendable {
         communicationStyle: CommunicationStyle = CommunicationStyle(),
         technicalProfile: TechnicalProfile = TechnicalProfile(),
         workHabits: WorkHabits = WorkHabits(),
-        learningStyle: LearningStyle = LearningStyle(),
+        learningStyle: UserLearningStyle = UserLearningStyle(),
         preferences: UserPreferences = UserPreferences(),
         stressIndicators: StressIndicators = StressIndicators(),
         createdAt: Date = Date(),
@@ -221,7 +221,7 @@ public struct WorkHabits: Sendable {
 
 // MARK: - Learning Style
 
-public struct LearningStyle: Sendable {
+public struct UserLearningStyle: Sendable {
     public var preferredMethod: LearningMethod
     public var pacingPreference: Double          // 0 = slow/thorough, 1 = fast/overview
     public var retentionStyle: RetentionStyle
