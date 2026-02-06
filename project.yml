@@ -380,7 +380,7 @@ targets:
           - "**/Components/ChatInputView.swift"
           - "**/Providers/OpenRouterProvider.swift"
           - "**/Providers/PerplexityProvider.swift"
-          - "**/LifeMonitoring/LifeMonitoringCoordinator.swift"
+          - "**/LifeMonitoring/**"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
