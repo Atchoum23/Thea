@@ -200,7 +200,7 @@ public enum WorkingMemorySource: String, Sendable {
 
 /// Manages episodic memory - storing and retrieving past experiences
 @MainActor
-public final class EpisodicMemoryManager: ObservableObject, Sendable {
+public final class EpisodicMemoryManager: ObservableObject {
     public static let shared = EpisodicMemoryManager()
 
     private let logger = Logger(subsystem: "com.thea.memory", category: "Episodic")
@@ -208,7 +208,7 @@ public final class EpisodicMemoryManager: ObservableObject, Sendable {
     private let maxEpisodes = 10000
 
     @Published public private(set) var episodes: [Episode] = []
-    @Published public private(set) var currentSessionId: UUID = UUID()
+    @Published public private(set) var currentSessionId = UUID()
 
     private init() {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -341,7 +341,7 @@ public final class EpisodicMemoryManager: ObservableObject, Sendable {
 
 /// Manages semantic memory - learned concepts and patterns
 @MainActor
-public final class SemanticMemoryManager: ObservableObject, Sendable {
+public final class SemanticMemoryManager: ObservableObject {
     public static let shared = SemanticMemoryManager()
 
     private let logger = Logger(subsystem: "com.thea.memory", category: "Semantic")
@@ -622,7 +622,7 @@ public actor WorkingMemoryManager {
 
 /// Consolidates memories - summarizes and compacts old memories
 @MainActor
-public final class MemoryConsolidator: ObservableObject, Sendable {
+public final class MemoryConsolidator: ObservableObject {
     public static let shared = MemoryConsolidator()
 
     private let logger = Logger(subsystem: "com.thea.memory", category: "Consolidation")
@@ -768,7 +768,7 @@ public final class MemoryConsolidator: ObservableObject, Sendable {
 
 /// Unified interface for all memory systems
 @MainActor
-public final class UnifiedMemorySystem: ObservableObject, Sendable {
+public final class UnifiedMemorySystem: ObservableObject {
     public static let shared = UnifiedMemorySystem()
 
     private let logger = Logger(subsystem: "com.thea.memory", category: "UnifiedMemorySystem")

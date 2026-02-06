@@ -36,12 +36,12 @@ public final class InputActivityMonitor {
 
     public private(set) var isMonitoring: Bool = false
     public private(set) var currentSession: InputSession?
-    public private(set) var todayMetrics: DailyInputMetrics = DailyInputMetrics()
+    public private(set) var todayMetrics = DailyInputMetrics()
     public private(set) var recentSessions: [InputSession] = []
 
     // MARK: - Configuration
 
-    public var configuration: InputMonitorConfiguration = InputMonitorConfiguration()
+    public var configuration = InputMonitorConfiguration()
 
     // MARK: - Private State
 
@@ -50,7 +50,7 @@ public final class InputActivityMonitor {
     #endif
 
     private var sessionStartTime: Date?
-    private var lastActivityTime: Date = Date()
+    private var lastActivityTime = Date()
     private var idleCheckTimer: Timer?
     private var metricsTimer: Timer?
     private var sessionMouseClicks: Int = 0
@@ -284,8 +284,7 @@ public final class InputActivityMonitor {
 
         var score = 1.0
         let switchRate = Double(appSwitchCount) / (duration / 60.0)
-        if switchRate > 3 { score -= 0.3 }
-        else if switchRate > 1 { score -= 0.15 }
+        if switchRate > 3 { score -= 0.3 } else if switchRate > 1 { score -= 0.15 }
 
         let activityRate = Double(sessionKeystrokes + sessionMouseClicks) / (duration / 60.0)
         if activityRate > 30 { score += 0.1 }
@@ -348,7 +347,7 @@ public struct TypingBurst: Sendable {
 }
 
 public struct DailyInputMetrics: Sendable {
-    public var date: Date = Date()
+    public var date = Date()
     public var totalMouseClicks: Int = 0
     public var totalMouseDistance: Double = 0
     public var totalKeystrokes: Int = 0
@@ -357,5 +356,5 @@ public struct DailyInputMetrics: Sendable {
     public var totalActiveTime: TimeInterval = 0
     public var averageTypingSpeed: Double = 0
     public var activityByHour: [Int: Int] = [:]
-    public var peakProductivityHour: Int? { activityByHour.max(by: { $0.value < $1.value })?.key }
+    public var peakProductivityHour: Int? { activityByHour.max { $0.value < $1.value }?.key }
 }

@@ -251,7 +251,7 @@ public final class ResourceDiscoveryEngine: ObservableObject {
     @Published public private(set) var lastError: String?
 
     /// Discovery statistics
-    @Published public private(set) var stats: DiscoveryStats = DiscoveryStats()
+    @Published public private(set) var stats = DiscoveryStats()
 
     // MARK: - Configuration
 

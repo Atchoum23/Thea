@@ -87,12 +87,12 @@ public struct ContactRelationship: Identifiable, Codable, Sendable {
     }
 
     public enum CommunicationFrequency: String, Codable, Sendable {
-        case daily = "daily"
-        case weekly = "weekly"
-        case monthly = "monthly"
-        case quarterly = "quarterly"
-        case rarely = "rarely"
-        case inactive = "inactive" // No contact in 6+ months
+        case daily
+        case weekly
+        case monthly
+        case quarterly
+        case rarely
+        case inactive // No contact in 6+ months
 
         public var expectedDaysBetweenContact: Int {
             switch self {
@@ -342,7 +342,7 @@ public actor RelationshipIntelligence {
 
     private func calculateAverageResponseTime(for contactId: String) -> TimeInterval? {
         // Would analyze message pairs to find response times
-        return nil
+        nil
     }
 
     private func detectTier(for relationship: ContactRelationship) -> ContactRelationship.RelationshipTier {
@@ -436,20 +436,20 @@ public actor RelationshipIntelligence {
     // MARK: - Queries
 
     public func getRelationship(for contactId: String) -> ContactRelationship? {
-        return relationships[contactId]
+        relationships[contactId]
     }
 
     public func getVIPContacts() -> [ContactRelationship] {
-        return relationships.values.filter { $0.tier == .vip }.sorted { $0.importanceScore > $1.importanceScore }
+        relationships.values.filter { $0.tier == .vip }.sorted { $0.importanceScore > $1.importanceScore }
     }
 
     public func getInnerCircle() -> [ContactRelationship] {
-        return relationships.values.filter { $0.tier == .inner || $0.tier == .vip }
+        relationships.values.filter { $0.tier == .inner || $0.tier == .vip }
             .sorted { $0.importanceScore > $1.importanceScore }
     }
 
     public func getContactsByRelationshipType(_ type: ContactRelationship.RelationshipType) -> [ContactRelationship] {
-        return relationships.values.filter { $0.relationship == type }
+        relationships.values.filter { $0.relationship == type }
     }
 
     public func getRecentlyContactedPeople(days: Int = 7) -> [ContactRelationship] {
@@ -461,7 +461,7 @@ public actor RelationshipIntelligence {
     }
 
     public func getPeopleToReconnectWith() async -> [ContactRelationship] {
-        return await checkForRelationshipDecay()
+        await checkForRelationshipDecay()
     }
 
     // MARK: - Manual Configuration

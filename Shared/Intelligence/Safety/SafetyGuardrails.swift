@@ -406,7 +406,7 @@ public struct SafetyRule: Identifiable, Codable, Sendable {
 
 /// Main manager for safety guardrails
 @MainActor
-public final class SafetyGuardrailsManager: ObservableObject, Sendable {
+public final class SafetyGuardrailsManager: ObservableObject {
     public static let shared = SafetyGuardrailsManager()
 
     private let logger = Logger(subsystem: "com.thea.safety", category: "Guardrails")
@@ -424,7 +424,7 @@ public final class SafetyGuardrailsManager: ObservableObject, Sendable {
     public var auditRetentionDays: Int = 90
     public var isEnabled: Bool = true
 
-    private var currentSessionId: UUID = UUID()
+    private var currentSessionId = UUID()
 
     private init() {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -876,7 +876,7 @@ public final class SafetyGuardrailsManager: ObservableObject, Sendable {
 
     private func captureSnapshot(_ resource: AffectedResource) async -> SnapshotItem? {
         // In production, would actually read file content
-        return SnapshotItem(
+        SnapshotItem(
             resourceType: resource.type.rawValue,
             resourcePath: resource.identifier,
             originalContent: nil,

@@ -359,7 +359,7 @@ public actor ToolResultCache {
 
 /// Main engine for tool composition and execution
 @MainActor
-public final class ToolCompositionEngine: ObservableObject, Sendable {
+public final class ToolCompositionEngine: ObservableObject {
     public static let shared = ToolCompositionEngine()
 
     private let logger = Logger(subsystem: "com.thea.tools", category: "Composition")
@@ -450,7 +450,6 @@ public final class ToolCompositionEngine: ObservableObject, Sendable {
                     switch pipeline.errorHandling {
                     case .stopOnError:
                         logger.error("Pipeline stopped at step \(step.name): \(result.error ?? "")")
-                        break
                     case .continueOnError:
                         logger.warning("Continuing after error in step \(step.name)")
                         continue
@@ -563,7 +562,7 @@ public final class ToolCompositionEngine: ObservableObject, Sendable {
             for step in steps {
                 group.addTask {
                     // Use captured copy for parallel execution
-                    return await self.executeStepIsolated(step, context: capturedContext)
+                    await self.executeStepIsolated(step, context: capturedContext)
                 }
             }
 

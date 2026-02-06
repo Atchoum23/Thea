@@ -115,7 +115,7 @@ public struct QuerySuggestionOverlay: View {
     private func fetchIntentPrediction() async -> String? {
         // Use ProactivityEngine for intent prediction
         // This would integrate with the existing ProactivityEngine
-        return nil // Placeholder - wire to ProactivityEngine.predictNextIntent()
+        nil // Placeholder - wire to ProactivityEngine.predictNextIntent()
     }
 
     private func fetchContextSuggestions(for conversationId: UUID) async -> [QuerySuggestion] {
@@ -130,7 +130,7 @@ public struct QuerySuggestionOverlay: View {
     private func fetchMemorySuggestions() async -> [QuerySuggestion] {
         // Get suggestions from MemoryService based on patterns
         // This would integrate with MemoryService.recall()
-        return [] // Placeholder
+        [] // Placeholder
     }
 
     private func removeDuplicates(_ suggestions: [QuerySuggestion]) -> [QuerySuggestion] {

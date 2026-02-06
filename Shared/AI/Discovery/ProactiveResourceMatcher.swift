@@ -141,7 +141,7 @@ public final class ProactiveResourceMatcher: ObservableObject {
 
     // MARK: - Private State
 
-    private var userPreferences: UserResourcePreferences = UserResourcePreferences()
+    private var userPreferences = UserResourcePreferences()
     private var usageHistory: [UUID: ResourceUsageStats] = [:]
     private var nlpTagger: NLTagger?
     private var cancellables = Set<AnyCancellable>()
@@ -381,7 +381,7 @@ public final class ProactiveResourceMatcher: ObservableObject {
                     matchReason: .capabilityNeed(capability: capability),
                     confidence: 0.6,
                     context: context,
-                    suggestedTools: resource.tools.filter { tool in
+                    suggestedTools: resource.tools.filter { _ in
                         resource.capabilities.contains { $0.category == capability }
                     }
                 )

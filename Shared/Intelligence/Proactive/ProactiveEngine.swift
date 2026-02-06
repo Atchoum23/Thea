@@ -220,7 +220,7 @@ public enum PatternType: String, Codable, Sendable {
 
 /// Main engine for proactive behavior
 @MainActor
-public final class ProactiveEngine: ObservableObject, Sendable {
+public final class ProactiveEngine: ObservableObject {
     public static let shared = ProactiveEngine()
 
     private let logger = Logger(subsystem: "com.thea.proactive", category: "Engine")
@@ -237,7 +237,7 @@ public final class ProactiveEngine: ObservableObject, Sendable {
     public var isEnabled: Bool = true
 
     // State
-    private var lastAnalysis: Date = Date.distantPast
+    private var lastAnalysis = Date.distantPast
     private var actionHistory: [(action: String, timestamp: Date)] = []
     private var fileAccessHistory: [(file: String, timestamp: Date)] = []
 

@@ -411,7 +411,7 @@ public actor TaskIntelligence {
 
     private func extractContacts(from input: String) async -> [String] {
         // Would use Contacts framework to match names
-        return []
+        []
     }
 
     // MARK: - Urgency Calculation
@@ -730,17 +730,17 @@ public actor TaskIntelligence {
     }
 
     public func getTasksByProject(_ project: String) -> [TheaTask] {
-        return tasks.values.filter { $0.project == project && $0.completedAt == nil }
+        tasks.values.filter { $0.project == project && $0.completedAt == nil }
             .sorted { $0.urgencyScore > $1.urgencyScore }
     }
 
     public func getUrgentTasks(threshold: Double = 0.7) -> [TheaTask] {
-        return tasks.values.filter { $0.urgencyScore >= threshold && $0.completedAt == nil }
+        tasks.values.filter { $0.urgencyScore >= threshold && $0.completedAt == nil }
             .sorted { $0.urgencyScore > $1.urgencyScore }
     }
 
     public func getAllActiveTasks() -> [TheaTask] {
-        return tasks.values.filter { $0.completedAt == nil }
+        tasks.values.filter { $0.completedAt == nil }
             .sorted { $0.urgencyScore > $1.urgencyScore }
     }
 

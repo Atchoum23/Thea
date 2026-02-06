@@ -274,7 +274,7 @@ public final class AutonomyPolicyManager: ObservableObject {
     @Published public var categoryOverrides: [ActionCategory: AutonomyLevel] = [:]
 
     /// Current trust score
-    @Published public private(set) var trustScore: AutonomyTrustScore = AutonomyTrustScore()
+    @Published public private(set) var trustScore = AutonomyTrustScore()
 
     /// Actions that have been approved once (for askOnce mode)
     @Published public private(set) var approvedActionTypes: Set<String> = []

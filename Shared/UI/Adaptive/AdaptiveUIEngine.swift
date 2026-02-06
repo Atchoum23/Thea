@@ -185,7 +185,7 @@ public final class AdaptiveUIEngine: ObservableObject {
     // MARK: - Published State
 
     /// Current adaptive layout
-    @Published public private(set) var layout: AdaptiveLayout = AdaptiveLayout()
+    @Published public private(set) var layout = AdaptiveLayout()
 
     /// UI element visibility preferences
     @Published public private(set) var visibilityPreferences: [String: UIVisibilityPreference] = [:]

@@ -54,7 +54,7 @@ public actor ModelPrewarmingService {
     public private(set) var isMonitoring: Bool = false
 
     /// Pre-warming statistics
-    public private(set) var stats: PrewarmingStats = PrewarmingStats()
+    public private(set) var stats = PrewarmingStats()
 
     // MARK: - Model Mapping
 
@@ -70,7 +70,7 @@ public actor ModelPrewarmingService {
         .factual: "mlx-community/Qwen2.5-1.5B-4bit",
         .analysis: "mlx-community/Qwen2.5-3B-4bit",
         .summarization: "mlx-community/Qwen2.5-1.5B-4bit",
-        .planning: "mlx-community/Qwen2.5-3B-4bit",
+        .planning: "mlx-community/Qwen2.5-3B-4bit"
     ]
 
     // MARK: - Initialization

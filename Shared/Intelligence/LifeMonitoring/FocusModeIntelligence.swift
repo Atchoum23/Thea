@@ -3039,7 +3039,7 @@ public actor FocusModeIntelligence {
         // PRIVACY: Location is NEVER shared with contacts
         // This function returns nil - location only affects internal behavior
         // (e.g., response timing, tone) but is never mentioned in messages
-        return nil
+        nil
     }
 
     /// Internal: Adjust response behavior based on location (without revealing it)
@@ -3723,12 +3723,12 @@ public actor FocusModeIntelligence {
 
     private func checkLocationPatterns() async -> PredictionSignal? {
         // Would use CoreLocation
-        return nil
+        nil
     }
 
     private func determineBestFocusMode(from signals: [PredictionSignal]) -> String? {
         // Return most confident suggestion
-        signals.max(by: { $0.confidence < $1.confidence })?.suggestedMode
+        signals.max { $0.confidence < $1.confidence }?.suggestedMode
     }
 
     // MARK: - 3. Contextual Intelligence
@@ -3788,7 +3788,7 @@ public actor FocusModeIntelligence {
 
     private func hasMeetingWithContactSoon(_ contactId: String) async -> Bool {
         // Would check calendar for events with this contact
-        return false
+        false
     }
 
     private func messageContainsProjectReference(_ message: String) -> Bool {
@@ -3815,7 +3815,7 @@ public actor FocusModeIntelligence {
 
     private func isReplyToYourMessage(contactId: String?) async -> Bool {
         // Would check recent outgoing messages to this contact
-        return false
+        false
     }
 
     // MARK: - 4. Focus Session Summary
@@ -3952,7 +3952,7 @@ public actor FocusModeIntelligence {
 
         // This would integrate with the iOS Visual Voicemail system
         // or poll COMBOX status via DTMF commands
-        return []
+        []
     }
 
     public struct VoicemailInfo: Sendable {

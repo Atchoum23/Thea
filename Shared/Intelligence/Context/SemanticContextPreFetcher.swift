@@ -132,9 +132,9 @@ public struct ContextBundle: Sendable {
     }
 }
 
-// MARK: - Prefetch Request
+// MARK: - Semantic Prefetch Request
 
-public struct PrefetchRequest: Sendable {
+public struct SemanticPrefetchRequest: Sendable {
     public let query: String?
     public let conversationId: UUID?
     public let projectPath: String?
@@ -231,7 +231,7 @@ public final class SemanticContextPreFetcher {
     // MARK: - Public API
 
     /// Prefetch context for an upcoming query
-    public func prefetchContext(for request: PrefetchRequest) async -> ContextBundle {
+    public func prefetchContext(for request: SemanticPrefetchRequest) async -> ContextBundle {
         isPrefetching = true
         defer { isPrefetching = false }
 
@@ -443,7 +443,7 @@ public final class SemanticContextPreFetcher {
         return items
     }
 
-    private func prefetchFromMemory(_ request: PrefetchRequest) async -> [ContextItem] {
+    private func prefetchFromMemory(_ request: SemanticPrefetchRequest) async -> [ContextItem] {
         var items: [ContextItem] = []
 
         // User preferences
@@ -572,9 +572,13 @@ extension SemanticContextPreFetcher {
             return
         }
 
-        let request = PrefetchRequest(
+        let request = SemanticPrefetchRequest(
             query: partialQuery,
-            userContext: .current()
+            conversationId: nil,
+            projectPath: nil,
+            recentFiles: [],
+            activeGoals: [],
+            userContext: SemanticPrefetchRequest.UserContextSnapshot()
         )
 
         _ = await prefetchContext(for: request)

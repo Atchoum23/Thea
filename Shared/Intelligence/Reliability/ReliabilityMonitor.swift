@@ -19,7 +19,7 @@ public final class ReliabilityMonitor: ObservableObject {
 
     // MARK: - State
 
-    @Published public private(set) var systemHealth: SystemHealth = SystemHealth()
+    @Published public private(set) var systemHealth = SystemHealth()
     @Published public private(set) var circuitBreakers: [String: CircuitBreaker] = [:]
     @Published public private(set) var degradationLevel: DegradationLevel = .none
 
@@ -97,8 +97,8 @@ public final class ReliabilityMonitor: ObservableObject {
 public struct SystemHealth: Sendable {
     public var isHealthy: Bool = true
     public var overallScore: Float = 1.0
-    public var lastCheckAt: Date = Date()
-    public var memoryStatus: ComponentStatus = ComponentStatus(name: "Memory", isOperational: true, lastError: nil)
+    public var lastCheckAt = Date()
+    public var memoryStatus = ComponentStatus(name: "Memory", isOperational: true, lastError: nil)
 }
 
 public struct ComponentStatus: Sendable {

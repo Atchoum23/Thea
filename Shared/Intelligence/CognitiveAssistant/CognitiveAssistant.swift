@@ -19,9 +19,9 @@ public final class CognitiveAssistant: ObservableObject {
 
     // MARK: - State
 
-    @Published public private(set) var cognitiveState: CognitiveState = CognitiveState()
+    @Published public private(set) var cognitiveState = CognitiveState()
     @Published public private(set) var activeInterventions: [CognitiveIntervention] = []
-    @Published public private(set) var sessionMetrics: SessionMetrics = SessionMetrics()
+    @Published public private(set) var sessionMetrics = SessionMetrics()
 
     // MARK: - Configuration
 
@@ -72,18 +72,11 @@ public final class CognitiveAssistant: ObservableObject {
 
     private func assessFocusState() -> CognitiveFocusState {
         let timeSinceLastAction = Date().timeIntervalSince(sessionMetrics.lastActionAt ?? Date())
-        if timeSinceLastAction > 300 { return .distracted }
-        else if sessionMetrics.recentActions > 5 { return .deepFocus }
-        else if sessionMetrics.recentActions > 2 { return .focused }
-        else { return .shallow }
+        if timeSinceLastAction > 300 { return .distracted } else if sessionMetrics.recentActions > 5 { return .deepFocus } else if sessionMetrics.recentActions > 2 { return .focused } else { return .shallow }
     }
 
     private func determineOverallState(_ state: CognitiveState) -> OverallCognitiveState {
-        if state.fatigueLevel >= fatigueThreshold && state.cognitiveLoad >= overloadThreshold { return .overloaded }
-        else if state.fatigueLevel >= fatigueThreshold { return .fatigued }
-        else if state.focusState == .deepFocus { return .optimal }
-        else if state.focusState == .distracted { return .unfocused }
-        else { return .normal }
+        if state.fatigueLevel >= fatigueThreshold && state.cognitiveLoad >= overloadThreshold { return .overloaded } else if state.fatigueLevel >= fatigueThreshold { return .fatigued } else if state.focusState == .deepFocus { return .optimal } else if state.focusState == .distracted { return .unfocused } else { return .normal }
     }
 
     private func checkForInterventions() async {
@@ -119,7 +112,7 @@ public struct CognitiveState: Sendable {
     public var fatigueLevel: Float = 0.0
     public var focusState: CognitiveFocusState = .shallow
     public var overallState: OverallCognitiveState = .normal
-    public var lastUpdated: Date = Date()
+    public var lastUpdated = Date()
 }
 
 public enum CognitiveFocusState: String, Sendable { case deepFocus, focused, shallow, distracted }
@@ -153,7 +146,7 @@ public struct CognitiveAction: Identifiable, Sendable {
 }
 
 public struct SessionMetrics: Sendable {
-    public var startTime: Date = Date()
+    public var startTime = Date()
     public var endTime: Date?
     public var lastActionAt: Date?
     public var totalActions: Int = 0

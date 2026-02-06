@@ -173,7 +173,7 @@ public final class IntentAnticipator {
         // Group by action type
         let grouped = Dictionary(grouping: candidates) { $0.intent.actionType }
 
-        return grouped.map { (actionType, candidates) in
+        return grouped.map { actionType, candidates in
             // Weighted average of confidence
             let totalWeight = candidates.reduce(0.0) { $0 + $1.weight }
             let weightedConfidence = candidates.reduce(0.0) { sum, candidate in

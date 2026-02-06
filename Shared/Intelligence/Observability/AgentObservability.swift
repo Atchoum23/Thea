@@ -393,7 +393,7 @@ public struct DecisionExplanation: Identifiable, Sendable {
 
 /// Central manager for observability
 @MainActor
-public final class ObservabilityManager: ObservableObject, Sendable {
+public final class ObservabilityManager: ObservableObject {
     public static let shared = ObservabilityManager()
 
     private let logger = Logger(subsystem: "com.thea.observability", category: "Manager")
@@ -565,7 +565,7 @@ public final class ObservabilityManager: ObservableObject, Sendable {
         let now = Date()
 
         // Build hourly usage (last 24 hours)
-        let hourlyData = hourlyUsage.compactMap { (hour, usage) -> TokenDashboard.HourlyUsage? in
+        let hourlyData = hourlyUsage.compactMap { hour, usage -> TokenDashboard.HourlyUsage? in
             guard now.timeIntervalSince(hour) < 86400 else { return nil }
             return TokenDashboard.HourlyUsage(
                 hour: hour,
@@ -576,7 +576,7 @@ public final class ObservabilityManager: ObservableObject, Sendable {
         }.sorted { $0.hour < $1.hour }
 
         // Build daily usage (last 30 days)
-        let dailyData = dailyUsage.compactMap { (day, usage) -> TokenDashboard.DailyUsage? in
+        let dailyData = dailyUsage.compactMap { day, usage -> TokenDashboard.DailyUsage? in
             guard now.timeIntervalSince(day) < 30 * 86400 else { return nil }
             return TokenDashboard.DailyUsage(
                 date: day,
@@ -589,7 +589,7 @@ public final class ObservabilityManager: ObservableObject, Sendable {
 
         // Build model breakdown
         let totalModelTokens = modelUsage.values.map { $0.input + $0.output }.reduce(0, +)
-        let modelData = modelUsage.map { (modelId, usage) -> TokenDashboard.ModelUsageBreakdown in
+        let modelData = modelUsage.map { modelId, usage -> TokenDashboard.ModelUsageBreakdown in
             let tokens = usage.input + usage.output
             return TokenDashboard.ModelUsageBreakdown(
                 modelId: modelId,
@@ -601,7 +601,7 @@ public final class ObservabilityManager: ObservableObject, Sendable {
         }.sorted { $0.cost > $1.cost }
 
         // Build task type breakdown
-        let taskData = taskTypeUsage.map { (taskType, usage) -> TokenDashboard.TaskTypeBreakdown in
+        let taskData = taskTypeUsage.map { taskType, usage -> TokenDashboard.TaskTypeBreakdown in
             TokenDashboard.TaskTypeBreakdown(
                 taskType: taskType,
                 tokens: usage.tokens,

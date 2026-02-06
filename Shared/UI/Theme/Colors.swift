@@ -121,7 +121,7 @@ extension Color {
     static let theaGlassGradient = LinearGradient(
         colors: [
             Color(hex: "0066FF").opacity(0.08),
-            Color(hex: "00D4AA").opacity(0.06),
+            Color(hex: "00D4AA").opacity(0.06)
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing

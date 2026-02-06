@@ -126,7 +126,7 @@ public final class VoiceModeController: NSObject, ObservableObject {
     private var wakeWordDetected = false
     private var silenceTimer: Timer?
     private var commandBuffer: String = ""
-    private var lastAudioTime: Date = Date()
+    private var lastAudioTime = Date()
 
     // MARK: - Callbacks
 
@@ -138,7 +138,7 @@ public final class VoiceModeController: NSObject, ObservableObject {
 
     // MARK: - Initialization
 
-    private override init() {
+    override private init() {
         super.init()
         loadSettings()
 

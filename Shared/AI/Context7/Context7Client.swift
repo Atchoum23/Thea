@@ -368,7 +368,7 @@ public actor Context7Client {
 
     /// Get cache statistics
     public var cacheStats: (count: Int, oldestAge: TimeInterval?) {
-        let oldest = cache.values.min(by: { $0.timestamp < $1.timestamp })
+        let oldest = cache.values.min { $0.timestamp < $1.timestamp }
         let age = oldest.map { Date().timeIntervalSince($0.timestamp) }
         return (cache.count, age)
     }
