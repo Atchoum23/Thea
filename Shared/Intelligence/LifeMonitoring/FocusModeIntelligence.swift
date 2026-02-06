@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 // FocusModeIntelligence.swift
 // THEA - Focus Mode Intelligence & Emergency Communication System
 // Created by Claude - February 2026
@@ -810,6 +811,7 @@ public struct LocationFocusBehavior: Codable, Sendable {
 // MARK: - Focus Mode Intelligence Actor
 
 /// Main intelligence system - runs on Mac, syncs with iPhone
+// swiftlint:disable:next type_body_length
 public actor FocusModeIntelligence {
     // MARK: - Singleton
 
@@ -1847,13 +1849,13 @@ public actor FocusModeIntelligence {
     private func languageFromPhoneNumber(_ phoneNumber: String) -> String? {
         let countryCodeToLanguage: [String: String] = [
             "+1": "en", "+44": "en", "+61": "en", "+64": "en",
-            "+33": "fr", "+32": "fr",
+            "+33": "fr", "+32": "fr", // Belgium - could be fr/nl
             "+41": "de", // Switzerland - could be de/fr/it
             "+49": "de", "+43": "de",
             "+39": "it",
             "+34": "es", "+52": "es", "+54": "es",
             "+351": "pt", "+55": "pt",
-            "+31": "nl", "+32": "nl",
+            "+31": "nl",
             "+81": "ja",
             "+86": "zh", "+852": "zh", "+886": "zh",
             "+82": "ko",

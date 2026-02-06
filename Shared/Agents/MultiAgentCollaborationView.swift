@@ -469,7 +469,7 @@ struct AgentNetworkView: View {
     }
 
     private func positionForAgent(_ agent: CollaborationAgent) -> CGPoint {
-        let index = agents.firstIndex { $0.id == agent.id }?? 0
+        let index = agents.firstIndex { $0.id == agent.id } ?? 0
         let count = agents.count
         let centerX = size.width / 2
         let centerY = size.height / 2
@@ -480,7 +480,7 @@ struct AgentNetworkView: View {
         }
 
         let radius = min(size.width, size.height) * 0.35
-        let nonCoordinatorIndex = agents.filter { $0.role != .coordinator }.firstIndex { $0.id == agent.id }?? 0
+        let nonCoordinatorIndex = agents.filter { $0.role != .coordinator }.firstIndex { $0.id == agent.id } ?? 0
         let nonCoordinatorCount = agents.filter { $0.role != .coordinator }.count
         let angle = (2 * .pi / Double(nonCoordinatorCount)) * Double(nonCoordinatorIndex) - .pi / 2
 
