@@ -363,6 +363,7 @@ targets:
           - "**/Integrations/MusicIntegration.swift"
           - "**/Integrations/SystemIntegration.swift"
           - "**/Verification/MultiModelConsensus.swift"
+          - "**/AI/Adaptive/AdaptivePromptEngine.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
