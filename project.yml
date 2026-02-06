@@ -327,6 +327,10 @@ targets:
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
+          - "**/Views/Code/**"
+          - "**/Settings/Privacy/**"
+          - "**/Settings/ResourceAllocationSettingsView.swift"
+          - "**/Views/SelfExecutionView.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
