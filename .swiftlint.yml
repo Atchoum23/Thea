@@ -255,8 +255,8 @@ type_name:
     - iOSVoiceSettingsView
     - iOSFinancialView
     - iOSAddAccountView
-    - macOSChatDetailView
-    - macOSProjectDetailView
+    - MacChatDetailView
+    - MacProjectDetailView
     - macOSKnowledgeView
     - macOSFinancialView
     - macOSCodeView
