@@ -1,6 +1,8 @@
 @preconcurrency import SwiftData
 import SwiftUI
 
+// MARK: - iOS Home View
+
 @MainActor
 struct iOSHomeView: View {
     @Environment(\.modelContext) private var modelContext
@@ -23,11 +25,11 @@ struct iOSHomeView: View {
 
         var icon: String {
             switch self {
-            case .chat: "message.fill"
+            case .chat: "bubble.left.and.bubble.right.fill"
             case .projects: "folder.fill"
-            case .knowledge: "brain.head.profile"
-            case .financial: "dollarsign.circle.fill"
-            case .settings: "gear"
+            case .knowledge: "books.vertical.fill"
+            case .financial: "chart.pie.fill"
+            case .settings: "gearshape"
             }
         }
     }
@@ -108,7 +110,6 @@ struct iOSHomeView: View {
         chatManager.setModelContext(modelContext)
         projectManager.setModelContext(modelContext)
 
-        // Request voice permissions if enabled
         if voiceManager.isEnabled {
             Task {
                 try? await voiceManager.requestPermissions()
@@ -123,108 +124,130 @@ struct iOSHomeView: View {
 struct iOSChatListView: View {
     @Binding var showingNewConversation: Bool
     @State private var chatManager = ChatManager.shared
-    @State private var selectedConversation: Conversation?
+    @State private var searchText = ""
 
     var body: some View {
         Group {
             if chatManager.conversations.isEmpty {
-                emptyStateView
+                WelcomeView { prompt in
+                    let conversation = chatManager.createConversation(title: "New Conversation")
+                    chatManager.selectConversation(conversation)
+                    NotificationCenter.default.post(
+                        name: Notification.Name.newConversation,
+                        object: prompt
+                    )
+                }
             } else {
                 conversationList
             }
         }
+        .searchable(text: $searchText, prompt: "Search conversations")
     }
 
-    private var emptyStateView: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "message.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.theaPrimary)
-
-            Text("No Conversations Yet")
-                .font(.title2)
-                .fontWeight(.semibold)
-
-            Text("Start a new conversation with THEA")
-                .font(.body)
-                .foregroundStyle(.secondary)
-
-            Button {
-                showingNewConversation = true
-            } label: {
-                Label("New Conversation", systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.theaPrimary)
-                    .foregroundStyle(.white)
-                    .clipShape(Capsule())
+    private var filteredConversations: [Conversation] {
+        if searchText.isEmpty {
+            chatManager.conversations
+        } else {
+            chatManager.conversations.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText)
             }
         }
-        .padding()
     }
 
     private var conversationList: some View {
         List {
-            ForEach(chatManager.conversations) { conversation in
-                NavigationLink(destination: iOSChatView(conversation: conversation)) {
-                    IOSConversationRow(conversation: conversation)
-                }
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        chatManager.deleteConversation(conversation)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+            // Pinned
+            let pinned = filteredConversations.filter(\.isPinned)
+            if !pinned.isEmpty {
+                Section("Pinned") {
+                    ForEach(pinned) { conversation in
+                        NavigationLink(destination: iOSChatView(conversation: conversation)) {
+                            IOSConversationRow(conversation: conversation)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                chatManager.deleteConversation(conversation)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                ChatManager.shared.togglePin(conversation)
+                            } label: {
+                                Label("Unpin", systemImage: "pin.slash")
+                            }
+                            .tint(.orange)
+                        }
                     }
                 }
-                .swipeActions(edge: .leading) {
-                    Button {
-                        conversation.isPinned.toggle()
-                    } label: {
-                        Label(
-                            conversation.isPinned ? "Unpin" : "Pin",
-                            systemImage: conversation.isPinned ? "pin.slash" : "pin"
-                        )
+            }
+
+            // Recent
+            let recent = filteredConversations.filter { !$0.isPinned }
+            if !recent.isEmpty {
+                Section("Recent") {
+                    ForEach(recent) { conversation in
+                        NavigationLink(destination: iOSChatView(conversation: conversation)) {
+                            IOSConversationRow(conversation: conversation)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                chatManager.deleteConversation(conversation)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                ChatManager.shared.togglePin(conversation)
+                            } label: {
+                                Label("Pin", systemImage: "pin")
+                            }
+                            .tint(.orange)
+                        }
                     }
-                    .tint(.theaPrimary)
                 }
             }
         }
-        .listStyle(.plain)
+        .listStyle(.insetGrouped)
     }
 }
+
+// MARK: - Conversation Row
 
 private struct IOSConversationRow: View {
     let conversation: Conversation
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: TheaSpacing.xs) {
             HStack {
                 Text(conversation.title)
-                    .font(.headline)
+                    .font(.theaBody)
+                    .fontWeight(.medium)
                     .lineLimit(1)
 
                 Spacer()
 
                 if conversation.isPinned {
                     Image(systemName: "pin.fill")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.theaPrimary)
                 }
             }
 
             if let lastMessage = conversation.messages.last {
                 Text(lastMessage.content.textValue)
-                    .font(.subheadline)
+                    .font(.theaCaption1)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
             }
 
             Text(conversation.updatedAt, style: .relative)
-                .font(.caption)
+                .font(.theaCaption2)
                 .foregroundStyle(.tertiary)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, TheaSpacing.xxs)
     }
 }
 
@@ -243,18 +266,28 @@ struct iOSChatView: View {
     var body: some View {
         VStack(spacing: 0) {
             messageList
-            inputArea
+            ChatInputView(
+                text: $messageText,
+                isStreaming: chatManager.isStreaming
+            ) {
+                if chatManager.isStreaming {
+                    chatManager.cancelStreaming()
+                } else {
+                    sendMessage()
+                }
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 VStack(spacing: 2) {
                     Text(conversation.title)
-                        .font(.headline)
+                        .font(.theaBody)
+                        .fontWeight(.semibold)
 
                     if chatManager.isStreaming {
                         Text("Thinking...")
-                            .font(.caption)
+                            .font(.theaCaption2)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -267,6 +300,7 @@ struct iOSChatView: View {
                 } label: {
                     Image(systemName: isListeningForVoice ? "mic.fill" : "mic")
                         .foregroundStyle(isListeningForVoice ? .red : .theaPrimary)
+                        .symbolEffect(.bounce, value: isListeningForVoice)
                 }
             }
         }
@@ -278,67 +312,54 @@ struct iOSChatView: View {
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 16) {
-                    ForEach(conversation.messages) { message in
-                        MessageBubble(message: message)
-                            .id(message.id)
+                if conversation.messages.isEmpty && !chatManager.isStreaming {
+                    WelcomeView { prompt in
+                        messageText = prompt
+                        sendMessage()
                     }
+                } else {
+                    LazyVStack(spacing: TheaSpacing.md) {
+                        ForEach(conversation.messages) { message in
+                            MessageBubble(message: message)
+                                .id(message.id)
+                        }
+
+                        if chatManager.isStreaming {
+                            StreamingMessageView(
+                                streamingText: chatManager.streamingText,
+                                status: chatManager.streamingText.isEmpty ? .thinking : .generating
+                            )
+                            .id("streaming")
+                        }
+                    }
+                    .padding(.horizontal, TheaSpacing.lg)
+                    .padding(.vertical, TheaSpacing.md)
                 }
-                .padding()
             }
             .onChange(of: conversation.messages.count) { _, _ in
                 if let lastMessage = conversation.messages.last {
-                    withAnimation {
+                    withAnimation(TheaAnimation.smooth) {
                         proxy.scrollTo(lastMessage.id, anchor: .bottom)
                     }
                 }
             }
-        }
-    }
-
-    private var inputArea: some View {
-        VStack(spacing: 0) {
-            Divider()
-
-            HStack(alignment: .bottom, spacing: 12) {
-                TextField("Message THEA...", text: $messageText, axis: .vertical)
-                    .textFieldStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color(uiColor: .systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .lineLimit(1 ... 6)
-                    .focused($isInputFocused)
-                    .disabled(chatManager.isStreaming)
-
-                Button {
-                    sendMessage()
-                } label: {
-                    Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(messageText.isEmpty && !chatManager.isStreaming ? .secondary : Color.theaPrimary)
+            .onChange(of: chatManager.streamingText) { _, _ in
+                withAnimation(TheaAnimation.smooth) {
+                    proxy.scrollTo("streaming", anchor: .bottom)
                 }
-                .disabled(messageText.isEmpty && !chatManager.isStreaming)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(uiColor: .systemBackground))
         }
     }
 
     private func sendMessage() {
-        guard !messageText.isEmpty || chatManager.isStreaming else { return }
+        guard !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
-        if chatManager.isStreaming {
-            chatManager.cancelStreaming()
-        } else {
-            let text = messageText
-            messageText = ""
-            isInputFocused = false
+        let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        messageText = ""
+        isInputFocused = false
 
-            Task {
-                try? await chatManager.sendMessage(text, in: conversation)
-            }
+        Task {
+            try? await chatManager.sendMessage(text, in: conversation)
         }
     }
 
@@ -368,22 +389,39 @@ struct iOSNewConversationView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Conversation Title") {
-                    TextField("Enter title...", text: $title)
+            VStack(spacing: TheaSpacing.xxl) {
+                // Suggestion chips for quick start
+                SuggestionChipGrid { item in
+                    let conversation = chatManager.createConversation(title: item.text)
+                    chatManager.selectConversation(conversation)
+                    NotificationCenter.default.post(
+                        name: Notification.Name.newConversation,
+                        object: item.prompt
+                    )
+                    dismiss()
                 }
+                .padding(.horizontal, TheaSpacing.lg)
 
-                Section("Project (Optional)") {
-                    Button {
-                        showingProjectPicker = true
-                    } label: {
-                        HStack {
-                            Text(selectedProject?.title ?? "None")
-                                .foregroundStyle(selectedProject == nil ? .secondary : .primary)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
+                Divider()
+
+                // Manual title entry
+                Form {
+                    Section("Or start with a title") {
+                        TextField("Conversation title...", text: $title)
+                    }
+
+                    Section("Project (Optional)") {
+                        Button {
+                            showingProjectPicker = true
+                        } label: {
+                            HStack {
+                                Text(selectedProject?.title ?? "None")
+                                    .foregroundStyle(selectedProject == nil ? .secondary : .primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
                         }
                     }
                 }
@@ -392,16 +430,12 @@ struct iOSNewConversationView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                    Button("Cancel") { dismiss() }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Create") {
-                        createConversation()
-                    }
-                    .disabled(title.isEmpty)
+                    Button("Create") { createConversation() }
+                        .disabled(title.isEmpty)
                 }
             }
             .sheet(isPresented: $showingProjectPicker) {
@@ -414,11 +448,12 @@ struct iOSNewConversationView: View {
         let conversation = chatManager.createConversation(
             title: title.isEmpty ? "New Conversation" : title
         )
-        // TODO: Associate with project when ChatManager supports projectID
         chatManager.selectConversation(conversation)
         dismiss()
     }
 }
+
+// MARK: - Project Picker
 
 struct ProjectPickerView: View {
     @Environment(\.dismiss) private var dismiss
@@ -462,9 +497,7 @@ struct ProjectPickerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                    Button("Cancel") { dismiss() }
                 }
             }
         }
