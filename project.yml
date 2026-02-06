@@ -381,6 +381,7 @@ targets:
           - "**/Providers/OpenRouterProvider.swift"
           - "**/Providers/PerplexityProvider.swift"
           - "**/LifeMonitoring/**"
+          - "**/Search/SemanticSearchService.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
