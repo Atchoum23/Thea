@@ -93,7 +93,6 @@
 		0FD0DB6758079D1738FE7E4D /* IntegrationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1942158A31A4A96EC101D1 /* IntegrationTypes.swift */; };
 		0FE691E48B65D88A8BB4D157 /* CodeIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E259E3F43F52B61F698519 /* CodeIntelligence.swift */; };
 		1018BA87ED2E6686BD9ECF79 /* install-automatic-checks.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0B5B6B96B5575DBA93C9EA9B /* install-automatic-checks.sh */; };
-		104E797F8FB24B15C00A9F40 /* LocalModelRecommendationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FAD4A128B1DD8882B34BAF7 /* LocalModelRecommendationEngine.swift */; };
 		1095994DED37F4EEDCADFC09 /* DistributedTaskExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2AE425B0B8FE0D50096C3F4 /* DistributedTaskExecutor.swift */; };
 		10F288E9FA42ACDCE381FC97 /* SpotlightIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 709B89EF2F7499C7F1037829 /* SpotlightIntegration.swift */; };
 		10FD15BBBD9C8FDAF8E34AAF /* LifeIntelligenceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50671203559B8D1DBBEB01C6 /* LifeIntelligenceCoordinator.swift */; };
@@ -331,7 +330,6 @@
 		3D319C9F44C65771AE6A3762 /* ConversationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD832FB6DCFFBDABEEA368EC /* ConversationTests.swift */; };
 		3D551D5B47E10F8AA682290E /* ModelQualityBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 327ED661399525721BA5A159 /* ModelQualityBenchmark.swift */; };
 		3D9DB321DECFDA6D08928435 /* DisplayProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B601DDCFE347A5365BB44D5 /* DisplayProfileManager.swift */; };
-		3DE3BB95604A98690DCF2DBE /* ProactivityEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81DA97D1CC9C765F9F4D697 /* ProactivityEngine.swift */; };
 		3DFFEAF5AEBAC5B7A66C46A6 /* CoworkSkillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B03B6F03504CAAF475DA730 /* CoworkSkillsView.swift */; };
 		3E0FD1A9D0761010E986D144 /* ExtendedThinkingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD18CFEB891FE7709779479 /* ExtendedThinkingView.swift */; };
 		3E3693C5FF913C7E9DA6C19C /* GoogleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F74F450B2F44A98E1CE88C84 /* GoogleProvider.swift */; };
@@ -1301,7 +1299,6 @@
 		FF2F8343715D6C9FCF6D17B8 /* BlueprintExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A267513D6EE787367169E2 /* BlueprintExecutor.swift */; };
 		FF4CB3F2D0541F4A91D91682 /* NutritionDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2325FF7CE9DC47C5C6352D /* NutritionDashboardView.swift */; };
 		FFBE49EE46C95D5FCDD8EEEE /* ProactiveResourceMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3BD239581295469998A0DD /* ProactiveResourceMatcher.swift */; };
-		FFE05E4FE6A3C141C59C182F /* ProactiveModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2773F8F641292B6CCE461F4C /* ProactiveModelManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -6827,7 +6824,6 @@
 				849E070136DBE77D8FB9CD79 /* LocalModelRecommendationEngine+Helpers.swift in Sources */,
 				F32FE75B4C659007D19828D5 /* LocalModelRecommendationEngine+Recommendations.swift in Sources */,
 				DF183DB849CB4A78902EA0C4 /* LocalModelRecommendationEngine+Scanning.swift in Sources */,
-				104E797F8FB24B15C00A9F40 /* LocalModelRecommendationEngine.swift in Sources */,
 				4C8A51D6BEE6347D6F696FC3 /* LocalModelRecommendationTypes.swift in Sources */,
 				C594FC36F7C308B31ADD36A2 /* LocalModelsListViews.swift in Sources */,
 				98385DF5F49B86396997C8A7 /* LocalModelsManagerViews.swift in Sources */,
@@ -6923,11 +6919,9 @@
 				7282A92C70235D2674106C80 /* PrivacyManager.swift in Sources */,
 				A3414B4FFE74A2828F650019 /* PrivacyPreservingAIRouter.swift in Sources */,
 				86AC167D4AD041E216C7B234 /* ProactiveEngine.swift in Sources */,
-				FFE05E4FE6A3C141C59C182F /* ProactiveModelManager.swift in Sources */,
 				1516B877413D37585E03BF7C /* ProactiveNotificationIntelligence.swift in Sources */,
 				E9AD19AD7C550B118500ABBF /* ProactiveResourceMatcher.swift in Sources */,
 				18C9F6A734B7546CEA7E010A /* ProactiveSuggestionEngine.swift in Sources */,
-				3DE3BB95604A98690DCF2DBE /* ProactivityEngine.swift in Sources */,
 				99165E1D508ABD48E401C93B /* ProcessObserver.swift in Sources */,
 				ED696212219DBE92ED22DD88 /* Project.swift in Sources */,
 				C483DBB904D4AFC18BA588B9 /* ProjectKnowledge.swift in Sources */,
