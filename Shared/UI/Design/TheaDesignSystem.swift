@@ -199,6 +199,27 @@ public enum TheaAnimation {
     public static let entrance = Animation.spring(response: 0.4, dampingFraction: 0.8)
     /// Bouncy feedback for success states
     public static let bouncy = Animation.spring(response: 0.3, dampingFraction: 0.6)
+
+    // MARK: - Extended Presets
+
+    /// Natural spring for general UI transitions
+    public static let spring = Animation.spring(response: 0.35, dampingFraction: 0.85)
+    /// Gentle spring for subtle movements
+    public static let gentleSpring = Animation.spring(response: 0.5, dampingFraction: 0.8)
+    /// Snappy animation for quick state changes
+    public static let snappy = Animation.snappy(duration: 0.25)
+    /// Morphing animation for shape/layout transitions
+    public static let morphing = Animation.smooth(duration: 0.4)
+    /// Message appear animation
+    public static let messageAppear = Animation.spring(response: 0.4, dampingFraction: 0.75)
+    /// Tab switch transition
+    public static let tabSwitch = Animation.easeInOut(duration: 0.25)
+
+    /// Staggered animation for lists and grids
+    public static func staggered(index: Int, baseDelay: Double = 0.05) -> Animation {
+        .spring(response: 0.4, dampingFraction: 0.8)
+            .delay(Double(index) * baseDelay)
+    }
 }
 
 // MARK: - Adaptive Theme
