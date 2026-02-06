@@ -18,7 +18,7 @@ public enum IntelligenceEvent: Sendable {
     case queryReceived(query: String, conversationId: UUID)
     case responseGenerated(quality: Double, latency: TimeInterval)
     case taskCompleted(taskType: String, success: Bool, duration: TimeInterval)
-    case patternDetected(pattern: DetectedPattern)
+    case patternDetected(pattern: IntelligencePattern)
     case suggestionPresented(suggestion: UnifiedSuggestion)
     case suggestionAccepted(suggestionId: UUID)
     case suggestionDismissed(suggestionId: UUID)
@@ -28,9 +28,9 @@ public enum IntelligenceEvent: Sendable {
     case userModelUpdated(aspect: UserModelAspect)
 }
 
-// MARK: - Detected Pattern
+// MARK: - Intelligence Pattern (renamed to avoid conflict with PatternDetector.IntelligencePattern)
 
-public struct DetectedPattern: Identifiable, Sendable {
+public struct IntelligencePattern: Identifiable, Sendable {
     public let id: UUID
     public let type: PatternType
     public let description: String
@@ -363,7 +363,7 @@ public enum UserModelAspect: String, Sendable {
 public protocol IntelligenceSubsystem: Sendable {
     var subsystemId: String { get }
     func processEvent(_ event: IntelligenceEvent) async
-    func getInsights() async -> [DetectedPattern]
+    func getInsights() async -> [IntelligencePattern]
     func getSuggestions(context: IntelligenceContext) async -> [UnifiedSuggestion]
 }
 
@@ -429,7 +429,7 @@ public final class UnifiedIntelligenceHub {
     // MARK: - State
 
     private(set) var isActive = false
-    private(set) var detectedPatterns: [DetectedPattern] = []
+    private(set) var detectedPatterns: [IntelligencePattern] = []
     private(set) var activeBlockers: [DetectedBlocker] = []
     private(set) var inferredGoals: [InferredGoal] = []
     private(set) var pendingSuggestions: [UnifiedSuggestion] = []
@@ -446,7 +446,7 @@ public final class UnifiedIntelligenceHub {
 
     private var eventHistory: [IntelligenceEvent] = []
     private var suggestionHistory: [(suggestion: UnifiedSuggestion, accepted: Bool, timestamp: Date)] = []
-    private var patternHistory: [DetectedPattern] = []
+    private var patternHistory: [IntelligencePattern] = []
 
     // MARK: - Configuration
 
@@ -600,7 +600,7 @@ public final class UnifiedIntelligenceHub {
     }
 
     /// Get relevant patterns for a task type
-    public func getPatternsForTask(_ taskType: String) -> [DetectedPattern] {
+    public func getPatternsForTask(_ taskType: String) -> [IntelligencePattern] {
         detectedPatterns.filter { pattern in
             pattern.metadata["taskType"] == taskType ||
             pattern.type == .workflow
@@ -658,7 +658,7 @@ public final class UnifiedIntelligenceHub {
 
     private func handleTaskCompleted(taskType: String, success: Bool, duration: TimeInterval) async {
         // Detect patterns in task completion
-        let pattern = DetectedPattern(
+        let pattern = IntelligencePattern(
             type: .productivity,
             description: "Completed \(taskType) task",
             confidence: success ? 0.8 : 0.4,
@@ -694,14 +694,14 @@ public final class UnifiedIntelligenceHub {
         }
     }
 
-    private func handlePatternDetected(_ pattern: DetectedPattern) async {
+    private func handlePatternDetected(_ pattern: IntelligencePattern) async {
         // Check if we've seen this pattern before
         if let existingIndex = detectedPatterns.firstIndex(where: {
             $0.type == pattern.type && $0.description == pattern.description
         }) {
             // Update existing pattern
             let existing = detectedPatterns[existingIndex]
-            detectedPatterns[existingIndex] = DetectedPattern(
+            detectedPatterns[existingIndex] = IntelligencePattern(
                 id: existing.id,
                 type: existing.type,
                 description: existing.description,
@@ -837,7 +837,7 @@ public final class UnifiedIntelligenceHub {
             let daysSinceLastSeen = now.timeIntervalSince(pattern.lastSeen) / 86400
             if daysSinceLastSeen > 7 {
                 let decayFactor = 1.0 - (daysSinceLastSeen / Double(patternDecayDays))
-                detectedPatterns[index] = DetectedPattern(
+                detectedPatterns[index] = IntelligencePattern(
                     id: pattern.id,
                     type: pattern.type,
                     description: pattern.description,
