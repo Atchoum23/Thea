@@ -347,6 +347,7 @@ targets:
           - "**/Verification/ConfidenceSystem.swift"
           - "**/Settings/Advanced/**"
           - "**/Components/ConfidenceIndicatorViews.swift"
+          - "**/Views/PhaseProgressView.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:

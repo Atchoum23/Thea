@@ -38,7 +38,6 @@
 		050EB88236E28ADF14C7E125 /* WellnessServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D2C588E044E581B386E56D /* WellnessServiceTests.swift */; };
 		053EB39C11A2FE1CD7AE5BCE /* FocusOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2B7D088340F1C762251C23 /* FocusOrchestrator.swift */; };
 		054257EA3542520FF464C37B /* ProactiveNotificationIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AE251446D24B99DC6D9EBC /* ProactiveNotificationIntelligence.swift */; };
-		063A1C8D2776AAF27F8F13DE /* AdvancedExpDiagSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A5B860E75CF5ECCAF651EA /* AdvancedExpDiagSections.swift */; };
 		063ADA397ECA847771F03CCA /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684629699F86D3CF574A670B /* ServiceContainer.swift */; };
 		069FAA15A5AA8BC4F4EDF23F /* FileOperationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1542CBF91CCF05C9FC2C9C44 /* FileOperationsManager.swift */; };
 		06B89B7187CADFC3B8C82F40 /* PromptEngineeringModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C9E67F316E11C79A15D6FC /* PromptEngineeringModels.swift */; };
@@ -219,7 +218,6 @@
 		29070BEE2878CA42CDEDDDD8 /* AdaptiveOCREngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA442AE1630095516AB91743 /* AdaptiveOCREngine.swift */; };
 		291C8F99CF27CA8BAE8B5DE7 /* TheaAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D38ED8E6F71CD71517A09 /* TheaAnimations.swift */; };
 		29606B23A2216E9B54F20D42 /* TheaAppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1E5812E31F47BF9AC08874 /* TheaAppIntents.swift */; };
-		2985F30D54171A90AECFB31F /* AdvancedDevNetworkSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED10786E7611B231B9D80A9B /* AdvancedDevNetworkSections.swift */; };
 		29DBF10440D8972988B0C67C /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A373BF922E2CE1A1F95EFE1 /* Fonts.swift */; };
 		29FE598E8A1243A9932A1D1B /* MessagesMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816C08896648DA36A471E0E7 /* MessagesMonitor.swift */; };
 		2A1D9AAC066F4132F3EB8692 /* AutonomyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1814CBA4DD27BA382ED3FAA /* AutonomyController.swift */; };
@@ -490,7 +488,6 @@
 		57F41F597DC422CF963605AB /* MonitoringSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9A95D026B80FEF5D3FCC2FE /* MonitoringSettingsView.swift */; };
 		57FC737122BAE94597B7BE77 /* OrchestrationIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95BB275BABEA672FCC727F7 /* OrchestrationIntegrationTests.swift */; };
 		581EBB5DBB01C9F20957C1F5 /* OllamaAgentLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB5C8EEF65B9FE928E53EDA /* OllamaAgentLoop.swift */; };
-		59191F62B1B5AAAC9BA406F0 /* AdvancedSheetsActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84818CD23A60E664EC76468D /* AdvancedSheetsActions.swift */; };
 		59309C6D80B0038987379A7E /* FinancialDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5915F5D74F8946C40FA0A6DF /* FinancialDashboardView.swift */; };
 		59732CF91A5DDE9FB7DF2D3F /* AccessibilityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227EFCDDE7E3D6F6855CFBB9 /* AccessibilityBridge.swift */; };
 		59969363D9FB9D83F69C1430 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195908F24C579B94425A9585 /* HomeView.swift */; };
@@ -513,7 +510,6 @@
 		5DEA648DAA6E9AC55D407310 /* ShortcutsIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4006F1EE54F4D4022032B75 /* ShortcutsIntegration.swift */; };
 		5DFBC81A08309DA8C988D15C /* SkillDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 470431AA074BE7A96CA0C146 /* SkillDefinition.swift */; };
 		5DFE79EC23DFB8222EE47495 /* IncomeAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED86001500B1861BEEC65E4E /* IncomeAnalytics.swift */; };
-		5E22F11EA1AC9B702FC7B896 /* AdvancedOverviewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FD92AA8A41DA2502B304CE /* AdvancedOverviewSection.swift */; };
 		5E3FC3F76E36E0BEFE38D42A /* MLXModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F396E8B81F894117A0195CC /* MLXModelManager.swift */; };
 		5E42AD0FE968C85245C7B40A /* THEAMCPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6FA2CD00E94D6DC003A006D /* THEAMCPServer.swift */; };
 		5ED9D1079793715E22E48B6D /* UnifiedFeedbackAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E38A8ED40A815D29E999F2E7 /* UnifiedFeedbackAggregator.swift */; };
@@ -570,7 +566,6 @@
 		6B2BDD1AE3AA30C2B9B78015 /* UnifiedContextSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD68D6416E308F43865C790 /* UnifiedContextSync.swift */; };
 		6B6CD0C18512B6F411D7C889 /* iOSFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F42D3A3FB644BCBC33E638 /* iOSFeatures.swift */; };
 		6B8904175CEBC221B0E97DD4 /* HardwareShortcutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96EC4C26E421999E4B884CF0 /* HardwareShortcutManager.swift */; };
-		6BA1C7AE414808A4CB940A0E /* AdvancedPerfCacheSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4458C4571C0BCB48406F8CE9 /* AdvancedPerfCacheSections.swift */; };
 		6BB2A9C16B21D623A37DA1CA /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BDDCCBB3B72669B2C56E08E /* OnboardingView.swift */; };
 		6BC9AC4853B507BAB8BF43B3 /* ConditionPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7487777505B578C3E6DA4ED2 /* ConditionPickerSheet.swift */; };
 		6C1C00CB062D1ABA748F18BF /* CoworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA74874061E712A9AFEA8F5D /* CoworkView.swift */; };
@@ -961,7 +956,6 @@
 		B51EA50E5C396C849D5EFB86 /* IntentAnticipator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372B4F0049D6FB7C93950371 /* IntentAnticipator.swift */; };
 		B56BFB0589196452BD4B850F /* BrowserAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312CDA1C3E942F50ACC3BFF2 /* BrowserAutomation.swift */; };
 		B5AF3D620B8B1E19B4F7AAA1 /* AnthropicProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5028FD03DD32838DE36130A7 /* AnthropicProvider.swift */; };
-		B5D62EFB6F3D0B3AAD4F501F /* AdvancedSettingsTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34681A3C61A1B64E1F558EF /* AdvancedSettingsTypes.swift */; };
 		B6133AAAB68E85373776F3D7 /* UnifiedContextEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9E575E743A3367C2D7BB93 /* UnifiedContextEngine.swift */; };
 		B68874DBF038CDC346E9C1B3 /* ContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE86E6C7C4A9B05B467349F5 /* ContextManager.swift */; };
 		B6C888AF6A47FEFBEF7370F6 /* KnowledgeSourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C753C6F7254C714D5E19EEEE /* KnowledgeSourcesView.swift */; };
@@ -1009,7 +1003,6 @@
 		BFA9A77E36D50053B536B557 /* MeetingIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98E15E0D71D6C0EF7C9806F3 /* MeetingIntelligence.swift */; };
 		BFC31A6A566EC0E895347049 /* SystemPromptSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D0B9C9258F4B2B582055A8 /* SystemPromptSettingsView.swift */; };
 		BFC402CB6C4147506218649C /* CloudKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A092B851A3F64DCAC0E8CF57 /* CloudKitService.swift */; };
-		BFF3E0A77022253A50DE1358 /* AdvancedLoggingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C3D24F76CE662A73AC7DD2 /* AdvancedLoggingSection.swift */; };
 		C0A4954CA50D937248D2B272 /* LifeTrackingDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F75B783D4DF4E372CAE8123 /* LifeTrackingDashboardView.swift */; };
 		C0B4EC5C6782615CD1349388 /* LegacyScreenCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793C4EF801100996337F7D2E /* LegacyScreenCapture.swift */; };
 		C111667F3BD89F361B5F671F /* AssertionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F136C9853E8EAD371566DE /* AssertionManager.swift */; };
@@ -1305,7 +1298,6 @@
 		FCB9AE702A52B9D9CA429BF1 /* XcodeIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5880D4EE0852DB29F5FCDEBE /* XcodeIntegration.swift */; };
 		FCE3F847DF1736E92EAEF9A8 /* MemoryInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1918675B8795C7EF48DDCA1 /* MemoryInspectorView.swift */; };
 		FCEED9CAFA04FE178DDC8564 /* AIProviderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3EDD38D4D04B72138D09FA /* AIProviderConfig.swift */; };
-		FCF525C7BC9622D9B4E908D3 /* ConfidenceIndicatorViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B29E5ADA808A415C058FED0 /* ConfidenceIndicatorViews.swift */; };
 		FCF970444EE31C85354FAAF8 /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 443F35519368AE73B7B17433 /* OpenAI */; };
 		FD32C35712D8D883EF4DA19B /* SupraModelSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBAACCCCCCE6D357E5B565B6 /* SupraModelSelector.swift */; };
 		FD64653F0C8C599AD0666611 /* CoworkProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20139D179BC17752B359CC7C /* CoworkProgressView.swift */; };
@@ -6593,14 +6585,7 @@
 				29070BEE2878CA42CDEDDDD8 /* AdaptiveOCREngine.swift in Sources */,
 				8039A0A11344819981E14259 /* AdaptivePromptEngine.swift in Sources */,
 				E91956283681BD253ACE2394 /* AdaptiveUIEngine.swift in Sources */,
-				2985F30D54171A90AECFB31F /* AdvancedDevNetworkSections.swift in Sources */,
-				063A1C8D2776AAF27F8F13DE /* AdvancedExpDiagSections.swift in Sources */,
-				BFF3E0A77022253A50DE1358 /* AdvancedLoggingSection.swift in Sources */,
-				5E22F11EA1AC9B702FC7B896 /* AdvancedOverviewSection.swift in Sources */,
-				6BA1C7AE414808A4CB940A0E /* AdvancedPerfCacheSections.swift in Sources */,
 				D0D9D0EB9218E38CF3644919 /* AdvancedPromptSettingsView.swift in Sources */,
-				B5D62EFB6F3D0B3AAD4F501F /* AdvancedSettingsTypes.swift in Sources */,
-				59191F62B1B5AAAC9BA406F0 /* AdvancedSheetsActions.swift in Sources */,
 				ACDC0C0E9D4B4619621418C2 /* AgentCommunicationBus.swift in Sources */,
 				A2B54B50828F14555F7B38E5 /* AgentEnhancements.swift in Sources */,
 				0EC995DB88EE0AA9506AB953 /* AgentMode.swift in Sources */,
@@ -6696,7 +6681,6 @@
 				93A094626DC36E596651CD15 /* CompilerError+Convenience.swift in Sources */,
 				91363237584AA535DBE4243B /* CompilerError+Sorting.swift in Sources */,
 				037512A47044211C191E4631 /* ConditionPickerSheet.swift in Sources */,
-				FCF525C7BC9622D9B4E908D3 /* ConfidenceIndicatorViews.swift in Sources */,
 				97FCDDCDAD1F8F5A7F6A647F /* ContactsIntegration.swift in Sources */,
 				99AA5508D0EBBC3F182AA2DC /* ContentView.swift in Sources */,
 				D9470477AE4E8BCE6D33A2E4 /* Context7Client.swift in Sources */,
