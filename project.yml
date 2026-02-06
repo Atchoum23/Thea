@@ -437,6 +437,8 @@ targets:
           - "**/Anticipatory/InterventionScheduler.swift"
           - "**/Views/KeyboardShortcutsHelpView.swift"
           - "**/Anticipatory/AnticipatoryIntelligenceCore.swift"
+          # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
+          - "**/Design/DesignSystemStubs.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
