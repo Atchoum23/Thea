@@ -8,7 +8,7 @@ protocol AIProvider: Sendable {
 
     func validateAPIKey(_ key: String) async throws -> ValidationResult
     func chat(messages: [AIMessage], model: String, stream: Bool) async throws -> AsyncThrowingStream<ChatResponse, Error>
-    func listModels() async throws -> [AIModel]
+    func listModels() async throws -> [ProviderAIModel]
 }
 
 // MARK: - Provider Metadata
@@ -114,9 +114,11 @@ struct ChatResponse: Sendable {
     }
 }
 
-// MARK: - AI Model
+// MARK: - Provider AI Model Info
+// Note: The main AIModel type is in Shared/Core/Models/AIModel.swift
+// This is a simpler provider-specific version for API responses
 
-struct AIModel: Codable, Identifiable, Sendable {
+struct ProviderAIModel: Codable, Identifiable, Sendable {
     let id: String
     let name: String
     let description: String?

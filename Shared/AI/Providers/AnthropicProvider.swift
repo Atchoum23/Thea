@@ -200,9 +200,9 @@ final class AnthropicProvider: AIProvider, Sendable {
 
     // MARK: - Models
 
-    func listModels() async throws -> [AIModel] {
+    func listModels() async throws -> [ProviderAIModel] {
         [
-            AIModel(
+            ProviderAIModel(
                 id: "claude-opus-4-20250514",
                 name: "Claude Opus 4",
                 description: "Most capable Claude model",
@@ -213,7 +213,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                 supportsVision: true,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "claude-sonnet-4-20250514",
                 name: "Claude Sonnet 4",
                 description: "Balanced intelligence and speed",
@@ -224,7 +224,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                 supportsVision: true,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "claude-3-5-sonnet-20241022",
                 name: "Claude 3.5 Sonnet",
                 description: "Previous generation balanced model",
@@ -235,7 +235,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                 supportsVision: true,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "claude-3-5-haiku-20241022",
                 name: "Claude 3.5 Haiku",
                 description: "Fast and cost-effective",

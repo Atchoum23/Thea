@@ -181,7 +181,7 @@
     }
 
     /// Security level presets
-    enum SecurityLevel: String, CaseIterable, Codable {
+    enum TerminalSecurityLevel: String, CaseIterable, Codable {
         case unrestricted = "Unrestricted"
         case standard = "Standard"
         case sandboxed = "Sandboxed"

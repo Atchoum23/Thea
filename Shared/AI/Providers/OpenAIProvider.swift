@@ -120,11 +120,11 @@ final class OpenAIProvider: AIProvider, Sendable {
 
     // MARK: - Models
 
-    func listModels() async throws -> [AIModel] {
+    func listModels() async throws -> [ProviderAIModel] {
         // OpenAI doesn't provide pricing/context info via API
         // Return hardcoded list of common models
         [
-            AIModel(
+            ProviderAIModel(
                 id: "gpt-4o",
                 name: "GPT-4o",
                 description: "Most capable GPT-4 model with vision",
@@ -135,7 +135,7 @@ final class OpenAIProvider: AIProvider, Sendable {
                 supportsVision: true,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "gpt-4-turbo",
                 name: "GPT-4 Turbo",
                 description: "Fast and capable GPT-4",
@@ -146,7 +146,7 @@ final class OpenAIProvider: AIProvider, Sendable {
                 supportsVision: true,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "gpt-3.5-turbo",
                 name: "GPT-3.5 Turbo",
                 description: "Fast and cost-effective",
@@ -157,7 +157,7 @@ final class OpenAIProvider: AIProvider, Sendable {
                 supportsVision: false,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "o1",
                 name: "o1",
                 description: "Reasoning model",

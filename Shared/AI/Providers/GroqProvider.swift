@@ -184,9 +184,9 @@ final class GroqProvider: AIProvider, Sendable {
 
     // MARK: - Models
 
-    func listModels() async throws -> [AIModel] {
+    func listModels() async throws -> [ProviderAIModel] {
         [
-            AIModel(
+            ProviderAIModel(
                 id: "llama-3.3-70b-versatile",
                 name: "Llama 3.3 70B",
                 description: "Most capable Llama model on Groq",
@@ -197,7 +197,7 @@ final class GroqProvider: AIProvider, Sendable {
                 supportsVision: false,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "llama-3.1-8b-instant",
                 name: "Llama 3.1 8B",
                 description: "Ultra-fast Llama model",
@@ -208,7 +208,7 @@ final class GroqProvider: AIProvider, Sendable {
                 supportsVision: false,
                 supportsFunctionCalling: true
             ),
-            AIModel(
+            ProviderAIModel(
                 id: "mixtral-8x7b-32768",
                 name: "Mixtral 8x7B",
                 description: "Fast mixture of experts model",
