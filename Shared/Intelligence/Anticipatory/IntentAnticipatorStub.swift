@@ -66,4 +66,38 @@ public struct AnticipatedIntent: Identifiable, Sendable {
     }
 }
 
-// PredictedUserIntent is defined in AnticipatoryIntelligenceCore.swift
+/// User feedback about prediction/anticipation accuracy
+public struct AnticipationFeedback: Sendable {
+    public let anticipationId: UUID
+    public let wasHelpful: Bool
+    public let wasAccurate: Bool
+    public let wasAccepted: Bool
+    public let timestamp: Date
+
+    public init(anticipationId: UUID, wasHelpful: Bool, wasAccurate: Bool, wasAccepted: Bool = false) {
+        self.anticipationId = anticipationId
+        self.wasHelpful = wasHelpful
+        self.wasAccurate = wasAccurate
+        self.wasAccepted = wasAccepted
+        self.timestamp = Date()
+    }
+}
+
+/// Predicted user intent with confidence
+public struct PredictedUserIntent: Identifiable, Sendable {
+    public let id: UUID
+    public let intent: String
+    public let confidence: Double
+    public let suggestedAction: String?
+    public let timestamp: Date
+
+    public init(intent: String, confidence: Double, suggestedAction: String? = nil) {
+        self.id = UUID()
+        self.intent = intent
+        self.confidence = confidence
+        self.suggestedAction = suggestedAction
+        self.timestamp = Date()
+    }
+}
+
+// TemporalPattern is defined in TemporalPatternEngine.swift

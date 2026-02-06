@@ -248,6 +248,15 @@ final class ChatManager: ObservableObject {
     private func selectProviderAndModel(for query: String) async throws -> (AIProvider, String) {
         let orchestratorConfig = AppConfiguration.shared.orchestratorConfig
 
+        // Orchestrator functionality temporarily disabled - use default provider
+        // TODO: Re-enable when TaskClassifier, QueryDecomposer, ModelRouter are available
+        _ = orchestratorConfig.orchestratorEnabled
+        _ = query // Silence unused parameter warning
+
+        return try getDefaultProviderAndModel()
+
+        // Original orchestrator code (disabled):
+        /*
         // Check if orchestrator is enabled
         guard orchestratorConfig.orchestratorEnabled else {
             // Orchestrator disabled - use default provider
@@ -336,6 +345,7 @@ final class ChatManager: ObservableObject {
             }
             return try getDefaultProviderAndModel()
         }
+        */
     }
 
     /// Fallback: get default provider and model (original behavior)

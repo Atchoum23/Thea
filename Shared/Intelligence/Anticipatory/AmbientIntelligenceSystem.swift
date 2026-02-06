@@ -261,3 +261,20 @@ public struct DetectedActivity: Identifiable, Sendable {
         self.endedAt = nil
     }
 }
+
+// MARK: - User Action
+
+/// Represents a user action that can be recorded and analyzed
+public struct UserAction: Identifiable, Sendable {
+    public let id: UUID
+    public let type: String
+    public let timestamp: Date
+    public let metadata: [String: String]
+
+    public init(type: String, metadata: [String: String] = [:]) {
+        self.id = UUID()
+        self.type = type
+        self.timestamp = Date()
+        self.metadata = metadata
+    }
+}

@@ -91,13 +91,13 @@ final class ChatViewModel {
 
     // MARK: - Provider Selection
 
-    /// Get available providers
-    var availableProviderInfo: [any AIProvider] {
+    /// Get available provider info
+    var availableProviderInfo: [ProviderRegistry.ProviderInfo] {
         providerRegistry.availableProviders
     }
 
     /// Get configured providers
-    var configuredProviders: [any AIProvider] {
+    var configuredProviders: [AIProvider] {
         providerRegistry.configuredProviders
     }
 

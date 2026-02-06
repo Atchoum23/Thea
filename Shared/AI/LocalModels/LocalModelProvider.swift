@@ -672,8 +672,8 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
         .success()
     }
 
-    func listModels() async throws -> [AIModel] {
-        [AIModel(
+    func listModels() async throws -> [ProviderAIModel] {
+        [ProviderAIModel(
             id: modelName,
             name: modelName,
             description: "Local model",
@@ -721,11 +721,8 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
                             _ = try await engine.loadLocalModel(path: self.instance.model.path)
                         }
 
-                        // Classify the task for dynamic system prompt
-                        // This ensures the model gets appropriate instructions based on the query type
-                        let classification = try? await TaskClassifier.shared.classify(userText)
-                        let taskType = classification?.primaryType
-                        let dynamicSystemPrompt = MLXInferenceEngine.systemPrompt(for: taskType)
+                        // Use default system prompt (TaskClassifier is not available)
+                        let dynamicSystemPrompt = MLXInferenceEngine.systemPrompt(for: nil)
 
                         // Convert history to the format expected by MLXInferenceEngine
                         let history: [MLXInferenceEngine.ChatHistoryMessage] = historyMessages.map {
