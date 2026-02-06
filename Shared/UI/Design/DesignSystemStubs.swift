@@ -67,34 +67,6 @@ public enum TheaBrandColors {
     )
 }
 
-// MARK: - GlassCardModifier Stub
-
-public struct GlassCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = 16
-    var tint: Color = .clear
-
-    public init(cornerRadius: CGFloat = 16, tint: Color = .clear) {
-        self.cornerRadius = cornerRadius
-        self.tint = tint
-    }
-
-    public func body(content: Content) -> some View {
-        content
-            .background(.ultraThinMaterial)
-            .cornerRadius(cornerRadius)
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(tint.opacity(0.2), lineWidth: 1)
-            )
-    }
-}
-
-public extension View {
-    func glassCard(cornerRadius: CGFloat = 16, tint: Color = .clear) -> some View {
-        modifier(GlassCardModifier(cornerRadius: cornerRadius, tint: tint))
-    }
-}
-
 // MARK: - TheaButtonStyle Stub
 
 public struct TheaButtonStyle: ButtonStyle {
