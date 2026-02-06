@@ -101,7 +101,7 @@ public final class UnifiedSuggestionCoordinator {
     // MARK: - State
 
     private(set) var activeSuggestions: [UnifiedSuggestion] = []
-    private(set) var statistics: SuggestionStatistics = SuggestionStatistics()
+    private(set) var statistics = SuggestionStatistics()
     private(set) var isEnabled = true
 
     // MARK: - Configuration

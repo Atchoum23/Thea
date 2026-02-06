@@ -262,25 +262,25 @@ public struct ConfidenceCalibration: Codable, Sendable {
 public struct ReflexionCalibrationBucket: Codable, Sendable {
     public let rangeStart: Float
     public let rangeEnd: Float
-    public var count: Int
-    public var correct: Int
+    public var sampleCount: Int
+    public var correctCount: Int
 
     public init(rangeStart: Float, rangeEnd: Float) {
         self.rangeStart = rangeStart
         self.rangeEnd = rangeEnd
-        self.count = 0
-        self.correct = 0
+        self.sampleCount = 0
+        self.correctCount = 0
     }
 
     public var actualAccuracy: Float {
-        guard count > 0 else { return rangeStart + 0.05 }
-        return Float(correct) / Float(count)
+        guard sampleCount > 0 else { return rangeStart + 0.05 }
+        return Float(correctCount) / Float(sampleCount)
     }
 
     public mutating func record(wasCorrect: Bool) {
-        count += 1
+        sampleCount += 1
         if wasCorrect {
-            correct += 1
+            correctCount += 1
         }
     }
 }
