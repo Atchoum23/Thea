@@ -418,7 +418,7 @@ public struct TodoistSyncResponse: Codable, Sendable {
     }
 }
 
-public struct TodoistCommand: Sendable {
+public struct TodoistCommand: @unchecked Sendable {
     public let type: String
     public let uuid: String
     public let tempId: String?
@@ -557,9 +557,9 @@ public actor TodoistIntegration {
 
         let task = TodoistTaskCreate(
             content: parsed.content,
+            labels: parsed.labels,
             priority: parsed.priority,
-            dueString: parsed.dueString,
-            labels: parsed.labels
+            dueString: parsed.dueString
         )
 
         return try await client.createTask(task)
