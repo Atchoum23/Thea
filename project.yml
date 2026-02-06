@@ -369,6 +369,7 @@ targets:
           - "**/AI/Proactive/ProactivityEngine.swift"
           - "**/Settings/AutonomousSettingsView.swift"
           - "**/Settings/LocalModels/**"
+          - "**/Integrations/FinderIntegration.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
