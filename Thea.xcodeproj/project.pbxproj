@@ -493,7 +493,6 @@
 		59191F62B1B5AAAC9BA406F0 /* AdvancedSheetsActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84818CD23A60E664EC76468D /* AdvancedSheetsActions.swift */; };
 		59309C6D80B0038987379A7E /* FinancialDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5915F5D74F8946C40FA0A6DF /* FinancialDashboardView.swift */; };
 		59732CF91A5DDE9FB7DF2D3F /* AccessibilityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227EFCDDE7E3D6F6855CFBB9 /* AccessibilityBridge.swift */; };
-		5975CE44A84D80DC43110DEE /* ConfidenceSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4087B713EA7AC7006F571AED /* ConfidenceSystem.swift */; };
 		59969363D9FB9D83F69C1430 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195908F24C579B94425A9585 /* HomeView.swift */; };
 		59A41822D1CEAE5A65000962 /* SystemPromptConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE9C5718A596C7319B00E186 /* SystemPromptConfiguration.swift */; };
 		5A983B95DE350655F4413F11 /* SquadDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CA11C8F1811269469955084 /* SquadDefinition.swift */; };
@@ -651,7 +650,6 @@
 		798A3DAD797933F8231E0B95 /* MLXInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9430FC9CE288D2FADA7C0A /* MLXInferenceEngine.swift */; };
 		799891533B390A1EF07E3F95 /* TheaWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBEE5BD5428A013538A50C8 /* TheaWidgetBundle.swift */; };
 		79AA82A513A4A634FEA11F09 /* SwiftValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6EB6A9A503F52F027DB785 /* SwiftValidator.swift */; };
-		79E316C53A9F6700C6DDC7BC /* ConfigurationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D2A4787ED57620C1C96F1A /* ConfigurationManager.swift */; };
 		79E3927FA7E7D926ADC44E44 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652F0D07D0D33049CEB15B8C /* ChatViewModel.swift */; };
 		7A108023976E796DC3AC81C0 /* ModelCatalogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC4EF9E0AE7045062A1CC30 /* ModelCatalogManager.swift */; };
 		7A39003F69010DA2A51B75FC /* InteractiveWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4CDA30CCCEF656B4AF20E68 /* InteractiveWidgets.swift */; };
@@ -6699,8 +6697,6 @@
 				91363237584AA535DBE4243B /* CompilerError+Sorting.swift in Sources */,
 				037512A47044211C191E4631 /* ConditionPickerSheet.swift in Sources */,
 				FCF525C7BC9622D9B4E908D3 /* ConfidenceIndicatorViews.swift in Sources */,
-				5975CE44A84D80DC43110DEE /* ConfidenceSystem.swift in Sources */,
-				79E316C53A9F6700C6DDC7BC /* ConfigurationManager.swift in Sources */,
 				97FCDDCDAD1F8F5A7F6A647F /* ContactsIntegration.swift in Sources */,
 				99AA5508D0EBBC3F182AA2DC /* ContentView.swift in Sources */,
 				D9470477AE4E8BCE6D33A2E4 /* Context7Client.swift in Sources */,

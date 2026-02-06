@@ -345,6 +345,8 @@ targets:
           - "**/AI/Context/**"
           - "**/Configuration/ConfigurationManager.swift"
           - "**/Verification/ConfidenceSystem.swift"
+          - "**/Settings/Advanced/**"
+          - "**/Components/ConfidenceIndicatorViews.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
