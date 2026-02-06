@@ -1,12 +1,14 @@
 // swiftlint:disable type_name
 import SwiftUI
 
-// MARK: - tvOS Home View (Standalone)
+// MARK: - tvOS Home View (10-Foot, Focus-Based)
 
+/// tvOS home view designed for 10-foot viewing distance.
+/// Hero card for current conversation, voice-first input,
+/// focus-based navigation, large typography.
 struct tvOSHomeView: View {
     @State private var selectedTab: Tab = .chat
     @State private var messages: [TVMessage] = []
-    @State private var inputText: String = ""
 
     enum Tab: String, CaseIterable {
         case chat = "Chat"
@@ -14,8 +16,8 @@ struct tvOSHomeView: View {
 
         var icon: String {
             switch self {
-            case .chat: "message.fill"
-            case .settings: "gear"
+            case .chat: "bubble.left.and.bubble.right.fill"
+            case .settings: "gearshape"
             }
         }
     }
@@ -38,90 +40,207 @@ struct tvOSHomeView: View {
     private func viewForTab(_ tab: Tab) -> some View {
         switch tab {
         case .chat:
-            tvOSChatView(messages: $messages, inputText: $inputText)
+            tvOSChatView(messages: $messages)
         case .settings:
             tvOSSettingsView()
         }
     }
 }
 
-// MARK: - Chat View
+// MARK: - Chat View (Hero Layout)
 
 struct tvOSChatView: View {
     @Binding var messages: [TVMessage]
-    @Binding var inputText: String
-    @FocusState private var isFocused: Bool
+    @State private var isListening = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            if messages.isEmpty {
-                placeholderView
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(messages) { message in
-                            TVMessageRow(message: message)
-                        }
-                    }
-                    .padding()
+        ScrollView {
+            VStack(spacing: TheaSpacing.xxxl) {
+                if messages.isEmpty {
+                    heroWelcomeView
+                } else {
+                    heroConversationCard
                 }
-            }
 
-            inputBar
+                voiceDictationButton
+
+                if !messages.isEmpty {
+                    conversationHistory
+                }
+
+                quickSuggestions
+            }
+            .padding(.horizontal, 80)
+            .padding(.vertical, TheaSpacing.xxl)
         }
         .navigationTitle("Thea")
     }
 
-    private var placeholderView: some View {
-        VStack(spacing: 32) {
-            Image(systemName: "message.fill")
-                .font(.system(size: 100))
-                .foregroundStyle(.blue)
+    // MARK: - Hero Welcome
 
-            Text("Welcome to THEA")
-                .font(.largeTitle)
-                .fontWeight(.bold)
+    private var heroWelcomeView: some View {
+        VStack(spacing: TheaSpacing.xl) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 80, weight: .medium))
+                .foregroundStyle(Color.theaPrimaryDefault)
+                .symbolEffect(.pulse, options: .repeating)
+
+            Text("Welcome to Thea")
+                .font(.system(size: 52, weight: .bold, design: .rounded))
 
             Text("Your AI Life Companion on Apple TV")
                 .font(.title2)
                 .foregroundStyle(.secondary)
-
-            Text("Start a conversation below")
-                .font(.title3)
-                .foregroundStyle(.tertiary)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
     }
 
-    private var inputBar: some View {
-        HStack(spacing: 16) {
-            TextField("Ask Thea...", text: $inputText)
-                .font(.title3)
-                .focused($isFocused)
-                .onSubmit(sendMessage)
+    // MARK: - Hero Conversation Card
 
-            Button(action: sendMessage) {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 44))
+    private var heroConversationCard: some View {
+        VStack(alignment: .leading, spacing: TheaSpacing.lg) {
+            // Last exchange
+            if let lastUserMsg = messages.last(where: { $0.isUser }) {
+                HStack(alignment: .top, spacing: TheaSpacing.lg) {
+                    Image(systemName: "person.circle.fill")
+                        .font(.system(size: 32))
+                        .foregroundStyle(.secondary)
+
+                    Text(lastUserMsg.content)
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
             }
-            .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+            if let lastResponse = messages.last(where: { !$0.isUser }) {
+                HStack(alignment: .top, spacing: TheaSpacing.lg) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 32))
+                        .foregroundStyle(Color.theaPrimaryDefault)
+
+                    Text(lastResponse.content)
+                        .font(.title3)
+                        .lineLimit(6)
+                }
+            }
+
+            HStack {
+                Spacer()
+                Text(messages.last?.timestamp ?? Date(), style: .relative)
+                    .font(.callout)
+                    .foregroundStyle(.tertiary)
+            }
         }
-        .padding()
+        .padding(TheaSpacing.xxl)
+        .frame(maxWidth: 1000, alignment: .leading)
         .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
+        .focusable()
+        #if os(tvOS)
+        .hoverEffect(.highlight)
+        #endif
     }
 
-    private func sendMessage() {
-        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
+    // MARK: - Voice Dictation Button
 
+    private var voiceDictationButton: some View {
+        Button {
+            toggleListening()
+        } label: {
+            HStack(spacing: TheaSpacing.lg) {
+                Image(systemName: isListening ? "waveform" : "mic.fill")
+                    .font(.system(size: 36))
+                    .foregroundStyle(isListening ? .red : Color.theaPrimaryDefault)
+                    .symbolEffect(.variableColor, isActive: isListening)
+
+                VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
+                    Text(isListening ? "Listening..." : "Press to Speak")
+                        .font(.title2.bold())
+
+                    Text(isListening ? "Release to send" : "Use Siri Remote or press to dictate")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+            .padding(TheaSpacing.xl)
+            .frame(maxWidth: 800)
+            .background(isListening ? Color.red.opacity(0.15) : .ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
+        }
+        .buttonStyle(.plain)
+        .focusable()
+        #if os(tvOS)
+        .hoverEffect(.highlight)
+        #endif
+    }
+
+    // MARK: - Conversation History
+
+    private var conversationHistory: some View {
+        VStack(alignment: .leading, spacing: TheaSpacing.md) {
+            Text("Conversation")
+                .font(.title3.bold())
+                .foregroundStyle(.secondary)
+                .padding(.leading, TheaSpacing.sm)
+
+            LazyVStack(spacing: TheaSpacing.md) {
+                ForEach(messages) { message in
+                    TVMessageCard(message: message)
+                }
+            }
+        }
+    }
+
+    // MARK: - Quick Suggestions
+
+    private var quickSuggestions: some View {
+        VStack(alignment: .leading, spacing: TheaSpacing.lg) {
+            Text(messages.isEmpty ? "Try asking" : "Suggestions")
+                .font(.title3.bold())
+                .foregroundStyle(.secondary)
+                .padding(.leading, TheaSpacing.sm)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: TheaSpacing.lg) {
+                    TVSuggestionCard(icon: "text.bubble", text: "Help me write something") {
+                        sendMessage("Help me write an email")
+                    }
+                    TVSuggestionCard(icon: "lightbulb", text: "Brainstorm ideas") {
+                        sendMessage("Give me creative project ideas")
+                    }
+                    TVSuggestionCard(icon: "globe", text: "Explain a topic") {
+                        sendMessage("Explain a concept to me")
+                    }
+                    TVSuggestionCard(icon: "checklist", text: "Plan my day") {
+                        sendMessage("Help me plan my day")
+                    }
+                }
+                .padding(.horizontal, TheaSpacing.sm)
+            }
+        }
+    }
+
+    // MARK: - Actions
+
+    private func toggleListening() {
+        isListening.toggle()
+
+        if !isListening {
+            sendMessage("Hello, Thea!")
+        }
+    }
+
+    private func sendMessage(_ text: String) {
         let userMessage = TVMessage(content: text, isUser: true)
         messages.append(userMessage)
-        inputText = ""
 
-        // Simulate AI response
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             let response = TVMessage(
-                content: "This is a placeholder response. Full AI integration coming soon!",
+                content: "I'd be happy to help you with that! Full AI integration coming soon.",
                 isUser: false
             )
             messages.append(response)
@@ -129,24 +248,65 @@ struct tvOSChatView: View {
     }
 }
 
-// MARK: - Message Row
+// MARK: - TV Message Card
 
-struct TVMessageRow: View {
+struct TVMessageCard: View {
     let message: TVMessage
 
     var body: some View {
-        HStack {
-            if message.isUser { Spacer() }
+        HStack(alignment: .top, spacing: TheaSpacing.lg) {
+            Image(systemName: message.isUser ? "person.circle.fill" : "sparkles")
+                .font(.system(size: 28))
+                .foregroundStyle(message.isUser ? .secondary : Color.theaPrimaryDefault)
+                .frame(width: 36)
 
-            Text(message.content)
-                .padding()
-                .background(message.isUser ? Color.blue : Color.gray.opacity(0.3))
-                .foregroundStyle(message.isUser ? .white : .primary)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .frame(maxWidth: 800, alignment: message.isUser ? .trailing : .leading)
+            VStack(alignment: .leading, spacing: TheaSpacing.xs) {
+                Text(message.isUser ? "You" : "Thea")
+                    .font(.callout.bold())
+                    .foregroundStyle(.secondary)
 
-            if !message.isUser { Spacer() }
+                Text(message.content)
+                    .font(.title3)
+            }
+
+            Spacer()
         }
+        .padding(TheaSpacing.xl)
+        .frame(maxWidth: 1000, alignment: .leading)
+        .background(message.isUser ? Color.clear : .ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
+        .focusable()
+    }
+}
+
+// MARK: - TV Suggestion Card
+
+struct TVSuggestionCard: View {
+    let icon: String
+    let text: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: TheaSpacing.md) {
+                Image(systemName: icon)
+                    .font(.system(size: 36))
+                    .foregroundStyle(Color.theaPrimaryDefault)
+
+                Text(text)
+                    .font(.callout)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+            }
+            .frame(width: 200, height: 140)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
+        }
+        .buttonStyle(.plain)
+        .focusable()
+        #if os(tvOS)
+        .hoverEffect(.highlight)
+        #endif
     }
 }
 
@@ -157,7 +317,6 @@ struct tvOSSettingsView: View {
 
     var body: some View {
         List {
-            // MARK: - AI Settings
             Section("AI & Models") {
                 NavigationLink {
                     tvOSAISettingsView()
@@ -182,7 +341,6 @@ struct tvOSSettingsView: View {
                 }
             }
 
-            // MARK: - Appearance
             Section("Appearance") {
                 NavigationLink {
                     tvOSAppearanceSettingsView()
@@ -196,7 +354,6 @@ struct tvOSSettingsView: View {
                 }
             }
 
-            // MARK: - Data & Sync
             Section("Data & Sync") {
                 NavigationLink {
                     tvOSSyncSettingsView()
@@ -210,19 +367,7 @@ struct tvOSSettingsView: View {
                 }
             }
 
-            // MARK: - Privacy & Security
             Section("Privacy & Security") {
-                NavigationLink {
-                    tvOSPermissionsView()
-                } label: {
-                    tvOSSettingsRow(
-                        icon: "hand.raised.fill",
-                        iconColor: .red,
-                        title: "Permissions",
-                        subtitle: "App access"
-                    )
-                }
-
                 NavigationLink {
                     tvOSPrivacySettingsView()
                 } label: {
@@ -235,7 +380,6 @@ struct tvOSSettingsView: View {
                 }
             }
 
-            // MARK: - About
             Section("About") {
                 NavigationLink {
                     tvOSAboutView()
@@ -253,7 +397,7 @@ struct tvOSSettingsView: View {
     }
 }
 
-// MARK: - Settings Row Component
+// MARK: - Settings Row
 
 struct tvOSSettingsRow: View {
     let icon: String
@@ -262,15 +406,15 @@ struct tvOSSettingsRow: View {
     let subtitle: String
 
     var body: some View {
-        HStack(spacing: 20) {
+        HStack(spacing: TheaSpacing.xl) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundStyle(.white)
                 .frame(width: 50, height: 50)
                 .background(iconColor)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.md))
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
                 Text(title)
                     .font(.title3)
 
@@ -281,15 +425,14 @@ struct tvOSSettingsRow: View {
 
             Spacer()
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, TheaSpacing.sm)
     }
 }
 
-// MARK: - tvOS AI Settings
+// MARK: - AI Settings
 
 struct tvOSAISettingsView: View {
     @State private var config = TVOSSettingsConfig.load()
-
     private let availableProviders = ["OpenAI", "Anthropic", "Google", "Perplexity", "Groq"]
 
     var body: some View {
@@ -327,7 +470,7 @@ struct tvOSAISettingsView: View {
     }
 }
 
-// MARK: - tvOS Voice Settings
+// MARK: - Voice Settings
 
 struct tvOSVoiceSettingsView: View {
     @State private var config = TVOSSettingsConfig.load()
@@ -362,18 +505,12 @@ struct tvOSVoiceSettingsView: View {
                     .onChange(of: config.speechRate) { _, _ in config.save() }
                 }
             }
-
-            Section {
-                Button("Test Voice") {
-                    // Test voice
-                }
-            }
         }
         .navigationTitle("Voice")
     }
 }
 
-// MARK: - tvOS Appearance Settings
+// MARK: - Appearance Settings
 
 struct tvOSAppearanceSettingsView: View {
     @State private var config = TVOSSettingsConfig.load()
@@ -411,7 +548,7 @@ struct tvOSAppearanceSettingsView: View {
     }
 }
 
-// MARK: - tvOS Sync Settings
+// MARK: - Sync Settings
 
 struct tvOSSyncSettingsView: View {
     @State private var config = TVOSSettingsConfig.load()
@@ -438,9 +575,6 @@ struct tvOSSyncSettingsView: View {
                 }
 
                 Section {
-                    LabeledContent("Last Sync", value: "Just now")
-                    LabeledContent("Devices", value: "3 connected")
-
                     Button("Sync Now") {
                         // Sync action
                     }
@@ -451,7 +585,7 @@ struct tvOSSyncSettingsView: View {
     }
 }
 
-// MARK: - tvOS Privacy Settings
+// MARK: - Privacy Settings
 
 struct tvOSPrivacySettingsView: View {
     @State private var config = TVOSSettingsConfig.load()
@@ -490,130 +624,40 @@ struct tvOSPrivacySettingsView: View {
     }
 }
 
-// MARK: - tvOS Permissions View (Simplified)
-
-struct tvOSPermissionsView: View {
-    var body: some View {
-        List {
-            Section {
-                Text("Manage permissions in the Settings app on your Apple TV.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Required Permissions") {
-                tvOSSimplePermissionRow(name: "Microphone", icon: "mic.fill", description: "For voice input via Siri Remote")
-                tvOSSimplePermissionRow(name: "Speech Recognition", icon: "waveform", description: "For voice commands")
-            }
-
-            Section("Optional Permissions") {
-                tvOSSimplePermissionRow(name: "HomeKit", icon: "homekit", description: "For smart home control")
-                tvOSSimplePermissionRow(name: "Apple Music", icon: "music.note", description: "For music playback")
-            }
-
-            Section {
-                Text("To change permissions, go to Settings > Apps > THEA on your Apple TV.")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .navigationTitle("Permissions")
-    }
-}
-
-private struct tvOSSimplePermissionRow: View {
-    let name: String
-    let icon: String
-    let description: String
-
-    var body: some View {
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(.blue)
-                .frame(width: 40)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(name)
-                    .font(.title3)
-
-                Text(description)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .padding(.vertical, 8)
-    }
-}
-
-// MARK: - tvOS About View
+// MARK: - About View
 
 struct tvOSAboutView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 40) {
-                // Logo
-                Image(systemName: "brain.head.profile")
-                    .font(.system(size: 120))
-                    .foregroundStyle(.blue)
+                Image(systemName: "sparkles")
+                    .font(.system(size: 100))
+                    .foregroundStyle(Color.theaPrimaryDefault)
 
-                // Title
-                VStack(spacing: 8) {
+                VStack(spacing: TheaSpacing.sm) {
                     Text("THEA")
-                        .font(.system(size: 60, weight: .bold))
+                        .font(.system(size: 60, weight: .bold, design: .rounded))
 
                     Text("Your AI Life Companion")
                         .font(.title2)
                         .foregroundStyle(.secondary)
                 }
 
-                // Info
                 HStack(spacing: 60) {
-                    VStack(spacing: 8) {
-                        Text("Version")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                        Text("1.0.0")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                    }
-
-                    VStack(spacing: 8) {
-                        Text("Build")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                        Text("2026.01.29")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                    }
-
-                    VStack(spacing: 8) {
-                        Text("Platform")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                        Text("tvOS")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                    }
+                    tvOSInfoPill(label: "Version", value: "1.0.0")
+                    tvOSInfoPill(label: "Build", value: "2026.02")
+                    tvOSInfoPill(label: "Platform", value: "tvOS")
                 }
-                .padding()
+                .padding(TheaSpacing.xl)
                 .background(.ultraThinMaterial)
-                .cornerRadius(16)
+                .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
 
-                // Features
-                VStack(spacing: 16) {
-                    Text("Features")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-
-                    HStack(spacing: 40) {
-                        tvOSFeatureCard(icon: "message.fill", title: "Multi-Provider AI")
-                        tvOSFeatureCard(icon: "mic.fill", title: "Voice Input")
-                        tvOSFeatureCard(icon: "icloud.fill", title: "iCloud Sync")
-                    }
+                HStack(spacing: 40) {
+                    tvOSFeatureCard(icon: "cpu", title: "Multi-Provider AI")
+                    tvOSFeatureCard(icon: "mic.fill", title: "Voice Input")
+                    tvOSFeatureCard(icon: "icloud.fill", title: "iCloud Sync")
                 }
 
-                // Copyright
                 Text("© 2026 THEA. All rights reserved.")
                     .font(.callout)
                     .foregroundStyle(.tertiary)
@@ -624,56 +668,68 @@ struct tvOSAboutView: View {
     }
 }
 
+private struct tvOSInfoPill: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        VStack(spacing: TheaSpacing.xs) {
+            Text(label)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.title3)
+                .fontWeight(.medium)
+        }
+    }
+}
+
 struct tvOSFeatureCard: View {
     let icon: String
     let title: String
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: TheaSpacing.md) {
             Image(systemName: icon)
                 .font(.system(size: 40))
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.theaPrimaryDefault)
 
             Text(title)
                 .font(.callout)
                 .multilineTextAlignment(.center)
         }
-        .frame(width: 150)
-        .padding()
+        .frame(width: 160)
+        .padding(TheaSpacing.xl)
         .background(.ultraThinMaterial)
-        .cornerRadius(16)
+        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
+        .focusable()
     }
 }
 
 // MARK: - tvOS Settings Configuration
 
 struct TVOSSettingsConfig: Codable, Equatable {
-    // AI
     var defaultProvider: String = "OpenAI"
     var streamResponses: Bool = true
     var responseLength: String = "normal"
     var rememberContext: Bool = true
     var suggestFollowups: Bool = true
 
-    // Voice
     var voiceInputEnabled: Bool = true
     var speakResponses: Bool = false
     var voiceType: String = "default"
     var speechRate: Double = 1.0
 
-    // Appearance
     var theme: String = "system"
     var fontSize: String = "medium"
     var boldText: Bool = false
     var reduceMotion: Bool = false
 
-    // Sync
     var iCloudSyncEnabled: Bool = true
     var syncConversations: Bool = true
     var syncSettings: Bool = true
     var syncKnowledge: Bool = true
 
-    // Privacy
     var analyticsEnabled: Bool = false
     var crashReports: Bool = true
     var historyRetention: String = "30"

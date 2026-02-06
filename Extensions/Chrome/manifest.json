@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Thea - AI Browser Companion",
-  "version": "1.0.0",
-  "description": "Complete browser protection: ad blocking, dark mode, password management, email protection, and AI assistance",
+  "version": "2.0.0",
+  "description": "All-in-one browser companion: AI sidebar, dark mode (20+ themes), video speed control, ad blocking, password manager, email protection, print-friendly reader, persistent memory, and privacy shield",
   "author": "Thea",
 
   "icons": {
@@ -34,7 +34,8 @@
     "clipboardWrite",
     "alarms",
     "nativeMessaging",
-    "cookies"
+    "cookies",
+    "sidePanel"
   ],
 
   "optional_permissions": [
@@ -59,11 +60,25 @@
       "matches": ["<all_urls>"],
       "js": [
         "content/content-script.js",
-        "content/icloud-autofill-ui.js"
+        "content/icloud-autofill-ui.js",
+        "content/dark-mode-engine.js",
+        "content/video-controller.js",
+        "content/print-friendly.js",
+        "content/ai-sidebar.js",
+        "content/privacy-shield.js"
       ],
       "css": ["content/content-styles.css"],
       "run_at": "document_start",
-      "all_frames": true
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "content/icloud-autofill-ui.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true
     }
   ],
 
@@ -107,19 +122,26 @@
       },
       "description": "Toggle dark mode"
     },
-    "quick-prompt": {
+    "toggle-ai-sidebar": {
       "suggested_key": {
         "default": "Alt+Space",
         "mac": "Alt+Space"
       },
-      "description": "Open quick prompt"
+      "description": "Toggle AI sidebar"
     },
     "clean-page": {
       "suggested_key": {
         "default": "Alt+P",
         "mac": "Alt+P"
       },
-      "description": "Clean page for printing"
+      "description": "Open reader / print-friendly view"
+    },
+    "toggle-video-speed": {
+      "suggested_key": {
+        "default": "Alt+V",
+        "mac": "Alt+V"
+      },
+      "description": "Show video speed controller"
     }
   },
 
