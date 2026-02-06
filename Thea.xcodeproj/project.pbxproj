@@ -805,7 +805,6 @@
 		9AAB11A15FB4468286B89C88 /* PredictiveLifeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF153B8582A62ACE58BCEE17 /* PredictiveLifeEngine.swift */; };
 		9AD454803621B870533E2C88 /* EventBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC3ABDC9369A6666E89856F /* EventBus.swift */; };
 		9B0F85A5213130B4FEA9406C /* StreamingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F31B883CFBAD460B87029FB6 /* StreamingIndicator.swift */; };
-		9B2DB343A2E998E625ACF815 /* MultiModelConsensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D417926C4545172DC9448E9D /* MultiModelConsensus.swift */; };
 		9BAF2F6907A4CB79F554ED3F /* DisplayProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E38CA55E7F4FD63FF4AE8E /* DisplayProtocols.swift */; };
 		9BBFAFC49C58D4D0C22570CB /* MemorySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DB63898CAA005F46BE1F89 /* MemorySettingsView.swift */; };
 		9BD515D0A5D67AB72CE507B7 /* TheaDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED75163DF913BC2186A5BFA /* TheaDesignSystem.swift */; };
@@ -6883,7 +6882,6 @@
 				57F41F597DC422CF963605AB /* MonitoringSettingsView.swift in Sources */,
 				890E3DA6E1B8E7C114FBA747 /* MultiAgentCollaborationView.swift in Sources */,
 				A5A9D41578BCEFA36BF694FF /* MultiLanguageUtteranceBuilder.swift in Sources */,
-				9B2DB343A2E998E625ACF815 /* MultiModelConsensus.swift in Sources */,
 				5C2CAACB5A96B36BB709DE01 /* NetworkDiscoveryService.swift in Sources */,
 				F713790A3290F08CD429F923 /* NetworkManager.swift in Sources */,
 				FE57800F548BCBCA0DD2672F /* NetworkObserver.swift in Sources */,
