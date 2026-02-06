@@ -342,6 +342,7 @@ targets:
           - "**/LifeMonitoring/RelationshipIntelligence.swift"
           - "**/Managers/PermissionsTypes.swift"
           - "**/PatternLearning/**"
+          - "**/AI/Context/**"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
