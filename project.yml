@@ -383,7 +383,6 @@ targets:
           - "**/Settings/AutoCorrectSettingsView.swift"
           - "**/Integrations/SafariIntegration.swift"
           - "**/Verification/CodeExecutionVerifier.swift"
-          - "**/Components/ChatInputView.swift"
           - "**/LifeMonitoring/**"
           - "**/Search/SemanticSearchService.swift"
           - "**/Components/QuerySuggestionOverlay.swift"

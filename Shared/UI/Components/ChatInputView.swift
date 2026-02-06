@@ -80,6 +80,8 @@ struct ChatInputView: View {
                 }
                 .buttonStyle(.plain)
                 .help("Attach Files")
+                .accessibilityLabel("Attach files")
+                .accessibilityHint("Opens file picker to attach documents")
                 .disabled(isStreaming)
 
                 #if os(macOS)
@@ -90,6 +92,8 @@ struct ChatInputView: View {
                     }
                     .buttonStyle(.plain)
                     .help("Capture Screenshot")
+                    .accessibilityLabel("Capture screenshot")
+                    .accessibilityHint("Takes a screenshot to attach to your message")
                     .disabled(isStreaming)
                 #endif
 
@@ -129,6 +133,8 @@ struct ChatInputView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!canSend && !isStreaming)
+                .accessibilityLabel(isStreaming ? "Stop generating" : "Send message")
+                .accessibilityHint(isStreaming ? "Stops the AI response" : "Sends your message to the AI")
             }
             .padding(.horizontal, TheaSpacing.lg)
         }
@@ -284,11 +290,14 @@ struct AttachmentChip: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Remove \(attachment.name)")
         }
         .padding(.horizontal, TheaSpacing.md)
         .padding(.vertical, TheaSpacing.sm)
         .background(Color.theaSurface)
         .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.sm))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Attached file: \(attachment.name), \(attachment.formattedSize)")
     }
 }
 

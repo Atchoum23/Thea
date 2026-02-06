@@ -186,5 +186,23 @@ struct ConversationRow: View {
             }
             .tint(.orange)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(conversationAccessibilityLabel)
+        .accessibilityHint("Double-tap to open conversation")
+    }
+
+    private var conversationAccessibilityLabel: String {
+        var label = conversation.title
+        if conversation.isPinned {
+            label += ", pinned"
+        }
+        let time = conversation.updatedAt.formatted(.dateTime.hour().minute())
+        label += ", updated \(time)"
+        if let lastMessage = conversation.messages.last {
+            let preview = lastMessage.content.textValue
+            let truncated = preview.count > 100 ? String(preview.prefix(100)) + "…" : preview
+            label += ". Last message: \(truncated)"
+        }
+        return label
     }
 }

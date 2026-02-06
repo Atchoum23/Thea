@@ -763,6 +763,7 @@
 		BB5EBF80E211668B5F088F0D /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C28597903749D947CF54F1 /* HealthKitService.swift */; };
 		BB5F271124F49F98AA0B8BBF /* PreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B51525C80519DE6AA5F721E /* PreviewViewController.swift */; };
 		BBA1E9F9D43102FAB664D398 /* TheaUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D668DE7E9A1B18F49BD359F /* TheaUITests.swift */; };
+		BBBB408924B0C4F1BD6EA0F7 /* ChatInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E6B4F13AFFD1C1A5293E53 /* ChatInputView.swift */; };
 		BC57659FF0692741E4984CD7 /* BadgeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418E8673B0275094BFCAC501 /* BadgeManager.swift */; };
 		BCB9C77527513F7E895783D6 /* LocationTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E987E8F72EC93271972697 /* LocationTrackingManager.swift */; };
 		BCEE1BCCE0DDC92B06279A8B /* PermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2BFC6536B6A14AFE7DF537 /* PermissionManager.swift */; };
@@ -1769,6 +1770,7 @@
 		F50BBA77C706BDFACD80323A /* CompilerError+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CompilerError+Convenience.swift"; sourceTree = "<group>"; };
 		F57CBF047D9F2E4C6D0FB876 /* OpenAIProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIProviderTests.swift; sourceTree = "<group>"; };
 		F59DF9656C551995AA2DDBBD /* SwiftDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataHelpers.swift; sourceTree = "<group>"; };
+		F5E6B4F13AFFD1C1A5293E53 /* ChatInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputView.swift; sourceTree = "<group>"; };
 		F62D1AE6F6053576C4D4D182 /* CognitiveModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitiveModels.swift; sourceTree = "<group>"; };
 		F74F450B2F44A98E1CE88C84 /* GoogleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleProvider.swift; sourceTree = "<group>"; };
 		F7D263A49EDCC79B973E539D /* TheaSharePlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaSharePlay.swift; sourceTree = "<group>"; };
@@ -3138,6 +3140,7 @@
 			children = (
 				0C7636472A090704E0588078 /* ArtifactPanel.swift */,
 				3FFA2724F57F9B3A5C5502A6 /* BranchNavigator.swift */,
+				F5E6B4F13AFFD1C1A5293E53 /* ChatInputView.swift */,
 				A39A485B529A1FB622C9D3F4 /* CommandPalette.swift */,
 				9BD18CFEB891FE7709779479 /* ExtendedThinkingView.swift */,
 				89ADBB04DD5856B19A5115C3 /* HelpButton.swift */,
@@ -5731,6 +5734,7 @@
 				31A7C60A3D62D393342B0E6B /* CareerProtocols.swift in Sources */,
 				AFE69489A46D4331B4F0FC27 /* CareerService.swift in Sources */,
 				9E1446CCD00CEB972F5F612E /* CausalPatternAnalyzer.swift in Sources */,
+				BBBB408924B0C4F1BD6EA0F7 /* ChatInputView.swift in Sources */,
 				713B4032327C2A7FC06C7195 /* ChatManager.swift in Sources */,
 				E57D19BE3955FE023E760A6F /* ChatView.swift in Sources */,
 				AD2CE69360230B26645EB1F0 /* ChatViewModel.swift in Sources */,

@@ -76,6 +76,9 @@ struct MessageBubble: View {
                 Spacer(minLength: TheaSpacing.jumbo)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(messageAccessibilityLabel)
+        .accessibilityHint(message.messageRole == .assistant ? "AI response" : "Your message")
         .onHover { hovering in
             withAnimation(.easeInOut(duration: 0.15)) {
                 isHovering = hovering
@@ -221,6 +224,16 @@ struct MessageBubble: View {
     private func regenerateMessage() {
         // TODO: Implement regenerate via ChatManager
         // This should trigger a new response for the same user message
+    }
+
+    // MARK: - Accessibility
+
+    private var messageAccessibilityLabel: String {
+        let role = message.messageRole == .user ? "You" : "Thea"
+        let time = message.timestamp.formatted(.dateTime.hour().minute())
+        let content = message.content.textValue
+        let truncated = content.count > 200 ? String(content.prefix(200)) + "…" : content
+        return "\(role), \(time): \(truncated)"
     }
 
     // MARK: - Styling
