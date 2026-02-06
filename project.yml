@@ -343,6 +343,8 @@ targets:
           - "**/Managers/PermissionsTypes.swift"
           - "**/PatternLearning/**"
           - "**/AI/Context/**"
+          - "**/Configuration/ConfigurationManager.swift"
+          - "**/Verification/ConfidenceSystem.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
