@@ -109,7 +109,6 @@
 		12C6262FFC7A95B540BAA526 /* VoiceModeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA444BB269C0E5224B08869 /* VoiceModeController.swift */; };
 		12D339823EB38D9BD8303F53 /* ConversationContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AC31159725D5E6CDD80F0A /* ConversationContextManager.swift */; };
 		12DC3D59088EDD24E64C397A /* SafariIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBD868FB2CC146CE1E9176D /* SafariIntegration.swift */; };
-		1345E72572210BAA90220DEB /* ModelPrewarmingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFA3716EAD14731C5F465F7 /* ModelPrewarmingService.swift */; };
 		136429158715BF0E74F8867F /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7C70A28037B58D695B48A285 /* MarkdownUI */; };
 		14572CFD145AC1EC53DBE195 /* ArtifactPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C7636472A090704E0588078 /* ArtifactPanel.swift */; };
 		145F4EBC6F39107508E8CCA4 /* AccessibilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463DC960E3919D6B3D09A2C5 /* AccessibilityManager.swift */; };
@@ -1082,7 +1081,6 @@
 		E20E5EFA675F93960B37D69A /* TrustScoreSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7956A6A63A1EE069548E9 /* TrustScoreSystem.swift */; };
 		E28FB1BE340EBD2F68255440 /* AppIntegrationFramework.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4078FB242939B81A937F2F3F /* AppIntegrationFramework.swift */; };
 		E2D76C9E899D188BE96B0FEE /* KnowledgeSourceManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F36B6E60A594278D929AA2 /* KnowledgeSourceManagerTests.swift */; };
-		E2D9E068301F684569BB3E2E /* ModelRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB9744B949BD7B4F272881A /* ModelRouter.swift */; };
 		E2EFE18F6E13E0D0D43C95E4 /* iOSKnowledgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8105F90A4C25CB92A1349820 /* iOSKnowledgeView.swift */; };
 		E384607FB4F1FA39F488E28C /* GoogleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F74F450B2F44A98E1CE88C84 /* GoogleProvider.swift */; };
 		E3941522B36BF93F39BD1187 /* SquadDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CA11C8F1811269469955084 /* SquadDefinition.swift */; };
@@ -6730,8 +6728,6 @@
 				7A108023976E796DC3AC81C0 /* ModelCatalogManager.swift in Sources */,
 				8547CB15115DD86ED1DE07BC /* ModelContainerFactory.swift in Sources */,
 				22F12DBB4F05A113AAEF4917 /* ModelDownloadManager.swift in Sources */,
-				1345E72572210BAA90220DEB /* ModelPrewarmingService.swift in Sources */,
-				E2D9E068301F684569BB3E2E /* ModelRouter.swift in Sources */,
 				15E54CE211AB5770D7480420 /* ModelSelectionConfiguration.swift in Sources */,
 				6E51573A719C766034AB3AEA /* ModelSelectorView.swift in Sources */,
 				DFC17A6C9EA601406008B5FA /* ModelSettingsView.swift in Sources */,
