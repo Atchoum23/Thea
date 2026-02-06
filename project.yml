@@ -288,6 +288,19 @@ targets:
           - "**/Core/Services/Mock*.swift"
           - "**/Core/Services/ChatService.swift"
           - "**/Core/Services/ProjectService.swift"
+          # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
+          - "**/Execution/Terminal/**"
+          # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
+          - "**/Providers/Anthropic/**"
+          - "**/Providers/DeepSeek/**"
+          - "**/Providers/Google/**"
+          - "**/Providers/Groq/**"
+          - "**/Providers/OpenAI/**"
+          - "**/Providers/OpenRouter/**"
+          - "**/Providers/Perplexity/**"
+          - "**/Providers/Helpers/**"
+          - "**/Providers/Protocol/**"
+          - "**/Providers/Registry/**"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
@@ -396,6 +409,18 @@ targets:
           - "**/RemoteInputService.swift"
           - "**/RemoteSystemService.swift"
           - "**/Resources/Info.plist"
+          # Exclude duplicate folders
+          - "**/Execution/Terminal/**"
+          - "**/Providers/Anthropic/**"
+          - "**/Providers/DeepSeek/**"
+          - "**/Providers/Google/**"
+          - "**/Providers/Groq/**"
+          - "**/Providers/OpenAI/**"
+          - "**/Providers/OpenRouter/**"
+          - "**/Providers/Perplexity/**"
+          - "**/Providers/Helpers/**"
+          - "**/Providers/Protocol/**"
+          - "**/Providers/Registry/**"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
     settings:
