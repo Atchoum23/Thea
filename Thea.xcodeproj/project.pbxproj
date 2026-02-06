@@ -733,7 +733,6 @@
 		8CA2120DC60474BC31FCCB93 /* MCPGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BA1E069EB5671CECF82B3DA /* MCPGateway.swift */; };
 		8CB18121DD7695E0B5DF83D2 /* LocalModelRecommendationEngine+Hardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A0773033CC1984860B48AE /* LocalModelRecommendationEngine+Hardware.swift */; };
 		8CCB799F63AA19C8B9AB7744 /* IntentDisambiguation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77EC5B01AAFE2D78B7E4955 /* IntentDisambiguation.swift */; };
-		8D608B401BB1E97F5281207D /* FinderIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3227923FC04FCB3C88D90EBB /* FinderIntegration.swift */; };
 		8D985025543DD64BAB0353A2 /* IntegrationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5427843F93176F4C55BF2A2B /* IntegrationsManager.swift */; };
 		8DCCCD57FAF216E1F1E73B47 /* Scriptserror-summary.sh in Resources */ = {isa = PBXBuildFile; fileRef = BF4145F0BDEF139330DA0734 /* Scriptserror-summary.sh */; };
 		8DF1EBAB8070FF35229D1824 /* QAToolsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD3F97B247B7F411AEEBE44F /* QAToolsManager.swift */; };
@@ -6726,7 +6725,6 @@
 				63FDA60C099E2157E74BC40A /* FinancialIntegration.swift in Sources */,
 				406332D3A367D4F25B418FFA /* FinancialManager.swift in Sources */,
 				27495E2305E59672DCC5DE66 /* FinancialModels.swift in Sources */,
-				8D608B401BB1E97F5281207D /* FinderIntegration.swift in Sources */,
 				C38F644054AFA4CD7B5175DC /* FocusContextProvider.swift in Sources */,
 				0BA2667569BA2E83362E9DAA /* FocusFilterManager.swift in Sources */,
 				1231A9CF067386C5F5918BC4 /* FocusForestService.swift in Sources */,
