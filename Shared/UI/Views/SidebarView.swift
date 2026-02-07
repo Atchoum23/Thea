@@ -102,10 +102,12 @@ struct SidebarView: View {
     }
 
     private var filteredConversations: [Conversation] {
+        // Only show conversations that have at least one message
+        let withMessages = conversations.filter { !$0.messages.isEmpty }
         if searchText.isEmpty {
-            return conversations
+            return withMessages
         }
-        return conversations.filter {
+        return withMessages.filter {
             $0.title.localizedCaseInsensitiveContains(searchText)
         }
     }

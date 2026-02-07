@@ -18,8 +18,6 @@ struct ContentView: View {
     @State private var selectedConversation: Conversation?
     @State private var selectedProject: Project?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
-    @State private var hasAutoCreatedConversation = false
-
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             sidebarContent
@@ -33,7 +31,6 @@ struct ContentView: View {
         .dynamicTypeSize(dynamicTypeSizeForFontSize)
         .onAppear {
             setupManagers()
-            autoCreateConversationIfNeeded()
         }
     }
 
@@ -166,20 +163,6 @@ struct ContentView: View {
         }
     }
 
-    /// Auto-create a new conversation when window opens directly to chat
-    private func autoCreateConversationIfNeeded() {
-        guard !hasAutoCreatedConversation,
-              selectedItem == .chat,
-              selectedConversation == nil else { return }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            if selectedConversation == nil {
-                hasAutoCreatedConversation = true
-                let conversation = chatManager.createConversation(title: "New Conversation")
-                selectedConversation = conversation
-            }
-        }
-    }
 }
 
 // MARK: - Navigation Items
