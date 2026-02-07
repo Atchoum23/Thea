@@ -378,15 +378,4 @@ public enum QueryUrgency: String, Sendable {
     case high       // Need fast response
 }
 
-// TaskType extension for routing
-extension TaskType {
-    /// Whether this is a simple task suitable for light models
-    public var isSimple: Bool {
-        switch self {
-        case .conversation, .general, .factual, .simpleQA, .translation:
-            return true
-        default:
-            return false
-        }
-    }
-}
+// Note: TaskType.isSimple is defined in Intelligence/Classification/TaskType.swift
