@@ -19,6 +19,8 @@ struct ContentView: View {
     @State private var selectedProject: Project?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var welcomeInputText = ""
+    @State private var showingNewProjectDialog = false
+    @State private var newProjectTitle = ""
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -150,25 +152,65 @@ struct ContentView: View {
             NavigationLink(value: project) {
                 ContentProjectRow(project: project)
             }
+            .contextMenu {
+                Button("Rename") {
+                    newProjectTitle = project.title
+                    // TODO: implement rename sheet
+                }
+                Divider()
+                Button("Delete", role: .destructive) {
+                    projectManager.deleteProject(project)
+                    if selectedProject?.id == project.id {
+                        selectedProject = nil
+                    }
+                }
+            }
+        }
+        .overlay {
+            if projectManager.projects.isEmpty {
+                ContentUnavailableView {
+                    Label("No Projects", systemImage: "folder")
+                } description: {
+                    Text("Create a project to organize related conversations.")
+                } actions: {
+                    Button("Create Project") {
+                        newProjectTitle = ""
+                        showingNewProjectDialog = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
         }
         .navigationTitle("Projects")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    createNewProject()
+                    newProjectTitle = ""
+                    showingNewProjectDialog = true
                 } label: {
                     Image(systemName: "plus")
                 }
-                .help("New Project")
+                .help("New Project (⇧⌘P)")
             }
         }
         .frame(minWidth: 250)
+        .alert("New Project", isPresented: $showingNewProjectDialog) {
+            TextField("Project Name", text: $newProjectTitle)
+            Button("Cancel", role: .cancel) {}
+            Button("Create") {
+                createNewProject()
+            }
+            .disabled(newProjectTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        } message: {
+            Text("Enter a name for your new project workspace.")
+        }
     }
 
     // MARK: - Actions
 
     private func createNewProject() {
-        let project = projectManager.createProject(title: "New Project")
+        let title = newProjectTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let project = projectManager.createProject(title: title.isEmpty ? "New Project" : title)
         selectedProject = project
     }
 
