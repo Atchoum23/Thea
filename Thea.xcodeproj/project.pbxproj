@@ -642,6 +642,7 @@
 		95C530925CCDC2AFEB8FCB68 /* KeyboardShortcutsSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E91815F223C3127334E69AE /* KeyboardShortcutsSystem.swift */; };
 		95EB31D1960CAD87F3ADDB2B /* WorkflowRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3493F8A22652BAC7D2FD476D /* WorkflowRecorder.swift */; };
 		96266D488EFE32382FCC592C /* LocationContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F9D0D068A4F0D27BD17605 /* LocationContextProvider.swift */; };
+		96F36C885784453FEC15389C /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = 6A7A3FB90573D2EAB0FA237E /* popup.css */; };
 		972AA302C1C0403F2093FE01 /* RemoteFileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 074E07BC454AAE5357088F19 /* RemoteFileService.swift */; };
 		972C1A73511048BE461BEBF1 /* AAnticipatoryCommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19CD3B1C6BF1D449D68E2F41 /* AAnticipatoryCommonTypes.swift */; };
 		97D01B0E450405F102E2D6E6 /* FileSystemObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA10AE173BF28B5AAD1C84A /* FileSystemObserver.swift */; };
@@ -913,6 +914,7 @@
 		D954CBECD1ABE33724198EBD /* PIISanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806230C49B50DFD0E5F66CB4 /* PIISanitizer.swift */; };
 		D9628FA6CC0F8BCDE0EA9B32 /* TheaSafariExtensionMac.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 16DD6A3E402BE847CA3BEBC0 /* TheaSafariExtensionMac.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D9638B7C118FA7C2C7FB1F1E /* ServicesHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 096F4C0E21989556605B3B74 /* ServicesHandler.swift */; };
+		D96C44694ED1F09242486128 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = 6A7A3FB90573D2EAB0FA237E /* popup.css */; };
 		D9942005F212A8758ED7CD59 /* AIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1D529663D235ED1CE630B7 /* AIModel.swift */; };
 		D9CA4FF95AE506C161C41000 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E261D294AB8CABCBB792A2 /* NetworkManager.swift */; };
 		D9CDF4702F03AA555A913DCD /* CareerDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3D28C6BCD24A79A3A8B050 /* CareerDashboardView.swift */; };
@@ -1507,6 +1509,7 @@
 		69BB871466FFD38D9226F022 /* MultiAgentCollaborationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAgentCollaborationView.swift; sourceTree = "<group>"; };
 		6A342AA74736F692B933EE3F /* GroqProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqProvider.swift; sourceTree = "<group>"; };
 		6A4C6FB1D421301F8EA7A01A /* Thea-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Thea-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A7A3FB90573D2EAB0FA237E /* popup.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = popup.css; sourceTree = "<group>"; };
 		6B2F0B5C0C342B237690D603 /* OrchestratorConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorConfiguration.swift; sourceTree = "<group>"; };
 		6BCB7B11E6C5C3D1E18B7A29 /* NotificationPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPayload.swift; sourceTree = "<group>"; };
 		6C3D28C6BCD24A79A3A8B050 /* CareerDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareerDashboardView.swift; sourceTree = "<group>"; };
@@ -3894,6 +3897,7 @@
 		C7882248C5BD50CAFC4A6A7B /* popup */ = {
 			isa = PBXGroup;
 			children = (
+				6A7A3FB90573D2EAB0FA237E /* popup.css */,
 				BA4319DEFD2969DFD74645AD /* popup.html */,
 				55ED60A26645151D1B26BE21 /* popup.js */,
 			);
@@ -5084,6 +5088,7 @@
 				7D39C08E5A6240245E1B4227 /* icon-48.png in Resources */,
 				37884AE4F083D4B958E01294 /* icon-96.png in Resources */,
 				F2385135595B865EEEA12ABB /* manifest.json in Resources */,
+				D96C44694ED1F09242486128 /* popup.css in Resources */,
 				A7FB6F5FAD8D1D056021C56A /* popup.html in Resources */,
 				9A06FCF42B71B3C2D7CBCF26 /* popup.js in Resources */,
 			);
@@ -5140,6 +5145,7 @@
 				4AF310C3EC42A038AB52949F /* icon-48.png in Resources */,
 				D57C39A40F3E8F1BFDCDFFC1 /* icon-96.png in Resources */,
 				A86FD793C554CAC46003B683 /* manifest.json in Resources */,
+				96F36C885784453FEC15389C /* popup.css in Resources */,
 				31F87A981C21DBE88D4E4B4F /* popup.html in Resources */,
 				7B18E335BADBA87E7653CC69 /* popup.js in Resources */,
 			);

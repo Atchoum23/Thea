@@ -155,6 +155,8 @@ git pushsync origin main  # Only if user requests — triggers sync build on the
 Thea uses `git pushsync` (a global git alias) to keep both Macs in sync:
 
 - **`git pushsync origin main`** = `git push` + SSH trigger to rebuild on the other Mac
+- Tries **Tailscale hostname** first (internet), then **`.local`** (LAN), falls back to **5-min polling**
 - A **launchd agent** (`com.alexis.thea-sync`) polls every 5 minutes as a fallback
 - The sync script (`~/bin/thea-sync.sh`) pulls, runs xcodegen, builds Release, and installs to `/Applications`
 - A **Claude Code hook** (`.claude/hooks/enforce-pushsync.sh`) blocks plain `git push` and reminds you to use `git pushsync`
+- **For internet sync**: Install Tailscale on both Macs (`brew install tailscale && tailscale up --ssh`)
