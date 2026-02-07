@@ -454,6 +454,182 @@ struct SyncSettingsView: View {
         }
     }
 
+    // MARK: - Device Updates Section
+
+    #if os(macOS)
+    @ViewBuilder
+    private var deviceUpdatesSection: some View {
+        // Update availability banner
+        if let update = updateService.availableUpdate {
+            HStack(spacing: 12) {
+                Image(systemName: "arrow.down.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.blue)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Update Available")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Text("v\(update.version) (build \(update.build)) from \(update.sourceDevice)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(update.publishedAt, style: .relative)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+
+                Spacer()
+
+                Button {
+                    Task {
+                        isUpdating = true
+                        let success = await updateService.performUpdate()
+                        updateResult = success ? .success : .failure
+                        isUpdating = false
+                    }
+                } label: {
+                    if isUpdating {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Label("Update Now", systemImage: "arrow.down.to.line")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isUpdating)
+            }
+            .padding(.vertical, 4)
+        }
+
+        // Update result feedback
+        if let result = updateResult {
+            HStack {
+                Image(systemName: result == .success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundStyle(result == .success ? .green : .red)
+                Text(result == .success
+                    ? "Update installed. Restart Thea to use the new version."
+                    : "Update failed. Check ~/Library/Logs/thea-sync-stderr.log for details.")
+                    .font(.caption)
+            }
+        }
+
+        // Auto-update toggle
+        Toggle("Auto-update when available", isOn: $updateService.autoUpdateEnabled)
+
+        // Check for updates
+        HStack {
+            Button {
+                Task {
+                    await updateService.checkForUpdates()
+                }
+            } label: {
+                Label("Check for Updates", systemImage: "arrow.triangle.2.circlepath")
+            }
+            .disabled(updateService.isCheckingForUpdate)
+
+            Spacer()
+
+            if updateService.isCheckingForUpdate {
+                ProgressView()
+                    .controlSize(.small)
+            } else if let lastChecked = updateService.lastChecked {
+                Text("Last checked \(lastChecked, style: .relative) ago")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+
+        // Push update to other devices
+        if updateService.availableUpdate == nil {
+            Button {
+                Task {
+                    await publishCurrentBuild()
+                }
+            } label: {
+                Label("Push This Build to Other Devices", systemImage: "square.and.arrow.up")
+            }
+            .help("Notify other Macs that this build is available for installation")
+        }
+
+        // Update history
+        if !updateService.updateHistory.isEmpty {
+            DisclosureGroup("Update History") {
+                ForEach(updateService.updateHistory.prefix(5)) { update in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("v\(update.version) (build \(update.build))")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                            Text("From \(update.sourceDevice)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        VStack(alignment: .trailing, spacing: 2) {
+                            if let installed = update.installedAt {
+                                Text("Installed")
+                                    .font(.caption2)
+                                    .foregroundStyle(.green)
+                                Text(installed, style: .relative)
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            } else {
+                                Text(update.publishedAt, style: .relative)
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func publishCurrentBuild() async {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
+        let deviceName = DeviceProfile.current().name
+
+        // Get current git commit hash
+        let commitHash = currentCommitHash()
+
+        do {
+            try await updateService.publishUpdate(
+                version: version,
+                build: build,
+                commitHash: commitHash,
+                sourceDevice: deviceName
+            )
+        } catch {
+            // Silently log — the user will see the error via the update banner next time
+            Logger(subsystem: "app.thea", category: "AppUpdate")
+                .error("Failed to publish update: \(error.localizedDescription)")
+        }
+    }
+
+    private func currentCommitHash() -> String {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        process.arguments = ["rev-parse", "--short", "HEAD"]
+        process.currentDirectoryURL = Bundle.main.bundleURL
+
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+
+        do {
+            try process.run()
+            process.waitUntilExit()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "unknown"
+        } catch {
+            return "unknown"
+        }
+    }
+    #endif
+
     // MARK: - Handoff Section
 
     private var handoffSection: some View {
@@ -732,6 +908,13 @@ struct SyncSettingsView: View {
         backgroundSyncEnabled = true
         syncOverCellular = false
     }
+}
+
+// MARK: - Update Result
+
+private enum UpdateResult: Equatable {
+    case success
+    case failure
 }
 
 // MARK: - Preview
