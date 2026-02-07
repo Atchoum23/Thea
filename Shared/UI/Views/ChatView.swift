@@ -55,9 +55,9 @@ struct ChatView: View {
             .navigationSubtitle("\(messages.count) messages")
         #endif
             .toolbar {
-                // Plan toggle
-                if planManager.activePlan != nil {
-                    ToolbarItem {
+                ToolbarItem {
+                    // Plan toggle — only visible when a plan exists
+                    if planManager.activePlan != nil {
                         Button {
                             planManager.togglePanel()
                         } label: {
