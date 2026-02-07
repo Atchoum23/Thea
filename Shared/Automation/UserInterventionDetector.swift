@@ -18,7 +18,7 @@
     // MARK: - User Action
 
     /// Represents a user input action detected during automation.
-    public enum UserAction: Sendable {
+    public enum InterventionAction: Sendable {
         case mouseClick(CGPoint)
         case mouseMove(CGPoint)
         case keyPress
@@ -54,10 +54,10 @@
         public private(set) var isUserActive: Bool = false
 
         /// The most recent user action
-        public private(set) var lastUserAction: UserAction?
+        public private(set) var lastInterventionAction: InterventionAction?
 
         /// Timestamp of the most recent user action
-        public private(set) var lastUserActionTime: Date?
+        public private(set) var lastInterventionActionTime: Date?
 
         /// Total number of user actions detected in this session
         public private(set) var actionCount: Int = 0
@@ -179,10 +179,10 @@
 
         // MARK: - Event Handling
 
-        private func handleUserEvent(_ action: UserAction, event: NSEvent?) {
+        private func handleUserEvent(_ action: InterventionAction, event: NSEvent?) {
             isUserActive = true
-            lastUserAction = action
-            lastUserActionTime = Date()
+            lastInterventionAction = action
+            lastInterventionActionTime = Date()
             actionCount += 1
 
             // Cancel existing timeout
