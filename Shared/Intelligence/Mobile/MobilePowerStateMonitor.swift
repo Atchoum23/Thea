@@ -168,7 +168,7 @@ public final class MobilePowerStateMonitor {
         }
 
         NotificationCenter.default.addObserver(
-            forName: NSNotification.Name.NSProcessInfoMobilePowerStateDidChange,
+            forName: .NSProcessInfoPowerStateDidChange,
             object: nil,
             queue: .main
         ) { [weak self] _ in

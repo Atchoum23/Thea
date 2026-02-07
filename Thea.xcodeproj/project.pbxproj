@@ -481,7 +481,6 @@
 		6F4D7024F38DC4F88F349374 /* SemanticContextPreFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B38DD058343153F93531D3FA /* SemanticContextPreFetcher.swift */; };
 		6F58893E57F2070406B50A5A /* TerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0BF70246406DD068AB52CC /* TerminalView.swift */; };
 		6FBCAFFE268AD341E4E8FAE7 /* DeviceStateContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 467F319EC5AD164899A62A11 /* DeviceStateContextProvider.swift */; };
-		6FD7FD761EE2BB6EA621D8B9 /* PowerStateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DD6B9A3A154972D5275EFF /* PowerStateMonitor.swift */; };
 		709092501E211E6A0DD75407 /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049FEB96EC7834FF1DF9B0A /* NotificationPreferences.swift */; };
 		70A814F827D70C1D16410F83 /* NutritionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1376B06D380D1E325F43CEE7 /* NutritionModels.swift */; };
 		70AA59827C01EAEBEF3D44E5 /* CoworkContextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA59F7DE23369BDDE886752E /* CoworkContextView.swift */; };
@@ -557,6 +556,7 @@
 		7FC0931BB84FBF8394455F75 /* SiriShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119E655F208CE7BAFF433FBC /* SiriShortcuts.swift */; };
 		7FE5FD6066F13548043C0A50 /* NutritionDataImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8D18BE29EA58B17F342D35 /* NutritionDataImporter.swift */; };
 		8043264EC82F7DB7D9BF47E0 /* SwiftBestPracticesLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA71D9A17E303BD39C81021B /* SwiftBestPracticesLibrary.swift */; };
+		804CB7AC7B1E38B6B2EF5806 /* MobilePowerStateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C3B51AB6B1D763BB9D3AF0C /* MobilePowerStateMonitor.swift */; };
 		8068FD874442CB3C6185F678 /* COMPLETE-CLAUDE-PROMPT.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9497367BEF7D80B80F4027F3 /* COMPLETE-CLAUDE-PROMPT.txt */; };
 		80B4A6528368C1F2AC6ABC22 /* ConvergenceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9B28E0923FBC9BBA77DADB /* ConvergenceDetector.swift */; };
 		811C0A93484C4A09F9E96109 /* PlanManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954D1F5B8BA0920CC2DA1EAD /* PlanManager.swift */; };
@@ -583,7 +583,6 @@
 		85B409E3FD385FBF9FC9D8AE /* COMPLETE-CLAUDE-PROMPT.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9497367BEF7D80B80F4027F3 /* COMPLETE-CLAUDE-PROMPT.txt */; };
 		85BB197C019074016531B2C3 /* AIProviderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F3EDD38D4D04B72138D09FA /* AIProviderConfig.swift */; };
 		8641BB4BB3FC0A0E3107FD30 /* SmartDeviceIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9A661C64BA0987A7008E46 /* SmartDeviceIntegration.swift */; };
-		865B7D42508DC798CDF76421 /* PowerStateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DD6B9A3A154972D5275EFF /* PowerStateMonitor.swift */; };
 		86AC167D4AD041E216C7B234 /* ProactiveEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B340B98A1F83EFB3A973119 /* ProactiveEngine.swift */; };
 		87143D7C307F5E64C16C9FB8 /* AgentSecPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1595E570BA8E5E4E8F5130 /* AgentSecPolicyTests.swift */; };
 		87191B9E6BA1378DBE8EA0C4 /* IncomeServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A701A0A188D2D2FF28903F /* IncomeServiceTests.swift */; };
@@ -918,6 +917,7 @@
 		DA6ACE255ACB7E88236C0F65 /* KnowledgeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4074CF308473917E27370DC8 /* KnowledgeManager.swift */; };
 		DA7AA9ED0674311A55BFBAB3 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA4B2213269B451EA532382 /* FeatureFlags.swift */; };
 		DAB90B63C1F530C8169D0741 /* TerminalIntegrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168A485CE489BFED059F2666 /* TerminalIntegrationManager.swift */; };
+		DAFF7FE1F677CBC8FFF78000 /* MobilePowerStateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C3B51AB6B1D763BB9D3AF0C /* MobilePowerStateMonitor.swift */; };
 		DB3101E75AA6586005CAF10A /* DisplayModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E4025CA3A830CB1162DDC32 /* DisplayModels.swift */; };
 		DB46E68FEF2C07ED402C0A55 /* CrossDeviceNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3902B30CDC25FBD064860BE /* CrossDeviceNotificationService.swift */; };
 		DB8F100C7C7D25B78D49792C /* BackupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1024C5BC0C57A598D5D156D8 /* BackupManager.swift */; };
@@ -1230,6 +1230,7 @@
 		0B7DEFB5658C9402032C3DBB /* TheaRemoteClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaRemoteClient.swift; sourceTree = "<group>"; };
 		0C024B1C0C732C6B62677534 /* AdaptiveGovernanceOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveGovernanceOrchestrator.swift; sourceTree = "<group>"; };
 		0C2DD4974ABE973EAF549759 /* ProcessObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessObserver.swift; sourceTree = "<group>"; };
+		0C3B51AB6B1D763BB9D3AF0C /* MobilePowerStateMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilePowerStateMonitor.swift; sourceTree = "<group>"; };
 		0C7636472A090704E0588078 /* ArtifactPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtifactPanel.swift; sourceTree = "<group>"; };
 		0E5623FEB3E9B9505927826E /* SubagentDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubagentDefinition.swift; sourceTree = "<group>"; };
 		0E76D8B6698DEEAC37CA268D /* Thea.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Thea.entitlements; sourceTree = "<group>"; };
@@ -1710,7 +1711,6 @@
 		C4F36B6E60A594278D929AA2 /* KnowledgeSourceManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeSourceManagerTests.swift; sourceTree = "<group>"; };
 		C5C8EB5896F5D12809013DAF /* VoiceInteractionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInteractionEngine.swift; sourceTree = "<group>"; };
 		C5DB401C60376452D736B68A /* OpenAIProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIProviderTests.swift; sourceTree = "<group>"; };
-		C5DD6B9A3A154972D5275EFF /* PowerStateMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerStateMonitor.swift; sourceTree = "<group>"; };
 		C6B478CB9E95EF57A73E718D /* MigrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationManager.swift; sourceTree = "<group>"; };
 		C70E3E87D9CAD29709F642A1 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		C753C6F7254C714D5E19EEEE /* KnowledgeSourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeSourcesView.swift; sourceTree = "<group>"; };
@@ -4496,8 +4496,8 @@
 			children = (
 				56B851219F6C9A71A90F6833 /* AdaptiveModelRouter.swift */,
 				56466E07E84C9C940F83D535 /* MobileIntelligenceOrchestrator.swift */,
+				0C3B51AB6B1D763BB9D3AF0C /* MobilePowerStateMonitor.swift */,
 				049C31F091BE3AD0DB0093EF /* NetworkConditionMonitor.swift */,
-				C5DD6B9A3A154972D5275EFF /* PowerStateMonitor.swift */,
 				AAD76F0C50307B9122381B9B /* RemoteMacBridge.swift */,
 			);
 			path = Mobile;
@@ -5410,6 +5410,7 @@
 				52A765CC79584E7F6ACDC653 /* MigrationView.swift in Sources */,
 				FDC257B734A47C4249CFB767 /* MissionOrchestrator.swift in Sources */,
 				040925DCD661206AD3FB2E28 /* MobileIntelligenceOrchestrator.swift in Sources */,
+				804CB7AC7B1E38B6B2EF5806 /* MobilePowerStateMonitor.swift in Sources */,
 				C7A9A36052E24C01282D8618 /* ModelCatalogManager.swift in Sources */,
 				DA0181664D5AB4B2DE6BCAA3 /* ModelContainerFactory.swift in Sources */,
 				0E4A7FC02BC1E1A0BFBEC034 /* ModelDownloadManager.swift in Sources */,
@@ -5460,7 +5461,6 @@
 				20EFB0DAA736DA59BCF46A5A /* PlanViews.swift in Sources */,
 				70B4DCC92AC239B62A4B6772 /* PlatformColors.swift in Sources */,
 				D3ACF5753A69781E38CFD7D3 /* PowerStateManager.swift in Sources */,
-				6FD7FD761EE2BB6EA621D8B9 /* PowerStateMonitor.swift in Sources */,
 				5EE977C4159911A3A8201542 /* PredictiveEngine.swift in Sources */,
 				AC1CCE5F6A90F076A78DAE11 /* PredictiveJourneyMapper.swift in Sources */,
 				8F0787E172A44DCB61BB01B0 /* PreferenceSyncEngine.swift in Sources */,
@@ -6035,6 +6035,7 @@
 				2D94EB32A2BE606158407000 /* MigrationView.swift in Sources */,
 				DA4702A17F9FD234F85C3B9B /* MissionOrchestrator.swift in Sources */,
 				7F3EAE3E803FE81831F29771 /* MobileIntelligenceOrchestrator.swift in Sources */,
+				DAFF7FE1F677CBC8FFF78000 /* MobilePowerStateMonitor.swift in Sources */,
 				7A108023976E796DC3AC81C0 /* ModelCatalogManager.swift in Sources */,
 				8547CB15115DD86ED1DE07BC /* ModelContainerFactory.swift in Sources */,
 				22F12DBB4F05A113AAEF4917 /* ModelDownloadManager.swift in Sources */,
@@ -6084,7 +6085,6 @@
 				1F4CFE5A1EDDCD3A5333B45A /* PlatformColors.swift in Sources */,
 				38C76FF9D185B75E17C8DFE2 /* PowerObserver.swift in Sources */,
 				927D3E4C8B67CDE642913E5E /* PowerStateManager.swift in Sources */,
-				865B7D42508DC798CDF76421 /* PowerStateMonitor.swift in Sources */,
 				DC274DC7263D6B1801EF2616 /* PredictiveEngine.swift in Sources */,
 				1AA535163B54CE202C0D80D3 /* PredictiveJourneyMapper.swift in Sources */,
 				D3915127CFAB16532F25A843 /* PredictivePreloader.swift in Sources */,
@@ -6394,7 +6394,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = watchOS/Thea.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6B66PM4JLK;
 				INFOPLIST_FILE = watchOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -6459,7 +6461,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_ENTITLEMENTS = tvOS/Thea.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6B66PM4JLK;
 				INFOPLIST_FILE = tvOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -6538,7 +6542,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = watchOS/Thea.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6B66PM4JLK;
 				INFOPLIST_FILE = watchOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -7125,7 +7131,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_ENTITLEMENTS = tvOS/Thea.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6B66PM4JLK;
 				INFOPLIST_FILE = tvOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
