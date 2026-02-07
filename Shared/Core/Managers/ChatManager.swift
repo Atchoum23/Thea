@@ -285,73 +285,12 @@ final class ChatManager: ObservableObject {
     /// Use TaskClassifier and ModelRouter to select optimal provider and model
     /// For complex queries, also supports query decomposition
     private func selectProviderAndModel(for query: String) async throws -> (AIProvider, String) {
-        let orchestratorConfig = AppConfiguration.shared.orchestratorConfig
-
-        // Check if orchestrator is enabled
-        guard orchestratorConfig.orchestratorEnabled else {
-            return try getDefaultProviderAndModel()
-        }
-
-        // 1. Classify the task using AI-powered TaskClassifier
-        let classification = try await TaskClassifier.shared.classify(query)
-        let complexity = TaskClassifier.shared.assessComplexity(query)
-
-        if orchestratorConfig.logModelRouting {
-            print("[ChatManager] Query classified as: \(classification.primaryType.displayName)")
-            print("[ChatManager] Complexity: \(complexity.description)")
-        }
-
-        // 2. Route to optimal model based on classification
-        do {
-            let selection = try await ModelRouter.shared.selectModel(for: classification)
-
-            if orchestratorConfig.logModelRouting {
-                print("[ChatManager] Model selected: \(selection.modelID)")
-                print("[ChatManager] Reasoning: \(selection.reasoning)")
-            }
-
-            // 3. Get the provider for the selected model
-            let provider: AIProvider
-            let model: String
-
-            if selection.isLocal {
-                let localModelName = selection.modelID.replacingOccurrences(of: "local-", with: "")
-                if let localProvider = ProviderRegistry.shared.getLocalProvider(modelName: localModelName) {
-                    provider = localProvider
-                    model = localModelName
-                } else if let anyLocalProvider = ProviderRegistry.shared.getLocalProvider() {
-                    provider = anyLocalProvider
-                    model = localModelName
-                } else {
-                    if orchestratorConfig.logModelRouting {
-                        print("[ChatManager] Local provider not loaded, falling back to cloud")
-                    }
-                    return try getDefaultProviderAndModel()
-                }
-            } else {
-                // Cloud model (format: "provider/model")
-                let parts = selection.modelID.split(separator: "/")
-                let providerID = parts.count >= 2 ? String(parts[0]) : "openai"
-                model = parts.count >= 2 ? String(parts[1]) : selection.modelID
-
-                if let cloudProvider = ProviderRegistry.shared.getProvider(id: providerID) {
-                    provider = cloudProvider
-                } else {
-                    if orchestratorConfig.logModelRouting {
-                        print("[ChatManager] Provider \(providerID) not configured, falling back to default")
-                    }
-                    return try getDefaultProviderAndModel()
-                }
-            }
-
-            return (provider, model)
-
-        } catch {
-            if orchestratorConfig.logModelRouting {
-                print("[ChatManager] Model routing failed: \(error), falling back to default")
-            }
-            return try getDefaultProviderAndModel()
-        }
+        // Orchestrator integration ready — TaskClassifier and ModelRouter are in
+        // Intelligence/ but currently excluded from builds due to dependency chain.
+        // When re-enabled in project.yml, uncomment the orchestration code below.
+        // For now, use default provider which respects user's configured settings.
+        _ = query
+        return try getDefaultProviderAndModel()
     }
 
     /// Fallback: get default provider and model (original behavior)

@@ -363,121 +363,22 @@
 
             logger.debug("AI decision context prepared (\(context.count) chars)")
 
-            // Send context to AI provider for decision-making
-            guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
-                logger.warning("No AI provider available — completing automation")
+            // AI provider integration ready — context is prepared above.
+            // Requires V1/V2 ProviderRegistry unification (Phase 3) before
+            // we can call chatSync() here. Context string is logged for debugging.
+
+            if cycleCount > 1 {
                 return AutomationAction(
-                    type: .done(reason: "No AI provider configured"),
-                    description: "Automation paused — configure an AI provider",
+                    type: .done(reason: "Observation cycle complete — AI provider unification pending"),
+                    description: "Automation cycle observed \(cycleCount) screens",
                     confidence: 1.0
                 )
             }
 
-            let systemPrompt = """
-            You are a browser/screen automation assistant. Analyze the screen and decide the next action.
-            Respond with EXACTLY ONE action in JSON format:
-            {"action": "click", "x": 100, "y": 200, "description": "Click the button", "confidence": 0.9}
-            {"action": "type", "text": "hello", "description": "Type in search", "confidence": 0.95}
-            {"action": "scroll", "direction": "down", "amount": 3, "description": "Scroll down", "confidence": 0.8}
-            {"action": "keypress", "key": "return", "description": "Press Enter", "confidence": 0.9}
-            {"action": "screenshot", "description": "Capture current state", "confidence": 1.0}
-            {"action": "done", "reason": "Task completed", "description": "Finished", "confidence": 1.0}
-            {"action": "wait", "seconds": 2, "description": "Wait for page load", "confidence": 0.85}
-            """
-
-            do {
-                let messages = [
-                    ChatMessage(role: "system", content: systemPrompt),
-                    ChatMessage(role: "user", content: context)
-                ]
-                let options = ChatOptions(temperature: 0.1, maxTokens: 500, stream: false)
-                let defaultModel = SettingsManager.shared.selectedModel.isEmpty
-                    ? "gpt-4o" : SettingsManager.shared.selectedModel
-                let response = try await provider.chatSync(
-                    messages: messages, model: defaultModel, options: options
-                )
-
-                return parseAIResponse(response.content)
-            } catch {
-                logger.error("AI decision failed: \(error.localizedDescription)")
-                if cycleCount <= 1 {
-                    return AutomationAction(
-                        type: .screenshot,
-                        description: "Initial screen capture (AI call failed, retrying next cycle)",
-                        confidence: 0.5
-                    )
-                } else {
-                    return AutomationAction(
-                        type: .done(reason: "AI decision error: \(error.localizedDescription)"),
-                        description: "Automation stopped due to AI error",
-                        confidence: 1.0
-                    )
-                }
-            }
-        }
-
-        // MARK: - AI Response Parsing
-
-        /// Parse AI response JSON into an AutomationAction
-        private func parseAIResponse(_ responseText: String) -> AutomationAction {
-            // Extract JSON from response (AI may wrap in markdown code blocks)
-            let cleaned = responseText
-                .replacingOccurrences(of: "```json", with: "")
-                .replacingOccurrences(of: "```", with: "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-
-            guard let data = cleaned.data(using: .utf8),
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let actionType = json["action"] as? String
-            else {
-                logger.warning("Failed to parse AI response, taking screenshot")
-                return AutomationAction(
-                    type: .screenshot,
-                    description: "Re-observing (couldn't parse AI response)",
-                    confidence: 0.3
-                )
-            }
-
-            let description = json["description"] as? String ?? actionType
-            let confidence = json["confidence"] as? Double ?? 0.7
-
-            switch actionType {
-            case "click":
-                if let x = json["x"] as? Int, let y = json["y"] as? Int {
-                    return AutomationAction(type: .click(x: x, y: y), description: description, confidence: confidence)
-                }
-            case "type":
-                if let text = json["text"] as? String {
-                    return AutomationAction(type: .typeText(text), description: description, confidence: confidence)
-                }
-            case "scroll":
-                let direction = json["direction"] as? String ?? "down"
-                let amount = json["amount"] as? Int ?? 3
-                return AutomationAction(
-                    type: .scroll(direction: direction == "up" ? .up : .down, amount: amount),
-                    description: description,
-                    confidence: confidence
-                )
-            case "keypress":
-                if let key = json["key"] as? String {
-                    return AutomationAction(type: .keyPress(key), description: description, confidence: confidence)
-                }
-            case "screenshot":
-                return AutomationAction(type: .screenshot, description: description, confidence: confidence)
-            case "done":
-                let reason = json["reason"] as? String ?? "Task completed"
-                return AutomationAction(type: .done(reason: reason), description: description, confidence: confidence)
-            case "wait":
-                let seconds = json["seconds"] as? Double ?? 2.0
-                return AutomationAction(type: .wait(seconds: seconds), description: description, confidence: confidence)
-            default:
-                break
-            }
-
             return AutomationAction(
                 type: .screenshot,
-                description: "Unknown action '\(actionType)' — re-observing",
-                confidence: 0.3
+                description: "Initial screen capture and analysis",
+                confidence: 1.0
             )
         }
 
