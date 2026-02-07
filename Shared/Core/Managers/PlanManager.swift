@@ -28,7 +28,8 @@ public final class PlanManager {
 
     // MARK: - Plan Lifecycle
 
-    /// Create a plan from a QueryDecomposition result
+    #if os(macOS)
+    /// Create a plan from a QueryDecomposition result (macOS only - requires MetaAI)
     public func createPlan(
         from decomposition: QueryDecomposition,
         title: String,
@@ -127,9 +128,10 @@ public final class PlanManager {
 
     /// Convert a SubQuery into a PlanStep
     private func stepFrom(_ subQuery: SubQuery) -> PlanStep {
-        PlanStep(
-            title: subQuery.query.prefix(80).trimmingCharacters(in: .whitespacesAndNewlines)
-                + (subQuery.query.count > 80 ? "..." : ""),
+        let queryStr = String(subQuery.query.prefix(80))
+        let trimmed = queryStr.trimmingCharacters(in: .whitespacesAndNewlines)
+        return PlanStep(
+            title: trimmed + (subQuery.query.count > 80 ? "..." : ""),
             activeDescription: activeDescriptionFor(subQuery),
             subQueryId: subQuery.id,
             taskType: subQuery.taskType.rawValue
@@ -139,20 +141,53 @@ public final class PlanManager {
     /// Generate present-tense description from a sub-query
     private func activeDescriptionFor(_ subQuery: SubQuery) -> String {
         let query = subQuery.query.lowercased()
+        let prefix60 = String(subQuery.query.prefix(60)).lowercased()
 
         if query.hasPrefix("design") || query.hasPrefix("create") || query.hasPrefix("build") {
-            return "Building \(subQuery.query.prefix(60).lowercased())..."
+            return "Building \(prefix60)..."
         } else if query.hasPrefix("implement") || query.hasPrefix("write") || query.hasPrefix("add") {
-            return "Implementing \(subQuery.query.prefix(60).lowercased())..."
+            return "Implementing \(prefix60)..."
         } else if query.hasPrefix("test") || query.hasPrefix("verify") || query.hasPrefix("validate") {
-            return "Testing \(subQuery.query.prefix(60).lowercased())..."
+            return "Testing \(prefix60)..."
         } else if query.hasPrefix("analyze") || query.hasPrefix("review") || query.hasPrefix("evaluate") {
-            return "Analyzing \(subQuery.query.prefix(60).lowercased())..."
+            return "Analyzing \(prefix60)..."
         } else if query.hasPrefix("document") || query.hasPrefix("explain") {
-            return "Documenting \(subQuery.query.prefix(60).lowercased())..."
+            return "Documenting \(prefix60)..."
         } else {
-            return "Working on \(subQuery.query.prefix(60).lowercased())..."
+            return "Working on \(prefix60)..."
         }
+    }
+    #endif
+
+    // MARK: - Platform-Independent Plan Creation
+
+    /// Create a plan from simple step descriptions (works on all platforms)
+    public func createSimplePlan(
+        title: String,
+        steps: [String],
+        conversationId: UUID? = nil
+    ) -> PlanState {
+        let planSteps = steps.enumerated().map { index, step in
+            PlanStep(
+                title: step,
+                activeDescription: "Working on step \(index + 1)...",
+                subQueryId: nil,
+                taskType: "general"
+            )
+        }
+
+        let phase = PlanPhase(title: "Steps", steps: planSteps)
+        let plan = PlanState(
+            title: title,
+            phases: [phase],
+            status: .creating,
+            conversationId: conversationId,
+            originalQuery: title
+        )
+
+        activePlan = plan
+        logger.info("Created simple plan '\(title)' with \(steps.count) steps")
+        return plan
     }
 
     // MARK: - Execution Tracking
