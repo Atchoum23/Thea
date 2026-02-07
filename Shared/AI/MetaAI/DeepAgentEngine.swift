@@ -252,7 +252,7 @@ final class DeepAgentEngine {
                 Subtask(step: 5, description: "Finalize timeline and deliverables", dependencies: [4])
             ]
 
-        case .debugging:
+        case .debugging, .codeDebugging:
             [
                 Subtask(step: 1, description: "Reproduce and understand the issue", dependencies: []),
                 Subtask(step: 2, description: "Identify potential root causes", dependencies: [1]),
@@ -260,6 +260,20 @@ final class DeepAgentEngine {
                 Subtask(step: 4, description: "Implement and verify fix", dependencies: [3]),
                 Subtask(step: 5, description: "Document solution and prevention", dependencies: [4])
             ]
+
+        // Code-related task types
+        case .codeAnalysis, .codeExplanation, .codeRefactoring:
+            [
+                Subtask(step: 1, description: "Understand code structure and purpose", dependencies: []),
+                Subtask(step: 2, description: "Analyze patterns and potential improvements", dependencies: [1]),
+                Subtask(step: 3, description: "Generate analysis or refactored version", dependencies: [2]),
+                Subtask(step: 4, description: "Verify correctness and document changes", dependencies: [3])
+            ]
+
+        // Additional task types
+        case .conversation, .translation, .system, .unknown, .creative, .math:
+            // Use AI to dynamically decompose these task types
+            try await dynamicDecomposition(instruction, context: context)
         }
     }
 

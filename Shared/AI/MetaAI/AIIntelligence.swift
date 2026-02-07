@@ -353,18 +353,30 @@ public final class AIIntelligence {
             throw AIIntelligenceError.noProviderAvailable
         }
 
-        let message = ChatMessage(role: "user", text: prompt)
+        let message = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(prompt),
+            timestamp: Date(),
+            model: "openai/gpt-4o-mini"
+        )
 
         var response = ""
         let stream = try await provider.chat(
             messages: [message],
             model: "openai/gpt-4o-mini", // Fast, cheap model for intelligence tasks
-            options: ChatOptions(stream: false)
+            stream: false
         )
 
         for try await chunk in stream {
-            if case let .content(text) = chunk {
+            switch chunk.type {
+            case .delta(let text):
                 response += text
+            case .complete:
+                break
+            case .error(let error):
+                throw error
             }
         }
 
@@ -686,7 +698,8 @@ public struct AIWorkflowContext: Sendable {
     }
 }
 
-public struct ErrorContext: Sendable {
+/// Error context for AI intelligence system (distinct from ProactiveErrorPrevention's ErrorContext)
+public struct AIErrorContext: Sendable {
     public let filePath: String?
     public let functionName: String?
     public let recentActions: [String]

@@ -20,7 +20,7 @@ public final class ReliabilityMonitor: ObservableObject {
     // MARK: - State
 
     @Published public private(set) var systemHealth = SystemHealth()
-    @Published public private(set) var circuitBreakers: [String: CircuitBreaker] = [:]
+    @Published public private(set) var circuitBreakers: [String: ReliabilityCircuitBreaker] = [:]
     @Published public private(set) var degradationLevel: DegradationLevel = .none
 
     // MARK: - Configuration
@@ -84,9 +84,9 @@ public final class ReliabilityMonitor: ObservableObject {
         }
     }
 
-    public func getCircuitBreaker(for service: String) -> CircuitBreaker {
+    public func getReliabilityCircuitBreaker(for service: String) -> ReliabilityCircuitBreaker {
         if let existing = circuitBreakers[service] { return existing }
-        let breaker = CircuitBreaker(name: service, failureThreshold: defaultFailureThreshold, recoveryTimeout: defaultRecoveryTimeout)
+        let breaker = ReliabilityCircuitBreaker(name: service, failureThreshold: defaultFailureThreshold, recoveryTimeout: defaultRecoveryTimeout)
         circuitBreakers[service] = breaker
         return breaker
     }
@@ -107,7 +107,7 @@ public struct ComponentStatus: Sendable {
     public let lastError: String?
 }
 
-public struct CircuitBreaker: Sendable {
+public struct ReliabilityCircuitBreaker: Sendable {
     public let name: String
     public var state: CircuitState = .closed
     public var failureCount: Int = 0
