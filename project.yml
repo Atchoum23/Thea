@@ -300,7 +300,26 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
-          # Exclude all MetaAI (use Intelligence folder versions)
+          # ============================================================
+          # ARCHITECTURE DECISION (2026-02-07):
+          # MetaAI folder is EXCLUDED - use Intelligence folder as canonical source.
+          #
+          # Context: MetaAI (~73 files) and Intelligence folders had duplicate
+          # type definitions causing build conflicts. Rather than maintaining
+          # two parallel implementations, Intelligence folder was chosen as
+          # the canonical source because:
+          #   1. It has cleaner separation of concerns (Core, Intent, Knowledge, etc.)
+          #   2. It follows protocol-based design patterns
+          #   3. It integrates better with the existing codebase
+          #
+          # If MetaAI files are needed in the future:
+          #   1. Check for type conflicts with Intelligence folder
+          #   2. Rename conflicting types with MetaAI prefix
+          #   3. Remove specific exclusions below rather than the blanket exclusion
+          #
+          # DO NOT remove this blanket exclusion without resolving all type conflicts.
+          # See git history for type renames already done (MetaAIMCPServerInfo, etc.)
+          # ============================================================
           - "**/AI/MetaAI/**"
           # Exclude duplicate Integrations (use Apple subfolder)
           - "**/Integrations/NotesIntegration.swift"
@@ -561,7 +580,7 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
-          # Exclude all MetaAI (use Intelligence folder versions)
+          # ARCHITECTURE DECISION: MetaAI excluded - see macOS target for full explanation
           - "**/AI/MetaAI/**"
           - "**/Integrations/NotesIntegration.swift"
           - "**/Integrations/RemindersIntegration.swift"
