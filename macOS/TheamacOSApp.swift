@@ -231,6 +231,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_: Notification) {
         log("🚀 applicationDidFinishLaunching called")
 
+        // Register for remote notifications (CloudKit subscriptions)
+        NSApplication.shared.registerForRemoteNotifications()
+        AppUpdateService.registerNotificationCategory()
+        log("📡 Registered for remote notifications and update category")
+
+        // Initialize AppUpdateService (triggers subscription setup + initial check)
+        _ = AppUpdateService.shared
+
         // SKIP heavy initialization when running tests to prevent memory issues and timeouts
         guard !isUITesting && !isUnitTesting else {
             log("⚡ Testing mode - skipping MLX/model initialization")
@@ -283,6 +291,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 try? await VoiceActivationManager.shared.requestPermissions()
                 try? VoiceActivationManager.shared.startWakeWordDetection()
             }
+        }
+    }
+
+    // MARK: - Remote Notifications
+
+    func application(_: NSApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        log("📡 Registered for remote notifications: \(tokenString.prefix(12))...")
+    }
+
+    func application(_: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        log("⚠️ Failed to register for remote notifications: \(error.localizedDescription)")
+    }
+
+    func application(
+        _: NSApplication,
+        didReceiveRemoteNotification userInfo: [String: Any]
+    ) {
+        log("📩 Received remote notification")
+
+        let anyHashableUserInfo: [AnyHashable: Any] = Dictionary(
+            uniqueKeysWithValues: userInfo.map { ($0.key as AnyHashable, $0.value) }
+        )
+
+        // Forward to AppUpdateService for update checks
+        Task { @MainActor in
+            await AppUpdateService.shared.handleRemoteNotification()
+        }
+
+        // Forward to CloudKitService for data sync
+        Task {
+            await CloudKitService.shared.handleNotification(anyHashableUserInfo)
         }
     }
 
