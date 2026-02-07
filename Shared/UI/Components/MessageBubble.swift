@@ -2,8 +2,8 @@
 //  MessageBubble.swift
 //  Thea
 //
-//  Enhanced message display with markdown rendering and code syntax highlighting
-//  Based on 2026 AI chat UI best practices research
+//  Enhanced message display with markdown rendering, code syntax highlighting,
+//  and comprehensive per-message actions (copy, edit, rewrite, split, etc.)
 //
 
 import MarkdownUI
@@ -23,6 +23,9 @@ struct MessageBubble: View {
 
     /// Callback when user wants to regenerate this response
     var onRegenerate: ((Message) -> Void)?
+
+    /// Callback for extended actions
+    var onAction: ((MessageAction, Message) -> Void)?
 
     /// Branch navigation info (nil if no branches exist)
     var branchInfo: BranchInfo?
@@ -68,6 +71,14 @@ struct MessageBubble: View {
                     .foregroundStyle(foregroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
 
+                // Hover action bar (appears below the bubble on hover)
+                #if os(macOS)
+                    if isHovering {
+                        hoverActionBar
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                #endif
+
                 metadataRow
             }
             .frame(maxWidth: TheaSize.messageMaxWidth, alignment: message.messageRole == .user ? .trailing : .leading)
@@ -84,16 +95,8 @@ struct MessageBubble: View {
                 isHovering = hovering
             }
         }
-        // Overlay action buttons on hover (macOS only)
-        #if os(macOS)
-            .overlay(alignment: message.messageRole == .user ? .topLeading : .topTrailing) {
-                if isHovering {
-                    hoverActions
-                        .offset(x: message.messageRole == .user ? -8 : 8, y: -8)
-                        .transition(.opacity.combined(with: .scale(scale: 0.9)))
-                }
-            }
-        #endif
+        // Context menu for full action set
+        .contextMenu { messageContextMenu }
     }
 
     // MARK: - Message Content
@@ -103,13 +106,11 @@ struct MessageBubble: View {
         let text = message.content.textValue
 
         if message.messageRole == .assistant {
-            // Use MarkdownUI for assistant messages (supports code blocks, lists, etc.)
             Markdown(text)
                 .markdownTheme(theaMarkdownTheme)
                 .markdownCodeSyntaxHighlighter(TheaCodeHighlighter())
                 .textSelection(.enabled)
         } else {
-            // User messages: plain text (usually short prompts)
             Text(text)
                 .font(.theaBody)
                 .textSelection(.enabled)
@@ -120,7 +121,6 @@ struct MessageBubble: View {
 
     private var metadataRow: some View {
         HStack(spacing: 8) {
-            // Show edited badge if message was edited
             if message.isEdited || message.branchIndex > 0 {
                 BranchInfoBadge(isEdited: message.isEdited, branchIndex: message.branchIndex)
             }
@@ -138,67 +138,226 @@ struct MessageBubble: View {
         .padding(.horizontal, 4)
     }
 
-    // MARK: - Hover Actions
+    // MARK: - Hover Action Bar
 
     #if os(macOS)
-        private var hoverActions: some View {
-            HStack(spacing: 4) {
-                // Copy button
-                Button {
+        /// Compact action bar shown below the message bubble on hover
+        private var hoverActionBar: some View {
+            HStack(spacing: 2) {
+                // Copy
+                actionButton(
+                    icon: showCopiedFeedback ? "checkmark" : "doc.on.doc",
+                    color: showCopiedFeedback ? .green : .secondary,
+                    help: "Copy"
+                ) {
                     copyToClipboard()
-                } label: {
-                    Image(systemName: showCopiedFeedback ? "checkmark" : "doc.on.doc")
-                        .font(.system(size: 12))
-                        .foregroundStyle(showCopiedFeedback ? .green : .secondary)
-                        .frame(width: 24, height: 24)
-                        .background(.ultraThinMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
-                .buttonStyle(.plain)
-                .help("Copy message")
-                .accessibilityLabel("Copy message to clipboard")
 
-                // Edit button (user messages only - creates a branch)
-                if message.messageRole == .user, let onEdit {
-                    Button {
-                        onEdit(message)
-                    } label: {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                            .frame(width: 24, height: 24)
-                            .background(.ultraThinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                // Edit (user messages) / Regenerate (assistant messages)
+                if message.messageRole == .user {
+                    actionButton(icon: "pencil", color: .secondary, help: "Edit & resend") {
+                        if let onEdit { onEdit(message) } else { onAction?(.edit, message) }
                     }
-                    .buttonStyle(.plain)
-                    .help("Edit message (creates a branch)")
-                    .accessibilityLabel("Edit message to create a new branch")
+                } else {
+                    actionButton(icon: "arrow.clockwise", color: .secondary, help: "Regenerate") {
+                        if let onRegenerate { onRegenerate(message) } else { onAction?(.regenerate, message) }
+                    }
                 }
 
-                // Regenerate button (assistant messages only)
+                // Rewrite (assistant only: rephrase, shorten, expand)
                 if message.messageRole == .assistant {
-                    Button {
-                        if let onRegenerate {
-                            onRegenerate(message)
-                        } else {
-                            regenerateMessage()
+                    Menu {
+                        Button { onAction?(.rewrite(.shorter), message) } label: {
+                            Label("Make shorter", systemImage: "arrow.down.right.and.arrow.up.left")
+                        }
+                        Button { onAction?(.rewrite(.longer), message) } label: {
+                            Label("Make longer", systemImage: "arrow.up.left.and.arrow.down.right")
+                        }
+                        Button { onAction?(.rewrite(.simpler), message) } label: {
+                            Label("Simplify", systemImage: "text.badge.minus")
+                        }
+                        Button { onAction?(.rewrite(.moreDetailed), message) } label: {
+                            Label("More detailed", systemImage: "text.badge.plus")
+                        }
+                        Button { onAction?(.rewrite(.moreFormal), message) } label: {
+                            Label("More formal", systemImage: "textformat")
+                        }
+                        Button { onAction?(.rewrite(.moreCasual), message) } label: {
+                            Label("More casual", systemImage: "face.smiling")
                         }
                     } label: {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 12))
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(.secondary)
-                            .frame(width: 24, height: 24)
-                            .background(.ultraThinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                            .frame(width: 26, height: 26)
                     }
                     .buttonStyle(.plain)
-                    .help("Regenerate response")
-                    .accessibilityLabel("Regenerate AI response")
+                    .help("Rewrite")
                 }
+
+                // Continue from here
+                actionButton(icon: "arrow.right.to.line", color: .secondary, help: "Continue from here") {
+                    onAction?(.continueFromHere, message)
+                }
+
+                // More menu (overflow)
+                Menu {
+                    Button { onAction?(.splitConversation, message) } label: {
+                        Label("Split conversation here", systemImage: "scissors")
+                    }
+
+                    Button { onAction?(.selectText, message) } label: {
+                        Label("Select text", systemImage: "selection.pin.in.out")
+                    }
+
+                    Divider()
+
+                    Button { onAction?(.readAloud, message) } label: {
+                        Label("Read aloud", systemImage: "speaker.wave.2")
+                    }
+
+                    Button { onAction?(.shareMessage, message) } label: {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+
+                    Button { onAction?(.pinMessage, message) } label: {
+                        Label("Pin message", systemImage: "pin")
+                    }
+
+                    Divider()
+
+                    Button(role: .destructive) { onAction?(.deleteMessage, message) } label: {
+                        Label("Delete message", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 26, height: 26)
+                }
+                .buttonStyle(.plain)
+                .help("More actions")
             }
-            .padding(4)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+
+        /// Reusable small action button for the hover bar
+        private func actionButton(icon: String, color: Color, help: String, action: @escaping () -> Void) -> some View {
+            Button(action: action) {
+                Image(systemName: icon)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(color)
+                    .frame(width: 26, height: 26)
+            }
+            .buttonStyle(.plain)
+            .help(help)
         }
     #endif
+
+    // MARK: - Context Menu
+
+    @ViewBuilder
+    private var messageContextMenu: some View {
+        // --- Clipboard ---
+        Button { copyToClipboard() } label: {
+            Label("Copy text", systemImage: "doc.on.doc")
+        }
+
+        if message.messageRole == .assistant {
+            Button { copyAsMarkdown() } label: {
+                Label("Copy as Markdown", systemImage: "doc.richtext")
+            }
+        }
+
+        Divider()
+
+        // --- Edit / Regenerate ---
+        if message.messageRole == .user {
+            Button {
+                if let onEdit { onEdit(message) } else { onAction?(.edit, message) }
+            } label: {
+                Label("Edit & resend", systemImage: "pencil")
+            }
+        }
+
+        if message.messageRole == .assistant {
+            Button {
+                if let onRegenerate { onRegenerate(message) } else { onAction?(.regenerate, message) }
+            } label: {
+                Label("Regenerate", systemImage: "arrow.clockwise")
+            }
+
+            // Rewrite submenu
+            Menu("Rewrite") {
+                Button { onAction?(.rewrite(.shorter), message) } label: {
+                    Label("Shorter", systemImage: "arrow.down.right.and.arrow.up.left")
+                }
+                Button { onAction?(.rewrite(.longer), message) } label: {
+                    Label("Longer", systemImage: "arrow.up.left.and.arrow.down.right")
+                }
+                Button { onAction?(.rewrite(.simpler), message) } label: {
+                    Label("Simpler", systemImage: "text.badge.minus")
+                }
+                Button { onAction?(.rewrite(.moreDetailed), message) } label: {
+                    Label("More detailed", systemImage: "text.badge.plus")
+                }
+                Button { onAction?(.rewrite(.moreFormal), message) } label: {
+                    Label("Formal tone", systemImage: "textformat")
+                }
+                Button { onAction?(.rewrite(.moreCasual), message) } label: {
+                    Label("Casual tone", systemImage: "face.smiling")
+                }
+            }
+
+            // Change model submenu
+            Menu("Retry with model") {
+                Button { onAction?(.retryWithModel("gpt-4o"), message) } label: { Text("GPT-4o") }
+                Button { onAction?(.retryWithModel("claude-4-sonnet"), message) } label: { Text("Claude 4 Sonnet") }
+                Button { onAction?(.retryWithModel("gemini-2.5-pro"), message) } label: { Text("Gemini 2.5 Pro") }
+                Button { onAction?(.retryWithModel("local"), message) } label: { Text("Local model") }
+            }
+        }
+
+        Divider()
+
+        // --- Navigation / Flow ---
+        Button { onAction?(.continueFromHere, message) } label: {
+            Label("Continue from here", systemImage: "arrow.right.to.line")
+        }
+
+        Button { onAction?(.splitConversation, message) } label: {
+            Label("Split conversation here", systemImage: "scissors")
+        }
+
+        Divider()
+
+        // --- Utility ---
+        Button { onAction?(.readAloud, message) } label: {
+            Label("Read aloud", systemImage: "speaker.wave.2")
+        }
+
+        Button { onAction?(.shareMessage, message) } label: {
+            Label("Share", systemImage: "square.and.arrow.up")
+        }
+
+        Button { onAction?(.pinMessage, message) } label: {
+            Label("Pin message", systemImage: "pin")
+        }
+
+        Button { onAction?(.selectText, message) } label: {
+            Label("Select text", systemImage: "selection.pin.in.out")
+        }
+
+        Divider()
+
+        // --- Destructive ---
+        Button(role: .destructive) { onAction?(.deleteMessage, message) } label: {
+            Label("Delete message", systemImage: "trash")
+        }
+    }
 
     // MARK: - Actions
 
@@ -221,9 +380,13 @@ struct MessageBubble: View {
         }
     }
 
-    private func regenerateMessage() {
-        // TODO: Implement regenerate via ChatManager
-        // This should trigger a new response for the same user message
+    private func copyAsMarkdown() {
+        #if os(macOS)
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(message.content.textValue, forType: .string)
+        #else
+            UIPasteboard.general.string = message.content.textValue
+        #endif
     }
 
     // MARK: - Accessibility
@@ -232,7 +395,7 @@ struct MessageBubble: View {
         let role = message.messageRole == .user ? "You" : "Thea"
         let time = message.timestamp.formatted(.dateTime.hour().minute())
         let content = message.content.textValue
-        let truncated = content.count > 200 ? String(content.prefix(200)) + "…" : content
+        let truncated = content.count > 200 ? String(content.prefix(200)) + "..." : content
         return "\(role), \(time): \(truncated)"
     }
 
@@ -317,6 +480,46 @@ struct MessageBubble: View {
     }
 }
 
+// MARK: - Message Action Enum
+
+/// All possible actions on a message/turn
+enum MessageAction {
+    case copy
+    case copyAsMarkdown
+    case edit
+    case regenerate
+    case rewrite(RewriteStyle)
+    case retryWithModel(String)
+    case continueFromHere
+    case splitConversation
+    case readAloud
+    case shareMessage
+    case pinMessage
+    case selectText
+    case deleteMessage
+
+    /// Rewrite styles for assistant responses
+    enum RewriteStyle: String, CaseIterable {
+        case shorter
+        case longer
+        case simpler
+        case moreDetailed
+        case moreFormal
+        case moreCasual
+
+        var label: String {
+            switch self {
+            case .shorter: "Shorter"
+            case .longer: "Longer"
+            case .simpler: "Simpler"
+            case .moreDetailed: "More detailed"
+            case .moreFormal: "More formal"
+            case .moreCasual: "More casual"
+            }
+        }
+    }
+}
+
 // MARK: - Code Block View with Syntax Highlighting
 
 struct CodeBlockView: View {
@@ -398,7 +601,6 @@ struct CodeBlockView: View {
                 return nil
             }
 
-            // Configure theme based on color scheme
             let themeName = colorScheme == .dark ? "monokai-sublime" : "github"
             highlighter.setTheme(to: themeName)
 
@@ -454,8 +656,6 @@ struct CodeBlockView: View {
 
 struct TheaCodeHighlighter: CodeSyntaxHighlighter {
     func highlightCode(_ code: String, language: String?) -> Text {
-        // For inline code, just use monospace font
-        // Block-level code uses CodeBlockView with full highlighting
         Text(code)
             .font(.system(.body, design: .monospaced))
     }
