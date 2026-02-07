@@ -1,97 +1,162 @@
 // Thea Chrome Extension Popup Script
+// Matches tabbed UI: Actions | Shield | Tools
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize UI
-  await initializeStatus();
-  await loadSettings();
+  setupTabs();
   setupEventListeners();
-  await updateBlockedCount();
+  await loadStats();
+  await loadToggles();
+  await checkiCloudStatus();
 });
 
-// Status Management
-async function initializeStatus() {
-  const statusDot = document.querySelector('.status-dot');
-  const statusText = document.querySelector('.status-text');
+// ============================================================================
+// Tab Navigation
+// ============================================================================
 
-  try {
-    // Check if native messaging is available
-    const response = await chrome.runtime.sendMessage({ action: 'getStatus' });
-    if (response?.connected) {
-      statusDot.classList.add('connected');
-      statusText.textContent = 'Connected to Thea';
-    } else {
-      statusDot.classList.remove('connected');
-      statusText.textContent = 'Thea app not running';
-    }
-  } catch (error) {
-    statusDot.classList.add('error');
-    statusText.textContent = 'Connection error';
-    console.error('Status check failed:', error);
-  }
-}
-
-// Settings Management
-async function loadSettings() {
-  const settings = await chrome.storage.local.get(['adBlocking', 'trackerBlocking']);
-
-  document.getElementById('ad-blocking').checked = settings.adBlocking !== false;
-  document.getElementById('tracker-blocking').checked = settings.trackerBlocking !== false;
-}
-
-async function saveSettings() {
-  const adBlocking = document.getElementById('ad-blocking').checked;
-  const trackerBlocking = document.getElementById('tracker-blocking').checked;
-
-  await chrome.storage.local.set({ adBlocking, trackerBlocking });
-
-  // Notify background script
-  chrome.runtime.sendMessage({
-    action: 'updateSettings',
-    settings: { adBlocking, trackerBlocking }
+function setupTabs() {
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+    });
   });
 }
 
+// ============================================================================
+// Stats Dashboard
+// ============================================================================
+
+async function loadStats() {
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'getStats' });
+    const stats = response || {};
+
+    document.getElementById('stat-blocked').textContent = formatNumber(
+      (stats.adsBlocked || 0) + (stats.trackersBlocked || 0)
+    );
+    document.getElementById('stat-trackers').textContent = formatNumber(
+      stats.trackersBlocked || 0
+    );
+    document.getElementById('stat-cookies').textContent = formatNumber(
+      stats.cookiesDeclined || 0
+    );
+    document.getElementById('stat-memories').textContent = formatNumber(
+      stats.memoriesSaved || 0
+    );
+  } catch (err) {
+    console.error('Failed to load stats:', err);
+  }
+}
+
+function formatNumber(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return String(n);
+}
+
+// ============================================================================
+// Toggle States (Shield + Tools tabs)
+// ============================================================================
+
+async function loadToggles() {
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'getState' });
+    if (!response) return;
+
+    // Shield tab
+    setToggle('toggle-adblock', response.adBlockerEnabled);
+    setToggle('toggle-privacy', response.privacyProtectionEnabled);
+    setToggle('toggle-cookies', response.privacyConfig?.cookieAutoDecline);
+    setToggle('toggle-email', response.emailProtectionEnabled);
+    setToggle('toggle-passwords', response.passwordManagerEnabled);
+
+    // Tools tab
+    setToggle('toggle-darkmode', response.darkModeEnabled);
+    setToggle('toggle-video', response.videoControllerEnabled);
+    setToggle('toggle-ai', response.aiAssistantEnabled);
+    setToggle('toggle-memory', response.memoryEnabled);
+  } catch (err) {
+    console.error('Failed to load toggles:', err);
+  }
+}
+
+function setToggle(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.checked = value !== false;
+}
+
+// ============================================================================
 // Event Listeners
+// ============================================================================
+
 function setupEventListeners() {
-  // Settings button
+  // Header buttons
+  document.getElementById('sidebar-btn').addEventListener('click', openAISidebar);
   document.getElementById('settings-btn').addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
   });
 
-  // Quick action buttons
+  // Actions tab buttons
   document.getElementById('summarize-btn').addEventListener('click', summarizePage);
-  document.getElementById('dark-mode-btn').addEventListener('click', toggleDarkMode);
-  document.getElementById('clean-page-btn').addEventListener('click', cleanPage);
+  document.getElementById('reader-btn').addEventListener('click', activateReaderMode);
+  document.getElementById('ai-sidebar-btn').addEventListener('click', openAISidebar);
   document.getElementById('save-memory-btn').addEventListener('click', saveToMemory);
+  document.getElementById('pick-element-btn').addEventListener('click', activateElementPicker);
+  document.getElementById('passwords-btn').addEventListener('click', openPasswordManager);
 
-  // Chat input
-  document.getElementById('chat-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      sendChatMessage();
-    }
-  });
-  document.getElementById('send-btn').addEventListener('click', sendChatMessage);
+  // Shield tab toggles
+  bindToggle('toggle-adblock', 'adBlockerEnabled');
+  bindToggle('toggle-privacy', 'privacyProtectionEnabled');
+  bindToggle('toggle-cookies', 'cookieAutoDecline', true);
+  bindToggle('toggle-email', 'emailProtectionEnabled');
+  bindToggle('toggle-passwords', 'passwordManagerEnabled');
 
-  // Toggle switches
-  document.getElementById('ad-blocking').addEventListener('change', saveSettings);
-  document.getElementById('tracker-blocking').addEventListener('change', saveSettings);
+  // Tools tab toggles
+  bindToggle('toggle-darkmode', 'darkModeEnabled');
+  bindToggle('toggle-video', 'videoControllerEnabled');
+  bindToggle('toggle-ai', 'aiAssistantEnabled');
+  bindToggle('toggle-memory', 'memoryEnabled');
 
-  // Open app button
+  // Footer
   document.getElementById('open-app-btn').addEventListener('click', (e) => {
     e.preventDefault();
-    chrome.runtime.sendMessage({ action: 'openTheaApp' });
+    chrome.runtime.sendMessage({ action: 'syncWithApp' });
   });
 }
 
-// Quick Actions
+function bindToggle(toggleId, featureKey, isPrivacySubKey = false) {
+  const el = document.getElementById(toggleId);
+  if (!el) return;
+
+  el.addEventListener('change', async () => {
+    if (isPrivacySubKey) {
+      const config = await chrome.runtime.sendMessage({ action: 'getPrivacyConfig' });
+      const updated = { ...(config || {}), [featureKey]: el.checked };
+      await chrome.runtime.sendMessage({ action: 'savePrivacyConfig', config: updated });
+    } else {
+      await chrome.runtime.sendMessage({
+        action: 'toggleFeature',
+        feature: featureKey,
+        enabled: el.checked
+      });
+    }
+  });
+}
+
+// ============================================================================
+// Action Handlers
+// ============================================================================
+
 async function summarizePage() {
   const btn = document.getElementById('summarize-btn');
+  btn.classList.add('loading');
   btn.disabled = true;
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-    // Get page content
     const [result] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: () => document.body.innerText.substring(0, 10000)
@@ -103,78 +168,42 @@ async function summarizePage() {
       task: 'summarize'
     });
 
-    showChatResponse(response?.summary || 'Unable to summarize this page.');
+    showNotification(response?.summary || 'Unable to summarize this page.');
   } catch (error) {
-    showChatResponse('Error: ' + error.message);
+    showNotification('Error: ' + error.message);
   } finally {
+    btn.classList.remove('loading');
     btn.disabled = false;
   }
 }
 
-async function toggleDarkMode() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  await chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    func: () => {
-      const isDark = document.body.classList.toggle('thea-dark-mode');
-
-      if (isDark) {
-        const style = document.createElement('style');
-        style.id = 'thea-dark-mode-styles';
-        style.textContent = `
-          html { filter: invert(1) hue-rotate(180deg); }
-          img, video, canvas, [style*="background-image"] { filter: invert(1) hue-rotate(180deg); }
-        `;
-        document.head.appendChild(style);
-      } else {
-        document.getElementById('thea-dark-mode-styles')?.remove();
-      }
-    }
-  });
+async function activateReaderMode() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    await chrome.tabs.sendMessage(tab.id, { action: 'activatePrintFriendly' });
+    window.close();
+  } catch (error) {
+    showNotification('Error activating reader mode.');
+  }
 }
 
-async function cleanPage() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  await chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    func: () => {
-      // Remove common clutter elements
-      const selectors = [
-        'header', 'footer', 'nav', 'aside',
-        '[class*="sidebar"]', '[class*="banner"]', '[class*="popup"]',
-        '[class*="modal"]', '[class*="cookie"]', '[class*="newsletter"]',
-        '[class*="ad-"]', '[class*="advertisement"]', '[id*="ad-"]',
-        '.social-share', '.related-posts', '.comments'
-      ];
-
-      selectors.forEach(selector => {
-        document.querySelectorAll(selector).forEach(el => {
-          el.style.display = 'none';
-        });
-      });
-
-      // Enhance readability
-      document.body.style.maxWidth = '800px';
-      document.body.style.margin = '0 auto';
-      document.body.style.padding = '20px';
-      document.body.style.fontSize = '18px';
-      document.body.style.lineHeight = '1.6';
-    }
-  });
-
-  showChatResponse('Page cleaned for reading.');
+async function openAISidebar() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    await chrome.tabs.sendMessage(tab.id, { action: 'toggleAISidebar' });
+    window.close();
+  } catch (error) {
+    showNotification('Error opening AI sidebar.');
+  }
 }
 
 async function saveToMemory() {
   const btn = document.getElementById('save-memory-btn');
+  btn.classList.add('loading');
   btn.disabled = true;
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-    // Get page metadata
     const [result] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: () => ({
@@ -190,73 +219,74 @@ async function saveToMemory() {
       data: result.result
     });
 
-    if (response?.success) {
-      showChatResponse('Saved to Thea memory!');
-    } else {
-      showChatResponse('Could not save. Is Thea app running?');
-    }
+    showNotification(response?.success ? 'Saved to memory!' : 'Failed to save.');
+    await loadStats();
   } catch (error) {
-    showChatResponse('Error: ' + error.message);
+    showNotification('Error: ' + error.message);
   } finally {
+    btn.classList.remove('loading');
     btn.disabled = false;
   }
 }
 
-// Chat Functions
-async function sendChatMessage() {
-  const input = document.getElementById('chat-input');
-  const message = input.value.trim();
-
-  if (!message) return;
-
-  input.value = '';
-  input.disabled = true;
-
+async function activateElementPicker() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-    // Get page context
-    const [result] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => ({
-        title: document.title,
-        url: location.href,
-        content: document.body.innerText.substring(0, 5000)
-      })
-    });
-
-    const response = await chrome.runtime.sendMessage({
-      action: 'askThea',
-      message: message,
-      context: result.result
-    });
-
-    showChatResponse(response?.answer || 'No response from Thea.');
+    await chrome.tabs.sendMessage(tab.id, { action: 'activateElementPicker' });
+    window.close();
   } catch (error) {
-    showChatResponse('Error: ' + error.message);
-  } finally {
-    input.disabled = false;
-    input.focus();
+    showNotification('Error activating element picker.');
   }
 }
 
-function showChatResponse(text) {
-  const responseEl = document.getElementById('chat-response');
-  responseEl.textContent = text;
-  responseEl.classList.remove('hidden');
+async function openPasswordManager() {
+  try {
+    await chrome.runtime.sendMessage({ action: 'openPasswordManager' });
+  } catch (error) {
+    showNotification('Error opening password manager.');
+  }
 }
 
-// Blocked Count
-async function updateBlockedCount() {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const response = await chrome.runtime.sendMessage({
-      action: 'getBlockedCount',
-      tabId: tab.id
-    });
+// ============================================================================
+// iCloud Status
+// ============================================================================
 
-    document.getElementById('blocked-count').textContent = response?.count || 0;
-  } catch (error) {
-    console.error('Failed to get blocked count:', error);
+async function checkiCloudStatus() {
+  const statusEl = document.getElementById('icloud-status');
+  const textEl = document.getElementById('icloud-text');
+  if (!statusEl || !textEl) return;
+
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'getiCloudStatus' });
+    if (response?.connected) {
+      statusEl.classList.add('connected');
+      textEl.textContent = 'iCloud: Connected';
+    } else {
+      statusEl.classList.remove('connected');
+      textEl.textContent = 'iCloud: Not connected';
+    }
+  } catch {
+    textEl.textContent = 'iCloud: Unavailable';
   }
+}
+
+// ============================================================================
+// Notification Toast
+// ============================================================================
+
+function showNotification(message) {
+  let toast = document.getElementById('thea-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'thea-toast';
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
 }

@@ -26,7 +26,7 @@ public final class OfflineQueueService {
     public private(set) var isOnline: Bool = true
 
     /// Queue of pending requests
-    public private(set) var pendingRequests: [QueuedRequest] = []
+    public private(set) var pendingRequests: [OfflineQueuedRequest] = []
 
     /// Whether the queue is currently being processed
     public private(set) var isProcessing: Bool = false
@@ -73,7 +73,7 @@ public final class OfflineQueueService {
     // MARK: - Queue Management
 
     /// Queue a request for later execution
-    public func queueRequest(_ request: QueuedRequest) {
+    public func queueRequest(_ request: OfflineQueuedRequest) {
         // Check if queue is full
         if pendingRequests.count >= config.maxQueueSize {
             // Remove oldest low-priority request
@@ -105,7 +105,7 @@ public final class OfflineQueueService {
         }
 
         // Queue for later
-        let request = QueuedRequest(
+        let request = OfflineQueuedRequest(
             id: UUID(),
             type: type,
             priority: priority,
@@ -168,35 +168,20 @@ public final class OfflineQueueService {
         savePendingRequests()
     }
 
-    private func processRequest(_ request: QueuedRequest) async throws {
+    private func processRequest(_ request: OfflineQueuedRequest) async throws {
         logger.info("Processing request: \(request.type.rawValue)")
 
         switch request.type {
         case .chat:
-            // Reconstruct and execute chat request
+            // Chat requests are handled by the ChatManager when replayed
+            // The payload contains serialized messages that can be restored
             if let payload = request.payload,
                let chatRequest = try? JSONDecoder().decode(ChatRequestPayload.self, from: payload)
             {
-                let provider = ProviderRegistry.shared.getProvider(id: chatRequest.providerId)
-                guard let provider else {
-                    throw OfflineQueueError.providerNotAvailable
-                }
-
-                let messages = chatRequest.messages.map { msg in
-                    AIMessage(
-                        id: msg.id,
-                        conversationID: msg.conversationID,
-                        role: AIMessageRole(rawValue: msg.role) ?? .user,
-                        content: .text(msg.content),
-                        timestamp: msg.timestamp,
-                        model: chatRequest.model
-                    )
-                }
-
-                _ = try await provider.chat(
-                    messages: messages,
-                    model: chatRequest.model,
-                    stream: false
+                // Post notification for ChatManager to handle
+                NotificationCenter.default.post(
+                    name: .offlineRequestReplay,
+                    object: chatRequest
                 )
             }
 
@@ -227,7 +212,7 @@ public final class OfflineQueueService {
         pendingRequests.removeAll { $0.id == id }
     }
 
-    private func updateRequest(_ request: QueuedRequest) {
+    private func updateRequest(_ request: OfflineQueuedRequest) {
         if let index = pendingRequests.firstIndex(where: { $0.id == request.id }) {
             pendingRequests[index] = request
         }
@@ -237,7 +222,7 @@ public final class OfflineQueueService {
 
     private func loadPendingRequests() {
         guard let data = UserDefaults.standard.data(forKey: "offline.pendingRequests"),
-              let requests = try? JSONDecoder().decode([QueuedRequest].self, from: data)
+              let requests = try? JSONDecoder().decode([OfflineQueuedRequest].self, from: data)
         else { return }
 
         pendingRequests = requests
@@ -277,7 +262,7 @@ public final class OfflineQueueService {
 // MARK: - Supporting Types
 
 /// A request queued for later execution
-public struct QueuedRequest: Identifiable, Codable, Sendable {
+public struct OfflineQueuedRequest: Identifiable, Codable, Sendable {
     public let id: UUID
     public let type: RequestType
     public let priority: RequestPriority
@@ -375,4 +360,10 @@ public enum OfflineQueueError: LocalizedError {
             "Queue is full"
         }
     }
+}
+
+// MARK: - Notifications
+
+public extension Notification.Name {
+    static let offlineRequestReplay = Notification.Name("thea.offline.requestReplay")
 }
