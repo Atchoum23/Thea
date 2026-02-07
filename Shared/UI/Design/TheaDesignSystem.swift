@@ -809,12 +809,11 @@ public struct TheaSpiralIconView: View {
                     .blur(radius: size * 0.25)
             }
 
-            // Actual app icon spiral artwork
+            // Extracted spiral artwork (transparent background)
             Image("TheaSpiral")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
-                .clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
                 .rotationEffect(.degrees(rotation))
                 .scaleEffect(beatScale)
         }

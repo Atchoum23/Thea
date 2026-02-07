@@ -87,8 +87,8 @@ struct ContentView: View {
         if let conversation = selectedConversation {
             MacChatDetailView(conversation: conversation)
                 .toolbar {
-                    ToolbarItem(placement: .navigation) {
-                        detailToolbarButtons
+                    ToolbarItem(placement: .primaryAction) {
+                        conversationsPanelToggle
                     }
                 }
         } else if let project = selectedProject {
@@ -96,16 +96,7 @@ struct ContentView: View {
         } else {
             // Welcome view with input bar always visible at bottom
             VStack(spacing: 0) {
-                WelcomeView { prompt in
-                    let conversation = chatManager.createConversation(title: "New Conversation")
-                    selectedConversation = conversation
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        NotificationCenter.default.post(
-                            name: Notification.Name.newConversation,
-                            object: prompt
-                        )
-                    }
-                }
+                WelcomeView()
 
                 // Input bar always visible even on welcome screen
                 ChatInputView(
@@ -125,34 +116,23 @@ struct ContentView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .navigation) {
-                    detailToolbarButtons
+                ToolbarItem(placement: .primaryAction) {
+                    conversationsPanelToggle
                 }
             }
         }
     }
 
-    /// Toolbar buttons for the detail pane: new chat + toggle conversations list
-    private var detailToolbarButtons: some View {
-        HStack(spacing: 4) {
-            Button {
-                let conversation = chatManager.createConversation(title: "New Conversation")
-                selectedConversation = conversation
-            } label: {
-                Image(systemName: "plus")
+    /// Toggle button for showing/hiding the conversations list panel (right side of toolbar)
+    private var conversationsPanelToggle: some View {
+        Button {
+            withAnimation {
+                showConversationsList.toggle()
             }
-            .help("New Conversation")
-            .keyboardShortcut("n", modifiers: [.command, .shift])
-
-            Button {
-                withAnimation {
-                    showConversationsList.toggle()
-                }
-            } label: {
-                Image(systemName: showConversationsList ? "sidebar.right" : "sidebar.left")
-            }
-            .help(showConversationsList ? "Hide Conversations" : "Show Conversations")
+        } label: {
+            Image(systemName: showConversationsList ? "sidebar.right" : "sidebar.left")
         }
+        .help(showConversationsList ? "Hide Conversations" : "Show Conversations")
     }
 
     // MARK: - Chat List
