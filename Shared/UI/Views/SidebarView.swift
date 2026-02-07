@@ -53,7 +53,7 @@ struct SidebarView: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Search conversations")
+        .searchable(text: $searchText, placement: .sidebar, prompt: "Search conversations")
         .navigationTitle("Conversations")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
