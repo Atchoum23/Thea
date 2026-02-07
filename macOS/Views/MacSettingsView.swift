@@ -41,7 +41,8 @@ struct MacSettingsView: View {
                     .tag(tab)
             }
         }
-        .frame(width: 680, height: 520)
+        .frame(minWidth: 560, idealWidth: 700, minHeight: 440, idealHeight: 580)
+        .textSelection(.enabled)
     }
 
     @ViewBuilder
@@ -73,7 +74,7 @@ struct MacSettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(maxWidth: 250)
+                    .frame(width: 260)
                 }
 
                 LabeledContent("Font Size") {
@@ -84,7 +85,7 @@ struct MacSettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(maxWidth: 250)
+                    .frame(width: 260)
                     .onChange(of: settingsManager.fontSize) { _, newSize in
                         applyFontSizeToThemeConfig(newSize)
                     }
@@ -98,7 +99,7 @@ struct MacSettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(maxWidth: 250)
+                    .frame(width: 260)
                 }
 
                 LabeledContent("Timestamps") {
@@ -109,7 +110,7 @@ struct MacSettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(maxWidth: 250)
+                    .frame(width: 260)
                 }
             }
 
@@ -366,11 +367,7 @@ struct MacSettingsView: View {
     // MARK: - Shared Components
 
     private var settingsFooter: some View {
-        Section {
-            Text("Changes are saved automatically.")
-                .font(.theaCaption2)
-                .foregroundStyle(.quaternary)
-        }
+        EmptyView()
     }
 
     private func syncStatusRow(

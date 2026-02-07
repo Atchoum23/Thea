@@ -32,6 +32,7 @@ struct ContentView: View {
             detailContent
         }
         .navigationSplitViewStyle(.balanced)
+        .textSelection(.enabled)
         .preferredColorScheme(colorSchemeForTheme)
         .dynamicTypeSize(dynamicTypeSizeForFontSize)
         .onAppear {
