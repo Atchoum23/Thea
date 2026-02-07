@@ -93,19 +93,12 @@ async function executeAction(action) {
 }
 
 function showResult(message) {
-    const content = document.querySelector('.content');
+    const content = document.querySelector('.container');
     const resultDiv = document.createElement('div');
-    resultDiv.style.cssText = `
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        font-size: 14px;
-        animation: slideIn 0.3s ease-out;
-    `;
+    resultDiv.className = 'thea-result';
     resultDiv.textContent = message;
-    content.insertBefore(resultDiv, content.firstChild);
+    const header = content.querySelector('header');
+    header.insertAdjacentElement('afterend', resultDiv);
 
     // Remove after delay
     setTimeout(() => {
@@ -158,28 +151,4 @@ function formatDate(timestamp) {
     return date.toLocaleDateString();
 }
 
-// Add animation styles
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    @keyframes slideOut {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-    }
-`;
-document.head.appendChild(style);
+// Animation styles are defined in popup.css
