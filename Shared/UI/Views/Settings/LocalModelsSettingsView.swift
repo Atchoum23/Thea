@@ -1235,13 +1235,73 @@ struct LocalModelsSettingsView: View {
     }
 
     private func downloadModel(_ modelId: String) {
-        // TODO: Implement actual download
-        print("Downloading model: \(modelId)")
+        Task {
+            do {
+                try await modelManager.downloadModel(id: modelId) { progress in
+                    Task { @MainActor in
+                        // Progress updates handled by modelManager's published properties
+                        if progress >= 1.0 {
+                            await modelManager.refreshModels()
+                        }
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Download failed: \(error.localizedDescription)"
+                    showingError = true
+                }
+            }
+        }
     }
 
     func testOllamaConnection() {
-        // TODO: Implement connection test
-        print("Testing Ollama connection to: \(settingsManager.ollamaURL)")
+        Task {
+            let urlString = settingsManager.ollamaURL.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard let url = URL(string: "\(urlString)/api/tags") else {
+                await MainActor.run {
+                    errorMessage = "Invalid Ollama URL: \(urlString)"
+                    showingError = true
+                }
+                return
+            }
+            do {
+                let (data, response) = try await URLSession.shared.data(from: url)
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    await MainActor.run {
+                        errorMessage = "Invalid response from Ollama"
+                        showingError = true
+                    }
+                    return
+                }
+                if httpResponse.statusCode == 200 {
+                    // Parse the models list for feedback
+                    if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let models = json["models"] as? [[String: Any]]
+                    {
+                        let modelNames = models.compactMap { $0["name"] as? String }
+                        await MainActor.run {
+                            errorMessage = "✅ Connected! Found \(models.count) model(s): \(modelNames.joined(separator: ", "))"
+                            showingError = true
+                        }
+                    } else {
+                        await MainActor.run {
+                            errorMessage = "✅ Connected to Ollama at \(urlString)"
+                            showingError = true
+                        }
+                    }
+                } else {
+                    await MainActor.run {
+                        errorMessage = "Ollama returned status \(httpResponse.statusCode)"
+                        showingError = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Cannot reach Ollama at \(urlString): \(error.localizedDescription)"
+                    showingError = true
+                }
+            }
+        }
     }
 }
 

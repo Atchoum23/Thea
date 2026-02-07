@@ -182,10 +182,52 @@ public actor ContextManager {
         messages: [TokenizedMessage],
         maxTokens: Int
     ) async -> [TokenizedMessage] {
-        // For now, fall back to sliding window
-        // TODO: Implement actual summarization using AI
-        logger.info("Summarization requested but using sliding window fallback")
-        return selectRecentMessages(from: messages, maxTokens: maxTokens)
+        // Build a condensed summary of older messages, then attach recent ones
+        let summaryBudget = Int(Double(maxTokens) * 0.2)
+        let recentBudget = maxTokens - summaryBudget
+
+        let recentMessages = selectRecentMessages(from: messages, maxTokens: recentBudget)
+        let recentSet = Set(recentMessages.map(\.id))
+
+        // Collect older messages not in the recent window
+        let olderMessages = messages.filter { !recentSet.contains($0.id) && $0.role != "system" }
+
+        guard !olderMessages.isEmpty else {
+            return recentMessages
+        }
+
+        // Build a compact conversation digest from older messages
+        var digestParts: [String] = []
+        var digestTokens = 0
+        let estimatedTokensPerChar = 4 // ~4 chars per token
+
+        for msg in olderMessages {
+            let summary = "[\(msg.role)]: \(String(msg.content.prefix(200)))"
+            let estimated = summary.count / estimatedTokensPerChar
+            if digestTokens + estimated > summaryBudget { break }
+            digestParts.append(summary)
+            digestTokens += estimated
+        }
+
+        if digestParts.isEmpty {
+            return recentMessages
+        }
+
+        let summaryContent = "[Earlier conversation summary — \(olderMessages.count) messages condensed]\n" +
+            digestParts.joined(separator: "\n")
+        let summaryMessage = TokenizedMessage(
+            id: UUID().uuidString,
+            role: "system",
+            content: summaryContent,
+            tokenCount: digestTokens
+        )
+
+        logger.info("Summarization: condensed \(olderMessages.count) older messages into \(digestTokens) tokens")
+
+        // Prepend summary before recent messages
+        var result = [summaryMessage]
+        result.append(contentsOf: recentMessages)
+        return result
     }
 
     private func hybridPrepare(
@@ -194,13 +236,49 @@ public actor ContextManager {
     ) async -> [TokenizedMessage] {
         // Reserve 30% for summary, 70% for recent messages
         let recentTokens = Int(Double(maxTokens) * 0.7)
+        let summaryTokens = maxTokens - recentTokens
 
         // Get recent messages
         let recentMessages = selectRecentMessages(from: messages, maxTokens: recentTokens)
+        let recentSet = Set(recentMessages.map(\.id))
 
-        // TODO: Generate summary of older messages and prepend
-        logger.info("Hybrid mode using recent messages (summary TODO)")
+        // Get older messages for summarization
+        let olderMessages = messages.filter { !recentSet.contains($0.id) && $0.role != "system" }
 
-        return recentMessages
+        guard !olderMessages.isEmpty else {
+            return recentMessages
+        }
+
+        // Build compact summary of older messages
+        var summaryParts: [String] = []
+        var tokenCount = 0
+        let estimatedTokensPerChar = 4
+
+        for msg in olderMessages {
+            let condensed = "[\(msg.role)]: \(String(msg.content.prefix(150)))"
+            let estimated = condensed.count / estimatedTokensPerChar
+            if tokenCount + estimated > summaryTokens { break }
+            summaryParts.append(condensed)
+            tokenCount += estimated
+        }
+
+        if summaryParts.isEmpty {
+            return recentMessages
+        }
+
+        let summaryContent = "[Conversation context — \(olderMessages.count) earlier messages]\n" +
+            summaryParts.joined(separator: "\n")
+        let summaryMessage = TokenizedMessage(
+            id: UUID().uuidString,
+            role: "system",
+            content: summaryContent,
+            tokenCount: tokenCount
+        )
+
+        logger.info("Hybrid prepare: \(olderMessages.count) older messages summarized + \(recentMessages.count) recent")
+
+        var result = [summaryMessage]
+        result.append(contentsOf: recentMessages)
+        return result
     }
 }
