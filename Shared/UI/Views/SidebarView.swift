@@ -122,10 +122,11 @@ struct SidebarView: View {
 
 struct ConversationRow: View {
     let conversation: Conversation
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         HStack(spacing: TheaSpacing.md) {
-            VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
+            VStack(alignment: .leading, spacing: scaledSpacing) {
                 Text(conversation.title)
                     .font(.theaBody)
                     .lineLimit(1)
@@ -134,24 +135,25 @@ struct ConversationRow: View {
                     Text(lastMessage.content.textValue)
                         .font(.theaCaption1)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
             }
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: TheaSpacing.xxs) {
+            VStack(alignment: .trailing, spacing: scaledSpacing) {
                 Text(conversation.updatedAt, format: .dateTime.hour().minute())
                     .font(.theaCaption2)
                     .foregroundStyle(.tertiary)
 
                 if conversation.isPinned {
                     Image(systemName: "pin.fill")
-                        .font(.caption2)
+                        .font(.theaCaption2)
                         .foregroundStyle(.secondary)
                 }
             }
         }
+        .padding(.vertical, scaledVerticalPadding)
         .contextMenu {
             Button {
                 ChatManager.shared.togglePin(conversation)
@@ -191,6 +193,28 @@ struct ConversationRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(conversationAccessibilityLabel)
         .accessibilityHint("Double-tap to open conversation")
+    }
+
+    /// Vertical padding scales with dynamic type to prevent clipping
+    private var scaledVerticalPadding: CGFloat {
+        switch dynamicTypeSize {
+        case .xSmall, .small: TheaSpacing.xxs
+        case .medium: TheaSpacing.xs
+        case .large, .xLarge: TheaSpacing.sm
+        case .xxLarge, .xxxLarge: TheaSpacing.md
+        default: TheaSpacing.sm
+        }
+    }
+
+    /// Inner spacing between title and preview scales with font size
+    private var scaledSpacing: CGFloat {
+        switch dynamicTypeSize {
+        case .xSmall, .small: TheaSpacing.xxs
+        case .medium: TheaSpacing.xxs
+        case .large, .xLarge: TheaSpacing.xs
+        case .xxLarge, .xxxLarge: TheaSpacing.sm
+        default: TheaSpacing.xs
+        }
     }
 
     private var conversationAccessibilityLabel: String {
