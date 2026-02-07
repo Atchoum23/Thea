@@ -182,8 +182,153 @@ public actor AsanaClient {
             queryParams: [
                 "workspace": workspace,
                 "owner": owner,
-                "opt_fields": "name,color,created_at"
+                "opt_fields": "name,color,created_at,created_by,custom_field_settings"
             ]
+        )
+        return response.data
+    }
+
+    /// Get a specific portfolio
+    public func getPortfolio(gid: String) async throws -> AsanaPortfolio {
+        let response: AsanaDataResponse<AsanaPortfolio> = try await request(
+            endpoint: "/portfolios/\(gid)",
+            queryParams: ["opt_fields": "name,color,created_at,created_by,custom_field_settings,members,owner"]
+        )
+        return response.data
+    }
+
+    /// Create a portfolio
+    public func createPortfolio(
+        name: String,
+        workspaceGid: String? = nil,
+        color: String? = nil,
+        owner: String? = nil
+    ) async throws -> AsanaPortfolio {
+        let workspace = workspaceGid ?? self.workspaceGid
+        guard let workspace else {
+            throw AsanaError.workspaceRequired
+        }
+
+        var data: [String: Any] = ["name": name, "workspace": workspace]
+        if let color { data["color"] = color }
+        if let owner { data["owner"] = owner }
+
+        let response: AsanaDataResponse<AsanaPortfolio> = try await request(
+            endpoint: "/portfolios",
+            method: "POST",
+            body: ["data": data]
+        )
+        return response.data
+    }
+
+    /// Update a portfolio
+    public func updatePortfolio(gid: String, updates: [String: Any]) async throws -> AsanaPortfolio {
+        let response: AsanaDataResponse<AsanaPortfolio> = try await request(
+            endpoint: "/portfolios/\(gid)",
+            method: "PUT",
+            body: ["data": updates]
+        )
+        return response.data
+    }
+
+    /// Delete a portfolio
+    public func deletePortfolio(gid: String) async throws {
+        let _: AsanaEmptyResponse = try await request(
+            endpoint: "/portfolios/\(gid)",
+            method: "DELETE"
+        )
+    }
+
+    /// Get portfolio items (projects)
+    public func getPortfolioItems(portfolioGid: String) async throws -> [AsanaProject] {
+        let response: AsanaDataResponse<[AsanaProject]> = try await request(
+            endpoint: "/portfolios/\(portfolioGid)/items",
+            queryParams: ["opt_fields": "name,notes,color,archived,due_on,current_status"]
+        )
+        return response.data
+    }
+
+    /// Add item to portfolio
+    public func addItemToPortfolio(portfolioGid: String, itemGid: String, insertBefore: String? = nil, insertAfter: String? = nil) async throws {
+        var data: [String: Any] = ["item": itemGid]
+        if let insertBefore { data["insert_before"] = insertBefore }
+        if let insertAfter { data["insert_after"] = insertAfter }
+
+        let _: AsanaEmptyResponse = try await request(
+            endpoint: "/portfolios/\(portfolioGid)/addItem",
+            method: "POST",
+            body: ["data": data]
+        )
+    }
+
+    /// Remove item from portfolio
+    public func removeItemFromPortfolio(portfolioGid: String, itemGid: String) async throws {
+        let _: AsanaEmptyResponse = try await request(
+            endpoint: "/portfolios/\(portfolioGid)/removeItem",
+            method: "POST",
+            body: ["data": ["item": itemGid]]
+        )
+    }
+
+    /// Add custom field to portfolio
+    public func addCustomFieldToPortfolio(portfolioGid: String, customFieldGid: String, isImportant: Bool = false, insertBefore: String? = nil, insertAfter: String? = nil) async throws -> AsanaCustomFieldSetting {
+        var data: [String: Any] = ["custom_field": customFieldGid, "is_important": isImportant]
+        if let insertBefore { data["insert_before"] = insertBefore }
+        if let insertAfter { data["insert_after"] = insertAfter }
+
+        let response: AsanaDataResponse<AsanaCustomFieldSetting> = try await request(
+            endpoint: "/portfolios/\(portfolioGid)/addCustomFieldSetting",
+            method: "POST",
+            body: ["data": data]
+        )
+        return response.data
+    }
+
+    /// Remove custom field from portfolio
+    public func removeCustomFieldFromPortfolio(portfolioGid: String, customFieldGid: String) async throws {
+        let _: AsanaEmptyResponse = try await request(
+            endpoint: "/portfolios/\(portfolioGid)/removeCustomFieldSetting",
+            method: "POST",
+            body: ["data": ["custom_field": customFieldGid]]
+        )
+    }
+
+    /// Add members to portfolio
+    public func addMembersToPortfolio(portfolioGid: String, members: [String]) async throws -> AsanaPortfolio {
+        let response: AsanaDataResponse<AsanaPortfolio> = try await request(
+            endpoint: "/portfolios/\(portfolioGid)/addMembers",
+            method: "POST",
+            body: ["data": ["members": members]]
+        )
+        return response.data
+    }
+
+    /// Remove members from portfolio
+    public func removeMembersFromPortfolio(portfolioGid: String, members: [String]) async throws -> AsanaPortfolio {
+        let response: AsanaDataResponse<AsanaPortfolio> = try await request(
+            endpoint: "/portfolios/\(portfolioGid)/removeMembers",
+            method: "POST",
+            body: ["data": ["members": members]]
+        )
+        return response.data
+    }
+
+    // MARK: - Portfolio Memberships
+
+    /// Get portfolio memberships
+    public func getPortfolioMemberships(portfolioGid: String) async throws -> [AsanaPortfolioMembership] {
+        let response: AsanaDataResponse<[AsanaPortfolioMembership]> = try await request(
+            endpoint: "/portfolios/\(portfolioGid)/portfolio_memberships",
+            queryParams: ["opt_fields": "user,portfolio"]
+        )
+        return response.data
+    }
+
+    /// Get a specific portfolio membership
+    public func getPortfolioMembership(gid: String) async throws -> AsanaPortfolioMembership {
+        let response: AsanaDataResponse<AsanaPortfolioMembership> = try await request(
+            endpoint: "/portfolio_memberships/\(gid)",
+            queryParams: ["opt_fields": "user,portfolio"]
         )
         return response.data
     }
@@ -191,18 +336,191 @@ public actor AsanaClient {
     // MARK: - Goals
 
     /// Get goals
-    public func getGoals(workspaceGid: String? = nil, teamGid: String? = nil) async throws -> [AsanaGoal] {
+    public func getGoals(
+        workspaceGid: String? = nil,
+        teamGid: String? = nil,
+        projectGid: String? = nil,
+        portfolioGid: String? = nil,
+        timePeriods: [String]? = nil,
+        isWorkspaceLevel: Bool? = nil
+    ) async throws -> [AsanaGoal] {
         let workspace = workspaceGid ?? self.workspaceGid
         guard let workspace else {
             throw AsanaError.workspaceRequired
         }
 
-        var params: [String: String] = ["workspace": workspace, "opt_fields": "name,notes,due_on,status"]
+        var params: [String: String] = [
+            "workspace": workspace,
+            "opt_fields": "name,notes,due_on,start_on,status,owner,html_notes,metric,current_status_update,time_period,is_workspace_level"
+        ]
         if let teamGid { params["team"] = teamGid }
+        if let projectGid { params["project"] = projectGid }
+        if let portfolioGid { params["portfolio"] = portfolioGid }
+        if let timePeriods { params["time_periods"] = timePeriods.joined(separator: ",") }
+        if let isWorkspaceLevel { params["is_workspace_level"] = String(isWorkspaceLevel) }
 
         let response: AsanaDataResponse<[AsanaGoal]> = try await request(
             endpoint: "/goals",
             queryParams: params
+        )
+        return response.data
+    }
+
+    /// Get a specific goal
+    public func getGoal(gid: String) async throws -> AsanaGoal {
+        let response: AsanaDataResponse<AsanaGoal> = try await request(
+            endpoint: "/goals/\(gid)",
+            queryParams: ["opt_fields": "name,notes,due_on,start_on,status,owner,html_notes,metric,current_status_update,time_period,is_workspace_level,likes,num_likes,followers"]
+        )
+        return response.data
+    }
+
+    /// Create a goal
+    public func createGoal(
+        name: String,
+        workspaceGid: String? = nil,
+        teamGid: String? = nil,
+        timePeriodGid: String? = nil,
+        dueOn: String? = nil,
+        startOn: String? = nil,
+        notes: String? = nil,
+        isWorkspaceLevel: Bool = false
+    ) async throws -> AsanaGoal {
+        let workspace = workspaceGid ?? self.workspaceGid
+        guard let workspace else {
+            throw AsanaError.workspaceRequired
+        }
+
+        var data: [String: Any] = [
+            "name": name,
+            "workspace": workspace,
+            "is_workspace_level": isWorkspaceLevel
+        ]
+        if let teamGid { data["team"] = teamGid }
+        if let timePeriodGid { data["time_period"] = timePeriodGid }
+        if let dueOn { data["due_on"] = dueOn }
+        if let startOn { data["start_on"] = startOn }
+        if let notes { data["notes"] = notes }
+
+        let response: AsanaDataResponse<AsanaGoal> = try await request(
+            endpoint: "/goals",
+            method: "POST",
+            body: ["data": data]
+        )
+        return response.data
+    }
+
+    /// Update a goal
+    public func updateGoal(gid: String, updates: [String: Any]) async throws -> AsanaGoal {
+        let response: AsanaDataResponse<AsanaGoal> = try await request(
+            endpoint: "/goals/\(gid)",
+            method: "PUT",
+            body: ["data": updates]
+        )
+        return response.data
+    }
+
+    /// Get parent goals for a goal
+    public func getParentGoals(goalGid: String) async throws -> [AsanaGoal] {
+        let response: AsanaDataResponse<[AsanaGoal]> = try await request(
+            endpoint: "/goals/\(goalGid)/parentGoals"
+        )
+        return response.data
+    }
+
+    // MARK: - Goal Metrics
+
+    /// Create a goal metric
+    public func createGoalMetric(
+        goalGid: String,
+        unit: String,
+        currentValue: Double,
+        targetValue: Double,
+        currencyCode: String? = nil,
+        progressSource: String = "manual"
+    ) async throws -> AsanaGoalMetric {
+        var data: [String: Any] = [
+            "unit": unit,
+            "current_number_value": currentValue,
+            "target_number_value": targetValue,
+            "progress_source": progressSource
+        ]
+        if let currencyCode { data["currency_code"] = currencyCode }
+
+        let response: AsanaDataResponse<AsanaGoalMetric> = try await request(
+            endpoint: "/goals/\(goalGid)/setMetric",
+            method: "POST",
+            body: ["data": data]
+        )
+        return response.data
+    }
+
+    /// Update a goal metric
+    public func updateGoalMetric(goalGid: String, currentValue: Double) async throws -> AsanaGoalMetric {
+        let response: AsanaDataResponse<AsanaGoalMetric> = try await request(
+            endpoint: "/goals/\(goalGid)/setMetricCurrentValue",
+            method: "POST",
+            body: ["data": ["current_number_value": currentValue]]
+        )
+        return response.data
+    }
+
+    // MARK: - Goal Relationships
+
+    /// Get goal relationships
+    public func getGoalRelationships(goalGid: String) async throws -> [AsanaGoalRelationship] {
+        let response: AsanaDataResponse<[AsanaGoalRelationship]> = try await request(
+            endpoint: "/goals/\(goalGid)/goalRelationships",
+            queryParams: ["opt_fields": "relationship_type,resource,goal,created_at"]
+        )
+        return response.data
+    }
+
+    /// Add a supporting relationship to a goal
+    public func addSupportingRelationship(
+        goalGid: String,
+        supportingResourceGid: String,
+        contributionWeight: Double? = nil,
+        insertBefore: String? = nil,
+        insertAfter: String? = nil
+    ) async throws -> AsanaGoalRelationship {
+        var data: [String: Any] = ["supporting_resource": supportingResourceGid]
+        if let contributionWeight { data["contribution_weight"] = contributionWeight }
+        if let insertBefore { data["insert_before"] = insertBefore }
+        if let insertAfter { data["insert_after"] = insertAfter }
+
+        let response: AsanaDataResponse<AsanaGoalRelationship> = try await request(
+            endpoint: "/goals/\(goalGid)/addSupportingRelationship",
+            method: "POST",
+            body: ["data": data]
+        )
+        return response.data
+    }
+
+    /// Remove a supporting relationship from a goal
+    public func removeSupportingRelationship(goalGid: String, supportingResourceGid: String) async throws {
+        let _: AsanaEmptyResponse = try await request(
+            endpoint: "/goals/\(goalGid)/removeSupportingRelationship",
+            method: "POST",
+            body: ["data": ["supporting_resource": supportingResourceGid]]
+        )
+    }
+
+    /// Get a specific goal relationship
+    public func getGoalRelationship(gid: String) async throws -> AsanaGoalRelationship {
+        let response: AsanaDataResponse<AsanaGoalRelationship> = try await request(
+            endpoint: "/goal_relationships/\(gid)",
+            queryParams: ["opt_fields": "relationship_type,resource,goal,created_at,contribution_weight"]
+        )
+        return response.data
+    }
+
+    /// Update a goal relationship
+    public func updateGoalRelationship(gid: String, contributionWeight: Double) async throws -> AsanaGoalRelationship {
+        let response: AsanaDataResponse<AsanaGoalRelationship> = try await request(
+            endpoint: "/goal_relationships/\(gid)",
+            method: "PUT",
+            body: ["data": ["contribution_weight": contributionWeight]]
         )
         return response.data
     }
