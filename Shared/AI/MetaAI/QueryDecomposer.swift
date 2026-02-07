@@ -271,13 +271,74 @@ public final class QueryDecomposer {
         _ results: [SubQueryResult],
         originalQuery: String
     ) async throws -> String {
-        // TODO: Implement AI-based aggregation
-        // For now, use simple concatenation
+        // Get a provider for aggregation
+        guard let provider = getDecompositionProvider() else {
+            // Fallback to simple aggregation
+            return aggregateSimple(results, originalQuery: originalQuery)
+        }
 
-        var aggregated = "Query: \(originalQuery)\n\n"
+        let prompt = createAggregationPrompt(results: results, originalQuery: originalQuery)
 
-        for (index, result) in results.enumerated() {
-            aggregated += "Result \(index + 1):\n\(result.response)\n\n"
+        do {
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: "aggregator"
+            )
+
+            var response = ""
+            let stream = try await provider.chat(
+                messages: [message],
+                model: getDecompositionModelID(for: provider),
+                stream: false
+            )
+
+            for try await chunk in stream {
+                if case .delta(let text) = chunk.type {
+                    response += text
+                }
+            }
+
+            // Return the synthesized response
+            return response.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        } catch {
+            print("⚠️ AI aggregation failed: \(error), using simple aggregation")
+            return aggregateSimple(results, originalQuery: originalQuery)
+        }
+    }
+
+    private func aggregateSimple(
+        _ results: [SubQueryResult],
+        originalQuery: String
+    ) -> String {
+        // Simple fallback aggregation
+        var aggregated = ""
+
+        // Check if all results are successful
+        let successfulResults = results.filter(\.success)
+        let failedResults = results.filter { !$0.success }
+
+        if successfulResults.count == 1 {
+            return successfulResults[0].response
+        }
+
+        if successfulResults.count > 1 {
+            // Combine responses with clear separation
+            for (index, result) in successfulResults.enumerated() {
+                if successfulResults.count > 2 {
+                    aggregated += "**Part \(index + 1):**\n"
+                }
+                aggregated += result.response + "\n\n"
+            }
+        }
+
+        // Append failure notes if any
+        if !failedResults.isEmpty {
+            aggregated += "\n---\n*Note: \(failedResults.count) sub-task(s) could not be completed.*"
         }
 
         return aggregated.trimmingCharacters(in: .whitespacesAndNewlines)
