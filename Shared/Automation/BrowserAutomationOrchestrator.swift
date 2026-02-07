@@ -387,60 +387,60 @@
         // MARK: - Action Execution
 
         /// Execute a single automation action using the appropriate engine.
-        private func executeAction(_ action: AutomationAction) async -> ActionResult {
+        private func executeAction(_ action: AutomationAction) async -> AutomationActionResult {
             do {
                 switch action.type {
                 case let .click(x, y):
                     try await automationEngine.executeAction(.click(x: x, y: y))
-                    return ActionResult(success: true, message: "Clicked at (\(x), \(y))")
+                    return AutomationActionResult(success: true, message: "Clicked at (\(x), \(y))")
 
                 case let .doubleClick(x, y):
                     try await automationEngine.executeAction(.click(x: x, y: y))
                     try await Task.sleep(for: .milliseconds(50))
                     try await automationEngine.executeAction(.click(x: x, y: y))
-                    return ActionResult(success: true, message: "Double-clicked at (\(x), \(y))")
+                    return AutomationActionResult(success: true, message: "Double-clicked at (\(x), \(y))")
 
                 case let .rightClick(x, y):
                     try await automationEngine.executeAction(.click(x: x, y: y))
-                    return ActionResult(success: true, message: "Right-clicked at (\(x), \(y))")
+                    return AutomationActionResult(success: true, message: "Right-clicked at (\(x), \(y))")
 
                 case let .type(text):
                     try await automationEngine.executeAction(.type(text: text))
-                    return ActionResult(success: true, message: "Typed \(text.count) chars")
+                    return AutomationActionResult(success: true, message: "Typed \(text.count) chars")
 
                 case let .keyCombo(key, modifiers):
                     let engineModifiers = modifiers.compactMap { AutomationEngine.KeyModifier(rawValue: $0) }
                     try await automationEngine.executeAction(.keyPress(key: key, modifiers: engineModifiers))
-                    return ActionResult(success: true, message: "Key combo: \(modifiers.joined(separator: "+"))+\(key)")
+                    return AutomationActionResult(success: true, message: "Key combo: \(modifiers.joined(separator: "+"))+\(key)")
 
                 case let .scroll(direction, amount):
                     let engineDir = AutomationEngine.ScrollDirection(rawValue: direction.rawValue) ?? .down
                     try await automationEngine.executeAction(.scroll(direction: engineDir, amount: amount))
-                    return ActionResult(success: true, message: "Scrolled \(direction.rawValue) x\(amount)")
+                    return AutomationActionResult(success: true, message: "Scrolled \(direction.rawValue) x\(amount)")
 
                 case let .navigate(url):
                     let service = BrowserAutomationService()
                     try await service.navigate(to: url)
-                    return ActionResult(success: true, message: "Navigated to \(url)")
+                    return AutomationActionResult(success: true, message: "Navigated to \(url)")
 
                 case let .jsExecute(script):
                     let service = BrowserAutomationService()
                     _ = try await service.executeJavaScript(script)
-                    return ActionResult(success: true, message: "JS executed")
+                    return AutomationActionResult(success: true, message: "JS executed")
 
                 case let .wait(seconds):
                     try await Task.sleep(for: .seconds(seconds))
-                    return ActionResult(success: true, message: "Waited \(seconds)s")
+                    return AutomationActionResult(success: true, message: "Waited \(seconds)s")
 
                 case .screenshot:
                     try await automationEngine.executeAction(.screenshot)
-                    return ActionResult(success: true, message: "Screenshot captured")
+                    return AutomationActionResult(success: true, message: "Screenshot captured")
 
                 case let .done(reason):
-                    return ActionResult(success: true, message: reason)
+                    return AutomationActionResult(success: true, message: reason)
                 }
             } catch {
-                return ActionResult(success: false, message: error.localizedDescription)
+                return AutomationActionResult(success: false, message: error.localizedDescription)
             }
         }
     }

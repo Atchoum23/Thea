@@ -18,7 +18,7 @@
         public let description: String
         public let confidence: Double
         public let timestamp: Date
-        public var result: ActionResult?
+        public var result: AutomationActionResult?
 
         public init(
             type: ActionType,
@@ -100,7 +100,7 @@
     // MARK: - Action Result
 
     /// Result of executing an automation action.
-    public struct ActionResult: Sendable {
+    public struct AutomationActionResult: Sendable {
         public let success: Bool
         public let message: String?
         public let timestamp: Date

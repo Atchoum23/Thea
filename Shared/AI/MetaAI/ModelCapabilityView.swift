@@ -7,8 +7,8 @@ import SwiftUI
 @MainActor
 public struct ModelCapabilityView: View {
     @State private var database = ModelCapabilityDatabase.shared
-    @State private var selectedModel: ModelCapability?
-    @State private var selectedTaskType: ModelCapability.TaskType?
+    @State private var selectedModel: ModelCapabilityRecord?
+    @State private var selectedTaskType: ModelCapabilityRecordRecord.CapabilityTaskType?
     @State private var searchText = ""
     @State private var showingCostCalculator = false
 
@@ -58,7 +58,7 @@ public struct ModelCapabilityView: View {
             // Model list
             List(filteredModels, selection: $selectedModel) { model in
                 ModelCapabilityRow(model: model)
-                    .tag(model as ModelCapability?)
+                    .tag(model as ModelCapabilityRecord?)
             }
             .listStyle(.sidebar)
         }
@@ -96,7 +96,7 @@ public struct ModelCapabilityView: View {
                     selectedTaskType = nil
                 }
 
-                ForEach(ModelCapability.TaskType.allCases, id: \.self) { taskType in
+                ForEach(ModelCapabilityRecordRecord.CapabilityTaskType.allCases, id: \.self) { taskType in
                     TaskTypeButton(
                         taskType: taskType,
                         isSelected: selectedTaskType == taskType
@@ -110,7 +110,7 @@ public struct ModelCapabilityView: View {
         }
     }
 
-    private var filteredModels: [ModelCapability] {
+    private var filteredModels: [ModelCapabilityRecord] {
         var filtered = database.models
 
         // Filter by search text
@@ -132,7 +132,7 @@ public struct ModelCapabilityView: View {
 
     // MARK: - Model Detail View
 
-    private func modelDetailView(model: ModelCapability) -> some View {
+    private func modelDetailView(model: ModelCapabilityRecord) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Header
@@ -162,7 +162,7 @@ public struct ModelCapabilityView: View {
         }
     }
 
-    private func modelHeader(model: ModelCapability) -> some View {
+    private func modelHeader(model: ModelCapabilityRecord) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -193,7 +193,7 @@ public struct ModelCapabilityView: View {
         }
     }
 
-    private func capabilitiesSection(model: ModelCapability) -> some View {
+    private func capabilitiesSection(model: ModelCapabilityRecord) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Strengths")
                 .font(.headline)
@@ -212,7 +212,7 @@ public struct ModelCapabilityView: View {
         }
     }
 
-    private func specificationsSection(model: ModelCapability) -> some View {
+    private func specificationsSection(model: ModelCapabilityRecord) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Specifications")
                 .font(.headline)
@@ -225,7 +225,7 @@ public struct ModelCapabilityView: View {
         }
     }
 
-    private func pricingSection(model: ModelCapability) -> some View {
+    private func pricingSection(model: ModelCapabilityRecord) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Pricing")
@@ -247,7 +247,7 @@ public struct ModelCapabilityView: View {
         }
     }
 
-    private func metadataSection(model: ModelCapability) -> some View {
+    private func metadataSection(model: ModelCapabilityRecord) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Metadata")
                 .font(.headline)
@@ -346,7 +346,7 @@ public struct ModelCapabilityView: View {
 // MARK: - Supporting Views
 
 private struct ModelCapabilityRow: View {
-    let model: ModelCapability
+    let model: ModelCapabilityRecord
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -374,7 +374,7 @@ private struct ModelCapabilityRow: View {
 }
 
 private struct TaskTypeButton: View {
-    let taskType: ModelCapability.TaskType?
+    let taskType: ModelCapabilityRecordRecord.CapabilityTaskType?
     let isSelected: Bool
     let action: () -> Void
 
@@ -457,7 +457,7 @@ private struct ModelFlowLayout: Layout {
 // MARK: - Cost Calculator Sheet
 
 private struct CostCalculatorSheet: View {
-    let model: ModelCapability
+    let model: ModelCapabilityRecord
     @State private var inputTokens: Double = 100_000
     @State private var outputTokens: Double = 50000
     @Environment(\.dismiss) private var dismiss
