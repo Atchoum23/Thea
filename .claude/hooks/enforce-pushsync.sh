@@ -6,11 +6,7 @@
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-# Match "git push" as actual command, NOT inside alias definitions or quoted strings
-# Skip if the command is setting a git config (alias definition contains "git push" as a string)
-if echo "$COMMAND" | grep -qE '\bgit\s+config\b'; then
-  exit 0
-fi
+# Match "git push" but NOT "git pushsync"
 if echo "$COMMAND" | grep -qE '\bgit\s+push\b' && ! echo "$COMMAND" | grep -qE '\bgit\s+pushsync\b'; then
   cat >&2 <<'EOF'
 BLOCKED: Use "git pushsync" instead of "git push".
