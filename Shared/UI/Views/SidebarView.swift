@@ -150,34 +150,41 @@ struct SidebarView: View {
 struct ConversationRow: View {
     let conversation: Conversation
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @StateObject private var projectManager = ProjectManager.shared
 
     var body: some View {
-        HStack(spacing: TheaSpacing.md) {
+        HStack(spacing: TheaSpacing.sm) {
             VStack(alignment: .leading, spacing: scaledSpacing) {
                 Text(conversation.title)
-                    .font(.theaBody)
+                    .font(.system(size: 13, weight: .medium))
                     .lineLimit(1)
+                    .truncationMode(.tail)
 
-                if let lastMessage = conversation.messages.last {
+                if let lastMessage = conversation.messages.sorted(by: { $0.timestamp < $1.timestamp }).last {
                     Text(lastMessage.content.textValue)
-                        .font(.theaCaption1)
+                        .font(.system(size: 11))
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
+                        .lineLimit(1)
                 }
             }
 
-            Spacer()
+            Spacer(minLength: 4)
 
-            VStack(alignment: .trailing, spacing: scaledSpacing) {
+            VStack(alignment: .trailing, spacing: 2) {
                 Text(conversation.updatedAt, format: .dateTime.hour().minute())
-                    .font(.theaCaption2)
+                    .font(.system(size: 10))
                     .foregroundStyle(.tertiary)
 
                 if conversation.isPinned {
                     Image(systemName: "pin.fill")
-                        .font(.theaCaption2)
+                        .font(.system(size: 9))
                         .foregroundStyle(.secondary)
                 }
+
+                // Show message count as a subtle badge
+                Text("\(conversation.messages.count)")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.quaternary)
             }
         }
         .padding(.vertical, scaledVerticalPadding)
@@ -189,6 +196,27 @@ struct ConversationRow: View {
                     conversation.isPinned ? "Unpin" : "Pin",
                     systemImage: conversation.isPinned ? "pin.slash" : "pin"
                 )
+            }
+
+            Divider()
+
+            // Project/workspace operations
+            if !projectManager.projects.isEmpty {
+                Menu("Move to Project") {
+                    ForEach(projectManager.projects) { project in
+                        Button(project.title) {
+                            projectManager.addConversation(conversation, to: project)
+                        }
+                    }
+
+                    if let projectID = conversation.projectID,
+                       let project = projectManager.projects.first(where: { $0.id == projectID }) {
+                        Divider()
+                        Button("Remove from \(project.title)") {
+                            projectManager.removeConversation(conversation, from: project)
+                        }
+                    }
+                }
             }
 
             Divider()
