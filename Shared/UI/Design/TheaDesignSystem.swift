@@ -408,21 +408,22 @@ public struct PulsingGlowModifier: ViewModifier {
     let isActive: Bool
 
     @State private var glowOpacity: Double = 0.3
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public func body(content: Content) -> some View {
         content
             .shadow(
-                color: isActive ? color.opacity(glowOpacity) : .clear,
+                color: isActive ? color.opacity(reduceMotion ? 0.5 : glowOpacity) : .clear,
                 radius: 20
             )
             .onAppear {
-                if isActive {
-                    withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                        glowOpacity = 0.6
-                    }
+                guard !reduceMotion, isActive else { return }
+                withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                    glowOpacity = 0.6
                 }
             }
             .onChange(of: isActive) { _, active in
+                guard !reduceMotion else { return }
                 if active {
                     withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
                         glowOpacity = 0.6
@@ -787,6 +788,7 @@ public struct TheaSpiralIconView: View {
 
     @State private var rotation: Double = 0
     @State private var glowIntensity: Double = 0.5
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(size: CGFloat = 40, isThinking: Bool = false, showGlow: Bool = true) {
         self.size = size
@@ -833,6 +835,10 @@ public struct TheaSpiralIconView: View {
     }
 
     private func startThinkingAnimation() {
+        guard !reduceMotion else {
+            glowIntensity = 0.7
+            return
+        }
         withAnimation(.linear(duration: 3.0).repeatForever(autoreverses: false)) {
             rotation = 360
         }
@@ -842,8 +848,9 @@ public struct TheaSpiralIconView: View {
     }
 
     private func stopThinkingAnimation() {
-        withAnimation(.easeOut(duration: 0.5)) {
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.5)) {
             glowIntensity = 0.5
+            rotation = 0
         }
     }
 }
@@ -853,6 +860,7 @@ public struct TheaSpiralIconView: View {
 /// Golden typing dots
 public struct TheaTypingIndicator: View {
     @State private var dotAnimations = [false, false, false]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init() {}
 
@@ -862,11 +870,12 @@ public struct TheaTypingIndicator: View {
                 Circle()
                     .fill(TheaBrandColors.gold)
                     .frame(width: 8, height: 8)
-                    .scaleEffect(dotAnimations[index] ? 1.2 : 0.8)
+                    .scaleEffect(reduceMotion ? 1.0 : (dotAnimations[index] ? 1.2 : 0.8))
                     .opacity(dotAnimations[index] ? 1.0 : 0.5)
             }
         }
         .onAppear {
+            guard !reduceMotion else { return }
             animateDots()
         }
     }
