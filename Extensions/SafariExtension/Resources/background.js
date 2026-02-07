@@ -1,28 +1,32 @@
 // Thea Safari Extension - Background Script
 // Handles extension lifecycle and messaging
 
+// Use browser.menus (Safari) with fallback to browser.contextMenus (Chrome compat)
+const menus = browser.menus || browser.contextMenus;
+
 // Context menu setup
 browser.runtime.onInstalled.addListener(() => {
-    // Create context menu items
-    browser.contextMenus.create({
+    if (!menus) return;
+
+    menus.create({
         id: "thea-ask",
         title: "Ask Thea about \"%s\"",
         contexts: ["selection"]
     });
 
-    browser.contextMenus.create({
+    menus.create({
         id: "thea-summarize",
         title: "Summarize with Thea",
         contexts: ["page", "link"]
     });
 
-    browser.contextMenus.create({
+    menus.create({
         id: "thea-save",
         title: "Save to Thea Memory",
         contexts: ["selection", "link", "image"]
     });
 
-    browser.contextMenus.create({
+    menus.create({
         id: "thea-translate",
         title: "Translate with Thea",
         contexts: ["selection"]
@@ -30,22 +34,24 @@ browser.runtime.onInstalled.addListener(() => {
 });
 
 // Handle context menu clicks
-browser.contextMenus.onClicked.addListener((info, tab) => {
-    switch (info.menuItemId) {
-        case "thea-ask":
-            handleAsk(info.selectionText, tab);
-            break;
-        case "thea-summarize":
-            handleSummarize(info.pageUrl || info.linkUrl, tab);
-            break;
-        case "thea-save":
-            handleSave(info, tab);
-            break;
-        case "thea-translate":
-            handleTranslate(info.selectionText, tab);
-            break;
-    }
-});
+if (menus) {
+    menus.onClicked.addListener((info, tab) => {
+        switch (info.menuItemId) {
+            case "thea-ask":
+                handleAsk(info.selectionText, tab);
+                break;
+            case "thea-summarize":
+                handleSummarize(info.pageUrl || info.linkUrl, tab);
+                break;
+            case "thea-save":
+                handleSave(info, tab);
+                break;
+            case "thea-translate":
+                handleTranslate(info.selectionText, tab);
+                break;
+        }
+    });
+}
 
 // Handle keyboard shortcuts
 browser.commands.onCommand.addListener((command) => {
@@ -65,7 +71,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         browser.runtime.sendNativeMessage("app.thea.safari", message.data)
             .then(response => sendResponse(response))
             .catch(error => sendResponse({ error: error.message }));
-        return true; // Keep channel open for async response
+        return true;
     }
 
     switch (message.action) {
@@ -80,7 +86,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return true;
 
         case "trackVisit":
-            // Send to native for tracking
             browser.runtime.sendNativeMessage("app.thea.safari", {
                 action: "trackBrowsing",
                 url: message.url,
@@ -115,89 +120,93 @@ browser.tabs.onActivated.addListener((activeInfo) => {
                 title: tab.title
             }).catch(() => {});
         }
-    });
-});
-
-// Handle page complete loads
-browser.webNavigation.onCompleted.addListener((details) => {
-    if (details.frameId === 0) { // Main frame only
-        browser.tabs.get(details.tabId).then((tab) => {
-            browser.runtime.sendNativeMessage("app.thea.safari", {
-                action: "trackBrowsing",
-                url: tab.url,
-                title: tab.title
-            }).catch(() => {});
-        });
-    }
+    }).catch(() => {});
 });
 
 // Action handlers
 async function handleAsk(text, tab) {
-    const response = await browser.runtime.sendNativeMessage("app.thea.safari", {
-        action: "analyzeContent",
-        content: text,
-        url: tab.url
-    });
-
-    if (response.quickSummary) {
-        browser.tabs.sendMessage(tab.id, {
-            action: "showNotification",
-            title: "Thea",
-            message: response.quickSummary
+    try {
+        const response = await browser.runtime.sendNativeMessage("app.thea.safari", {
+            action: "analyzeContent",
+            content: text,
+            url: tab.url
         });
+
+        if (response && response.quickSummary) {
+            browser.tabs.sendMessage(tab.id, {
+                action: "showNotification",
+                title: "Thea",
+                message: response.quickSummary
+            });
+        }
+    } catch (err) {
+        console.error("handleAsk error:", err);
     }
 }
 
 async function handleSummarize(url, tab) {
-    browser.tabs.sendMessage(tab.id, { action: "showLoading" });
+    try {
+        browser.tabs.sendMessage(tab.id, { action: "showLoading" });
 
-    const response = await browser.runtime.sendNativeMessage("app.thea.safari", {
-        action: "analyzeContent",
-        content: await getPageContent(tab.id),
-        url: url
-    });
+        const content = await getPageContent(tab.id);
+        const response = await browser.runtime.sendNativeMessage("app.thea.safari", {
+            action: "analyzeContent",
+            content: content,
+            url: url
+        });
 
-    browser.tabs.sendMessage(tab.id, {
-        action: "showResult",
-        title: "Summary",
-        content: response.quickSummary || response.message
-    });
+        browser.tabs.sendMessage(tab.id, {
+            action: "showResult",
+            title: "Summary",
+            content: (response && response.quickSummary) || "Could not summarize"
+        });
+    } catch (err) {
+        console.error("handleSummarize error:", err);
+    }
 }
 
 async function handleSave(info, tab) {
-    const data = {
-        url: tab.url,
-        title: tab.title,
-        selection: info.selectionText,
-        linkUrl: info.linkUrl,
-        imageUrl: info.srcUrl,
-        timestamp: Date.now()
-    };
+    try {
+        const data = {
+            url: tab.url,
+            title: tab.title,
+            selection: info.selectionText,
+            linkUrl: info.linkUrl,
+            imageUrl: info.srcUrl,
+            timestamp: Date.now()
+        };
 
-    await browser.runtime.sendNativeMessage("app.thea.safari", {
-        action: "saveToMemory",
-        data: data
-    });
+        await browser.runtime.sendNativeMessage("app.thea.safari", {
+            action: "saveToMemory",
+            data: data
+        });
 
-    browser.tabs.sendMessage(tab.id, {
-        action: "showNotification",
-        title: "Saved to Memory",
-        message: "Content saved to Thea"
-    });
+        browser.tabs.sendMessage(tab.id, {
+            action: "showNotification",
+            title: "Saved to Memory",
+            message: "Content saved to Thea"
+        });
+    } catch (err) {
+        console.error("handleSave error:", err);
+    }
 }
 
 async function handleTranslate(text, tab) {
-    await browser.runtime.sendNativeMessage("app.thea.safari", {
-        action: "executeAction",
-        actionId: "translate",
-        params: { text: text }
-    });
+    try {
+        await browser.runtime.sendNativeMessage("app.thea.safari", {
+            action: "executeAction",
+            actionId: "translate",
+            params: { text: text }
+        });
 
-    browser.tabs.sendMessage(tab.id, {
-        action: "showNotification",
-        title: "Translation",
-        message: "Open Thea for translation"
-    });
+        browser.tabs.sendMessage(tab.id, {
+            action: "showNotification",
+            title: "Translation",
+            message: "Open Thea for translation"
+        });
+    } catch (err) {
+        console.error("handleTranslate error:", err);
+    }
 }
 
 async function getPageContent(tabId) {

@@ -11,14 +11,15 @@
     "permissions": [
         "activeTab",
         "storage",
-        "contextMenus"
+        "menus",
+        "nativeMessaging"
     ],
     "host_permissions": [
         "<all_urls>"
     ],
     "background": {
-        "service_worker": "background.js",
-        "type": "module"
+        "scripts": ["background.js"],
+        "persistent": false
     },
     "content_scripts": [
         {
