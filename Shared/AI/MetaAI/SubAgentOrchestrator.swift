@@ -26,10 +26,10 @@ final class SubAgentOrchestrator {
     static let shared = SubAgentOrchestrator()
 
     private(set) var activeAgents: [SubAgent] = []
-    private(set) var completedTasks: [AgentTask] = []
+    private(set) var completedTasks: [SubAgentTask] = []
     private(set) var isOrchestrating: Bool = false
 
-    private var taskQueue: [AgentTask] = []
+    private var taskQueue: [SubAgentTask] = []
     private var agentPool: [AgentType: [SubAgent]] = [:]
 
     // Configuration accessor
@@ -747,7 +747,7 @@ struct OrchestrationProgress: Sendable {
 
 // MARK: - Agent Task
 
-struct AgentTask: Identifiable, Codable {
+struct SubAgentTask: Identifiable, Codable {
     let id: UUID
     let title: String
     let description: String
