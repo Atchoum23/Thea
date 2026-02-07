@@ -325,16 +325,4 @@ public struct AnticipatedUserAction: Sendable {
     }
 }
 
-public struct AnticipationFeedback: Sendable {
-    public let anticipationId: UUID
-    public let wasAccepted: Bool
-    public let wasHelpful: Bool?
-    public let timestamp: Date
-
-    public init(anticipationId: UUID, wasAccepted: Bool, wasHelpful: Bool? = nil) {
-        self.anticipationId = anticipationId
-        self.wasAccepted = wasAccepted
-        self.wasHelpful = wasHelpful
-        self.timestamp = Date()
-    }
-}
+// AnticipationFeedback is defined in AAnticipatoryCommonTypes.swift
