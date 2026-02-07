@@ -780,13 +780,15 @@ public struct TheaStreamingIndicatorView: View {
 
 // MARK: - THEA Spiral Icon
 
-/// Animated spiral icon representing THEA's intelligence
+/// Animated spiral icon using the actual app icon artwork.
+/// Features counter-clockwise rotation and a subtle breathing/heartbeat scale effect.
 public struct TheaSpiralIconView: View {
     let size: CGFloat
     var isThinking: Bool = false
     var showGlow: Bool = true
 
     @State private var rotation: Double = 0
+    @State private var beatScale: CGFloat = 1.0
     @State private var glowIntensity: Double = 0.5
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -802,25 +804,23 @@ public struct TheaSpiralIconView: View {
             if showGlow {
                 Circle()
                     .fill(TheaBrandColors.coreGlowGradient)
-                    .frame(width: size * 1.5, height: size * 1.5)
+                    .frame(width: size * 1.4, height: size * 1.4)
                     .opacity(glowIntensity)
-                    .blur(radius: size * 0.2)
+                    .blur(radius: size * 0.25)
             }
 
-            // Spiral (using hurricane SF Symbol - closest to our spiral)
-            Image(systemName: "hurricane")
-                .font(.system(size: size * 0.6, weight: .medium))
-                .foregroundStyle(TheaBrandColors.spiralGradient)
+            // Actual app icon spiral artwork
+            Image("TheaSpiral")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
                 .rotationEffect(.degrees(rotation))
-
-            // Core glow dot
-            Circle()
-                .fill(TheaBrandColors.coreGlow)
-                .frame(width: size * 0.15, height: size * 0.15)
-                .shadow(color: TheaBrandColors.gold, radius: 4)
+                .scaleEffect(beatScale)
         }
-        .frame(width: size, height: size)
+        .frame(width: size * 1.1, height: size * 1.1)
         .onAppear {
+            startIdleAnimations()
             if isThinking {
                 startThinkingAnimation()
             }
@@ -834,24 +834,46 @@ public struct TheaSpiralIconView: View {
         }
     }
 
+    /// Subtle idle animations: slow CCW rotation + gentle breathing beat
+    private func startIdleAnimations() {
+        guard !reduceMotion else { return }
+
+        // Slow counter-clockwise rotation: one full turn per 80 seconds
+        withAnimation(.linear(duration: 80).repeatForever(autoreverses: false)) {
+            rotation = -360
+        }
+
+        // Subtle heartbeat/breathing scale: gentle pulse every 4 seconds
+        withAnimation(.easeInOut(duration: 4.0).repeatForever(autoreverses: true)) {
+            beatScale = 1.04
+        }
+    }
+
     private func startThinkingAnimation() {
         guard !reduceMotion else {
             glowIntensity = 0.7
+            beatScale = 1.06
             return
         }
-        withAnimation(.linear(duration: 3.0).repeatForever(autoreverses: false)) {
-            rotation = 360
+        // Faster CCW rotation when thinking
+        withAnimation(.linear(duration: 4.0).repeatForever(autoreverses: false)) {
+            rotation = -360
+        }
+        // Stronger pulse when thinking
+        withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+            beatScale = 1.08
         }
         withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-            glowIntensity = 0.8
+            glowIntensity = 0.85
         }
     }
 
     private func stopThinkingAnimation() {
+        // Return to idle animations
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.5)) {
             glowIntensity = 0.5
-            rotation = 0
         }
+        startIdleAnimations()
     }
 }
 
