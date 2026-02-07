@@ -8,102 +8,220 @@
 </head>
 <body>
   <div class="container">
+    <!-- Header -->
     <header>
       <div class="logo">
-        <img src="../icons/icon48.png" alt="Thea" width="32" height="32">
+        <img src="../icons/icon48.png" alt="Thea" width="28" height="28">
         <h1>Thea</h1>
       </div>
-      <button id="settings-btn" class="icon-btn" title="Settings">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </button>
+      <div class="header-actions">
+        <button id="sidebar-btn" class="icon-btn" title="Open AI Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
     </header>
 
-    <section class="status-section">
-      <div class="status-indicator" id="status">
-        <span class="status-dot"></span>
-        <span class="status-text">Connecting...</span>
+    <!-- Stats Dashboard -->
+    <section class="stats-dashboard">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-blocked">0</span>
+        <span class="stat-label">Blocked</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-trackers">0</span>
+        <span class="stat-label">Trackers</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-cookies">0</span>
+        <span class="stat-label">Cookies</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-memories">0</span>
+        <span class="stat-label">Memories</span>
       </div>
     </section>
 
-    <section class="quick-actions">
-      <h2>Quick Actions</h2>
+    <!-- Tab Navigation -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="actions">Actions</button>
+      <button class="tab" data-tab="protection">Shield</button>
+      <button class="tab" data-tab="tools">Tools</button>
+    </nav>
+
+    <!-- Tab: Actions -->
+    <div class="tab-content active" id="tab-actions">
       <div class="action-grid">
-        <button class="action-btn" id="summarize-btn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="action-btn" id="summarize-btn" title="Summarize page">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
+            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
             <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
           </svg>
           <span>Summarize</span>
         </button>
-        <button class="action-btn" id="dark-mode-btn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        <button class="action-btn" id="reader-btn" title="Reader view">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
           </svg>
-          <span>Dark Mode</span>
+          <span>Reader</span>
         </button>
-        <button class="action-btn" id="clean-page-btn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
+        <button class="action-btn" id="ai-sidebar-btn" title="Open AI sidebar">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
           </svg>
-          <span>Clean Page</span>
+          <span>Ask AI</span>
         </button>
-        <button class="action-btn" id="save-memory-btn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="action-btn" id="save-memory-btn" title="Save to memory">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
             <polyline points="17 21 17 13 7 13 7 21"/>
             <polyline points="7 3 7 8 15 8"/>
           </svg>
-          <span>Save to Memory</span>
+          <span>Memory</span>
         </button>
-      </div>
-    </section>
-
-    <section class="chat-section">
-      <h2>Ask Thea</h2>
-      <div class="chat-input-container">
-        <input type="text" id="chat-input" placeholder="Ask about this page...">
-        <button id="send-btn" class="icon-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="22" y1="2" x2="11" y2="13"/>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        <button class="action-btn" id="pick-element-btn" title="Hide page element">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
           </svg>
+          <span>Picker</span>
+        </button>
+        <button class="action-btn" id="passwords-btn" title="Password manager">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>Passwords</span>
         </button>
       </div>
-      <div id="chat-response" class="chat-response hidden"></div>
-    </section>
+    </div>
 
-    <section class="protection-section">
-      <h2>Page Protection</h2>
+    <!-- Tab: Protection -->
+    <div class="tab-content" id="tab-protection">
       <div class="toggle-row">
-        <span>Ad Blocking</span>
+        <div class="toggle-info">
+          <span class="toggle-label">Ad Blocking</span>
+          <span class="toggle-desc">Block ads and trackers</span>
+        </div>
         <label class="toggle">
-          <input type="checkbox" id="ad-blocking" checked>
+          <input type="checkbox" id="toggle-adblock" checked>
           <span class="slider"></span>
         </label>
       </div>
       <div class="toggle-row">
-        <span>Tracker Blocking</span>
+        <div class="toggle-info">
+          <span class="toggle-label">Privacy Shield</span>
+          <span class="toggle-desc">Fingerprint & tracking protection</span>
+        </div>
         <label class="toggle">
-          <input type="checkbox" id="tracker-blocking" checked>
+          <input type="checkbox" id="toggle-privacy" checked>
           <span class="slider"></span>
         </label>
       </div>
-      <div class="stats">
-        <span id="blocked-count">0</span> blocked on this page
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">Cookie Auto-Decline</span>
+          <span class="toggle-desc">Auto-reject cookie banners</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-cookies" checked>
+          <span class="slider"></span>
+        </label>
       </div>
-    </section>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">Email Protection</span>
+          <span class="toggle-desc">Hide My Email aliases</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-email" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">Password Manager</span>
+          <span class="toggle-desc">Autofill & save passwords</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-passwords" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
 
+      <div class="icloud-status" id="icloud-status">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+        </svg>
+        <span id="icloud-text">iCloud: Checking...</span>
+      </div>
+    </div>
+
+    <!-- Tab: Tools -->
+    <div class="tab-content" id="tab-tools">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">Dark Mode</span>
+          <span class="toggle-desc" id="dark-theme-name">21 themes available</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-darkmode">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">Video Speed</span>
+          <span class="toggle-desc">Control playback speed</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-video" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">AI Assistant</span>
+          <span class="toggle-desc">Sidebar & quick actions</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-ai" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">Memory System</span>
+          <span class="toggle-desc">Save & recall context</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-memory" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="shortcuts-info">
+        <h3>Keyboard Shortcuts</h3>
+        <div class="shortcut"><kbd>Alt+T</kbd> Open popup</div>
+        <div class="shortcut"><kbd>Alt+D</kbd> Dark mode</div>
+        <div class="shortcut"><kbd>Alt+Space</kbd> AI sidebar</div>
+        <div class="shortcut"><kbd>Alt+P</kbd> Reader view</div>
+        <div class="shortcut"><kbd>Alt+V</kbd> Video speed</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
     <footer>
       <a href="#" id="open-app-btn">Open Thea App</a>
-      <span class="version">v1.0.0</span>
+      <span class="version">v2.0.0</span>
     </footer>
   </div>
 

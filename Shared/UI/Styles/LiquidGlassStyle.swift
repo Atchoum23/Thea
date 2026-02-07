@@ -57,9 +57,9 @@ struct CircularGlassModifier: ViewModifier {
     }
 }
 
-// MARK: - Glass Card Modifier
+// MARK: - Simple Glass Card Modifier
 
-struct GlassCardModifier: ViewModifier {
+struct SimpleGlassCardModifier: ViewModifier {
     var cornerRadius: CGFloat = TheaCornerRadius.card
     var padding: CGFloat = TheaSpacing.lg
 
