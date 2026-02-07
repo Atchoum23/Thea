@@ -1,22 +1,71 @@
+import AVFoundation
+import Contacts
+import CoreLocation
+import Speech
 import SwiftUI
+import UserNotifications
+
+// MARK: - Permission State
+
+private enum MacPermissionState {
+    case granted
+    case denied
+    case notDetermined
+    case unknown
+
+    var label: String {
+        switch self {
+        case .granted: "Granted"
+        case .denied: "Denied"
+        case .notDetermined: "Not Set"
+        case .unknown: "Unknown"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .granted: .green
+        case .denied: .red
+        case .notDetermined: .gray
+        case .unknown: .gray
+        }
+    }
+}
 
 // MARK: - Window Resizable Helper
 
 /// Invisible NSView that forces its host NSWindow to accept the `.resizable` style mask.
-/// SwiftUI's `Settings` scene strips `.resizable` — this re-injects it from AppKit.
+/// SwiftUI's `Settings` scene actively strips `.resizable` — we use KVO to re-inject
+/// it every time the system removes it, ensuring the resize handle always appears.
 private struct WindowResizableHelper: NSViewRepresentable {
     func makeNSView(context _: Context) -> NSView {
-        let view = ResizableInjectorView()
-        return view
+        ResizableInjectorView()
     }
 
     func updateNSView(_: NSView, context _: Context) {}
 
     private class ResizableInjectorView: NSView {
+        private var observation: NSKeyValueObservation?
+
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            guard let window else { return }
+            guard let window else {
+                observation = nil
+                return
+            }
             window.styleMask.insert(.resizable)
+
+            observation = window.observe(\.styleMask, options: [.new]) { win, _ in
+                if !win.styleMask.contains(.resizable) {
+                    DispatchQueue.main.async {
+                        win.styleMask.insert(.resizable)
+                    }
+                }
+            }
+        }
+
+        deinit {
+            observation?.invalidate()
         }
     }
 }
@@ -24,7 +73,7 @@ private struct WindowResizableHelper: NSViewRepresentable {
 // MARK: - macOS Settings View
 
 /// Consolidated settings for macOS with progressive disclosure.
-/// Tabs: General, AI & Models, Voice & Input, Sync & Privacy, Advanced
+/// Tabs: General, AI & Models, Voice & Input, Permissions, Sync & Privacy, Advanced
 struct MacSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var settingsManager = SettingsManager.shared
@@ -38,6 +87,7 @@ struct MacSettingsView: View {
         case general = "General"
         case ai = "AI & Models"
         case voice = "Voice & Input"
+        case permissions = "Permissions"
         case syncPrivacy = "Sync & Privacy"
         case advanced = "Advanced"
 
@@ -46,6 +96,7 @@ struct MacSettingsView: View {
             case .general: "gear"
             case .ai: "brain.head.profile"
             case .voice: "mic.fill"
+            case .permissions: "hand.raised.fill"
             case .syncPrivacy: "lock.icloud.fill"
             case .advanced: "slider.horizontal.3"
             }
@@ -76,6 +127,8 @@ struct MacSettingsView: View {
             aiSettings
         case .voice:
             voiceSettings
+        case .permissions:
+            permissionsSettings
         case .syncPrivacy:
             syncPrivacySettings
         case .advanced:
@@ -88,7 +141,6 @@ struct MacSettingsView: View {
     private var generalSettings: some View {
         Form {
             Section("Appearance") {
-                // Use fixed-width container for all segmented pickers to ensure vertical alignment
                 let pickerWidth: CGFloat = 280
 
                 LabeledContent("Theme") {
@@ -173,7 +225,6 @@ struct MacSettingsView: View {
 
     private var aiSettings: some View {
         Form {
-            // MARK: Provider & Routing
             Section("Provider & Routing") {
                 Picker("Default Provider", selection: $settingsManager.defaultProvider) {
                     ForEach(settingsManager.availableProviders, id: \.self) { provider in
@@ -188,18 +239,38 @@ struct MacSettingsView: View {
                     .foregroundStyle(.tertiary)
             }
 
-            // MARK: Local Models
             Section("Local Models") {
                 LabeledContent("Ollama URL") {
-                    TextField("", text: $localModelConfig.ollamaBaseURL)
+                    TextField("http://localhost:11434", text: $localModelConfig.ollamaBaseURL)
                         .textFieldStyle(.roundedBorder)
-                        .frame(maxWidth: 280)
+                        .frame(maxWidth: 320)
                 }
 
                 LabeledContent("MLX Models Dir") {
-                    TextField("", text: $localModelConfig.mlxModelsDirectory)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(maxWidth: 280)
+                    HStack(spacing: 6) {
+                        TextField("~/.cache/huggingface/hub", text: $localModelConfig.mlxModelsDirectory)
+                            .textFieldStyle(.roundedBorder)
+                            .truncationMode(.head)
+                            .help(localModelConfig.mlxModelsDirectory)
+
+                        Button {
+                            let panel = NSOpenPanel()
+                            panel.canChooseFiles = false
+                            panel.canChooseDirectories = true
+                            panel.allowsMultipleSelection = false
+                            panel.directoryURL = URL(
+                                fileURLWithPath: (localModelConfig.mlxModelsDirectory as NSString)
+                                    .expandingTildeInPath
+                            )
+                            if panel.runModal() == .OK, let url = panel.url {
+                                localModelConfig.mlxModelsDirectory = url.path
+                            }
+                        } label: {
+                            Image(systemName: "folder")
+                        }
+                        .help("Choose Folder…")
+                    }
+                    .frame(maxWidth: 320)
                 }
 
                 let localCount = ProviderRegistry.shared.getAvailableLocalModels().count
@@ -209,7 +280,6 @@ struct MacSettingsView: View {
                 AppConfiguration.shared.localModelConfig = newValue
             }
 
-            // MARK: API Keys
             Section("API Keys") {
                 apiKeyField(label: "OpenAI", key: $openAIKey, provider: "openai")
                 apiKeyField(label: "Anthropic", key: $anthropicKey, provider: "anthropic")
@@ -222,8 +292,6 @@ struct MacSettingsView: View {
                     .font(.theaCaption2)
                     .foregroundStyle(.tertiary)
             }
-
-            // NOTE: System Prompts and Advanced Prompts configurable via API key providers
         }
         .formStyle(.grouped)
         .padding()
@@ -297,6 +365,227 @@ struct MacSettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
+    }
+
+    // MARK: - Permissions Settings
+
+    @State private var permissionStates: [String: MacPermissionState] = [:]
+    @State private var isRefreshingPermissions = false
+
+    private var permissionsSettings: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("System Permissions")
+                            .font(.theaHeadline)
+                        Text("Thea needs certain permissions to function fully. Grant or check status below.")
+                            .font(.theaCaption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button {
+                        refreshMacPermissions()
+                    } label: {
+                        HStack(spacing: 4) {
+                            if isRefreshingPermissions {
+                                ProgressView().scaleEffect(0.7)
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                            Text("Refresh")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isRefreshingPermissions)
+                }
+            }
+
+            Section("Core Permissions") {
+                permissionRow(
+                    key: "microphone", label: "Microphone", icon: "mic.fill",
+                    description: "Required for voice activation and speech input.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone"
+                )
+                permissionRow(
+                    key: "speechRecognition", label: "Speech Recognition", icon: "waveform",
+                    description: "Required for voice-to-text and wake word detection.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_SpeechRecognition"
+                )
+                permissionRow(
+                    key: "contacts", label: "Contacts", icon: "person.crop.circle",
+                    description: "Allows Thea to reference and manage your contacts.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts"
+                )
+                permissionRow(
+                    key: "location", label: "Location", icon: "location.fill",
+                    description: "Enables location-aware suggestions and context.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices"
+                )
+                permissionRow(
+                    key: "notifications", label: "Notifications", icon: "bell.fill",
+                    description: "Alerts for completed tasks, updates, and reminders.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Notifications"
+                )
+            }
+
+            Section("macOS System Access") {
+                permissionRow(
+                    key: "accessibility", label: "Accessibility", icon: "accessibility",
+                    description: "Needed for reading screen content and UI automation.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+                )
+                permissionRow(
+                    key: "screenRecording", label: "Screen Recording", icon: "rectangle.dashed.badge.record",
+                    description: "Required for capturing screen context.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
+                )
+                permissionRow(
+                    key: "fullDiskAccess", label: "Full Disk Access", icon: "internaldrive",
+                    description: "Required for reading files across your system.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
+                )
+                permissionRow(
+                    key: "automation", label: "Automation", icon: "gearshape.2",
+                    description: "Allows Thea to control other apps via AppleScript.",
+                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation"
+                )
+            }
+
+            Section("Quick Actions") {
+                HStack(spacing: 12) {
+                    quickActionButton("Privacy Settings", icon: "hand.raised.fill") {
+                        NSWorkspace.shared.open(
+                            URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy")!
+                        )
+                    }
+                    quickActionButton("Accessibility", icon: "accessibility") {
+                        NSWorkspace.shared.open(
+                            URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
+                        )
+                    }
+                    quickActionButton("Screen Recording", icon: "rectangle.dashed.badge.record") {
+                        CGRequestScreenCaptureAccess()
+                        refreshMacPermissions()
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .padding()
+        .onAppear { refreshMacPermissions() }
+    }
+
+    private func permissionRow(
+        key: String, label: String, icon: String,
+        description: String, settingsURL: String
+    ) -> some View {
+        let state = permissionStates[key] ?? .unknown
+        return HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(state.color)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label).font(.theaSubhead)
+                Text(description)
+                    .font(.theaCaption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+
+            Spacer()
+
+            Text(state.label)
+                .font(.theaCaption2)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(state.color.opacity(0.15))
+                .foregroundStyle(state.color)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+
+            Button {
+                if let url = URL(string: settingsURL) {
+                    NSWorkspace.shared.open(url)
+                }
+            } label: {
+                Image(systemName: "gear")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func quickActionButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: icon).font(.title2)
+                Text(title).font(.theaCaption2).multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+        }
+        .buttonStyle(.bordered)
+    }
+
+    private func refreshMacPermissions() {
+        isRefreshingPermissions = true
+        Task {
+            var states: [String: MacPermissionState] = [:]
+
+            switch AVCaptureDevice.authorizationStatus(for: .audio) {
+            case .authorized: states["microphone"] = .granted
+            case .denied, .restricted: states["microphone"] = .denied
+            case .notDetermined: states["microphone"] = .notDetermined
+            @unknown default: states["microphone"] = .unknown
+            }
+
+            switch SFSpeechRecognizer.authorizationStatus() {
+            case .authorized: states["speechRecognition"] = .granted
+            case .denied, .restricted: states["speechRecognition"] = .denied
+            case .notDetermined: states["speechRecognition"] = .notDetermined
+            @unknown default: states["speechRecognition"] = .unknown
+            }
+
+            switch CNContactStore.authorizationStatus(for: .contacts) {
+            case .authorized: states["contacts"] = .granted
+            case .denied, .restricted: states["contacts"] = .denied
+            case .notDetermined: states["contacts"] = .notDetermined
+            @unknown default: states["contacts"] = .unknown
+            }
+
+            let locStatus = CLLocationManager().authorizationStatus
+            switch locStatus {
+            case .authorizedAlways, .authorized: states["location"] = .granted
+            case .denied: states["location"] = .denied
+            case .notDetermined: states["location"] = .notDetermined
+            case .restricted: states["location"] = .denied
+            @unknown default: states["location"] = .unknown
+            }
+
+            let notifSettings = await UNUserNotificationCenter.current().notificationSettings()
+            switch notifSettings.authorizationStatus {
+            case .authorized, .provisional: states["notifications"] = .granted
+            case .denied: states["notifications"] = .denied
+            case .notDetermined: states["notifications"] = .notDetermined
+            @unknown default: states["notifications"] = .unknown
+            }
+
+            states["accessibility"] = AXIsProcessTrusted() ? .granted : .denied
+            states["screenRecording"] = CGPreflightScreenCaptureAccess() ? .granted : .denied
+
+            let testPath = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Library/Mail").path
+            states["fullDiskAccess"] = FileManager.default.isReadableFile(atPath: testPath) ? .granted : .denied
+            states["automation"] = AXIsProcessTrusted() ? .granted : .unknown
+
+            await MainActor.run {
+                permissionStates = states
+                isRefreshingPermissions = false
+            }
+        }
     }
 
     // MARK: - Sync & Privacy Settings
@@ -383,12 +672,6 @@ struct MacSettingsView: View {
     private var advancedSettings: some View {
         Form {
             Section("Execution Safety") {
-                Picker("Execution Mode", selection: $settingsManager.executionMode) {
-                    Text("Safe").tag("safe")
-                    Text("Normal").tag("normal")
-                    Text("Aggressive").tag("aggressive")
-                }
-
                 Toggle("Allow File Creation", isOn: $settingsManager.allowFileCreation)
                 Toggle("Allow File Editing", isOn: $settingsManager.allowFileEditing)
                 Toggle("Allow Code Execution", isOn: $settingsManager.allowCodeExecution)
@@ -403,13 +686,6 @@ struct MacSettingsView: View {
             Section("Development") {
                 Toggle("Enable Debug Mode", isOn: $settingsManager.debugMode)
                 Toggle("Show Performance Metrics", isOn: $settingsManager.showPerformanceMetrics)
-            }
-
-            Section("Experimental") {
-                Toggle("Enable Beta Features", isOn: $settingsManager.betaFeaturesEnabled)
-                Text("Beta features may be unstable and are subject to change.")
-                    .font(.theaCaption2)
-                    .foregroundStyle(.secondary)
             }
 
             Section("Cache") {
@@ -428,8 +704,6 @@ struct MacSettingsView: View {
                     settingsManager.resetToDefaults()
                 }
             }
-
-            // Additional advanced features (Cowork, Integrations, etc.) will be added in future updates
         }
         .formStyle(.grouped)
         .padding()
@@ -529,18 +803,14 @@ struct MacSettingsView: View {
 
     // MARK: - Font Size Scaling
 
-    /// Adjusts themeConfig base font sizes when the user changes the font size picker.
-    /// On macOS, `.dynamicTypeSize()` alone doesn't scale `Font.system(size:)` calls,
-    /// so we explicitly adjust the stored base sizes.
     private func applyFontSizeToThemeConfig(_ size: String) {
         var config = AppConfiguration.shared.themeConfig
         let scale: CGFloat = switch size {
         case "small": 0.85
         case "large": 1.25
-        default: 1.0  // "medium"
+        default: 1.0
         }
 
-        // Default sizes (from ThemeConfiguration defaults)
         config.displaySize = round(34 * scale)
         config.title1Size = round(28 * scale)
         config.title2Size = round(22 * scale)
