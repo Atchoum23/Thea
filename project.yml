@@ -798,8 +798,10 @@ targets:
         TARGETED_DEVICE_FAMILY: 4
         SKIP_INSTALL: NO
 
-        # Code Signing Identity
-        CODE_SIGN_IDENTITY: "iPhone Developer"
+        # Code Signing (explicit for watchOS)
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 6B66PM4JLK
+        CODE_SIGN_IDENTITY: "Apple Development"
 
         # Runpath Search Paths
         LD_RUNPATH_SEARCH_PATHS:
@@ -838,8 +840,10 @@ targets:
         TVOS_DEPLOYMENT_TARGET: "26.0"
         TARGETED_DEVICE_FAMILY: 3
 
-        # Code Signing Identity
-        CODE_SIGN_IDENTITY: "iPhone Developer"
+        # Code Signing (explicit for tvOS)
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 6B66PM4JLK
+        CODE_SIGN_IDENTITY: "Apple Development"
 
         # Runpath Search Paths
         LD_RUNPATH_SEARCH_PATHS:
