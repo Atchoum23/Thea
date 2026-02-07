@@ -131,6 +131,10 @@ final class SettingsManager: ObservableObject {
 
     // MARK: - Local Models Settings
 
+    @Published var preferLocalModels: Bool {
+        didSet { persist(preferLocalModels, forKey: "preferLocalModels") }
+    }
+
     @Published var mlxModelsPath: String {
         didSet { persist(mlxModelsPath, forKey: "mlxModelsPath") }
     }
@@ -227,6 +231,7 @@ final class SettingsManager: ObservableObject {
         showPerformanceMetrics = UserDefaults.standard.bool(forKey: "showPerformanceMetrics")
         betaFeaturesEnabled = UserDefaults.standard.bool(forKey: "betaFeaturesEnabled")
 
+        preferLocalModels = UserDefaults.standard.bool(forKey: "preferLocalModels")
         mlxModelsPath = UserDefaults.standard.string(forKey: "mlxModelsPath") ?? "~/.cache/huggingface/hub/"
         ollamaEnabled = UserDefaults.standard.bool(forKey: "ollamaEnabled")
         ollamaURL = UserDefaults.standard.string(forKey: "ollamaURL") ?? "http://localhost:11434"
@@ -288,6 +293,7 @@ final class SettingsManager: ObservableObject {
         debugMode = d.bool(forKey: "debugMode")
         showPerformanceMetrics = d.bool(forKey: "showPerformanceMetrics")
         betaFeaturesEnabled = d.bool(forKey: "betaFeaturesEnabled")
+        preferLocalModels = d.bool(forKey: "preferLocalModels")
         mlxModelsPath = d.string(forKey: "mlxModelsPath") ?? "~/.cache/huggingface/hub/"
         ollamaEnabled = d.bool(forKey: "ollamaEnabled")
         ollamaURL = d.string(forKey: "ollamaURL") ?? "http://localhost:11434"
