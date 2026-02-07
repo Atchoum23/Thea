@@ -5,7 +5,7 @@ import SwiftUI
 // Displays a server in the sidebar list
 
 struct MCPServerRow: View {
-    let server: MCPServerInfo
+    let server: MetaAIMCPServerInfo
 
     var body: some View {
         HStack(spacing: 12) {
@@ -68,7 +68,7 @@ struct MCPServerRow: View {
 
 #Preview {
     List {
-        MCPServerRow(server: MCPServerInfo(
+        MCPServerRow(server: MetaAIMCPServerInfo(
             id: UUID(),
             name: "filesystem",
             description: "File system operations",
@@ -76,7 +76,7 @@ struct MCPServerRow: View {
             toolCount: 5
         ))
 
-        MCPServerRow(server: MCPServerInfo(
+        MCPServerRow(server: MetaAIMCPServerInfo(
             id: UUID(),
             name: "terminal",
             description: "Terminal command execution",
@@ -84,7 +84,7 @@ struct MCPServerRow: View {
             toolCount: 2
         ))
 
-        MCPServerRow(server: MCPServerInfo(
+        MCPServerRow(server: MetaAIMCPServerInfo(
             id: UUID(),
             name: "git",
             description: "Git repository operations",
