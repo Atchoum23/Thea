@@ -335,11 +335,19 @@ public actor PrivacyPreservingAIRouter {
                         decision: decision
                     )
                 } catch {
-                    // Fall through to remote with anonymization
+                    // Local failed — fall through to anonymized remote
                 }
             }
-            // Fall through to anonymized remote
-            fallthrough
+            // Anonymize then send remote (same as remoteAnonymized)
+            let anonymizedLocal = await anonymize(content: content, decision: decision)
+            let resultLocal = try await remoteProcessor(anonymizedLocal.content)
+            let finalLocal = await anonymizer.deAnonymize(result: resultLocal, mapping: anonymizedLocal.mapping)
+            return ProcessingResult(
+                output: finalLocal,
+                processedLocally: false,
+                anonymizationApplied: true,
+                decision: decision
+            )
 
         case .remoteAnonymized:
             // Anonymize then send remote

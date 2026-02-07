@@ -464,20 +464,20 @@ public struct EfficiencySuggestion: Identifiable, Sendable {
     public let createdAt: Date
 
     public enum SuggestionType: String, Sendable {
-        case shortcut = "shortcut"
-        case automation = "automation"
-        case workflow = "workflow"
-        case focus = "focus"
-        case scheduling = "scheduling"
-        case health = "health"
+        case shortcut
+        case automation
+        case workflow
+        case focus
+        case scheduling
+        case health
     }
 
     public enum SuggestionCategory: String, Sendable {
-        case shortcuts = "shortcuts"
-        case workflow = "workflow"
-        case focus = "focus"
-        case time = "time"
-        case wellbeing = "wellbeing"
+        case shortcuts
+        case workflow
+        case focus
+        case time
+        case wellbeing
     }
 }
 

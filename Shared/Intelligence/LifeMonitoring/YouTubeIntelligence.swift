@@ -12,16 +12,16 @@ import Foundation
 
 /// Type of YouTube content
 public enum YouTubeContentType: String, Sendable, CaseIterable {
-    case music = "music"             // YouTube Music tracks
-    case podcast = "podcast"         // Long-form podcast content
-    case educational = "educational" // Educational videos
-    case news = "news"              // News content
-    case entertainment = "entertainment" // Entertainment
-    case tutorial = "tutorial"       // How-to videos
-    case documentary = "documentary" // Documentaries
-    case lecture = "lecture"         // Academic lectures
-    case interview = "interview"     // Interviews
-    case other = "other"
+    case music             // YouTube Music tracks
+    case podcast           // Long-form podcast content
+    case educational       // Educational videos
+    case news              // News content
+    case entertainment     // Entertainment
+    case tutorial          // How-to videos
+    case documentary       // Documentaries
+    case lecture           // Academic lectures
+    case interview         // Interviews
+    case other
 
     public var learningValue: LearningValue {
         switch self {
@@ -287,9 +287,9 @@ public struct ContentPreferences: Sendable {
     public var learningGoals: [String]
 
     public enum DurationPreference: String, Sendable {
-        case short = "short"     // < 10 min
-        case medium = "medium"   // 10-30 min
-        case long = "long"       // 30-60 min
+        case short               // < 10 min
+        case medium              // 10-30 min
+        case long                // 30-60 min
         case veryLong = "very_long" // > 60 min
     }
 
@@ -715,7 +715,7 @@ public actor YouTubeIntelligence {
         // Boost if covers favorite topics
         let favoriteTopics = Set(preferences.favoriteTopics.keys)
         let contentTopics = Set(content.extractedTopics.map { $0.name })
-        if !favoriteTopics.intersection(contentTopics).isEmpty {
+        if !favoriteTopics.isDisjoint(with: contentTopics) {
             relevance += 0.2
         }
 

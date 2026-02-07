@@ -15,36 +15,36 @@ import EventKit
 /// Source where a deadline was discovered
 public enum DeadlineSource: String, Sendable, CaseIterable {
     // Calendar & Reminders
-    case calendar = "calendar"
-    case reminders = "reminders"
+    case calendar
+    case reminders
 
     // Communications
-    case email = "email"
-    case message = "message"
-    case slack = "slack"
-    case teams = "teams"
+    case email
+    case message
+    case slack
+    case teams
 
     // Documents
-    case document = "document"
-    case spreadsheet = "spreadsheet"
-    case pdf = "pdf"
+    case document
+    case spreadsheet
+    case pdf
     case scannedMail = "scanned_mail"
 
     // Financial
-    case bill = "bill"
-    case invoice = "invoice"
+    case bill
+    case invoice
     case taxDocument = "tax_document"
     case bankStatement = "bank_statement"
 
     // Work
     case projectManagement = "project_management"
-    case jira = "jira"
-    case asana = "asana"
-    case github = "github"
+    case jira
+    case asana
+    case github
 
     // Personal
     case subscriptionRenewal = "subscription_renewal"
-    case warranty = "warranty"
+    case warranty
     case medicalAppointment = "medical_appointment"
     case governmentDeadline = "government_deadline"
 
@@ -56,14 +56,14 @@ public enum DeadlineSource: String, Sendable, CaseIterable {
 
 /// Category of deadline importance
 public enum DeadlineCategory: String, Sendable, CaseIterable {
-    case financial = "financial"         // Bills, taxes, payments
-    case work = "work"                   // Work deadlines, projects
-    case health = "health"               // Medical appointments, medications
-    case legal = "legal"                 // Legal deadlines, government
-    case social = "social"               // Events, commitments
-    case personal = "personal"           // Personal goals, tasks
-    case administrative = "administrative" // Renewals, paperwork
-    case educational = "educational"     // Courses, certifications
+    case financial           // Bills, taxes, payments
+    case work                // Work deadlines, projects
+    case health              // Medical appointments, medications
+    case legal               // Legal deadlines, government
+    case social              // Events, commitments
+    case personal            // Personal goals, tasks
+    case administrative      // Renewals, paperwork
+    case educational         // Courses, certifications
 
     public var defaultPriority: Int {
         switch self {
@@ -81,12 +81,12 @@ public enum DeadlineCategory: String, Sendable, CaseIterable {
 
 /// Urgency level based on time remaining
 public enum DeadlineUrgency: String, Sendable {
-    case overdue = "overdue"
-    case critical = "critical"     // < 24 hours
-    case urgent = "urgent"         // 1-3 days
-    case approaching = "approaching" // 3-7 days
-    case upcoming = "upcoming"     // 1-4 weeks
-    case future = "future"         // > 4 weeks
+    case overdue
+    case critical              // < 24 hours
+    case urgent                // 1-3 days
+    case approaching           // 3-7 days
+    case upcoming              // 1-4 weeks
+    case future                // > 4 weeks
 
     public var reminderFrequency: TimeInterval {
         switch self {
@@ -246,11 +246,11 @@ public struct ReminderSchedule: Sendable {
     public let reminderChannels: [ReminderChannel]
 
     public enum ReminderChannel: String, Sendable {
-        case notification = "notification"
-        case voice = "voice"
-        case email = "email"
-        case calendar = "calendar"
-        case widget = "widget"
+        case notification
+        case voice
+        case email
+        case calendar
+        case widget
     }
 
     public static func defaultSchedule(for category: DeadlineCategory) -> ReminderSchedule {

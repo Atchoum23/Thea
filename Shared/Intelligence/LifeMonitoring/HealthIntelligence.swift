@@ -14,27 +14,27 @@ import HealthKit
 
 /// Categories of health data
 public enum WellnessCategory: String, Sendable, CaseIterable {
-    case activity = "activity"           // Steps, exercise, movement
-    case sleep = "sleep"                 // Sleep duration, quality
-    case vitals = "vitals"               // Heart rate, blood pressure
-    case nutrition = "nutrition"         // Food, water, caffeine
+    case activity            // Steps, exercise, movement
+    case sleep               // Sleep duration, quality
+    case vitals              // Heart rate, blood pressure
+    case nutrition           // Food, water, caffeine
     case mentalHealth = "mental_health"  // Mood, stress, anxiety
-    case medications = "medications"     // Rx and supplements
-    case cognitive = "cognitive"         // Focus, memory, attention
-    case body = "body"                   // Weight, body composition
+    case medications         // Rx and supplements
+    case cognitive           // Focus, memory, attention
+    case body                // Weight, body composition
 }
 
 /// Mental health assessment types
 public enum PsychAssessmentType: String, Sendable, CaseIterable {
-    case adhd = "adhd"           // ADHD assessment
-    case anxiety = "anxiety"     // GAD-7
-    case depression = "depression" // PHQ-9
-    case stress = "stress"       // PSS
-    case iq = "iq"              // IQ test results
-    case eq = "eq"              // Emotional intelligence
-    case burnout = "burnout"    // Burnout assessment
-    case sleep = "sleep"        // Sleep quality assessment
-    case custom = "custom"      // User-defined assessments
+    case adhd                // ADHD assessment
+    case anxiety             // GAD-7
+    case depression          // PHQ-9
+    case stress              // PSS
+    case iq                  // IQ test results
+    case eq                  // Emotional intelligence
+    case burnout             // Burnout assessment
+    case sleep               // Sleep quality assessment
+    case custom              // User-defined assessments
 
     public var displayName: String {
         switch self {
@@ -75,10 +75,10 @@ public struct Medication: Identifiable, Sendable {
         case onceDaily = "once_daily"
         case twiceDaily = "twice_daily"
         case thriceDaily = "thrice_daily"
-        case weekly = "weekly"
-        case biweekly = "biweekly"
-        case monthly = "monthly"
-        case custom = "custom"
+        case weekly
+        case biweekly
+        case monthly
+        case custom
 
         public var displayName: String {
             switch self {
@@ -95,14 +95,14 @@ public struct Medication: Identifiable, Sendable {
     }
 
     public enum MedicationCategory: String, Sendable {
-        case adhd = "adhd"
-        case antidepressant = "antidepressant"
-        case anxiolytic = "anxiolytic"
+        case adhd
+        case antidepressant
+        case anxiolytic
         case sleepAid = "sleep_aid"
         case painRelief = "pain_relief"
-        case vitamin = "vitamin"
-        case supplement = "supplement"
-        case other = "other"
+        case vitamin
+        case supplement
+        case other
     }
 
     public init(
@@ -192,11 +192,11 @@ public struct PsychologicalAssessment: Identifiable, Sendable {
     public let source: String? // Where it was administered
 
     public enum SeverityLevel: String, Sendable {
-        case minimal = "minimal"
-        case mild = "mild"
-        case moderate = "moderate"
+        case minimal
+        case mild
+        case moderate
         case moderateSevere = "moderate_severe"
-        case severe = "severe"
+        case severe
 
         public var color: String {
             switch self {
@@ -260,10 +260,10 @@ public struct HealthMonitorInsight: Identifiable, Sendable {
 
     public enum Significance: String, Sendable {
         case informational = "info"
-        case positive = "positive"
-        case warning = "warning"
-        case concern = "concern"
-        case urgent = "urgent"
+        case positive
+        case warning
+        case concern
+        case urgent
     }
 
     public init(

@@ -314,10 +314,10 @@ public struct FileSystemChange: Sendable {
 }
 
 public enum FileSystemChangeType: String, Codable, Sendable {
-    case created = "created"
-    case modified = "modified"
-    case deleted = "deleted"
-    case renamed = "renamed"
+    case created
+    case modified
+    case deleted
+    case renamed
 }
 
 #endif

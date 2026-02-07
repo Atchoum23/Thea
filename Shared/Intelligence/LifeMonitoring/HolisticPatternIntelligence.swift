@@ -146,13 +146,13 @@ public struct DetectedLifePattern: Identifiable, Codable, Sendable {
 }
 
 public enum PatternFrequency: String, Codable, Sendable {
-    case rare = "rare"              // Less than once a month
-    case occasional = "occasional"  // A few times a month
-    case weekly = "weekly"          // About once a week
-    case frequent = "frequent"      // Multiple times a week
-    case daily = "daily"            // Every day
+    case rare                        // Less than once a month
+    case occasional                  // A few times a month
+    case weekly                      // About once a week
+    case frequent                    // Multiple times a week
+    case daily                       // Every day
     case multipleDays = "multiple_daily" // Multiple times per day
-    case continuous = "continuous"  // Ongoing pattern
+    case continuous                  // Ongoing pattern
 }
 
 public struct PatternTimeContext: Codable, Sendable {
@@ -196,15 +196,15 @@ public struct PatternTrigger: Codable, Sendable {
     }
 
     public enum TriggerType: String, Codable, Sendable {
-        case time           // Triggered by time of day
-        case location       // Triggered by location
-        case activity       // Triggered by preceding activity
-        case person         // Triggered by interaction with someone
-        case emotion        // Triggered by emotional state
-        case external       // External trigger (weather, news, etc.)
-        case device         // Triggered by device state
-        case notification   // Triggered by a notification
-        case calendar       // Triggered by calendar event
+        case time            // Triggered by time of day
+        case location        // Triggered by location
+        case activity        // Triggered by preceding activity
+        case person          // Triggered by interaction with someone
+        case emotion         // Triggered by emotional state
+        case external        // External trigger (weather, news, etc.)
+        case device          // Triggered by device state
+        case notification    // Triggered by a notification
+        case calendar        // Triggered by calendar event
     }
 }
 
@@ -311,11 +311,11 @@ public struct PatternSuggestion: Identifiable, Codable, Sendable {
     }
 
     public enum EffortLevel: String, Codable, Sendable {
-        case minimal = "minimal"
-        case low = "low"
-        case medium = "medium"
-        case high = "high"
-        case significant = "significant"
+        case minimal
+        case low
+        case medium
+        case high
+        case significant
     }
 }
 
