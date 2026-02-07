@@ -85,6 +85,9 @@ struct MacSettingsView: View {
                     .pickerStyle(.segmented)
                     .labelsHidden()
                     .frame(maxWidth: 250)
+                    .onChange(of: settingsManager.fontSize) { _, newSize in
+                        applyFontSizeToThemeConfig(newSize)
+                    }
                 }
 
                 LabeledContent("Message Density") {
@@ -454,5 +457,36 @@ struct MacSettingsView: View {
 
     private func clearCache() {
         print("Clearing cache")
+    }
+
+    // MARK: - Font Size Scaling
+
+    /// Adjusts themeConfig base font sizes when the user changes the font size picker.
+    /// On macOS, `.dynamicTypeSize()` alone doesn't scale `Font.system(size:)` calls,
+    /// so we explicitly adjust the stored base sizes.
+    private func applyFontSizeToThemeConfig(_ size: String) {
+        var config = AppConfiguration.shared.themeConfig
+        let scale: CGFloat = switch size {
+        case "small": 0.85
+        case "large": 1.25
+        default: 1.0  // "medium"
+        }
+
+        // Default sizes (from ThemeConfiguration defaults)
+        config.displaySize = round(34 * scale)
+        config.title1Size = round(28 * scale)
+        config.title2Size = round(22 * scale)
+        config.title3Size = round(20 * scale)
+        config.headlineSize = round(17 * scale)
+        config.bodySize = round(17 * scale)
+        config.calloutSize = round(16 * scale)
+        config.subheadSize = round(15 * scale)
+        config.footnoteSize = round(13 * scale)
+        config.caption1Size = round(12 * scale)
+        config.caption2Size = round(11 * scale)
+        config.codeSize = round(14 * scale)
+        config.codeInlineSize = round(16 * scale)
+
+        AppConfiguration.shared.themeConfig = config
     }
 }
