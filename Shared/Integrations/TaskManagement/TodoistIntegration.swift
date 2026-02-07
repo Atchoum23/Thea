@@ -1032,10 +1032,11 @@ public struct TodoistUIExtension: Sendable {
     }
 
     /// Verify HMAC signature from Todoist
-    public static func verifySignature(payload: Data, signature: String, verificationToken: String) -> Bool {
-        // Implement HMAC-SHA256 verification
-        // Compare computed hash with x-todoist-hmac-sha256 header
-        true // Placeholder
+    public static func verifySignature(payload: Data, signature: String, clientSecret: String) -> Bool {
+        let key = SymmetricKey(data: Data(clientSecret.utf8))
+        let hmac = HMAC<SHA256>.authenticationCode(for: payload, using: key)
+        let computedSignature = Data(hmac).base64EncodedString()
+        return computedSignature == signature
     }
 }
 
@@ -1072,6 +1073,8 @@ public enum TodoistError: Error, Sendable {
     case apiError(statusCode: Int, message: String?)
     case syncFailed
     case rateLimited
+    case oauthNotConfigured
+    case tokenRevocationFailed
 }
 
 // MARK: - Helper Types
