@@ -1,12 +1,17 @@
-// TaskClassifier.swift
+// MetaAITaskClassifier.swift
+// Thea - MetaAI
+//
+// Fast keyword-based task classifier for MetaAI orchestration.
+// For semantic classification with learning, use Intelligence/Classification/TaskClassifier.
+
 import Foundation
 
-/// Classifies user queries into task types for optimal model routing.
-/// Uses keyword matching and optional AI-based classification for accuracy.
+/// Fast keyword-based task classifier for MetaAI orchestration.
+/// Uses pattern matching for quick classification without AI calls.
 @MainActor
 @Observable
-public final class TaskClassifier {
-    public static let shared = TaskClassifier()
+public final class MetaAITaskClassifier {
+    public static let shared = MetaAITaskClassifier()
 
     private let config = OrchestratorConfiguration.load()
 
@@ -15,7 +20,7 @@ public final class TaskClassifier {
     // MARK: - Public API
 
     /// Classify a query into a task type with confidence score
-    public func classify(_ query: String) async throws -> TaskClassification {
+    public func classify(_ query: String) async throws -> MetaAIClassificationResult {
         // 1. Try keyword-based classification first (fast)
         let keywordResult = classifyByKeywords(query)
 
@@ -53,12 +58,12 @@ public final class TaskClassifier {
 
     // MARK: - Keyword-Based Classification
 
-    private func classifyByKeywords(_ query: String) -> TaskClassification {
+    private func classifyByKeywords(_ query: String) -> MetaAIClassificationResult {
         let lowercased = query.lowercased()
 
         // Code generation patterns
         if matchesCodePatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .codeGeneration,
                 secondaryTypes: [],
                 confidence: 0.85,
@@ -68,7 +73,7 @@ public final class TaskClassifier {
 
         // Math and logic patterns
         if matchesMathPatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .mathLogic,
                 secondaryTypes: [],
                 confidence: 0.9,
@@ -78,7 +83,7 @@ public final class TaskClassifier {
 
         // Summarization patterns
         if matchesSummarizationPatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .summarization,
                 secondaryTypes: [],
                 confidence: 0.8,
@@ -88,7 +93,7 @@ public final class TaskClassifier {
 
         // Complex reasoning patterns
         if matchesReasoningPatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .complexReasoning,
                 secondaryTypes: [],
                 confidence: 0.75,
@@ -98,7 +103,7 @@ public final class TaskClassifier {
 
         // Creative writing patterns
         if matchesCreativePatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .creativeWriting,
                 secondaryTypes: [],
                 confidence: 0.8,
@@ -108,7 +113,7 @@ public final class TaskClassifier {
 
         // Debugging patterns
         if matchesDebuggingPatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .debugging,
                 secondaryTypes: [.codeGeneration],
                 confidence: 0.85,
@@ -118,7 +123,7 @@ public final class TaskClassifier {
 
         // Analysis patterns
         if matchesAnalysisPatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .analysis,
                 secondaryTypes: [],
                 confidence: 0.7,
@@ -128,7 +133,7 @@ public final class TaskClassifier {
 
         // Planning patterns
         if matchesPlanningPatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .planning,
                 secondaryTypes: [],
                 confidence: 0.75,
@@ -138,7 +143,7 @@ public final class TaskClassifier {
 
         // Factual lookup patterns
         if matchesFactualPatterns(lowercased) {
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: .factual,
                 secondaryTypes: [],
                 confidence: 0.7,
@@ -147,7 +152,7 @@ public final class TaskClassifier {
         }
 
         // Default to simple Q&A with low confidence
-        return TaskClassification(
+        return MetaAIClassificationResult(
             primaryType: .simpleQA,
             secondaryTypes: [],
             confidence: 0.5,
@@ -241,7 +246,7 @@ public final class TaskClassifier {
 
     // MARK: - AI-Based Classification
 
-    private func classifyWithAI(_ query: String, fallback: TaskClassification) async throws -> TaskClassification {
+    private func classifyWithAI(_ query: String, fallback: MetaAIClassificationResult) async throws -> MetaAIClassificationResult {
         // Use a fast, cheap model for classification
         // Priority: local model > gpt-4o-mini > fallback
 
@@ -331,8 +336,8 @@ public final class TaskClassifier {
     private func parseClassificationResponse(
         _ response: String,
         query: String,
-        fallback: TaskClassification
-    ) throws -> TaskClassification {
+        fallback: MetaAIClassificationResult
+    ) throws -> MetaAIClassificationResult {
         // Extract JSON from response
         let jsonString = extractJSON(from: response)
 
@@ -353,7 +358,7 @@ public final class TaskClassifier {
                 return fallback
             }
 
-            return TaskClassification(
+            return MetaAIClassificationResult(
                 primaryType: taskType,
                 secondaryTypes: [],
                 confidence: Float(decoded.confidence),
@@ -375,10 +380,10 @@ public final class TaskClassifier {
     }
 }
 
-// MARK: - Supporting Types
+// MARK: - MetaAI Classification Result
 
-/// Result of task classification
-public struct TaskClassification: Sendable {
+/// Result of MetaAI task classification (keyword-based)
+public struct MetaAIClassificationResult: Sendable {
     public let primaryType: TaskType
     public let secondaryTypes: [TaskType]
     public let confidence: Float // 0.0 - 1.0
@@ -404,5 +409,15 @@ public struct TaskClassification: Sendable {
     /// Get all relevant task types (primary + secondary)
     public var allTypes: [TaskType] {
         [primaryType] + secondaryTypes
+    }
+
+    /// Convert to standard ClassificationResult for compatibility
+    public func toClassificationResult() -> ClassificationResult {
+        ClassificationResult(
+            taskType: primaryType,
+            confidence: Double(confidence),
+            reasoning: reasoning,
+            alternativeTypes: secondaryTypes.isEmpty ? nil : secondaryTypes.map { ($0, Double(confidence) * 0.8) }
+        )
     }
 }

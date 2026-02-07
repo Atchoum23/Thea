@@ -171,18 +171,18 @@ public final class BluetoothDeviceManager {
                 object: nil,
                 queue: .main
             ) { [weak self] notification in
-                // Extract the sendable data before crossing actor boundary
-                let userInfo = notification.userInfo
+                // Extract the sendable reason value before crossing actor boundary
+                let reasonValue = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
                 Task { @MainActor in
-                    self?.handleiOSRouteChange(userInfo: userInfo)
+                    self?.handleiOSRouteChange(reasonValue: reasonValue)
                 }
             }
 
             logger.info("iOS audio route monitoring started")
         }
 
-        private func handleiOSRouteChange(userInfo: [AnyHashable: Any]?) {
-            guard let reasonValue = userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
+        private func handleiOSRouteChange(reasonValue: UInt?) {
+            guard let reasonValue,
                   let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue)
             else {
                 scanCurrentDevices()
