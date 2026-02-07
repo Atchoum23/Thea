@@ -4,9 +4,11 @@
 //
 //  Asana integration with MCP Server support
 //  Based on: REST API, Webhooks, App Components, Script Actions, MCP Server
+//  Updated Feb 2026 with Goal Relationships, Portfolio Memberships, Typeahead
 //
 
 import Foundation
+import CryptoKit
 
 // MARK: - Asana Client
 
