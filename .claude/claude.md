@@ -19,8 +19,9 @@
 
 3. **Push to remote regularly** (at minimum every 5 commits):
    ```bash
-   git push origin main
+   git pushsync origin main
    ```
+   **IMPORTANT**: Always use `git pushsync` instead of `git push`. This pushes to origin AND triggers a sync build + install on the other Mac. A Claude Code hook enforces this — plain `git push` will be blocked.
 
 ### 🚫 FORBIDDEN Commands
 
@@ -146,5 +147,14 @@ See @.claude/COMPREHENSIVE_QA_PLAN.md for the full checklist.
 cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
 git add -A && git status
 # If changes exist, commit with descriptive message
-git push origin main  # Only if user requests
+git pushsync origin main  # Only if user requests — triggers sync build on the other Mac
 ```
+
+## Multi-Mac Auto-Sync
+
+Thea uses `git pushsync` (a global git alias) to keep both Macs in sync:
+
+- **`git pushsync origin main`** = `git push` + SSH trigger to rebuild on the other Mac
+- A **launchd agent** (`com.alexis.thea-sync`) polls every 5 minutes as a fallback
+- The sync script (`~/bin/thea-sync.sh`) pulls, runs xcodegen, builds Release, and installs to `/Applications`
+- A **Claude Code hook** (`.claude/hooks/enforce-pushsync.sh`) blocks plain `git push` and reminds you to use `git pushsync`
