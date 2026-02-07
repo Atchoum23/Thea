@@ -84,9 +84,32 @@ SYNCEOF
 chmod +x ~/bin/thea-sync.sh
 echo "  ✓ Created ~/bin/thea-sync.sh"
 
-# 3. Set up git pushsync alias (auto-detects which Mac to trigger)
-git config --global alias.pushsync '!f() { git push "$@" && OTHER_MAC=""; THIS_MAC=$(hostname -s); if [ "$THIS_MAC" = "mbam2" ] || [ "$THIS_MAC" = "MBAM2" ]; then OTHER_MAC="MSM3U.local"; elif [ "$THIS_MAC" = "msm3u" ] || [ "$THIS_MAC" = "MSM3U" ]; then OTHER_MAC="MBAM2.local"; fi; if [ -n "$OTHER_MAC" ]; then echo "Triggering sync on $OTHER_MAC..."; ssh -o ConnectTimeout=5 -o BatchMode=yes "alexis@$OTHER_MAC" "/Users/alexis/bin/thea-sync.sh" </dev/null >/dev/null 2>&1 & echo "Build triggered (background)."; fi; }; f'
-echo "  ✓ Configured git pushsync alias"
+# 3. Create git-pushsync script and alias
+cat > ~/bin/git-pushsync << 'PUSHSYNCEOF'
+#!/bin/bash
+# git-pushsync — Push to remote and trigger sync build on the other Mac
+set -euo pipefail
+
+git push "$@"
+
+THIS_MAC=$(hostname -s | tr '[:upper:]' '[:lower:]')
+OTHER_MAC=""
+
+case "$THIS_MAC" in
+  mbam2) OTHER_MAC="MSM3U.local" ;;
+  msm3u) OTHER_MAC="MBAM2.local" ;;
+esac
+
+if [ -n "$OTHER_MAC" ]; then
+  echo "Triggering sync on $OTHER_MAC..."
+  ssh -o ConnectTimeout=5 -o BatchMode=yes "alexis@$OTHER_MAC" \
+    "/Users/alexis/bin/thea-sync.sh" </dev/null >/dev/null 2>&1 &
+  echo "Build triggered (background)."
+fi
+PUSHSYNCEOF
+chmod +x ~/bin/git-pushsync
+git config --global alias.pushsync '!/Users/alexis/bin/git-pushsync'
+echo "  ✓ Created ~/bin/git-pushsync and configured git alias"
 
 # 4. Create launchd polling agent (5-minute fallback)
 cat > ~/Library/LaunchAgents/com.alexis.thea-sync.plist << 'PLISTEOF'
