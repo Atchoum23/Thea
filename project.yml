@@ -687,6 +687,11 @@ targets:
           - "**/LocalModels/**"
           - "**/Focus/FocusOrchestrator.swift"
           - "**/V1Parity/SiriIntegration.swift"
+          # Exclude macOS-only browser automation files
+          - "**/Automation/BrowserAutomationOrchestrator.swift"
+          - "**/Automation/UserInterventionDetector.swift"
+          - "**/Automation/ScreenAnalyzer.swift"
+          - "**/Automation/AutomationAction.swift"
           # TheaDesignSystem.swift KEPT for iOS - contains design tokens
           - "**/Design/LiquidGlassDesign.swift"
           # Exclude stubs since TheaDesignSystem is included

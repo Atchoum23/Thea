@@ -196,7 +196,7 @@ public actor EnvironmentContextProvider: ContextProvider {
             ambientLightLevel: nil, // Would need sensors
             noiseLevel: nil, // Would need microphone
             nearbyBluetoothDevices: bluetoothDevices,
-            connectedAccessories: getConnectedAccessories(),
+            connectedAccessories: await getConnectedAccessories(),
             homeKitScene: homeScene,
             weatherCondition: nil, // Would need WeatherKit
             temperature: nil
@@ -204,14 +204,14 @@ public actor EnvironmentContextProvider: ContextProvider {
     }
 
     private func getConnectedAccessories() -> [String] {
-        let accessories: [String] = []
+        // Use BluetoothDeviceManager for categorized audio device data
+        let devices = BluetoothDeviceManager.shared.connectedAudioDevices
+        guard !devices.isEmpty else { return [] }
 
-        #if os(iOS)
-            // Check for AirPods, etc. via AVAudioSession
-            // Simplified implementation
-        #endif
-
-        return accessories
+        return devices.map { device in
+            let btLabel = device.isBluetooth ? "BT" : "Wired"
+            return "\(device.name) (\(device.category.displayName), \(btLabel))"
+        }
     }
 }
 
