@@ -338,8 +338,8 @@ public final class ContextAggregator: ObservableObject {
     // MARK: - Predictive Context
 
     /// Predict likely context needs based on patterns
-    public func predictContextNeeds() -> [ContextPrediction] {
-        var predictions: [ContextPrediction] = []
+    public func predictContextNeeds() -> [AggregatedContextPrediction] {
+        var predictions: [AggregatedContextPrediction] = []
 
         let now = Date()
         let hour = Calendar.current.component(.hour, from: now)
@@ -354,7 +354,7 @@ public final class ContextAggregator: ObservableObject {
                 .sorted { $0.value > $1.value }
 
             if let topTask = taskCounts.first, topTask.value >= 3 {
-                predictions.append(ContextPrediction(
+                predictions.append(AggregatedContextPrediction(
                     prediction: "You often work on \(topTask.key.description) tasks at this time",
                     confidence: min(0.9, Double(topTask.value) / 10.0),
                     suggestedAction: "Pre-load \(topTask.key.rawValue) resources"
@@ -364,7 +364,7 @@ public final class ContextAggregator: ObservableObject {
 
         // Battery predictions
         if let battery = currentContext.device.batteryLevel, battery < 30 {
-            predictions.append(ContextPrediction(
+            predictions.append(AggregatedContextPrediction(
                 prediction: "Low battery may impact AI performance",
                 confidence: 0.8,
                 suggestedAction: "Switch to efficient local models"
@@ -373,7 +373,7 @@ public final class ContextAggregator: ObservableObject {
 
         // Working hours predictions
         if currentContext.temporal.isWorkingHours {
-            predictions.append(ContextPrediction(
+            predictions.append(AggregatedContextPrediction(
                 prediction: "Work hours - optimizing for productivity",
                 confidence: 0.7,
                 suggestedAction: "Prioritize accuracy over speed"
@@ -1018,7 +1018,7 @@ public struct ContextTrends: Sendable {
 // MARK: - Context Prediction
 
 /// A prediction about context needs
-public struct ContextPrediction: Identifiable, Sendable {
+public struct AggregatedContextPrediction: Identifiable, Sendable {
     public let id = UUID()
     public let prediction: String
     public let confidence: Double
