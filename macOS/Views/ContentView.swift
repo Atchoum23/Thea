@@ -139,6 +139,22 @@ struct ContentView: View {
     private var chatListView: some View {
         SidebarView(selection: $selectedConversation)
             .frame(minWidth: 250)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        withAnimation {
+                            if columnVisibility == .all {
+                                columnVisibility = .detailOnly
+                            } else {
+                                columnVisibility = .all
+                            }
+                        }
+                    } label: {
+                        Image(systemName: columnVisibility == .all ? "sidebar.right" : "sidebar.left")
+                    }
+                    .help(columnVisibility == .all ? "Hide Conversations" : "Show Conversations")
+                }
+            }
     }
 
     // MARK: - Projects List

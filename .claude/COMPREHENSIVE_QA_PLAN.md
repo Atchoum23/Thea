@@ -1,4 +1,4 @@
-# Autonomous Self-Healing QA Plan v2.0
+# Autonomous Self-Healing QA Plan v3.0
 
 ## Goal
 
@@ -994,6 +994,102 @@ fi
 
 ---
 
+## Phase 11.5: CI/CD Workflow File Fix Loop (MANDATORY)
+
+**Purpose:** Phase 11 monitors CI results and fixes *code* issues. Phase 11.5 fixes the *workflow files themselves* when they have structural problems. This phase was added after discovering that E2E Tests had been failing for 8+ consecutive runs due to a workflow file bug that was never investigated.
+
+**CRITICAL RULE: If a workflow has been failing for more than 2 consecutive runs, the workflow file itself is likely broken and must be investigated.**
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+echo "=== Phase 11.5: CI/CD Workflow File Fix Loop ==="
+
+# Step 1: Ensure gh CLI is authenticated
+if ! gh auth status &>/dev/null; then
+  echo "✗ FATAL: GitHub CLI not authenticated"
+  echo "  Run: gh auth login -h github.com"
+  echo "  This MUST be done interactively — cannot be automated"
+  exit 1
+fi
+
+# Step 2: Check ALL workflow histories for recurring failures
+echo "Checking workflow failure patterns..."
+for WORKFLOW in "CI" "E2E Tests" "Security Audit (Full)"; do
+  echo ""
+  echo "--- $WORKFLOW ---"
+  RECENT=$(gh run list --workflow="$WORKFLOW" --limit 5 --json conclusion -q '.[].conclusion' 2>/dev/null)
+  FAIL_COUNT=$(echo "$RECENT" | grep -c "failure" || echo "0")
+  echo "Last 5 runs: $FAIL_COUNT failures"
+
+  if [ "$FAIL_COUNT" -ge 2 ]; then
+    echo "⚠ PATTERN: $WORKFLOW has $FAIL_COUNT consecutive failures"
+    echo "  → The WORKFLOW FILE itself likely needs fixing (not just code)"
+    echo "  → Investigate .github/workflows/ files"
+
+    # Get the latest failure log
+    RUN_ID=$(gh run list --workflow="$WORKFLOW" --status failure --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null)
+    if [ -n "$RUN_ID" ]; then
+      echo "  Fetching failure log for run $RUN_ID..."
+      gh run view "$RUN_ID" --log-failed 2>/dev/null | tail -30
+    fi
+  fi
+done
+
+# Step 3: Known workflow file issues and fixes
+echo ""
+echo "=== Checking Known Workflow Issues ==="
+
+# Issue A: E2E Tests — Thea.app path mismatch
+# The verify step does: find build -name "Thea.app" -type d
+# But the app is at: build/Build/Products/Debug-iphonesimulator/Thea.app
+echo "Checking e2e-tests.yml for path issues..."
+if grep -q 'find build -name "Thea.app"' .github/workflows/e2e-tests.yml 2>/dev/null; then
+  echo "  ⚠ E2E Tests: Verify step uses shallow 'find build' — may not find nested .app"
+  echo "  → Fix: Use 'find build -name \"Thea.app\" -type d -path \"*Products*\"'"
+fi
+
+# Issue B: CI — macOS build timeout
+echo "Checking ci.yml for timeout issues..."
+if ! grep -q "timeout-minutes" .github/workflows/ci.yml 2>/dev/null; then
+  echo "  ⚠ CI: No explicit timeout-minutes set — relying on GitHub default (6h)"
+  echo "  → Fix: Add 'timeout-minutes: 45' to Build job"
+elif grep -q "timeout-minutes: 30" .github/workflows/ci.yml 2>/dev/null; then
+  echo "  ⚠ CI: timeout-minutes may be too low for Release macOS build (~30min)"
+  echo "  → Fix: Increase to 'timeout-minutes: 45'"
+fi
+
+# Issue C: Security Audit — Swift toolchain mismatch
+echo "Checking thea-audit-main.yml for toolchain issues..."
+if grep -q "swift-macOS" .github/workflows/thea-audit-main.yml 2>/dev/null || \
+   grep -q "hostedtoolcache/swift" .github/workflows/thea-audit-main.yml 2>/dev/null; then
+  echo "  ⚠ Security Audit: May be using hostedtoolcache Swift instead of Xcode's Swift"
+  echo "  → Fix: Ensure 'swift build' uses Xcode's bundled toolchain via 'xcrun swift build'"
+fi
+
+echo ""
+echo "After fixing workflow files, commit and push:"
+echo "  git add .github/workflows/"
+echo "  git commit -m 'fix: repair CI/CD workflow files'"
+echo "  git pushsync origin main"
+echo ""
+echo "Then re-run Phase 11 to monitor the fixed workflows."
+
+echo "✓ Phase 11.5 COMPLETE (manual workflow fixes may be required)"
+```
+
+**Gate:** All workflow files verified, known issues identified and fixed, all 6 GitHub Actions workflows green.
+
+**Known Workflow Issues (as of 2026-02-07):**
+
+| Workflow | Issue | Root Cause | Fix |
+|----------|-------|------------|-----|
+| **E2E Tests** | `Thea.app not found in build directory` | `find build -name "Thea.app"` doesn't search deep enough; app at `build/Build/Products/Debug-iphonesimulator/Thea.app` | Fix path in verify step |
+| **CI** | macOS Release build cancelled/timeout | Build takes >29min, exceeds job timeout | Increase `timeout-minutes` to 45+ or add DerivedData caching |
+| **Security Audit** | `swift-frontend` crash (`_Builtin_float` module) | Swift 6.0.3 in hostedtoolcache incompatible with Xcode 26.2 SDK | Use `xcrun swift build` instead of bare `swift build` |
+
+---
+
 ## Phase Execution Summary (Complete)
 
 | Phase | What | Time | Auto-Fix? |
@@ -1005,14 +1101,16 @@ fi
 | 3 | Sanitizers (ASan/TSan) | 30 sec | No |
 | 4 | Debug Builds (All 4 Platforms) | 2 min | Yes |
 | 5 | Release Builds (All 4 Platforms) | 3 min | Yes |
+| **5.5** | **Xcode GUI Builds (All 4 Platforms)** | **5 min** | **Yes** |
 | 6 | Memory/Runtime Verification | 30 sec | No |
 | 7 | Security Audit | 30 sec | No |
 | 8 | Final Verification & Report | 10 sec | N/A |
 | 9 | Commit & Sync Changes | 5 sec | Yes |
 | 10 | Update Documentation | 2 min | Yes |
-| **11** | **CI/CD Fix Loop** | **5-15 min** | **Yes** |
+| 11 | CI/CD Fix Loop (code fixes) | 5-15 min | Yes |
+| **11.5** | **CI/CD Workflow File Fix Loop** | **10-30 min** | **Yes** |
 
-**Total: ~15-20 minutes** (with CI monitoring)
+**Total: ~25-40 minutes** (with GUI builds + CI monitoring + workflow fixes)
 
 ---
 
@@ -1026,3 +1124,4 @@ fi
 | 2.2 | Jan 31, 2026 | Added Phase 11 (CI/CD Fix Loop) for post-push verification |
 | 2.3 | Jan 31, 2026 | **ZERO TOLERANCE policy** - 0 errors AND 0 warnings required for all phases |
 | 2.4 | Jan 31, 2026 | Added Phase 0.5 (Pre-Build Cleanup) to prevent Xcode database lock errors |
+| **3.0** | **Feb 07, 2026** | **MAJOR: Added Phase 5.5 (Xcode GUI Builds — MANDATORY), Phase 11.5 (Workflow File Fix Loop). Documented known CI failures: E2E path mismatch, CI macOS timeout, Security Audit toolchain crash. Updated total phase count to 15. Lessons from QA run that skipped GUI builds and left 3 workflows red.** |
