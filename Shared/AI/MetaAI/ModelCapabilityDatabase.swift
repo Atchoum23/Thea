@@ -5,12 +5,13 @@ import OSLog
 
 // Maintains up-to-date database of AI model capabilities for intelligent routing
 
-public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
+/// Model capability record for database storage (distinct from ModelCapabilityRecord enum in AIModel.swift)
+public struct ModelCapabilityRecord: Codable, Identifiable, Sendable, Hashable {
     public let id: String // modelId
     public let modelId: String
     public let displayName: String
     public let provider: String
-    public let strengths: [TaskType]
+    public let strengths: [CapabilityTaskType]
     public let contextWindow: Int
     public let costPerMillionInput: Double
     public let costPerMillionOutput: Double
@@ -26,7 +27,8 @@ public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
         case manual = "Manual Entry"
     }
 
-    public enum TaskType: String, Codable, Sendable, CaseIterable {
+    /// Task types for model capability routing (distinct from TaskType in TaskClassifier)
+    public enum CapabilityTaskType: String, Codable, Sendable, CaseIterable {
         case code = "Code Generation"
         case reasoning = "Complex Reasoning"
         case creative = "Creative Writing"
@@ -43,7 +45,7 @@ public struct ModelCapability: Codable, Identifiable, Sendable, Hashable {
         modelId: String,
         displayName: String,
         provider: String,
-        strengths: [TaskType],
+        strengths: [CapabilityTaskType],
         contextWindow: Int,
         costPerMillionInput: Double,
         costPerMillionOutput: Double,
@@ -84,7 +86,7 @@ public final class ModelCapabilityDatabase {
 
     private let logger = Logger(subsystem: "com.thea.orchestrator", category: "ModelCapabilityDatabase")
 
-    public private(set) var models: [ModelCapability] = []
+    public private(set) var models: [ModelCapabilityRecord] = []
     public private(set) var lastUpdated: Date?
     public private(set) var isUpdating: Bool = false
 
@@ -141,7 +143,7 @@ public final class ModelCapabilityDatabase {
     private func addSeedData() {
         models = [
             // Claude Models
-            ModelCapability(
+            ModelCapabilityRecord(
                 modelId: "anthropic/claude-opus-4-5-20251101",
                 displayName: "Claude Opus 4.5",
                 provider: "anthropic",
@@ -153,7 +155,7 @@ public final class ModelCapabilityDatabase {
                 qualityScore: 0.95,
                 source: .manual
             ),
-            ModelCapability(
+            ModelCapabilityRecord(
                 modelId: "anthropic/claude-sonnet-4-20250514",
                 displayName: "Claude Sonnet 4",
                 provider: "anthropic",
@@ -167,7 +169,7 @@ public final class ModelCapabilityDatabase {
             ),
 
             // OpenAI Models
-            ModelCapability(
+            ModelCapabilityRecord(
                 modelId: "openai/gpt-4o",
                 displayName: "GPT-4o",
                 provider: "openai",
@@ -179,7 +181,7 @@ public final class ModelCapabilityDatabase {
                 qualityScore: 0.90,
                 source: .manual
             ),
-            ModelCapability(
+            ModelCapabilityRecord(
                 modelId: "openai/gpt-4o-mini",
                 displayName: "GPT-4o Mini",
                 provider: "openai",
@@ -193,7 +195,7 @@ public final class ModelCapabilityDatabase {
             ),
 
             // Google Models
-            ModelCapability(
+            ModelCapabilityRecord(
                 modelId: "google/gemini-2.0-flash",
                 displayName: "Gemini 2.0 Flash",
                 provider: "google",
@@ -207,7 +209,7 @@ public final class ModelCapabilityDatabase {
             ),
 
             // DeepSeek Models
-            ModelCapability(
+            ModelCapabilityRecord(
                 modelId: "deepseek/deepseek-chat",
                 displayName: "DeepSeek Chat",
                 provider: "deepseek",
@@ -221,7 +223,7 @@ public final class ModelCapabilityDatabase {
             ),
 
             // Meta Models
-            ModelCapability(
+            ModelCapabilityRecord(
                 modelId: "meta-llama/llama-3.1-405b",
                 displayName: "Llama 3.1 405B",
                 provider: "meta",
@@ -262,7 +264,7 @@ public final class ModelCapabilityDatabase {
         logger.info("Database updated: \(self.models.count) models indexed")
     }
 
-    public func getBestModel(for taskType: ModelCapability.TaskType, preferences: RoutingPreferences) -> ModelCapability? {
+    public func getBestModel(for taskType: ModelCapabilityRecord.CapabilityTaskType, preferences: RoutingPreferences) -> ModelCapabilityRecord? {
         models
             .filter { $0.strengths.contains(taskType) }
             .filter { preferences.localPreferred ? $0.provider == "local" : true }
@@ -275,15 +277,15 @@ public final class ModelCapabilityDatabase {
             .first
     }
 
-    public func getModel(id: String) -> ModelCapability? {
+    public func getModel(id: String) -> ModelCapabilityRecord? {
         models.first { $0.modelId == id }
     }
 
-    public func getModels(for provider: String) -> [ModelCapability] {
+    public func getModels(for provider: String) -> [ModelCapabilityRecord] {
         models.filter { $0.provider == provider }
     }
 
-    public func getModels(strongIn taskType: ModelCapability.TaskType) -> [ModelCapability] {
+    public func getModels(strongIn taskType: ModelCapabilityRecord.CapabilityTaskType) -> [ModelCapabilityRecord] {
         models.filter { $0.strengths.contains(taskType) }
     }
 
@@ -331,7 +333,7 @@ public final class ModelCapabilityDatabase {
         // In production:
         // 1. Fetch models from API
         // 2. Parse response
-        // 3. Map to ModelCapability
+        // 3. Map to ModelCapabilityRecord
         // 4. Merge with existing models
     }
 
@@ -361,7 +363,7 @@ public final class ModelCapabilityDatabase {
         do {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            models = try decoder.decode([ModelCapability].self, from: data)
+            models = try decoder.decode([ModelCapabilityRecord].self, from: data)
             lastUpdated = UserDefaults.standard.object(forKey: "\(storageKey).lastUpdated") as? Date
             logger.info("Loaded \(self.models.count) models from cache")
         } catch {
