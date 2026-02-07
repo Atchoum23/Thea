@@ -56,3 +56,4 @@ yarn-error.log*
 fix_*.py
 add_*.py
 *.txt
+# Ignore stray Xcode projects
