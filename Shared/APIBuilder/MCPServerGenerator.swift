@@ -669,13 +669,14 @@ public enum MCPGeneratorError: Error, LocalizedError, Sendable {
 // MARK: - MCP Protocol Types
 
 public protocol MCPServer: Actor {
-    var serverMetadata: MCPServerMetadata { get }
+    var serverMetadata: MCPGeneratedServerMetadata { get }
     func start() async throws
     func stop() async
     func handleRequest(_ request: MCPRequest) async throws -> MCPResponse
 }
 
-public struct MCPServerMetadata: Sendable {
+/// Metadata for a generated MCP server (distinct from MCPServerMetadata in MCPServerLifecycleManager)
+public struct MCPGeneratedServerMetadata: Sendable {
     public let name: String
     public let version: String
     public let capabilities: MCPCapabilities

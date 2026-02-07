@@ -343,7 +343,7 @@ targets:
           - "**/LifeMonitoring/RelationshipIntelligence.swift"
           - "**/Managers/PermissionsTypes.swift"
           - "**/PatternLearning/**"
-          # AI/Context kept for macOS - needed by THEAOrchestrator
+          - "**/AI/Context/**"
           - "**/Configuration/ConfigurationManager.swift"
           - "**/Verification/ConfidenceSystem.swift"
           - "**/Settings/Advanced/**"

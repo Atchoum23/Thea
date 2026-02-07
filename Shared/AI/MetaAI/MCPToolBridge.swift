@@ -190,8 +190,8 @@ final class MCPToolRegistry {
 
 // MARK: - MetaAI MCP Server Info
 
-/// MCP Server info for MetaAI subsystem (distinct from TrustScoreSystem's MetaAIMCPServerInfo)
-struct MetaAIMetaAIMCPServerInfo: Identifiable, Hashable, Sendable {
+/// MCP Server info for MetaAI subsystem (distinct from TrustScoreSystem's MCPServerInfo)
+struct MetaAIMCPServerInfo: Identifiable, Hashable, Sendable {
     let id: UUID
     let name: String
     let description: String
