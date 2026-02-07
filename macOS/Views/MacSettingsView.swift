@@ -144,17 +144,73 @@ struct MacSettingsView: View {
     @State private var openRouterKey: String = ""
     @State private var apiKeysLoaded: Bool = false
 
+    @State private var providerConfig = AppConfiguration.shared.providerConfig
+    @State private var localModelConfig = AppConfiguration.shared.localModelConfig
+
     private var aiSettings: some View {
         Form {
-            Section("Default Provider") {
-                Picker("Provider", selection: $settingsManager.defaultProvider) {
+            // MARK: Provider & Routing
+            Section("Provider & Routing") {
+                Picker("Default Provider", selection: $settingsManager.defaultProvider) {
                     ForEach(settingsManager.availableProviders, id: \.self) { provider in
                         Text(provider.capitalized).tag(provider)
                     }
                 }
+
                 Toggle("Stream Responses", isOn: $settingsManager.streamResponses)
+
+                Toggle("Prefer Local Models When Available", isOn: Binding(
+                    get: { settingsManager.preferLocalModels },
+                    set: { settingsManager.preferLocalModels = $0 }
+                ))
             }
 
+            // MARK: Generation Defaults
+            Section("Generation Defaults") {
+                LabeledContent("Default Model") {
+                    TextField("", text: $providerConfig.defaultModel)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(maxWidth: 280)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Temperature: \(providerConfig.defaultTemperature, specifier: "%.1f")")
+                        .font(.caption)
+                    Slider(value: $providerConfig.defaultTemperature, in: 0 ... 2, step: 0.1)
+                }
+
+                Stepper("Max Tokens: \(providerConfig.defaultMaxTokens)",
+                        value: $providerConfig.defaultMaxTokens, in: 256 ... 32768, step: 256)
+
+                Stepper("Request Timeout: \(Int(providerConfig.requestTimeoutSeconds))s",
+                        value: $providerConfig.requestTimeoutSeconds, in: 10 ... 300, step: 10)
+            }
+            .onChange(of: providerConfig) { _, newValue in
+                AppConfiguration.shared.providerConfig = newValue
+            }
+
+            // MARK: Local Models
+            Section("Local Models") {
+                LabeledContent("Ollama URL") {
+                    TextField("", text: $localModelConfig.ollamaBaseURL)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(maxWidth: 280)
+                }
+
+                LabeledContent("MLX Models Dir") {
+                    TextField("", text: $localModelConfig.mlxModelsDirectory)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(maxWidth: 280)
+                }
+
+                let localCount = ProviderRegistry.shared.getAvailableLocalModels().count
+                LabeledContent("Discovered Models", value: "\(localCount)")
+            }
+            .onChange(of: localModelConfig) { _, newValue in
+                AppConfiguration.shared.localModelConfig = newValue
+            }
+
+            // MARK: API Keys
             Section("API Keys") {
                 apiKeyField(label: "OpenAI", key: $openAIKey, provider: "openai")
                 apiKeyField(label: "Anthropic", key: $anthropicKey, provider: "anthropic")
@@ -163,20 +219,17 @@ struct MacSettingsView: View {
                 apiKeyField(label: "Groq", key: $groqKey, provider: "groq")
                 apiKeyField(label: "OpenRouter", key: $openRouterKey, provider: "openrouter")
 
-                Text("API keys are stored securely in your Keychain.")
+                Text("Stored securely in your Keychain.")
                     .font(.theaCaption2)
                     .foregroundStyle(.tertiary)
             }
 
-            Section("Models") {
-                ModelSettingsView()
+            // MARK: Model Catalog
+            Section("Model Catalog") {
+                NavigationLink("Browse & Compare Models") {
+                    ModelSettingsView()
+                }
             }
-
-            Section("Integrations") {
-                IntegrationsSettingsView()
-            }
-
-            settingsFooter
         }
         .formStyle(.grouped)
         .padding()
@@ -335,6 +388,24 @@ struct MacSettingsView: View {
 
     private var advancedSettings: some View {
         Form {
+            Section("Execution Safety") {
+                Picker("Execution Mode", selection: $settingsManager.executionMode) {
+                    Text("Safe").tag("safe")
+                    Text("Normal").tag("normal")
+                    Text("Aggressive").tag("aggressive")
+                }
+
+                Toggle("Allow File Creation", isOn: $settingsManager.allowFileCreation)
+                Toggle("Allow File Editing", isOn: $settingsManager.allowFileEditing)
+                Toggle("Allow Code Execution", isOn: $settingsManager.allowCodeExecution)
+                Toggle("Allow External API Calls", isOn: $settingsManager.allowExternalAPICalls)
+                Toggle("Require Approval for Destructive Actions", isOn: $settingsManager.requireDestructiveApproval)
+                Toggle("Enable Rollback", isOn: $settingsManager.enableRollback)
+                Toggle("Create Backups Before Changes", isOn: $settingsManager.createBackups)
+                Stepper("Max Concurrent Tasks: \(settingsManager.maxConcurrentTasks)",
+                        value: $settingsManager.maxConcurrentTasks, in: 1 ... 10)
+            }
+
             Section("Development") {
                 Toggle("Enable Debug Mode", isOn: $settingsManager.debugMode)
                 Toggle("Show Performance Metrics", isOn: $settingsManager.showPerformanceMetrics)
@@ -358,7 +429,11 @@ struct MacSettingsView: View {
                 Button("Clear Cache") { clearCache() }
             }
 
-            settingsFooter
+            Section("Reset") {
+                Button("Reset All Settings to Defaults", role: .destructive) {
+                    settingsManager.resetToDefaults()
+                }
+            }
         }
         .formStyle(.grouped)
         .padding()
