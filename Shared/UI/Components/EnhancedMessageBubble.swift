@@ -38,6 +38,7 @@ public struct EnhancedMessageBubble: View {
     @State private var showCopiedFeedback = false
     @State private var expandedBlocks: Set<String> = []
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public var body: some View {
         HStack(alignment: .top, spacing: TheaSpacing.md) {
@@ -169,8 +170,11 @@ public struct EnhancedMessageBubble: View {
                     Rectangle()
                         .fill(Color.theaPrimaryDefault)
                         .frame(width: 2, height: 16)
-                        .opacity(cursorOpacity)
-                        .animation(.easeInOut(duration: 0.5).repeatForever(), value: cursorOpacity)
+                        .opacity(reduceMotion ? 1.0 : cursorOpacity)
+                        .animation(
+                            reduceMotion ? nil : .easeInOut(duration: 0.5).repeatForever(),
+                            value: cursorOpacity
+                        )
                 }
             }
             .padding(.horizontal, TheaSpacing.lg)
