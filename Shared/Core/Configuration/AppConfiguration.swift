@@ -12,7 +12,19 @@ final class AppConfiguration {
 
     private let defaults = UserDefaults.standard
 
-    private init() {}
+    // Stored property for theme so @Observable tracks changes and views re-render
+    var themeConfigStored: ThemeConfiguration
+
+    private init() {
+        // Load themeConfig from UserDefaults at launch
+        if let data = UserDefaults.standard.data(forKey: "AppConfiguration.themeConfig"),
+           let config = try? JSONDecoder().decode(ThemeConfiguration.self, from: data)
+        {
+            themeConfigStored = config
+        } else {
+            themeConfigStored = ThemeConfiguration()
+        }
+    }
 
     // MARK: - App Info
 
@@ -139,16 +151,12 @@ final class AppConfiguration {
 
     // MARK: - Theme Configuration
 
+    /// Theme config backed by stored property for proper @Observable tracking.
+    /// Changes immediately re-render views that read font sizes, colors, etc.
     var themeConfig: ThemeConfiguration {
-        get {
-            if let data = defaults.data(forKey: "AppConfiguration.themeConfig"),
-               let config = try? JSONDecoder().decode(ThemeConfiguration.self, from: data)
-            {
-                return config
-            }
-            return ThemeConfiguration()
-        }
+        get { themeConfigStored }
         set {
+            themeConfigStored = newValue
             if let data = try? JSONEncoder().encode(newValue) {
                 defaults.set(data, forKey: "AppConfiguration.themeConfig")
             }
