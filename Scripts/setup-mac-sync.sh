@@ -88,24 +88,37 @@ echo "  ✓ Created ~/bin/thea-sync.sh"
 cat > ~/bin/git-pushsync << 'PUSHSYNCEOF'
 #!/bin/bash
 # git-pushsync — Push to remote and trigger sync build on the other Mac
+# Tries Tailscale hostname first (works over internet), then .local (LAN only).
+# If neither SSH works, the 5-min launchd polling will catch it.
 set -euo pipefail
 
 git push "$@"
 
 THIS_MAC=$(hostname -s | tr '[:upper:]' '[:lower:]')
-OTHER_MAC=""
 
+# Determine the other Mac's hostnames (Tailscale first, then mDNS/LAN)
+OTHER_HOSTS=()
 case "$THIS_MAC" in
-  mbam2) OTHER_MAC="MSM3U.local" ;;
-  msm3u) OTHER_MAC="MBAM2.local" ;;
+  mbam2) OTHER_HOSTS=("msm3u" "MSM3U.local") ;;
+  msm3u) OTHER_HOSTS=("mbam2" "MBAM2.local") ;;
 esac
 
-if [ -n "$OTHER_MAC" ]; then
-  echo "Triggering sync on $OTHER_MAC..."
-  ssh -o ConnectTimeout=5 -o BatchMode=yes "alexis@$OTHER_MAC" \
-    "/Users/alexis/bin/thea-sync.sh" </dev/null >/dev/null 2>&1 &
-  echo "Build triggered (background)."
+if [ ${#OTHER_HOSTS[@]} -eq 0 ]; then
+  exit 0
 fi
+
+# Try each hostname — first one reachable gets the sync trigger
+for host in "${OTHER_HOSTS[@]}"; do
+  if ssh -o ConnectTimeout=3 -o BatchMode=yes "alexis@$host" true 2>/dev/null; then
+    echo "Triggering sync on $host..."
+    ssh -o ConnectTimeout=5 -o BatchMode=yes "alexis@$host" \
+      "/Users/alexis/bin/thea-sync.sh" </dev/null >/dev/null 2>&1 &
+    echo "Build triggered (background)."
+    exit 0
+  fi
+done
+
+echo "Could not reach other Mac — polling will catch up within 5 min."
 PUSHSYNCEOF
 chmod +x ~/bin/git-pushsync
 git config --global alias.pushsync '!/Users/alexis/bin/git-pushsync'
