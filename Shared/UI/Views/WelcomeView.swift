@@ -7,7 +7,7 @@ struct WelcomeView: View {
         VStack(spacing: TheaSpacing.xl) {
             Spacer()
 
-            // Thea spiral icon — uses actual app icon with CCW rotation + beat
+            // Thea spiral icon — extracted spiral (no background) with CCW rotation + beat
             TheaSpiralIconView(size: 80, isThinking: false, showGlow: true)
 
             // Greeting with Thea's golden spiral brand colors
@@ -22,19 +22,6 @@ struct WelcomeView: View {
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(Self.timeBasedGreeting()) How can I help you today?")
-
-            // Suggestion chips
-            SuggestionChipGrid { item in
-                if let onSuggestionSelected {
-                    onSuggestionSelected(item.prompt)
-                } else {
-                    NotificationCenter.default.post(
-                        name: Notification.Name.newConversation,
-                        object: item.prompt
-                    )
-                }
-            }
-            .padding(.horizontal, TheaSpacing.xl)
 
             Spacer()
         }

@@ -1,6 +1,6 @@
 # Thea CI/CD Pipeline
-# Version: 3.2.0 - Updated action versions, improved caching, SPM validation integrated
-# Last Updated: January 31, 2026
+# Version: 4.0.0 - Updated to macOS 26 (Tahoe) runners with Xcode 26.2
+# Last Updated: February 7, 2026
 
 name: CI
 
@@ -19,8 +19,8 @@ on:
         options: [Debug, Release]
 
 env:
-  XCODE_VERSION: '16.2'
-  DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
+  XCODE_VERSION: '26.2'
+  DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,7 +32,7 @@ jobs:
   # ============================================
   swiftlint:
     name: SwiftLint
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -73,7 +73,7 @@ jobs:
   # ============================================
   build:
     name: Build ${{ matrix.platform }}
-    runs-on: macos-14
+    runs-on: macos-26
     needs: swiftlint
     timeout-minutes: 30
     strategy:
@@ -190,7 +190,7 @@ jobs:
   # ============================================
   test:
     name: Unit Tests
-    runs-on: macos-14
+    runs-on: macos-26
     needs: build
     timeout-minutes: 30
     steps:
