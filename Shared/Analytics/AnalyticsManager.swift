@@ -548,10 +548,13 @@ public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendabl
     private let fileURL: URL
 
     public init() {
-        guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            fatalError("Unable to access documents directory - this should never happen on a properly configured system")
+        if let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            fileURL = documentsPath.appendingPathComponent("analytics.json")
+        } else {
+            // Fallback to temporary directory if documents directory is unavailable
+            logger.error("Unable to access documents directory, falling back to temp directory")
+            fileURL = FileManager.default.temporaryDirectory.appendingPathComponent("analytics.json")
         }
-        fileURL = documentsPath.appendingPathComponent("analytics.json")
     }
 
     public func track(_: AnalyticsEvent) {

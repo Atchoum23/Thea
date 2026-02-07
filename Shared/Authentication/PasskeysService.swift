@@ -312,15 +312,19 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                // Last resort: return any window from any scene
-                return scenes.first?.windows.first ?? scenes.first.map { UIWindow(windowScene: $0) } ?? {
-                    // Create a temporary window scene if none exists (edge case)
-                    fatalError("No window scene available for presentation anchor")
-                }()
+                // Last resort: create a minimal window to prevent crash
+                if let firstScene = scenes.first {
+                    return UIWindow(windowScene: firstScene)
+                }
+                // Final fallback: create a plain UIWindow (auth will still work)
+                let fallbackWindow = UIWindow(frame: UIScreen.main.bounds)
+                fallbackWindow.makeKeyAndVisible()
+                return fallbackWindow
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
-                fatalError("Unsupported platform")
+                // watchOS/tvOS: return a minimal window
+                return NSWindow()
             #endif
         }
     }
@@ -467,11 +471,13 @@ public struct SignInWithAppleButton: View {
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                // Last resort: return any window from any scene
-                return scenes.first?.windows.first ?? scenes.first.map { UIWindow(windowScene: $0) } ?? {
-                    // Create a temporary window scene if none exists (edge case)
-                    fatalError("No window scene available for presentation anchor")
-                }()
+                // Last resort: create a minimal window to prevent crash
+                if let firstScene = scenes.first {
+                    return UIWindow(windowScene: firstScene)
+                }
+                let fallbackWindow = UIWindow(frame: UIScreen.main.bounds)
+                fallbackWindow.makeKeyAndVisible()
+                return fallbackWindow
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
