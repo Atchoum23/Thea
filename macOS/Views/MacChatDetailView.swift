@@ -37,19 +37,6 @@ struct MacChatDetailView: View {
             chatInput
         }
         .navigationTitle(conversation.title)
-        .toolbar {
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button {
-                    isListeningForVoice.toggle()
-                    handleVoiceInput()
-                } label: {
-                    Image(systemName: isListeningForVoice ? "mic.fill" : "mic")
-                        .foregroundStyle(isListeningForVoice ? .red : .theaPrimary)
-                        .symbolEffect(.bounce, value: isListeningForVoice)
-                }
-                .help(isListeningForVoice ? "Stop listening" : "Voice input")
-            }
-        }
         .onAppear {
             chatManager.selectConversation(conversation)
             isInputFocused = true
@@ -105,14 +92,20 @@ struct MacChatDetailView: View {
     private var chatInput: some View {
         ChatInputView(
             text: $messageText,
-            isStreaming: chatManager.isStreaming
-        ) {
-            if chatManager.isStreaming {
-                chatManager.cancelStreaming()
-            } else {
-                sendMessage()
-            }
-        }
+            isStreaming: chatManager.isStreaming,
+            onSend: {
+                if chatManager.isStreaming {
+                    chatManager.cancelStreaming()
+                } else {
+                    sendMessage()
+                }
+            },
+            onVoiceToggle: {
+                isListeningForVoice.toggle()
+                handleVoiceInput()
+            },
+            isListening: isListeningForVoice
+        )
     }
 
     // MARK: - Actions
