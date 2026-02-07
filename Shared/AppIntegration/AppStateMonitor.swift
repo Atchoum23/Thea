@@ -9,6 +9,7 @@
 @preconcurrency import Foundation
 #if os(macOS)
     import AppKit
+    import ScreenCaptureKit
 #endif
 
 // MARK: - Observer Storage (MainActor isolated)
@@ -361,50 +362,92 @@ public actor VisualAnalysisService {
 
     // MARK: - Screen Capture
 
-    /// Capture the entire screen
-    /// Screen capture - requires ScreenCaptureKit for macOS 14+
-    /// TODO: Implement with ScreenCaptureKit
+    /// Capture the entire screen using ScreenCaptureKit
     public func captureScreen() async throws -> CGImage? {
         #if os(macOS)
             guard CGPreflightScreenCaptureAccess() else {
                 CGRequestScreenCaptureAccess()
                 throw IntegrationError.accessibilityNotGranted
             }
-            // CGDisplayCreateImage is unavailable in macOS 14+
-            // Requires ScreenCaptureKit migration
-            throw IntegrationError.notSupported
+
+            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            guard let display = content.displays.first else {
+                throw IntegrationError.notSupported
+            }
+
+            let filter = SCContentFilter(display: display, excludingWindows: [])
+            let config = SCStreamConfiguration()
+            config.width = display.width * 2  // Retina
+            config.height = display.height * 2
+            config.pixelFormat = kCVPixelFormatType_32BGRA
+            config.showsCursor = false
+
+            return try await SCScreenshotManager.captureImage(
+                contentFilter: filter,
+                configuration: config
+            )
         #else
             throw IntegrationError.notSupported
         #endif
     }
 
-    /// Capture a specific region - requires ScreenCaptureKit for macOS 14+
-    /// TODO: Implement with ScreenCaptureKit
+    /// Capture a specific screen region using ScreenCaptureKit
     public func captureRegion(_ rect: CGRect) async throws -> CGImage? {
         #if os(macOS)
             guard CGPreflightScreenCaptureAccess() else {
                 throw IntegrationError.accessibilityNotGranted
             }
-            // CGDisplayCreateImage is unavailable in macOS 14+
-            // Requires ScreenCaptureKit migration
-            _ = rect // silence unused warning
-            throw IntegrationError.notSupported
+
+            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            guard let display = content.displays.first else {
+                throw IntegrationError.notSupported
+            }
+
+            let filter = SCContentFilter(display: display, excludingWindows: [])
+            let config = SCStreamConfiguration()
+            config.sourceRect = rect
+            config.width = Int(rect.width) * 2
+            config.height = Int(rect.height) * 2
+            config.pixelFormat = kCVPixelFormatType_32BGRA
+            config.showsCursor = false
+
+            return try await SCScreenshotManager.captureImage(
+                contentFilter: filter,
+                configuration: config
+            )
         #else
             throw IntegrationError.notSupported
         #endif
     }
 
-    /// Capture a specific window - requires ScreenCaptureKit for macOS 14+
-    /// TODO: Implement with ScreenCaptureKit
+    /// Capture a specific window using ScreenCaptureKit
     public func captureWindow(windowId: CGWindowID) async throws -> CGImage? {
         #if os(macOS)
             guard CGPreflightScreenCaptureAccess() else {
                 throw IntegrationError.accessibilityNotGranted
             }
-            // CGWindowListCreateImage is unavailable in macOS 14+
-            // Requires ScreenCaptureKit migration
-            _ = windowId // silence unused warning
-            throw IntegrationError.notSupported
+
+            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            guard let display = content.displays.first else {
+                throw IntegrationError.notSupported
+            }
+
+            // Find the matching window
+            guard let window = content.windows.first(where: { $0.windowID == windowId }) else {
+                throw IntegrationError.notSupported
+            }
+
+            let filter = SCContentFilter(desktopIndependentWindow: window)
+            let config = SCStreamConfiguration()
+            config.width = Int(window.frame.width) * 2
+            config.height = Int(window.frame.height) * 2
+            config.pixelFormat = kCVPixelFormatType_32BGRA
+            config.showsCursor = false
+
+            return try await SCScreenshotManager.captureImage(
+                contentFilter: filter,
+                configuration: config
+            )
         #else
             throw IntegrationError.notSupported
         #endif

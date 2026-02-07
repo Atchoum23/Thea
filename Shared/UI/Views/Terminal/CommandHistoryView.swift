@@ -43,8 +43,8 @@
             case .failed:
                 commands = commands.filter { !$0.wasSuccessful }
             case .favorites:
-                // TODO: Implement favorites
-                break
+                let favoriteIDs = Set(UserDefaults.standard.stringArray(forKey: "terminal.favoriteCommands") ?? [])
+                commands = commands.filter { favoriteIDs.contains($0.id.uuidString) }
             }
 
             // Apply sort
