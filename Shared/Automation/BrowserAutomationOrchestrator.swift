@@ -149,6 +149,7 @@
         private var automationTask: Task<Void, Never>?
         private var userInterventionDetector: UserInterventionDetector?
         private let screenAnalyzer = ScreenAnalyzer.shared
+        private let automationEngine = AutomationEngine()
 
         private init() {
             logger.info("BrowserAutomationOrchestrator initialized")
@@ -390,32 +391,32 @@
             do {
                 switch action.type {
                 case let .click(x, y):
-                    try await AutomationEngine.shared.click(x: x, y: y)
+                    try await automationEngine.executeAction(.click(x: x, y: y))
                     return ActionResult(success: true, message: "Clicked at (\(x), \(y))")
 
                 case let .doubleClick(x, y):
-                    try await AutomationEngine.shared.click(x: x, y: y)
+                    try await automationEngine.executeAction(.click(x: x, y: y))
                     try await Task.sleep(for: .milliseconds(50))
-                    try await AutomationEngine.shared.click(x: x, y: y)
+                    try await automationEngine.executeAction(.click(x: x, y: y))
                     return ActionResult(success: true, message: "Double-clicked at (\(x), \(y))")
 
                 case let .rightClick(x, y):
-                    // Right-click via CGEvent
-                    try await AutomationEngine.shared.click(x: x, y: y)
+                    try await automationEngine.executeAction(.click(x: x, y: y))
                     return ActionResult(success: true, message: "Right-clicked at (\(x), \(y))")
 
                 case let .type(text):
-                    try await AutomationEngine.shared.typeText(text)
+                    try await automationEngine.executeAction(.type(text: text))
                     return ActionResult(success: true, message: "Typed \(text.count) chars")
 
                 case let .keyCombo(key, modifiers):
-                    try await AutomationEngine.shared.pressKey(key, modifiers: modifiers)
+                    let engineModifiers = modifiers.compactMap { AutomationEngine.KeyModifier(rawValue: $0) }
+                    try await automationEngine.executeAction(.keyPress(key: key, modifiers: engineModifiers))
                     return ActionResult(success: true, message: "Key combo: \(modifiers.joined(separator: "+"))+\(key)")
 
                 case let .scroll(direction, amount):
-                    let dir: String = direction.rawValue
-                    try await AutomationEngine.shared.scroll(direction: dir, amount: amount)
-                    return ActionResult(success: true, message: "Scrolled \(dir) x\(amount)")
+                    let engineDir = AutomationEngine.ScrollDirection(rawValue: direction.rawValue) ?? .down
+                    try await automationEngine.executeAction(.scroll(direction: engineDir, amount: amount))
+                    return ActionResult(success: true, message: "Scrolled \(direction.rawValue) x\(amount)")
 
                 case let .navigate(url):
                     let service = BrowserAutomationService()
@@ -432,7 +433,7 @@
                     return ActionResult(success: true, message: "Waited \(seconds)s")
 
                 case .screenshot:
-                    _ = try await ScreenCapture.shared.captureScreen()
+                    try await automationEngine.executeAction(.screenshot)
                     return ActionResult(success: true, message: "Screenshot captured")
 
                 case let .done(reason):

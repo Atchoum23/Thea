@@ -204,6 +204,7 @@ public actor EnvironmentContextProvider: ContextProvider {
     }
 
     private func getConnectedAccessories() async -> [String] {
+        #if os(macOS)
         // Use BluetoothDeviceManager for categorized audio device data
         let devices = await MainActor.run {
             BluetoothDeviceManager.shared.connectedAudioDevices
@@ -214,6 +215,10 @@ public actor EnvironmentContextProvider: ContextProvider {
             let btLabel = device.isBluetooth ? "BT" : "Wired"
             return "\(device.name) (\(device.category.displayName), \(btLabel))"
         }
+        #else
+        // BluetoothDeviceManager is macOS-only
+        return []
+        #endif
     }
 }
 

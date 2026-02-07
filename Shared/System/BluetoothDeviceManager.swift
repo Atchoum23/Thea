@@ -106,7 +106,7 @@ public final class BluetoothDeviceManager {
 
     /// Set of device categories that trigger automatic voice output
     public var voiceOutputCategories: Set<AudioDeviceCategory> = [
-        .carAudio, .headphones, .earbuds, .handsfree,
+        .carAudio, .headphones, .earbuds, .handsfree
     ]
 
     /// Master toggle for automatic voice switching
@@ -134,7 +134,11 @@ public final class BluetoothDeviceManager {
     }
 
     deinit {
-        // Cleanup handled in stopMonitoring
+        #if os(iOS)
+        NotificationCenter.default.removeObserver(self)
+        #elseif os(macOS)
+        // macOS listeners are cleaned up automatically
+        #endif
     }
 
     // MARK: - Monitoring Lifecycle
@@ -150,9 +154,10 @@ public final class BluetoothDeviceManager {
     /// Stop all monitoring (cleanup)
     public func stopMonitoring() {
         #if os(iOS)
-            NotificationCenter.default.removeObserver(self)
+        // swiftlint:disable:next notification_center_detachment
+        NotificationCenter.default.removeObserver(self)
         #elseif os(macOS)
-            removeMacOSListeners()
+        removeMacOSListeners()
         #endif
     }
 
