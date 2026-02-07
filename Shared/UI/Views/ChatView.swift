@@ -11,6 +11,7 @@ struct ChatView: View {
     let conversation: Conversation
 
     @State private var chatManager = ChatManager.shared
+    @State private var planManager = PlanManager.shared
     @State private var inputText = ""
     @State private var selectedProvider: AIProvider?
     @State private var showingError: Error?
@@ -37,11 +38,35 @@ struct ChatView: View {
             messageList
             chatInput
         }
+        .overlay(alignment: .bottomTrailing) {
+            if planManager.isPanelCollapsed && planManager.activePlan?.isActive == true {
+                CompactPlanBar()
+                    .padding(TheaSpacing.lg)
+            }
+        }
+        #if os(macOS) || os(iOS)
+        .inspector(isPresented: $planManager.isPanelVisible) {
+            PlanPanel()
+                .inspectorColumnWidth(min: 300, ideal: 400, max: 500)
+        }
+        #endif
         .navigationTitle(conversation.title)
         #if os(macOS)
             .navigationSubtitle("\(messages.count) messages")
         #endif
             .toolbar {
+                // Plan toggle
+                if planManager.activePlan != nil {
+                    ToolbarItem {
+                        Button {
+                            planManager.togglePanel()
+                        } label: {
+                            Label("Plan", systemImage: "list.bullet.clipboard")
+                        }
+                        .help("Toggle plan panel")
+                    }
+                }
+
                 ToolbarItem {
                     Menu {
                         Button("Rename") {
