@@ -4,6 +4,7 @@
 // Integrates with PreferenceSyncEngine for per-category sync scope management
 // and CloudKitService for conversations/knowledge/projects sync.
 
+import OSLog
 import SwiftUI
 
 struct SyncSettingsView: View {

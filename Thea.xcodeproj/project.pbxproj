@@ -173,6 +173,7 @@
 		25A66C36F211D76DECC2BCBA /* SwiftDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59DF9656C551995AA2DDBBD /* SwiftDataHelpers.swift */; };
 		2614B8CBD5B393883A86BFB0 /* TrackingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8FD2C37F45BB996BAFEA7E /* TrackingModels.swift */; };
 		261C6BF95A49454CB4B891D4 /* UnifiedIntelligenceHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0269A46E02BD97A4CF52B0EA /* UnifiedIntelligenceHub.swift */; };
+		26D178AA8ECF1B93193FD926 /* AppUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39599F089C9590FCF0088F85 /* AppUpdateService.swift */; };
 		26D269B0A1EBE74CD50D5548 /* TheaFocusFilterExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DF41D7B50ADAD52B6CB74541 /* TheaFocusFilterExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		27495E2305E59672DCC5DE66 /* FinancialModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4318671F8DE98472EC663FBF /* FinancialModels.swift */; };
 		2859A26EBF963B47AAE2F78A /* BatteryOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDA0136BF5B66976C838A6C /* BatteryOptimizer.swift */; };
@@ -961,6 +962,7 @@
 		E384607FB4F1FA39F488E28C /* GoogleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F74F450B2F44A98E1CE88C84 /* GoogleProvider.swift */; };
 		E39165AE6D7C36F46FD2210F /* MLXModelScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A084203697C1879C1D6A26 /* MLXModelScanner.swift */; };
 		E3941522B36BF93F39BD1187 /* SquadDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CA11C8F1811269469955084 /* SquadDefinition.swift */; };
+		E4304EE41DABB3093BBD08C5 /* AppUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39599F089C9590FCF0088F85 /* AppUpdateService.swift */; };
 		E43684D4A779267E4D73AF97 /* TheaRemoteClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B7DEFB5658C9402032C3DBB /* TheaRemoteClient.swift */; };
 		E4A34D3DFD147C863DA35559 /* ClaudeAppBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D86C3D85760378D66231943 /* ClaudeAppBridge.swift */; };
 		E4C7042A8C46982DF9ACE52E /* ProjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF9B29745B3455B7EB0D745 /* ProjectManager.swift */; };
@@ -1354,6 +1356,7 @@
 		3706645721ACA3166BB1451F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		38C72B58751221A753F55B09 /* AgentSecKillSwitchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSecKillSwitchTests.swift; sourceTree = "<group>"; };
 		39037BEDEE29D1CE9E77BE5B /* OnDeviceAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceAIService.swift; sourceTree = "<group>"; };
+		39599F089C9590FCF0088F85 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
 		3984ED5374CAD335E9CEB703 /* CarPlayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayService.swift; sourceTree = "<group>"; };
 		3A31D5A95202A25306AF85DA /* ModelSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSelectorView.swift; sourceTree = "<group>"; };
 		3A39E657454A8273F0B46AEE /* WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetExtension.entitlements; sourceTree = "<group>"; };
@@ -1996,6 +1999,7 @@
 		052E97FD9181DF6B0C72DB5B /* Sync */ = {
 			isa = PBXGroup;
 			children = (
+				39599F089C9590FCF0088F85 /* AppUpdateService.swift */,
 				A092B851A3F64DCAC0E8CF57 /* CloudKitService.swift */,
 				B7710713218AA8C2E59D66B3 /* CrossDeviceService.swift */,
 				1AE015CDA0C3F95CE3FBB4F3 /* DeviceRegistry.swift */,
@@ -5226,6 +5230,7 @@
 				4BD0D53CD96D5A8BA0769BA9 /* AppActivityContextProvider.swift in Sources */,
 				2170C0C8D9D4B9FE5AD65818 /* AppClipManager.swift in Sources */,
 				7862B668708AC484EA83878E /* AppConfiguration.swift in Sources */,
+				26D178AA8ECF1B93193FD926 /* AppUpdateService.swift in Sources */,
 				9D68F5F26C5FB10718CA25F5 /* ApprovalManager.swift in Sources */,
 				49D3A05F14B8E61515E716CA /* ArtifactManager.swift in Sources */,
 				14572CFD145AC1EC53DBE195 /* ArtifactPanel.swift in Sources */,
@@ -5829,6 +5834,7 @@
 				62239361DBFA765E86F6B465 /* AppConfiguration.swift in Sources */,
 				E28FB1BE340EBD2F68255440 /* AppIntegrationFramework.swift in Sources */,
 				1767DA1AF1C5E7754D60055D /* AppStateMonitor.swift in Sources */,
+				E4304EE41DABB3093BBD08C5 /* AppUpdateService.swift in Sources */,
 				3EA4D9332CE02820FB95AD43 /* ApprovalManager.swift in Sources */,
 				81B5E6C085720212E93EED23 /* ArtifactManager.swift in Sources */,
 				D2ADF36031F463C45E94FE93 /* ArtifactPanel.swift in Sources */,
