@@ -609,11 +609,12 @@ public actor AsanaClient {
         )
     }
 
-    /// Verify webhook signature
+    /// Verify webhook signature using HMAC-SHA256
     public static func verifyWebhookSignature(payload: Data, signature: String, secret: String) -> Bool {
-        // HMAC-SHA256 verification
-        // Compare computed hash with X-Hook-Signature header
-        true // Placeholder
+        let key = SymmetricKey(data: Data(secret.utf8))
+        let hmac = HMAC<SHA256>.authenticationCode(for: payload, using: key)
+        let computedSignature = Data(hmac).map { String(format: "%02x", $0) }.joined()
+        return computedSignature == signature
     }
 
     // MARK: - Users & Teams
@@ -992,14 +993,205 @@ public struct AsanaGoal: Codable, Identifiable, Sendable {
     public let gid: String
     public let name: String
     public let notes: String?
+    public let htmlNotes: String?
     public let dueOn: String?
+    public let startOn: String?
     public let status: String?
+    public let owner: AsanaUserRef?
+    public let metric: AsanaGoalMetric?
+    public let currentStatusUpdate: AsanaStatusUpdateRef?
+    public let timePeriod: AsanaTimePeriodRef?
+    public let isWorkspaceLevel: Bool?
+    public let numLikes: Int?
+    public let liked: Bool?
 
     public var id: String { gid }
 
     enum CodingKeys: String, CodingKey {
-        case gid, name, notes, status
+        case gid, name, notes, status, owner, metric, liked
+        case htmlNotes = "html_notes"
         case dueOn = "due_on"
+        case startOn = "start_on"
+        case currentStatusUpdate = "current_status_update"
+        case timePeriod = "time_period"
+        case isWorkspaceLevel = "is_workspace_level"
+        case numLikes = "num_likes"
+    }
+}
+
+public struct AsanaGoalMetric: Codable, Sendable {
+    public let gid: String?
+    public let unit: String?
+    public let currentNumberValue: Double?
+    public let targetNumberValue: Double?
+    public let currencyCode: String?
+    public let progressSource: String?
+
+    enum CodingKeys: String, CodingKey {
+        case gid, unit
+        case currentNumberValue = "current_number_value"
+        case targetNumberValue = "target_number_value"
+        case currencyCode = "currency_code"
+        case progressSource = "progress_source"
+    }
+}
+
+public struct AsanaGoalRelationship: Codable, Identifiable, Sendable {
+    public let gid: String
+    public let relationshipType: String
+    public let resource: AsanaResourceRef?
+    public let goal: AsanaResourceRef?
+    public let contributionWeight: Double?
+    public let createdAt: String?
+
+    public var id: String { gid }
+
+    enum CodingKeys: String, CodingKey {
+        case gid, resource, goal
+        case relationshipType = "relationship_type"
+        case contributionWeight = "contribution_weight"
+        case createdAt = "created_at"
+    }
+}
+
+public struct AsanaResourceRef: Codable, Sendable {
+    public let gid: String
+    public let resourceType: String?
+    public let name: String?
+
+    enum CodingKeys: String, CodingKey {
+        case gid, name
+        case resourceType = "resource_type"
+    }
+}
+
+public struct AsanaStatusUpdateRef: Codable, Sendable {
+    public let gid: String
+    public let resourceSubtype: String?
+    public let title: String?
+
+    enum CodingKeys: String, CodingKey {
+        case gid, title
+        case resourceSubtype = "resource_subtype"
+    }
+}
+
+public struct AsanaTimePeriodRef: Codable, Sendable {
+    public let gid: String
+    public let displayName: String?
+    public let period: String?
+    public let startOn: String?
+    public let endOn: String?
+
+    enum CodingKeys: String, CodingKey {
+        case gid, period
+        case displayName = "display_name"
+        case startOn = "start_on"
+        case endOn = "end_on"
+    }
+}
+
+public struct AsanaTimePeriod: Codable, Identifiable, Sendable {
+    public let gid: String
+    public let displayName: String?
+    public let period: String?
+    public let startOn: String?
+    public let endOn: String?
+    public let parent: AsanaTimePeriodRef?
+
+    public var id: String { gid }
+
+    enum CodingKeys: String, CodingKey {
+        case gid, period, parent
+        case displayName = "display_name"
+        case startOn = "start_on"
+        case endOn = "end_on"
+    }
+}
+
+public struct AsanaPortfolioMembership: Codable, Identifiable, Sendable {
+    public let gid: String
+    public let user: AsanaUserRef?
+    public let portfolio: AsanaResourceRef?
+
+    public var id: String { gid }
+}
+
+public struct AsanaCustomFieldSetting: Codable, Sendable {
+    public let gid: String
+    public let customField: AsanaCustomField?
+    public let isImportant: Bool?
+    public let project: AsanaResourceRef?
+    public let portfolio: AsanaResourceRef?
+
+    enum CodingKeys: String, CodingKey {
+        case gid, project, portfolio
+        case customField = "custom_field"
+        case isImportant = "is_important"
+    }
+}
+
+public struct AsanaTypeaheadResult: Codable, Identifiable, Sendable {
+    public let gid: String
+    public let name: String
+    public let resourceType: String?
+
+    public var id: String { gid }
+
+    enum CodingKeys: String, CodingKey {
+        case gid, name
+        case resourceType = "resource_type"
+    }
+}
+
+public enum AsanaTypeaheadType: String, Sendable {
+    case user
+    case project
+    case portfolio
+    case tag
+    case task
+    case customField = "custom_field"
+    case team
+    case goal
+}
+
+public struct AsanaFavorite: Codable, Identifiable, Sendable {
+    public let gid: String
+    public let name: String?
+    public let resourceType: String?
+
+    public var id: String { gid }
+
+    enum CodingKeys: String, CodingKey {
+        case gid, name
+        case resourceType = "resource_type"
+    }
+}
+
+public struct AsanaMembership: Codable, Identifiable, Sendable {
+    public let gid: String
+    public let parent: AsanaResourceRef?
+    public let member: AsanaResourceRef?
+
+    public var id: String { gid }
+}
+
+public struct AsanaStatusUpdate: Codable, Identifiable, Sendable {
+    public let gid: String
+    public let title: String?
+    public let text: String?
+    public let htmlText: String?
+    public let statusType: String?
+    public let author: AsanaUserRef?
+    public let createdAt: String?
+
+    public var id: String { gid }
+
+    enum CodingKeys: String, CodingKey {
+        case gid, title, text, author
+        case htmlText = "html_text"
+        case statusType = "status_type"
+        case createdAt = "created_at"
     }
 }
 

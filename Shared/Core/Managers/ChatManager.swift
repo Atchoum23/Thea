@@ -116,6 +116,25 @@ final class ChatManager: ObservableObject {
     func sendMessage(_ text: String, in conversation: Conversation) async throws {
         debugLog("📤 sendMessage: Starting with text '\(text.prefix(50))...'")
 
+        // Check if this message should modify an active plan
+        if let activePlan = PlanManager.shared.activePlan, activePlan.isActive {
+            let isPlanModifying = detectPlanModificationIntent(text)
+            if isPlanModifying {
+                debugLog("📋 Detected plan modification intent, updating plan")
+                // For now, add as a new step in the last phase
+                let newStep = PlanStep(
+                    title: String(text.prefix(80)),
+                    activeDescription: "Working on \(text.prefix(60).lowercased())...",
+                    taskType: "general"
+                )
+                let modification = PlanModification(
+                    type: .insertSteps([newStep], afterStepId: nil),
+                    reason: "User added new instruction mid-execution"
+                )
+                PlanManager.shared.applyModification(modification)
+            }
+        }
+
         guard let context = modelContext else {
             debugLog("❌ No model context!")
             throw ChatError.noModelContext
@@ -239,6 +258,21 @@ final class ChatManager: ObservableObject {
         }
 
         try await sendMessage(lastUserMessage.content.textValue, in: conversation)
+    }
+
+    // MARK: - Plan Mode Integration
+
+    /// Detect whether a user message during plan execution is modifying the plan
+    /// Uses keyword heuristics; will be upgraded to AI-based detection
+    private func detectPlanModificationIntent(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        let modifiers = [
+            "also ", "additionally ", "add ", "don't forget ",
+            "skip ", "remove ", "change ", "update ",
+            "instead ", "actually ", "wait ", "hold on",
+            "before that", "after that", "and also"
+        ]
+        return modifiers.contains { lower.contains($0) }
     }
 
     // MARK: - Orchestrator Integration
