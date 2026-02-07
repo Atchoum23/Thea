@@ -3400,13 +3400,6 @@
 			path = Vision;
 			sourceTree = "<group>";
 		};
-		8FCA51E86B110D69C3F2E23C /* Models */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
 		913C0D6547668F2D4F13FF2A /* Communication */ = {
 			isa = PBXGroup;
 			children = (
@@ -3546,7 +3539,6 @@
 		A217802E92C4347AEC180FEC /* tvOS */ = {
 			isa = PBXGroup;
 			children = (
-				8FCA51E86B110D69C3F2E23C /* Models */,
 				356DDACF5D2008082D667AF3 /* Services */,
 				E7CD3641F1F1D61C2EA311AF /* Views */,
 				36AF7DA27F3CB1E987D640DC /* Info.plist */,
