@@ -169,22 +169,8 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
 
 // MARK: - Supporting Types
 
-// Note: TaskType is defined in TaskTypes.swift to avoid duplicates
-
-/// Query complexity levels
-public enum QueryComplexity: String, Codable, Sendable {
-    case simple
-    case moderate
-    case complex
-
-    public var description: String {
-        switch self {
-        case .simple: "Single-task, straightforward query"
-        case .moderate: "Multi-step or requires decomposition"
-        case .complex: "Complex reasoning, verification needed"
-        }
-    }
-}
+// Note: TaskType is defined in Intelligence/Classification/TaskType.swift
+// QueryComplexity is defined in Core/Orchestration/OrchestrationTypes.swift
 
 /// Execution strategies
 public enum ExecutionStrategy: String, Codable, Sendable {

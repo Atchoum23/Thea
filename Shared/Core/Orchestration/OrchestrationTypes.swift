@@ -16,6 +16,14 @@ public enum QueryComplexity: String, Codable, Sendable {
     case simple     // Single-step, straightforward
     case moderate   // May benefit from decomposition
     case complex    // Definitely needs decomposition
+
+    public var description: String {
+        switch self {
+        case .simple: "Single-task, straightforward query"
+        case .moderate: "Multi-step or requires decomposition"
+        case .complex: "Complex reasoning, verification needed"
+        }
+    }
 }
 
 // MARK: - Model Selection
