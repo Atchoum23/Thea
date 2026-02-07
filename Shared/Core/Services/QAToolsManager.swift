@@ -1,5 +1,6 @@
 #if os(macOS)
     import Foundation
+    import UserNotifications
 
     // MARK: - QA Tools Manager
 
@@ -469,8 +470,21 @@
         }
 
         private func postQANotification(for result: QAToolResult) {
-            // TODO: Implement system notification
-            print("QA Result: \(result.tool.displayName) - \(result.success ? "Passed" : "Failed")")
+            let content = UNMutableNotificationContent()
+            content.title = "QA: \(result.tool.displayName)"
+            content.body = result.success ? "✅ Passed" : "❌ Failed — check results"
+            content.sound = result.success ? .default : .defaultCritical
+
+            let request = UNNotificationRequest(
+                identifier: "qa-\(result.tool.rawValue)-\(Date.now.timeIntervalSince1970)",
+                content: content,
+                trigger: nil
+            )
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error {
+                    print("QA notification error: \(error.localizedDescription)")
+                }
+            }
         }
     }
 
