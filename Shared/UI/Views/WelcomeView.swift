@@ -7,19 +7,15 @@ struct WelcomeView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(alignment: .leading, spacing: TheaSpacing.xxxl) {
+        VStack(spacing: TheaSpacing.xl) {
             Spacer()
 
-            // Thea spiral icon with subtle idle spin
-            HStack {
-                TheaSpiralIconView(size: 56, isThinking: false, showGlow: true)
-                    .rotationEffect(.degrees(spiralRotation))
-                Spacer()
-            }
-            .padding(.horizontal, TheaSpacing.xxl)
+            // Thea spiral icon with subtle idle spin — centered
+            TheaSpiralIconView(size: 72, isThinking: false, showGlow: true)
+                .rotationEffect(.degrees(spiralRotation))
 
-            // Greeting with Thea's golden spiral brand colors
-            VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+            // Greeting with Thea's golden spiral brand colors — centered
+            VStack(spacing: TheaSpacing.sm) {
                 Text(Self.timeBasedGreeting())
                     .font(.theaLargeDisplay)
                     .foregroundStyle(TheaBrandColors.spiralGradient)
@@ -28,7 +24,6 @@ struct WelcomeView: View {
                     .font(.theaTitle2)
                     .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, TheaSpacing.xxl)
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(Self.timeBasedGreeting()) How can I help you today?")
 
@@ -43,9 +38,8 @@ struct WelcomeView: View {
                     )
                 }
             }
-            .padding(.horizontal, TheaSpacing.xxl)
+            .padding(.horizontal, TheaSpacing.xl)
 
-            Spacer()
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -7,53 +7,80 @@ struct SidebarView: View {
     @State private var searchText = ""
 
     var body: some View {
-        List(selection: $selection) {
-            if !pinnedConversations.isEmpty {
-                Section("Pinned") {
-                    ForEach(pinnedConversations) { conversation in
-                        ConversationRow(conversation: conversation)
-                            .tag(conversation)
+        VStack(spacing: 0) {
+            // Inline search field in the conversations list panel
+            HStack(spacing: TheaSpacing.sm) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                    .font(.theaCaption1)
+                TextField("Search conversations", text: $searchText)
+                    .textFieldStyle(.plain)
+                    .font(.theaCaption1)
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                            .font(.theaCaption2)
                     }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(.horizontal, TheaSpacing.md)
+            .padding(.vertical, TheaSpacing.sm)
+            .background(Color.theaSurface.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.md))
+            .padding(.horizontal, TheaSpacing.md)
+            .padding(.vertical, TheaSpacing.sm)
 
-            if !todayConversations.isEmpty {
-                Section("Today") {
-                    ForEach(todayConversations) { conversation in
-                        ConversationRow(conversation: conversation)
-                            .tag(conversation)
+            List(selection: $selection) {
+                if !pinnedConversations.isEmpty {
+                    Section("Pinned") {
+                        ForEach(pinnedConversations) { conversation in
+                            ConversationRow(conversation: conversation)
+                                .tag(conversation)
+                        }
                     }
                 }
-            }
 
-            if !yesterdayConversations.isEmpty {
-                Section("Yesterday") {
-                    ForEach(yesterdayConversations) { conversation in
-                        ConversationRow(conversation: conversation)
-                            .tag(conversation)
+                if !todayConversations.isEmpty {
+                    Section("Today") {
+                        ForEach(todayConversations) { conversation in
+                            ConversationRow(conversation: conversation)
+                                .tag(conversation)
+                        }
                     }
                 }
-            }
 
-            if !thisWeekConversations.isEmpty {
-                Section("Previous 7 Days") {
-                    ForEach(thisWeekConversations) { conversation in
-                        ConversationRow(conversation: conversation)
-                            .tag(conversation)
+                if !yesterdayConversations.isEmpty {
+                    Section("Yesterday") {
+                        ForEach(yesterdayConversations) { conversation in
+                            ConversationRow(conversation: conversation)
+                                .tag(conversation)
+                        }
                     }
                 }
-            }
 
-            if !olderConversations.isEmpty {
-                Section("Older") {
-                    ForEach(olderConversations) { conversation in
-                        ConversationRow(conversation: conversation)
-                            .tag(conversation)
+                if !thisWeekConversations.isEmpty {
+                    Section("Previous 7 Days") {
+                        ForEach(thisWeekConversations) { conversation in
+                            ConversationRow(conversation: conversation)
+                                .tag(conversation)
+                        }
+                    }
+                }
+
+                if !olderConversations.isEmpty {
+                    Section("Older") {
+                        ForEach(olderConversations) { conversation in
+                            ConversationRow(conversation: conversation)
+                                .tag(conversation)
+                        }
                     }
                 }
             }
         }
-        .searchable(text: $searchText, placement: .sidebar, prompt: "Search conversations")
         .navigationTitle("Conversations")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
