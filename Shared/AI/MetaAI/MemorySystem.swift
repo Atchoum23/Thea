@@ -17,9 +17,9 @@ final class MemorySystem {
     private(set) var semanticMemory: [SemanticMemory] = []
     private(set) var proceduralMemory: [ProceduralMemory] = []
 
-    // Configuration accessor
+    // Configuration accessor - uses TheaConfig as single source of truth
     private var config: MemoryConfiguration {
-        AppConfiguration.shared.memoryConfig
+        TheaConfig.shared.memory
     }
 
     private var providerConfig: ProviderConfiguration {
@@ -237,7 +237,7 @@ final class MemorySystem {
 
         for memory in toConsolidate {
             // Move to long-term with importance-based filtering
-            if memory.importance > config.consolidationMinImportance {
+            if memory.importance > Float(config.consolidationMinImportance) {
                 var consolidated = memory
                 consolidated.tier = .longTerm
                 longTermMemory.append(consolidated)
@@ -250,7 +250,7 @@ final class MemorySystem {
 
     func consolidateAllShortTerm() async throws {
         for memory in shortTermMemory {
-            if memory.importance > config.consolidationMinImportance {
+            if memory.importance > Float(config.consolidationMinImportance) {
                 var consolidated = memory
                 consolidated.tier = .longTerm
                 longTermMemory.append(consolidated)

@@ -5,8 +5,8 @@ import SwiftUI
 // Browse and inspect MCP servers and their tools
 
 struct MCPBrowserView: View {
-    @State private var servers: [MCPServerInfo] = []
-    @State private var selectedServer: MCPServerInfo?
+    @State private var servers: [MetaAIMCPServerInfo] = []
+    @State private var selectedServer: MetaAIMCPServerInfo?
 
     var body: some View {
         NavigationSplitView {
@@ -44,21 +44,21 @@ struct MCPBrowserView: View {
         servers = MCPToolRegistry.shared.mcpServers
         if servers.isEmpty {
             servers = [
-                MCPServerInfo(
+                MetaAIMCPServerInfo(
                     id: UUID(),
                     name: "filesystem",
                     description: "File system operations",
                     status: .connected,
                     toolCount: 5
                 ),
-                MCPServerInfo(
+                MetaAIMCPServerInfo(
                     id: UUID(),
                     name: "terminal",
                     description: "Terminal command execution",
                     status: .connected,
                     toolCount: 2
                 ),
-                MCPServerInfo(
+                MetaAIMCPServerInfo(
                     id: UUID(),
                     name: "git",
                     description: "Git repository operations",

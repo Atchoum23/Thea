@@ -38,7 +38,7 @@ final class MCPToolRegistry {
     private let logger = Logger(subsystem: "com.thea.metaai", category: "MCPToolRegistry")
 
     private(set) var mcpTools: [MCPToolBridge] = []
-    private(set) var mcpServers: [MCPServerInfo] = []
+    private(set) var mcpServers: [MetaAIMCPServerInfo] = []
 
     private init() {
         discoverMCPTools()
@@ -52,21 +52,21 @@ final class MCPToolRegistry {
         // Mock MCP servers for now
         // In production, this would scan actual MCP server configurations
         mcpServers = [
-            MCPServerInfo(
+            MetaAIMCPServerInfo(
                 id: UUID(),
                 name: "filesystem",
                 description: "File system operations",
                 status: .connected,
                 toolCount: 5
             ),
-            MCPServerInfo(
+            MetaAIMCPServerInfo(
                 id: UUID(),
                 name: "terminal",
                 description: "Terminal command execution",
                 status: .connected,
                 toolCount: 2
             ),
-            MCPServerInfo(
+            MetaAIMCPServerInfo(
                 id: UUID(),
                 name: "git",
                 description: "Git repository operations",
@@ -188,9 +188,10 @@ final class MCPToolRegistry {
     }
 }
 
-// MARK: - MCP Server Info
+// MARK: - MetaAI MCP Server Info
 
-struct MCPServerInfo: Identifiable, Hashable, Sendable {
+/// MCP Server info for MetaAI subsystem (distinct from TrustScoreSystem's MetaAIMCPServerInfo)
+struct MetaAIMetaAIMCPServerInfo: Identifiable, Hashable, Sendable {
     let id: UUID
     let name: String
     let description: String
