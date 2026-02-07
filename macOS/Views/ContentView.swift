@@ -86,11 +86,6 @@ struct ContentView: View {
     private var detailContent: some View {
         if let conversation = selectedConversation {
             MacChatDetailView(conversation: conversation)
-                .toolbar {
-                    ToolbarItem(placement: .navigation) {
-                        detailToolbarLeading
-                    }
-                }
         } else if let project = selectedProject {
             MacProjectDetailView(project: project)
         } else {
@@ -115,23 +110,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .navigation) {
-                    detailToolbarLeading
-                }
-            }
         }
-    }
-
-    /// Leading toolbar for the detail column: (+) new conversation button
-    private var detailToolbarLeading: some View {
-        Button {
-            let conversation = chatManager.createConversation(title: "New Conversation")
-            selectedConversation = conversation
-        } label: {
-            Image(systemName: "plus")
-        }
-        .help("New Conversation (⇧⌘N)")
     }
 
     // MARK: - Chat List
@@ -142,17 +121,12 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
-                        withAnimation {
-                            if columnVisibility == .all {
-                                columnVisibility = .detailOnly
-                            } else {
-                                columnVisibility = .all
-                            }
-                        }
+                        let conversation = chatManager.createConversation(title: "New Conversation")
+                        selectedConversation = conversation
                     } label: {
-                        Image(systemName: columnVisibility == .all ? "sidebar.right" : "sidebar.left")
+                        Image(systemName: "plus")
                     }
-                    .help(columnVisibility == .all ? "Hide Conversations" : "Show Conversations")
+                    .help("New Conversation (⇧⌘N)")
                 }
             }
     }

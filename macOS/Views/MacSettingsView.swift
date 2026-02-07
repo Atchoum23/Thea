@@ -1,5 +1,26 @@
 import SwiftUI
 
+// MARK: - Window Resizable Helper
+
+/// Invisible NSView that forces its host NSWindow to accept the `.resizable` style mask.
+/// SwiftUI's `Settings` scene strips `.resizable` — this re-injects it from AppKit.
+private struct WindowResizableHelper: NSViewRepresentable {
+    func makeNSView(context _: Context) -> NSView {
+        let view = ResizableInjectorView()
+        return view
+    }
+
+    func updateNSView(_: NSView, context _: Context) {}
+
+    private class ResizableInjectorView: NSView {
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            guard let window else { return }
+            window.styleMask.insert(.resizable)
+        }
+    }
+}
+
 // MARK: - macOS Settings View
 
 /// Consolidated settings for macOS with progressive disclosure.
@@ -42,6 +63,7 @@ struct MacSettingsView: View {
             }
         }
         .frame(minWidth: 560, idealWidth: 700, maxWidth: .infinity, minHeight: 440, idealHeight: 580, maxHeight: .infinity)
+        .background(WindowResizableHelper())
         .textSelection(.enabled)
     }
 
@@ -147,7 +169,6 @@ struct MacSettingsView: View {
     @State private var openRouterKey: String = ""
     @State private var apiKeysLoaded: Bool = false
 
-    @State private var providerConfig = AppConfiguration.shared.providerConfig
     @State private var localModelConfig = AppConfiguration.shared.localModelConfig
 
     private var aiSettings: some View {
@@ -162,34 +183,9 @@ struct MacSettingsView: View {
 
                 Toggle("Stream Responses", isOn: $settingsManager.streamResponses)
 
-                Toggle("Prefer Local Models When Available", isOn: Binding(
-                    get: { settingsManager.preferLocalModels },
-                    set: { settingsManager.preferLocalModels = $0 }
-                ))
-            }
-
-            // MARK: Generation Defaults
-            Section("Generation Defaults") {
-                LabeledContent("Default Model") {
-                    TextField("", text: $providerConfig.defaultModel)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(maxWidth: 280)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Temperature: \(providerConfig.defaultTemperature, specifier: "%.1f")")
-                        .font(.caption)
-                    Slider(value: $providerConfig.defaultTemperature, in: 0 ... 2, step: 0.1)
-                }
-
-                Stepper("Max Tokens: \(providerConfig.defaultMaxTokens)",
-                        value: $providerConfig.defaultMaxTokens, in: 256 ... 32768, step: 256)
-
-                Stepper("Request Timeout: \(Int(providerConfig.requestTimeoutSeconds))s",
-                        value: $providerConfig.requestTimeoutSeconds, in: 10 ... 300, step: 10)
-            }
-            .onChange(of: providerConfig) { _, newValue in
-                AppConfiguration.shared.providerConfig = newValue
+                Text("Model selection, temperature, tokens, and timeout are managed automatically by the Meta-AI orchestrator.")
+                    .font(.theaCaption2)
+                    .foregroundStyle(.tertiary)
             }
 
             // MARK: Local Models

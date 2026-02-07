@@ -800,20 +800,23 @@ public struct TheaSpiralIconView: View {
 
     public var body: some View {
         ZStack {
-            // Glow layer — radial gradient fades smoothly to transparent at edges
+            // Glow layer — very gradual radial fade from warm core to imperceptible edges
             if showGlow {
                 RadialGradient(
                     gradient: Gradient(stops: [
-                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.7), location: 0.0),
-                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.4), location: 0.3),
-                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.15), location: 0.6),
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.55), location: 0.0),
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.40), location: 0.15),
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.28), location: 0.30),
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.16), location: 0.45),
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.08), location: 0.60),
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.03), location: 0.78),
                         .init(color: Color.clear, location: 1.0)
                     ]),
                     center: .center,
-                    startRadius: size * 0.15,
-                    endRadius: size * 0.9
+                    startRadius: size * 0.1,
+                    endRadius: size * 1.1
                 )
-                .frame(width: size * 2.0, height: size * 2.0)
+                .frame(width: size * 2.4, height: size * 2.4)
             }
 
             // Extracted spiral artwork (transparent background)
@@ -825,7 +828,7 @@ public struct TheaSpiralIconView: View {
                 .rotationEffect(.degrees(rotation))
                 .scaleEffect(beatScale)
         }
-        .frame(width: size * 2.0, height: size * 2.0)
+        .frame(width: size * 2.4, height: size * 2.4)
         .onAppear {
             startIdleAnimations()
             if isThinking {
