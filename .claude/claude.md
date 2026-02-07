@@ -97,6 +97,29 @@ done
 - **ModelRouter**: Routes to optimal model based on task
 - **QueryDecomposer**: Breaks complex queries into sub-tasks
 
+## Architecture Decision: MetaAI vs Intelligence (2026-02-07)
+
+**IMPORTANT: The `Shared/AI/MetaAI/` folder is EXCLUDED from all builds.**
+
+The Intelligence folder (`Shared/Intelligence/`) is the **canonical source** for AI orchestration:
+- `Intelligence/Core/` - Core intelligence hub
+- `Intelligence/Intent/` - Intent classification and disambiguation
+- `Intelligence/Knowledge/` - Knowledge source management
+- `Intelligence/Orchestration/` - Orchestrator implementation
+
+**Why MetaAI is excluded:**
+1. MetaAI and Intelligence had duplicate type definitions causing build conflicts
+2. Intelligence folder has cleaner separation of concerns
+3. Intelligence uses protocol-based design patterns
+
+**If you need to re-enable MetaAI files:**
+1. Check for type conflicts with Intelligence folder first
+2. Rename conflicting types with `MetaAI` prefix (e.g., `MetaAIMCPServerInfo`)
+3. Remove specific exclusions in `project.yml` rather than the blanket exclusion
+4. Types already renamed: `MetaAIMCPServerInfo`, `AIErrorContext`, `ModelCapabilityRecord`, `ReActActionResult`, `HypothesisEvidence`
+
+**DO NOT remove the MetaAI blanket exclusion without resolving all type conflicts.**
+
 ## MLX Integration
 
 - Use `mlx-swift` and `mlx-swift-lm` for on-device inference
