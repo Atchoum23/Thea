@@ -8,6 +8,7 @@
 
 #if os(macOS)
     import AppKit
+    import ScreenCaptureKit
     import SwiftUI
 
     // MARK: - Quick Entry Window Controller
@@ -245,24 +246,54 @@
         }
 
         private func captureScreenshot() {
-            // Note: In a full implementation, use ScreenCaptureKit for modern screenshot capture
-            // For now, show a placeholder indicating the feature
-            // TODO: Implement using SCStreamConfiguration and SCShareableContent
+            Task {
+                do {
+                    let content = try await SCShareableContent.excludingDesktopWindows(
+                        false, onScreenWindowsOnly: true
+                    )
+                    guard let display = content.displays.first else { return }
 
-            // Create a placeholder image to indicate screenshot capture
-            let size = NSSize(width: 200, height: 100)
-            let image = NSImage(size: size)
-            image.lockFocus()
-            NSColor.systemGray.setFill()
-            NSRect(origin: .zero, size: size).fill()
-            let text = "Screenshot"
-            let attrs: [NSAttributedString.Key: Any] = [
-                .foregroundColor: NSColor.white,
-                .font: NSFont.systemFont(ofSize: 14)
-            ]
-            text.draw(at: NSPoint(x: 70, y: 42), withAttributes: attrs)
-            image.unlockFocus()
-            attachedScreenshot = image
+                    let filter = SCContentFilter(display: display, excludingWindows: [])
+                    let config = SCStreamConfiguration()
+                    config.width = display.width * 2
+                    config.height = display.height * 2
+                    config.pixelFormat = kCVPixelFormatType_32BGRA
+                    config.showsCursor = true
+
+                    let cgImage = try await SCScreenshotManager.captureImage(
+                        contentFilter: filter,
+                        configuration: config
+                    )
+
+                    await MainActor.run {
+                        let nsImage = NSImage(
+                            cgImage: cgImage,
+                            size: NSSize(
+                                width: CGFloat(display.width),
+                                height: CGFloat(display.height)
+                            )
+                        )
+                        attachedScreenshot = nsImage
+                    }
+                } catch {
+                    // Fallback: create a placeholder if screen capture fails
+                    await MainActor.run {
+                        let size = NSSize(width: 200, height: 100)
+                        let image = NSImage(size: size)
+                        image.lockFocus()
+                        NSColor.systemRed.withAlphaComponent(0.3).setFill()
+                        NSRect(origin: .zero, size: size).fill()
+                        let text = "⚠ Capture failed"
+                        let attrs: [NSAttributedString.Key: Any] = [
+                            .foregroundColor: NSColor.white,
+                            .font: NSFont.systemFont(ofSize: 12)
+                        ]
+                        text.draw(at: NSPoint(x: 50, y: 42), withAttributes: attrs)
+                        image.unlockFocus()
+                        attachedScreenshot = image
+                    }
+                }
+            }
         }
     }
 
