@@ -56,4 +56,5 @@ yarn-error.log*
 fix_*.py
 add_*.py
 *.txt
-# Ignore stray Xcode projects
+# Ignore stray Xcode projects (Xcode creates "Thea 2.xcodeproj" etc. on conflicts)
+Thea [0-9]*.xcodeproj/
