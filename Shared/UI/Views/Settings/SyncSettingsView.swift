@@ -9,11 +9,16 @@ import SwiftUI
 struct SyncSettingsView: View {
     @StateObject private var cloudKitService = CloudKitService.shared
     @StateObject private var syncEngine = PreferenceSyncEngine.shared
+    #if os(macOS)
+    @StateObject private var updateService = AppUpdateService.shared
+    #endif
     @State private var settingsManager = SettingsManager.shared
     @State private var handoffService = HandoffService.shared
     @State private var showingDeviceList = false
     @State private var isSyncing = false
     @State private var lastSyncError: String?
+    @State private var isUpdating = false
+    @State private var updateResult: UpdateResult?
 
     // Data-level sync toggles (CloudKit)
     @AppStorage("sync.conversations") private var syncConversations = true
@@ -48,6 +53,16 @@ struct SyncSettingsView: View {
             Section("Connected Devices") {
                 connectedDevicesSection
             }
+
+            #if os(macOS)
+            Section {
+                deviceUpdatesSection
+            } header: {
+                Text("App Updates")
+            } footer: {
+                Text("Push Thea updates to your other Macs. When a new build is published, other devices receive a notification and can update automatically.")
+            }
+            #endif
 
             Section("Handoff") {
                 handoffSection
