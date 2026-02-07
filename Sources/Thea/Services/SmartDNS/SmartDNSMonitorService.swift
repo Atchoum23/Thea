@@ -217,14 +217,44 @@ public final class SmartDNSMonitorService: ObservableObject {
     }
 
     private func notifyTizenApp(previousIP: String, currentIP: String) async {
-        // TODO: Send notification via sync-bridge when it's configured
-        // This would allow the TV to show an alert as well
+        // Notify Tizen companion app via sync-bridge using Bonjour/mDNS
+        // The Tizen app listens on port 8765 for JSON notifications
+        let payload: [String: Any] = [
+            "type": "smartdns_ip_change",
+            "previousIP": previousIP,
+            "currentIP": currentIP,
+            "timestamp": ISO8601DateFormatter().string(from: Date())
+        ]
+
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: payload) else { return }
+
+        // Try to reach the Tizen sync-bridge endpoint
+        let tizenHost = UserDefaults.standard.string(forKey: "tizen.syncBridgeHost") ?? ""
+        guard !tizenHost.isEmpty,
+              let url = URL(string: "http://\(tizenHost):8765/notify")
+        else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+        request.timeoutInterval = 5
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                print("🌐 SmartDNS Monitor: Tizen app notified of IP change")
+            }
+        } catch {
+            // Tizen app not reachable — this is expected when TV is off
+            print("🌐 SmartDNS Monitor: Tizen app not reachable (\(error.localizedDescription))")
+        }
     }
 
     // MARK: - Notifications
 
     private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
             if granted {
                 print("🌐 SmartDNS Monitor: Notification permission granted")
             }

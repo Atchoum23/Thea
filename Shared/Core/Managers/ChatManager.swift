@@ -287,22 +287,12 @@ final class ChatManager: ObservableObject {
     private func selectProviderAndModel(for query: String) async throws -> (AIProvider, String) {
         let orchestratorConfig = AppConfiguration.shared.orchestratorConfig
 
-        // Orchestrator functionality temporarily disabled - use default provider
-        // TODO: Re-enable when TaskClassifier, QueryDecomposer, ModelRouter are available
-        _ = orchestratorConfig.orchestratorEnabled
-        _ = query // Silence unused parameter warning
-
-        return try getDefaultProviderAndModel()
-
-        // Original orchestrator code (disabled):
-        /*
         // Check if orchestrator is enabled
         guard orchestratorConfig.orchestratorEnabled else {
-            // Orchestrator disabled - use default provider
             return try getDefaultProviderAndModel()
         }
 
-        // 1. Classify the task
+        // 1. Classify the task using AI-powered TaskClassifier
         let classification = try await TaskClassifier.shared.classify(query)
         let complexity = TaskClassifier.shared.assessComplexity(query)
 
@@ -311,24 +301,7 @@ final class ChatManager: ObservableObject {
             print("[ChatManager] Complexity: \(complexity.description)")
         }
 
-        // 2. For complex queries, check if decomposition is needed
-        // (This enables the SubAgentOrchestrator pattern for multi-step tasks)
-        if orchestratorConfig.shouldOrchestrate(complexity: complexity) && complexity == .complex {
-            // Log that we would decompose (full implementation would execute sub-queries)
-            if orchestratorConfig.showDecompositionDetails {
-                let decomposition = try? await QueryDecomposer.shared.decompose(query)
-                if let decomp = decomposition, decomp.subQueries.count > 1 {
-                    print("[ChatManager] Complex query detected - \(decomp.subQueries.count) sub-queries identified")
-                    for (index, subQuery) in decomp.subQueries.enumerated() {
-                        print("[ChatManager]   \(index + 1). [\(subQuery.taskType.rawValue)] \(subQuery.query.prefix(50))...")
-                    }
-                    // TODO: Execute sub-queries in parallel with appropriate models
-                    // For now, fall through to single model execution
-                }
-            }
-        }
-
-        // 2. Route to optimal model
+        // 2. Route to optimal model based on classification
         do {
             let selection = try await ModelRouter.shared.selectModel(for: classification)
 
@@ -342,24 +315,21 @@ final class ChatManager: ObservableObject {
             let model: String
 
             if selection.isLocal {
-                // Local model selected
                 let localModelName = selection.modelID.replacingOccurrences(of: "local-", with: "")
                 if let localProvider = ProviderRegistry.shared.getLocalProvider(modelName: localModelName) {
                     provider = localProvider
                     model = localModelName
                 } else if let anyLocalProvider = ProviderRegistry.shared.getLocalProvider() {
-                    // Fallback to any available local provider
                     provider = anyLocalProvider
                     model = localModelName
                 } else {
-                    // No local provider available - fall back to cloud
                     if orchestratorConfig.logModelRouting {
                         print("[ChatManager] Local provider not loaded, falling back to cloud")
                     }
                     return try getDefaultProviderAndModel()
                 }
             } else {
-                // Cloud model selected (format: "provider/model")
+                // Cloud model (format: "provider/model")
                 let parts = selection.modelID.split(separator: "/")
                 let providerID = parts.count >= 2 ? String(parts[0]) : "openai"
                 model = parts.count >= 2 ? String(parts[1]) : selection.modelID
@@ -367,7 +337,6 @@ final class ChatManager: ObservableObject {
                 if let cloudProvider = ProviderRegistry.shared.getProvider(id: providerID) {
                     provider = cloudProvider
                 } else {
-                    // Provider not configured - fallback
                     if orchestratorConfig.logModelRouting {
                         print("[ChatManager] Provider \(providerID) not configured, falling back to default")
                     }
@@ -378,13 +347,11 @@ final class ChatManager: ObservableObject {
             return (provider, model)
 
         } catch {
-            // Model routing failed - fallback to default
             if orchestratorConfig.logModelRouting {
                 print("[ChatManager] Model routing failed: \(error), falling back to default")
             }
             return try getDefaultProviderAndModel()
         }
-        */
     }
 
     /// Fallback: get default provider and model (original behavior)
