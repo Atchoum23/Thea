@@ -235,7 +235,7 @@
                     if let detector = userInterventionDetector, detector.isUserActive {
                         state = .waitingForUser
                         isUserActive = true
-                        logger.info("User active — pausing automation (action: \(detector.lastUserAction?.displayName ?? "unknown"))")
+                        logger.info("User active — pausing automation (action: \(detector.lastInterventionAction?.displayName ?? "unknown"))")
 
                         // Wait until user stops
                         while detector.isUserActive && !Task.isCancelled {
