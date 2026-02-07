@@ -18,11 +18,16 @@ struct ContentView: View {
     @State private var selectedConversation: Conversation?
     @State private var selectedProject: Project?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    @State private var showConversationsList = true
+    @State private var welcomeInputText = ""
+
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             sidebarContent
         } content: {
-            listContent
+            if showConversationsList {
+                listContent
+            }
         } detail: {
             detailContent
         }
@@ -40,11 +45,11 @@ struct ContentView: View {
         List(NavigationItem.allCases, selection: $selectedItem) { item in
             NavigationLink(value: item) {
                 Label(item.rawValue, systemImage: item.icon)
-                    .font(.theaBody)
+                    .font(.system(size: 13))
             }
         }
         .navigationTitle("THEA")
-        .frame(minWidth: 180)
+        .frame(minWidth: 160, idealWidth: 180)
         .listStyle(.sidebar)
     }
 
@@ -80,20 +85,72 @@ struct ContentView: View {
     private var detailContent: some View {
         if let conversation = selectedConversation {
             MacChatDetailView(conversation: conversation)
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        detailToolbarButtons
+                    }
+                }
         } else if let project = selectedProject {
             MacProjectDetailView(project: project)
         } else {
-            WelcomeView { prompt in
-                let conversation = chatManager.createConversation(title: "New Conversation")
-                selectedConversation = conversation
-                // Post the prompt after a short delay to allow view to appear
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    NotificationCenter.default.post(
-                        name: Notification.Name.newConversation,
-                        object: prompt
-                    )
+            // Welcome view with input bar always visible at bottom
+            VStack(spacing: 0) {
+                WelcomeView { prompt in
+                    let conversation = chatManager.createConversation(title: "New Conversation")
+                    selectedConversation = conversation
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        NotificationCenter.default.post(
+                            name: Notification.Name.newConversation,
+                            object: prompt
+                        )
+                    }
+                }
+
+                // Input bar always visible even on welcome screen
+                ChatInputView(
+                    text: $welcomeInputText,
+                    isStreaming: false
+                ) {
+                    guard !welcomeInputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                    let prompt = welcomeInputText.trimmingCharacters(in: .whitespacesAndNewlines)
+                    welcomeInputText = ""
+                    let conversation = chatManager.createConversation(title: "New Conversation")
+                    selectedConversation = conversation
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        Task {
+                            try? await chatManager.sendMessage(prompt, in: conversation)
+                        }
+                    }
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    detailToolbarButtons
+                }
+            }
+        }
+    }
+
+    /// Toolbar buttons for the detail pane: new chat + toggle conversations list
+    private var detailToolbarButtons: some View {
+        HStack(spacing: 4) {
+            Button {
+                let conversation = chatManager.createConversation(title: "New Conversation")
+                selectedConversation = conversation
+            } label: {
+                Image(systemName: "plus")
+            }
+            .help("New Conversation")
+            .keyboardShortcut("n", modifiers: [.command, .shift])
+
+            Button {
+                withAnimation {
+                    showConversationsList.toggle()
+                }
+            } label: {
+                Image(systemName: showConversationsList ? "sidebar.right" : "sidebar.left")
+            }
+            .help(showConversationsList ? "Hide Conversations" : "Show Conversations")
         }
     }
 
