@@ -33,6 +33,7 @@ struct MessageBubble: View {
     @State private var isHovering = false
     @State private var showCopiedFeedback = false
     @Environment(\.colorScheme) private var colorScheme
+    @StateObject private var settingsManager = SettingsManager.shared
 
     /// Info about branches for this message position
     struct BranchInfo {
@@ -65,8 +66,8 @@ struct MessageBubble: View {
                 }
 
                 messageContent
-                    .padding(.horizontal, TheaSpacing.lg)
-                    .padding(.vertical, TheaSpacing.md)
+                    .padding(.horizontal, densityHorizontalPadding)
+                    .padding(.vertical, densityVerticalPadding)
                     .background(backgroundColor)
                     .foregroundStyle(foregroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
@@ -131,9 +132,19 @@ struct MessageBubble: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text(message.timestamp, format: .dateTime.hour().minute())
-                .font(.theaCaption2)
-                .foregroundStyle(.secondary)
+            // Respect timestampDisplay setting
+            if settingsManager.timestampDisplay != "hidden" {
+                if settingsManager.timestampDisplay == "relative" {
+                    Text(message.timestamp, format: .relative(presentation: .named))
+                        .font(.theaCaption2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    // "absolute" — show exact time
+                    Text(message.timestamp, format: .dateTime.hour().minute())
+                        .font(.theaCaption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .padding(.horizontal, 4)
     }
@@ -397,6 +408,24 @@ struct MessageBubble: View {
         let content = message.content.textValue
         let truncated = content.count > 200 ? String(content.prefix(200)) + "..." : content
         return "\(role), \(time): \(truncated)"
+    }
+
+    // MARK: - Density Padding
+
+    private var densityHorizontalPadding: CGFloat {
+        switch settingsManager.messageDensity {
+        case "compact": TheaSpacing.md
+        case "spacious": TheaSpacing.xl
+        default: TheaSpacing.lg  // "comfortable"
+        }
+    }
+
+    private var densityVerticalPadding: CGFloat {
+        switch settingsManager.messageDensity {
+        case "compact": TheaSpacing.sm
+        case "spacious": TheaSpacing.lg
+        default: TheaSpacing.md  // "comfortable"
+        }
     }
 
     // MARK: - Styling

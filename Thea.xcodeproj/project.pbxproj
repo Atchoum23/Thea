@@ -2128,7 +2128,6 @@
 				5C367398D2AA21D8DC80ABDB /* DependencyInjection */,
 				1896907E2C87B21DA2A63B11 /* EventBus */,
 				95F751005115F3A72189F702 /* Features */,
-				B1F65BA3E9B341F60B5028E0 /* Helpers */,
 				E037CA5B6B7A318FB74A204C /* Managers */,
 				1D98291E71052F1264D998AD /* Models */,
 				E8692B77419CC126AFEAA637 /* Orchestration */,
@@ -3696,13 +3695,6 @@
 				61B008A8ECD107BA625AEA7F /* UnifiedSuggestionCoordinator.swift */,
 			);
 			path = Suggestions;
-			sourceTree = "<group>";
-		};
-		B1F65BA3E9B341F60B5028E0 /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Helpers;
 			sourceTree = "<group>";
 		};
 		B2A3EDCBA5BFD6670FA8302A /* Products */ = {

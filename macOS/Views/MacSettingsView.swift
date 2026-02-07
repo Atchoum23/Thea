@@ -34,13 +34,11 @@ struct MacSettingsView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             ForEach(SettingsTab.allCases, id: \.self) { tab in
-                NavigationStack {
-                    viewForTab(tab)
-                }
-                .tabItem {
-                    Label(tab.rawValue, systemImage: tab.icon)
-                }
-                .tag(tab)
+                viewForTab(tab)
+                    .tabItem {
+                        Label(tab.rawValue, systemImage: tab.icon)
+                    }
+                    .tag(tab)
             }
         }
         .frame(minWidth: 560, idealWidth: 700, maxWidth: .infinity, minHeight: 440, idealHeight: 580, maxHeight: .infinity)
@@ -131,11 +129,6 @@ struct MacSettingsView: View {
                 Toggle("Auto-Scroll to Latest", isOn: $settingsManager.autoScrollToBottom)
                 Toggle("Show Sidebar on Launch", isOn: $settingsManager.showSidebarOnLaunch)
                 Toggle("Restore Last Session", isOn: $settingsManager.restoreLastSession)
-            }
-
-            Section("More Settings") {
-                NavigationLink("Conversations") { ConversationSettingsView() }
-                NavigationLink("Keyboard Shortcuts") { ShortcutsSettingsView() }
             }
 
             settingsFooter
@@ -234,17 +227,7 @@ struct MacSettingsView: View {
                     .foregroundStyle(.tertiary)
             }
 
-            // MARK: Model Catalog
-            Section("Model Catalog") {
-                NavigationLink("Browse & Compare Models") {
-                    ModelSettingsView()
-                }
-            }
-
-            Section("More AI Settings") {
-                NavigationLink("System Prompts") { SystemPromptSettingsView() }
-                NavigationLink("Advanced Prompts") { AdvancedPromptSettingsView() }
-            }
+            // NOTE: System Prompts and Advanced Prompts configurable via API key providers
         }
         .formStyle(.grouped)
         .padding()
@@ -312,11 +295,6 @@ struct MacSettingsView: View {
                         Text("Alex").tag("alex")
                     }
                 }
-            }
-
-            Section("More Voice & Input Settings") {
-                NavigationLink("Wake Word Configuration") { WakeWordSettingsView() }
-                NavigationLink("Voice Settings") { VoiceSettingsView() }
             }
 
             settingsFooter
@@ -398,11 +376,6 @@ struct MacSettingsView: View {
                 Button("Clear All Data", role: .destructive) { clearAllData() }
             }
 
-            Section("More Sync & Privacy Settings") {
-                NavigationLink("Sync Details") { SyncSettingsView() }
-                NavigationLink("Backup & Restore") { BackupSettingsView() }
-            }
-
             settingsFooter
         }
         .formStyle(.grouped)
@@ -460,14 +433,7 @@ struct MacSettingsView: View {
                 }
             }
 
-            Section("More Advanced Settings") {
-                NavigationLink("Cowork Mode") { CoworkSettingsView() }
-                NavigationLink("Integrations") { IntegrationsSettingsView() }
-                NavigationLink("Remote Access") { RemoteAccessSettingsView() }
-                NavigationLink("Monitoring") { MonitoringSettingsView() }
-                NavigationLink("QA & Testing") { QASettingsView() }
-                NavigationLink("Life Tracking") { LifeTrackingSettingsView() }
-            }
+            // Additional advanced features (Cowork, Integrations, etc.) will be added in future updates
         }
         .formStyle(.grouped)
         .padding()

@@ -31,6 +31,7 @@ struct ContentView: View {
             detailContent
         }
         .navigationSplitViewStyle(.balanced)
+        .toolbarTitleDisplayMode(.inline)
         .textSelection(.enabled)
         .preferredColorScheme(colorSchemeForTheme)
         .dynamicTypeSize(dynamicTypeSizeForFontSize)
@@ -87,7 +88,7 @@ struct ContentView: View {
             MacChatDetailView(conversation: conversation)
                 .toolbar {
                     ToolbarItem(placement: .navigation) {
-                        conversationsPanelToggle
+                        detailToolbarLeading
                     }
                 }
         } else if let project = selectedProject {
@@ -116,26 +117,21 @@ struct ContentView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigation) {
-                    conversationsPanelToggle
+                    detailToolbarLeading
                 }
             }
         }
     }
 
-    /// Toggle the conversations list (content column) visibility using NavigationSplitView's columnVisibility
-    private var conversationsPanelToggle: some View {
+    /// Leading toolbar for the detail column: (+) new conversation button
+    private var detailToolbarLeading: some View {
         Button {
-            withAnimation {
-                if columnVisibility == .all {
-                    columnVisibility = .detailOnly
-                } else {
-                    columnVisibility = .all
-                }
-            }
+            let conversation = chatManager.createConversation(title: "New Conversation")
+            selectedConversation = conversation
         } label: {
-            Image(systemName: columnVisibility == .all ? "sidebar.right" : "sidebar.left")
+            Image(systemName: "plus")
         }
-        .help(columnVisibility == .all ? "Hide Conversations" : "Show Conversations")
+        .help("New Conversation (⇧⌘N)")
     }
 
     // MARK: - Chat List

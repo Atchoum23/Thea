@@ -800,13 +800,20 @@ public struct TheaSpiralIconView: View {
 
     public var body: some View {
         ZStack {
-            // Glow layer
+            // Glow layer — radial gradient fades smoothly to transparent at edges
             if showGlow {
-                Circle()
-                    .fill(TheaBrandColors.coreGlowGradient)
-                    .frame(width: size * 1.4, height: size * 1.4)
-                    .opacity(glowIntensity)
-                    .blur(radius: size * 0.25)
+                RadialGradient(
+                    gradient: Gradient(stops: [
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.7), location: 0.0),
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.4), location: 0.3),
+                        .init(color: TheaBrandColors.gold.opacity(glowIntensity * 0.15), location: 0.6),
+                        .init(color: Color.clear, location: 1.0)
+                    ]),
+                    center: .center,
+                    startRadius: size * 0.15,
+                    endRadius: size * 0.9
+                )
+                .frame(width: size * 2.0, height: size * 2.0)
             }
 
             // Extracted spiral artwork (transparent background)
@@ -818,8 +825,7 @@ public struct TheaSpiralIconView: View {
                 .rotationEffect(.degrees(rotation))
                 .scaleEffect(beatScale)
         }
-        .frame(width: size * 1.5, height: size * 1.5)
-        .clipped()
+        .frame(width: size * 2.0, height: size * 2.0)
         .onAppear {
             startIdleAnimations()
             if isThinking {
@@ -839,33 +845,38 @@ public struct TheaSpiralIconView: View {
     private func startIdleAnimations() {
         guard !reduceMotion else { return }
 
-        // Slow clockwise rotation: one full turn per 80 seconds
-        withAnimation(.linear(duration: 80).repeatForever(autoreverses: false)) {
+        // Slow clockwise rotation: one full turn per 40 seconds (noticeably alive)
+        withAnimation(.linear(duration: 40).repeatForever(autoreverses: false)) {
             rotation = 360
         }
 
-        // Subtle heartbeat/breathing scale: gentle pulse every 4 seconds
-        withAnimation(.easeInOut(duration: 4.0).repeatForever(autoreverses: true)) {
-            beatScale = 1.04
+        // Breathing scale: gentle inhale/exhale every 3 seconds, like a sleeping entity
+        withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+            beatScale = 1.06
+        }
+
+        // Glow subtly pulses in sync
+        withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+            glowIntensity = 0.65
         }
     }
 
     private func startThinkingAnimation() {
         guard !reduceMotion else {
-            glowIntensity = 0.7
-            beatScale = 1.06
+            glowIntensity = 0.8
+            beatScale = 1.08
             return
         }
-        // Faster CW rotation when thinking
-        withAnimation(.linear(duration: 4.0).repeatForever(autoreverses: false)) {
+        // Faster CW rotation when thinking (awakened)
+        withAnimation(.linear(duration: 3.0).repeatForever(autoreverses: false)) {
             rotation = 360
         }
-        // Stronger pulse when thinking
-        withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-            beatScale = 1.08
+        // Stronger, quicker pulse when thinking
+        withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+            beatScale = 1.10
         }
-        withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-            glowIntensity = 0.85
+        withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+            glowIntensity = 0.9
         }
     }
 

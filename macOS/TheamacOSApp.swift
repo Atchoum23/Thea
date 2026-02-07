@@ -123,6 +123,17 @@ struct TheamacOSApp: App {
             if let container = modelContainer {
                 MacSettingsView()
                     .modelContainer(container)
+                    .onAppear {
+                        // Force the Settings window to be user-resizable
+                        DispatchQueue.main.async {
+                            if let settingsWindow = NSApp.windows.first(where: {
+                                $0.identifier?.rawValue.contains("settings") == true
+                                    || $0.title.localizedCaseInsensitiveContains("settings")
+                            }) {
+                                settingsWindow.styleMask.insert(.resizable)
+                            }
+                        }
+                    }
             }
         }
     }

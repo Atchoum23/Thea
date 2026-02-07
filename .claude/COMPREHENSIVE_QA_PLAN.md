@@ -50,13 +50,16 @@ Fix any issues found. Do not stop until completion.
 | 3 | Sanitizers (ASan/TSan) | 30 sec | No |
 | 4 | Debug Builds (All 4 Platforms) | 2 min | Yes |
 | 5 | Release Builds (All 4 Platforms) | 3 min | Yes |
+| 5.5 | **Xcode GUI Builds (All 4 Platforms)** | **5 min** | **Yes** |
 | 6 | Memory/Runtime Verification | 30 sec | No |
 | 7 | Security Audit | 30 sec | No |
 | 8 | Final Verification & Report | 10 sec | N/A |
 | 9 | Commit & Sync Changes | 5 sec | Yes |
 | 10 | Update Documentation | 2 min | Yes |
+| 11 | CI/CD Fix Loop | 5-15 min | Yes |
+| 11.5 | **CI/CD Workflow Fix Loop** | **10-30 min** | **Yes** |
 
-**Total: ~10-12 minutes** (includes documentation review)
+**Total: ~25-40 minutes** (includes GUI builds + CI monitoring + workflow fixes)
 
 ---
 
@@ -407,6 +410,95 @@ fi
 ```
 
 **Gate:** All 4 platforms build with 0 errors AND 0 warnings in Release.
+
+---
+
+## Phase 5.5: Xcode GUI Builds (MANDATORY — DO NOT SKIP)
+
+**Purpose:** CLI builds (`xcodebuild`) and Xcode GUI builds show DIFFERENT warnings. The Xcode GUI has indexer warnings, project settings warnings, capability/entitlement warnings, and additional static analysis NOT visible in CLI output. **CLI-ONLY IS NOT ACCEPTABLE.**
+
+**Reference:** See `.claude/AUTONOMOUS_BUILD_QA.md` (Phase 3: GUI Builds) and `.claude/XCODE_BUILD_FIX_MODUS_OPERANDI.md` (Phase 2: GUI Build Cycle) for full details.
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+echo "=== Phase 5.5: Xcode GUI Builds (MANDATORY) ==="
+
+# Step 1: Open Xcode with the project
+open "Thea.xcodeproj"
+sleep 5
+
+# Step 2: Build each scheme using CLI-with-GUI-log method
+# This writes to default DerivedData so Xcode GUI sees results
+for scheme in Thea-iOS Thea-macOS Thea-watchOS Thea-tvOS; do
+  echo "Building $scheme via GUI-visible CLI..."
+
+  if [ -x "./Tools/XcodeBuildHelper/xcode-cli-with-gui-log.sh" ]; then
+    ./Tools/XcodeBuildHelper/xcode-cli-with-gui-log.sh "$scheme" Debug
+  else
+    # Fallback: direct xcodebuild to default DerivedData (GUI-visible)
+    DEST=$(case "$scheme" in
+      Thea-iOS)     echo "generic/platform=iOS" ;;
+      Thea-macOS)   echo "platform=macOS" ;;
+      Thea-watchOS) echo "generic/platform=watchOS" ;;
+      Thea-tvOS)    echo "generic/platform=tvOS" ;;
+    esac)
+
+    xcodebuild -project Thea.xcodeproj -scheme "$scheme" \
+      -destination "$DEST" -configuration Debug \
+      CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+      build 2>&1 | tail -5
+  fi
+done
+
+# Step 3: Read GUI build results from xcactivitylog
+echo ""
+echo "Reading Xcode GUI build results..."
+
+# Use XCLogParser if available (RECOMMENDED — more reliable than gunzip)
+if command -v xclogparser &>/dev/null; then
+  LOG=$(find ~/Library/Developer/Xcode/DerivedData/Thea-*/Logs/Build \
+    -name "*.xcactivitylog" -mmin -15 2>/dev/null | sort -r | head -1)
+
+  if [ -n "$LOG" ]; then
+    xclogparser parse --file "$LOG" --reporter issues --output /tmp/gui_build_issues.json 2>/dev/null
+    GUI_ERRORS=$(cat /tmp/gui_build_issues.json | jq '.errors | length' 2>/dev/null || echo "0")
+    GUI_WARNINGS=$(cat /tmp/gui_build_issues.json | jq '.warnings | length' 2>/dev/null || echo "0")
+
+    echo "GUI Build Results: $GUI_ERRORS errors, $GUI_WARNINGS warnings"
+
+    if [ "$GUI_ERRORS" -gt 0 ] || [ "$GUI_WARNINGS" -gt 0 ]; then
+      echo "✗ GUI build has issues — MUST FIX before proceeding"
+      cat /tmp/gui_build_issues.json | jq -r '.errors[] | "\(.documentURL):\(.startingLineNumber): \(.title)"' 2>/dev/null | head -20
+      cat /tmp/gui_build_issues.json | jq -r '.warnings[] | "\(.documentURL):\(.startingLineNumber): \(.title)"' 2>/dev/null | head -20
+      rm -f /tmp/gui_build_issues.json
+      exit 1
+    fi
+    rm -f /tmp/gui_build_issues.json
+  fi
+else
+  echo "⚠ XCLogParser not installed — install with: brew install xclogparser"
+  echo "  Falling back to manual Xcode Issue Navigator check"
+fi
+
+# Step 4: ALWAYS verify in Xcode Issue Navigator (Cmd+5)
+echo ""
+echo "IMPORTANT: Manually verify Xcode Issue Navigator (Cmd+5) shows 0 issues"
+echo "  The Issue Navigator catches issues that log parsing may miss:"
+echo "  - Missing package products"
+echo "  - Project configuration warnings"
+echo "  - Capability/entitlement issues"
+
+echo "✓ Phase 5.5 PASSED (pending visual verification)"
+```
+
+**Gate:** All 4 platforms build with 0 errors AND 0 warnings in BOTH CLI and GUI. Xcode Issue Navigator (Cmd+5) shows 0 issues.
+
+**Why This Phase Is Critical (Lessons Learned 2026-02-07):**
+1. Previous QA runs skipped GUI builds entirely, only running 8 CLI builds instead of the required 16
+2. The `AUTONOMOUS_BUILD_QA.md` explicitly requires ALL 16 builds (4 platforms × 2 configs × CLI + GUI)
+3. GUI-only warnings include indexer issues, project settings problems, and entitlement misconfigurations
+4. These GUI-only issues are exactly the kind that cause CI failures on GitHub Actions
 
 ---
 

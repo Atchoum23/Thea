@@ -82,16 +82,6 @@ struct SidebarView: View {
             }
         }
         .navigationTitle("Conversations")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    createNewConversation()
-                } label: {
-                    Label("New Chat", systemImage: "plus")
-                }
-                .help("New Conversation (⇧⌘N)")
-            }
-        }
     }
 
     // MARK: - Grouped Conversations
@@ -156,13 +146,14 @@ struct ConversationRow: View {
         HStack(spacing: TheaSpacing.sm) {
             VStack(alignment: .leading, spacing: scaledSpacing) {
                 Text(conversation.title)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.theaSubhead)
+                    .fontWeight(.medium)
                     .lineLimit(1)
                     .truncationMode(.tail)
 
                 if let lastMessage = conversation.messages.sorted(by: { $0.timestamp < $1.timestamp }).last {
                     Text(lastMessage.content.textValue)
-                        .font(.system(size: 11))
+                        .font(.theaCaption1)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -172,18 +163,18 @@ struct ConversationRow: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 Text(conversation.updatedAt, format: .dateTime.hour().minute())
-                    .font(.system(size: 10))
+                    .font(.theaCaption2)
                     .foregroundStyle(.tertiary)
 
                 if conversation.isPinned {
                     Image(systemName: "pin.fill")
-                        .font(.system(size: 9))
+                        .font(.theaCaption2)
                         .foregroundStyle(.secondary)
                 }
 
                 // Show message count as a subtle badge
                 Text("\(conversation.messages.count)")
-                    .font(.system(size: 9))
+                    .font(.theaCaption2)
                     .foregroundStyle(.quaternary)
             }
         }

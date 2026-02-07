@@ -15,9 +15,28 @@ struct MacChatDetailView: View {
     // Use @Query to properly observe message changes
     @Query private var allMessages: [Message]
 
+    @StateObject private var settingsManager = SettingsManager.shared
     @State private var messageText = ""
     @State private var isListeningForVoice = false
     @FocusState private var isInputFocused: Bool
+
+    /// Message spacing derived from the density setting
+    private var messageSpacing: CGFloat {
+        switch settingsManager.messageDensity {
+        case "compact": TheaSpacing.sm
+        case "spacious": TheaSpacing.xxl
+        default: TheaSpacing.lg  // "comfortable"
+        }
+    }
+
+    /// Vertical padding derived from the density setting
+    private var messagePadding: CGFloat {
+        switch settingsManager.messageDensity {
+        case "compact": TheaSpacing.sm
+        case "spacious": TheaSpacing.xl
+        default: TheaSpacing.lg  // "comfortable"
+        }
+    }
 
     // Filter messages for this conversation
     private var messages: [Message] {
@@ -53,8 +72,10 @@ struct MacChatDetailView: View {
                         messageText = prompt
                         sendMessage()
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .containerRelativeFrame(.vertical) { length, _ in length }
                 } else {
-                    LazyVStack(spacing: TheaSpacing.lg) {
+                    LazyVStack(spacing: messageSpacing) {
                         // When streaming, hide the last assistant message to avoid duplicate display
                         let displayMessages = chatManager.isStreaming
                             ? messages.filter { msg in
@@ -85,7 +106,7 @@ struct MacChatDetailView: View {
                         }
                     }
                     .padding(.horizontal, TheaSpacing.xxl)
-                    .padding(.vertical, TheaSpacing.lg)
+                    .padding(.vertical, messagePadding)
                 }
             }
             .scrollContentBackground(.hidden)
