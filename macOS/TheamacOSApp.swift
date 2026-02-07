@@ -40,8 +40,10 @@ struct TheamacOSApp: App {
         }
     }
 
+    @Environment(\.openWindow) private var openWindow
+
     var body: some Scene {
-        // MAIN WINDOW GROUP - Can open multiple instances
+        // MAIN WINDOW GROUP - Supports multiple windows and tabs
         WindowGroup(id: "main") {
             if let container = modelContainer {
                 ContentView()
@@ -57,7 +59,6 @@ struct TheamacOSApp: App {
                         Text("Data storage initialization failed. Your data will not be saved between sessions. Please restart Thea to resolve this issue.")
                     }
             } else {
-                // TODO: Restore DataStorageErrorView once implemented
                 Text("Storage initialization failed. Please restart Thea.")
                     .frame(minWidth: 900, minHeight: 600)
             }
@@ -65,10 +66,20 @@ struct TheamacOSApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Window") {
-                    // TODO: Restore WindowManager.shared.openNewChatWindow()
-                    NSApp.keyWindow?.makeKeyAndOrderFront(nil)
+                    openWindow(id: "main")
                 }
                 .keyboardShortcut("n", modifiers: .command)
+
+                Button("New Tab") {
+                    // macOS native tab: merge a new window into the current window as a tab
+                    openWindow(id: "main")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        NSApp.keyWindow?.mergeAllWindows(nil)
+                    }
+                }
+                .keyboardShortcut("t", modifiers: .command)
+
+                Divider()
 
                 Button("New Conversation") {
                     _ = ChatManager.shared.createConversation(title: "New Conversation")
@@ -83,8 +94,7 @@ struct TheamacOSApp: App {
                 Divider()
 
                 Button("New Life Tracking Window") {
-                    // TODO: Restore WindowManager.shared.openNewLifeTrackingWindow()
-                    // Placeholder action
+                    openWindow(id: "life-tracking")
                 }
                 .keyboardShortcut("l", modifiers: [.command, .option])
             }
@@ -239,6 +249,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Initialize AppUpdateService (triggers subscription setup + initial check)
         _ = AppUpdateService.shared
 
+        // Enable native macOS window tabbing (View > Show Tab Bar, Cmd+T)
+        NSWindow.allowsAutomaticWindowTabbing = true
+
         // SKIP heavy initialization when running tests to prevent memory issues and timeouts
         guard !isUITesting && !isUnitTesting else {
             log("⚡ Testing mode - skipping MLX/model initialization")
@@ -327,7 +340,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
-        true
+        // Keep app running even after last window closes (user can reopen via dock)
+        false
     }
 
     func applicationSupportsSecureRestorableState(_: NSApplication) -> Bool {
