@@ -272,7 +272,7 @@ public final class NetworkConditionMonitor {
 
 public extension NetworkConditionMonitor {
     /// Get recommended inference route based on network conditions
-    func recommendedRoute(powerState: PowerState) -> InferenceRoute {
+    func recommendedRoute(powerState: MobilePowerState) -> InferenceRoute {
         let network = currentCondition
 
         // No network - must use local

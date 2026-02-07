@@ -79,7 +79,7 @@ public final class AdaptiveModelRouter {
     // MARK: - Dependencies
 
     private let orchestrator = MobileIntelligenceOrchestrator.shared
-    private let powerMonitor = PowerStateMonitor.shared
+    private let powerMonitor = MobilePowerStateMonitor.shared
     private let networkMonitor = NetworkConditionMonitor.shared
 
     // MARK: - State
@@ -209,7 +209,7 @@ public final class AdaptiveModelRouter {
     private func scoreRoute(
         _ route: InferenceRoute,
         context: RoutingContext,
-        power: PowerState,
+        power: MobilePowerState,
         network: NetworkCondition
     ) -> Float {
         var score: Float = 0.5
