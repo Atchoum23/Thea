@@ -66,7 +66,7 @@ public final class MobileIntelligenceOrchestrator {
 
     // MARK: - Dependencies
 
-    private let powerMonitor = PowerStateMonitor.shared
+    private let powerMonitor = MobilePowerStateMonitor.shared
     private let networkMonitor = NetworkConditionMonitor.shared
 
     // MARK: - State
@@ -94,7 +94,7 @@ public final class MobileIntelligenceOrchestrator {
         networkMonitor.startMonitoring()
 
         // React to power changes
-        powerMonitor.onPowerStateChanged = { [weak self] _ in
+        powerMonitor.onMobilePowerStateChanged = { [weak self] _ in
             Task { @MainActor in
                 self?.updateAvailableModes()
             }
@@ -199,7 +199,7 @@ public final class MobileIntelligenceOrchestrator {
 
     private func scoreMode(
         _ mode: InferenceMode,
-        power: PowerState,
+        power: MobilePowerState,
         network: NetworkCondition,
         budget: InferenceBudget,
         taskType: TaskType,

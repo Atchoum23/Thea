@@ -1,4 +1,4 @@
-// PowerStateMonitor.swift
+// MobilePowerStateMonitor.swift
 // Thea - Mobile Intelligence
 //
 // Monitors device power state for battery-aware inference decisions.
@@ -14,7 +14,7 @@ import UIKit
 // MARK: - Power State
 
 /// Current power state of the device
-public struct PowerState: Sendable {
+public struct MobilePowerState: Sendable {
     public let batteryLevel: Float          // 0.0 - 1.0
     public let isCharging: Bool
     public let isLowPowerMode: Bool
@@ -110,17 +110,17 @@ public struct InferenceBudget: Sendable {
 /// Monitors device power state for intelligent inference decisions
 @MainActor
 @Observable
-public final class PowerStateMonitor {
-    public static let shared = PowerStateMonitor()
+public final class MobilePowerStateMonitor {
+    public static let shared = MobilePowerStateMonitor()
 
     // MARK: - State
 
-    public private(set) var currentState: PowerState
+    public private(set) var currentState: MobilePowerState
     public private(set) var currentBudget: InferenceBudget
     public private(set) var drainHistory: [DrainSample] = []
 
     /// Callbacks for power state changes
-    public var onPowerStateChanged: (@Sendable (PowerState) -> Void)?
+    public var onMobilePowerStateChanged: (@Sendable (MobilePowerState) -> Void)?
     public var onBudgetChanged: (@Sendable (InferenceBudget) -> Void)?
 
     // MARK: - Internal
@@ -129,7 +129,7 @@ public final class PowerStateMonitor {
     private var monitoringTask: Task<Void, Never>?
 
     private init() {
-        self.currentState = PowerState(
+        self.currentState = MobilePowerState(
             batteryLevel: 1.0,
             isCharging: true,
             isLowPowerMode: false,
@@ -153,7 +153,7 @@ public final class PowerStateMonitor {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.updatePowerState()
+                self?.updateMobilePowerState()
             }
         }
 
@@ -163,17 +163,17 @@ public final class PowerStateMonitor {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.updatePowerState()
+                self?.updateMobilePowerState()
             }
         }
 
         NotificationCenter.default.addObserver(
-            forName: NSNotification.Name.NSProcessInfoPowerStateDidChange,
+            forName: NSNotification.Name.NSProcessInfoMobilePowerStateDidChange,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.updatePowerState()
+                self?.updateMobilePowerState()
             }
         }
         #endif
@@ -184,12 +184,12 @@ public final class PowerStateMonitor {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.updatePowerState()
+                self?.updateMobilePowerState()
             }
         }
 
         // Initial update
-        updatePowerState()
+        updateMobilePowerState()
 
         // Start periodic monitoring
         startPeriodicMonitoring()
@@ -200,14 +200,14 @@ public final class PowerStateMonitor {
         monitoringTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(60))
-                await self?.updatePowerState()
+                await self?.updateMobilePowerState()
                 await self?.recordDrainSample()
             }
         }
     }
 
-    private func updatePowerState() {
-        let newState = readCurrentPowerState()
+    private func updateMobilePowerState() {
+        let newState = readCurrentMobilePowerState()
         let oldState = currentState
         currentState = newState
 
@@ -220,19 +220,19 @@ public final class PowerStateMonitor {
 
         // Notify if significant change
         if significantChange(from: oldState, to: newState) {
-            onPowerStateChanged?(newState)
+            onMobilePowerStateChanged?(newState)
         }
     }
 
-    private func readCurrentPowerState() -> PowerState {
+    private func readCurrentMobilePowerState() -> MobilePowerState {
         #if os(iOS)
         let device = UIDevice.current
         let batteryLevel = device.batteryLevel >= 0 ? device.batteryLevel : 1.0
         let isCharging = device.batteryState == .charging || device.batteryState == .full
         let isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
-        let thermalState = PowerState.ThermalState(from: ProcessInfo.processInfo.thermalState)
+        let thermalState = MobilePowerState.ThermalState(from: ProcessInfo.processInfo.thermalState)
 
-        return PowerState(
+        return MobilePowerState(
             batteryLevel: batteryLevel,
             isCharging: isCharging,
             isLowPowerMode: isLowPowerMode,
@@ -241,10 +241,10 @@ public final class PowerStateMonitor {
         )
         #elseif os(macOS)
         // macOS laptop battery monitoring
-        let thermalState = PowerState.ThermalState(from: ProcessInfo.processInfo.thermalState)
+        let thermalState = MobilePowerState.ThermalState(from: ProcessInfo.processInfo.thermalState)
         let (level, charging) = getMacOSBatteryInfo()
 
-        return PowerState(
+        return MobilePowerState(
             batteryLevel: level,
             isCharging: charging,
             isLowPowerMode: ProcessInfo.processInfo.isLowPowerModeEnabled,
@@ -252,7 +252,7 @@ public final class PowerStateMonitor {
             estimatedDrainRate: calculateDrainRate()
         )
         #else
-        return PowerState(
+        return MobilePowerState(
             batteryLevel: 1.0,
             isCharging: true,
             isLowPowerMode: false,
@@ -271,7 +271,7 @@ public final class PowerStateMonitor {
     }
     #endif
 
-    private func calculateBudget(for state: PowerState) -> InferenceBudget {
+    private func calculateBudget(for state: MobilePowerState) -> InferenceBudget {
         if state.isCharging {
             return .unlimited
         }
@@ -287,7 +287,7 @@ public final class PowerStateMonitor {
         return .unlimited
     }
 
-    private func significantChange(from old: PowerState, to new: PowerState) -> Bool {
+    private func significantChange(from old: MobilePowerState, to new: MobilePowerState) -> Bool {
         if old.isCharging != new.isCharging { return true }
         if old.isLowPowerMode != new.isLowPowerMode { return true }
         if old.thermalState != new.thermalState { return true }
