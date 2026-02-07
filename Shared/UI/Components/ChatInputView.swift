@@ -29,6 +29,8 @@ struct ChatInputView: View {
     @Binding var text: String
     let isStreaming: Bool
     let onSend: () -> Void
+    var onVoiceToggle: (() -> Void)?
+    var isListening: Bool = false
 
     @FocusState private var isFocused: Bool
     @State private var selectedModel = AppConfiguration.shared.providerConfig.defaultModel
@@ -120,6 +122,23 @@ struct ChatInputView: View {
                         return true
                     }
                 #endif
+
+                // Microphone button (inline voice input)
+                if let onVoiceToggle {
+                    Button {
+                        onVoiceToggle()
+                    } label: {
+                        Image(systemName: isListening ? "mic.fill" : "mic")
+                            .font(.system(size: TheaSize.iconMedium))
+                            .foregroundStyle(isListening ? .red : .secondary)
+                            .symbolEffect(.bounce, value: isListening)
+                    }
+                    .buttonStyle(.plain)
+                    .help(isListening ? "Stop listening" : "Voice input")
+                    .accessibilityLabel(isListening ? "Stop voice input" : "Start voice input")
+                    .accessibilityHint("Activates microphone for voice dictation")
+                    .disabled(isStreaming)
+                }
 
                 // Send / Stop button
                 Button {
