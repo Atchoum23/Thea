@@ -1,0 +1,331 @@
+/* Thea Safari Extension Popup Styles */
+/* Brand: Blue #0066FF, Teal #00D4AA, Purple #8B5CF6, Gold #FFB84D */
+/* Unified design matching Chrome extension */
+
+:root {
+  --thea-blue: #0066FF;
+  --thea-teal: #00D4AA;
+  --thea-purple: #8B5CF6;
+  --thea-gold: #FFB84D;
+
+  --success: #34C759;
+  --warning: #FF9F0A;
+  --danger: #FF3B30;
+
+  --bg-primary: #F2F2F7;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E5E5EA;
+  --text-primary: #1C1C1E;
+  --text-secondary: #8E8E93;
+  --text-tertiary: #AEAEB2;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-focus: rgba(0, 102, 255, 0.4);
+  --shadow: rgba(0, 0, 0, 0.08);
+  --accent: var(--thea-blue);
+  --accent-subtle: rgba(0, 102, 255, 0.08);
+  --gradient-brand: linear-gradient(135deg, var(--thea-blue), var(--thea-teal));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #141418;
+    --bg-secondary: #1C1C22;
+    --bg-tertiary: #26262E;
+    --text-primary: #F5F5F7;
+    --text-secondary: #8E8E93;
+    --text-tertiary: #636366;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-focus: rgba(0, 102, 255, 0.5);
+    --shadow: rgba(0, 0, 0, 0.4);
+    --accent-subtle: rgba(0, 102, 255, 0.12);
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 350px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 14px;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img {
+  border-radius: 6px;
+}
+
+.logo h1 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-context {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Search Box */
+.search-box {
+  display: flex;
+  gap: 8px;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s ease;
+  font-family: inherit;
+}
+
+.search-box input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.search-box input:focus {
+  border-color: var(--accent);
+}
+
+.search-box button {
+  width: 40px;
+  height: 40px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.search-box button:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.3);
+}
+
+/* Action Grid */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.action-btn svg {
+  color: var(--accent);
+  stroke: var(--accent);
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: var(--accent-subtle);
+  border-color: var(--border-focus);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.12);
+}
+
+.action-btn:hover svg {
+  stroke: var(--thea-teal);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.action-btn span {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Recent Section */
+.recent-section {
+  margin-top: 2px;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.recent-item:hover {
+  border-color: var(--border-focus);
+  background: var(--accent-subtle);
+}
+
+.recent-item.empty {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.recent-item.empty:hover {
+  border-color: var(--border);
+  background: var(--bg-secondary);
+}
+
+.recent-item svg {
+  flex-shrink: 0;
+  stroke: var(--text-tertiary);
+}
+
+.recent-text {
+  flex: 1;
+  overflow: hidden;
+}
+
+.recent-title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Footer */
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+footer a:hover {
+  opacity: 0.8;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--success);
+  border-radius: 50%;
+}
+
+/* Result notification */
+.thea-result {
+  background: var(--accent-subtle);
+  border: 1px solid var(--border-focus);
+  color: var(--text-primary);
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
