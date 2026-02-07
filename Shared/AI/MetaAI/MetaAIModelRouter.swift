@@ -1,12 +1,17 @@
-// ModelRouter.swift
+// MetaAIModelRouter.swift
+// Thea - MetaAI
+//
+// Routes tasks to optimal AI models based on task type, preferences, and availability.
+// For advanced routing with learning, use Intelligence/Routing/ModelRouter.
+
 import Foundation
 
 /// Routes tasks to optimal AI models based on task type, preferences, and availability.
 /// Implements local model preference with cloud fallback logic.
 @MainActor
 @Observable
-public final class ModelRouter {
-    public static let shared = ModelRouter()
+public final class MetaAIModelRouter {
+    public static let shared = MetaAIModelRouter()
 
     private let config = OrchestratorConfiguration.load()
     private let providerRegistry = ProviderRegistry.shared
@@ -18,9 +23,9 @@ public final class ModelRouter {
 
     /// Select the best model for a given task
     public func selectModel(
-        for classification: TaskClassification,
+        for classification: MetaAIClassificationResult,
         preference: OrchestratorConfiguration.LocalModelPreference? = nil
-    ) async throws -> ModelSelection {
+    ) async throws -> MetaAIModelSelection {
         let effectivePreference = preference ?? config.localModelPreference
 
         // 1. Get candidate models from routing rules
@@ -35,7 +40,7 @@ public final class ModelRouter {
         let available = await filterAvailableModels(candidates)
 
         guard !available.isEmpty else {
-            throw ModelRoutingError.noModelsAvailable(taskType: classification.primaryType)
+            throw MetaAIModelRoutingError.noModelsAvailable(taskType: classification.primaryType)
         }
 
         // 3. Apply local model preference logic
@@ -46,8 +51,8 @@ public final class ModelRouter {
         )
 
         if config.logModelRouting {
-            print("[ModelRouter] Selected \(selected.modelID) for \(classification.primaryType.displayName)")
-            print("[ModelRouter] Reasoning: \(selected.reasoning)")
+            print("[MetaAIModelRouter] Selected \(selected.modelID) for \(classification.primaryType.displayName)")
+            print("[MetaAIModelRouter] Reasoning: \(selected.reasoning)")
         }
 
         return selected
@@ -218,7 +223,7 @@ public final class ModelRouter {
         config.preferredModels(for: taskType)
     }
 
-    private func selectDefaultModel(for taskType: TaskType) async throws -> ModelSelection {
+    private func selectDefaultModel(for taskType: TaskType) async throws -> MetaAIModelSelection {
         // Fallback logic when no routing rule exists
         let defaultModel = switch taskType {
         case .simpleQA, .factual, .summarization:
@@ -237,7 +242,7 @@ public final class ModelRouter {
 
         // Check if default model is available
         if await isModelAvailable(defaultModel) {
-            return ModelSelection(
+            return MetaAIModelSelection(
                 modelID: defaultModel,
                 providerID: defaultModel.split(separator: "/").first.map(String.init) ?? "unknown",
                 isLocal: false,
@@ -246,7 +251,7 @@ public final class ModelRouter {
             )
         }
 
-        throw ModelRoutingError.noModelsAvailable(taskType: taskType)
+        throw MetaAIModelRoutingError.noModelsAvailable(taskType: taskType)
     }
 
     // MARK: - Availability Filtering
@@ -269,7 +274,7 @@ public final class ModelRouter {
         _ models: [String],
         preference: OrchestratorConfiguration.LocalModelPreference,
         taskType: TaskType
-    ) async throws -> ModelSelection {
+    ) async throws -> MetaAIModelSelection {
         let localModels = models.filter { $0.hasPrefix("local-") }
         let cloudModels = models.filter { !$0.hasPrefix("local-") }
 
@@ -277,7 +282,7 @@ public final class ModelRouter {
         case .always:
             // Only use local models
             guard let localModel = localModels.first else {
-                throw ModelRoutingError.localModelRequired(taskType: taskType)
+                throw MetaAIModelRoutingError.localModelRequired(taskType: taskType)
             }
             return createSelection(for: localModel, reasoning: "Local-only preference")
 
@@ -287,7 +292,7 @@ public final class ModelRouter {
                 return createSelection(for: localModel, reasoning: "Local model preferred")
             }
             guard let cloudModel = cloudModels.first else {
-                throw ModelRoutingError.noModelsAvailable(taskType: taskType)
+                throw MetaAIModelRoutingError.noModelsAvailable(taskType: taskType)
             }
             return createSelection(for: cloudModel, reasoning: "Local unavailable, using cloud fallback")
 
@@ -300,7 +305,7 @@ public final class ModelRouter {
             }
             guard let cloudModel = cloudModels.first else {
                 guard let localModel = localModels.first else {
-                    throw ModelRoutingError.noModelsAvailable(taskType: taskType)
+                    throw MetaAIModelRoutingError.noModelsAvailable(taskType: taskType)
                 }
                 return createSelection(for: localModel, reasoning: "Cloud unavailable, using local fallback")
             }
@@ -312,13 +317,13 @@ public final class ModelRouter {
                 return createSelection(for: cloudModel, reasoning: "Cloud-first preference")
             }
             guard let localModel = localModels.first else {
-                throw ModelRoutingError.noModelsAvailable(taskType: taskType)
+                throw MetaAIModelRoutingError.noModelsAvailable(taskType: taskType)
             }
             return createSelection(for: localModel, reasoning: "Cloud unavailable, using local fallback")
         }
     }
 
-    private func createSelection(for modelID: String, reasoning: String) -> ModelSelection {
+    private func createSelection(for modelID: String, reasoning: String) -> MetaAIModelSelection {
         let isLocal = modelID.hasPrefix("local-")
 
         // For local models, resolve the pattern to an actual model name
@@ -341,7 +346,7 @@ public final class ModelRouter {
 
         let cost = estimatedCost(for: resolvedModelID, tokens: 1000)
 
-        return ModelSelection(
+        return MetaAIModelSelection(
             modelID: resolvedModelID,
             providerID: providerID,
             isLocal: isLocal,
@@ -353,12 +358,12 @@ public final class ModelRouter {
     // MARK: - Cost Optimization
 
     /// Select cheapest available model that can handle the task
-    public func selectCheapestModel(for classification: TaskClassification) async throws -> ModelSelection {
+    public func selectCheapestModel(for classification: MetaAIClassificationResult) async throws -> MetaAIModelSelection {
         let candidates = getCandidateModels(for: classification.primaryType)
         let available = await filterAvailableModels(candidates)
 
         guard !available.isEmpty else {
-            throw ModelRoutingError.noModelsAvailable(taskType: classification.primaryType)
+            throw MetaAIModelRoutingError.noModelsAvailable(taskType: classification.primaryType)
         }
 
         // Sort by estimated cost (local models first, then cloud by cost)
@@ -369,17 +374,17 @@ public final class ModelRouter {
         }
 
         guard let cheapest = sorted.first else {
-            throw ModelRoutingError.noModelsAvailable(taskType: classification.primaryType)
+            throw MetaAIModelRoutingError.noModelsAvailable(taskType: classification.primaryType)
         }
 
         return createSelection(for: cheapest, reasoning: "Cheapest available model")
     }
 }
 
-// MARK: - Supporting Types
+// MARK: - MetaAI Model Selection
 
-/// Result of model selection
-public struct ModelSelection: Sendable {
+/// Result of MetaAI model selection
+public struct MetaAIModelSelection: Sendable {
     public let modelID: String
     public let providerID: String
     public let isLocal: Bool
@@ -413,10 +418,23 @@ public struct ModelSelection: Sendable {
         guard let budget else { return true }
         return estimatedCost <= budget
     }
+
+    /// Convert to standard ModelSelection for compatibility
+    public func toModelSelection() -> ModelSelection {
+        ModelSelection(
+            modelID: modelID,
+            providerID: providerID,
+            reasoning: reasoning,
+            isLocal: isLocal,
+            estimatedCost: Double(truncating: estimatedCost as NSNumber)
+        )
+    }
 }
 
-/// Model routing errors
-public enum ModelRoutingError: Error, LocalizedError {
+// MARK: - MetaAI Model Routing Errors
+
+/// MetaAI model routing errors
+public enum MetaAIModelRoutingError: Error, LocalizedError {
     case noModelsAvailable(taskType: TaskType)
     case localModelRequired(taskType: TaskType)
     case exceedsCostBudget(cost: Decimal, budget: Decimal)
