@@ -300,8 +300,11 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
-          # Exclude duplicate MetaAI (use Intelligence folder versions)
-          - "**/AI/MetaAI/**"
+          # MetaAI: Exclude only files that conflict with Intelligence folder
+          # TaskClassifier.swift renamed to MetaAITaskClassifier.swift - no conflict
+          # ModelRouter.swift renamed to MetaAIModelRouter.swift - no conflict
+          # TaskTypes.swift updated to not define duplicate TaskType - no conflict
+          # QueryDecomposer.swift types are canonical - keep it
           # Exclude duplicate Integrations (use Apple subfolder)
           - "**/Integrations/NotesIntegration.swift"
           - "**/Integrations/RemindersIntegration.swift"
@@ -560,7 +563,7 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
-          - "**/AI/MetaAI/**"
+          # MetaAI: Re-enabled (duplicates renamed/removed)
           - "**/Integrations/NotesIntegration.swift"
           - "**/Integrations/RemindersIntegration.swift"
           - "**/AI/Memory/**"

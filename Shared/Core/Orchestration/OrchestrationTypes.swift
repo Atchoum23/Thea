@@ -60,10 +60,10 @@ public struct ModelSelection: Sendable {
     }
 }
 
-// MARK: - Execution Strategy
+// MARK: - Optimization Priority
 
-/// Strategy for executing sub-queries (what to optimize for)
-public enum ExecutionStrategy: String, Codable, Sendable {
+/// What to optimize for when executing sub-queries
+public enum OptimizationPriority: String, Codable, Sendable {
     case fastest      // Prioritize speed
     case cheapest     // Prioritize cost
     case bestQuality  // Prioritize output quality
