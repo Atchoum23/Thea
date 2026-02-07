@@ -203,9 +203,11 @@ public actor EnvironmentContextProvider: ContextProvider {
         )
     }
 
-    private func getConnectedAccessories() -> [String] {
+    private func getConnectedAccessories() async -> [String] {
         // Use BluetoothDeviceManager for categorized audio device data
-        let devices = BluetoothDeviceManager.shared.connectedAudioDevices
+        let devices = await MainActor.run {
+            BluetoothDeviceManager.shared.connectedAudioDevices
+        }
         guard !devices.isEmpty else { return [] }
 
         return devices.map { device in
