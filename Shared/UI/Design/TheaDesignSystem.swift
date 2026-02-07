@@ -814,10 +814,12 @@ public struct TheaSpiralIconView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
+                .clipShape(Circle())
                 .rotationEffect(.degrees(rotation))
                 .scaleEffect(beatScale)
         }
-        .frame(width: size * 1.1, height: size * 1.1)
+        .frame(width: size * 1.5, height: size * 1.5)
+        .clipped()
         .onAppear {
             startIdleAnimations()
             if isThinking {
@@ -833,13 +835,13 @@ public struct TheaSpiralIconView: View {
         }
     }
 
-    /// Subtle idle animations: slow CCW rotation + gentle breathing beat
+    /// Subtle idle animations: slow CW rotation + gentle breathing beat
     private func startIdleAnimations() {
         guard !reduceMotion else { return }
 
-        // Slow counter-clockwise rotation: one full turn per 80 seconds
+        // Slow clockwise rotation: one full turn per 80 seconds
         withAnimation(.linear(duration: 80).repeatForever(autoreverses: false)) {
-            rotation = -360
+            rotation = 360
         }
 
         // Subtle heartbeat/breathing scale: gentle pulse every 4 seconds
@@ -854,9 +856,9 @@ public struct TheaSpiralIconView: View {
             beatScale = 1.06
             return
         }
-        // Faster CCW rotation when thinking
+        // Faster CW rotation when thinking
         withAnimation(.linear(duration: 4.0).repeatForever(autoreverses: false)) {
-            rotation = -360
+            rotation = 360
         }
         // Stronger pulse when thinking
         withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {

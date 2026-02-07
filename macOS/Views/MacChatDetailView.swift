@@ -55,7 +55,18 @@ struct MacChatDetailView: View {
                     }
                 } else {
                     LazyVStack(spacing: TheaSpacing.lg) {
-                        ForEach(messages) { message in
+                        // When streaming, hide the last assistant message to avoid duplicate display
+                        let displayMessages = chatManager.isStreaming
+                            ? messages.filter { msg in
+                                // Skip the last assistant message (it's shown by StreamingMessageView)
+                                if msg.messageRole == .assistant, msg.id == messages.last(where: { $0.messageRole == .assistant })?.id {
+                                    return false
+                                }
+                                return true
+                            }
+                            : messages
+
+                        ForEach(displayMessages) { message in
                             MessageBubble(message: message)
                                 .id(message.id)
                                 .transition(.asymmetric(

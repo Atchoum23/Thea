@@ -89,7 +89,7 @@ struct SidebarView: View {
                 } label: {
                     Label("New Chat", systemImage: "plus")
                 }
-                .keyboardShortcut("n", modifiers: .command)
+                .help("New Conversation (⇧⌘N)")
             }
         }
     }

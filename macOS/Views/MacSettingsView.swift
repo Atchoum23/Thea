@@ -41,7 +41,7 @@ struct MacSettingsView: View {
                     .tag(tab)
             }
         }
-        .frame(minWidth: 560, idealWidth: 700, minHeight: 440, idealHeight: 580)
+        .frame(minWidth: 560, idealWidth: 700, maxWidth: .infinity, minHeight: 440, idealHeight: 580, maxHeight: .infinity)
         .textSelection(.enabled)
     }
 
@@ -66,6 +66,9 @@ struct MacSettingsView: View {
     private var generalSettings: some View {
         Form {
             Section("Appearance") {
+                // Use fixed-width container for all segmented pickers to ensure vertical alignment
+                let pickerWidth: CGFloat = 280
+
                 LabeledContent("Theme") {
                     Picker("Theme", selection: $settingsManager.theme) {
                         Text("System").tag("system")
@@ -74,7 +77,7 @@ struct MacSettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(width: 260)
+                    .frame(width: pickerWidth)
                 }
 
                 LabeledContent("Font Size") {
@@ -85,7 +88,7 @@ struct MacSettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(width: 260)
+                    .frame(width: pickerWidth)
                     .onChange(of: settingsManager.fontSize) { _, newSize in
                         applyFontSizeToThemeConfig(newSize)
                     }
@@ -99,7 +102,7 @@ struct MacSettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(width: 260)
+                    .frame(width: pickerWidth)
                 }
 
                 LabeledContent("Timestamps") {
@@ -110,7 +113,7 @@ struct MacSettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(width: 260)
+                    .frame(width: pickerWidth)
                 }
             }
 

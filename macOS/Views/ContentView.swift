@@ -18,16 +18,13 @@ struct ContentView: View {
     @State private var selectedConversation: Conversation?
     @State private var selectedProject: Project?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
-    @State private var showConversationsList = true
     @State private var welcomeInputText = ""
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             sidebarContent
         } content: {
-            if showConversationsList {
-                listContent
-            }
+            listContent
         } detail: {
             detailContent
         }
@@ -46,7 +43,7 @@ struct ContentView: View {
         List(NavigationItem.allCases, selection: $selectedItem) { item in
             NavigationLink(value: item) {
                 Label(item.rawValue, systemImage: item.icon)
-                    .font(.system(size: 13))
+                    .font(.theaBody)
             }
         }
         .navigationTitle("THEA")
@@ -87,7 +84,7 @@ struct ContentView: View {
         if let conversation = selectedConversation {
             MacChatDetailView(conversation: conversation)
                 .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
+                    ToolbarItem(placement: .navigation) {
                         conversationsPanelToggle
                     }
                 }
@@ -116,23 +113,27 @@ struct ContentView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .navigation) {
                     conversationsPanelToggle
                 }
             }
         }
     }
 
-    /// Toggle button for showing/hiding the conversations list panel (right side of toolbar)
+    /// Toggle the conversations list (content column) visibility using NavigationSplitView's columnVisibility
     private var conversationsPanelToggle: some View {
         Button {
             withAnimation {
-                showConversationsList.toggle()
+                if columnVisibility == .all {
+                    columnVisibility = .detailOnly
+                } else {
+                    columnVisibility = .all
+                }
             }
         } label: {
-            Image(systemName: showConversationsList ? "sidebar.right" : "sidebar.left")
+            Image(systemName: columnVisibility == .all ? "sidebar.right" : "sidebar.left")
         }
-        .help(showConversationsList ? "Hide Conversations" : "Show Conversations")
+        .help(columnVisibility == .all ? "Hide Conversations" : "Show Conversations")
     }
 
     // MARK: - Chat List
