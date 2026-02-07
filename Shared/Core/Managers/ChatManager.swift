@@ -227,6 +227,11 @@ final class ChatManager: ObservableObject {
             conversation.updatedAt = Date()
             try context.save()
             debugLog("✅ Message saved successfully")
+
+            // Route response through voice if BT audio device is active
+            if AudioOutputRouter.shared.isVoiceOutputActive {
+                AudioOutputRouter.shared.routeResponse(streamingText)
+            }
         } catch {
             debugLog("❌ Error during chat: \(error)")
             context.delete(assistantMessage)
