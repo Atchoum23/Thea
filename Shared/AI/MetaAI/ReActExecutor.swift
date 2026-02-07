@@ -658,8 +658,8 @@ public struct ReActThought: Sendable {
     public let answer: String?
 }
 
-/// Result of action execution
-public struct ActionResult: Sendable {
+/// Result of ReAct action execution (distinct from AutomationAction.ActionResult)
+public struct ReActActionResult: Sendable {
     public let success: Bool
     public let output: String
     public let duration: TimeInterval

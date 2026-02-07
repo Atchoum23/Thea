@@ -5,7 +5,7 @@ import OSLog
 
 // Maintains up-to-date database of AI model capabilities for intelligent routing
 
-/// Model capability record for database storage (distinct from ModelCapabilityRecord enum in AIModel.swift)
+/// Model capability record for database storage (distinct from ModelCapability enum in AIModel.swift)
 public struct ModelCapabilityRecord: Codable, Identifiable, Sendable, Hashable {
     public let id: String // modelId
     public let modelId: String
