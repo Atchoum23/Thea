@@ -16,15 +16,15 @@ import Speech
 
 /// Context that determines voice interaction appropriateness
 public enum VoiceContext: String, Sendable, CaseIterable {
-    case driving = "driving"           // In vehicle, hands busy
-    case walking = "walking"           // Walking, can listen
-    case exercising = "exercising"     // Working out
-    case working = "working"           // At work, be quiet
-    case sleeping = "sleeping"         // Do not disturb
-    case meeting = "meeting"           // In a meeting
-    case home = "home"                 // At home, normal volume
-    case transit = "transit"           // Public transit
-    case unknown = "unknown"           // Default
+    case driving             // In vehicle, hands busy
+    case walking             // Walking, can listen
+    case exercising          // Working out
+    case working             // At work, be quiet
+    case sleeping            // Do not disturb
+    case meeting             // In a meeting
+    case home                // At home, normal volume
+    case transit             // Public transit
+    case unknown             // Default
 
     public var isVoiceSafe: Bool {
         switch self {
@@ -66,12 +66,12 @@ public enum VoiceContext: String, Sendable, CaseIterable {
 
 /// Type of voice interaction
 public enum VoiceInteractionType: String, Sendable {
-    case notification = "notification"    // One-way notification
-    case question = "question"            // Expecting yes/no response
-    case request = "request"              // Expecting action/data
-    case conversation = "conversation"    // Multi-turn
-    case alert = "alert"                  // Urgent alert
-    case reminder = "reminder"            // Scheduled reminder
+    case notification         // One-way notification
+    case question             // Expecting yes/no response
+    case request              // Expecting action/data
+    case conversation         // Multi-turn
+    case alert                // Urgent alert
+    case reminder             // Scheduled reminder
 }
 
 /// Priority of voice interaction
@@ -184,10 +184,10 @@ public struct VoiceResponse: Sendable {
 public enum MessagingPlatform: String, Sendable, CaseIterable {
     case iMessage = "imessage"
     case whatsApp = "whatsapp"
-    case telegram = "telegram"
-    case signal = "signal"
-    case slack = "slack"
-    case sms = "sms"
+    case telegram
+    case signal
+    case slack
+    case sms
 
     public var displayName: String {
         switch self {
