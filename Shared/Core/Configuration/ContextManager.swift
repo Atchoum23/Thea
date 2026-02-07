@@ -216,10 +216,11 @@ public actor ContextManager {
         let summaryContent = "[Earlier conversation summary — \(olderMessages.count) messages condensed]\n" +
             digestParts.joined(separator: "\n")
         let summaryMessage = TokenizedMessage(
-            id: UUID().uuidString,
+            id: UUID(),
             role: "system",
             content: summaryContent,
-            tokenCount: digestTokens
+            tokenCount: digestTokens,
+            timestamp: Date()
         )
 
         logger.info("Summarization: condensed \(olderMessages.count) older messages into \(digestTokens) tokens")
@@ -269,10 +270,11 @@ public actor ContextManager {
         let summaryContent = "[Conversation context — \(olderMessages.count) earlier messages]\n" +
             summaryParts.joined(separator: "\n")
         let summaryMessage = TokenizedMessage(
-            id: UUID().uuidString,
+            id: UUID(),
             role: "system",
             content: summaryContent,
-            tokenCount: tokenCount
+            tokenCount: tokenCount,
+            timestamp: Date()
         )
 
         logger.info("Hybrid prepare: \(olderMessages.count) older messages summarized + \(recentMessages.count) recent")
