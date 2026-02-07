@@ -27,9 +27,10 @@ public class CloudKitService: ObservableObject {
     // MARK: - CloudKit Configuration
 
     private let containerIdentifier = "iCloud.app.theathe"
-    private let privateDatabase: CKDatabase
-    private let sharedDatabase: CKDatabase
-    private let publicDatabase: CKDatabase
+    private var container: CKContainer?
+    private var privateDatabase: CKDatabase?
+    private var sharedDatabase: CKDatabase?
+    private var publicDatabase: CKDatabase?
 
     // MARK: - Record Types
 
@@ -54,13 +55,25 @@ public class CloudKitService: ObservableObject {
     // MARK: - Initialization
 
     private init() {
-        let container = CKContainer(identifier: containerIdentifier)
-        privateDatabase = container.privateCloudDatabase
-        sharedDatabase = container.sharedCloudDatabase
-        publicDatabase = container.publicCloudDatabase
-
         // Load initial sync state from SettingsManager
         syncEnabled = SettingsManager.shared.iCloudSyncEnabled
+
+        // Initialize CloudKit container safely — CKContainer(identifier:) can
+        // trigger an assertion if the container isn't in the entitlements/provisioning profile.
+        do {
+            let ckContainer = try Self.createContainer(identifier: containerIdentifier)
+            container = ckContainer
+            privateDatabase = ckContainer.privateCloudDatabase
+            sharedDatabase = ckContainer.sharedCloudDatabase
+            publicDatabase = ckContainer.publicCloudDatabase
+        } catch {
+            container = nil
+            privateDatabase = nil
+            sharedDatabase = nil
+            publicDatabase = nil
+            iCloudAvailable = false
+            syncStatus = .error("CloudKit container not configured")
+        }
 
         // Load saved change tokens for delta sync
         loadChangeTokens()
@@ -72,6 +85,20 @@ public class CloudKitService: ObservableObject {
 
         // Observe settings changes
         setupSettingsObserver()
+    }
+
+    /// Create a CKContainer, catching any assertion failures from misconfigured entitlements.
+    private static func createContainer(identifier: String) throws -> CKContainer {
+        // Use the default container instead of a named one if the identifier
+        // isn't present in the app's entitlements.  CKContainer(identifier:)
+        // will hit a `brk` instruction (crash) if the identifier is missing.
+        // We verify by checking the entitlements key first.
+        guard let containers = Bundle.main.object(forInfoDictionaryKey: "com.apple.developer.icloud-container-identifiers") as? [String],
+              containers.contains(identifier) else {
+            // Identifier not in Info.plist / entitlements — fall back to default container
+            return CKContainer.default()
+        }
+        return CKContainer(identifier: identifier)
     }
 
     // MARK: - Change Token Persistence
@@ -119,8 +146,12 @@ public class CloudKitService: ObservableObject {
     // MARK: - iCloud Status
 
     private func checkiCloudStatus() async {
+        guard let container else {
+            iCloudAvailable = false
+            return
+        }
         do {
-            let status = try await CKContainer(identifier: containerIdentifier).accountStatus()
+            let status = try await container.accountStatus()
             iCloudAvailable = status == .available
         } catch {
             iCloudAvailable = false
@@ -131,7 +162,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync all data using delta sync (only fetches changes since last sync)
     public func syncAll() async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, privateDatabase != nil else { return }
 
         syncStatus = .syncing
         defer { syncStatus = .idle }
@@ -145,6 +176,7 @@ public class CloudKitService: ObservableObject {
     /// Perform delta sync using CKServerChangeToken
     /// This only fetches records that have changed since the last sync
     private func performDeltaSync() async throws {
+        guard let privateDatabase else { return }
         let zoneID = CKRecordZone.ID(zoneName: "TheaZone", ownerName: CKCurrentUserDefaultName)
 
         // Ensure the zone exists
@@ -232,6 +264,7 @@ public class CloudKitService: ObservableObject {
 
     /// Ensure the custom record zone exists
     private func ensureZoneExists(_ zoneID: CKRecordZone.ID) async throws {
+        guard let privateDatabase else { return }
         let zone = CKRecordZone(zoneID: zoneID)
         do {
             _ = try await privateDatabase.save(zone)
@@ -311,7 +344,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync conversations
     public func syncConversations() async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         // Fetch changes since last sync
         let predicate = NSPredicate(value: true)
@@ -331,7 +364,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync settings
     public func syncSettings() async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let recordID = CKRecord.ID(recordName: "userSettings")
 
@@ -347,7 +380,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync knowledge base
     public func syncKnowledge() async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: RecordType.knowledge.rawValue, predicate: predicate)
@@ -364,7 +397,7 @@ public class CloudKitService: ObservableObject {
 
     /// Sync projects
     public func syncProjects() async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: RecordType.project.rawValue, predicate: predicate)
@@ -383,7 +416,7 @@ public class CloudKitService: ObservableObject {
 
     /// Save a conversation to CloudKit
     public func saveConversation(_ conversation: CloudConversation) async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let record = conversation.toRecord()
         try await privateDatabase.save(record)
@@ -392,7 +425,7 @@ public class CloudKitService: ObservableObject {
 
     /// Save settings to CloudKit
     public func saveSettings() async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let settings = CloudSettings.current()
         let record = settings.toRecord()
@@ -401,7 +434,7 @@ public class CloudKitService: ObservableObject {
 
     /// Save a knowledge item to CloudKit
     public func saveKnowledgeItem(_ item: CloudKnowledgeItem) async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let record = item.toRecord()
         try await privateDatabase.save(record)
@@ -409,7 +442,7 @@ public class CloudKitService: ObservableObject {
 
     /// Save a project to CloudKit
     public func saveProject(_ project: CloudProject) async throws {
-        guard syncEnabled, iCloudAvailable else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let record = project.toRecord()
         try await privateDatabase.save(record)
@@ -419,12 +452,14 @@ public class CloudKitService: ObservableObject {
 
     /// Delete a conversation from CloudKit
     public func deleteConversation(_ id: UUID) async throws {
+        guard let privateDatabase else { return }
         let recordID = CKRecord.ID(recordName: "conversation-\(id.uuidString)")
         try await privateDatabase.deleteRecord(withID: recordID)
     }
 
     /// Delete a knowledge item from CloudKit
     public func deleteKnowledgeItem(_ id: UUID) async throws {
+        guard let privateDatabase else { return }
         let recordID = CKRecord.ID(recordName: "knowledge-\(id.uuidString)")
         try await privateDatabase.deleteRecord(withID: recordID)
     }
@@ -432,6 +467,7 @@ public class CloudKitService: ObservableObject {
     // MARK: - Subscriptions
 
     private func setupSubscriptions() async {
+        guard let privateDatabase else { return }
         do {
             // Subscribe to conversation changes
             let conversationSubscription = CKQuerySubscription(
@@ -641,6 +677,7 @@ public class CloudKitService: ObservableObject {
 
     /// Share a conversation with another user
     public func shareConversation(_ conversationId: UUID, with participants: [CKShare.Participant]) async throws -> CKShare {
+        guard let privateDatabase else { throw CloudKitError.notAuthenticated }
         let recordID = CKRecord.ID(recordName: "conversation-\(conversationId.uuidString)")
         let record = try await privateDatabase.record(for: recordID)
 
