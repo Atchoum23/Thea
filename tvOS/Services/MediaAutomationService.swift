@@ -603,7 +603,7 @@ final class MediaAutomationService: ObservableObject {
         monitoringTask = Task {
             while !Task.isCancelled {
                 await checkForNewReleases()
-                try? await Task.sleep(for: .minutes(15))
+                try? await Task.sleep(for: .seconds(15 * 60))
             }
         }
     }

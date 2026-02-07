@@ -214,7 +214,7 @@ struct TVEnhancedChatView: View {
             Button(action: sendMessage) {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 50))
-                    .foregroundStyle(inputText.isEmpty ? .secondary : .blue)
+                    .foregroundStyle(inputText.isEmpty ? Color.secondary : Color.blue)
             }
             .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
             .buttonStyle(.plain)

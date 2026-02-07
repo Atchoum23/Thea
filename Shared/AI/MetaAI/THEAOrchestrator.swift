@@ -147,7 +147,83 @@ public final class THEAOrchestrator: ObservableObject {
                     // Send decision chunk first (so UI can show reasoning)
                     continuation.yield(.decision(decision))
 
-                    // Execute with streaming
+                    // Plan mode: decompose, create visible plan, execute step by step
+                    if decision.strategy == .planMode {
+                        let decomposition = try await QueryDecomposer.shared.decompose(input.text)
+
+                        let plan = await PlanManager.shared.createPlan(
+                            from: decomposition,
+                            title: self.generatePlanTitle(input.text),
+                            conversationId: input.conversationId
+                        )
+
+                        continuation.yield(.planCreated(plan))
+                        await PlanManager.shared.showPanel()
+                        await PlanManager.shared.startExecution()
+
+                        var fullContent = ""
+                        var tokenCount = 0
+                        var completedIds = Set<UUID>()
+
+                        for phase in plan.phases {
+                            for step in phase.steps {
+                                guard let subQuery = decomposition.subQueries.first(where: { $0.id == step.subQueryId }) else {
+                                    continue
+                                }
+
+                                // Wait for dependencies
+                                guard subQuery.canExecute(completed: completedIds) else { continue }
+
+                                continuation.yield(.planStepStarted(step.id))
+                                await PlanManager.shared.stepStarted(step.id, modelUsed: decision.selectedModel)
+
+                                do {
+                                    let stepResult = try await self.executeSubQuery(subQuery, decision: decision)
+                                    continuation.yield(.content(stepResult.content))
+                                    continuation.yield(.planStepCompleted(step.id, stepResult.content))
+                                    await PlanManager.shared.stepCompleted(step.id, result: stepResult.content)
+                                    fullContent += stepResult.content + "\n\n"
+                                    tokenCount += stepResult.tokenCount
+                                    completedIds.insert(subQuery.id)
+                                } catch {
+                                    continuation.yield(.planStepFailed(step.id, error.localizedDescription))
+                                    await PlanManager.shared.stepFailed(step.id, error: error.localizedDescription)
+                                }
+                            }
+                        }
+
+                        if let finalPlan = await PlanManager.shared.activePlan {
+                            continuation.yield(.planCompleted(finalPlan))
+                        }
+
+                        // Build final response
+                        let response = THEAResponse(
+                            id: UUID(),
+                            content: fullContent.trimmingCharacters(in: .whitespacesAndNewlines),
+                            decision: decision,
+                            metadata: ResponseMetadata(
+                                startTime: startTime,
+                                endTime: Date(),
+                                tokenCount: tokenCount,
+                                modelUsed: decision.selectedModel,
+                                providerUsed: decision.selectedProvider
+                            ),
+                            suggestions: [],
+                            learnings: [],
+                            relatedMemories: Array(memories.prefix(3))
+                        )
+
+                        continuation.yield(.complete(response))
+
+                        if await self.enableLearning {
+                            await self.recordOutcome(input: input, decision: decision, response: response)
+                        }
+
+                        continuation.finish()
+                        return
+                    }
+
+                    // Execute with streaming (non-plan-mode path)
                     var fullContent = ""
                     var tokenCount = 0
 
@@ -364,6 +440,8 @@ public final class THEAOrchestrator: ObservableObject {
             whyThisStrategy = "Multiple models will provide best coverage."
         case .localFallback:
             whyThisStrategy = "Using local model for privacy/speed."
+        case .planMode:
+            whyThisStrategy = "Complex multi-step task — creating a visible plan with tracked progress."
         }
 
         // Build alternatives
@@ -391,19 +469,39 @@ public final class THEAOrchestrator: ObservableObject {
         input: THEAInput,
         context: AggregatedContext
     ) -> THEAExecutionStrategy {
-        // Complex queries with low confidence might need decomposition
-        if classification.confidence < 0.6 && input.text.count > 200 {
-            return .decomposed
-        }
-
-        // Some task types naturally benefit from decomposition
-        if [.planning, .research, .analysis].contains(classification.taskType) && input.text.count > 300 {
-            return .decomposed
-        }
-
         // If network is constrained, prefer local
         if context.device.networkStatus == .disconnected && context.aiResources.localModelCount > 0 {
             return .localFallback
+        }
+
+        let complexity = TaskClassifier.shared.assessComplexity(input.text)
+
+        // Plan mode: planning-type tasks with moderate+ complexity
+        if classification.taskType == .planning && complexity != .simple {
+            return .planMode
+        }
+
+        // Plan mode: complex queries that benefit from visible decomposition
+        if complexity == .complex && input.text.count > 200 {
+            return .planMode
+        }
+
+        // Plan mode: multi-domain queries (low confidence + multiple alternative types)
+        if classification.confidence < 0.6 &&
+            (classification.alternativeTypes?.count ?? 0) >= 2 &&
+            input.text.count > 150
+        {
+            return .planMode
+        }
+
+        // Plan mode: substantial research/analysis tasks
+        if [.research, .analysis].contains(classification.taskType) && input.text.count > 300 {
+            return .planMode
+        }
+
+        // Decomposition for moderately complex queries
+        if classification.confidence < 0.6 && input.text.count > 200 {
+            return .decomposed
         }
 
         // Default to direct execution
@@ -653,6 +751,39 @@ public final class THEAOrchestrator: ObservableObject {
 
     // MARK: - User Feedback
 
+    // MARK: - Plan Mode Helpers
+
+    private func generatePlanTitle(_ query: String) -> String {
+        let firstSentence = query.components(separatedBy: CharacterSet(charactersIn: ".!?\n")).first ?? query
+        let trimmed = firstSentence.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.count <= 60 { return trimmed }
+        return String(trimmed.prefix(57)) + "..."
+    }
+
+    private func executeSubQuery(_ subQuery: SubQuery, decision: THEADecision) async throws -> THEAExecutionResult {
+        guard let provider = ProviderRegistry.shared.getProvider(id: decision.selectedProvider) else {
+            throw THEAError.providerNotAvailable(decision.selectedProvider)
+        }
+
+        let systemPrompt = THEASelfAwareness.shared.generateSystemPrompt(for: subQuery.taskType)
+
+        let messages = [
+            ChatMessage(role: "system", text: systemPrompt),
+            ChatMessage(role: "user", text: subQuery.query)
+        ]
+
+        let response = try await provider.chatSync(
+            messages: messages,
+            model: decision.selectedModel,
+            options: ChatOptions(stream: false)
+        )
+
+        return THEAExecutionResult(
+            content: response.content,
+            tokenCount: response.usage?.totalTokens ?? 0
+        )
+    }
+
     /// Record user feedback on a response (thumbs up/down, corrections)
     public func recordFeedback(
         responseId: UUID,
@@ -762,6 +893,7 @@ public enum THEAExecutionStrategy: String, Sendable {
     case decomposed    // Break into sub-tasks
     case multiModel    // Use multiple models
     case localFallback // Use local model
+    case planMode      // Visible plan with tracked steps
 }
 
 public struct ContextFactor: Identifiable, Sendable {
@@ -836,6 +968,13 @@ public enum THEAStreamChunk: Sendable {
     case content(String)
     case complete(THEAResponse)
     case error(Error)
+    // Plan mode events
+    case planCreated(PlanState)
+    case planStepStarted(UUID)
+    case planStepCompleted(UUID, String?)
+    case planStepFailed(UUID, String)
+    case planModified(PlanModification)
+    case planCompleted(PlanState)
 }
 
 struct THEAExecutionResult {

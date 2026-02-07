@@ -1,6 +1,25 @@
 // swiftlint:disable type_name
 import SwiftUI
 
+// MARK: - watchOS Design Tokens (local to avoid Shared dependency)
+
+private enum WatchSpacing {
+    static let xxs: CGFloat = 2
+    static let xs: CGFloat = 4
+    static let sm: CGFloat = 8
+    static let md: CGFloat = 12
+    static let lg: CGFloat = 16
+}
+
+private enum WatchCornerRadius {
+    static let md: CGFloat = 12
+    static let lg: CGFloat = 16
+}
+
+private extension Color {
+    static let watchPrimary = Color(red: 0.96, green: 0.65, blue: 0.14) // TheaBrandColors.gold
+}
+
 // MARK: - watchOS Home View (Voice-First, Glanceable)
 
 /// Voice-first watchOS experience.
@@ -15,12 +34,12 @@ struct watchOSHomeView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: TheaSpacing.lg) {
+                VStack(spacing: WatchSpacing.lg) {
                     voiceActivationCard
                     recentConversationsSection
                     quickActionsSection
                 }
-                .padding(.horizontal, TheaSpacing.sm)
+                .padding(.horizontal, WatchSpacing.sm)
             }
             .navigationTitle("Thea")
             .toolbar {
@@ -41,10 +60,10 @@ struct watchOSHomeView: View {
         Button {
             toggleListening()
         } label: {
-            VStack(spacing: TheaSpacing.md) {
+            VStack(spacing: WatchSpacing.md) {
                 Image(systemName: isListening ? "waveform" : "mic.fill")
                     .font(.system(size: 44, weight: .medium))
-                    .foregroundStyle(isListening ? .red : Color.theaPrimaryDefault)
+                    .foregroundStyle(isListening ? .red : Color.watchPrimary)
                     .symbolEffect(.variableColor, isActive: isListening)
                     .frame(width: 70, height: 70)
 
@@ -58,30 +77,30 @@ struct watchOSHomeView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, TheaSpacing.lg)
+            .padding(.vertical, WatchSpacing.lg)
         }
         .buttonStyle(.plain)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
+        .clipShape(RoundedRectangle(cornerRadius: WatchCornerRadius.lg))
     }
 
     // MARK: - Recent Conversations
 
     private var recentConversationsSection: some View {
-        VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+        VStack(alignment: .leading, spacing: WatchSpacing.sm) {
             if !messages.isEmpty {
                 Text("Recent")
                     .font(.caption.bold())
                     .foregroundStyle(.secondary)
-                    .padding(.leading, TheaSpacing.xxs)
+                    .padding(.leading, WatchSpacing.xxs)
 
                 // Show last assistant message as a preview card
                 if let lastResponse = messages.last(where: { !$0.isUser }) {
-                    VStack(alignment: .leading, spacing: TheaSpacing.xs) {
-                        HStack(spacing: TheaSpacing.xs) {
+                    VStack(alignment: .leading, spacing: WatchSpacing.xs) {
+                        HStack(spacing: WatchSpacing.xs) {
                             Image(systemName: "sparkles")
                                 .font(.caption)
-                                .foregroundStyle(Color.theaPrimaryDefault)
+                                .foregroundStyle(Color.watchPrimary)
                             Text("Thea")
                                 .font(.caption.bold())
                                 .foregroundStyle(.secondary)
@@ -96,7 +115,7 @@ struct watchOSHomeView: View {
                             .lineLimit(3)
 
                         // Quick reply chips
-                        HStack(spacing: TheaSpacing.xs) {
+                        HStack(spacing: WatchSpacing.xs) {
                             WatchQuickReply(text: "Tell me more") {
                                 sendQuickReply("Tell me more")
                             }
@@ -105,9 +124,9 @@ struct watchOSHomeView: View {
                             }
                         }
                     }
-                    .padding(TheaSpacing.md)
+                    .padding(WatchSpacing.md)
                     .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.md))
+                    .clipShape(RoundedRectangle(cornerRadius: WatchCornerRadius.md))
                 }
             }
         }
@@ -116,7 +135,7 @@ struct watchOSHomeView: View {
     // MARK: - Quick Actions
 
     private var quickActionsSection: some View {
-        VStack(spacing: TheaSpacing.sm) {
+        VStack(spacing: WatchSpacing.sm) {
             WatchActionRow(icon: "text.bubble", label: "Compose") {
                 sendQuickReply("Help me compose a message")
             }
@@ -174,8 +193,8 @@ private struct WatchQuickReply: View {
         Button(action: action) {
             Text(text)
                 .font(.caption2)
-                .padding(.horizontal, TheaSpacing.sm)
-                .padding(.vertical, TheaSpacing.xxs)
+                .padding(.horizontal, WatchSpacing.sm)
+                .padding(.vertical, WatchSpacing.xxs)
                 .background(.ultraThinMaterial)
                 .clipShape(Capsule())
         }
@@ -192,10 +211,10 @@ private struct WatchActionRow: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: TheaSpacing.sm) {
+            HStack(spacing: WatchSpacing.sm) {
                 Image(systemName: icon)
                     .font(.body)
-                    .foregroundStyle(Color.theaPrimaryDefault)
+                    .foregroundStyle(Color.watchPrimary)
                     .frame(width: 28)
 
                 Text(label)
@@ -207,12 +226,12 @@ private struct WatchActionRow: View {
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
-            .padding(.vertical, TheaSpacing.sm)
-            .padding(.horizontal, TheaSpacing.md)
+            .padding(.vertical, WatchSpacing.sm)
+            .padding(.horizontal, WatchSpacing.md)
         }
         .buttonStyle(.plain)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.md))
+        .clipShape(RoundedRectangle(cornerRadius: WatchCornerRadius.md))
     }
 }
 

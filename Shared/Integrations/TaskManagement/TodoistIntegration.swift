@@ -3,24 +3,36 @@
 //  Thea
 //
 //  Todoist integration for task management
-//  Based on: REST API v2, Sync API v9, UI Extensions
+//  Based on: API v1 (unified REST + Sync), UI Extensions
+//  Updated Feb 2026 to support API v1 migration from REST v2/Sync v9
 //
 
 import Foundation
+import CryptoKit
 
 // MARK: - Todoist Client
 
-/// Comprehensive Todoist API client supporting REST, Sync, and UI Extensions
+/// Comprehensive Todoist API client supporting unified API v1, REST v2, Sync v9, and UI Extensions
 public actor TodoistClient {
     private let baseURL = "https://api.todoist.com"
-    private let syncEndpoint = "/sync/v9/sync"
-    private let restEndpoint = "/rest/v2"
+    private let apiV1Endpoint = "/api/v1"
+    private let syncEndpoint = "/sync/v9/sync"  // Legacy, still supported
+    private let restEndpoint = "/rest/v2"  // Legacy, still supported
 
     private var accessToken: String?
     private var syncToken: String = "*"
     private var tempIdMapping: [String: String] = [:]
+    private var clientId: String?
+    private var clientSecret: String?
 
     public init() {}
+
+    // MARK: - Configuration
+
+    public func configureOAuth(clientId: String, clientSecret: String) {
+        self.clientId = clientId
+        self.clientSecret = clientSecret
+    }
 
     // MARK: - Configuration
 
@@ -126,6 +138,301 @@ public actor TodoistClient {
         return try await restRequest(endpoint: "/comments", method: "POST", body: body)
     }
 
+    // MARK: - API v1 Endpoints (New unified API)
+
+    /// Quick add task with natural language parsing
+    public func quickAddTask(text: String) async throws -> TodoistTask {
+        try await apiV1Request(
+            endpoint: "/tasks/quick",
+            method: "POST",
+            body: ["text": text]
+        )
+    }
+
+    /// Get completed tasks by completion date
+    public func getCompletedTasks(
+        projectId: String? = nil,
+        since: Date? = nil,
+        until: Date? = nil,
+        limit: Int = 50
+    ) async throws -> [TodoistCompletedTask] {
+        var params: [String: String] = ["limit": String(limit)]
+        if let projectId { params["project_id"] = projectId }
+        if let since { params["since"] = ISO8601DateFormatter().string(from: since) }
+        if let until { params["until"] = ISO8601DateFormatter().string(from: until) }
+        return try await apiV1Request(endpoint: "/tasks/completed/by_completion_date", queryParams: params)
+    }
+
+    /// Get productivity stats
+    public func getProductivityStats() async throws -> TodoistStats {
+        try await apiV1Request(endpoint: "/tasks/completed/stats")
+    }
+
+    /// Get activity logs
+    public func getActivities(
+        objectType: String? = nil,
+        objectId: String? = nil,
+        eventType: String? = nil,
+        limit: Int = 50
+    ) async throws -> [TodoistActivity] {
+        var params: [String: String] = ["limit": String(limit)]
+        if let objectType { params["object_type"] = objectType }
+        if let objectId { params["object_id"] = objectId }
+        if let eventType { params["event_type"] = eventType }
+        return try await apiV1Request(endpoint: "/activities", queryParams: params)
+    }
+
+    /// Get archived projects
+    public func getArchivedProjects() async throws -> [TodoistProject] {
+        try await apiV1Request(endpoint: "/projects/archived")
+    }
+
+    /// Get archived sections
+    public func getArchivedSections(projectId: String? = nil) async throws -> [TodoistSection] {
+        var params: [String: String] = [:]
+        if let projectId { params["project_id"] = projectId }
+        return try await apiV1Request(endpoint: "/sections/archived", queryParams: params)
+    }
+
+    /// Get backups
+    public func getBackups() async throws -> [TodoistBackup] {
+        try await apiV1Request(endpoint: "/backups")
+    }
+
+    /// Get or create email forwarding address
+    public func getOrCreateEmail(projectId: String? = nil) async throws -> TodoistEmail {
+        var body: [String: Any] = [:]
+        if let projectId { body["project_id"] = projectId }
+        return try await apiV1Request(endpoint: "/emails", method: "PUT", body: body)
+    }
+
+    /// Disable email forwarding
+    public func disableEmail() async throws {
+        let _: EmptyResponse = try await apiV1Request(endpoint: "/emails", method: "DELETE")
+    }
+
+    // MARK: - Workspaces (API v1)
+
+    /// Get workspaces
+    public func getWorkspaces() async throws -> [TodoistWorkspace] {
+        let response = try await sync(resourceTypes: ["workspaces"])
+        return response.workspaces ?? []
+    }
+
+    /// Create workspace
+    public func createWorkspace(name: String, description: String? = nil) async throws -> TodoistSyncResponse {
+        var args: [String: Any] = ["name": name]
+        if let description { args["description"] = description }
+        let command = TodoistCommand(
+            type: "workspace_add",
+            uuid: UUID().uuidString,
+            tempId: UUID().uuidString,
+            args: args
+        )
+        return try await executeCommands([command])
+    }
+
+    /// Update workspace
+    public func updateWorkspace(id: String, name: String? = nil, description: String? = nil) async throws -> TodoistSyncResponse {
+        var args: [String: Any] = ["id": id]
+        if let name { args["name"] = name }
+        if let description { args["description"] = description }
+        let command = TodoistCommand(
+            type: "workspace_update",
+            uuid: UUID().uuidString,
+            args: args
+        )
+        return try await executeCommands([command])
+    }
+
+    /// Invite users to workspace
+    public func inviteToWorkspace(id: String, emails: [String], role: String = "MEMBER") async throws -> TodoistSyncResponse {
+        let command = TodoistCommand(
+            type: "workspace_invite",
+            uuid: UUID().uuidString,
+            args: [
+                "id": id,
+                "email_list": emails,
+                "role": role
+            ]
+        )
+        return try await executeCommands([command])
+    }
+
+    // MARK: - Workspace Filters (API v1)
+
+    /// Add workspace filter
+    public func addWorkspaceFilter(workspaceId: String, name: String, query: String, isFavorite: Bool = false) async throws -> TodoistSyncResponse {
+        let command = TodoistCommand(
+            type: "workspace_filter_add",
+            uuid: UUID().uuidString,
+            tempId: UUID().uuidString,
+            args: [
+                "workspace_id": workspaceId,
+                "name": name,
+                "query": query,
+                "is_favorite": isFavorite
+            ]
+        )
+        return try await executeCommands([command])
+    }
+
+    /// Update workspace filter
+    public func updateWorkspaceFilter(id: String, name: String? = nil, query: String? = nil, isFavorite: Bool? = nil) async throws -> TodoistSyncResponse {
+        var args: [String: Any] = ["id": id]
+        if let name { args["name"] = name }
+        if let query { args["query"] = query }
+        if let isFavorite { args["is_favorite"] = isFavorite }
+        let command = TodoistCommand(
+            type: "workspace_filter_update",
+            uuid: UUID().uuidString,
+            args: args
+        )
+        return try await executeCommands([command])
+    }
+
+    /// Delete workspace filter
+    public func deleteWorkspaceFilter(id: String) async throws -> TodoistSyncResponse {
+        let command = TodoistCommand(
+            type: "workspace_filter_delete",
+            uuid: UUID().uuidString,
+            args: ["id": id]
+        )
+        return try await executeCommands([command])
+    }
+
+    // MARK: - Notifications (API v1)
+
+    /// Mark notifications as read
+    public func markNotificationsRead(ids: [String]) async throws -> TodoistSyncResponse {
+        let command = TodoistCommand(
+            type: "live_notifications_mark_read",
+            uuid: UUID().uuidString,
+            args: ["ids": ids]
+        )
+        return try await executeCommands([command])
+    }
+
+    /// Mark notifications as unread
+    public func markNotificationsUnread(ids: [String]) async throws -> TodoistSyncResponse {
+        let command = TodoistCommand(
+            type: "live_notifications_mark_unread",
+            uuid: UUID().uuidString,
+            args: ["ids": ids]
+        )
+        return try await executeCommands([command])
+    }
+
+    /// Mark all notifications as read
+    public func markAllNotificationsRead() async throws -> TodoistSyncResponse {
+        let command = TodoistCommand(
+            type: "live_notifications_mark_read_all",
+            uuid: UUID().uuidString,
+            args: [:]
+        )
+        return try await executeCommands([command])
+    }
+
+    // MARK: - Karma & Goals
+
+    /// Update karma goals (e.g., vacation mode)
+    public func updateKarmaGoals(vacationMode: Bool? = nil, dailyGoal: Int? = nil, weeklyGoal: Int? = nil) async throws -> TodoistSyncResponse {
+        var args: [String: Any] = [:]
+        if let vacationMode { args["vacation_mode"] = vacationMode ? 1 : 0 }
+        if let dailyGoal { args["daily_goal"] = dailyGoal }
+        if let weeklyGoal { args["weekly_goal"] = weeklyGoal }
+        let command = TodoistCommand(
+            type: "update_goals",
+            uuid: UUID().uuidString,
+            args: args
+        )
+        return try await executeCommands([command])
+    }
+
+    // MARK: - Templates (API v1)
+
+    /// Export project as template file
+    public func exportTemplateFile(projectId: String) async throws -> Data {
+        try await apiV1RawRequest(endpoint: "/templates/file", queryParams: ["project_id": projectId])
+    }
+
+    /// Export project as template URL
+    public func exportTemplateURL(projectId: String) async throws -> TodoistTemplateURL {
+        try await apiV1Request(endpoint: "/templates/url", queryParams: ["project_id": projectId])
+    }
+
+    // MARK: - OAuth & Token Management (API v1)
+
+    /// Migrate personal token to OAuth token
+    public func migratePersonalToken(personalToken: String, scope: String) async throws -> TodoistOAuthToken {
+        guard let clientId, let clientSecret else {
+            throw TodoistError.oauthNotConfigured
+        }
+        return try await apiV1Request(
+            endpoint: "/access_tokens/migrate_personal_token",
+            method: "POST",
+            body: [
+                "client_id": clientId,
+                "client_secret": clientSecret,
+                "personal_token": personalToken,
+                "scope": scope
+            ]
+        )
+    }
+
+    /// Revoke access token (RFC 7009 compliant)
+    public func revokeToken(token: String) async throws {
+        guard let clientId, let clientSecret else {
+            throw TodoistError.oauthNotConfigured
+        }
+
+        guard let url = URL(string: baseURL + apiV1Endpoint + "/revoke") else {
+            throw TodoistError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        // HTTP Basic Auth with client credentials
+        let credentials = "\(clientId):\(clientSecret)"
+        if let credentialsData = credentials.data(using: .utf8) {
+            let base64Credentials = credentialsData.base64EncodedString()
+            request.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["token": token])
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw TodoistError.tokenRevocationFailed
+        }
+    }
+
+    /// Delete/revoke access token (legacy endpoint)
+    public func deleteAccessToken(token: String) async throws {
+        guard let clientId, let clientSecret else {
+            throw TodoistError.oauthNotConfigured
+        }
+        let _: EmptyResponse = try await apiV1Request(
+            endpoint: "/access_tokens",
+            method: "DELETE",
+            queryParams: [
+                "client_id": clientId,
+                "client_secret": clientSecret,
+                "access_token": token
+            ]
+        )
+    }
+
+    // MARK: - ID Translation (API v1)
+
+    /// Translate between old (numeric) and new (string) IDs
+    public func translateIds(objectType: String, ids: [String]) async throws -> TodoistIdMapping {
+        let idsString = ids.joined(separator: ",")
+        return try await apiV1Request(endpoint: "/ids_mapping/\(objectType)/\(idsString)")
+    }
+
     // MARK: - Sync API v9
 
     /// Perform incremental sync
@@ -160,6 +467,88 @@ public actor TodoistClient {
     }
 
     // MARK: - Private Helpers
+
+    private func apiV1Request<T: Decodable>(
+        endpoint: String,
+        method: String = "GET",
+        queryParams: [String: String] = [:],
+        body: [String: Any]? = nil
+    ) async throws -> T {
+        guard let token = accessToken else {
+            throw TodoistError.notAuthenticated
+        }
+
+        var urlString = baseURL + apiV1Endpoint + endpoint
+        if !queryParams.isEmpty {
+            let queryString = queryParams.map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? $0.value)" }.joined(separator: "&")
+            urlString += "?\(queryString)"
+        }
+
+        guard let url = URL(string: urlString) else {
+            throw TodoistError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(UUID().uuidString, forHTTPHeaderField: "X-Request-Id")
+
+        if let body {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw TodoistError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw TodoistError.apiError(statusCode: httpResponse.statusCode, message: String(data: data, encoding: .utf8))
+        }
+
+        if data.isEmpty || T.self == EmptyResponse.self {
+            return EmptyResponse() as! T
+        }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode(T.self, from: data)
+    }
+
+    private func apiV1RawRequest(
+        endpoint: String,
+        method: String = "GET",
+        queryParams: [String: String] = [:]
+    ) async throws -> Data {
+        guard let token = accessToken else {
+            throw TodoistError.notAuthenticated
+        }
+
+        var urlString = baseURL + apiV1Endpoint + endpoint
+        if !queryParams.isEmpty {
+            let queryString = queryParams.map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? $0.value)" }.joined(separator: "&")
+            urlString += "?\(queryString)"
+        }
+
+        guard let url = URL(string: urlString) else {
+            throw TodoistError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw TodoistError.invalidResponse
+        }
+
+        return data
+    }
 
     private func restRequest<T: Decodable>(
         endpoint: String,
@@ -397,24 +786,177 @@ public struct TodoistAttachment: Codable, Sendable {
     public let resourceType: String
 }
 
+// MARK: - API v1 Additional Models
+
+public struct TodoistCompletedTask: Codable, Identifiable, Sendable {
+    public let id: String
+    public let taskId: String
+    public let content: String
+    public let projectId: String
+    public let completedAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case taskId = "task_id"
+        case content
+        case projectId = "project_id"
+        case completedAt = "completed_at"
+    }
+}
+
+public struct TodoistStats: Codable, Sendable {
+    public let karmaLastUpdate: Double?
+    public let karmaUpdateReasons: [String]?
+    public let daysItems: [TodoistDayStats]?
+    public let completedCount: Int?
+    public let weekItems: [TodoistWeekStats]?
+    public let goalsDaily: Int?
+    public let goalsWeekly: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case karmaLastUpdate = "karma_last_update"
+        case karmaUpdateReasons = "karma_update_reasons"
+        case daysItems = "days_items"
+        case completedCount = "completed_count"
+        case weekItems = "week_items"
+        case goalsDaily = "goals_daily"
+        case goalsWeekly = "goals_weekly"
+    }
+}
+
+public struct TodoistDayStats: Codable, Sendable {
+    public let date: String
+    public let totalCompleted: Int
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case totalCompleted = "total_completed"
+    }
+}
+
+public struct TodoistWeekStats: Codable, Sendable {
+    public let date: String
+    public let totalCompleted: Int
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case totalCompleted = "total_completed"
+    }
+}
+
+public struct TodoistActivity: Codable, Identifiable, Sendable {
+    public let id: String
+    public let objectType: String
+    public let objectId: String
+    public let eventType: String
+    public let eventDate: String
+    public let initiatorId: String?
+    public let extraData: [String: String]?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case objectType = "object_type"
+        case objectId = "object_id"
+        case eventType = "event_type"
+        case eventDate = "event_date"
+        case initiatorId = "initiator_id"
+        case extraData = "extra_data"
+    }
+}
+
+public struct TodoistBackup: Codable, Sendable {
+    public let version: String
+    public let url: String
+}
+
+public struct TodoistEmail: Codable, Sendable {
+    public let email: String
+    public let projectId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case email
+        case projectId = "project_id"
+    }
+}
+
+public struct TodoistWorkspace: Codable, Identifiable, Sendable {
+    public let id: String
+    public let name: String
+    public let description: String?
+    public let createdAt: String?
+    public let ownerId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, description
+        case createdAt = "created_at"
+        case ownerId = "owner_id"
+    }
+}
+
+public struct TodoistTemplateURL: Codable, Sendable {
+    public let exportedUrl: String
+
+    enum CodingKeys: String, CodingKey {
+        case exportedUrl = "exported_url"
+    }
+}
+
+public struct TodoistOAuthToken: Codable, Sendable {
+    public let accessToken: String
+    public let tokenType: String
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case tokenType = "token_type"
+    }
+}
+
+public struct TodoistIdMapping: Codable, Sendable {
+    public let oldToNew: [String: String]
+    public let newToOld: [String: String]
+
+    enum CodingKeys: String, CodingKey {
+        case oldToNew = "old_to_new"
+        case newToOld = "new_to_old"
+    }
+}
+
 // MARK: - Sync API Models
 
 public struct TodoistSyncResponse: Codable, Sendable {
     public let syncToken: String
     public let fullSync: Bool
+    public let fullSyncDateUtc: String?
     public let projects: [TodoistProject]?
     public let items: [TodoistTask]?
     public let labels: [TodoistLabel]?
     public let sections: [TodoistSection]?
+    public let workspaces: [TodoistWorkspace]?
+    public let liveNotifications: [TodoistNotification]?
     public let tempIdMapping: [String: String]
     public let syncStatus: [String: String]?
 
     enum CodingKeys: String, CodingKey {
         case syncToken = "sync_token"
         case fullSync = "full_sync"
-        case projects, items, labels, sections
+        case fullSyncDateUtc = "full_sync_date_utc"
+        case projects, items, labels, sections, workspaces
+        case liveNotifications = "live_notifications"
         case tempIdMapping = "temp_id_mapping"
         case syncStatus = "sync_status"
+    }
+}
+
+public struct TodoistNotification: Codable, Identifiable, Sendable {
+    public let id: String
+    public let type: String
+    public let isRead: Bool?
+    public let createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, type
+        case isRead = "is_read"
+        case createdAt = "created_at"
     }
 }
 

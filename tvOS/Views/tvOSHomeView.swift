@@ -1,6 +1,28 @@
 // swiftlint:disable type_name
 import SwiftUI
 
+// MARK: - tvOS Design Tokens (local to avoid Shared dependency)
+
+private enum TVSpacing {
+    static let xs: CGFloat = 4
+    static let sm: CGFloat = 8
+    static let md: CGFloat = 12
+    static let lg: CGFloat = 16
+    static let xl: CGFloat = 24
+    static let xxl: CGFloat = 32
+    static let xxxl: CGFloat = 48
+}
+
+private enum TVCornerRadius {
+    static let md: CGFloat = 12
+    static let lg: CGFloat = 16
+    static let xl: CGFloat = 20
+}
+
+private extension Color {
+    static let tvPrimary = Color(red: 0.96, green: 0.65, blue: 0.14) // TheaBrandColors.gold
+}
+
 // MARK: - tvOS Home View (10-Foot, Focus-Based)
 
 /// tvOS home view designed for 10-foot viewing distance.
@@ -55,7 +77,7 @@ struct tvOSChatView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: TheaSpacing.xxxl) {
+            VStack(spacing: TVSpacing.xxxl) {
                 if messages.isEmpty {
                     heroWelcomeView
                 } else {
@@ -71,7 +93,7 @@ struct tvOSChatView: View {
                 quickSuggestions
             }
             .padding(.horizontal, 80)
-            .padding(.vertical, TheaSpacing.xxl)
+            .padding(.vertical, TVSpacing.xxl)
         }
         .navigationTitle("Thea")
     }
@@ -79,10 +101,10 @@ struct tvOSChatView: View {
     // MARK: - Hero Welcome
 
     private var heroWelcomeView: some View {
-        VStack(spacing: TheaSpacing.xl) {
+        VStack(spacing: TVSpacing.xl) {
             Image(systemName: "sparkles")
                 .font(.system(size: 80, weight: .medium))
-                .foregroundStyle(Color.theaPrimaryDefault)
+                .foregroundStyle(Color.tvPrimary)
                 .symbolEffect(.pulse, options: .repeating)
 
             Text("Welcome to Thea")
@@ -99,10 +121,10 @@ struct tvOSChatView: View {
     // MARK: - Hero Conversation Card
 
     private var heroConversationCard: some View {
-        VStack(alignment: .leading, spacing: TheaSpacing.lg) {
+        VStack(alignment: .leading, spacing: TVSpacing.lg) {
             // Last exchange
             if let lastUserMsg = messages.last(where: { $0.isUser }) {
-                HStack(alignment: .top, spacing: TheaSpacing.lg) {
+                HStack(alignment: .top, spacing: TVSpacing.lg) {
                     Image(systemName: "person.circle.fill")
                         .font(.system(size: 32))
                         .foregroundStyle(.secondary)
@@ -115,10 +137,10 @@ struct tvOSChatView: View {
             }
 
             if let lastResponse = messages.last(where: { !$0.isUser }) {
-                HStack(alignment: .top, spacing: TheaSpacing.lg) {
+                HStack(alignment: .top, spacing: TVSpacing.lg) {
                     Image(systemName: "sparkles")
                         .font(.system(size: 32))
-                        .foregroundStyle(Color.theaPrimaryDefault)
+                        .foregroundStyle(Color.tvPrimary)
 
                     Text(lastResponse.content)
                         .font(.title3)
@@ -133,10 +155,10 @@ struct tvOSChatView: View {
                     .foregroundStyle(.tertiary)
             }
         }
-        .padding(TheaSpacing.xxl)
+        .padding(TVSpacing.xxl)
         .frame(maxWidth: 1000, alignment: .leading)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
+        .clipShape(RoundedRectangle(cornerRadius: TVCornerRadius.xl))
         .focusable()
         #if os(tvOS)
         .hoverEffect(.highlight)
@@ -149,13 +171,13 @@ struct tvOSChatView: View {
         Button {
             toggleListening()
         } label: {
-            HStack(spacing: TheaSpacing.lg) {
+            HStack(spacing: TVSpacing.lg) {
                 Image(systemName: isListening ? "waveform" : "mic.fill")
                     .font(.system(size: 36))
-                    .foregroundStyle(isListening ? .red : Color.theaPrimaryDefault)
+                    .foregroundStyle(isListening ? .red : Color.tvPrimary)
                     .symbolEffect(.variableColor, isActive: isListening)
 
-                VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
+                VStack(alignment: .leading, spacing: TVSpacing.xs) {
                     Text(isListening ? "Listening..." : "Press to Speak")
                         .font(.title2.bold())
 
@@ -166,10 +188,10 @@ struct tvOSChatView: View {
 
                 Spacer()
             }
-            .padding(TheaSpacing.xl)
+            .padding(TVSpacing.xl)
             .frame(maxWidth: 800)
-            .background(isListening ? Color.red.opacity(0.15) : .ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
+            .background(isListening ? AnyShapeStyle(Color.red.opacity(0.15)) : AnyShapeStyle(.ultraThinMaterial))
+            .clipShape(RoundedRectangle(cornerRadius: TVCornerRadius.xl))
         }
         .buttonStyle(.plain)
         .focusable()
@@ -181,13 +203,13 @@ struct tvOSChatView: View {
     // MARK: - Conversation History
 
     private var conversationHistory: some View {
-        VStack(alignment: .leading, spacing: TheaSpacing.md) {
+        VStack(alignment: .leading, spacing: TVSpacing.md) {
             Text("Conversation")
                 .font(.title3.bold())
                 .foregroundStyle(.secondary)
-                .padding(.leading, TheaSpacing.sm)
+                .padding(.leading, TVSpacing.sm)
 
-            LazyVStack(spacing: TheaSpacing.md) {
+            LazyVStack(spacing: TVSpacing.md) {
                 ForEach(messages) { message in
                     TVMessageCard(message: message)
                 }
@@ -198,14 +220,14 @@ struct tvOSChatView: View {
     // MARK: - Quick Suggestions
 
     private var quickSuggestions: some View {
-        VStack(alignment: .leading, spacing: TheaSpacing.lg) {
+        VStack(alignment: .leading, spacing: TVSpacing.lg) {
             Text(messages.isEmpty ? "Try asking" : "Suggestions")
                 .font(.title3.bold())
                 .foregroundStyle(.secondary)
-                .padding(.leading, TheaSpacing.sm)
+                .padding(.leading, TVSpacing.sm)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: TheaSpacing.lg) {
+                HStack(spacing: TVSpacing.lg) {
                     TVSuggestionCard(icon: "text.bubble", text: "Help me write something") {
                         sendMessage("Help me write an email")
                     }
@@ -219,7 +241,7 @@ struct tvOSChatView: View {
                         sendMessage("Help me plan my day")
                     }
                 }
-                .padding(.horizontal, TheaSpacing.sm)
+                .padding(.horizontal, TVSpacing.sm)
             }
         }
     }
@@ -254,13 +276,13 @@ struct TVMessageCard: View {
     let message: TVMessage
 
     var body: some View {
-        HStack(alignment: .top, spacing: TheaSpacing.lg) {
+        HStack(alignment: .top, spacing: TVSpacing.lg) {
             Image(systemName: message.isUser ? "person.circle.fill" : "sparkles")
                 .font(.system(size: 28))
-                .foregroundStyle(message.isUser ? .secondary : Color.theaPrimaryDefault)
+                .foregroundStyle(message.isUser ? .secondary : Color.tvPrimary)
                 .frame(width: 36)
 
-            VStack(alignment: .leading, spacing: TheaSpacing.xs) {
+            VStack(alignment: .leading, spacing: TVSpacing.xs) {
                 Text(message.isUser ? "You" : "Thea")
                     .font(.callout.bold())
                     .foregroundStyle(.secondary)
@@ -271,10 +293,10 @@ struct TVMessageCard: View {
 
             Spacer()
         }
-        .padding(TheaSpacing.xl)
+        .padding(TVSpacing.xl)
         .frame(maxWidth: 1000, alignment: .leading)
-        .background(message.isUser ? Color.clear : .ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
+        .background(message.isUser ? AnyShapeStyle(Color.clear) : AnyShapeStyle(.ultraThinMaterial))
+        .clipShape(RoundedRectangle(cornerRadius: TVCornerRadius.lg))
         .focusable()
     }
 }
@@ -288,10 +310,10 @@ struct TVSuggestionCard: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: TheaSpacing.md) {
+            VStack(spacing: TVSpacing.md) {
                 Image(systemName: icon)
                     .font(.system(size: 36))
-                    .foregroundStyle(Color.theaPrimaryDefault)
+                    .foregroundStyle(Color.tvPrimary)
 
                 Text(text)
                     .font(.callout)
@@ -300,7 +322,7 @@ struct TVSuggestionCard: View {
             }
             .frame(width: 200, height: 140)
             .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
+            .clipShape(RoundedRectangle(cornerRadius: TVCornerRadius.lg))
         }
         .buttonStyle(.plain)
         .focusable()
@@ -406,15 +428,15 @@ struct tvOSSettingsRow: View {
     let subtitle: String
 
     var body: some View {
-        HStack(spacing: TheaSpacing.xl) {
+        HStack(spacing: TVSpacing.xl) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundStyle(.white)
                 .frame(width: 50, height: 50)
                 .background(iconColor)
-                .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.md))
+                .clipShape(RoundedRectangle(cornerRadius: TVCornerRadius.md))
 
-            VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
+            VStack(alignment: .leading, spacing: TVSpacing.xs) {
                 Text(title)
                     .font(.title3)
 
@@ -425,7 +447,7 @@ struct tvOSSettingsRow: View {
 
             Spacer()
         }
-        .padding(.vertical, TheaSpacing.sm)
+        .padding(.vertical, TVSpacing.sm)
     }
 }
 
@@ -632,9 +654,9 @@ struct tvOSAboutView: View {
             VStack(spacing: 40) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 100))
-                    .foregroundStyle(Color.theaPrimaryDefault)
+                    .foregroundStyle(Color.tvPrimary)
 
-                VStack(spacing: TheaSpacing.sm) {
+                VStack(spacing: TVSpacing.sm) {
                     Text("THEA")
                         .font(.system(size: 60, weight: .bold, design: .rounded))
 
@@ -648,9 +670,9 @@ struct tvOSAboutView: View {
                     tvOSInfoPill(label: "Build", value: "2026.02")
                     tvOSInfoPill(label: "Platform", value: "tvOS")
                 }
-                .padding(TheaSpacing.xl)
+                .padding(TVSpacing.xl)
                 .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
+                .clipShape(RoundedRectangle(cornerRadius: TVCornerRadius.lg))
 
                 HStack(spacing: 40) {
                     tvOSFeatureCard(icon: "cpu", title: "Multi-Provider AI")
@@ -673,7 +695,7 @@ private struct tvOSInfoPill: View {
     let value: String
 
     var body: some View {
-        VStack(spacing: TheaSpacing.xs) {
+        VStack(spacing: TVSpacing.xs) {
             Text(label)
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -689,19 +711,19 @@ struct tvOSFeatureCard: View {
     let title: String
 
     var body: some View {
-        VStack(spacing: TheaSpacing.md) {
+        VStack(spacing: TVSpacing.md) {
             Image(systemName: icon)
                 .font(.system(size: 40))
-                .foregroundStyle(Color.theaPrimaryDefault)
+                .foregroundStyle(Color.tvPrimary)
 
             Text(title)
                 .font(.callout)
                 .multilineTextAlignment(.center)
         }
         .frame(width: 160)
-        .padding(TheaSpacing.xl)
+        .padding(TVSpacing.xl)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
+        .clipShape(RoundedRectangle(cornerRadius: TVCornerRadius.lg))
         .focusable()
     }
 }

@@ -566,7 +566,7 @@ public struct AsanaCustomField: Codable, Sendable {
 
 // MARK: - Batch API Models
 
-public struct AsanaBatchAction: Sendable {
+public struct AsanaBatchAction: @unchecked Sendable {
     public let relativePath: String
     public let method: String
     public let data: [String: Any]?
@@ -772,7 +772,7 @@ public struct AsanaMCPQueryResult: Codable, Sendable {
 
 // MARK: - Helper Types
 
-public struct AsanaAnyCodable: Codable, Sendable {
+public struct AsanaAnyCodable: Codable, @unchecked Sendable {
     public let value: Any
 
     public init(_ value: Any) {
