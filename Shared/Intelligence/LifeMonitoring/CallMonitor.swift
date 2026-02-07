@@ -28,35 +28,35 @@ struct SendableAudioBuffer: @unchecked Sendable {
 
 /// Source of the call
 public enum CallSource: String, Sendable, CaseIterable {
-    case phone = "phone"           // Regular phone calls
-    case facetime = "facetime"     // FaceTime audio/video
-    case zoom = "zoom"             // Zoom
-    case teams = "teams"           // Microsoft Teams
-    case slack = "slack"           // Slack huddles/calls
-    case discord = "discord"       // Discord
-    case whatsapp = "whatsapp"     // WhatsApp calls
-    case telegram = "telegram"     // Telegram calls
-    case signal = "signal"         // Signal calls
-    case skype = "skype"           // Skype
-    case meet = "meet"             // Google Meet
-    case webex = "webex"           // Webex
-    case other = "other"           // Unknown source
+    case phone              // Regular phone calls
+    case facetime           // FaceTime audio/video
+    case zoom               // Zoom
+    case teams              // Microsoft Teams
+    case slack              // Slack huddles/calls
+    case discord            // Discord
+    case whatsapp           // WhatsApp calls
+    case telegram           // Telegram calls
+    case signal             // Signal calls
+    case skype              // Skype
+    case meet               // Google Meet
+    case webex              // Webex
+    case other              // Unknown source
 }
 
 /// Type of call
 public enum CallType: String, Sendable {
-    case incoming = "incoming"
-    case outgoing = "outgoing"
-    case conference = "conference"
+    case incoming
+    case outgoing
+    case conference
 }
 
 /// Call status
 public enum CallStatus: String, Sendable {
-    case ringing = "ringing"
-    case active = "active"
+    case ringing
+    case active
     case onHold = "on_hold"
-    case ended = "ended"
-    case missed = "missed"
+    case ended
+    case missed
 }
 
 // MARK: - Call Record
@@ -262,9 +262,9 @@ public struct CallAnalysis: Sendable {
 
         public enum SentimentLevel: String, Sendable {
             case veryNegative = "very_negative"
-            case negative = "negative"
-            case neutral = "neutral"
-            case positive = "positive"
+            case negative
+            case neutral
+            case positive
             case veryPositive = "very_positive"
         }
 

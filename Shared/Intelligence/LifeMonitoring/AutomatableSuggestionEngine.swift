@@ -303,15 +303,15 @@ public struct SuggestionContext: Sendable {
     public let source: String
 
     public enum Trigger: String, Sendable {
-        case pattern = "pattern"           // Detected behavioral pattern
-        case schedule = "schedule"         // Time-based trigger
-        case event = "event"               // External event
-        case location = "location"         // Location-based
-        case condition = "condition"       // Condition met
-        case prediction = "prediction"     // Predicted need
-        case request = "request"           // User implied request
-        case deadline = "deadline"         // Approaching deadline
-        case anomaly = "anomaly"           // Something unusual
+        case pattern           // Detected behavioral pattern
+        case schedule          // Time-based trigger
+        case event             // External event
+        case location          // Location-based
+        case condition         // Condition met
+        case prediction        // Predicted need
+        case request           // User implied request
+        case deadline          // Approaching deadline
+        case anomaly           // Something unusual
     }
 
     public init(
