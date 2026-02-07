@@ -349,6 +349,9 @@ final class TraktService: ObservableObject {
 
     // MARK: - Scrobbling
 
+    /// Empty response struct for fire-and-forget API calls
+    private struct EmptyResponse: Decodable {}
+
     func startWatching(show: TraktShow, episode: TraktEpisode, progress: Double = 0) async throws {
         let body: [String: Any] = [
             "show": ["ids": ["trakt": show.ids.trakt]],
@@ -356,7 +359,7 @@ final class TraktService: ObservableObject {
             "progress": progress
         ]
 
-        let _: [String: Any] = try await post(endpoint: "/scrobble/start", body: body, authenticated: true)
+        let _: EmptyResponse = try await post(endpoint: "/scrobble/start", body: body, authenticated: true)
     }
 
     func stopWatching(show: TraktShow, episode: TraktEpisode, progress: Double) async throws {
@@ -366,7 +369,7 @@ final class TraktService: ObservableObject {
             "progress": progress
         ]
 
-        let _: [String: Any] = try await post(endpoint: "/scrobble/stop", body: body, authenticated: true)
+        let _: EmptyResponse = try await post(endpoint: "/scrobble/stop", body: body, authenticated: true)
     }
 
     // MARK: - Network

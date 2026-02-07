@@ -266,16 +266,7 @@ struct iOSChatView: View {
     var body: some View {
         VStack(spacing: 0) {
             messageList
-            ChatInputView(
-                text: $messageText,
-                isStreaming: chatManager.isStreaming
-            ) {
-                if chatManager.isStreaming {
-                    chatManager.cancelStreaming()
-                } else {
-                    sendMessage()
-                }
-            }
+            iOSChatInput
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -349,6 +340,46 @@ struct iOSChatView: View {
                 }
             }
         }
+    }
+
+    // MARK: - iOS Chat Input
+
+    private var iOSChatInput: some View {
+        HStack(spacing: TheaSpacing.md) {
+            TextField("Message Thea...", text: $messageText, axis: .vertical)
+                .textFieldStyle(.plain)
+                .lineLimit(1 ... 6)
+                .focused($isInputFocused)
+                .disabled(chatManager.isStreaming)
+                .onSubmit {
+                    if !messageText.isEmpty {
+                        sendMessage()
+                    }
+                }
+                .padding(.horizontal, TheaSpacing.lg)
+                .padding(.vertical, TheaSpacing.md)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
+
+            Button {
+                if chatManager.isStreaming {
+                    chatManager.cancelStreaming()
+                } else {
+                    sendMessage()
+                }
+            } label: {
+                Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(
+                        !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || chatManager.isStreaming
+                            ? Color.theaPrimaryDefault : .secondary
+                    )
+            }
+            .disabled(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !chatManager.isStreaming)
+            .accessibilityLabel(chatManager.isStreaming ? "Stop generating" : "Send message")
+        }
+        .padding(.horizontal, TheaSpacing.lg)
+        .padding(.vertical, TheaSpacing.md)
     }
 
     private func sendMessage() {

@@ -114,7 +114,7 @@ extension View {
         cornerRadius: CGFloat = TheaCornerRadius.card,
         padding: CGFloat = TheaSpacing.lg
     ) -> some View {
-        modifier(GlassCardModifier(cornerRadius: cornerRadius, padding: padding))
+        modifier(SimpleGlassCardModifier(cornerRadius: cornerRadius, padding: padding))
     }
 
     /// Applies soft scroll-edge effects replacing hard dividers

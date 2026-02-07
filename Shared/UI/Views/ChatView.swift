@@ -137,16 +137,53 @@ struct ChatView: View {
     // MARK: - Chat Input
 
     private var chatInput: some View {
-        ChatInputView(
-            text: $inputText,
-            isStreaming: chatManager.isStreaming
-        ) {
-            if chatManager.isStreaming {
-                chatManager.cancelStreaming()
-            } else {
-                sendMessage()
+        #if os(macOS)
+            ChatInputView(
+                text: $inputText,
+                isStreaming: chatManager.isStreaming
+            ) {
+                if chatManager.isStreaming {
+                    chatManager.cancelStreaming()
+                } else {
+                    sendMessage()
+                }
             }
-        }
+        #else
+            HStack(spacing: TheaSpacing.md) {
+                TextField("Message Thea...", text: $inputText, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .lineLimit(1 ... 6)
+                    .disabled(chatManager.isStreaming)
+                    .onSubmit {
+                        if !inputText.isEmpty {
+                            sendMessage()
+                        }
+                    }
+                    .padding(.horizontal, TheaSpacing.lg)
+                    .padding(.vertical, TheaSpacing.md)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
+
+                Button {
+                    if chatManager.isStreaming {
+                        chatManager.cancelStreaming()
+                    } else {
+                        sendMessage()
+                    }
+                } label: {
+                    Image(systemName: chatManager.isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
+                        .font(.system(size: 32))
+                        .foregroundStyle(
+                            !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || chatManager.isStreaming
+                                ? Color.theaPrimaryDefault : .secondary
+                        )
+                }
+                .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !chatManager.isStreaming)
+                .accessibilityLabel(chatManager.isStreaming ? "Stop generating" : "Send message")
+            }
+            .padding(.horizontal, TheaSpacing.lg)
+            .padding(.vertical, TheaSpacing.md)
+        #endif
     }
 
     // MARK: - Actions

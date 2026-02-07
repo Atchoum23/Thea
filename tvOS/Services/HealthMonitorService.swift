@@ -38,7 +38,7 @@ struct ServiceHealthCheck: Identifiable, Sendable {
     let latency: TimeInterval?
     let lastChecked: Date
     var message: String?
-    var details: [String: String]
+    var details: [String: String] = [:]
 }
 
 /// Overall system health report
