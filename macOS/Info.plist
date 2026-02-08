@@ -25,6 +25,14 @@
 	<string>15</string>
 
 	<!-- ================================ -->
+	<!-- App Icon                         -->
+	<!-- ================================ -->
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+
+	<!-- ================================ -->
 	<!-- macOS Specific                   -->
 	<!-- ================================ -->
 	<key>LSMinimumSystemVersion</key>
