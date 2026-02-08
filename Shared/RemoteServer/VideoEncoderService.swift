@@ -9,6 +9,8 @@ import Combine
 import CoreMedia
 import Foundation
 #if os(macOS)
+    import AppKit
+    import CoreImage
     import VideoToolbox
 #endif
 
