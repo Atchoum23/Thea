@@ -6,6 +6,9 @@
 //  Replaces the excluded MetaAI/MemorySystem with a clean implementation
 //  that integrates with MemoryManager and LongTermMemoryManager.
 //
+//  Types are prefixed with "Retrieval" to avoid conflicts with
+//  Intelligence/Memory/LongTermMemorySystem.swift types.
+//
 //  CREATED: February 8, 2026
 //
 
@@ -25,7 +28,7 @@ public actor MemorySystem {
     // MARK: - Short-Term Memory Store
 
     /// In-memory short-term buffer (cleared on restart)
-    private var shortTermMemories: [MemoryEntry] = []
+    private var shortTermMemories: [RetrievalMemoryEntry] = []
     private let maxShortTermMemories = 200
 
     private init() {}
@@ -36,10 +39,10 @@ public actor MemorySystem {
     @discardableResult
     public func addShortTermMemory(
         content: String,
-        type: MemoryEntryType = .contextual,
+        type: RetrievalMemoryEntryType = .contextual,
         metadata: [String: String] = [:]
     ) throws -> UUID {
-        let entry = MemoryEntry(
+        let entry = RetrievalMemoryEntry(
             content: content,
             tier: .shortTerm,
             type: type,
@@ -65,8 +68,8 @@ public actor MemorySystem {
         for query: String,
         limit: Int = 10,
         threshold: Double = 0.3
-    ) async throws -> [MemoryEntry] {
-        var results: [MemoryEntry] = []
+    ) async throws -> [RetrievalMemoryEntry] {
+        var results: [RetrievalMemoryEntry] = []
 
         // 1. Search short-term memories by keyword overlap
         let queryWords = Set(query.lowercased().components(separatedBy: .alphanumerics.inverted).filter { $0.count > 2 })
@@ -81,7 +84,7 @@ public actor MemorySystem {
         // 2. Search MemoryManager (semantic search or keyword)
         let managerResults = await MemoryManager.shared.semanticSearch(query: query, limit: limit)
         for record in managerResults {
-            results.append(MemoryEntry(
+            results.append(RetrievalMemoryEntry(
                 content: "\(record.key): \(record.value)",
                 tier: record.type == .semantic ? .longTerm : .shortTerm,
                 type: .contextual,
@@ -98,7 +101,7 @@ public actor MemorySystem {
             limit: limit
         )
         for memory in longTermResults {
-            results.append(MemoryEntry(
+            results.append(RetrievalMemoryEntry(
                 content: memory.content,
                 tier: .longTerm,
                 type: .factual,
@@ -126,7 +129,7 @@ public actor MemorySystem {
     public func retrieveEpisodicMemories(
         for query: String,
         limit: Int = 5
-    ) async throws -> [EpisodicMemoryEntry] {
+    ) async throws -> [RetrievalEpisodicEntry] {
         let records = await MemoryManager.shared.retrieveEpisodicMemories(
             from: Calendar.current.date(byAdding: .day, value: -90, to: Date()),
             limit: limit * 2
@@ -143,7 +146,7 @@ public actor MemorySystem {
         }
 
         return filtered.prefix(limit).map { record in
-            EpisodicMemoryEntry(
+            RetrievalEpisodicEntry(
                 event: record.key,
                 context: record.value,
                 importance: Float(record.confidence),
@@ -158,11 +161,11 @@ public actor MemorySystem {
     public func retrieveSemanticMemories(
         for query: String,
         limit: Int = 5
-    ) async throws -> [SemanticMemoryEntry] {
+    ) async throws -> [RetrievalSemanticEntry] {
         let records = await MemoryManager.shared.semanticSearch(query: query, limit: limit)
 
         return records.map { record in
-            SemanticMemoryEntry(
+            RetrievalSemanticEntry(
                 concept: record.key,
                 definition: record.value,
                 importance: Float(record.confidence),
@@ -176,16 +179,16 @@ public actor MemorySystem {
     public func retrieveProceduralMemories(
         for query: String,
         limit: Int = 3
-    ) async throws -> [ProceduralMemoryEntry] {
+    ) async throws -> [RetrievalProceduralEntry] {
         // Search MemoryManager procedural records
         let keywords = query.lowercased().components(separatedBy: .alphanumerics.inverted).filter { $0.count > 2 }
 
-        var results: [ProceduralMemoryEntry] = []
+        var results: [RetrievalProceduralEntry] = []
 
         for keyword in keywords {
             if let procedure = await MemoryManager.shared.retrieveBestProcedure(for: keyword) {
                 if let metadata = OmniProceduralMetadata.decode(procedure.metadata) {
-                    results.append(ProceduralMemoryEntry(
+                    results.append(RetrievalProceduralEntry(
                         skill: procedure.key,
                         steps: [procedure.value],
                         successRate: Float(metadata.successRate),
@@ -216,14 +219,14 @@ public actor MemorySystem {
     }
 }
 
-// MARK: - Memory Entry (canonical type for cross-tier results)
+// MARK: - Retrieval Memory Entry (canonical type for cross-tier results)
 
 /// A memory entry returned from retrieval queries
-public struct MemoryEntry: Identifiable, Sendable {
+public struct RetrievalMemoryEntry: Identifiable, Sendable {
     public let id: UUID
     public let content: String
-    public let tier: MemoryTier
-    public let type: MemoryEntryType
+    public let tier: RetrievalMemoryTier
+    public let type: RetrievalMemoryEntryType
     public let importance: Double
     public let metadata: [String: String]
     public let createdAt: Date
@@ -232,8 +235,8 @@ public struct MemoryEntry: Identifiable, Sendable {
     public init(
         id: UUID = UUID(),
         content: String,
-        tier: MemoryTier = .shortTerm,
-        type: MemoryEntryType = .contextual,
+        tier: RetrievalMemoryTier = .shortTerm,
+        type: RetrievalMemoryEntryType = .contextual,
         importance: Double = 0.5,
         metadata: [String: String] = [:],
         createdAt: Date = Date(),
@@ -250,10 +253,10 @@ public struct MemoryEntry: Identifiable, Sendable {
     }
 }
 
-// MARK: - Memory Tier
+// MARK: - Retrieval Memory Tier
 
-/// Memory tier classification
-public enum MemoryTier: String, Codable, Sendable {
+/// Memory tier classification for retrieval results
+public enum RetrievalMemoryTier: String, Codable, Sendable {
     case shortTerm   // Working memory, volatile
     case longTerm    // Persistent, decays over time
     case episodic    // Event-based memories
@@ -261,10 +264,10 @@ public enum MemoryTier: String, Codable, Sendable {
     case procedural  // How-to knowledge
 }
 
-// MARK: - Memory Entry Type
+// MARK: - Retrieval Memory Entry Type
 
 /// Type of memory entry for classification
-public enum MemoryEntryType: String, Codable, Sendable {
+public enum RetrievalMemoryEntryType: String, Codable, Sendable {
     case contextual    // Context from conversation
     case factual       // Learned fact
     case preference    // User preference
@@ -272,10 +275,10 @@ public enum MemoryEntryType: String, Codable, Sendable {
     case temporal      // Time-based memory
 }
 
-// MARK: - Episodic Memory Entry
+// MARK: - Retrieval Episodic Entry
 
-/// Episodic memory (specific events/experiences)
-public struct EpisodicMemoryEntry: Sendable {
+/// Episodic memory result (specific events/experiences)
+public struct RetrievalEpisodicEntry: Sendable {
     public let event: String
     public let context: String
     public let importance: Float
@@ -300,10 +303,10 @@ public struct EpisodicMemoryEntry: Sendable {
     }
 }
 
-// MARK: - Semantic Memory Entry
+// MARK: - Retrieval Semantic Entry
 
-/// Semantic memory (concepts and definitions)
-public struct SemanticMemoryEntry: Sendable {
+/// Semantic memory result (concepts and definitions)
+public struct RetrievalSemanticEntry: Sendable {
     public let concept: String
     public let definition: String
     public let importance: Float
@@ -325,10 +328,10 @@ public struct SemanticMemoryEntry: Sendable {
     }
 }
 
-// MARK: - Procedural Memory Entry
+// MARK: - Retrieval Procedural Entry
 
-/// Procedural memory (skills and how-to knowledge)
-public struct ProceduralMemoryEntry: Sendable {
+/// Procedural memory result (skills and how-to knowledge)
+public struct RetrievalProceduralEntry: Sendable {
     public let skill: String
     public let steps: [String]
     public let successRate: Float

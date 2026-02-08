@@ -119,12 +119,9 @@ public struct QuerySuggestionOverlay: View {
     }
 
     private func fetchContextSuggestions(for conversationId: UUID) async -> [QuerySuggestion] {
-        // Get follow-up suggestions from ConversationContextManager
-        let followUps = await ConversationContextManager.shared.suggestFollowUpQuestions(for: conversationId)
-
-        return followUps.map { text in
-            QuerySuggestion(text: text, source: .contextBased, confidence: 0.7)
-        }
+        // Placeholder: wire to conversation context analysis when available
+        _ = conversationId
+        return []
     }
 
     private func fetchMemorySuggestions() async -> [QuerySuggestion] {
