@@ -550,8 +550,16 @@ import Network
         public var allowedPaths: [String]
         public var blockedPaths: [String]
 
-        // SECURITY FIX (FINDING-015): Network discovery is now opt-in (disabled by default)
-        // This prevents automatic network presence exposure and requires explicit user consent
+        // Extended feature toggles
+        public var enableClipboardSync: Bool
+        public var enableUnattendedAccess: Bool
+        public var enableSessionRecording: Bool
+        public var autoRecordSessions: Bool
+        public var enableAudioStreaming: Bool
+        public var enableChatAnnotations: Bool
+        public var enableTwoFactor: Bool
+        public var auditLogRetentionDays: Int
+
         public init(
             serverName: String = "Thea Remote",
             port: UInt16 = 9847,
@@ -559,7 +567,7 @@ import Network
             authMethod: AuthenticationMethod = .pairingCode,
             authTimeout: TimeInterval = 30,
             requireConfirmation: Bool = true,
-            enableDiscovery: Bool = false, // SECURITY: Disabled by default - requires explicit opt-in
+            enableDiscovery: Bool = false,
             enableScreenSharing: Bool = true,
             enableInputControl: Bool = true,
             enableFileAccess: Bool = true,
@@ -569,9 +577,17 @@ import Network
             whitelist: [String] = [],
             encryptionRequired: Bool = true,
             sessionTimeout: TimeInterval = 3600,
-            maxFileTransferSize: Int64 = 1_073_741_824, // 1GB
+            maxFileTransferSize: Int64 = 1_073_741_824,
             allowedPaths: [String] = [],
-            blockedPaths: [String] = ["/etc", "/var", "/private", "/System"]
+            blockedPaths: [String] = ["/etc", "/var", "/private", "/System"],
+            enableClipboardSync: Bool = true,
+            enableUnattendedAccess: Bool = false,
+            enableSessionRecording: Bool = false,
+            autoRecordSessions: Bool = false,
+            enableAudioStreaming: Bool = false,
+            enableChatAnnotations: Bool = true,
+            enableTwoFactor: Bool = false,
+            auditLogRetentionDays: Int = 90
         ) {
             self.serverName = serverName
             self.port = port
@@ -592,6 +608,14 @@ import Network
             self.maxFileTransferSize = maxFileTransferSize
             self.allowedPaths = allowedPaths
             self.blockedPaths = blockedPaths
+            self.enableClipboardSync = enableClipboardSync
+            self.enableUnattendedAccess = enableUnattendedAccess
+            self.enableSessionRecording = enableSessionRecording
+            self.autoRecordSessions = autoRecordSessions
+            self.enableAudioStreaming = enableAudioStreaming
+            self.enableChatAnnotations = enableChatAnnotations
+            self.enableTwoFactor = enableTwoFactor
+            self.auditLogRetentionDays = auditLogRetentionDays
         }
 
         private static let storageKey = "RemoteServerConfiguration"
