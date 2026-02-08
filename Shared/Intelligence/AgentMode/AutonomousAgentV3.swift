@@ -167,7 +167,7 @@ public struct AutonomousExecutionState: Sendable {
     public var completedSteps: [UUID]
     public var failedSteps: [UUID: ExecutionError]
     public var fixAttempts: [UUID: Int]
-    public var auditLog: [AuditEntry]
+    public var auditLog: [AgentAuditEntry]
 
     public enum ExecutionStatus: String, Sendable {
         case planning
@@ -198,7 +198,7 @@ public struct AutonomousExecutionState: Sendable {
         }
     }
 
-    public struct AuditEntry: Identifiable, Sendable {
+    public struct AgentAuditEntry: Identifiable, Sendable {
         public let id: UUID
         public let timestamp: Date
         public let action: String
@@ -402,7 +402,7 @@ public final class AutonomousAgentV3 {
         logger.info("Starting execution of plan: \(plan.goal)")
 
         // Log audit entry
-        state.auditLog.append(AutonomousExecutionState.AuditEntry(
+        state.auditLog.append(AutonomousExecutionState.AgentAuditEntry(
             id: UUID(),
             timestamp: Date(),
             action: "plan_started",
@@ -467,7 +467,7 @@ public final class AutonomousAgentV3 {
                     state.completedSteps.append(step.id)
 
                     // Log success
-                    state.auditLog.append(AutonomousExecutionState.AuditEntry(
+                    state.auditLog.append(AutonomousExecutionState.AgentAuditEntry(
                         id: UUID(),
                         timestamp: Date(),
                         action: "step_completed",
@@ -730,7 +730,7 @@ public final class AutonomousAgentV3 {
         logger.info("AI suggested fix: \(suggestion.prefix(100))...")
 
         // Log fix attempt
-        state.auditLog.append(AutonomousExecutionState.AuditEntry(
+        state.auditLog.append(AutonomousExecutionState.AgentAuditEntry(
             id: UUID(),
             timestamp: Date(),
             action: "fix_attempted",
@@ -799,7 +799,7 @@ public struct AutonomousPlanResult: Sendable {
     public let completedSteps: Int
     public let failedSteps: Int
     public let totalDuration: TimeInterval
-    public let auditLog: [AutonomousExecutionState.AuditEntry]
+    public let auditLog: [AutonomousExecutionState.AgentAuditEntry]
 }
 
 // MARK: - Errors
