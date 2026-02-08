@@ -98,28 +98,43 @@ done
 - **ModelRouter**: Routes to optimal model based on task
 - **QueryDecomposer**: Breaks complex queries into sub-tasks
 
-## Architecture Decision: MetaAI vs Intelligence (2026-02-07)
+## Excluded From Builds — DO NOT IMPLEMENT
 
-**IMPORTANT: The `Shared/AI/MetaAI/` folder is EXCLUDED from all builds.**
+**CRITICAL RULE: Unless the user EXPLICITLY instructs you to work in an excluded folder/file, you MUST NOT create, modify, or implement code in any path listed below. These files are excluded from ALL build targets in `project.yml` and are dead code. Working in them is wasted effort.**
 
-The Intelligence folder (`Shared/Intelligence/`) is the **canonical source** for AI orchestration:
-- `Intelligence/Core/` - Core intelligence hub
-- `Intelligence/Intent/` - Intent classification and disambiguation
-- `Intelligence/Knowledge/` - Knowledge source management
-- `Intelligence/Orchestration/` - Orchestrator implementation
+If a task seems to require changes in an excluded area, **STOP and ask the user** whether they want you to:
+1. Implement in the canonical (included) location instead, or
+2. Explicitly opt into working in the excluded area.
 
-**Why MetaAI is excluded:**
-1. MetaAI and Intelligence had duplicate type definitions causing build conflicts
-2. Intelligence folder has cleaner separation of concerns
-3. Intelligence uses protocol-based design patterns
+**When in doubt**, grep `project.yml` for the file/folder name before implementing.
 
-**If you need to re-enable MetaAI files:**
-1. Check for type conflicts with Intelligence folder first
-2. Rename conflicting types with `MetaAI` prefix (e.g., `MetaAIMCPServerInfo`)
-3. Remove specific exclusions in `project.yml` rather than the blanket exclusion
-4. Types already renamed: `MetaAIMCPServerInfo`, `AIErrorContext`, `ModelCapabilityRecord`, `ReActActionResult`, `HypothesisEvidence`
+### Excluded Areas (by category)
 
-**DO NOT remove the MetaAI blanket exclusion without resolving all type conflicts.**
+| Category | Excluded Pattern(s) | Use Instead |
+|---|---|---|
+| **MetaAI** (blanket, ~73 files) | `**/AI/MetaAI/**`, `**/Views/MetaAI/**`, `**/MetaAI/ModelBenchmarkService.swift` | `Shared/Intelligence/` |
+| **Duplicate Providers** | `**/Providers/{Anthropic,DeepSeek,Google,Groq,OpenAI,OpenRouter,Perplexity,Helpers,Protocol,Registry}/**`, `**/AI/Providers/AnthropicFilesAPI.swift`, `**/AI/Providers/AnthropicTokenCounter.swift` | `Shared/AI/Providers/` |
+| **Duplicate Terminal** | `**/Execution/Terminal/**` | `Shared/System/Terminal/` |
+| **Duplicate Memory** | `**/AI/Memory/**` | `Shared/Memory/` |
+| **AI Subsystems** | `**/AI/Context/**`, `**/AI/Adaptive/**`, `**/AI/MultiModal/**`, `**/AI/Proactive/**` | None active |
+| **Autonomy / Automation** | `**/Autonomy/**`, `**/Automation/**`, `**/Autonomous/**`, `**/AgentMode/**`, `**/SelfEvolution/**` | None active |
+| **Learning / Monitoring** | `**/PatternLearning/**`, `**/LifeMonitoring/**`, `**/LifeAssistant/**` | None active |
+| **LocalModels** | `**/LocalModels/**` (all files) | None active |
+| **Integrations** | `**/Integrations/{Mail,Finder,Safari,Xcode,Shortcuts,Terminal,Music,Calendar,Messages,Notes,Reminders,MCP,System,IntegrationModule}*` | None active |
+| **Verification** | `**/Verification/{ConfidenceSystem,MultiModelConsensus,CodeExecutionVerifier,StaticAnalysisVerifier,UserFeedbackLearner,WebSearchVerifier}.swift` | None active |
+| **Anticipatory / Classification / Routing** | `**/Anticipatory/**`, `**/Classification/**`, `**/Routing/**`, `**/Prediction/**` | None active |
+| **PromptEngineering** | `**/PromptEngineering/**` | None active |
+| **ResourceManagement** | `**/ResourceManagement/**` | None active |
+| **Squads** | `**/Squads/**` | None active |
+| **Settings Views** | `**/Settings/Orchestrator/**`, `**/Settings/LocalModels/**`, `**/Settings/Privacy/**`, `**/Settings/Advanced/**`, `**/Settings/AutonomousTasks/**`, plus ~15 individual Settings files | None active |
+| **Views** | `**/Views/Code/**`, `**/Views/LocalModels/**`, `**/Views/LifeTracking/**`, plus individual view files | None active |
+| **Components** | `EnhancedMessageBubble`, `ExecutableCodeBlock`, `THEAThinkingView`, `StreamingTextView`, `ConfidenceIndicatorViews`, `TheaTextInputField`, `MemoryContextView`, `QuerySuggestionOverlay` | None active |
+| **Design (platform)** | `**/Theme/DesignTokens.swift` (macOS), `**/Design/DesignSystemStubs.swift`, `**/Theme/TheaAnimations.swift` | `TheaDesignSystem.swift` (macOS canonical) |
+| **Widgets** | `**/Widgets/**` (macOS only) | WidgetKit not available on macOS main app |
+
+### MetaAI Details
+
+The MetaAI folder was excluded because it had duplicate type definitions conflicting with `Shared/Intelligence/`. Types already renamed with `MetaAI` prefix: `MetaAIMCPServerInfo`, `AIErrorContext`, `ModelCapabilityRecord`, `ReActActionResult`, `HypothesisEvidence`. **DO NOT remove the MetaAI blanket exclusion without resolving all type conflicts.**
 
 ## MLX Integration
 
