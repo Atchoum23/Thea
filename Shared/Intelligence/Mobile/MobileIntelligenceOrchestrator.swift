@@ -42,7 +42,7 @@ public enum InferenceMode: String, Sendable, CaseIterable {
 // MARK: - Routing Decision
 
 /// Result of routing decision
-public struct RoutingDecision: Sendable {
+public struct MobileRoutingDecision: Sendable {
     public let mode: InferenceMode
     public let reasoning: String
     public let confidence: Float
@@ -151,7 +151,7 @@ public final class MobileIntelligenceOrchestrator {
         _ query: String,
         taskType: TaskType,
         urgency: QueryUrgency = .normal
-    ) -> RoutingDecision {
+    ) -> MobileRoutingDecision {
         let power = powerMonitor.currentState
         let network = networkMonitor.currentCondition
         let budget = powerMonitor.currentBudget
@@ -177,7 +177,7 @@ public final class MobileIntelligenceOrchestrator {
 
         guard let best = modeScores.first else {
             // Fallback to cloud
-            return RoutingDecision(
+            return MobileRoutingDecision(
                 mode: .cloud,
                 reasoning: "No available modes, defaulting to cloud",
                 confidence: 0.5,
@@ -188,7 +188,7 @@ public final class MobileIntelligenceOrchestrator {
 
         let fallbacks = modeScores.dropFirst().prefix(2).map { $0.0 }
 
-        return RoutingDecision(
+        return MobileRoutingDecision(
             mode: best.0,
             reasoning: best.2,
             confidence: min(best.1, 1.0),
@@ -299,7 +299,7 @@ public final class MobileIntelligenceOrchestrator {
         return (score, reasons.joined(separator: "; "))
     }
 
-    private func defaultConstraints(for mode: InferenceMode, budget: InferenceBudget) -> RoutingDecision.RoutingConstraints {
+    private func defaultConstraints(for mode: InferenceMode, budget: InferenceBudget) -> MobileRoutingDecision.RoutingConstraints {
         switch mode {
         case .localLight:
             return .init(
