@@ -464,9 +464,8 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
-          # Exclude Anthropic files that depend on excluded ProviderError/ChatContentPart types
-          - "**/AI/Providers/AnthropicFilesAPI.swift"
-          - "**/AI/Providers/AnthropicTokenCounter.swift"
+          # AnthropicFilesAPI.swift and AnthropicTokenCounter.swift are now ACTIVE
+          # (ported to use AnthropicError/AIMessage from active layer)
           # ARCHITECTURE DECISION: MetaAI excluded - see macOS target for full explanation
           - "**/AI/MetaAI/**"
           - "**/Integrations/NotesIntegration.swift"
