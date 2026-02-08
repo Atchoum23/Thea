@@ -9,6 +9,10 @@ final class Conversation {
     var updatedAt: Date
     var isPinned: Bool
     var projectID: UUID?
+    var isArchived: Bool
+    var isRead: Bool
+    var status: String // "idle" | "generating" | "error" | "queued"
+    var lastModelUsed: String?
 
     @Relationship(deleteRule: .cascade, inverse: \Message.conversation)
     var messages: [Message]
@@ -22,6 +26,10 @@ final class Conversation {
         updatedAt: Date = Date(),
         isPinned: Bool = false,
         projectID: UUID? = nil,
+        isArchived: Bool = false,
+        isRead: Bool = true,
+        status: String = "idle",
+        lastModelUsed: String? = nil,
         messages: [Message] = [],
         metadata: ConversationMetadata = ConversationMetadata()
     ) {
@@ -31,8 +39,24 @@ final class Conversation {
         self.updatedAt = updatedAt
         self.isPinned = isPinned
         self.projectID = projectID
+        self.isArchived = isArchived
+        self.isRead = isRead
+        self.status = status
+        self.lastModelUsed = lastModelUsed
         self.messages = messages
         self.metadata = metadata
+    }
+
+    // MARK: - Convenience
+
+    var hasUnreadMessages: Bool { !isRead }
+
+    func markAsViewed() {
+        isRead = true
+    }
+
+    func markAsUnread() {
+        isRead = false
     }
 }
 
@@ -43,17 +67,26 @@ struct ConversationMetadata: Codable, Sendable {
     var totalCost: Decimal
     var preferredModel: String?
     var tags: [String]
+    var isMuted: Bool
+    var systemPrompt: String?
+    var lastExportedAt: Date?
 
     init(
         totalTokens: Int = 0,
         totalCost: Decimal = 0,
         preferredModel: String? = nil,
-        tags: [String] = []
+        tags: [String] = [],
+        isMuted: Bool = false,
+        systemPrompt: String? = nil,
+        lastExportedAt: Date? = nil
     ) {
         self.totalTokens = totalTokens
         self.totalCost = totalCost
         self.preferredModel = preferredModel
         self.tags = tags
+        self.isMuted = isMuted
+        self.systemPrompt = systemPrompt
+        self.lastExportedAt = lastExportedAt
     }
 }
 
