@@ -294,8 +294,8 @@ targets:
           # DUPLICATE IMPLEMENTATIONS (canonical source takes precedence)
           # ============================================================
           - "**/Execution/Terminal/**"
-          - "**/AI/Providers/AnthropicFilesAPI.swift"
-          - "**/AI/Providers/AnthropicTokenCounter.swift"
+          # AnthropicFilesAPI.swift and AnthropicTokenCounter.swift are now ACTIVE
+          # (ported to use AnthropicError/AIMessage from active layer)
           - "**/Providers/Anthropic/**"
           - "**/Providers/DeepSeek/**"
           - "**/Providers/Google/**"
