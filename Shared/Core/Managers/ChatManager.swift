@@ -149,24 +149,51 @@ final class ChatManager: ObservableObject {
         let existingIndices = conversation.messages.map(\.orderIndex)
         let nextUserIndex = (existingIndices.max() ?? -1) + 1
 
-        // Create user message with orderIndex
+        // Create user message with orderIndex and device origin
+        let currentDevice = DeviceRegistry.shared.currentDevice
         let userMessage = Message(
             conversationID: conversation.id,
             role: .user,
             content: .text(text),
-            orderIndex: nextUserIndex
+            orderIndex: nextUserIndex,
+            deviceID: currentDevice.id,
+            deviceName: currentDevice.name,
+            deviceType: currentDevice.type.rawValue
         )
         conversation.messages.append(userMessage)
         context.insert(userMessage)
         try context.save()
 
-        // Prepare messages for API
-        let apiMessages = conversation.messages.map { msg in
-            AIMessage(
+        // Prepare messages for API with device context
+        let deviceContext = buildDeviceContextPrompt()
+        var apiMessages: [AIMessage] = []
+
+        // Inject device context as system message at the start
+        apiMessages.append(AIMessage(
+            id: UUID(),
+            conversationID: conversation.id,
+            role: .system,
+            content: .text(deviceContext),
+            timestamp: Date.distantPast,
+            model: model
+        ))
+
+        // Add conversation messages with per-message device annotations
+        apiMessages += conversation.messages.map { msg in
+            var content = msg.content
+            // Annotate user messages with their origin device if different from current
+            if msg.messageRole == .user, let msgDeviceName = msg.deviceName,
+               msgDeviceName != currentDevice.name
+            {
+                let annotation = "[Sent from \(msgDeviceName)]"
+                let originalText = msg.content.textValue
+                content = .text("\(annotation) \(originalText)")
+            }
+            return AIMessage(
                 id: msg.id,
                 conversationID: msg.conversationID,
                 role: msg.messageRole,
-                content: msg.content,
+                content: content,
                 timestamp: msg.timestamp,
                 model: msg.model ?? model
             )
@@ -188,7 +215,10 @@ final class ChatManager: ObservableObject {
             conversationID: conversation.id,
             role: .assistant,
             content: .text(""),
-            orderIndex: assistantOrderIndex
+            orderIndex: assistantOrderIndex,
+            deviceID: currentDevice.id,
+            deviceName: currentDevice.name,
+            deviceType: currentDevice.type.rawValue
         )
         assistantMessage.model = model
         conversation.messages.append(assistantMessage)
@@ -308,6 +338,42 @@ final class ChatManager: ObservableObject {
         }
         let model = AppConfiguration.shared.providerConfig.defaultModel
         return (provider, model)
+    }
+
+    // MARK: - Device Context for AI
+
+    /// Builds a device-aware context supplement for the system prompt.
+    /// Tells the AI which device the user is currently on and which devices are in the ecosystem.
+    private func buildDeviceContextPrompt() -> String {
+        let current = DeviceRegistry.shared.currentDevice
+        let allDevices = DeviceRegistry.shared.registeredDevices
+        let onlineDevices = DeviceRegistry.shared.onlineDevices
+
+        var lines: [String] = []
+        lines.append("DEVICE CONTEXT:")
+        lines.append("- Current device: \(current.name) (\(current.type.displayName), \(current.osVersion))")
+
+        if current.capabilities.supportsLocalModels {
+            lines.append("- This device supports local AI models")
+        }
+
+        #if os(macOS)
+        let totalRAM = ProcessInfo.processInfo.physicalMemory / (1024 * 1024 * 1024)
+        lines.append("- RAM: \(totalRAM) GB")
+        #endif
+
+        if allDevices.count > 1 {
+            let others = allDevices.filter { $0.id != current.id }
+            let otherNames = others.map { device in
+                let status = onlineDevices.contains { $0.id == device.id } ? "online" : "offline"
+                return "\(device.name) (\(device.type.displayName), \(status))"
+            }
+            lines.append("- Other devices in ecosystem: \(otherNames.joined(separator: ", "))")
+        }
+
+        lines.append("- User prompts from this conversation may originate from different devices (check message context).")
+
+        return lines.joined(separator: "\n")
     }
 }
 

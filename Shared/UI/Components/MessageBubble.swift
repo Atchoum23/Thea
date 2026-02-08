@@ -126,6 +126,15 @@ struct MessageBubble: View {
                 BranchInfoBadge(isEdited: message.isEdited, branchIndex: message.branchIndex)
             }
 
+            // Device origin badge (shown when message has device info)
+            if let deviceName = message.deviceName {
+                DeviceOriginBadge(
+                    deviceName: deviceName,
+                    deviceType: message.deviceType,
+                    isCurrentDevice: message.deviceID == DeviceRegistry.shared.currentDevice.id
+                )
+            }
+
             if let model = message.model {
                 Text(model)
                     .font(.theaCaption2)

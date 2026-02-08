@@ -710,6 +710,9 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
     public var modifiedAt: Date
     public var tags: [String]
 
+    // Track which devices have participated in this conversation
+    public var participatingDeviceIDs: [String]
+
     public init(
         id: UUID = UUID(),
         title: String,
@@ -717,7 +720,8 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
         aiModel: String = "Claude",
         createdAt: Date = Date(),
         modifiedAt: Date = Date(),
-        tags: [String] = []
+        tags: [String] = [],
+        participatingDeviceIDs: [String] = []
     ) {
         self.id = id
         self.title = title
@@ -726,6 +730,7 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
         self.tags = tags
+        self.participatingDeviceIDs = participatingDeviceIDs
     }
 
     init(from record: CKRecord) {
@@ -736,6 +741,7 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
         createdAt = record["createdAt"] as? Date ?? Date()
         modifiedAt = record["modifiedAt"] as? Date ?? Date()
         tags = record["tags"] as? [String] ?? []
+        participatingDeviceIDs = record["participatingDeviceIDs"] as? [String] ?? []
     }
 
     func toRecord() -> CKRecord {
@@ -746,6 +752,7 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
         record["createdAt"] = createdAt as CKRecordValue
         record["modifiedAt"] = modifiedAt as CKRecordValue
         record["tags"] = tags as CKRecordValue
+        record["participatingDeviceIDs"] = participatingDeviceIDs as CKRecordValue
         return record
     }
 }
@@ -756,11 +763,27 @@ public struct CloudMessage: Identifiable, Hashable, Sendable {
     public let role: String
     public let timestamp: Date
 
-    public init(id: UUID = UUID(), content: String, role: String, timestamp: Date = Date()) {
+    // Device origin tracking
+    public var deviceID: String?
+    public var deviceName: String?
+    public var deviceType: String?
+
+    public init(
+        id: UUID = UUID(),
+        content: String,
+        role: String,
+        timestamp: Date = Date(),
+        deviceID: String? = nil,
+        deviceName: String? = nil,
+        deviceType: String? = nil
+    ) {
         self.id = id
         self.content = content
         self.role = role
         self.timestamp = timestamp
+        self.deviceID = deviceID
+        self.deviceName = deviceName
+        self.deviceType = deviceType
     }
 }
 

@@ -17,6 +17,17 @@ final class Message {
     /// timestamps might be identical (e.g., rapid message creation)
     var orderIndex: Int = 0
 
+    // MARK: - Device Origin
+
+    /// Unique device identifier that created this message (from DeviceRegistry)
+    var deviceID: String?
+
+    /// Human-readable name of the originating device (e.g. "Mac Studio", "Alexis's iPhone")
+    var deviceName: String?
+
+    /// Device type string for the originating device (e.g. "mac", "iPhone", "iPad")
+    var deviceType: String?
+
     // MARK: - Branching Support
 
     /// ID of the parent message this was branched from (nil for original messages)
@@ -44,7 +55,10 @@ final class Message {
         metadata: MessageMetadata? = nil,
         orderIndex: Int = 0,
         parentMessageId: UUID? = nil,
-        branchIndex: Int = 0
+        branchIndex: Int = 0,
+        deviceID: String? = nil,
+        deviceName: String? = nil,
+        deviceType: String? = nil
     ) {
         self.id = id
         self.conversationID = conversationID
@@ -57,6 +71,9 @@ final class Message {
         self.orderIndex = orderIndex
         self.parentMessageId = parentMessageId
         self.branchIndex = branchIndex
+        self.deviceID = deviceID
+        self.deviceName = deviceName
+        self.deviceType = deviceType
     }
 
     // Computed properties for easy access
@@ -71,6 +88,26 @@ final class Message {
     var metadata: MessageMetadata? {
         guard let data = metadataData else { return nil }
         return try? JSONDecoder().decode(MessageMetadata.self, from: data)
+    }
+
+    /// The parsed device type for this message's origin device
+    var originDeviceType: DeviceType? {
+        guard let raw = deviceType else { return nil }
+        return DeviceType(rawValue: raw)
+    }
+
+    /// SF Symbol name for this message's origin device
+    var deviceIcon: String? {
+        originDeviceType?.icon
+    }
+
+    /// Stamps the current device identity onto this message
+    @MainActor
+    func stampCurrentDevice() {
+        let device = DeviceRegistry.shared.currentDevice
+        deviceID = device.id
+        deviceName = device.name
+        deviceType = device.type.rawValue
     }
 
     /// Original content if this message was edited
@@ -90,7 +127,10 @@ final class Message {
             metadata: nil,
             orderIndex: orderIndex,
             parentMessageId: id,
-            branchIndex: branchIndex
+            branchIndex: branchIndex,
+            deviceID: deviceID,
+            deviceName: deviceName,
+            deviceType: deviceType
         )
         branchedMessage.isEdited = true
         branchedMessage.originalContentData = contentData
@@ -145,16 +185,27 @@ struct MessageMetadata: Codable, Sendable {
     var cachedTokens: Int?
     var reasoningTokens: Int?
 
+    // Device context captured at generation time (for assistant messages)
+    var respondingDeviceID: String?
+    var respondingDeviceName: String?
+    var respondingDeviceType: String?
+
     init(
         finishReason: String? = nil,
         systemFingerprint: String? = nil,
         cachedTokens: Int? = nil,
-        reasoningTokens: Int? = nil
+        reasoningTokens: Int? = nil,
+        respondingDeviceID: String? = nil,
+        respondingDeviceName: String? = nil,
+        respondingDeviceType: String? = nil
     ) {
         self.finishReason = finishReason
         self.systemFingerprint = systemFingerprint
         self.cachedTokens = cachedTokens
         self.reasoningTokens = reasoningTokens
+        self.respondingDeviceID = respondingDeviceID
+        self.respondingDeviceName = respondingDeviceName
+        self.respondingDeviceType = respondingDeviceType
     }
 }
 
