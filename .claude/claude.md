@@ -92,11 +92,13 @@ done
 - **Architecture**: MVVM with SwiftUI + SwiftData
 - **Remote**: `https://github.com/Atchoum23/Thea.git`
 
-## Orchestrator System
+## Orchestrator System (ACTIVE in macOS build)
 
-- **TaskClassifier**: Classifies queries (code, math, creative, etc.)
-- **ModelRouter**: Routes to optimal model based on task
-- **QueryDecomposer**: Breaks complex queries into sub-tasks
+- **TaskClassifier** (`Intelligence/Classification/`): Classifies queries by type
+- **TaskType** (`Intelligence/Classification/`): Task type enum used across codebase
+- **ModelRouter** (`Intelligence/Routing/`): Routes to optimal model based on task
+- **SmartModelRouter** (`Intelligence/Routing/`): Advanced routing with cost optimization
+- **ChatManager.selectProviderAndModel()**: Wired to use TaskClassifier + ModelRouter
 
 ## Excluded From Builds — DO NOT IMPLEMENT
 
@@ -119,10 +121,10 @@ If a task seems to require changes in an excluded area, **STOP and ask the user*
 | **AI Subsystems** | `**/AI/Context/**`, `**/AI/Adaptive/**`, `**/AI/MultiModal/**`, `**/AI/Proactive/**` | None active |
 | **Autonomy / Automation** | `**/Autonomy/**`, `**/Automation/**`, `**/Autonomous/**`, `**/AgentMode/**`, `**/SelfEvolution/**` | None active |
 | **Learning / Monitoring** | `**/PatternLearning/**`, `**/LifeMonitoring/**`, `**/LifeAssistant/**` | None active |
-| **LocalModels** | `**/LocalModels/**` (all files) | None active |
+| **LocalModels** | Selective: `ProactiveModelManager`, `LocalModelRecommendation*`, `AIModelGovernor`, `ModelGovernanceEngine`, `UnifiedLocalModelOrchestrator`, `SupraModelSelector`, `OllamaAgentLoop`, `ModelQualityBenchmark`, `PredictivePreloader` | Core LocalModel files now active |
 | **Integrations** | `**/Integrations/{Mail,Finder,Safari,Xcode,Shortcuts,Terminal,Music,Calendar,Messages,Notes,Reminders,MCP,System,IntegrationModule}*` | None active |
-| **Verification** | `**/Verification/{ConfidenceSystem,MultiModelConsensus,CodeExecutionVerifier,StaticAnalysisVerifier,UserFeedbackLearner,WebSearchVerifier}.swift` | None active |
-| **Anticipatory / Classification / Routing** | `**/Anticipatory/**`, `**/Classification/**`, `**/Routing/**`, `**/Prediction/**` | None active |
+| **Verification** | `**/Intelligence/Verification/**` | None active |
+| **Anticipatory** | `**/Anticipatory/**`, `**/Prediction/**` | None active |
 | **PromptEngineering** | `**/PromptEngineering/**` | None active |
 | **ResourceManagement** | `**/ResourceManagement/**` | None active |
 | **Squads** | `**/Squads/**` | None active |
