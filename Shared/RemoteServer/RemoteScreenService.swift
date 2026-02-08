@@ -67,7 +67,27 @@ public class RemoteScreenService: ObservableObject {
 
         case .getWindowList:
             try await getWindowList()
+
+        case let .captureDisplay(displayId, quality, scale):
+            try await captureSpecificDisplay(displayId: displayId, quality: quality, scale: scale)
+
+        case let .startStreamForDisplay(displayId, fps, quality, scale):
+            try await startStreamForDisplay(displayId: displayId, fps: fps, quality: quality, scale: scale)
+
+        case let .configureStream(codec, profile):
+            configureStreamCodec(codec: codec, profile: profile)
         }
+    }
+
+    // MARK: - Stream Configuration
+
+    private var activeCodec: VideoCodec = .jpeg
+    private var activeProfile: StreamQualityProfile = .balanced
+
+    private func configureStreamCodec(codec: VideoCodec, profile: StreamQualityProfile) -> ScreenResponse {
+        activeCodec = codec
+        activeProfile = profile
+        return .streamStarted(streamId: activeStreamId ?? "configured")
     }
 
     // MARK: - Full Screen Capture
@@ -178,6 +198,68 @@ public class RemoteScreenService: ObservableObject {
             ))
         #else
             return .error("Region capture not available on this platform")
+        #endif
+    }
+
+    // MARK: - Multi-Monitor Capture
+
+    private func captureSpecificDisplay(displayId: Int, quality: Float, scale: Float) async throws -> ScreenResponse {
+        #if os(macOS)
+            guard CGPreflightScreenCaptureAccess() else {
+                CGRequestScreenCaptureAccess()
+                return .error("Screen recording permission required")
+            }
+
+            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+
+            guard let display = content.displays.first(where: { Int($0.displayID) == displayId }) else {
+                return .error("Display \(displayId) not found")
+            }
+
+            let filter = SCContentFilter(display: display, excludingWindows: [])
+
+            let config = SCStreamConfiguration()
+            config.width = Int(CGFloat(display.width) * CGFloat(scale))
+            config.height = Int(CGFloat(display.height) * CGFloat(scale))
+            config.pixelFormat = kCVPixelFormatType_32BGRA
+            config.showsCursor = true
+            config.scalesToFit = true
+
+            let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
+            let data = try encodeImage(image, quality: quality)
+
+            return .frame(ScreenFrame(
+                width: config.width,
+                height: config.height,
+                format: .jpeg,
+                data: data
+            ))
+        #else
+            return .error("Screen capture not available on this platform")
+        #endif
+    }
+
+    private func startStreamForDisplay(displayId: Int, fps: Int, quality: Float, scale: Float) async throws -> ScreenResponse {
+        #if os(macOS)
+            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+
+            guard let display = content.displays.first(where: { Int($0.displayID) == displayId }) else {
+                return .error("Display \(displayId) not found")
+            }
+
+            let filter = SCContentFilter(display: display, excludingWindows: [])
+
+            let config = SCStreamConfiguration()
+            config.width = Int(CGFloat(display.width) * CGFloat(scale))
+            config.height = Int(CGFloat(display.height) * CGFloat(scale))
+            config.pixelFormat = kCVPixelFormatType_32BGRA
+            config.showsCursor = true
+            config.scalesToFit = true
+            config.minimumFrameInterval = CMTime(value: 1, timescale: CMTimeScale(fps))
+
+            return try await startStream(fps: fps, quality: quality, scale: scale)
+        #else
+            return .error("Streaming not available on this platform")
         #endif
     }
 
