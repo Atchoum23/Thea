@@ -58,3 +58,13 @@ add_*.py
 *.txt
 # Ignore stray Xcode projects (Xcode creates "Thea 2.xcodeproj" etc. on conflicts)
 Thea [0-9]*.xcodeproj/
+
+# Ignore Finder duplicate folders
+*\ 2/
+*\ 3/
+
+# Build logs and profiling
+build*.log
+test_*.log
+*.profraw
+swiftlint_report.json
