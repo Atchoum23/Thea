@@ -125,7 +125,7 @@ public final class InterventionScheduler {
             return false
 
         case .contextChange(let expectedContext):
-            return context.recentActivity.contains(expectedContext)
+            return context.recentActivityTypes.contains(expectedContext)
         }
     }
 

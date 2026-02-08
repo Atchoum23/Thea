@@ -954,6 +954,19 @@ public struct AgentContextCheckpoint: Identifiable, Sendable {
     public var isAutomatic: Bool
 }
 
+/// Lightweight chat message for agent conversation context
+public struct ChatMessage: Codable, Sendable {
+    public let role: String
+    public let content: String
+    public let timestamp: Date
+
+    public init(role: String, content: String, timestamp: Date = Date()) {
+        self.role = role
+        self.content = content
+        self.timestamp = timestamp
+    }
+}
+
 /// Conversation context for checkpointing
 public struct AgentConversationContext: Codable, Sendable {
     public var messages: [ChatMessage]

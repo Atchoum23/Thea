@@ -24,7 +24,7 @@ import NaturalLanguage
 
 /// A THEA-managed task with full intelligence context
 public struct TheaTask: Identifiable, Codable, Sendable {
-    public let id: UUID
+    public var id: UUID
     public var title: String
     public var notes: String?
     public var createdAt: Date

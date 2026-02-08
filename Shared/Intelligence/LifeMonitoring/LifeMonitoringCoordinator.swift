@@ -175,7 +175,7 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         await photosMonitor?.stop()
         await notificationMonitor?.stop()
         await documentEditingMonitor?.stop()
-        await inputActivityMonitor?.stop()
+        inputActivityMonitor?.stopMonitoring()
         behaviorPatternAnalyzer?.stop()
         efficiencySuggestionEngine?.stop()
 
@@ -354,7 +354,7 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         // Input Activity Monitoring (mouse, keyboard, typing patterns)
         if configuration.inputActivityMonitoringEnabled {
             inputActivityMonitor = InputActivityMonitor.shared
-            await inputActivityMonitor?.start()
+            inputActivityMonitor?.startMonitoring()
             activeDataSources.insert(.inputActivity)
             logger.info("Input activity monitoring started")
         }

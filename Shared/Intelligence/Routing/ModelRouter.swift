@@ -846,18 +846,7 @@ public struct RoutingInsights: Sendable {
 
 // MARK: - V1 Compatibility
 
-/// V1 compatibility result type
-public struct ModelSelection: Sendable {
-    public let modelID: String
-    public let providerID: String
-    public let reasoning: String
-
-    public init(modelID: String, providerID: String, reasoning: String = "") {
-        self.modelID = modelID
-        self.providerID = providerID
-        self.reasoning = reasoning
-    }
-}
+// ModelSelection is defined in OrchestrationTypes.swift
 
 // V1 compatibility extension
 public extension ModelRouter {

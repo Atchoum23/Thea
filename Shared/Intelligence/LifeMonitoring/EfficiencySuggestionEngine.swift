@@ -272,7 +272,7 @@ public final class EfficiencySuggestionEngine: ObservableObject {
     private func generateBreakSuggestions() -> [EfficiencySuggestion] {
         var suggestions: [EfficiencySuggestion] = []
 
-        let inputStats = InputActivityMonitor.shared.todayStats
+        let inputStats = InputActivityMonitor.shared.todayMetrics
 
         // Suggest break if active for more than 90 minutes continuously
         if inputStats.totalActiveTime > 5400 && inputStats.sessionCount <= 2 {

@@ -547,23 +547,25 @@ public final class TaskClassifier: ObservableObject {
     private func classifyWithAI(prompt: String) async throws -> String {
         // Use fast model for classification
         let messages = [
-            ChatMessage(role: "system", text: "You are a precise task classifier. Respond only with JSON."),
-            ChatMessage(role: "user", text: prompt)
+            AIMessage(role: "system", content: "You are a precise task classifier. Respond only with JSON."),
+            AIMessage(role: "user", content: prompt)
         ]
 
-        let options = ChatOptions(
-            temperature: 0.1, // Low temperature for consistency
-            maxTokens: 500,
-            stream: false
-        )
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
+            throw ClassificationError.noProvider
+        }
 
-        let response = try await ProviderRegistry.shared.chatSync(
-            messages: messages,
-            model: classificationModel,
-            options: options
-        )
+        let stream = try await provider.chat(messages: messages, model: classificationModel, stream: false)
+        var responseText = ""
+        for try await chunk in stream {
+            if case let .delta(text) = chunk.type {
+                responseText += text
+            } else if case let .complete(message) = chunk.type {
+                responseText = message.content
+            }
+        }
 
-        return response.content
+        return responseText
     }
 
     private func parseClassificationResponse(_ response: String, for query: String) throws -> ClassificationResult {
@@ -1080,6 +1082,7 @@ public enum ClassificationError: Error, LocalizedError {
     case invalidResponse(String)
     case unknownTaskType(String)
     case providerError(Error)
+    case noProvider
 
     public var errorDescription: String? {
         switch self {
@@ -1089,6 +1092,8 @@ public enum ClassificationError: Error, LocalizedError {
             return "Unknown task type: \(type)"
         case let .providerError(error):
             return "Provider error during classification: \(error.localizedDescription)"
+        case .noProvider:
+            return "No AI provider available for classification"
         }
     }
 }

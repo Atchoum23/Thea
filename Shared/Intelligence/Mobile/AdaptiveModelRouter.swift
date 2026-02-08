@@ -40,7 +40,7 @@ public struct InferenceRoute: Identifiable, Sendable {
 // MARK: - Routing Context
 
 /// Context for making routing decisions
-public struct RoutingContext: Sendable {
+public struct InferenceRoutingContext: Sendable {
     public let taskType: TaskType
     public let queryComplexity: QueryComplexity
     public let expectedResponseLength: ResponseLength
@@ -179,7 +179,7 @@ public final class AdaptiveModelRouter {
     // MARK: - Route Selection
 
     /// Select the best route for the given context
-    public func selectRoute(for context: RoutingContext) -> InferenceRoute? {
+    public func selectRoute(for context: InferenceRoutingContext) -> InferenceRoute? {
         guard !availableRoutes.isEmpty else { return nil }
 
         let power = powerMonitor.currentState
@@ -208,7 +208,7 @@ public final class AdaptiveModelRouter {
 
     private func scoreRoute(
         _ route: InferenceRoute,
-        context: RoutingContext,
+        context: InferenceRoutingContext,
         power: MobilePowerState,
         network: NetworkCondition
     ) -> Float {
@@ -288,7 +288,7 @@ public final class AdaptiveModelRouter {
     /// Record the outcome of using a route
     public func recordOutcome(
         route: InferenceRoute,
-        context: RoutingContext,
+        context: InferenceRoutingContext,
         success: Bool,
         actualLatency: TimeInterval,
         userRating: Float? = nil
@@ -317,7 +317,7 @@ public final class AdaptiveModelRouter {
     // MARK: - Fallback
 
     /// Get fallback routes if the primary fails
-    public func getFallbackRoutes(excluding: InferenceRoute, context: RoutingContext) -> [InferenceRoute] {
+    public func getFallbackRoutes(excluding: InferenceRoute, context: InferenceRoutingContext) -> [InferenceRoute] {
         availableRoutes
             .filter { $0.id != excluding.id }
             .sorted { route1, route2 in
