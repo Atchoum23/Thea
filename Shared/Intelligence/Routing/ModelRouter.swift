@@ -128,7 +128,7 @@ public final class ModelRouter: ObservableObject {
     // MARK: - Candidate Selection
 
     private func getCandidateModels(for taskType: TaskType) -> [AIModel] {
-        let allModels = ProviderRegistry.shared.allModels
+        let allModels = AIModel.allKnownModels
 
         // Filter by required capabilities
         let requiredCapabilities = taskType.preferredCapabilities
@@ -268,9 +268,9 @@ public final class ModelRouter: ObservableObject {
         let defaultProvider = TheaConfig.shared.ai.defaultProvider
 
         // Try to find the default model
-        if let found = ProviderRegistry.shared.findModel(defaultModel) {
+        if let found = AIModel.allKnownModels.first(where: { $0.id == defaultModel }) {
             return RoutingDecision(
-                model: found.model,
+                model: found,
                 provider: defaultProvider,
                 taskType: classification.taskType,
                 confidence: 0.5,
@@ -544,9 +544,9 @@ public final class ModelRouter: ObservableObject {
         }
 
         // Pattern 2: Task sequence patterns
-        let recentTaskTypes = recentDecisions.suffix(3).map(\.taskType)
+        let recentTaskTypes = recentDecisions.suffix(3).map { $0.taskType }
         if recentTaskTypes.count >= 2 {
-            let taskSequence = recentTaskTypes.map(\.rawValue).joined(separator: " → ")
+            let taskSequence = recentTaskTypes.map { $0.rawValue }.joined(separator: " → ")
 
             // Check if this sequence consistently succeeds with certain models
             let sequenceSuccesses = recentDecisions.filter { d in
