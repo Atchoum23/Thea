@@ -189,6 +189,50 @@ final class SettingsManager: ObservableObject {
         didSet { persist(maxConcurrentTasks, forKey: "maxConcurrentTasks") }
     }
 
+    // MARK: - Input Settings
+
+    @Published var submitShortcut: String {
+        didSet { persist(submitShortcut, forKey: "submitShortcut") }
+    }
+
+    // MARK: - Notification Settings
+
+    @Published var notifyOnResponseComplete: Bool {
+        didSet { persist(notifyOnResponseComplete, forKey: "notifyOnResponseComplete") }
+    }
+
+    @Published var notifyOnAttentionRequired: Bool {
+        didSet { persist(notifyOnAttentionRequired, forKey: "notifyOnAttentionRequired") }
+    }
+
+    @Published var playNotificationSound: Bool {
+        didSet { persist(playNotificationSound, forKey: "playNotificationSound") }
+    }
+
+    @Published var showDockBadge: Bool {
+        didSet { persist(showDockBadge, forKey: "showDockBadge") }
+    }
+
+    @Published var doNotDisturb: Bool {
+        didSet { persist(doNotDisturb, forKey: "doNotDisturb") }
+    }
+
+    // MARK: - Focus & Search Settings
+
+    @Published var activeFocusMode: String {
+        didSet { persist(activeFocusMode, forKey: "activeFocusMode") }
+    }
+
+    @Published var enableSemanticSearch: Bool {
+        didSet { persist(enableSemanticSearch, forKey: "enableSemanticSearch") }
+    }
+
+    // MARK: - Export Settings
+
+    @Published var defaultExportFormat: String {
+        didSet { persist(defaultExportFormat, forKey: "defaultExportFormat") }
+    }
+
     // MARK: - Favorite Models
 
     @Published var favoriteModels: Set<String> {
@@ -247,6 +291,16 @@ final class SettingsManager: ObservableObject {
         preventSleepDuringExecution = UserDefaults.standard.object(forKey: "preventSleepDuringExecution") as? Bool ?? true
         maxConcurrentTasks = UserDefaults.standard.integer(forKey: "maxConcurrentTasks") != 0
             ? UserDefaults.standard.integer(forKey: "maxConcurrentTasks") : 3
+
+        submitShortcut = UserDefaults.standard.string(forKey: "submitShortcut") ?? "enter"
+        notifyOnResponseComplete = UserDefaults.standard.object(forKey: "notifyOnResponseComplete") as? Bool ?? true
+        notifyOnAttentionRequired = UserDefaults.standard.object(forKey: "notifyOnAttentionRequired") as? Bool ?? true
+        playNotificationSound = UserDefaults.standard.object(forKey: "playNotificationSound") as? Bool ?? true
+        showDockBadge = UserDefaults.standard.object(forKey: "showDockBadge") as? Bool ?? true
+        doNotDisturb = UserDefaults.standard.bool(forKey: "doNotDisturb")
+        activeFocusMode = UserDefaults.standard.string(forKey: "activeFocusMode") ?? "general"
+        enableSemanticSearch = UserDefaults.standard.object(forKey: "enableSemanticSearch") as? Bool ?? true
+        defaultExportFormat = UserDefaults.standard.string(forKey: "defaultExportFormat") ?? "markdown"
 
         if let savedFavorites = UserDefaults.standard.array(forKey: "favoriteModels") as? [String] {
             favoriteModels = Set(savedFavorites)
@@ -308,6 +362,16 @@ final class SettingsManager: ObservableObject {
         preventSleepDuringExecution = d.object(forKey: "preventSleepDuringExecution") as? Bool ?? true
         maxConcurrentTasks = d.integer(forKey: "maxConcurrentTasks") != 0
             ? d.integer(forKey: "maxConcurrentTasks") : 3
+
+        submitShortcut = d.string(forKey: "submitShortcut") ?? "enter"
+        notifyOnResponseComplete = d.object(forKey: "notifyOnResponseComplete") as? Bool ?? true
+        notifyOnAttentionRequired = d.object(forKey: "notifyOnAttentionRequired") as? Bool ?? true
+        playNotificationSound = d.object(forKey: "playNotificationSound") as? Bool ?? true
+        showDockBadge = d.object(forKey: "showDockBadge") as? Bool ?? true
+        doNotDisturb = d.bool(forKey: "doNotDisturb")
+        activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
+        enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
+        defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
 
         if let savedFavorites = d.array(forKey: "favoriteModels") as? [String] {
             favoriteModels = Set(savedFavorites)
@@ -410,6 +474,16 @@ final class SettingsManager: ObservableObject {
         createBackups = true
         preventSleepDuringExecution = true
         maxConcurrentTasks = 3
+
+        submitShortcut = "enter"
+        notifyOnResponseComplete = true
+        notifyOnAttentionRequired = true
+        playNotificationSound = true
+        showDockBadge = true
+        doNotDisturb = false
+        activeFocusMode = "general"
+        enableSemanticSearch = true
+        defaultExportFormat = "markdown"
 
         for provider in availableProviders {
             deleteAPIKey(for: provider)

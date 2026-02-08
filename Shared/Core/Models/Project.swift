@@ -6,6 +6,10 @@ final class Project {
     @Attribute(.unique) var id: UUID
     var title: String
     var customInstructions: String
+    var projectDescription: String
+    var iconName: String
+    var colorHex: String
+    var parentProjectID: UUID?
     var createdAt: Date
     var updatedAt: Date
 
@@ -19,6 +23,10 @@ final class Project {
         id: UUID = UUID(),
         title: String,
         customInstructions: String = "",
+        projectDescription: String = "",
+        iconName: String = "folder",
+        colorHex: String = "#007AFF",
+        parentProjectID: UUID? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
         conversations: [Conversation] = [],
@@ -28,6 +36,10 @@ final class Project {
         self.id = id
         self.title = title
         self.customInstructions = customInstructions
+        self.projectDescription = projectDescription
+        self.iconName = iconName
+        self.colorHex = colorHex
+        self.parentProjectID = parentProjectID
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.conversations = conversations
