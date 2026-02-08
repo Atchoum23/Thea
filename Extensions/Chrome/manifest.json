@@ -75,7 +75,9 @@
         "content/privacy-shield.js",
         "content/cosmetic-filter.js",
         "content/password-enhancer-ui.js",
-        "content/password-enhancer.js"
+        "content/password-enhancer.js",
+        "content/writing-assistant.js",
+        "content/session-manager.js"
       ],
       "css": ["content/content-styles.css"],
       "run_at": "document_start",
