@@ -545,10 +545,18 @@ public final class TaskClassifier: ObservableObject {
     }
 
     private func classifyWithAI(prompt: String) async throws -> String {
-        // Use fast model for classification
+        let convID = UUID()
         let messages = [
-            AIMessage(role: "system", content: "You are a precise task classifier. Respond only with JSON."),
-            AIMessage(role: "user", content: prompt)
+            AIMessage(
+                id: UUID(), conversationID: convID, role: .system,
+                content: .text("You are a precise task classifier. Respond only with JSON."),
+                timestamp: Date(), model: classificationModel
+            ),
+            AIMessage(
+                id: UUID(), conversationID: convID, role: .user,
+                content: .text(prompt),
+                timestamp: Date(), model: classificationModel
+            )
         ]
 
         guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
@@ -561,7 +569,7 @@ public final class TaskClassifier: ObservableObject {
             if case let .delta(text) = chunk.type {
                 responseText += text
             } else if case let .complete(message) = chunk.type {
-                responseText = message.content
+                responseText = message.content.textValue
             }
         }
 

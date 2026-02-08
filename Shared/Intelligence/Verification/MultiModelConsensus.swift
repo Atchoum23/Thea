@@ -121,7 +121,11 @@ public final class MultiModelConsensus {
                 return nil
             }
 
-            let message = AIMessage(role: "user", content: validationPrompt)
+            let message = AIMessage(
+                id: UUID(), conversationID: UUID(), role: .user,
+                content: .text(validationPrompt),
+                timestamp: Date(), model: modelId
+            )
 
             var responseText = ""
             let stream = try await provider.chat(
@@ -135,7 +139,7 @@ public final class MultiModelConsensus {
                 case let .delta(text):
                     responseText += text
                 case let .complete(msg):
-                    responseText = msg.content
+                    responseText = msg.content.textValue
                 case .error:
                     break
                 }
