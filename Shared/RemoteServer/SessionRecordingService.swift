@@ -126,18 +126,18 @@ public class SessionRecordingService: ObservableObject {
     // MARK: - Write Frame
 
     /// Write a pixel buffer frame to the recording
+    #if os(macOS)
     public func writeFrame(pixelBuffer: CVPixelBuffer, presentationTime: CMTime) {
-        #if os(macOS)
-            guard isRecording,
-                  let input = videoInput,
-                  let adaptor = pixelBufferAdaptor,
-                  input.isReadyForMoreMediaData
-            else { return }
+        guard isRecording,
+              let input = videoInput,
+              let adaptor = pixelBufferAdaptor,
+              input.isReadyForMoreMediaData
+        else { return }
 
-            adaptor.append(pixelBuffer, withPresentationTime: presentationTime)
-            frameCount += 1
-        #endif
+        adaptor.append(pixelBuffer, withPresentationTime: presentationTime)
+        frameCount += 1
     }
+    #endif
 
     /// Write an encoded frame (from VideoEncoderService) - converts to pixel buffer first
     public func writeEncodedFrame(_ frame: EncodedFrame) {

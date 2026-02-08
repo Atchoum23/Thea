@@ -304,7 +304,7 @@ public final class AppUpdateService: ObservableObject {
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/bash")
-        process.arguments = [syncScript.path]
+        process.arguments = [syncScript.path, "--build-install"]
         process.environment = [
             "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
             "HOME": FileManager.default.homeDirectoryForCurrentUser.path
