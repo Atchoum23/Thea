@@ -151,6 +151,7 @@ public enum RemotePermission: String, Codable, Sendable, CaseIterable {
     case executeCommands
     case systemControl
     case networkAccess
+    case inferenceRelay
 
     public var displayName: String {
         switch self {
@@ -163,12 +164,13 @@ public enum RemotePermission: String, Codable, Sendable, CaseIterable {
         case .executeCommands: "Execute Commands"
         case .systemControl: "System Control"
         case .networkAccess: "Network Access"
+        case .inferenceRelay: "AI Inference"
         }
     }
 
     public var riskLevel: RiskLevel {
         switch self {
-        case .viewScreen, .viewFiles: .low
+        case .viewScreen, .viewFiles, .inferenceRelay: .low
         case .controlScreen, .readFiles: .medium
         case .writeFiles, .executeCommands, .networkAccess: .high
         case .deleteFiles, .systemControl: .critical
