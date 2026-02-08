@@ -59,6 +59,7 @@
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_thea._tcp</string>
+		<string>_thea-remote._tcp</string>
 	</array>
 
 	<!-- Bluetooth -->

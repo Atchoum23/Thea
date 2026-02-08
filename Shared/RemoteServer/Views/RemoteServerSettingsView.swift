@@ -307,6 +307,7 @@ import SwiftUI
             case .mac: "desktopcomputer"
             case .iPhone: "iphone"
             case .iPad: "ipad"
+            case .tv: "appletv"
             case .unknown: "questionmark.circle"
             }
         }

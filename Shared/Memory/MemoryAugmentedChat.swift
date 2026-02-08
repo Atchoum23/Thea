@@ -161,7 +161,8 @@ public final class MemoryAugmentedChat {
     // MARK: - Private Methods
 
     private func classifyTask(_ message: String) async -> TaskType {
-        // Use the AI-powered task classifier
+        #if os(macOS)
+        // Use the AI-powered task classifier (macOS only)
         do {
             let classification = try await TaskClassifier.shared.classify(message)
             return classification.taskType
@@ -169,6 +170,9 @@ public final class MemoryAugmentedChat {
             logger.warning("Task classification failed: \(error.localizedDescription)")
             return .general
         }
+        #else
+        return .general
+        #endif
     }
 
     private func buildSystemContext(

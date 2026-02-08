@@ -363,6 +363,7 @@ import SwiftUI
             case .executeCommands: "terminal"
             case .systemControl: "power"
             case .networkAccess: "network"
+            case .inferenceRelay: "brain"
             }
         }
 
