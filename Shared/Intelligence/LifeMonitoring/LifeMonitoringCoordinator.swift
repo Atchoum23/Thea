@@ -467,12 +467,7 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         )
 
         for memory in triggered {
-            await ProactivityEngine.shared.queueSuggestion(AIProactivitySuggestion(
-                type: "memory_trigger",
-                title: memory.key,
-                reason: "You wanted to be reminded: \(memory.value)",
-                priority: .normal
-            ))
+            logger.info("Memory trigger: \(memory.key)")
         }
     }
 

@@ -146,14 +146,8 @@ public final class LifeInsightsAnalyzer: ObservableObject {
         if let insight = await generateEventInsight(event) {
             await addInsights([insight])
 
-            // If insight is actionable, queue proactive suggestion
             if insight.isActionable {
-                await ProactivityEngine.shared.queueSuggestion(AIProactivitySuggestion(
-                    type: insight.type.rawValue,
-                    title: insight.title,
-                    reason: insight.description,
-                    priority: insight.priority == .high ? .high : .normal
-                ))
+                logger.info("Actionable insight: \(insight.title)")
             }
         }
     }
@@ -457,37 +451,18 @@ public final class LifeInsightsAnalyzer: ObservableObject {
         from events: [LifeEvent],
         insights: [AnalyzedLifeInsight]
     ) async {
-        // Check for actionable insights
         for insight in insights where insight.isActionable {
-            await ProactivityEngine.shared.queueSuggestion(AIProactivitySuggestion(
-                type: insight.type.rawValue,
-                title: insight.title,
-                reason: insight.suggestedAction ?? insight.description,
-                priority: insight.priority == .high ? .high : .normal
-            ))
+            logger.info("Actionable insight: \(insight.title)")
         }
 
-        // Check aggregation for proactive suggestions
         let aggregation = eventAggregator.getAggregation()
 
-        // Break reminder after extended focus
         if aggregation.focusTimeMinutes >= 90 {
-            await ProactivityEngine.shared.queueSuggestion(AIProactivitySuggestion(
-                type: "wellness",
-                title: "Time for a Break",
-                reason: "You've been focused for \(aggregation.focusTimeMinutes) minutes. Consider a short break.",
-                priority: .normal
-            ))
+            logger.info("Break suggestion: focused for \(aggregation.focusTimeMinutes) minutes")
         }
 
-        // Context switch alert
         if aggregation.contextSwitches >= 10 {
-            await ProactivityEngine.shared.queueSuggestion(AIProactivitySuggestion(
-                type: "productivity",
-                title: "High Context Switching",
-                reason: "You've switched contexts \(aggregation.contextSwitches) times. Consider focusing on one task.",
-                priority: .low
-            ))
+            logger.info("Context switch alert: \(aggregation.contextSwitches) switches")
         }
     }
 

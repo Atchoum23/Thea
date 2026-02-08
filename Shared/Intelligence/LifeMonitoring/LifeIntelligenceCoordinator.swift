@@ -522,7 +522,7 @@ public actor LifeIntelligenceCoordinator {
     }
 
     /// Log a communication event
-    public func logCommunication(
+    func logCommunication(
         contactId: String,
         contactName: String,
         direction: RelationshipIntelligence.CommunicationEvent.Direction,
