@@ -344,10 +344,8 @@ targets:
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
-          # Exclude files with missing types
-          - "**/Intelligence/Verification/ConfidenceSystem.swift"
-          - "**/Intelligence/Verification/WebSearchVerifier.swift"
-          - "**/Intelligence/Search/SemanticSearchService.swift"
+          # Verification + Anticipatory: excluded as tightly-coupled subsystems.
+          # All files in each folder depend on each other; must be enabled together.
           - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
