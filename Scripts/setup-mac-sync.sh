@@ -17,7 +17,13 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cat > ~/bin/thea-sync.sh << 'SYNCEOF'
 #!/bin/bash
-# thea-sync.sh — Auto-pull, build Release, install to /Applications
+# thea-sync.sh — Sync Thea source code from remote.
+# By default: pull only (safe, always runs).
+# With --build-install: also build Release, run tests, install to /Applications.
+#
+# Usage:
+#   thea-sync.sh              # Pull code only (used by pushsync and launchd)
+#   thea-sync.sh --build-install  # Pull + build + test + install (from Settings UI)
 set -euo pipefail
 
 PROJECT_DIR="/Users/alexis/Documents/IT & Tech/MyApps/Thea"
@@ -25,6 +31,11 @@ LOG_FILE="/Users/alexis/Library/Logs/thea-sync.log"
 LOCK_FILE="/tmp/thea-sync.lock"
 SCHEME="Thea-macOS"
 CONFIG="Release"
+BUILD_INSTALL=false
+
+if [[ "${1:-}" == "--build-install" ]]; then
+    BUILD_INSTALL=true
+fi
 
 if [ -f "$LOCK_FILE" ]; then
     pid=$(cat "$LOCK_FILE" 2>/dev/null || echo "")
@@ -58,6 +69,15 @@ log "Pull OK → $(git rev-parse --short HEAD)"
 
 command -v xcodegen &>/dev/null && { log "xcodegen..."; xcodegen generate --use-cache >> "$LOG_FILE" 2>&1 || true; }
 
+osascript -e 'display notification "Thea source code synced to latest" with title "Thea Sync" sound name "Tink"' 2>/dev/null || true
+
+if [ "$BUILD_INSTALL" = false ]; then
+    log "Code sync complete (pull only)."
+    exit 0
+fi
+
+# === BUILD + TEST + INSTALL (only with --build-install) ===
+
 log "Building $SCHEME ($CONFIG)..."
 BUILD_LOG=$(mktemp)
 if xcodebuild -project Thea.xcodeproj -scheme "$SCHEME" -destination "platform=macOS" \
@@ -65,13 +85,24 @@ if xcodebuild -project Thea.xcodeproj -scheme "$SCHEME" -destination "platform=m
     CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$BUILD_LOG" | tail -5 >> "$LOG_FILE" 2>&1; then
 
     log "Build OK"
+
+    log "Running tests..."
+    if swift test >> "$LOG_FILE" 2>&1; then
+        log "Tests passed"
+    else
+        log "WARNING: Tests failed — skipping install"
+        osascript -e 'display notification "Thea build OK but tests failed — not installing" with title "Thea Sync" sound name "Basso"' 2>/dev/null || true
+        rm -f "$BUILD_LOG"
+        exit 1
+    fi
+
     APP_PATH="$PROJECT_DIR/.build/DerivedData/Build/Products/$CONFIG"
     if [ -d "$APP_PATH/Thea.app" ]; then
         killall Thea 2>/dev/null || true; sleep 1
         rm -rf /Applications/Thea.app
         cp -R "$APP_PATH/Thea.app" /Applications/Thea.app
         log "Installed → /Applications/Thea.app"
-        osascript -e 'display notification "Thea synced & installed" with title "Thea Sync" sound name "Glass"' 2>/dev/null || true
+        osascript -e 'display notification "Thea built, tested & installed" with title "Thea Sync" sound name "Glass"' 2>/dev/null || true
     else
         log "WARNING: .app not found at $APP_PATH"
     fi

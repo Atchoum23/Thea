@@ -36,11 +36,11 @@ public class PrivacyModeService: ObservableObject {
     // MARK: - Privacy Mode Control
 
     /// Enable privacy mode - blanks screen and optionally disables local input
-    public func enablePrivacyMode(blankScreen: Bool = true, disableLocalInput: Bool = true) {
+    public func enablePrivacyMode(shouldBlankScreen: Bool = true, disableLocalInput: Bool = true) {
         guard !isPrivacyModeActive else { return }
 
         #if os(macOS)
-            if blankScreen {
+            if shouldBlankScreen {
                 blankScreen()
             }
             if disableLocalInput {
@@ -129,10 +129,11 @@ public class PrivacyModeService: ObservableObject {
 
     deinit {
         // Ensure we restore screen on deallocation
-        Task { @MainActor in
-            #if os(macOS)
-                blankingWindow?.close()
-            #endif
-        }
+        #if os(macOS)
+            let window = blankingWindow
+            Task { @MainActor in
+                window?.close()
+            }
+        #endif
     }
 }
