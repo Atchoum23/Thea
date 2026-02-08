@@ -76,9 +76,11 @@ struct TVEnhancedHomeView: View {
 // MARK: - Enhanced Chat View
 
 struct TVEnhancedChatView: View {
+    @ObservedObject var inferenceClient: RemoteInferenceClient
     @State private var messages: [TVChatMessage] = []
     @State private var inputText = ""
     @State private var isProcessing = false
+    @State private var activeRequestId: String?
     @State private var suggestedPrompts: [String] = [
         "What's on my calendar today?",
         "Find new releases this week",
@@ -90,6 +92,8 @@ struct TVEnhancedChatView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                connectionBanner
+
                 if messages.isEmpty {
                     welcomeView
                 } else {
@@ -100,13 +104,32 @@ struct TVEnhancedChatView: View {
             }
             .navigationTitle("Thea")
         }
+        .onAppear { setupStreamCallbacks() }
+    }
+
+    // MARK: - Connection Banner
+
+    @ViewBuilder
+    private var connectionBanner: some View {
+        if !inferenceClient.connectionState.isConnected {
+            HStack(spacing: 12) {
+                Image(systemName: "desktopcomputer.trianglebadge.exclamationmark")
+                    .foregroundStyle(.orange)
+                Text("Not connected to Mac — responses are simulated")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, 40)
+            .padding(.vertical, 8)
+            .background(.ultraThinMaterial)
+        }
     }
 
     private var welcomeView: some View {
         VStack(spacing: 40) {
             Spacer()
 
-            // Logo
             Image(systemName: "brain.head.profile")
                 .font(.system(size: 120))
                 .foregroundStyle(
@@ -127,7 +150,6 @@ struct TVEnhancedChatView: View {
                     .foregroundStyle(.secondary)
             }
 
-            // Suggested prompts
             VStack(spacing: 16) {
                 Text("Try asking:")
                     .font(.headline)
@@ -165,7 +187,7 @@ struct TVEnhancedChatView: View {
                             .id(message.id)
                     }
 
-                    if isProcessing {
+                    if isProcessing, !messages.contains(where: { $0.isStreaming }) {
                         HStack {
                             ProgressView()
                                 .scaleEffect(0.8)
@@ -190,7 +212,6 @@ struct TVEnhancedChatView: View {
 
     private var inputArea: some View {
         HStack(spacing: 16) {
-            // Voice input button
             Button {
                 // Trigger Siri voice input
             } label: {
@@ -202,7 +223,6 @@ struct TVEnhancedChatView: View {
             }
             .buttonStyle(.plain)
 
-            // Text input
             TextField("Ask Thea anything...", text: $inputText)
                 .font(.title3)
                 .focused($isInputFocused)
@@ -211,7 +231,6 @@ struct TVEnhancedChatView: View {
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
 
-            // Send button
             Button(action: sendMessage) {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 50))
@@ -224,6 +243,8 @@ struct TVEnhancedChatView: View {
         .background(.ultraThinMaterial)
     }
 
+    // MARK: - Send Message
+
     private func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
@@ -233,12 +254,44 @@ struct TVEnhancedChatView: View {
         inputText = ""
         isProcessing = true
 
-        // Simulate AI response (would connect to actual AI service)
+        if inferenceClient.connectionState.isConnected {
+            sendViaRelay()
+        } else {
+            sendSimulated(text: text)
+        }
+    }
+
+    private func sendViaRelay() {
+        let conversationMessages = messages.suffix(20).map { msg in
+            (role: msg.isUser ? "user" : "assistant", content: msg.content)
+        }
+
+        let assistantMsg = TVChatMessage(content: "", isUser: false, isStreaming: true)
+        messages.append(assistantMsg)
+
+        Task {
+            do {
+                let reqId = try await inferenceClient.sendInferenceRequest(
+                    messages: conversationMessages
+                )
+                activeRequestId = reqId
+            } catch {
+                if let idx = messages.lastIndex(where: { !$0.isUser && $0.isStreaming }) {
+                    messages[idx] = TVChatMessage(
+                        content: "Failed to send: \(error.localizedDescription)",
+                        isUser: false
+                    )
+                }
+                isProcessing = false
+            }
+        }
+    }
+
+    private func sendSimulated(text: String) {
         Task {
             try? await Task.sleep(for: .seconds(1.5))
-
             let response = TVChatMessage(
-                content: generateContextualResponse(for: text),
+                content: generateFallbackResponse(for: text),
                 isUser: false
             )
             messages.append(response)
@@ -246,26 +299,62 @@ struct TVEnhancedChatView: View {
         }
     }
 
-    private func generateContextualResponse(for query: String) -> String {
+    // MARK: - Stream Callbacks
+
+    private func setupStreamCallbacks() {
+        inferenceClient.onStreamDelta = { _, delta in
+            Task { @MainActor in
+                if let idx = messages.lastIndex(where: { !$0.isUser && $0.isStreaming }) {
+                    messages[idx].content += delta
+                }
+            }
+        }
+
+        inferenceClient.onStreamComplete = { _, complete in
+            Task { @MainActor in
+                if let idx = messages.lastIndex(where: { !$0.isUser && $0.isStreaming }) {
+                    messages[idx].content = complete.fullText
+                    messages[idx].isStreaming = false
+                    messages[idx].modelName = complete.model
+                }
+                isProcessing = false
+                activeRequestId = nil
+            }
+        }
+
+        inferenceClient.onStreamError = { _, errorDesc in
+            Task { @MainActor in
+                if let idx = messages.lastIndex(where: { !$0.isUser && $0.isStreaming }) {
+                    messages[idx].content = "Error: \(errorDesc)"
+                    messages[idx].isStreaming = false
+                }
+                isProcessing = false
+                activeRequestId = nil
+            }
+        }
+    }
+
+    // MARK: - Fallback Response
+
+    private func generateFallbackResponse(for query: String) -> String {
         let lower = query.lowercased()
 
         if lower.contains("calendar") || lower.contains("today") {
-            return "Based on your Trakt calendar, you have 3 episodes airing today:\n\n• Severance S2E05 at 20:00\n• The Last of Us S2E03 at 21:00\n• True Detective S5E02 at 22:00\n\nWould you like me to check streaming availability for any of these?"
-        }
-
-        if lower.contains("download") || lower.contains("queue") {
-            return "Your download queue currently has 2 items:\n\n1. Dune Part Two (2024) - 78% complete, ETA 12 min\n2. Shogun S01E10 - Queued\n\nBoth releases are high quality (2160p Remux, Atmos)."
+            return "I'm not connected to your Mac right now. " +
+                "Connect via Settings → Mac Connection to enable AI responses."
         }
 
         if lower.contains("watch") || lower.contains("recommend") {
-            return "Based on your viewing history and current mood, I'd recommend:\n\n🎬 **For a movie night:** Oppenheimer (available on your Plex)\n📺 **To continue a series:** You're 2 episodes behind on The Bear\n🆕 **Something new:** Ripley just premiered on Netflix\n\nWhat sounds good to you?"
+            return "I need to be connected to your Mac server for AI inference. " +
+                "Go to Settings → Mac Connection to set up the connection."
         }
 
-        if lower.contains("release") || lower.contains("new") {
-            return "This week's notable releases:\n\n**Movies:**\n• Challengers (2024) - Now in theaters, expected digital release in 3 weeks\n\n**TV Shows:**\n• Baby Reindeer S01 - All episodes on Netflix\n• Fallout S01 - All episodes on Prime Video\n\nWant me to add any of these to your watchlist?"
-        }
-
-        return "I can help you with:\n\n• 📅 Check your TV calendar and upcoming episodes\n• ⬇️ Monitor download queue and grab new releases\n• 📺 Find where content is streaming\n• 🎬 Get personalized recommendations\n\nWhat would you like to do?"
+        return "I'm running in offline mode without AI inference. To get real AI responses:\n\n" +
+            "1. Make sure Thea is running on your Mac\n" +
+            "2. Enable Remote Server in Thea's Mac settings\n" +
+            "3. Go to Settings → Mac Connection on this Apple TV\n" +
+            "4. Select your Mac from the list\n\n" +
+            "Once connected, I'll route your questions through your Mac's AI models!"
     }
 }
 
@@ -273,9 +362,11 @@ struct TVEnhancedChatView: View {
 
 struct TVChatMessage: Identifiable {
     let id = UUID()
-    let content: String
+    var content: String
     let isUser: Bool
     let timestamp = Date()
+    var isStreaming = false
+    var modelName: String?
 }
 
 struct TVChatMessageRow: View {
@@ -294,12 +385,41 @@ struct TVChatMessageRow: View {
                     .clipShape(Circle())
             }
 
-            Text(message.content)
-                .font(.body)
-                .padding(20)
-                .background(message.isUser ? Color.blue : Color.secondary.opacity(0.2))
-                .foregroundStyle(message.isUser ? .white : .primary)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
+            VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
+                if message.content.isEmpty && message.isStreaming {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                        Text("Thinking...")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(20)
+                    .background(Color.secondary.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                } else {
+                    HStack(spacing: 0) {
+                        Text(message.content)
+                            .font(.body)
+
+                        if message.isStreaming {
+                            Text("▊")
+                                .foregroundStyle(.blue)
+                                .opacity(0.8)
+                        }
+                    }
+                    .padding(20)
+                    .background(message.isUser ? Color.blue : Color.secondary.opacity(0.2))
+                    .foregroundStyle(message.isUser ? .white : .primary)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                }
+
+                if let model = message.modelName {
+                    Text(model)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
 
             if message.isUser {
                 Image(systemName: "person.circle.fill")
@@ -329,7 +449,6 @@ struct TVMediaAutomationView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 30) {
-                // Section picker
                 Picker("Section", selection: $selectedSection) {
                     ForEach(MediaSection.allCases, id: \.self) { section in
                         Text(section.rawValue).tag(section)
@@ -338,7 +457,6 @@ struct TVMediaAutomationView: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 60)
 
-                // Content
                 ScrollView {
                     LazyVStack(spacing: 20) {
                         switch selectedSection {
@@ -568,6 +686,8 @@ struct Badge: View {
 // MARK: - Enhanced Settings View
 
 struct TVEnhancedSettingsView: View {
+    @ObservedObject var inferenceClient: RemoteInferenceClient
+
     var body: some View {
         NavigationStack {
             List {
@@ -595,7 +715,12 @@ struct TVEnhancedSettingsView: View {
                     NavigationLink {
                         TVStreamingSettingsView()
                     } label: {
-                        SettingsRow(icon: "play.rectangle.fill", color: .purple, title: "Streaming Accounts", subtitle: "Netflix, Disney+, Canal+...")
+                        SettingsRow(
+                            icon: "play.rectangle.fill",
+                            color: .purple,
+                            title: "Streaming Accounts",
+                            subtitle: "Netflix, Disney+, Canal+..."
+                        )
                     }
 
                     NavigationLink {
@@ -609,13 +734,33 @@ struct TVEnhancedSettingsView: View {
                     NavigationLink {
                         Text("Quality Profiles")
                     } label: {
-                        SettingsRow(icon: "slider.horizontal.3", color: .green, title: "Quality Profiles", subtitle: "TRaSH Guides presets")
+                        SettingsRow(
+                            icon: "slider.horizontal.3",
+                            color: .green,
+                            title: "Quality Profiles",
+                            subtitle: "TRaSH Guides presets"
+                        )
                     }
 
                     NavigationLink {
                         Text("Indexers")
                     } label: {
                         SettingsRow(icon: "magnifyingglass", color: .orange, title: "Indexers", subtitle: "Torrent sources")
+                    }
+                }
+
+                Section("AI & Connectivity") {
+                    NavigationLink {
+                        TVInferenceRelaySettingsView(client: inferenceClient)
+                    } label: {
+                        SettingsRow(
+                            icon: "desktopcomputer",
+                            color: .indigo,
+                            title: "Mac Connection",
+                            subtitle: inferenceClient.connectionState.isConnected
+                                ? "Connected to \(inferenceClient.connectedServerName ?? "Mac")"
+                                : "Connect to your Mac for AI inference"
+                        )
                     }
                 }
 
@@ -691,7 +836,6 @@ struct TVTraktSettingsView: View {
 
                     Button("Connect") {
                         traktService.configure(clientID: clientID, clientSecret: clientSecret)
-                        // Would trigger OAuth flow
                     }
                     .disabled(clientID.isEmpty || clientSecret.isEmpty)
                 }
