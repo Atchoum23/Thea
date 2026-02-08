@@ -40,6 +40,12 @@ struct ChatInputView: View {
     @State private var attachmentManager = FileAttachmentManager.shared
     @State private var dragOver = false
 
+    // Phase B: Slash commands & mentions overlay state
+    #if os(macOS) || os(iOS)
+    @State private var showMentionOverlay = false
+    @State private var mentionQuery = ""
+    #endif
+
     var body: some View {
         VStack(spacing: 8) {
             // Attachment preview bar
@@ -47,7 +53,26 @@ struct ChatInputView: View {
                 attachmentPreviewBar
             }
 
-            // Model selector
+            // Slash command overlay (above input)
+            #if os(macOS) || os(iOS)
+            SlashCommandOverlay(inputText: $text) { command in
+                handleSlashCommand(command)
+            }
+            .padding(.horizontal, TheaSpacing.lg)
+
+            // Mention overlay (above input)
+            if showMentionOverlay {
+                MentionAutocompleteView(
+                    query: mentionQuery,
+                    onSelect: { item in handleMentionSelect(item) },
+                    onDismiss: { showMentionOverlay = false }
+                )
+                .padding(.horizontal, TheaSpacing.lg)
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
+            #endif
+
+            // Model selector + character counter
             HStack {
                 CompactModelSelectorView(
                     selectedModel: $selectedModel
@@ -59,6 +84,11 @@ struct ChatInputView: View {
                 }
 
                 Spacer()
+
+                // Character counter
+                if !text.isEmpty {
+                    characterCounter
+                }
 
                 // Attachment count badge
                 if !attachmentManager.attachments.isEmpty {
@@ -99,7 +129,30 @@ struct ChatInputView: View {
                     .disabled(isStreaming)
                 #endif
 
-                // Glass-styled text input
+                // Text input — use TheaTextInputField on macOS for configurable shortcuts
+                #if os(macOS)
+                TheaTextInputField(
+                    text: $text,
+                    placeholder: "Message Thea...",
+                    isFocused: _isFocused,
+                    isDisabled: isStreaming,
+                    dragOver: dragOver,
+                    onSubmit: {
+                        inputLog("onSubmit triggered via TheaTextInputField")
+                        if canSend {
+                            onSend()
+                        }
+                    },
+                    onPasteImage: { imageData in
+                        handlePastedImage(imageData)
+                    }
+                )
+                .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
+                    handleDrop(providers: providers)
+                    return true
+                }
+                #else
+                // iOS/watchOS/tvOS: standard TextField
                 HStack(alignment: .bottom, spacing: TheaSpacing.sm) {
                     TextField("Message Thea...", text: $text, axis: .vertical)
                         .textFieldStyle(.plain)
@@ -108,7 +161,7 @@ struct ChatInputView: View {
                         .disabled(isStreaming)
                         .onSubmit {
                             inputLog("onSubmit triggered")
-                            if !text.isEmpty || !attachmentManager.attachments.isEmpty {
+                            if canSend {
                                 onSend()
                             }
                         }
@@ -116,11 +169,6 @@ struct ChatInputView: View {
                 .padding(.horizontal, TheaSpacing.lg)
                 .padding(.vertical, TheaSpacing.md)
                 .liquidGlassRounded(cornerRadius: TheaCornerRadius.xl)
-                #if os(macOS)
-                    .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
-                        handleDrop(providers: providers)
-                        return true
-                    }
                 #endif
 
                 // Microphone button (inline voice input)
@@ -169,6 +217,11 @@ struct ChatInputView: View {
             isFocused = true
             selectedModel = AppConfiguration.shared.providerConfig.defaultModel
         }
+        #if os(macOS) || os(iOS)
+        .onChange(of: text) { _, newValue in
+            updateOverlayState(newValue)
+        }
+        #endif
         #if os(macOS)
         .sheet(isPresented: $showingScreenshotPreview) {
             if let image = capturedImage {
@@ -183,6 +236,78 @@ struct ChatInputView: View {
 
     private var canSend: Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachmentManager.attachments.isEmpty
+    }
+
+    // MARK: - Character Counter
+
+    private var characterCounter: some View {
+        let count = text.count
+        let color: Color = count > 10_000 ? .red : (count > 5_000 ? .orange : .secondary)
+        return Text("\(count)")
+            .font(.caption2.monospacedDigit())
+            .foregroundStyle(color)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .accessibilityLabel("\(count) characters typed")
+    }
+
+    // MARK: - Slash Command Handling
+
+    #if os(macOS) || os(iOS)
+    private func handleSlashCommand(_ command: SlashCommand) {
+        // Replace the "/" prefix with the command text and a trailing space
+        text = "/\(command.name) "
+        inputLog("Slash command selected: /\(command.name)")
+    }
+
+    // MARK: - Mention Handling
+
+    private func handleMentionSelect(_ item: MentionItem) {
+        // Replace the @query with the mention reference
+        if let atRange = text.range(of: "@", options: .backwards) {
+            text = String(text[text.startIndex..<atRange.lowerBound]) + "@\(item.name) "
+        }
+        showMentionOverlay = false
+        inputLog("Mention selected: @\(item.name)")
+    }
+
+    // MARK: - Overlay State Management
+
+    private func updateOverlayState(_ newText: String) {
+        // Check for @mention trigger
+        if let lastAt = newText.lastIndex(of: "@") {
+            let afterAt = String(newText[newText.index(after: lastAt)...])
+            // Only show if the @ is preceded by whitespace or is at the start
+            let beforeAt = lastAt == newText.startIndex
+                || newText[newText.index(before: lastAt)].isWhitespace
+            if beforeAt && !afterAt.contains(" ") {
+                mentionQuery = afterAt
+                showMentionOverlay = true
+                return
+            }
+        }
+        showMentionOverlay = false
+    }
+    #endif
+
+    // MARK: - Image Paste Handling
+
+    private func handlePastedImage(_ imageData: Data) {
+        // Convert pasted image data to a file attachment
+        Task {
+            let tempDir = FileManager.default.temporaryDirectory
+            let fileName = "pasted-image-\(UUID().uuidString.prefix(8)).png"
+            let tempURL = tempDir.appendingPathComponent(fileName)
+            do {
+                try imageData.write(to: tempURL)
+                try await attachmentManager.addAttachment(from: tempURL)
+                inputLog("Pasted image attached: \(fileName)")
+            } catch {
+                inputLog("Failed to attach pasted image: \(error)")
+            }
+        }
     }
 
     // MARK: - Attachment Preview Bar
@@ -240,7 +365,7 @@ struct ChatInputView: View {
     private func handleDrop(providers: [NSItemProvider]) {
         for provider in providers {
             if provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
-                provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { data, error in
+                provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { data, _ in
                     guard let data = data as? Data,
                           let url = URL(dataRepresentation: data, relativeTo: nil) else { return }
 
