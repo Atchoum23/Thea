@@ -98,7 +98,14 @@ done
 - **TaskType** (`Intelligence/Classification/`): Task type enum used across codebase
 - **ModelRouter** (`Intelligence/Routing/`): Routes to optimal model based on task
 - **SmartModelRouter** (`Intelligence/Routing/`): Advanced routing with cost optimization
-- **ChatManager.selectProviderAndModel()**: Wired to use TaskClassifier + ModelRouter
+- **SemanticSearchService** (`Intelligence/Search/`): Embedding-based semantic search (macOS only)
+- **ChatManager.selectProviderAndModel()**: Wired with `#if os(macOS)` to use TaskClassifier + ModelRouter; falls back to default provider on iOS/watchOS/tvOS
+
+## CloudKit (ACTIVE)
+
+- **CloudKitService** (`Shared/Sync/CloudKitService.swift`): Canonical CloudKit implementation (delta sync, subscriptions, sharing)
+- **SyncSettingsView** (`Shared/UI/Views/Settings/SyncSettingsView.swift`): Comprehensive sync UI (macOS "Sync" tab)
+- **CloudSyncManager was REMOVED** — it was dead code, never called
 
 ## Excluded From Builds — DO NOT IMPLEMENT
 
