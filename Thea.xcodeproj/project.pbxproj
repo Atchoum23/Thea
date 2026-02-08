@@ -205,6 +205,7 @@
 		2C0CE26F89A75A196536C000 /* IntentDisambiguation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77EC5B01AAFE2D78B7E4955 /* IntentDisambiguation.swift */; };
 		2C8B4D62A9E3C259FB9EB820 /* StaticAnalysisVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8187E849AAA5EC9CBDB243F /* StaticAnalysisVerifier.swift */; };
 		2CA2E3323FE852A26F316AD4 /* HDKnowledgeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3151C1AA921620527D16FC69 /* HDKnowledgeScanner.swift */; };
+		2CA928DA104E2772D0F67E1C /* InferenceRelayHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50342EEE33EF5DE86B78D9C2 /* InferenceRelayHandler.swift */; };
 		2CF2AF27EF10D1C1DF57C6EA /* AgentSecEnforcerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DC042AE07052C05C5274FF /* AgentSecEnforcerTests.swift */; };
 		2D4417A2EA16C3500C061FCF /* DocumentIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C99C11F4BBFF59A307C700D /* DocumentIntelligence.swift */; };
 		2D4C2D17107100618EECDCCE /* MigrationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C23C2BCE70110E703E0F6E6 /* MigrationEngine.swift */; };
@@ -765,6 +766,7 @@
 		A687806325DDDFDB134D3814 /* IncomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 270E9C14561580AE91CD94C0 /* IncomeViewModel.swift */; };
 		A68968CE519B969E6D948D88 /* SystemPromptConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE9C5718A596C7319B00E186 /* SystemPromptConfiguration.swift */; };
 		A692DBD96EAF604BD1752599 /* TheaRemoteServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA88CB3630D0278DA99046B6 /* TheaRemoteServer.swift */; };
+		A6B11E1B54AC60BA655C24DA /* InferenceRelayHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50342EEE33EF5DE86B78D9C2 /* InferenceRelayHandler.swift */; };
 		A6B1652A966151BC2FB27C76 /* PermissionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98179C2572BBED4C0F018C2 /* PermissionsSettingsView.swift */; };
 		A6EF5E36D39D197FBC0257C7 /* RemindersIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E9D82E9593330A9EC81607 /* RemindersIntegration.swift */; };
 		A712DC65BE0AC9915111A216 /* PriorityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B9081D50C18C318D7E018E /* PriorityManager.swift */; };
@@ -786,6 +788,7 @@
 		AA12EBDE8AB1833EE5864FD1 /* video-controller.css in Resources */ = {isa = PBXBuildFile; fileRef = FCA42A41D86946FB5AD20286 /* video-controller.css */; };
 		AA21C6329C6770F328CC62F3 /* TaskBreakdownService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27D90B373D6905F399C035F /* TaskBreakdownService.swift */; };
 		AAA1D948B64CBB8F5663C0A3 /* ToolFrameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB2D9DAE9153070DC42CA20 /* ToolFrameworkTests.swift */; };
+		AAE6B0D0300F40266B5BC393 /* InferenceRelayProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38385F32DD8062479DDD388C /* InferenceRelayProtocol.swift */; };
 		AAEEA70E3A0D869FEED5040C /* SendableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1929BDC645D1ABE08396E35E /* SendableValue.swift */; };
 		AB9F7B68A3F0E96CFC9A9C89 /* IncrementalIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEC0F435920F3E3F310E126 /* IncrementalIndexer.swift */; };
 		ABFBAA9606280C526B197B94 /* ProjectMemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481F245A51B8370C481C0E4 /* ProjectMemoryManager.swift */; };
@@ -1551,6 +1554,7 @@
 		50207830375DF465B9FF47B2 /* StoreKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitService.swift; sourceTree = "<group>"; };
 		5028FD03DD32838DE36130A7 /* AnthropicProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicProvider.swift; sourceTree = "<group>"; };
 		50298F368E9D88D39615881C /* SkillsRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsRegistry.swift; sourceTree = "<group>"; };
+		50342EEE33EF5DE86B78D9C2 /* InferenceRelayHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceRelayHandler.swift; sourceTree = "<group>"; };
 		504F004E3218F648DBA1B73C /* FocusFilterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusFilterManager.swift; sourceTree = "<group>"; };
 		50B6778A314349EEE2113CFB /* content-core.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "content-core.js"; sourceTree = "<group>"; };
 		5124AE6AF8345D2125711ED3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -4893,6 +4897,7 @@
 		F96B7B02E25F284595E1114C /* InferenceRelay */ = {
 			isa = PBXGroup;
 			children = (
+				50342EEE33EF5DE86B78D9C2 /* InferenceRelayHandler.swift */,
 				38385F32DD8062479DDD388C /* InferenceRelayProtocol.swift */,
 			);
 			path = InferenceRelay;
@@ -5752,6 +5757,7 @@
 				A687806325DDDFDB134D3814 /* IncomeViewModel.swift in Sources */,
 				AB9F7B68A3F0E96CFC9A9C89 /* IncrementalIndexer.swift in Sources */,
 				F9D81883464E8CF8A8747350 /* IndexedFile.swift in Sources */,
+				A6B11E1B54AC60BA655C24DA /* InferenceRelayHandler.swift in Sources */,
 				88974666AB896411B98FA3BC /* InferenceRelayProtocol.swift in Sources */,
 				4BA179734C3AE51F03DA6397 /* InlineCodeEditor.swift in Sources */,
 				92C6EA03CA0D93B16940FB2C /* InsightEngine.swift in Sources */,
@@ -6055,6 +6061,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E041BB61282D31195FFC5CD0 /* HealthMonitorService.swift in Sources */,
+				AAE6B0D0300F40266B5BC393 /* InferenceRelayProtocol.swift in Sources */,
 				480FEB6FF6A248C35BCC9175 /* MediaAutomationService.swift in Sources */,
 				21F5F4EB75A35698E9542B54 /* StreamingService.swift in Sources */,
 				498D2E7B18E49D6C77C23875 /* TVDashboardView.swift in Sources */,
@@ -6388,6 +6395,7 @@
 				EE72CA99A6EA84B8191508BF /* IncomeViewModel.swift in Sources */,
 				CF0846627C386092580471F3 /* IncrementalIndexer.swift in Sources */,
 				1D03EADA256A1AD5C56D60CB /* IndexedFile.swift in Sources */,
+				2CA928DA104E2772D0F67E1C /* InferenceRelayHandler.swift in Sources */,
 				65B41165663912330FC8C609 /* InferenceRelayProtocol.swift in Sources */,
 				EBCB02304E1273C2FB7E8846 /* InlineCodeEditor.swift in Sources */,
 				0C9E00A50AF0EE4AB49E8927 /* InputTrackingManager.swift in Sources */,

@@ -827,6 +827,8 @@ targets:
         excludes:
           - "**/TVFeatures/**"
       - path: Shared/Resources/Assets.xcassets
+      # Shared inference relay protocol types (pure Foundation+Codable, no heavy deps)
+      - path: Shared/InferenceRelay/InferenceRelayProtocol.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.tvos
