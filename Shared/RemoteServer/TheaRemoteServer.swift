@@ -701,6 +701,14 @@ import Network
         @Published public var encryptionRequired: Bool = true
         @Published public var useWhitelist: Bool = false
         @Published public var sessionTimeout: TimeInterval = 3600
+        @Published public var enableClipboardSync: Bool = false
+        @Published public var enableUnattendedAccess: Bool = false
+        @Published public var enableSessionRecording: Bool = false
+        @Published public var autoRecordSessions: Bool = false
+        @Published public var enableAudioStreaming: Bool = false
+        @Published public var enableChatAnnotations: Bool = false
+        @Published public var enableTwoFactor: Bool = false
+        @Published public var auditLogRetentionDays: Int = 90
     }
 
 #endif
