@@ -357,16 +357,24 @@ import SwiftUI
             case .suspiciousActivity: "exclamationmark.triangle"
             case .fileAccessBlocked, .commandBlocked: "xmark.shield"
             case .serverError: "exclamationmark.circle"
+            case .totpFailed, .totpVerified: "key"
+            case .unattendedAccessUsed: "person.slash"
+            case .privacyModeEnabled, .privacyModeDisabled: "eye.slash"
+            case .recordingStarted, .recordingStopped: "record.circle"
+            case .clipboardSynced: "doc.on.clipboard"
+            case .configurationChanged: "gearshape"
             }
         }
 
         private var eventColor: Color {
             switch event.type {
-            case .serverStarted, .clientConnected: .green
-            case .serverStopped, .clientDisconnected: .gray
-            case .connectionRejected, .authenticationFailed, .permissionDenied: .orange
+            case .serverStarted, .clientConnected, .totpVerified: .green
+            case .serverStopped, .clientDisconnected, .configurationChanged: .gray
+            case .connectionRejected, .authenticationFailed, .permissionDenied, .totpFailed: .orange
             case .rateLimitExceeded, .suspiciousActivity, .fileAccessBlocked, .commandBlocked: .red
             case .serverError: .red
+            case .unattendedAccessUsed, .clipboardSynced: .blue
+            case .privacyModeEnabled, .privacyModeDisabled, .recordingStarted, .recordingStopped: .purple
             }
         }
 
