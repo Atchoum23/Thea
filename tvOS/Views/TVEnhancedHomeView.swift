@@ -75,9 +75,11 @@ struct TVEnhancedHomeView: View {
 // MARK: - Enhanced Chat View
 
 struct TVEnhancedChatView: View {
+    @StateObject private var inferenceClient = RemoteInferenceClient()
     @State private var messages: [TVChatMessage] = []
     @State private var inputText = ""
     @State private var isProcessing = false
+    @State private var activeRequestId: String?
     @State private var suggestedPrompts: [String] = [
         "What's on my calendar today?",
         "Find new releases this week",
@@ -89,6 +91,8 @@ struct TVEnhancedChatView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                connectionBanner
+
                 if messages.isEmpty {
                     welcomeView
                 } else {
@@ -98,6 +102,26 @@ struct TVEnhancedChatView: View {
                 inputArea
             }
             .navigationTitle("Thea")
+        }
+        .onAppear { setupStreamCallbacks() }
+    }
+
+    // MARK: - Connection Banner
+
+    @ViewBuilder
+    private var connectionBanner: some View {
+        if !inferenceClient.connectionState.isConnected {
+            HStack(spacing: 12) {
+                Image(systemName: "desktopcomputer.trianglebadge.exclamationmark")
+                    .foregroundStyle(.orange)
+                Text("Not connected to Mac — responses are simulated")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, 40)
+            .padding(.vertical, 8)
+            .background(.ultraThinMaterial)
         }
     }
 
@@ -223,6 +247,8 @@ struct TVEnhancedChatView: View {
         .background(.ultraThinMaterial)
     }
 
+    // MARK: - Send Message
+
     private func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
@@ -232,12 +258,49 @@ struct TVEnhancedChatView: View {
         inputText = ""
         isProcessing = true
 
-        // Simulate AI response (would connect to actual AI service)
+        if inferenceClient.connectionState.isConnected {
+            sendViaRelay(text: text)
+        } else {
+            sendSimulated(text: text)
+        }
+    }
+
+    /// Send chat via the macOS inference relay (real AI response).
+    private func sendViaRelay(text: String) {
+        // Build conversation context from recent messages
+        let conversationMessages = messages.suffix(20).map { msg -> (role: String, content: String) in
+            (role: msg.isUser ? "user" : "assistant", content: msg.content)
+        }
+
+        // Create a placeholder assistant message for streaming
+        let assistantMessage = TVChatMessage(content: "", isUser: false, isStreaming: true)
+        messages.append(assistantMessage)
+
+        Task {
+            do {
+                let requestId = try await inferenceClient.sendInferenceRequest(
+                    messages: conversationMessages
+                )
+                activeRequestId = requestId
+            } catch {
+                // Replace streaming placeholder with error message
+                if let idx = messages.lastIndex(where: { !$0.isUser && $0.isStreaming }) {
+                    messages[idx] = TVChatMessage(
+                        content: "Failed to send request: \(error.localizedDescription)",
+                        isUser: false
+                    )
+                }
+                isProcessing = false
+            }
+        }
+    }
+
+    /// Fallback: simulated responses when not connected to a Mac server.
+    private func sendSimulated(text: String) {
         Task {
             try? await Task.sleep(for: .seconds(1.5))
-
             let response = TVChatMessage(
-                content: generateContextualResponse(for: text),
+                content: generateFallbackResponse(for: text),
                 isUser: false
             )
             messages.append(response)
@@ -245,26 +308,57 @@ struct TVEnhancedChatView: View {
         }
     }
 
-    private func generateContextualResponse(for query: String) -> String {
+    // MARK: - Stream Callbacks
+
+    private func setupStreamCallbacks() {
+        inferenceClient.onStreamDelta = { [self] _, delta in
+            Task { @MainActor in
+                // Append delta to the last assistant (streaming) message
+                if let idx = messages.lastIndex(where: { !$0.isUser && $0.isStreaming }) {
+                    messages[idx].content += delta
+                }
+            }
+        }
+
+        inferenceClient.onStreamComplete = { [self] _, complete in
+            Task { @MainActor in
+                // Finalize the streaming message
+                if let idx = messages.lastIndex(where: { !$0.isUser && $0.isStreaming }) {
+                    messages[idx].content = complete.fullText
+                    messages[idx].isStreaming = false
+                    messages[idx].modelName = complete.model
+                }
+                isProcessing = false
+                activeRequestId = nil
+            }
+        }
+
+        inferenceClient.onStreamError = { [self] _, errorDesc in
+            Task { @MainActor in
+                if let idx = messages.lastIndex(where: { !$0.isUser && $0.isStreaming }) {
+                    messages[idx].content = "Error: \(errorDesc)"
+                    messages[idx].isStreaming = false
+                }
+                isProcessing = false
+                activeRequestId = nil
+            }
+        }
+    }
+
+    // MARK: - Fallback Response
+
+    private func generateFallbackResponse(for query: String) -> String {
         let lower = query.lowercased()
 
         if lower.contains("calendar") || lower.contains("today") {
-            return "Based on your Trakt calendar, you have 3 episodes airing today:\n\n• Severance S2E05 at 20:00\n• The Last of Us S2E03 at 21:00\n• True Detective S5E02 at 22:00\n\nWould you like me to check streaming availability for any of these?"
-        }
-
-        if lower.contains("download") || lower.contains("queue") {
-            return "Your download queue currently has 2 items:\n\n1. Dune Part Two (2024) - 78% complete, ETA 12 min\n2. Shogun S01E10 - Queued\n\nBoth releases are high quality (2160p Remux, Atmos)."
+            return "I'm not connected to your Mac right now, so I can't check your calendar. Connect to your Mac server in Settings → Mac Connection to enable AI responses."
         }
 
         if lower.contains("watch") || lower.contains("recommend") {
-            return "Based on your viewing history and current mood, I'd recommend:\n\n🎬 **For a movie night:** Oppenheimer (available on your Plex)\n📺 **To continue a series:** You're 2 episodes behind on The Bear\n🆕 **Something new:** Ripley just premiered on Netflix\n\nWhat sounds good to you?"
+            return "I'd love to give you personalized recommendations, but I need to be connected to your Mac server for AI inference. Go to Settings → Mac Connection to set up the connection."
         }
 
-        if lower.contains("release") || lower.contains("new") {
-            return "This week's notable releases:\n\n**Movies:**\n• Challengers (2024) - Now in theaters, expected digital release in 3 weeks\n\n**TV Shows:**\n• Baby Reindeer S01 - All episodes on Netflix\n• Fallout S01 - All episodes on Prime Video\n\nWant me to add any of these to your watchlist?"
-        }
-
-        return "I can help you with:\n\n• 📅 Check your TV calendar and upcoming episodes\n• ⬇️ Monitor download queue and grab new releases\n• 📺 Find where content is streaming\n• 🎬 Get personalized recommendations\n\nWhat would you like to do?"
+        return "I'm running in offline mode without AI inference. To get real AI responses:\n\n1. Make sure Thea is running on your Mac\n2. Enable Remote Server in Thea's Mac settings\n3. Go to Settings → Mac Connection on this Apple TV\n4. Select your Mac from the list\n\nOnce connected, I'll route your questions through your Mac's AI models!"
     }
 }
 
@@ -272,9 +366,11 @@ struct TVEnhancedChatView: View {
 
 struct TVChatMessage: Identifiable {
     let id = UUID()
-    let content: String
+    var content: String
     let isUser: Bool
     let timestamp = Date()
+    var isStreaming = false
+    var modelName: String?
 }
 
 struct TVChatMessageRow: View {
@@ -293,12 +389,41 @@ struct TVChatMessageRow: View {
                     .clipShape(Circle())
             }
 
-            Text(message.content)
-                .font(.body)
-                .padding(20)
-                .background(message.isUser ? Color.blue : Color.secondary.opacity(0.2))
-                .foregroundStyle(message.isUser ? .white : .primary)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
+            VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
+                if message.content.isEmpty && message.isStreaming {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                        Text("Thinking...")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(20)
+                    .background(Color.secondary.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                } else {
+                    HStack(spacing: 0) {
+                        Text(message.content)
+                            .font(.body)
+
+                        if message.isStreaming {
+                            Text("▊")
+                                .foregroundStyle(.blue)
+                                .opacity(0.8)
+                        }
+                    }
+                    .padding(20)
+                    .background(message.isUser ? Color.blue : Color.secondary.opacity(0.2))
+                    .foregroundStyle(message.isUser ? .white : .primary)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                }
+
+                if let model = message.modelName {
+                    Text(model)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
 
             if message.isUser {
                 Image(systemName: "person.circle.fill")
@@ -567,6 +692,8 @@ struct Badge: View {
 // MARK: - Enhanced Settings View
 
 struct TVEnhancedSettingsView: View {
+    @StateObject private var inferenceClient = RemoteInferenceClient()
+
     var body: some View {
         NavigationStack {
             List {
@@ -615,6 +742,21 @@ struct TVEnhancedSettingsView: View {
                         Text("Indexers")
                     } label: {
                         SettingsRow(icon: "magnifyingglass", color: .orange, title: "Indexers", subtitle: "Torrent sources")
+                    }
+                }
+
+                Section("AI & Connectivity") {
+                    NavigationLink {
+                        TVInferenceRelaySettingsView(client: inferenceClient)
+                    } label: {
+                        SettingsRow(
+                            icon: "desktopcomputer",
+                            color: .indigo,
+                            title: "Mac Connection",
+                            subtitle: inferenceClient.connectionState.isConnected
+                                ? "Connected to \(inferenceClient.connectedServerName ?? "Mac")"
+                                : "Connect to your Mac for AI inference"
+                        )
                     }
                 }
 
