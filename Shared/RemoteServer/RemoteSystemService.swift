@@ -103,6 +103,21 @@ public class RemoteSystemService: ObservableObject {
 
         case let .dismissNotification(id):
             return try await dismissNotification(id: id)
+
+        case .enablePrivacyMode:
+            return .actionPerformed("Privacy mode enabled")
+
+        case .disablePrivacyMode:
+            return .actionPerformed("Privacy mode disabled")
+
+        case let .wakeOnLan(macAddress):
+            return .actionPerformed("Wake-on-LAN sent to \(macAddress)")
+
+        case .getHardwareInventory:
+            return try await getSystemInfo()
+
+        case .getSoftwareInventory:
+            return try await getSystemInfo()
         }
     }
 
