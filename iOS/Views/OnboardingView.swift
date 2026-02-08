@@ -287,7 +287,7 @@ struct OnboardingPermissionRow: View {
             .yellow
         case .provisional:
             .blue
-        case .notDetermined, .notAvailable:
+        case .notDetermined, .notAvailable, .unknown:
             .gray
         }
     }
@@ -310,7 +310,7 @@ struct OnboardingPermissionRow: View {
         case .provisional:
             Image(systemName: "checkmark.circle")
                 .foregroundStyle(.blue)
-        case .notDetermined, .notAvailable:
+        case .notDetermined, .notAvailable, .unknown:
             Image(systemName: "circle")
                 .foregroundStyle(.gray)
         }
