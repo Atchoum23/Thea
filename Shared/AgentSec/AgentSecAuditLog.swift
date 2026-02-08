@@ -22,7 +22,7 @@ public final class AgentSecAuditLog: ObservableObject {
 
     // MARK: - Published State
 
-    @Published public private(set) var entries: [AuditEntry] = []
+    @Published public private(set) var entries: [AgentSecAuditEntry] = []
     @Published public private(set) var totalEntryCount: Int = 0
 
     // MARK: - Initialization
@@ -57,7 +57,7 @@ public final class AgentSecAuditLog: ObservableObject {
         severity: AuditSeverity = .info,
         context: [String: String] = [:]
     ) {
-        let entry = AuditEntry(
+        let entry = AgentSecAuditEntry(
             event: event,
             details: details,
             severity: severity,
@@ -140,28 +140,28 @@ public final class AgentSecAuditLog: ObservableObject {
     // MARK: - Query Methods
 
     /// Get entries by event type
-    public func entries(for eventType: AuditEventType) -> [AuditEntry] {
+    public func entries(for eventType: AuditEventType) -> [AgentSecAuditEntry] {
         entries.filter { $0.event == eventType }
     }
 
     /// Get entries by severity
-    public func entries(withSeverity severity: AuditSeverity) -> [AuditEntry] {
+    public func entries(withSeverity severity: AuditSeverity) -> [AgentSecAuditEntry] {
         entries.filter { $0.severity == severity }
     }
 
     /// Get entries in time range
-    public func entries(from startDate: Date, to endDate: Date) -> [AuditEntry] {
+    public func entries(from startDate: Date, to endDate: Date) -> [AgentSecAuditEntry] {
         entries.filter { $0.timestamp >= startDate && $0.timestamp <= endDate }
     }
 
     /// Get recent entries (last N)
-    public func recentEntries(_ count: Int = 100) -> [AuditEntry] {
+    public func recentEntries(_ count: Int = 100) -> [AgentSecAuditEntry] {
         Array(entries.suffix(count))
     }
 
     // MARK: - File Operations
 
-    private func writeEntryToFile(_ entry: AuditEntry) {
+    private func writeEntryToFile(_ entry: AgentSecAuditEntry) {
         let formatter = ISO8601DateFormatter()
         let line = "\(formatter.string(from: entry.timestamp))|\(entry.severity.rawValue)|\(entry.event.rawValue)|\(entry.details)|\(entry.contextString)\n"
 
@@ -197,7 +197,7 @@ public final class AgentSecAuditLog: ObservableObject {
                    let severity = AuditSeverity(rawValue: parts[1]),
                    let event = AuditEventType(rawValue: parts[2])
                 {
-                    let entry = AuditEntry(
+                    let entry = AgentSecAuditEntry(
                         id: UUID(),
                         timestamp: timestamp,
                         event: event,
@@ -234,7 +234,7 @@ public final class AgentSecAuditLog: ObservableObject {
 // MARK: - Audit Entry
 
 /// A single audit log entry
-public struct AuditEntry: Identifiable, Codable, Sendable {
+public struct AgentSecAuditEntry: Identifiable, Codable, Sendable {
     public let id: UUID
     public let timestamp: Date
     public let event: AuditEventType
