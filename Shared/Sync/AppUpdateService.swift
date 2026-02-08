@@ -40,10 +40,20 @@ public final class AppUpdateService: ObservableObject {
 
     // MARK: - Private
 
-    private var privateDatabase: CKDatabase {
-        CKContainer(identifier: containerIdentifier).privateCloudDatabase
+    private var _container: CKContainer?
+    private var container: CKContainer? {
+        if _container == nil {
+            // Lazily create container - may fail if entitlements are missing
+            _container = CKContainer(identifier: containerIdentifier)
+        }
+        return _container
     }
 
+    private var privateDatabase: CKDatabase? {
+        container?.privateCloudDatabase
+    }
+
+    private var cloudKitAvailable = true
     private var subscriptionSetUp = false
     private var cancellables = Set<AnyCancellable>()
 
@@ -72,7 +82,13 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - CloudKit Subscription
 
     private func setupSubscription() async {
-        guard !subscriptionSetUp else { return }
+        guard !subscriptionSetUp, cloudKitAvailable else { return }
+
+        guard let database = privateDatabase else {
+            cloudKitAvailable = false
+            logger.warning("CloudKit not available - update sync disabled")
+            return
+        }
 
         let predicate = NSPredicate(value: true)
         let subscription = CKQuerySubscription(
@@ -89,12 +105,15 @@ public final class AppUpdateService: ObservableObject {
         subscription.notificationInfo = notificationInfo
 
         do {
-            _ = try await privateDatabase.save(subscription)
+            _ = try await database.save(subscription)
             subscriptionSetUp = true
             logger.info("App update CloudKit subscription created")
         } catch let error as CKError where error.code == .serverRejectedRequest {
             subscriptionSetUp = true
             logger.debug("App update subscription already exists")
+        } catch let error as CKError where error.code == .notAuthenticated || error.code == .permissionFailure {
+            cloudKitAvailable = false
+            logger.warning("CloudKit not authenticated or permission denied - update sync disabled")
         } catch {
             logger.error("Failed to setup update subscription: \(error.localizedDescription)")
         }
@@ -109,6 +128,11 @@ public final class AppUpdateService: ObservableObject {
         commitHash: String,
         sourceDevice: String
     ) async throws {
+        guard cloudKitAvailable, let database = privateDatabase else {
+            logger.debug("CloudKit not available - skipping update publish")
+            return
+        }
+
         let record = CKRecord(recordType: recordType)
         record["version"] = version as CKRecordValue
         record["build"] = build as CKRecordValue
@@ -119,7 +143,7 @@ public final class AppUpdateService: ObservableObject {
         record["deviceID"] = DeviceProfile.current().id as CKRecordValue
 
         do {
-            _ = try await privateDatabase.save(record)
+            _ = try await database.save(record)
             logger.info("Published update notification: v\(version) build \(build) from \(sourceDevice)")
         } catch {
             logger.error("Failed to publish update: \(error.localizedDescription)")
@@ -130,6 +154,11 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - Check for Updates
 
     public func checkForUpdates() async {
+        guard cloudKitAvailable, let database = privateDatabase else {
+            logger.debug("CloudKit not available - skipping update check")
+            return
+        }
+
         isCheckingForUpdate = true
         defer {
             isCheckingForUpdate = false
@@ -146,7 +175,7 @@ public final class AppUpdateService: ObservableObject {
         query.sortDescriptors = [NSSortDescriptor(key: "publishedAt", ascending: false)]
 
         do {
-            let results = try await privateDatabase.records(matching: query, resultsLimit: 10)
+            let results = try await database.records(matching: query, resultsLimit: 10)
 
             var latestUpdate: AppUpdateInfo?
 
@@ -334,15 +363,17 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - Cleanup
 
     private func cleanupOldUpdateRecords() async {
+        guard cloudKitAvailable, let database = privateDatabase else { return }
+
         let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
         let predicate = NSPredicate(format: "publishedAt < %@", cutoff as NSDate)
         let query = CKQuery(recordType: recordType, predicate: predicate)
 
         do {
-            let results = try await privateDatabase.records(matching: query)
+            let results = try await database.records(matching: query)
             let recordIDs = results.matchResults.map { $0.0 }
             if !recordIDs.isEmpty {
-                _ = try await privateDatabase.modifyRecords(saving: [], deleting: recordIDs)
+                _ = try await database.modifyRecords(saving: [], deleting: recordIDs)
                 logger.info("Cleaned up \(recordIDs.count) old update records")
             }
         } catch {
