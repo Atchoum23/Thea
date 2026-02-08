@@ -131,7 +131,7 @@ If a task seems to require changes in an excluded area, **STOP and ask the user*
 | Category | Excluded Pattern(s) | Use Instead |
 |---|---|---|
 | **MetaAI** (blanket, ~73 files) | `**/AI/MetaAI/**`, `**/Views/MetaAI/**`, `**/MetaAI/ModelBenchmarkService.swift` | `Shared/Intelligence/` |
-| **Duplicate Providers** | `**/Providers/{Anthropic,DeepSeek,Google,Groq,OpenAI,OpenRouter,Perplexity,Helpers,Protocol,Registry}/**`, `**/AI/Providers/AnthropicFilesAPI.swift`, `**/AI/Providers/AnthropicTokenCounter.swift` | `Shared/AI/Providers/` |
+| **Duplicate Providers** | `**/Providers/{Anthropic,DeepSeek,Google,Groq,OpenAI,OpenRouter,Perplexity,Helpers,Protocol,Registry}/**` | `Shared/AI/Providers/` (AnthropicFilesAPI + AnthropicTokenCounter now ACTIVE) |
 | **Duplicate Terminal** | `**/Execution/Terminal/**` | `Shared/System/Terminal/` |
 | **Duplicate Memory** | `**/AI/Memory/**` | `Shared/Memory/` |
 | **AI Subsystems** | `**/AI/Context/**`, `**/AI/Adaptive/**`, `**/AI/MultiModal/**`, `**/AI/Proactive/**` | None active |
@@ -144,7 +144,7 @@ If a task seems to require changes in an excluded area, **STOP and ask the user*
 | **PromptEngineering** | `**/PromptEngineering/**` | None active |
 | **ResourceManagement** | `**/ResourceManagement/**` | None active |
 | **Squads** | `**/Squads/**` | None active |
-| **Settings Views** | `**/Settings/Orchestrator/**`, `**/Settings/LocalModels/**`, `**/Settings/Privacy/**`, `**/Settings/Advanced/**`, `**/Settings/AutonomousTasks/**`, plus ~15 individual Settings files | None active |
+| **Settings Views** | `**/Settings/Orchestrator/**`, `**/Settings/LocalModels/**`, `**/Settings/Privacy/**`, `**/Settings/Advanced/**`, `**/Settings/AutonomousTasks/**`, plus ~15 individual Settings files | `PermissionsSettingsView` now ACTIVE (used by MacSettingsView) |
 | **Views** | `**/Views/Code/**`, `**/Views/LocalModels/**`, `**/Views/LifeTracking/**`, plus individual view files | None active |
 | **Components** | `EnhancedMessageBubble`, `ExecutableCodeBlock`, `THEAThinkingView`, `StreamingTextView`, `ConfidenceIndicatorViews`, `TheaTextInputField`, `MemoryContextView`, `QuerySuggestionOverlay` | None active |
 | **Design (platform)** | `**/Theme/DesignTokens.swift` (macOS), `**/Design/DesignSystemStubs.swift`, `**/Theme/TheaAnimations.swift` | `TheaDesignSystem.swift` (macOS canonical) |

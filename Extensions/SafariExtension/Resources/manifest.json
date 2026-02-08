@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Thea",
-    "version": "1.0.0",
-    "description": "Your intelligent AI companion in Safari",
+    "version": "2.0.0",
+    "description": "All-in-one browser companion: AI sidebar, dark mode (20+ themes), video speed control, ad blocking, password manager, print-friendly reader, persistent memory, privacy shield, and writing assistant",
     "icons": {
         "48": "icon-48.png",
         "96": "icon-96.png",
@@ -12,30 +12,81 @@
         "activeTab",
         "storage",
         "menus",
-        "nativeMessaging"
+        "nativeMessaging",
+        "tabs",
+        "declarativeNetRequest"
     ],
     "host_permissions": [
         "<all_urls>"
     ],
     "background": {
-        "scripts": ["background.js"],
+        "scripts": [
+            "background/state-manager.js",
+            "background/native-bridge.js",
+            "background/dark-mode-handler.js",
+            "background/ad-block-handler.js",
+            "background/memory-handler.js",
+            "background/writing-handler.js",
+            "background/message-router.js",
+            "background/background.js"
+        ],
         "persistent": false
     },
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["content.js"],
-            "css": ["content.css"],
-            "run_at": "document_end"
+            "js": [
+                "content/notification.js",
+                "content/dark-mode-themes.js",
+                "content/dark-mode-engine.js",
+                "content/video-controller-ui.js",
+                "content/video-controller.js",
+                "content/cosmetic-filter-rules.js",
+                "content/cosmetic-filter.js",
+                "content/privacy-shield.js",
+                "content/password-enhancer-ui.js",
+                "content/password-enhancer.js",
+                "content/print-friendly-ui.js",
+                "content/print-friendly.js",
+                "content/ai-sidebar-ui.js",
+                "content/ai-sidebar.js",
+                "content/writing-assistant.js",
+                "content/session-manager.js",
+                "content/selection-handler.js",
+                "content/content-core.js"
+            ],
+            "css": [
+                "content/content-styles.css",
+                "content/video-controller.css",
+                "content/ai-sidebar.css",
+                "content/print-friendly.css",
+                "content/password-enhancer.css",
+                "content/writing-assistant.css"
+            ],
+            "run_at": "document_start",
+            "all_frames": false
         }
     ],
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "blocking_rules",
+                "enabled": true,
+                "path": "rules/blocking-rules.json"
+            }
+        ]
+    },
     "action": {
-        "default_popup": "popup.html",
+        "default_popup": "popup/popup.html",
         "default_icon": {
             "48": "icon-48.png",
             "96": "icon-96.png"
         },
         "default_title": "Thea"
+    },
+    "options_ui": {
+        "page": "options/options.html",
+        "open_in_tab": true
     },
     "commands": {
         "_execute_action": {
@@ -45,6 +96,20 @@
             },
             "description": "Open Thea popup"
         },
+        "toggle-dark-mode": {
+            "suggested_key": {
+                "default": "Alt+D",
+                "mac": "Alt+D"
+            },
+            "description": "Toggle dark mode"
+        },
+        "toggle-ai-sidebar": {
+            "suggested_key": {
+                "default": "Alt+Space",
+                "mac": "Alt+Space"
+            },
+            "description": "Toggle AI sidebar"
+        },
         "quick-action": {
             "suggested_key": {
                 "default": "Ctrl+Shift+A",
@@ -52,5 +117,11 @@
             },
             "description": "Quick AI action on selection"
         }
-    }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["content/dark-mode-inject.css"],
+            "matches": ["<all_urls>"]
+        }
+    ]
 }
