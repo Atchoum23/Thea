@@ -326,11 +326,38 @@ targets:
           - "**/Integrations/RemindersIntegration.swift"
           # Exclude duplicate Memory (use Memory folder not AI/Memory)
           - "**/AI/Memory/**"
-          # Exclude DesignTokens (duplicates TheaDesignSystem definitions on macOS)
+          # Exclude DesignTokens (duplicates TheaDesignSystem definitions)
           - "**/Theme/DesignTokens.swift"
+          # Exclude duplicate Settings views (use subfolder versions)
+          - "**/Settings/LocalModelsSettingsView.swift"
+          - "**/Settings/AutonomousTaskSettingsView.swift"
           # Exclude MetaAI views that depend on excluded MetaAI folder
           - "**/Views/MetaAI/**"
-          # (Duplicate exclusions removed — consolidated below)
+          # Exclude views that depend on missing types
+          - "**/Settings/OrchestratorSettingsView.swift"
+          - "**/Settings/Orchestrator/**"
+          - "**/Settings/MemorySettingsView.swift"
+
+          - "**/Settings/PrivacySettingsView.swift"
+          - "**/Settings/AdvancedSettingsView.swift"
+          - "**/Settings/AIProvidersSettingsView.swift"
+          # Verification + Anticipatory: excluded as tightly-coupled subsystems.
+          # All files in each folder depend on each other; must be enabled together.
+          - "**/ResourceManagement/**"
+          - "**/Components/EnhancedMessageBubble.swift"
+          - "**/Components/ExecutableCodeBlock.swift"
+          - "**/Code/CodeIntelligence.swift"
+          - "**/Views/Code/**"
+          - "**/Settings/Privacy/**"
+          - "**/Settings/ResourceAllocationSettingsView.swift"
+          - "**/Views/SelfExecutionView.swift"
+          - "**/AI/MultiModal/MultiModalCoordinator.swift"
+          - "**/AI/MultiModal/MultiModalAnalyzer.swift"
+          - "**/Theme/DesignTokens.swift"
+          - "**/Core/DeviceCapabilityRouter.swift"
+          - "**/Views/DeviceSwitcherView.swift"
+          - "**/Components/THEAThinkingView.swift"
+          - "**/DistributedTaskExecutor.swift"
           # ============================================================
           # BLANKET DIRECTORY EXCLUSIONS (macOS)
           # These entire folders are excluded because they contain
@@ -338,30 +365,61 @@ targets:
           # Using blanket patterns prevents new files in these dirs
           # from accidentally breaking the build.
           # ============================================================
-          # Phase 1+2 INCLUDED: PatternLearning, LifeAssistant, Anticipatory,
-          # Prediction, Autonomy, Autonomous, AgentMode, SelfEvolution, Squads,
-          # PromptEngineering, IntelligenceOrchestrator
-          # LifeMonitoring dir does not exist, Automation dir does not exist
-          # Phase 1+2 INCLUDED: All LocalModels files, AI/Context, AI/Adaptive,
-          # AI/Proactive, ResourceManagement, Views/Code, Views/LocalModels,
-          # Views/LifeTracking, Settings subdirectories
+          - "**/PatternLearning/**"
+          - "**/LifeMonitoring/**"
+          - "**/LifeAssistant/**"
+          - "**/Anticipatory/**"
+          - "**/Prediction/**"
+          - "**/Autonomy/**"
+          - "**/Automation/**"
+          - "**/Autonomous/**"
+          - "**/AgentMode/**"
+          - "**/Intelligence/Orchestration/IntelligenceOrchestrator.swift"
+          - "**/SelfEvolution/**"
+          - "**/Squads/**"
+          - "**/PromptEngineering/**"
+          # LocalModels: selective exclusion (LocalModelManager, MLXModelManager,
+          # MLXInferenceEngine, MLXModelScanner, LocalModelProvider are actively used)
+          - "**/LocalModels/ProactiveModelManager.swift"
+          - "**/LocalModels/LocalModelRecommendationEngine.swift"
+          - "**/LocalModels/LocalModelRecommendationEngine+*.swift"
+          - "**/LocalModels/LocalModelRecommendationTypes.swift"
+          - "**/LocalModels/AIModelGovernor.swift"
+          - "**/LocalModels/ModelGovernanceEngine.swift"
+          - "**/LocalModels/UnifiedLocalModelOrchestrator.swift"
+          - "**/LocalModels/SupraModelSelector.swift"
+          - "**/LocalModels/OllamaAgentLoop.swift"
+          - "**/LocalModels/ModelQualityBenchmark.swift"
+          - "**/LocalModels/PredictivePreloader.swift"
+          - "**/AI/Context/**"
+          - "**/AI/Adaptive/**"
+          - "**/AI/Proactive/**"
+          - "**/ResourceManagement/**"
           - "**/Widgets/**"
+          - "**/Views/Code/**"
+          - "**/Views/LocalModels/**"
+          - "**/Views/LifeTracking/**"
+          - "**/Settings/Advanced/**"
+          - "**/Settings/LocalModels/**"
+          - "**/Settings/Privacy/**"
+          - "**/Settings/Orchestrator/**"
+          - "**/Settings/AutonomousTasks/**"
           # ============================================================
           # INDIVIDUAL FILE EXCLUSIONS (macOS)
           # Files outside the blanket-excluded directories that still
           # need to be excluded due to missing types or dependencies.
           # ============================================================
-          # Phase 1 INCLUDED: ConfigurationManager, ConfidenceIndicatorViews,
-          # DeviceSwitcherView, PlatformFeaturesHub, CodeIntelligence,
-          # TestGenerator, RemoteCommandService, THEAMCPServer,
-          # IntegrationModule, DeviceCapabilityRouter, TheaIntegrationHub+NewFeatures
+          - "**/Configuration/ConfigurationManager.swift"
+          - "**/Components/ConfidenceIndicatorViews.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/THEAThinkingView.swift"
           - "**/Views/PhaseProgressView.swift"
           - "**/Views/SelfExecutionView.swift"
+          - "**/Views/DeviceSwitcherView.swift"
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/Managers/IntegrationsManager.swift"
+          - "**/Integrations/IntegrationModule.swift"
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
@@ -375,31 +433,43 @@ targets:
           - "**/Integrations/MessagesIntegration.swift"
           - "**/Integrations/XcodeIntegration.swift"
           - "**/MetaAI/ModelBenchmarkService.swift"
+          - "**/Platforms/PlatformFeaturesHub.swift"
           - "**/TextProcessing/LiveAutoCorrect.swift"
+          - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
+          - "**/Code/CodeIntelligence.swift"
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
+          - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Core/TheaIntegrationHub.swift"
+          - "**/Execution/Testing/TestGenerator.swift"
           - "**/V1Parity/MessageRegeneration.swift"
+          - "**/RemoteServer/RemoteCommandService.swift"
           - "**/Launcher/QuickLauncher.swift"
+          - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           - "**/Intelligence/Subagents/**"
-          # Phase 1 INCLUDED: SystemPromptSettingsView, AIFeaturesSettingsView,
-          # SettingsPrivacyAboutViews, SettingsViewModel, AdvancedSettingsView,
-          # AIProvidersSettingsView, AutomationSettingsView
-          # Settings views with missing dependencies (still excluded)
+          # Settings views with missing dependencies
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
+
           - "**/Settings/PrivacySettingsView.swift"
+          - "**/Settings/AdvancedSettingsView.swift"
+          - "**/Settings/AIProvidersSettingsView.swift"
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
           - "**/Settings/ResourceAllocationSettingsView.swift"
+          - "**/Settings/SettingsPrivacyAboutViews.swift"
           - "**/Settings/AutoCorrectSettingsView.swift"
+          - "**/Settings/AIFeaturesSettingsView.swift"
           - "**/Settings/SettingsConfigurationViews.swift"
           - "**/Settings/PromptEngineeringSettingsView.swift"
+          - "**/Settings/AutomationSettingsView.swift"
           - "**/Settings/WorkflowSettingsView.swift"
           - "**/Settings/TerminalSettingsView.swift"
           - "**/Settings/IntegrationsSettingsView.swift"
           - "**/Settings/AutonomousSettingsView.swift"
+          - "**/Settings/SystemPromptSettingsView.swift"
+          - "**/ViewModels/SettingsViewModel.swift"
           # Theme exclusions
           - "**/Theme/DesignTokens.swift"
           # TheaAnimations.swift and DesignSystemStubs.swift now INCLUDED
