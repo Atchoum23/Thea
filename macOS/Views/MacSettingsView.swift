@@ -70,71 +70,192 @@ private struct WindowResizableHelper: NSViewRepresentable {
     }
 }
 
+// MARK: - Settings Category
+
+/// Sidebar categories modeled after macOS System Settings.
+enum SettingsCategory: String, CaseIterable, Identifiable {
+    // Group 0: Core
+    case general = "General"
+    case aiModels = "AI & Models"
+
+    // Group 1: Intelligence
+    case providers = "Providers"
+    case memory = "Memory"
+    case agent = "Agent"
+    case knowledge = "Knowledge"
+
+    // Group 2: Input / Output
+    case voiceInput = "Voice & Input"
+    case codeIntelligence = "Code Intelligence"
+
+    // Group 3: System
+    case permissions = "Permissions"
+    case sync = "Sync"
+    case privacy = "Privacy"
+
+    // Group 4: Customization
+    case theme = "Theme"
+    case advanced = "Advanced"
+
+    // Group 5: Info
+    case about = "About"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .general: "gear"
+        case .aiModels: "brain.head.profile"
+        case .providers: "server.rack"
+        case .memory: "memorychip"
+        case .agent: "person.2.circle"
+        case .knowledge: "books.vertical"
+        case .voiceInput: "mic.fill"
+        case .codeIntelligence: "chevron.left.forwardslash.chevron.right"
+        case .permissions: "hand.raised.fill"
+        case .sync: "icloud.fill"
+        case .privacy: "lock.shield"
+        case .theme: "paintpalette"
+        case .advanced: "slider.horizontal.3"
+        case .about: "info.circle"
+        }
+    }
+
+    var group: Int {
+        switch self {
+        case .general, .aiModels: 0
+        case .providers, .memory, .agent, .knowledge: 1
+        case .voiceInput, .codeIntelligence: 2
+        case .permissions, .sync, .privacy: 3
+        case .theme, .advanced: 4
+        case .about: 5
+        }
+    }
+
+    /// Categories grouped for sidebar display with dividers between groups.
+    static var grouped: [[SettingsCategory]] {
+        let groups = Dictionary(grouping: allCases, by: \.group)
+        return groups.keys.sorted().compactMap { groups[$0] }
+    }
+}
+
 // MARK: - macOS Settings View
 
-/// Consolidated settings for macOS with progressive disclosure.
-/// Tabs: General, AI & Models, Voice & Input, Permissions, Sync & Privacy, Advanced
+/// Consolidated macOS settings with a System Settings-style sidebar/detail layout.
 struct MacSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var settingsManager = SettingsManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
 
-    @State private var selectedTab: SettingsTab = .general
+    // Sidebar state
+    @State private var selectedCategory: SettingsCategory? = .general
+    @State private var searchText: String = ""
 
-    enum SettingsTab: String, CaseIterable {
-        case general = "General"
-        case ai = "AI & Models"
-        case voice = "Voice & Input"
-        case configuration = "Configuration"
-        case permissions = "Permissions"
-        case sync = "Sync"
-        case advanced = "Advanced"
+    // AI & Models state
+    @State private var openAIKey: String = ""
+    @State private var anthropicKey: String = ""
+    @State private var googleKey: String = ""
+    @State private var perplexityKey: String = ""
+    @State private var groqKey: String = ""
+    @State private var openRouterKey: String = ""
+    @State private var apiKeysLoaded: Bool = false
+    @State private var localModelConfig = AppConfiguration.shared.localModelConfig
 
-        var icon: String {
-            switch self {
-            case .general: "gear"
-            case .ai: "brain.head.profile"
-            case .voice: "mic.fill"
-            case .configuration: "gearshape.2"
-            case .permissions: "hand.raised.fill"
-            case .sync: "icloud.fill"
-            case .advanced: "slider.horizontal.3"
-            }
-        }
-    }
+    // Permissions state
+    @State private var permissionStates: [String: MacPermissionState] = [:]
+    @State private var isRefreshingPermissions = false
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ForEach(SettingsTab.allCases, id: \.self) { tab in
-                viewForTab(tab)
-                    .tabItem {
-                        Label(tab.rawValue, systemImage: tab.icon)
-                    }
-                    .tag(tab)
-            }
+        NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
+            settingsSidebar
+        } detail: {
+            settingsDetail
         }
-        .frame(minWidth: 560, idealWidth: 700, maxWidth: .infinity, minHeight: 440, idealHeight: 580, maxHeight: .infinity)
+        .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
+        .toolbar(removing: .sidebarToggle)
+        .frame(
+            minWidth: 780, idealWidth: 920, maxWidth: .infinity,
+            minHeight: 500, idealHeight: 640, maxHeight: .infinity
+        )
         .background(WindowResizableHelper())
         .textSelection(.enabled)
     }
 
+    // MARK: - Sidebar
+
+    private var settingsSidebar: some View {
+        List(selection: $selectedCategory) {
+            ForEach(Array(filteredGroups.enumerated()), id: \.offset) { index, group in
+                if index > 0 {
+                    Divider()
+                }
+                ForEach(group) { category in
+                    Label(category.rawValue, systemImage: category.icon)
+                        .tag(category)
+                }
+            }
+        }
+        .listStyle(.sidebar)
+        .searchable(text: $searchText, placement: .sidebar, prompt: "Search")
+    }
+
+    private var filteredGroups: [[SettingsCategory]] {
+        if searchText.isEmpty {
+            return SettingsCategory.grouped
+        }
+        let query = searchText.lowercased()
+        let filtered = SettingsCategory.allCases.filter {
+            $0.rawValue.lowercased().contains(query)
+        }
+        return filtered.isEmpty ? [] : [filtered]
+    }
+
+    // MARK: - Detail View Router
+
     @ViewBuilder
-    private func viewForTab(_ tab: SettingsTab) -> some View {
-        switch tab {
+    private var settingsDetail: some View {
+        if let category = selectedCategory {
+            detailContent(for: category)
+                .id(category)
+        } else {
+            Text("Select a category")
+                .font(.theaTitle3)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    @ViewBuilder
+    private func detailContent(for category: SettingsCategory) -> some View {
+        switch category {
         case .general:
             generalSettings
-        case .ai:
+        case .aiModels:
             aiSettings
-        case .voice:
-            voiceSettings
-        case .configuration:
-            configurationSettings
+        case .providers:
+            providersSettings
+        case .memory:
+            MemoryConfigurationView()
+        case .agent:
+            AgentConfigurationView()
+        case .knowledge:
+            KnowledgeScannerConfigurationView()
+        case .voiceInput:
+            voiceInputSettings
+        case .codeIntelligence:
+            CodeIntelligenceConfigurationView()
         case .permissions:
             permissionsSettings
         case .sync:
             SyncSettingsView()
+        case .privacy:
+            ConfigurationPrivacySettingsView()
+        case .theme:
+            ThemeConfigurationView()
         case .advanced:
             advancedSettings
+        case .about:
+            AboutView()
         }
     }
 
@@ -206,24 +327,11 @@ struct MacSettingsView: View {
                 Toggle("Show Sidebar on Launch", isOn: $settingsManager.showSidebarOnLaunch)
                 Toggle("Restore Last Session", isOn: $settingsManager.restoreLastSession)
             }
-
-            settingsFooter
         }
         .formStyle(.grouped)
-        .padding()
     }
 
     // MARK: - AI & Models Settings
-
-    @State private var openAIKey: String = ""
-    @State private var anthropicKey: String = ""
-    @State private var googleKey: String = ""
-    @State private var perplexityKey: String = ""
-    @State private var groqKey: String = ""
-    @State private var openRouterKey: String = ""
-    @State private var apiKeysLoaded: Bool = false
-
-    @State private var localModelConfig = AppConfiguration.shared.localModelConfig
 
     private var aiSettings: some View {
         Form {
@@ -296,83 +404,109 @@ struct MacSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .padding()
         .onAppear { loadAPIKeysIfNeeded() }
     }
 
-    // MARK: - Voice & Input Settings
+    // MARK: - Providers Settings (drill-down)
 
-    private var voiceSettings: some View {
-        Form {
-            Section("Voice Activation") {
-                Toggle("Enable Voice Activation", isOn: $voiceManager.isEnabled)
-                    .onChange(of: voiceManager.isEnabled) { _, newValue in
-                        if !newValue {
-                            voiceManager.stopVoiceCommand()
-                            voiceManager.stopWakeWordDetection()
+    private var providersSettings: some View {
+        NavigationStack {
+            Form {
+                Section("AI Providers") {
+                    NavigationLink("API Endpoints & Timeouts") {
+                        ProviderConfigurationView()
+                    }
+
+                    NavigationLink("API Key Validation Models") {
+                        APIValidationConfigurationView()
+                    }
+
+                    NavigationLink("External APIs") {
+                        ExternalAPIsConfigurationView()
+                    }
+                }
+            }
+            .formStyle(.grouped)
+            .navigationTitle("Providers")
+        }
+    }
+
+    // MARK: - Voice & Input Settings (with drill-down)
+
+    private var voiceInputSettings: some View {
+        NavigationStack {
+            Form {
+                Section("Voice Activation") {
+                    Toggle("Enable Voice Activation", isOn: $voiceManager.isEnabled)
+                        .onChange(of: voiceManager.isEnabled) { _, newValue in
+                            if !newValue {
+                                voiceManager.stopVoiceCommand()
+                                voiceManager.stopWakeWordDetection()
+                            }
                         }
-                    }
 
-                if voiceManager.isEnabled {
-                    HStack {
-                        Text("Wake Word")
-                        TextField("Wake Word", text: $voiceManager.wakeWord)
-                            .textFieldStyle(.roundedBorder)
-                    }
+                    if voiceManager.isEnabled {
+                        HStack {
+                            Text("Wake Word")
+                            TextField("Wake Word", text: $voiceManager.wakeWord)
+                                .textFieldStyle(.roundedBorder)
+                        }
 
-                    Toggle("Conversation Mode", isOn: $voiceManager.conversationMode)
+                        Toggle("Conversation Mode", isOn: $voiceManager.conversationMode)
 
-                    HStack {
-                        Button("Test Wake Word") {
-                            try? voiceManager.startWakeWordDetection()
+                        HStack {
+                            Button("Test Wake Word") {
+                                try? voiceManager.startWakeWordDetection()
+                            }
+
+                            if voiceManager.isListening {
+                                Button("Stop") {
+                                    voiceManager.stopWakeWordDetection()
+                                }
+                                .foregroundStyle(.red)
+                            }
                         }
 
                         if voiceManager.isListening {
-                            Button("Stop") {
-                                voiceManager.stopWakeWordDetection()
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Listening for '\(voiceManager.wakeWord)'...")
+                                    .font(.theaCaption1)
+                                    .foregroundStyle(.secondary)
                             }
-                            .foregroundStyle(.red)
                         }
                     }
 
-                    if voiceManager.isListening {
-                        HStack {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                            Text("Listening for '\(voiceManager.wakeWord)'...")
-                                .font(.theaCaption1)
-                                .foregroundStyle(.secondary)
+                    Text("Voice features require microphone permission.")
+                        .font(.theaCaption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("Text-to-Speech") {
+                    Toggle("Read Responses Aloud", isOn: $settingsManager.readResponsesAloud)
+
+                    if settingsManager.readResponsesAloud {
+                        Picker("Voice", selection: $settingsManager.selectedVoice) {
+                            Text("Default").tag("default")
+                            Text("Samantha").tag("samantha")
+                            Text("Alex").tag("alex")
                         }
                     }
                 }
 
-                Text("Voice features require microphone permission.")
-                    .font(.theaCaption2)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Text-to-Speech") {
-                Toggle("Read Responses Aloud", isOn: $settingsManager.readResponsesAloud)
-
-                if settingsManager.readResponsesAloud {
-                    Picker("Voice", selection: $settingsManager.selectedVoice) {
-                        Text("Default").tag("default")
-                        Text("Samantha").tag("samantha")
-                        Text("Alex").tag("alex")
+                Section("Advanced Voice Configuration") {
+                    NavigationLink("Recognition & Synthesis Settings") {
+                        VoiceConfigurationView()
                     }
                 }
             }
-
-            settingsFooter
+            .formStyle(.grouped)
+            .navigationTitle("Voice & Input")
         }
-        .formStyle(.grouped)
-        .padding()
     }
 
     // MARK: - Permissions Settings
-
-    @State private var permissionStates: [String: MacPermissionState] = [:]
-    @State private var isRefreshingPermissions = false
 
     private var permissionsSettings: some View {
         Form {
@@ -474,9 +608,66 @@ struct MacSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .padding()
         .onAppear { refreshMacPermissions() }
     }
+
+    // MARK: - Advanced Settings
+
+    private var advancedSettings: some View {
+        Form {
+            Section("Execution Safety") {
+                Toggle("Allow File Creation", isOn: $settingsManager.allowFileCreation)
+                Toggle("Allow File Editing", isOn: $settingsManager.allowFileEditing)
+                Toggle("Allow Code Execution", isOn: $settingsManager.allowCodeExecution)
+                Toggle("Allow External API Calls", isOn: $settingsManager.allowExternalAPICalls)
+                Toggle("Require Approval for Destructive Actions", isOn: $settingsManager.requireDestructiveApproval)
+                Toggle("Enable Rollback", isOn: $settingsManager.enableRollback)
+                Toggle("Create Backups Before Changes", isOn: $settingsManager.createBackups)
+                Stepper("Max Concurrent Tasks: \(settingsManager.maxConcurrentTasks)",
+                        value: $settingsManager.maxConcurrentTasks, in: 1 ... 10)
+            }
+
+            Section("Development") {
+                Toggle("Enable Debug Mode", isOn: $settingsManager.debugMode)
+                Toggle("Show Performance Metrics", isOn: $settingsManager.showPerformanceMetrics)
+            }
+
+            Section("Cache") {
+                HStack {
+                    Text("Cache Size")
+                    Spacer()
+                    Text("~50 MB")
+                        .font(.theaCaption1)
+                        .foregroundStyle(.secondary)
+                }
+                Button("Clear Cache") { clearCache() }
+            }
+
+            Section("Privacy") {
+                Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
+                Text("Help improve THEA by sharing anonymous usage data.")
+                    .font(.theaCaption2)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Data Management") {
+                Button("Export All Data") { exportAllData() }
+                Button("Clear All Data", role: .destructive) { clearAllData() }
+            }
+
+            Section("Reset") {
+                Button("Reset All Settings to Defaults", role: .destructive) {
+                    settingsManager.resetToDefaults()
+                }
+                Button("Reset All Configuration to Defaults", role: .destructive) {
+                    AppConfiguration.shared.resetAllToDefaults()
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    // MARK: - Shared Components
 
     private func permissionRow(
         key: String, label: String, icon: String,
@@ -531,6 +722,8 @@ struct MacSettingsView: View {
         }
         .buttonStyle(.bordered)
     }
+
+    // MARK: - Permission Refresh
 
     private func refreshMacPermissions() {
         isRefreshingPermissions = true
@@ -589,133 +782,6 @@ struct MacSettingsView: View {
             }
         }
     }
-
-    // MARK: - Sync Settings (delegates to SyncSettingsView)
-
-    // MARK: - Configuration Settings
-
-    private var configurationSettings: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    Text("Fine-tune THEA's subsystems")
-                        .font(.theaCaption2)
-                        .foregroundStyle(.secondary)
-                }
-
-                Section("AI Providers") {
-                    NavigationLink("API Endpoints & Timeouts") {
-                        ProviderConfigurationView()
-                    }
-
-                    NavigationLink("API Key Validation Models") {
-                        APIValidationConfigurationView()
-                    }
-
-                    NavigationLink("External APIs") {
-                        ExternalAPIsConfigurationView()
-                    }
-                }
-
-                Section("Intelligence") {
-                    NavigationLink("Memory Capacity & Decay") {
-                        MemoryConfigurationView()
-                    }
-
-                    NavigationLink("Agent Behavior & Limits") {
-                        AgentConfigurationView()
-                    }
-
-                    NavigationLink("Knowledge Scanner") {
-                        KnowledgeScannerConfigurationView()
-                    }
-
-                    NavigationLink("Code Intelligence") {
-                        CodeIntelligenceConfigurationView()
-                    }
-                }
-
-                Section("Appearance") {
-                    NavigationLink("Voice Recognition & Synthesis") {
-                        VoiceConfigurationView()
-                    }
-
-                    NavigationLink("Theme & Typography") {
-                        ThemeConfigurationView()
-                    }
-                }
-
-                Section {
-                    Button("Reset All Configuration to Defaults", role: .destructive) {
-                        AppConfiguration.shared.resetAllToDefaults()
-                    }
-                }
-            }
-            .formStyle(.grouped)
-            .padding()
-        }
-    }
-
-    // MARK: - Advanced Settings
-
-    private var advancedSettings: some View {
-        Form {
-            Section("Execution Safety") {
-                Toggle("Allow File Creation", isOn: $settingsManager.allowFileCreation)
-                Toggle("Allow File Editing", isOn: $settingsManager.allowFileEditing)
-                Toggle("Allow Code Execution", isOn: $settingsManager.allowCodeExecution)
-                Toggle("Allow External API Calls", isOn: $settingsManager.allowExternalAPICalls)
-                Toggle("Require Approval for Destructive Actions", isOn: $settingsManager.requireDestructiveApproval)
-                Toggle("Enable Rollback", isOn: $settingsManager.enableRollback)
-                Toggle("Create Backups Before Changes", isOn: $settingsManager.createBackups)
-                Stepper("Max Concurrent Tasks: \(settingsManager.maxConcurrentTasks)",
-                        value: $settingsManager.maxConcurrentTasks, in: 1 ... 10)
-            }
-
-            Section("Development") {
-                Toggle("Enable Debug Mode", isOn: $settingsManager.debugMode)
-                Toggle("Show Performance Metrics", isOn: $settingsManager.showPerformanceMetrics)
-            }
-
-            Section("Cache") {
-                HStack {
-                    Text("Cache Size")
-                    Spacer()
-                    Text("~50 MB")
-                        .font(.theaCaption1)
-                        .foregroundStyle(.secondary)
-                }
-                Button("Clear Cache") { clearCache() }
-            }
-
-            Section("Privacy") {
-                Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
-                Text("Help improve THEA by sharing anonymous usage data.")
-                    .font(.theaCaption2)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Data Management") {
-                Button("Export All Data") { exportAllData() }
-                Button("Clear All Data", role: .destructive) { clearAllData() }
-            }
-
-            Section("Reset") {
-                Button("Reset All Settings to Defaults", role: .destructive) {
-                    settingsManager.resetToDefaults()
-                }
-            }
-        }
-        .formStyle(.grouped)
-        .padding()
-    }
-
-    // MARK: - Shared Components
-
-    private var settingsFooter: some View {
-        EmptyView()
-    }
-
 
     // MARK: - API Key Helpers
 
