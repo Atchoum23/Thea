@@ -117,7 +117,8 @@ public struct EncodedFrame: Sendable {
 
         // MARK: - Compression Session
 
-        private var compressionSession: VTCompressionSession?
+        // nonisolated(unsafe) allows deinit to access this property
+        nonisolated(unsafe) private var compressionSession: VTCompressionSession?
         private var frameCallback: ((EncodedFrame) -> Void)?
         private var width: Int = 0
         private var height: Int = 0
@@ -133,9 +134,7 @@ public struct EncodedFrame: Sendable {
         public init() {}
 
         deinit {
-            // VTCompressionSession is a CF type that's safe to invalidate here
-            nonisolated(unsafe) let session = compressionSession
-            if let session {
+            if let session = compressionSession {
                 VTCompressionSessionInvalidate(session)
             }
         }
