@@ -478,7 +478,7 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
+          # PermissionsSettingsView.swift is now ACTIVE (pure SwiftUI, no platform deps)
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
