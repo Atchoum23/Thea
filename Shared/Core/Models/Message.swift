@@ -90,6 +90,7 @@ final class Message {
         return try? JSONDecoder().decode(MessageMetadata.self, from: data)
     }
 
+    #if !THEA_MODELS_ONLY
     /// The parsed device type for this message's origin device
     var originDeviceType: DeviceType? {
         guard let raw = deviceType else { return nil }
@@ -109,6 +110,7 @@ final class Message {
         deviceName = device.name
         deviceType = device.type.rawValue
     }
+    #endif
 
     /// Original content if this message was edited
     var originalContent: MessageContent? {

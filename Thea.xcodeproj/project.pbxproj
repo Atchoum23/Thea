@@ -551,6 +551,7 @@
 		75821EE5487439A6BBF3EE8B /* UnifiedDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA73D8A062838B6AFF06B6D /* UnifiedDashboardView.swift */; };
 		7584FB08220EECC2A074B7C3 /* ActivityLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FA8A5312027FA2898354A1 /* ActivityLogger.swift */; };
 		758F9477AE306DDF79E0C75B /* SettingsCommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172E49CC6B5F5DC4F4C7086D /* SettingsCommonTypes.swift */; };
+		75B8FF75A58C97760721F4F9 /* RemoteInferenceClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830A8824378DAFA673E5A02A /* RemoteInferenceClient.swift */; };
 		764C57F2CC5F3752A339A32F /* native-bridge.js in Resources */ = {isa = PBXBuildFile; fileRef = 9761D65BB4BE5C985E8E9E2F /* native-bridge.js */; };
 		76BF0B81039217FCC74532B5 /* SafariExtensionActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA42D2DD59388237D024C130 /* SafariExtensionActions.swift */; };
 		76CDE208BBBFD1C3684A6DB4 /* ActiveMemoryRetrieval.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5AF516C256474DA060B95C /* ActiveMemoryRetrieval.swift */; };
@@ -1705,6 +1706,7 @@
 		8105F90A4C25CB92A1349820 /* iOSKnowledgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSKnowledgeView.swift; sourceTree = "<group>"; };
 		817A13DB0843532696614A1D /* HealthContextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthContextProvider.swift; sourceTree = "<group>"; };
 		826AC9D7AE3F12A7C81ECD23 /* AgentResourcePool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentResourcePool.swift; sourceTree = "<group>"; };
+		830A8824378DAFA673E5A02A /* RemoteInferenceClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteInferenceClient.swift; sourceTree = "<group>"; };
 		8389641132482E54E73CEC58 /* TVStreamingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVStreamingView.swift; sourceTree = "<group>"; };
 		838C96947C9DBCA4BF256FDE /* UserFeedbackLearner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserFeedbackLearner.swift; sourceTree = "<group>"; };
 		85041AF083A269AEA2F7B4B1 /* AllProvidersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllProvidersTests.swift; sourceTree = "<group>"; };
@@ -2686,6 +2688,7 @@
 			children = (
 				044B524336BE4030659DA0D4 /* HealthMonitorService.swift */,
 				8ECA3D49F73A0B0279BBB7B1 /* MediaAutomationService.swift */,
+				830A8824378DAFA673E5A02A /* RemoteInferenceClient.swift */,
 				5B101D7016CEFD023816AE6C /* StreamingService.swift */,
 				4C5A1765C297CB988B0FCE32 /* TraktService.swift */,
 			);
@@ -6063,6 +6066,7 @@
 				E041BB61282D31195FFC5CD0 /* HealthMonitorService.swift in Sources */,
 				AAE6B0D0300F40266B5BC393 /* InferenceRelayProtocol.swift in Sources */,
 				480FEB6FF6A248C35BCC9175 /* MediaAutomationService.swift in Sources */,
+				75B8FF75A58C97760721F4F9 /* RemoteInferenceClient.swift in Sources */,
 				21F5F4EB75A35698E9542B54 /* StreamingService.swift in Sources */,
 				498D2E7B18E49D6C77C23875 /* TVDashboardView.swift in Sources */,
 				C95BFA4CDD1A35BDB46C9DF0 /* TVEnhancedHomeView.swift in Sources */,

@@ -224,7 +224,7 @@ public final class RemoteMacBridge {
             throw RemoteMacError.notConnected
         }
 
-        let request = InferenceRequest(
+        let request = RemoteMacInferenceRequest(
             query: query,
             model: model,
             maxTokens: maxTokens,
@@ -302,7 +302,7 @@ public final class RemoteMacBridge {
 
 // MARK: - Supporting Types
 
-private struct InferenceRequest: Codable {
+private struct RemoteMacInferenceRequest: Codable {
     let query: String
     let model: String?
     let maxTokens: Int

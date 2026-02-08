@@ -304,7 +304,7 @@ public struct ContextualSuggestionsView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(suggestions) { suggestion in
-                    SuggestionChip(suggestion: suggestion) {
+                    MemorySuggestionChip(suggestion: suggestion) {
                         onSelect(suggestion)
                     }
                 }
@@ -314,7 +314,7 @@ public struct ContextualSuggestionsView: View {
     }
 }
 
-struct SuggestionChip: View {
+struct MemorySuggestionChip: View {
     let suggestion: ContextualSuggestion
     let action: () -> Void
 
