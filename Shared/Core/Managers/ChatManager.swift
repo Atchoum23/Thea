@@ -282,8 +282,10 @@ final class ChatManager: ObservableObject {
 
     // MARK: - Orchestrator Integration
 
-    /// Select provider and model using TaskClassifier + ModelRouter orchestration
+    /// Select provider and model using TaskClassifier + ModelRouter orchestration (macOS)
+    /// Falls back to default provider on other platforms
     private func selectProviderAndModel(for query: String) async throws -> (AIProvider, String) {
+        #if os(macOS)
         do {
             let classification = try await TaskClassifier.shared.classify(query)
             let decision = ModelRouter.shared.route(classification: classification)
@@ -293,6 +295,9 @@ final class ChatManager: ObservableObject {
         } catch {
             debugLog("⚠️ Orchestrator fallback: \(error.localizedDescription)")
         }
+        #else
+        _ = query
+        #endif
         return try getDefaultProviderAndModel()
     }
 
