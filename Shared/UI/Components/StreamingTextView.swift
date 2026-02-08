@@ -555,7 +555,68 @@ public struct EnhancedStreamingMessageView: View {
     }
 }
 
+// MARK: - Typing Indicator
+
+/// Animated three-dot typing indicator for thinking state
+struct StreamingTypingIndicator: View {
+    @State private var phase: Int = 0
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<3, id: \.self) { index in
+                Circle()
+                    .fill(Color.secondary)
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(phase == index ? 1.3 : 0.8)
+                    .opacity(phase == index ? 1.0 : 0.4)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .onAppear {
+            Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { _ in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    phase = (phase + 1) % 3
+                }
+            }
+        }
+    }
+}
+
 // Note: PulsingGlowModifier and pulsingGlow extension are defined in MessageBubble.swift
+
+// MARK: - Streaming Typing Indicator
+
+/// Animated typing indicator (three bouncing dots) shown while AI is thinking
+struct StreamingTypingIndicator: View {
+    @State private var animating = false
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<3, id: \.self) { index in
+                Circle()
+                    .fill(Color.secondary.opacity(0.6))
+                    .frame(width: 8, height: 8)
+                    .offset(y: animating ? -4 : 4)
+                    .animation(
+                        .easeInOut(duration: 0.5)
+                        .repeatForever(autoreverses: true)
+                        .delay(Double(index) * 0.15),
+                        value: animating
+                    )
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        #if os(macOS)
+        .background(Color(.controlBackgroundColor).opacity(0.5))
+        #else
+        .background(Color(.systemGray6).opacity(0.5))
+        #endif
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .onAppear { animating = true }
+    }
+}
 
 // MARK: - Preview
 

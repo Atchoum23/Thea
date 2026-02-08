@@ -13,6 +13,16 @@ final class ProviderRegistry {
     private var providers: [String: AIProvider] = [:]
     private var localProviders: [String: AIProvider] = [:]
 
+    /// All instantiated providers (cloud + local), keyed by provider ID.
+    /// Used by InferenceRelayHandler to enumerate models.
+    var allProviders: [String: AIProvider] {
+        var result = providers
+        for (key, value) in localProviders {
+            result[key] = value
+        }
+        return result
+    }
+
     // Configuration accessor
     private var orchestratorConfig: OrchestratorConfiguration {
         AppConfiguration.shared.orchestratorConfig
