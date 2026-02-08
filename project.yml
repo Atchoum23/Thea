@@ -290,6 +290,9 @@ targets:
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
+          # Also exclude AI/Providers files that depend on excluded Protocol types
+          - "**/AI/Providers/AnthropicFilesAPI.swift"
+          - "**/AI/Providers/AnthropicTokenCounter.swift"
           - "**/Providers/Anthropic/**"
           - "**/Providers/DeepSeek/**"
           - "**/Providers/Google/**"
@@ -337,7 +340,7 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
-
+          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
@@ -357,6 +360,7 @@ targets:
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"
+          - "**/Managers/ResponseNotificationHandler.swift"
           - "**/DistributedTaskExecutor.swift"
           # ============================================================
           # BLANKET DIRECTORY EXCLUSIONS (macOS)
@@ -414,11 +418,18 @@ targets:
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/THEAThinkingView.swift"
+          - "**/Components/QuerySuggestionOverlay.swift"
+          - "**/Components/MemoryContextView.swift"
+          - "**/Components/StreamingTextView.swift"
+          - "**/Components/TheaTextInputField.swift"
           - "**/Views/PhaseProgressView.swift"
           - "**/Views/SelfExecutionView.swift"
           - "**/Views/DeviceSwitcherView.swift"
+          - "**/Views/KeyboardShortcutsView.swift"
+          - "**/Views/KeyboardShortcutsHelpView.swift"
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/Managers/IntegrationsManager.swift"
+          - "**/Managers/ResponseNotificationHandler.swift"
           - "**/Integrations/IntegrationModule.swift"
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
@@ -432,6 +443,9 @@ targets:
           - "**/Integrations/ShortcutsIntegration.swift"
           - "**/Integrations/MessagesIntegration.swift"
           - "**/Integrations/XcodeIntegration.swift"
+          - "**/Memory/LongTermMemoryManager.swift"
+          - "**/Memory/ActiveMemoryRetrieval.swift"
+          - "**/Memory/MemoryAugmentedChat.swift"
           - "**/MetaAI/ModelBenchmarkService.swift"
           - "**/Platforms/PlatformFeaturesHub.swift"
           - "**/TextProcessing/LiveAutoCorrect.swift"
@@ -451,7 +465,7 @@ targets:
           # Settings views with missing dependencies
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
-
+          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
@@ -472,7 +486,9 @@ targets:
           - "**/ViewModels/SettingsViewModel.swift"
           # Theme exclusions
           - "**/Theme/DesignTokens.swift"
-          # TheaAnimations.swift and DesignSystemStubs.swift now INCLUDED
+          - "**/Theme/TheaAnimations.swift"
+          # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
+          - "**/Design/DesignSystemStubs.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:
@@ -593,6 +609,9 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
+          # Exclude Anthropic files that depend on excluded ProviderError/ChatContentPart types
+          - "**/AI/Providers/AnthropicFilesAPI.swift"
+          - "**/AI/Providers/AnthropicTokenCounter.swift"
           # ARCHITECTURE DECISION: MetaAI excluded - see macOS target for full explanation
           - "**/AI/MetaAI/**"
           - "**/Integrations/NotesIntegration.swift"
@@ -605,7 +624,7 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
-
+          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
@@ -623,6 +642,7 @@ targets:
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"
+          - "**/Managers/ResponseNotificationHandler.swift"
           - "**/DistributedTaskExecutor.swift"
           - "**/LifeMonitoring/**"
           - "**/PatternLearning/**"
@@ -634,6 +654,7 @@ targets:
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/AgentMode/AgentEnhancements.swift"
           - "**/Integrations/IntegrationModule.swift"
+          - "**/Memory/LongTermMemoryManager.swift"
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
@@ -662,7 +683,11 @@ targets:
           - "**/Integrations/SafariIntegration.swift"
           - "**/Components/ChatInputView.swift"
           - "**/Search/SemanticSearchService.swift"
+          - "**/Components/QuerySuggestionOverlay.swift"
           - "**/Settings/AIFeaturesSettingsView.swift"
+          - "**/Memory/ActiveMemoryRetrieval.swift"
+          - "**/Components/MemoryContextView.swift"
+          - "**/Components/StreamingTextView.swift"
           - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
           - "**/Prediction/ModelPrewarmingService.swift"
@@ -683,6 +708,7 @@ targets:
           - "**/Settings/AutomationSettingsView.swift"
           - "**/AgentMode/AutonomousAgentV3.swift"
           - "**/SelfEvolution/AutonomousImprovement.swift"
+          - "**/Views/KeyboardShortcutsView.swift"
           - "**/LifeAssistant/LifeAssistantService.swift"
           - "**/Views/LifeTracking/**"
           - "**/Settings/TerminalSettingsView.swift"
@@ -699,8 +725,11 @@ targets:
           - "**/LocalModels/SupraModelSelector.swift"
           - "**/Core/TheaIntegrationHub.swift"
           - "**/Launcher/QuickLauncher.swift"
+          - "**/Memory/MemoryAugmentedChat.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
+          - "**/Components/TheaTextInputField.swift"
           - "**/Anticipatory/InterventionScheduler.swift"
+          - "**/Views/KeyboardShortcutsHelpView.swift"
           - "**/Anticipatory/AnticipatoryIntelligenceCore.swift"
           - "**/LocalModels/**"
           - "**/Focus/FocusOrchestrator.swift"
@@ -825,8 +854,6 @@ targets:
         excludes:
           - "**/TVFeatures/**"
       - path: Shared/Resources/Assets.xcassets
-      # Shared inference relay protocol types (pure Foundation+Codable, no heavy deps)
-      - path: Shared/InferenceRelay/InferenceRelayProtocol.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.tvos
