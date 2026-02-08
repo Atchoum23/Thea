@@ -323,7 +323,7 @@ public final class NutritionImportCoordinator: ObservableObject {
         isImporting = false
     }
 
-    public func exportData(format: ExportFormat) async throws -> String {
+    public func exportData(format: NutritionExportFormat) async throws -> String {
         switch format {
         case .csv:
             try await importer.exportToCSV(importedItems)
@@ -339,7 +339,7 @@ public final class NutritionImportCoordinator: ObservableObject {
     }
 }
 
-public enum ExportFormat: String, Sendable {
+public enum NutritionExportFormat: String, Sendable {
     case csv = "CSV"
     case json = "JSON"
 }

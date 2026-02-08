@@ -290,6 +290,9 @@ targets:
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
+          # Also exclude AI/Providers files that depend on excluded Protocol types
+          - "**/AI/Providers/AnthropicFilesAPI.swift"
+          - "**/AI/Providers/AnthropicTokenCounter.swift"
           - "**/Providers/Anthropic/**"
           - "**/Providers/DeepSeek/**"
           - "**/Providers/Google/**"

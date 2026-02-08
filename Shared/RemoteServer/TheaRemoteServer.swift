@@ -353,6 +353,102 @@ import Network
             transferStats.messagesReceived += 1
         }
 
+        // MARK: - Extended Message Handlers
+
+        private func handleClipboardRequest(_ request: ClipboardRequest) async -> ClipboardResponse {
+            switch request {
+            case .getClipboard:
+                if let data = clipboardSync.getLocalClipboard() {
+                    return .clipboardData(data)
+                }
+                return .error("No clipboard data available")
+            case let .setClipboard(data):
+                clipboardSync.applyRemoteClipboard(data)
+                return .clipboardData(data)
+            case .startSync:
+                clipboardSync.startMonitoring()
+                return .syncStarted
+            case .stopSync:
+                clipboardSync.stopMonitoring()
+                return .syncStopped
+            }
+        }
+
+        private func handleAnnotationRequest(_ request: AnnotationRequest) {
+            switch request {
+            case let .addAnnotation(data):
+                annotationOverlay.addRemoteAnnotation(data)
+            case let .removeAnnotation(id):
+                annotationOverlay.removeAnnotation(id: id)
+            case .clearAnnotations:
+                annotationOverlay.clearAnnotations()
+            case .undoLastAnnotation:
+                annotationOverlay.undoLastAnnotation()
+            }
+        }
+
+        private func handleRecordingRequest(_ request: RecordingRequest) async -> RecordingResponse {
+            switch request {
+            case let .startRecording(sessionId):
+                do {
+                    let recordingId = try sessionRecording.startRecording(
+                        sessionId: sessionId,
+                        width: 1920,
+                        height: 1080
+                    )
+                    auditLog.log(action: .screenRecordingStarted, sessionId: sessionId, clientId: "", clientName: "", details: "Recording started: \(recordingId)")
+                    return .recordingStarted(recordingId: recordingId)
+                } catch {
+                    return .error(error.localizedDescription)
+                }
+            case .stopRecording:
+                if let metadata = await sessionRecording.stopRecording() {
+                    auditLog.log(action: .screenRecordingStopped, sessionId: metadata.sessionId, clientId: "", clientName: "", details: "Recording stopped: \(metadata.id)")
+                    return .recordingStopped(recordingId: metadata.id, durationSeconds: metadata.durationSeconds, fileSizeBytes: metadata.fileSizeBytes)
+                }
+                return .error("No recording in progress")
+            case .listRecordings:
+                return .recordingList(sessionRecording.recordings)
+            case let .deleteRecording(id):
+                sessionRecording.deleteRecording(id: id)
+                return .recordingList(sessionRecording.recordings)
+            }
+        }
+
+        private func handleAudioRequest(_ request: AudioRequest) async -> AudioResponse {
+            switch request {
+            case .startAudioStream:
+                do {
+                    try await audioStream.startCapture()
+                    return .audioStreamStarted
+                } catch {
+                    return .error(error.localizedDescription)
+                }
+            case .stopAudioStream:
+                await audioStream.stopCapture()
+                return .audioStreamStopped
+            case let .setAudioVolume(volume):
+                audioStream.volume = volume
+                return .audioStreamStarted
+            case .startMicrophoneForward, .stopMicrophoneForward:
+                return .error("Microphone forwarding not yet implemented")
+            }
+        }
+
+        private func handleInventoryRequest(_ request: InventoryRequest) async -> InventoryResponse {
+            switch request {
+            case .getHardwareInventory:
+                let hw = await assetInventory.collectHardwareInventory()
+                return .hardwareInventory(hw)
+            case .getSoftwareInventory:
+                let sw = await assetInventory.collectSoftwareInventory()
+                return .softwareInventory(sw)
+            case .getFullInventory:
+                let result = await assetInventory.collectFullInventory()
+                return .hardwareInventory(result.hardware)
+            }
+        }
+
         // MARK: - Network Proxy
 
         // SECURITY: Network proxy functionality has been removed to prevent SSRF attacks (FINDING-001)
@@ -421,7 +517,10 @@ import Network
             let event = SecurityEvent(type: type, details: details, timestamp: Date())
             securityEvents.append(event)
 
-            // Keep only recent events
+            // Also log to persistent audit log
+            auditLog.logSecurityEvent(type: type, details: details)
+
+            // Keep only recent in-memory events
             if securityEvents.count > 1000 {
                 securityEvents.removeFirst(500)
             }
