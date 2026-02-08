@@ -118,10 +118,10 @@ extension SafariWebExtensionHandler {
                 .filter { $0.pathExtension == "json" }
                 .sorted { lhs, rhs in
                     let lhsDate = (try? lhs.resourceValues(
-                        forKeys: [.contentModificationDateKey]
+                        forKeys: Set<URLResourceKey>([.contentModificationDateKey])
                     ))?.contentModificationDate ?? .distantPast
                     let rhsDate = (try? rhs.resourceValues(
-                        forKeys: [.contentModificationDateKey]
+                        forKeys: Set<URLResourceKey>([.contentModificationDateKey])
                     ))?.contentModificationDate ?? .distantPast
                     return lhsDate > rhsDate
                 }
@@ -291,10 +291,10 @@ extension SafariWebExtensionHandler {
                 .filter { $0.pathExtension == "json" }
                 .sorted { lhs, rhs in
                     let lhsDate = (try? lhs.resourceValues(
-                        forKeys: [.contentModificationDateKey]
+                        forKeys: Set<URLResourceKey>([.contentModificationDateKey])
                     ))?.contentModificationDate ?? .distantPast
                     let rhsDate = (try? rhs.resourceValues(
-                        forKeys: [.contentModificationDateKey]
+                        forKeys: Set<URLResourceKey>([.contentModificationDateKey])
                     ))?.contentModificationDate ?? .distantPast
                     return lhsDate > rhsDate
                 }

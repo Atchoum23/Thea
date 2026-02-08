@@ -451,7 +451,6 @@ targets:
           - "**/Integrations/ShortcutsIntegration.swift"
           - "**/Integrations/MessagesIntegration.swift"
           - "**/Integrations/XcodeIntegration.swift"
-          - "**/Memory/LongTermMemoryManager.swift"
           - "**/Memory/ActiveMemoryRetrieval.swift"
           - "**/Memory/MemoryAugmentedChat.swift"
           - "**/MetaAI/ModelBenchmarkService.swift"
@@ -473,7 +472,6 @@ targets:
           # Settings views with missing dependencies
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
