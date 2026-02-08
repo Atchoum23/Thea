@@ -77,9 +77,7 @@ private struct WindowResizableHelper: NSViewRepresentable {
 struct MacSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var settingsManager = SettingsManager.shared
-    @StateObject private var cloudKitService = CloudKitService.shared
     @State private var voiceManager = VoiceActivationManager.shared
-    @State private var handoffService = HandoffService.shared
 
     @State private var selectedTab: SettingsTab = .general
 
@@ -89,7 +87,7 @@ struct MacSettingsView: View {
         case voice = "Voice & Input"
         case configuration = "Configuration"
         case permissions = "Permissions"
-        case syncPrivacy = "Sync & Privacy"
+        case sync = "Sync"
         case advanced = "Advanced"
 
         var icon: String {
@@ -99,7 +97,7 @@ struct MacSettingsView: View {
             case .voice: "mic.fill"
             case .configuration: "gearshape.2"
             case .permissions: "hand.raised.fill"
-            case .syncPrivacy: "lock.icloud.fill"
+            case .sync: "icloud.fill"
             case .advanced: "slider.horizontal.3"
             }
         }
@@ -133,8 +131,8 @@ struct MacSettingsView: View {
             configurationSettings
         case .permissions:
             permissionsSettings
-        case .syncPrivacy:
-            syncPrivacySettings
+        case .sync:
+            SyncSettingsView()
         case .advanced:
             advancedSettings
         }
@@ -592,84 +590,7 @@ struct MacSettingsView: View {
         }
     }
 
-    // MARK: - Sync & Privacy Settings
-
-    private var syncPrivacySettings: some View {
-        Form {
-            Section("iCloud Sync") {
-                Toggle("Enable iCloud Sync", isOn: $settingsManager.iCloudSyncEnabled)
-
-                if settingsManager.iCloudSyncEnabled {
-                    syncStatusRow("iCloud Status",
-                                  isActive: cloudKitService.iCloudAvailable,
-                                  activeText: "Connected",
-                                  activeIcon: "checkmark.circle.fill",
-                                  inactiveText: "Not Available",
-                                  inactiveIcon: "exclamationmark.triangle.fill")
-
-                    HStack {
-                        Text("Sync Status:")
-                            .font(.theaCaption1)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(cloudKitService.syncStatus.description)
-                            .font(.theaCaption1)
-                            .foregroundStyle(.tertiary)
-                    }
-
-                    if let lastSync = cloudKitService.lastSyncDate {
-                        HStack {
-                            Text("Last Sync:")
-                                .font(.theaCaption1)
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(lastSync, style: .relative)
-                                .font(.theaCaption1)
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-
-                    Button("Sync Now") {
-                        Task { try? await cloudKitService.syncAll() }
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(!cloudKitService.iCloudAvailable
-                        || cloudKitService.syncStatus == .syncing)
-                }
-            }
-
-            Section("Handoff") {
-                Toggle("Enable Handoff", isOn: $settingsManager.handoffEnabled)
-
-                syncStatusRow("Handoff Status",
-                              isActive: handoffService.isEnabled,
-                              activeText: "Active",
-                              activeIcon: "hand.raised.fill",
-                              inactiveText: "Disabled",
-                              inactiveIcon: "hand.raised.slash")
-
-                Text("Continue conversations seamlessly across Apple devices.")
-                    .font(.theaCaption2)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Privacy") {
-                Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
-                Text("Help improve THEA by sharing anonymous usage data.")
-                    .font(.theaCaption2)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Data Management") {
-                Button("Export All Data") { exportAllData() }
-                Button("Clear All Data", role: .destructive) { clearAllData() }
-            }
-
-            settingsFooter
-        }
-        .formStyle(.grouped)
-        .padding()
-    }
+    // MARK: - Sync Settings (delegates to SyncSettingsView)
 
     // MARK: - Configuration Settings
 
@@ -767,6 +688,18 @@ struct MacSettingsView: View {
                 Button("Clear Cache") { clearCache() }
             }
 
+            Section("Privacy") {
+                Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
+                Text("Help improve THEA by sharing anonymous usage data.")
+                    .font(.theaCaption2)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Data Management") {
+                Button("Export All Data") { exportAllData() }
+                Button("Clear All Data", role: .destructive) { clearAllData() }
+            }
+
             Section("Reset") {
                 Button("Reset All Settings to Defaults", role: .destructive) {
                     settingsManager.resetToDefaults()
@@ -783,27 +716,6 @@ struct MacSettingsView: View {
         EmptyView()
     }
 
-    private func syncStatusRow(
-        _ label: String,
-        isActive: Bool,
-        activeText: String,
-        activeIcon: String,
-        inactiveText: String,
-        inactiveIcon: String
-    ) -> some View {
-        HStack {
-            Text(label)
-                .font(.theaCaption1)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Label(
-                isActive ? activeText : inactiveText,
-                systemImage: isActive ? activeIcon : inactiveIcon
-            )
-            .font(.theaCaption1)
-            .foregroundStyle(isActive ? .green : .secondary)
-        }
-    }
 
     // MARK: - API Key Helpers
 
