@@ -232,7 +232,7 @@ extension SafariWebExtensionHandler {
         let challenge = message["challenge"] as? String ?? ""
         let rpId = message["rpId"] as? String ?? ""
 
-        logger.info("Passkey registration requested for \(domain, privacy: .public)")
+        logger.info("Passkey registration requested for \(domain)")
 
         // Stub: full ASAuthorization integration requires main app context
         completion([
@@ -255,7 +255,7 @@ extension SafariWebExtensionHandler {
         let challenge = message["challenge"] as? String ?? ""
         let rpId = message["rpId"] as? String ?? ""
 
-        logger.info("Passkey authentication requested for \(domain, privacy: .public)")
+        logger.info("Passkey authentication requested for \(domain)")
 
         // Stub: full ASAuthorization integration requires main app context
         completion([

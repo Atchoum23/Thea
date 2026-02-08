@@ -430,11 +430,12 @@ extension NWTXTRecord {
         for key in knownKeys {
             if let entry = getEntry(for: key) {
                 switch entry {
-                case .keyValue(_, let data):
+                case let .keyValue(recordKey, data):
+                    _ = recordKey  // Silence unused warning
                     if let value = String(data: data, encoding: .utf8) {
                         result[key] = value
                     }
-                case .string(let value):
+                case let .string(value):
                     result[key] = value
                 @unknown default:
                     break
