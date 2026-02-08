@@ -134,10 +134,9 @@ public struct EncodedFrame: Sendable {
 
         deinit {
             // VTCompressionSession is a CF type that's safe to invalidate here
-            let session = compressionSession
+            nonisolated(unsafe) let session = compressionSession
             if let session {
-                nonisolated(unsafe) let unsafeSession = session
-                VTCompressionSessionInvalidate(unsafeSession)
+                VTCompressionSessionInvalidate(session)
             }
         }
 
