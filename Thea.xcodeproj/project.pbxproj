@@ -198,7 +198,6 @@
 		2E4BA466115CB98AD6BF1E2D /* CoworkArtifactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E94F6648B259AA8B80F84D /* CoworkArtifactsView.swift */; };
 		2E59C0EA5A16316D5F5FFACA /* ConnectivityMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ECA0D6AB8664A0177DD8BE /* ConnectivityMonitorTests.swift */; };
 		2F0E5442D52B77E9A0F6E5DD /* NotificationPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BCB7B11E6C5C3D1E18B7A29 /* NotificationPayload.swift */; };
-		2F668FEE623A3DACCB25D125 /* CloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDE656126F142E29F77BBD7 /* CloudSyncManager.swift */; };
 		2F7F8A9A838A28F11CE0FA2B /* NutritionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7130C85DA968036A0DA5FF11 /* NutritionServiceTests.swift */; };
 		2FAD36AFCC44FE8FD123ECB3 /* DocumentationGrounding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E31752880976FC52698EA4 /* DocumentationGrounding.swift */; };
 		2FD2FB1519624C018A7836D5 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CC5E9A02DF4C87912DC6C5BB /* Info.plist */; };
@@ -492,7 +491,6 @@
 		738AB229D93BF556EA03576F /* LiquidGlassStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14F6642BA0F9B1F6F5CDB0F2 /* LiquidGlassStyle.swift */; };
 		745454DFC4535E7135D1819F /* SecureConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444FC16DD3444080FBD0C456 /* SecureConnectionManager.swift */; };
 		747D801424ECFB247DD982EC /* UnattendedAccessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90AE089D33618BED143E8FC4 /* UnattendedAccessManager.swift */; };
-		74A5F259A306CD29D4D9B592 /* CloudSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDE656126F142E29F77BBD7 /* CloudSyncManager.swift */; };
 		74AF5FE60A086476B5098327 /* LongTermMemorySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7595B75143CD16243CB1734B /* LongTermMemorySystem.swift */; };
 		75198D3DA4B23978D5DB033C /* OfflineQueueService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F20B32B81DA497EC0B39499 /* OfflineQueueService.swift */; };
 		752011A1CDB2EC5C7FB28D09 /* ChatManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3276F882029F645CC059C4CB /* ChatManagerTests.swift */; };
@@ -1581,7 +1579,6 @@
 		8D53A7C7AC531FF9BCF6CBB1 /* QuickEntryWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickEntryWindow.swift; sourceTree = "<group>"; };
 		8DD1462275A5FD12A8FB4A9F /* AgentSecPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSecPolicy.swift; sourceTree = "<group>"; };
 		8DDA0136BF5B66976C838A6C /* BatteryOptimizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryOptimizer.swift; sourceTree = "<group>"; };
-		8DDE656126F142E29F77BBD7 /* CloudSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncManager.swift; sourceTree = "<group>"; };
 		8E15C29769BAC69EA08BA5FE /* SelfTuningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfTuningEngine.swift; sourceTree = "<group>"; };
 		8EA10AE173BF28B5AAD1C84A /* FileSystemObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemObserver.swift; sourceTree = "<group>"; };
 		8EA54AB3E7205058E389537D /* MCPServerGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPServerGenerator.swift; sourceTree = "<group>"; };
@@ -4309,7 +4306,6 @@
 			children = (
 				34D5300008C38D31B27960E4 /* ApprovalManager.swift */,
 				028DE98F628A0F693BC65625 /* ChatManager.swift */,
-				8DDE656126F142E29F77BBD7 /* CloudSyncManager.swift */,
 				6CCBC9AE92AB2A7D38E15728 /* CodeIntelligenceManager.swift */,
 				4AB52A8EEE4C9B4152809DC0 /* DraftSyncManager.swift */,
 				17BC9C279C462E946AAE1891 /* FinancialManager.swift */,
@@ -5267,7 +5263,6 @@
 				8E11CA887FD8FA573DD9DCF7 /* ClipboardContextProvider.swift in Sources */,
 				79DD161B0693776600C5FACB /* ClipboardSyncService.swift in Sources */,
 				BFC402CB6C4147506218649C /* CloudKitService.swift in Sources */,
-				2F668FEE623A3DACCB25D125 /* CloudSyncManager.swift in Sources */,
 				46312A8A008F6E036CBBC4FA /* CodeExecutionManager.swift in Sources */,
 				4724E5F883A98247D3F8A828 /* CodeIntelligenceManager.swift in Sources */,
 				EFB2C3DE4AFFB656E9DA047D /* CodebaseSearchEngine.swift in Sources */,
@@ -5875,7 +5870,6 @@
 				7539461341067BF4EE2C514C /* ClipboardObserver.swift in Sources */,
 				7E35F20DC5B6DCA3A41A42BC /* ClipboardSyncService.swift in Sources */,
 				8162D211ECEF911409D411BB /* CloudKitService.swift in Sources */,
-				74A5F259A306CD29D4D9B592 /* CloudSyncManager.swift in Sources */,
 				89E760BEEAF826391CB95100 /* CodeExecutionManager.swift in Sources */,
 				258213E1D2C95FF32D88F653 /* CodeIntelligenceManager.swift in Sources */,
 				77F7A40AA6CBBA58822BF161 /* CodebaseSearchEngine.swift in Sources */,
