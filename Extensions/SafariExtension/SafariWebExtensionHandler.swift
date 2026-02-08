@@ -89,6 +89,42 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             let formFields = message["fields"] as? [[String: Any]] ?? []
             handleSuggestAutofill(formFields, completion: completion)
 
+        case "askAI":
+            handleAskAI(message, completion: completion)
+
+        case "deepResearch":
+            handleDeepResearch(message, completion: completion)
+
+        case "searchMemory":
+            handleSearchMemory(message, completion: completion)
+
+        case "getCredentials":
+            handleGetCredentials(message, completion: completion)
+
+        case "saveCredential":
+            handleSaveCredential(message, completion: completion)
+
+        case "generatePassword":
+            handleGeneratePassword(completion: completion)
+
+        case "getTOTPSecret":
+            handleGetTOTPSecret(message, completion: completion)
+
+        case "registerPasskey":
+            handleRegisterPasskey(message, completion: completion)
+
+        case "authenticatePasskey":
+            handleAuthenticatePasskey(message, completion: completion)
+
+        case "getRecentSaves":
+            handleGetRecentSaves(completion: completion)
+
+        case "rewriteText":
+            handleRewriteText(message, completion: completion)
+
+        case "analyzeWritingStyle":
+            handleAnalyzeWritingStyle(message, completion: completion)
+
         default:
             completion(["error": "Unknown action: \(action)"])
         }
