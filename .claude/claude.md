@@ -101,6 +101,15 @@ done
 - **SemanticSearchService** (`Intelligence/Search/`): Embedding-based semantic search (macOS only)
 - **ChatManager.selectProviderAndModel()**: Wired with `#if os(macOS)` to use TaskClassifier + ModelRouter; falls back to default provider on iOS/watchOS/tvOS
 
+## Verification Pipeline (ACTIVE in macOS + iOS builds)
+
+- **ConfidenceSystem** (`Intelligence/Verification/`): Orchestrates all 5 sub-verifiers for response confidence scoring
+- **MultiModelConsensus** (`Intelligence/Verification/`): Cross-validates responses across multiple AI models
+- **WebSearchVerifier** (`Intelligence/Verification/`): Fact-checks responses against web sources via Perplexity/OpenRouter
+- **StaticAnalysisVerifier** (`Intelligence/Verification/`): Code analysis via patterns, SwiftLint, compiler checks, and AI
+- **CodeExecutionVerifier** (`Intelligence/Verification/`): Executes code snippets via JavaScriptCore/Process for verification
+- **UserFeedbackLearner** (`Intelligence/Verification/`): Learns from user feedback to improve confidence calibration
+
 ## CloudKit (ACTIVE)
 
 - **CloudKitService** (`Shared/Sync/CloudKitService.swift`): Canonical CloudKit implementation (delta sync, subscriptions, sharing)
@@ -130,7 +139,7 @@ If a task seems to require changes in an excluded area, **STOP and ask the user*
 | **Learning / Monitoring** | `**/PatternLearning/**`, `**/LifeMonitoring/**`, `**/LifeAssistant/**` | None active |
 | **LocalModels** | Selective: `ProactiveModelManager`, `LocalModelRecommendation*`, `AIModelGovernor`, `ModelGovernanceEngine`, `UnifiedLocalModelOrchestrator`, `SupraModelSelector`, `OllamaAgentLoop`, `ModelQualityBenchmark`, `PredictivePreloader` | Core LocalModel files now active |
 | **Integrations** | `**/Integrations/{Mail,Finder,Safari,Xcode,Shortcuts,Terminal,Music,Calendar,Messages,Notes,Reminders,MCP,System,IntegrationModule}*` | None active |
-| **Verification** | `**/Intelligence/Verification/**` | None active |
+| **Verification** | _(now ACTIVE — all 6 files enabled in macOS + iOS builds)_ | `Intelligence/Verification/` |
 | **Anticipatory** | `**/Anticipatory/**`, `**/Prediction/**` | None active |
 | **PromptEngineering** | `**/PromptEngineering/**` | None active |
 | **ResourceManagement** | `**/ResourceManagement/**` | None active |
