@@ -374,8 +374,6 @@ targets:
           - "**/PatternLearning/**"
           - "**/LifeMonitoring/**"
           - "**/LifeAssistant/**"
-          - "**/Routing/**"
-          - "**/Classification/TaskClassifier.swift"
           - "**/Anticipatory/**"
           - "**/Prediction/**"
           - "**/Autonomy/**"
