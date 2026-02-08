@@ -7,11 +7,11 @@ final class Conversation {
     var title: String
     var createdAt: Date
     var updatedAt: Date
-    var isPinned: Bool
+    var isPinned: Bool = false
     var projectID: UUID?
-    var isArchived: Bool
-    var isRead: Bool
-    var status: String // "idle" | "generating" | "error" | "queued"
+    var isArchived: Bool = false
+    var isRead: Bool = true
+    var status: String = "idle" // "idle" | "generating" | "error" | "queued"
     var lastModelUsed: String?
 
     @Relationship(deleteRule: .cascade, inverse: \Message.conversation)
