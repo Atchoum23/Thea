@@ -48,7 +48,11 @@ public class TOTPAuthenticator: ObservableObject {
 
         let base32Secret = base32Encode(secret)
         let issuer = "Thea Remote Desktop"
-        let account = Host.current().localizedName ?? "Mac"
+        #if os(macOS)
+            let account = Host.current().localizedName ?? "Mac"
+        #else
+            let account = ProcessInfo.processInfo.hostName
+        #endif
         let otpauthURL = "otpauth://totp/\(urlEncode(issuer)):\(urlEncode(account))?secret=\(base32Secret)&issuer=\(urlEncode(issuer))&digits=\(Self.digits)&period=\(Int(Self.period))"
 
         return TOTPSetupInfo(
