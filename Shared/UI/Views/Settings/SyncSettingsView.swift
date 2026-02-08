@@ -18,8 +18,10 @@ struct SyncSettingsView: View {
     @State private var showingDeviceList = false
     @State private var isSyncing = false
     @State private var lastSyncError: String?
+    #if os(macOS)
     @State private var isUpdating = false
     @State private var updateResult: UpdateResult?
+    #endif
 
     // Data-level sync toggles (CloudKit)
     @AppStorage("sync.conversations") private var syncConversations = true
