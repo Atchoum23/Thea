@@ -133,8 +133,11 @@ public struct EncodedFrame: Sendable {
         public init() {}
 
         deinit {
-            if let session = compressionSession {
-                VTCompressionSessionInvalidate(session)
+            // VTCompressionSession is a CF type that's safe to invalidate here
+            let session = compressionSession
+            if let session {
+                nonisolated(unsafe) let unsafeSession = session
+                VTCompressionSessionInvalidate(unsafeSession)
             }
         }
 
@@ -237,8 +240,10 @@ public struct EncodedFrame: Sendable {
                 infoFlagsOut: &infoFlags
             ) { [weak self] status, _, sampleBuffer in
                 guard status == noErr, let sampleBuffer else { return }
+                // CMSampleBuffer is a CF type safe to send across boundaries
+                nonisolated(unsafe) let safeSampleBuffer = sampleBuffer
                 Task { @MainActor in
-                    self?.handleEncodedFrame(sampleBuffer)
+                    self?.handleEncodedFrame(safeSampleBuffer)
                 }
             }
 
