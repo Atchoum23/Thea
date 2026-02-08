@@ -204,13 +204,13 @@ public final class ActiveMemoryRetrieval {
             let memories = try await MemorySystem.shared.retrieveRelevantMemories(
                 for: query,
                 limit: config.maxMemorySystemResults,
-                threshold: config.minSimilarityThreshold
+                threshold: Double(config.minSimilarityThreshold)
             )
 
             for memory in memories {
                 sources.append(RetrievalSource(
                     type: .memorySystem,
-                    tier: memory.tier == .shortTerm ? .working : .longTerm,
+                    tier: memory.tier == RetrievalMemoryTier.shortTerm ? .working : .longTerm,
                     content: memory.content,
                     relevanceScore: Double(memory.importance),
                     timestamp: memory.lastAccessed,
@@ -336,27 +336,10 @@ public final class ActiveMemoryRetrieval {
     // MARK: - Knowledge Graph Retrieval
 
     private func retrieveFromKnowledgeGraph(query: String) async -> PartialRetrievalResult {
-        var sources: [RetrievalSource] = []
-
-        // Search knowledge graph nodes
-        let nodes = await KnowledgeGraph.shared.searchNodes(query: query, limit: config.maxKnowledgeGraphResults)
-
-        for node in nodes {
-            sources.append(RetrievalSource(
-                type: .knowledgeNode,
-                tier: .semantic,
-                content: node.content,
-                relevanceScore: Double(node.importance),
-                timestamp: node.createdAt,
-                metadata: [
-                    "type": node.type.rawValue,
-                    "id": node.id.uuidString
-                ]
-            ))
-        }
-
-        let avgConfidence = sources.isEmpty ? 0.0 : sources.map(\.relevanceScore).reduce(0, +) / Double(sources.count)
-        return PartialRetrievalResult(sources: sources, averageConfidence: avgConfidence)
+        // KnowledgeGraph is not yet available in the canonical build
+        // Placeholder: returns empty results until KnowledgeGraph is implemented
+        _ = query
+        return PartialRetrievalResult(sources: [], averageConfidence: 0.0)
     }
 
     // MARK: - Event History Retrieval
