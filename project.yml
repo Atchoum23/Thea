@@ -374,7 +374,16 @@ targets:
           - "**/Anticipatory/**"
           - "**/Prediction/**"
           - "**/Autonomy/**"
-          - "**/Automation/**"
+          # Automation: selective exclusion (AutomationEngine, AutomationAction,
+          # BrowserAutomationOrchestrator, BrowserAutomationService, PermissionManager,
+          # ScreenAnalyzer, UserInterventionDetector are actively used on macOS)
+          - "**/Automation/AutonomousTaskExecutor.swift"
+          - "**/Automation/ShortcutsOrchestrator.swift"
+          - "**/Automation/ShortcutsService.swift"
+          - "**/Automation/WorkflowRecorder.swift"
+          - "**/Automation/WorkflowEngine.swift"
+          - "**/Automation/ScheduledTasks/**"
+          - "**/Automation/SmartTriggers/**"
           - "**/Autonomous/**"
           - "**/AgentMode/**"
           - "**/Intelligence/Orchestration/IntelligenceOrchestrator.swift"
