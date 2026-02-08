@@ -472,9 +472,7 @@ targets:
           - "**/ViewModels/SettingsViewModel.swift"
           # Theme exclusions
           - "**/Theme/DesignTokens.swift"
-          - "**/Theme/TheaAnimations.swift"
-          # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
-          - "**/Design/DesignSystemStubs.swift"
+          # TheaAnimations.swift and DesignSystemStubs.swift now INCLUDED
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
     settings:

@@ -568,11 +568,19 @@ public extension AIModel {
     }
 
     static var groqModels: [AIModel] {
-        [llama370b, mixtral8x7b]
+        [llama370b, llama318b, mixtral8x7b]
+    }
+
+    static var perplexityModels: [AIModel] {
+        [sonarPro, sonar, sonarReasoning]
+    }
+
+    static var openRouterModels: [AIModel] {
+        [orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
     }
 
     static var allKnownModels: [AIModel] {
-        anthropicModels + openaiModels + googleModels + deepseekModels + groqModels + [sonarPro]
+        anthropicModels + openaiModels + googleModels + deepseekModels + groqModels + perplexityModels + openRouterModels
     }
 }
 
