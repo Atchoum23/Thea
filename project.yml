@@ -290,9 +290,6 @@ targets:
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
-          # Also exclude AI/Providers files that depend on excluded Protocol types
-          - "**/AI/Providers/AnthropicFilesAPI.swift"
-          - "**/AI/Providers/AnthropicTokenCounter.swift"
           - "**/Providers/Anthropic/**"
           - "**/Providers/DeepSeek/**"
           - "**/Providers/Google/**"
@@ -340,7 +337,7 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
+
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
@@ -465,7 +462,7 @@ targets:
           # Settings views with missing dependencies
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
+
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
@@ -609,9 +606,6 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
-          # Exclude Anthropic files that depend on excluded ProviderError/ChatContentPart types
-          - "**/AI/Providers/AnthropicFilesAPI.swift"
-          - "**/AI/Providers/AnthropicTokenCounter.swift"
           # ARCHITECTURE DECISION: MetaAI excluded - see macOS target for full explanation
           - "**/AI/MetaAI/**"
           - "**/Integrations/NotesIntegration.swift"
@@ -624,7 +618,7 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
+
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"

@@ -1,36 +1,4 @@
-import AVFoundation
-import Contacts
-import CoreLocation
-import Speech
 import SwiftUI
-import UserNotifications
-
-// MARK: - Permission State
-
-private enum MacPermissionState {
-    case granted
-    case denied
-    case notDetermined
-    case unknown
-
-    var label: String {
-        switch self {
-        case .granted: "Granted"
-        case .denied: "Denied"
-        case .notDetermined: "Not Set"
-        case .unknown: "Unknown"
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .granted: .green
-        case .denied: .red
-        case .notDetermined: .gray
-        case .unknown: .gray
-        }
-    }
-}
 
 // MARK: - Window Resizable Helper
 
@@ -161,10 +129,6 @@ struct MacSettingsView: View {
     @State private var apiKeysLoaded: Bool = false
     @State private var localModelConfig = AppConfiguration.shared.localModelConfig
 
-    // Permissions state
-    @State private var permissionStates: [String: MacPermissionState] = [:]
-    @State private var isRefreshingPermissions = false
-
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
             settingsSidebar
@@ -245,7 +209,7 @@ struct MacSettingsView: View {
         case .codeIntelligence:
             CodeIntelligenceConfigurationView()
         case .permissions:
-            permissionsSettings
+            PermissionsSettingsView()
         case .sync:
             SyncSettingsView()
         case .privacy:
@@ -506,111 +470,6 @@ struct MacSettingsView: View {
         }
     }
 
-    // MARK: - Permissions Settings
-
-    private var permissionsSettings: some View {
-        Form {
-            Section {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("System Permissions")
-                            .font(.theaHeadline)
-                        Text("Thea needs certain permissions to function fully. Grant or check status below.")
-                            .font(.theaCaption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button {
-                        refreshMacPermissions()
-                    } label: {
-                        HStack(spacing: 4) {
-                            if isRefreshingPermissions {
-                                ProgressView().scaleEffect(0.7)
-                            } else {
-                                Image(systemName: "arrow.clockwise")
-                            }
-                            Text("Refresh")
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(isRefreshingPermissions)
-                }
-            }
-
-            Section("Core Permissions") {
-                permissionRow(
-                    key: "microphone", label: "Microphone", icon: "mic.fill",
-                    description: "Required for voice activation and speech input.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone"
-                )
-                permissionRow(
-                    key: "speechRecognition", label: "Speech Recognition", icon: "waveform",
-                    description: "Required for voice-to-text and wake word detection.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_SpeechRecognition"
-                )
-                permissionRow(
-                    key: "contacts", label: "Contacts", icon: "person.crop.circle",
-                    description: "Allows Thea to reference and manage your contacts.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Contacts"
-                )
-                permissionRow(
-                    key: "location", label: "Location", icon: "location.fill",
-                    description: "Enables location-aware suggestions and context.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices"
-                )
-                permissionRow(
-                    key: "notifications", label: "Notifications", icon: "bell.fill",
-                    description: "Alerts for completed tasks, updates, and reminders.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Notifications"
-                )
-            }
-
-            Section("macOS System Access") {
-                permissionRow(
-                    key: "accessibility", label: "Accessibility", icon: "accessibility",
-                    description: "Needed for reading screen content and UI automation.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
-                )
-                permissionRow(
-                    key: "screenRecording", label: "Screen Recording", icon: "rectangle.dashed.badge.record",
-                    description: "Required for capturing screen context.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
-                )
-                permissionRow(
-                    key: "fullDiskAccess", label: "Full Disk Access", icon: "internaldrive",
-                    description: "Required for reading files across your system.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
-                )
-                permissionRow(
-                    key: "automation", label: "Automation", icon: "gearshape.2",
-                    description: "Allows Thea to control other apps via AppleScript.",
-                    settingsURL: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation"
-                )
-            }
-
-            Section("Quick Actions") {
-                HStack(spacing: 12) {
-                    quickActionButton("Privacy Settings", icon: "hand.raised.fill") {
-                        NSWorkspace.shared.open(
-                            URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy")!
-                        )
-                    }
-                    quickActionButton("Accessibility", icon: "accessibility") {
-                        NSWorkspace.shared.open(
-                            URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                        )
-                    }
-                    quickActionButton("Screen Recording", icon: "rectangle.dashed.badge.record") {
-                        CGRequestScreenCaptureAccess()
-                        refreshMacPermissions()
-                    }
-                }
-            }
-        }
-        .formStyle(.grouped)
-        .onAppear { refreshMacPermissions() }
-    }
-
     // MARK: - Advanced Settings
 
     private var advancedSettings: some View {
@@ -665,122 +524,6 @@ struct MacSettingsView: View {
             }
         }
         .formStyle(.grouped)
-    }
-
-    // MARK: - Shared Components
-
-    private func permissionRow(
-        key: String, label: String, icon: String,
-        description: String, settingsURL: String
-    ) -> some View {
-        let state = permissionStates[key] ?? .unknown
-        return HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(state.color)
-                .frame(width: 24)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label).font(.theaSubhead)
-                Text(description)
-                    .font(.theaCaption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-
-            Spacer()
-
-            Text(state.label)
-                .font(.theaCaption2)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(state.color.opacity(0.15))
-                .foregroundStyle(state.color)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-
-            Button {
-                if let url = URL(string: settingsURL) {
-                    NSWorkspace.shared.open(url)
-                }
-            } label: {
-                Image(systemName: "gear")
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-        }
-        .padding(.vertical, 2)
-    }
-
-    private func quickActionButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: icon).font(.title2)
-                Text(title).font(.theaCaption2).multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-        }
-        .buttonStyle(.bordered)
-    }
-
-    // MARK: - Permission Refresh
-
-    private func refreshMacPermissions() {
-        isRefreshingPermissions = true
-        Task {
-            var states: [String: MacPermissionState] = [:]
-
-            switch AVCaptureDevice.authorizationStatus(for: .audio) {
-            case .authorized: states["microphone"] = .granted
-            case .denied, .restricted: states["microphone"] = .denied
-            case .notDetermined: states["microphone"] = .notDetermined
-            @unknown default: states["microphone"] = .unknown
-            }
-
-            switch SFSpeechRecognizer.authorizationStatus() {
-            case .authorized: states["speechRecognition"] = .granted
-            case .denied, .restricted: states["speechRecognition"] = .denied
-            case .notDetermined: states["speechRecognition"] = .notDetermined
-            @unknown default: states["speechRecognition"] = .unknown
-            }
-
-            switch CNContactStore.authorizationStatus(for: .contacts) {
-            case .authorized: states["contacts"] = .granted
-            case .denied, .restricted: states["contacts"] = .denied
-            case .notDetermined: states["contacts"] = .notDetermined
-            @unknown default: states["contacts"] = .unknown
-            }
-
-            let locStatus = CLLocationManager().authorizationStatus
-            switch locStatus {
-            case .authorizedAlways, .authorized: states["location"] = .granted
-            case .denied: states["location"] = .denied
-            case .notDetermined: states["location"] = .notDetermined
-            case .restricted: states["location"] = .denied
-            @unknown default: states["location"] = .unknown
-            }
-
-            let notifSettings = await UNUserNotificationCenter.current().notificationSettings()
-            switch notifSettings.authorizationStatus {
-            case .authorized, .provisional: states["notifications"] = .granted
-            case .denied: states["notifications"] = .denied
-            case .notDetermined: states["notifications"] = .notDetermined
-            @unknown default: states["notifications"] = .unknown
-            }
-
-            states["accessibility"] = AXIsProcessTrusted() ? .granted : .denied
-            states["screenRecording"] = CGPreflightScreenCaptureAccess() ? .granted : .denied
-
-            let testPath = FileManager.default.homeDirectoryForCurrentUser
-                .appendingPathComponent("Library/Mail").path
-            states["fullDiskAccess"] = FileManager.default.isReadableFile(atPath: testPath) ? .granted : .denied
-            states["automation"] = AXIsProcessTrusted() ? .granted : .unknown
-
-            await MainActor.run {
-                permissionStates = states
-                isRefreshingPermissions = false
-            }
-        }
     }
 
     // MARK: - API Key Helpers

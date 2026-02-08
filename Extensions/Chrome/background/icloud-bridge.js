@@ -1,9 +1,12 @@
 /**
  * iCloud Bridge for Thea Chrome/Brave Extension
  *
- * Provides Safari-like integration with:
- * - iCloud Passwords (via native messaging host)
- * - iCloud Hide My Email (via native messaging host)
+ * Core native messaging bridge: connection management, request/response
+ * handling, event emitter, and status tracking.
+ *
+ * Keychain-specific operations (getCredentials, saveCredential,
+ * generatePassword, autofillCredential, deleteCredential) are in
+ * icloud-keychain.js (attached to this singleton's prototype).
  *
  * This bridge communicates with TheaNativeMessagingHost through Chrome's
  * native messaging API to access iCloud services.
@@ -156,108 +159,7 @@ class iCloudBridge {
     }
 
     // ========================================
-    // Password Management (iCloud Keychain)
-    // ========================================
-
-    /**
-     * Get credentials for a domain
-     * @param {string} domain - The domain to get credentials for
-     * @returns {Promise<Array>} Array of credentials
-     */
-    async getCredentials(domain) {
-        await this.ensureConnected();
-
-        const response = await this.sendRequest('getCredentials', { domain });
-
-        if (response.success) {
-            return response.data?.credentials ?? [];
-        }
-
-        throw new Error(response.error || 'Failed to get credentials');
-    }
-
-    /**
-     * Save a credential to iCloud Passwords
-     * @param {Object} credential - The credential to save
-     * @returns {Promise<boolean>}
-     */
-    async saveCredential({ username, password, domain, notes }) {
-        await this.ensureConnected();
-
-        const response = await this.sendRequest('saveCredential', {
-            username,
-            password,
-            domain,
-            notes
-        });
-
-        if (response.success) {
-            this.emit('credentialSaved', { domain, username });
-            return true;
-        }
-
-        throw new Error(response.error || 'Failed to save credential');
-    }
-
-    /**
-     * Generate a strong password (Apple-style format)
-     * @returns {Promise<string>} Generated password
-     */
-    async generatePassword() {
-        await this.ensureConnected();
-
-        const response = await this.sendRequest('generatePassword', {});
-
-        if (response.success) {
-            return response.data?.password;
-        }
-
-        throw new Error(response.error || 'Failed to generate password');
-    }
-
-    /**
-     * Delete a credential from iCloud Passwords
-     * @param {string} domain
-     * @param {string} username
-     */
-    async deleteCredential(domain, username) {
-        await this.ensureConnected();
-
-        const response = await this.sendRequest('deleteCredential', {
-            domain,
-            username
-        });
-
-        if (response.success) {
-            this.emit('credentialDeleted', { domain, username });
-            return true;
-        }
-
-        throw new Error(response.error || 'Failed to delete credential');
-    }
-
-    /**
-     * Autofill credential for a domain (quick access)
-     * @param {string} domain
-     */
-    async autofillCredential(domain) {
-        await this.ensureConnected();
-
-        const response = await this.sendRequest('autofillCredential', { domain });
-
-        if (response.success && response.data?.found) {
-            return {
-                found: true,
-                username: response.data.username,
-                password: response.data.password
-            };
-        }
-
-        return { found: false };
-    }
-
-    // ========================================
-    // Hide My Email
+    // Hide My Email (via native bridge)
     // ========================================
 
     /**

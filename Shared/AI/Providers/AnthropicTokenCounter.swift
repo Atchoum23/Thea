@@ -1,5 +1,5 @@
 // AnthropicTokenCounter.swift
-// Thea V2
+// Thea
 //
 // Token Counting API for Anthropic Claude
 // Endpoint: POST /v1/messages/count_tokens
@@ -15,13 +15,13 @@ import OSLog
 /// Token counting API for Anthropic Claude
 /// Endpoint: POST /v1/messages/count_tokens
 /// Pricing: FREE
-public struct AnthropicTokenCounter: Sendable {
+struct AnthropicTokenCounter: Sendable {
     private let apiKey: String
     private let baseURL = "https://api.anthropic.com/v1/messages/count_tokens"
     private let apiVersion = "2023-06-01"
     private let logger = Logger(subsystem: "com.thea.v2", category: "AnthropicTokenCounter")
 
-    public init(apiKey: String) {
+    init(apiKey: String) {
         self.apiKey = apiKey
     }
 
@@ -34,22 +34,21 @@ public struct AnthropicTokenCounter: Sendable {
     ///   - systemPrompt: Optional system prompt
     ///   - tools: Optional tool definitions
     /// - Returns: Token count result
-    public func countTokens(
-        messages: [ChatMessage],
+    func countTokens(
+        messages: [AIMessage],
         model: String,
         systemPrompt: String? = nil,
         tools: [ToolDefinition]? = nil
     ) async throws -> TokenCountResult {
         guard let url = URL(string: baseURL) else {
-            throw ProviderError.invalidResponse(details: "Invalid URL")
+            throw AnthropicError.invalidResponseDetails("Invalid URL")
         }
 
-        // Build request body (same structure as messages API)
         var requestBody: [String: Any] = [
             "model": model,
             "messages": messages.map { msg in
                 [
-                    "role": msg.role,
+                    "role": msg.role == .user ? "user" : "assistant",
                     "content": msg.content.textValue
                 ]
             }
@@ -80,22 +79,22 @@ public struct AnthropicTokenCounter: Sendable {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw ProviderError.invalidResponse(details: "Invalid HTTP response")
+            throw AnthropicError.invalidResponseDetails("Invalid HTTP response")
         }
 
         if httpResponse.statusCode != 200 {
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = json["error"] as? [String: Any],
                let message = error["message"] as? String {
-                throw ProviderError.serverError(status: httpResponse.statusCode, message: message)
+                throw AnthropicError.serverError(status: httpResponse.statusCode, message: message)
             }
-            throw ProviderError.serverError(status: httpResponse.statusCode, message: nil)
+            throw AnthropicError.serverError(status: httpResponse.statusCode, message: nil)
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let inputTokens = json["input_tokens"] as? Int
         else {
-            throw ProviderError.invalidResponse(details: "Could not parse token count response")
+            throw AnthropicError.invalidResponseDetails("Could not parse token count response")
         }
 
         logger.debug("Token count: \(inputTokens) for model \(model)")
@@ -104,14 +103,8 @@ public struct AnthropicTokenCounter: Sendable {
     }
 
     /// Check if a message will fit within a model's context window
-    /// - Parameters:
-    ///   - messages: The messages to check
-    ///   - model: The model to use
-    ///   - maxTokens: Maximum output tokens requested
-    ///   - contextLimit: The model's context limit
-    /// - Returns: Whether the message fits and remaining capacity
-    public func checkFits(
-        messages: [ChatMessage],
+    func checkFits(
+        messages: [AIMessage],
         model: String,
         maxTokens: Int,
         contextLimit: Int
@@ -133,34 +126,16 @@ public struct AnthropicTokenCounter: Sendable {
 
 // MARK: - Token Count Result
 
-public struct TokenCountResult: Sendable {
-    public let inputTokens: Int
-
-    public init(inputTokens: Int) {
-        self.inputTokens = inputTokens
-    }
+struct TokenCountResult: Sendable {
+    let inputTokens: Int
 }
 
 // MARK: - Context Fit Result
 
-public struct ContextFitResult: Sendable {
-    public let fits: Bool
-    public let inputTokens: Int
-    public let maxOutputTokens: Int
-    public let remainingCapacity: Int
-    public let contextLimit: Int
-
-    public init(
-        fits: Bool,
-        inputTokens: Int,
-        maxOutputTokens: Int,
-        remainingCapacity: Int,
-        contextLimit: Int
-    ) {
-        self.fits = fits
-        self.inputTokens = inputTokens
-        self.maxOutputTokens = maxOutputTokens
-        self.remainingCapacity = remainingCapacity
-        self.contextLimit = contextLimit
-    }
+struct ContextFitResult: Sendable {
+    let fits: Bool
+    let inputTokens: Int
+    let maxOutputTokens: Int
+    let remainingCapacity: Int
+    let contextLimit: Int
 }

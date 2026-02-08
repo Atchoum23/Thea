@@ -5,8 +5,8 @@
 // - iCloud Passwords (via native messaging to access Keychain)
 // - iCloud Hide My Email (via direct iCloud.com API - like Safari)
 
-import icloudBridge from './icloud-bridge.js';
-import icloudClient from './icloud-client.js';
+import icloudBridge from './icloud-keychain.js';
+import icloudClient from './icloud-email-api.js';
 import memorySystem from './memory-system.js';
 
 // ============================================================================

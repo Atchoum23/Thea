@@ -450,14 +450,23 @@ struct AnthropicChatOptions: Sendable {
 
 enum AnthropicError: Error, LocalizedError {
     case invalidResponse
+    case invalidResponseDetails(String)
     case noResponse
+    case serverError(status: Int, message: String?)
+    case fileTooLarge(bytes: Int, maxBytes: Int)
 
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
             "Invalid response from Anthropic"
+        case let .invalidResponseDetails(details):
+            "Invalid response from Anthropic: \(details)"
         case .noResponse:
             "No response from Anthropic"
+        case let .serverError(status, message):
+            "Anthropic server error \(status)\(message.map { ": \($0)" } ?? "")"
+        case let .fileTooLarge(bytes, maxBytes):
+            "File too large: \(bytes) bytes exceeds \(maxBytes) byte limit"
         }
     }
 }

@@ -1,5 +1,5 @@
 // AnthropicFilesAPI.swift
-// Thea V2
+// Thea
 //
 // Files API for Anthropic Claude
 // Beta header: files-api-2025-04-14
@@ -18,14 +18,14 @@ import OSLog
 /// Beta header: files-api-2025-04-14
 /// Max: 500MB per file, 29-day retention
 /// Pricing: FREE
-public final class AnthropicFilesAPI: Sendable {
+final class AnthropicFilesAPI: Sendable {
     private let apiKey: String
     private let baseURL = "https://api.anthropic.com/v1/files"
     private let apiVersion = "2023-06-01"
     private let betaHeader = "files-api-2025-04-14"
     private let logger = Logger(subsystem: "com.thea.v2", category: "AnthropicFilesAPI")
 
-    public init(apiKey: String) {
+    init(apiKey: String) {
         self.apiKey = apiKey
     }
 
@@ -37,19 +37,19 @@ public final class AnthropicFilesAPI: Sendable {
     ///   - filename: Original filename
     ///   - mimeType: MIME type of the file
     /// - Returns: File upload response with file_id
-    public func upload(
+    func upload(
         file: Data,
         filename: String,
         mimeType: String
     ) async throws -> FileUploadResponse {
         guard let url = URL(string: baseURL) else {
-            throw ProviderError.invalidResponse(details: "Invalid URL")
+            throw AnthropicError.invalidResponseDetails("Invalid URL")
         }
 
         // Check file size limit (500MB)
         let maxSize = 500 * 1024 * 1024
         guard file.count <= maxSize else {
-            throw ProviderError.invalidResponse(details: "File exceeds 500MB limit")
+            throw AnthropicError.fileTooLarge(bytes: file.count, maxBytes: maxSize)
         }
 
         // Build multipart form data
@@ -83,16 +83,16 @@ public final class AnthropicFilesAPI: Sendable {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw ProviderError.invalidResponse(details: "Invalid HTTP response")
+            throw AnthropicError.invalidResponseDetails("Invalid HTTP response")
         }
 
         if httpResponse.statusCode != 200 && httpResponse.statusCode != 201 {
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = json["error"] as? [String: Any],
                let message = error["message"] as? String {
-                throw ProviderError.serverError(status: httpResponse.statusCode, message: message)
+                throw AnthropicError.serverError(status: httpResponse.statusCode, message: message)
             }
-            throw ProviderError.serverError(status: httpResponse.statusCode, message: nil)
+            throw AnthropicError.serverError(status: httpResponse.statusCode, message: nil)
         }
 
         let decoder = JSONDecoder()
@@ -108,11 +108,9 @@ public final class AnthropicFilesAPI: Sendable {
     // MARK: - Get File
 
     /// Get file metadata by ID
-    /// - Parameter fileId: The file ID
-    /// - Returns: File metadata
-    public func getFile(fileId: String) async throws -> FileUploadResponse {
+    func getFile(fileId: String) async throws -> FileUploadResponse {
         guard let url = URL(string: "\(baseURL)/\(fileId)") else {
-            throw ProviderError.invalidResponse(details: "Invalid URL")
+            throw AnthropicError.invalidResponseDetails("Invalid URL")
         }
 
         var request = URLRequest(url: url)
@@ -125,11 +123,11 @@ public final class AnthropicFilesAPI: Sendable {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw ProviderError.invalidResponse(details: "Invalid HTTP response")
+            throw AnthropicError.invalidResponseDetails("Invalid HTTP response")
         }
 
         if httpResponse.statusCode != 200 {
-            throw ProviderError.serverError(status: httpResponse.statusCode, message: nil)
+            throw AnthropicError.serverError(status: httpResponse.statusCode, message: nil)
         }
 
         let decoder = JSONDecoder()
@@ -142,11 +140,9 @@ public final class AnthropicFilesAPI: Sendable {
     // MARK: - Get Content
 
     /// Download file content by ID
-    /// - Parameter fileId: The file ID
-    /// - Returns: File data
-    public func getContent(fileId: String) async throws -> Data {
+    func getContent(fileId: String) async throws -> Data {
         guard let url = URL(string: "\(baseURL)/\(fileId)/content") else {
-            throw ProviderError.invalidResponse(details: "Invalid URL")
+            throw AnthropicError.invalidResponseDetails("Invalid URL")
         }
 
         var request = URLRequest(url: url)
@@ -159,11 +155,11 @@ public final class AnthropicFilesAPI: Sendable {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw ProviderError.invalidResponse(details: "Invalid HTTP response")
+            throw AnthropicError.invalidResponseDetails("Invalid HTTP response")
         }
 
         if httpResponse.statusCode != 200 {
-            throw ProviderError.serverError(status: httpResponse.statusCode, message: nil)
+            throw AnthropicError.serverError(status: httpResponse.statusCode, message: nil)
         }
 
         return data
@@ -172,10 +168,9 @@ public final class AnthropicFilesAPI: Sendable {
     // MARK: - Delete
 
     /// Delete a file
-    /// - Parameter fileId: The file ID to delete
-    public func delete(fileId: String) async throws {
+    func delete(fileId: String) async throws {
         guard let url = URL(string: "\(baseURL)/\(fileId)") else {
-            throw ProviderError.invalidResponse(details: "Invalid URL")
+            throw AnthropicError.invalidResponseDetails("Invalid URL")
         }
 
         var request = URLRequest(url: url)
@@ -188,11 +183,11 @@ public final class AnthropicFilesAPI: Sendable {
         let (_, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw ProviderError.invalidResponse(details: "Invalid HTTP response")
+            throw AnthropicError.invalidResponseDetails("Invalid HTTP response")
         }
 
         if httpResponse.statusCode != 200 && httpResponse.statusCode != 204 {
-            throw ProviderError.serverError(status: httpResponse.statusCode, message: nil)
+            throw AnthropicError.serverError(status: httpResponse.statusCode, message: nil)
         }
 
         logger.info("File deleted: \(fileId)")
@@ -201,10 +196,9 @@ public final class AnthropicFilesAPI: Sendable {
     // MARK: - List Files
 
     /// List all uploaded files
-    /// - Returns: Array of file metadata
-    public func listFiles() async throws -> [FileUploadResponse] {
+    func listFiles() async throws -> [FileUploadResponse] {
         guard let url = URL(string: baseURL) else {
-            throw ProviderError.invalidResponse(details: "Invalid URL")
+            throw AnthropicError.invalidResponseDetails("Invalid URL")
         }
 
         var request = URLRequest(url: url)
@@ -217,11 +211,11 @@ public final class AnthropicFilesAPI: Sendable {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw ProviderError.invalidResponse(details: "Invalid HTTP response")
+            throw AnthropicError.invalidResponseDetails("Invalid HTTP response")
         }
 
         if httpResponse.statusCode != 200 {
-            throw ProviderError.serverError(status: httpResponse.statusCode, message: nil)
+            throw AnthropicError.serverError(status: httpResponse.statusCode, message: nil)
         }
 
         let decoder = JSONDecoder()
@@ -235,15 +229,15 @@ public final class AnthropicFilesAPI: Sendable {
 
 // MARK: - File Response Types
 
-public struct FileUploadResponse: Codable, Sendable {
-    public let id: String           // file_id for referencing in messages
-    public let filename: String
-    public let mimeType: String
-    public let sizeBytes: Int
-    public let createdAt: Date
-    public let expiresAt: Date      // 29 days after creation
+struct FileUploadResponse: Codable, Sendable {
+    let id: String           // file_id for referencing in messages
+    let filename: String
+    let mimeType: String
+    let sizeBytes: Int
+    let createdAt: Date
+    let expiresAt: Date      // 29 days after creation
 
-    public init(
+    init(
         id: String,
         filename: String,
         mimeType: String,
@@ -260,28 +254,15 @@ public struct FileUploadResponse: Codable, Sendable {
     }
 }
 
-public struct FileListResponse: Codable, Sendable {
-    public let data: [FileUploadResponse]
-}
-
-// MARK: - File Content Block Extension
-
-public extension ChatContentPart {
-    /// Create a file reference content part using a file_id
-    static func fileReference(_ fileId: String) -> ChatContentPart {
-        // This creates a reference that can be used in messages
-        // The actual API format uses {"type": "file", "file_id": "..."}
-        .text("[file:\(fileId)]")
-    }
+struct FileListResponse: Codable, Sendable {
+    let data: [FileUploadResponse]
 }
 
 // MARK: - Helper for building file content blocks
 
-public struct AnthropicFileContent {
+struct AnthropicFileContent {
     /// Build a file content block for use in messages
-    /// - Parameter fileId: The file ID from upload response
-    /// - Returns: Dictionary for JSON serialization
-    public static func fileBlock(fileId: String) -> [String: Any] {
+    static func fileBlock(fileId: String) -> [String: Any] {
         [
             "type": "file",
             "file_id": fileId
@@ -289,9 +270,7 @@ public struct AnthropicFileContent {
     }
 
     /// Build an image content block from file
-    /// - Parameter fileId: The file ID of an image
-    /// - Returns: Dictionary for JSON serialization
-    public static func imageFromFile(fileId: String) -> [String: Any] {
+    static func imageFromFile(fileId: String) -> [String: Any] {
         [
             "type": "image",
             "source": [
@@ -302,9 +281,7 @@ public struct AnthropicFileContent {
     }
 
     /// Build a document content block from file
-    /// - Parameter fileId: The file ID of a document (PDF, etc.)
-    /// - Returns: Dictionary for JSON serialization
-    public static func documentFromFile(fileId: String) -> [String: Any] {
+    static func documentFromFile(fileId: String) -> [String: Any] {
         [
             "type": "document",
             "source": [
