@@ -339,7 +339,7 @@ import Network
                 try await session.send(message: .inventoryResponse(response))
 
             case .ping:
-                qualityMonitor.recordPing()
+                qualityMonitor.recordPingSent()
                 try await session.send(message: .pong)
 
             case .disconnect:
@@ -358,7 +358,7 @@ import Network
         private func handleClipboardRequest(_ request: ClipboardRequest) async -> ClipboardResponse {
             switch request {
             case .getClipboard:
-                if let data = clipboardSync.getLocalClipboard() {
+                if let data = clipboardSync.getCurrentClipboard() {
                     return .clipboardData(data)
                 }
                 return .error("No clipboard data available")
@@ -366,10 +366,10 @@ import Network
                 clipboardSync.applyRemoteClipboard(data)
                 return .clipboardData(data)
             case .startSync:
-                clipboardSync.startMonitoring()
+                clipboardSync.startSync()
                 return .syncStarted
             case .stopSync:
-                clipboardSync.stopMonitoring()
+                clipboardSync.stopSync()
                 return .syncStopped
             }
         }
