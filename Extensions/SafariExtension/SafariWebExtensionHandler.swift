@@ -11,7 +11,7 @@ import SafariServices
 /// Safari Web Extension Handler for Thea
 /// Bridges JavaScript messages to native code for enhanced web intelligence
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
-    private let logger = Logger(subsystem: "app.thea.safari", category: "ExtensionHandler")
+    let logger = Logger(subsystem: "app.thea.safari", category: "ExtensionHandler")
     let appGroupID = "group.app.theathe"
 
     func beginRequest(with context: NSExtensionContext) {
@@ -265,7 +265,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         return String(content.prefix(200)) + (content.count > 200 ? "..." : "")
     }
 
-    private func saveRequest(_ request: [String: Any]) {
+    func saveRequest(_ request: [String: Any]) {
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
             return
         }
@@ -281,7 +281,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
     }
 
-    private func notifyMainApp(_ event: String) {
+    func notifyMainApp(_ event: String) {
         let notificationName = CFNotificationName("app.thea.Safari\(event)" as CFString)
         CFNotificationCenterPostNotification(
             CFNotificationCenterGetDarwinNotifyCenter(),
