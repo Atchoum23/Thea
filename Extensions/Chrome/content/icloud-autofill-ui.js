@@ -1,19 +1,19 @@
 /**
- * iCloud Autofill UI for Thea Chrome/Brave Extension
+ * iCloud Autofill UI - Core Module
  *
- * Provides Safari-like autofill experience for:
- * - iCloud Passwords (Keychain)
- * - iCloud Hide My Email
+ * Styles, state, init, message handling, credential popup,
+ * autofill, save password banner, popup utilities.
  *
- * This creates native-feeling autofill dropdowns and prompts
- * that match Safari's UX as closely as possible.
+ * Loaded first. Other iCloud modules depend on this.
  */
 
 (function() {
   'use strict';
 
+  window.TheaModules = window.TheaModules || {};
+
   // ============================================================================
-  // Safari-like Autofill UI Constants
+  // Safari-like Autofill UI Styles
   // ============================================================================
 
   const STYLES = `
@@ -365,205 +365,64 @@
   let iCloudConnected = false;
 
   // ============================================================================
-  // Initialization
+  // Utilities
   // ============================================================================
 
-  function init() {
-    // Inject styles
-    const styleEl = document.createElement('style');
-    styleEl.id = 'thea-icloud-autofill-styles';
-    styleEl.textContent = STYLES;
-    document.head.appendChild(styleEl);
-
-    // Check iCloud connection status
-    checkiCloudStatus();
-
-    // Setup input observers
-    observeInputFields();
-
-    // Listen for messages from background
-    chrome.runtime.onMessage.addListener(handleMessage);
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
-  async function checkiCloudStatus() {
-    try {
-      const response = await chrome.runtime.sendMessage({ type: 'getiCloudStatus' });
-      if (response.success) {
-        iCloudConnected = response.data.connected;
+  function positionButtonInField(input, btn) {
+    const container = input.parentElement;
+    if (container) {
+      if (getComputedStyle(container).position === 'static') {
+        container.style.position = 'relative';
       }
-    } catch (e) {
-      console.log('iCloud status check failed:', e);
+      container.appendChild(btn);
     }
   }
 
-  function handleMessage(message, sender, sendResponse) {
-    // SECURITY: Verify message comes from our extension, not from web pages
-    if (!sender.id || sender.id !== chrome.runtime.id) {
-      console.warn('Thea: Rejected message from unauthorized sender');
-      sendResponse({ success: false, error: 'Unauthorized sender' });
-      return true;
+  function positionPopup(popup, anchorElement) {
+    const rect = anchorElement.getBoundingClientRect();
+    popup.style.position = 'fixed';
+    popup.style.top = `${rect.bottom + 4}px`;
+    popup.style.left = `${rect.left}px`;
+
+    // Adjust if off-screen
+    requestAnimationFrame(() => {
+      const popupRect = popup.getBoundingClientRect();
+      if (popupRect.right > window.innerWidth) {
+        popup.style.left = `${window.innerWidth - popupRect.width - 10}px`;
+      }
+      if (popupRect.bottom > window.innerHeight) {
+        popup.style.top = `${rect.top - popupRect.height - 4}px`;
+      }
+    });
+  }
+
+  function closeCurrentPopup() {
+    if (currentPopup) {
+      currentPopup.remove();
+      currentPopup = null;
     }
-
-    switch (message.type) {
-      case 'iCloudConnected':
-        iCloudConnected = true;
-        sendResponse({ success: true });
-        break;
-
-      case 'iCloudDisconnected':
-        iCloudConnected = false;
-        sendResponse({ success: true });
-        break;
-
-      case 'credentialSaved':
-        showSaveConfirmation(message.data);
-        sendResponse({ success: true });
-        break;
-
-      case 'aliasCreated':
-        showAliasCreatedNotification(message.data);
-        sendResponse({ success: true });
-        break;
-
-      default:
-        sendResponse({ success: false, error: 'Unknown message type' });
-    }
-    return true;
+    document.removeEventListener('click', closePopupHandler);
   }
 
-  // ============================================================================
-  // Input Field Detection & Enhancement
-  // ============================================================================
-
-  function observeInputFields() {
-    // Process existing fields
-    processInputFields();
-
-    // Watch for new fields
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach(node => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              processInputFields(node);
-            }
-          });
-        }
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
-
-  function processInputFields(root = document) {
-    // Find password fields for iCloud Passwords
-    const passwordFields = root.querySelectorAll('input[type="password"]');
-    passwordFields.forEach(field => {
-      if (!field.dataset.theaEnhanced) {
-        enhancePasswordField(field);
-      }
-    });
-
-    // Find email fields for Hide My Email
-    const emailFields = root.querySelectorAll(
-      'input[type="email"], input[name*="email"], input[autocomplete*="email"]'
-    );
-    emailFields.forEach(field => {
-      if (!field.dataset.theaEnhanced) {
-        enhanceEmailField(field);
-      }
-    });
-  }
-
-  // ============================================================================
-  // Password Field Enhancement (iCloud Passwords)
-  // ============================================================================
-
-  function enhancePasswordField(passwordField) {
-    passwordField.dataset.theaEnhanced = 'true';
-
-    // Find associated username field
-    const form = passwordField.closest('form');
-    const usernameField = form?.querySelector(
-      'input[type="text"], input[type="email"], input[autocomplete*="username"], input[autocomplete*="email"]'
-    );
-
-    if (!usernameField) return;
-
-    // Add Safari-like key icon button
-    const btn = createPasswordButton();
-    positionButtonInField(usernameField, btn);
-
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!iCloudConnected) {
-        await connectToiCloud();
-      }
-
-      showPasswordPopup(usernameField, passwordField);
-    });
-
-    // Also trigger on focus
-    usernameField.addEventListener('focus', async () => {
-      if (iCloudConnected) {
-        showPasswordPopup(usernameField, passwordField);
-      }
-    });
-  }
-
-  function createPasswordButton() {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'thea-password-btn';
-    btn.title = 'AutoFill from iCloud Keychain';
-    btn.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-    `;
-    return btn;
-  }
-
-  async function showPasswordPopup(usernameField, passwordField) {
-    closeCurrentPopup();
-
-    const domain = window.location.hostname;
-
-    try {
-      const response = await chrome.runtime.sendMessage({
-        type: 'getiCloudCredentials',
-        data: { domain }
-      });
-
-      if (!response.success) {
-        showConnectPrompt(usernameField);
-        return;
-      }
-
-      const credentials = response.data.credentials || [];
-
-      if (credentials.length === 0) {
-        showNoCredentialsPopup(usernameField, passwordField, domain);
-        return;
-      }
-
-      const popup = createCredentialPopup(credentials, usernameField, passwordField, domain);
-      positionPopup(popup, usernameField);
-      document.body.appendChild(popup);
-      currentPopup = popup;
-
-      // Close on click outside
-      setTimeout(() => {
-        document.addEventListener('click', closePopupHandler);
-      }, 100);
-
-    } catch (error) {
-      console.error('Failed to get credentials:', error);
+  function closePopupHandler(e) {
+    if (currentPopup && !currentPopup.contains(e.target)) {
+      closeCurrentPopup();
     }
   }
+
+  function setCurrentPopup(popup) {
+    currentPopup = popup;
+  }
+
+  // ============================================================================
+  // Credential Popup
+  // ============================================================================
 
   function createCredentialPopup(credentials, usernameField, passwordField, domain) {
     const popup = document.createElement('div');
@@ -634,7 +493,6 @@
     });
 
     footer.querySelector('[data-action="manage"]').addEventListener('click', () => {
-      // Open Thea settings or Passwords.app
       chrome.runtime.sendMessage({ type: 'openPasswordManager' });
       closeCurrentPopup();
     });
@@ -644,56 +502,9 @@
     return popup;
   }
 
-  function showNoCredentialsPopup(usernameField, passwordField, domain) {
-    const popup = document.createElement('div');
-    popup.className = 'thea-icloud-popup';
-
-    popup.innerHTML = `
-      <div class="thea-icloud-popup-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span>Passwords</span>
-        <span class="thea-badge">iCloud</span>
-      </div>
-      <div style="padding: 16px; text-align: center; color: #8e8e93; font-size: 13px;">
-        No saved passwords for ${escapeHtml(domain)}
-      </div>
-      <div class="thea-icloud-popup-footer">
-        <button class="primary" data-action="suggest" style="width: 100%;">Suggest Strong Password</button>
-      </div>
-    `;
-
-    popup.querySelector('[data-action="suggest"]').addEventListener('click', async () => {
-      const password = await suggestStrongPassword();
-      if (password) {
-        passwordField.value = password;
-        passwordField.dispatchEvent(new Event('input', { bubbles: true }));
-        closeCurrentPopup();
-      }
-    });
-
-    positionPopup(popup, usernameField);
-    document.body.appendChild(popup);
-    currentPopup = popup;
-
-    setTimeout(() => {
-      document.addEventListener('click', closePopupHandler);
-    }, 100);
-  }
-
-  async function suggestStrongPassword() {
-    try {
-      const response = await chrome.runtime.sendMessage({ type: 'generateiCloudPassword' });
-      if (response.success) {
-        return response.data.password;
-      }
-    } catch (e) {
-      console.error('Failed to generate password:', e);
-    }
-    return null;
-  }
+  // ============================================================================
+  // Autofill Credential
+  // ============================================================================
 
   function autofillCredential(credential, usernameField, passwordField) {
     // Fill username
@@ -714,112 +525,19 @@
   }
 
   // ============================================================================
-  // Email Field Enhancement (Hide My Email)
+  // Suggest Strong Password
   // ============================================================================
 
-  function enhanceEmailField(emailField) {
-    emailField.dataset.theaEnhanced = 'true';
-
-    // Don't add button to password reset or login email fields
-    const form = emailField.closest('form');
-    if (form?.querySelector('input[type="password"]')) {
-      return; // This is likely a login form
+  async function suggestStrongPassword() {
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'generateiCloudPassword' });
+      if (response.success) {
+        return response.data.password;
+      }
+    } catch (e) {
+      console.error('Failed to generate password:', e);
     }
-
-    // Add Hide My Email button
-    const btn = createHideEmailButton();
-    positionButtonInField(emailField, btn);
-
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!iCloudConnected) {
-        await connectToiCloud();
-      }
-
-      showHideMyEmailPopup(emailField);
-    });
-  }
-
-  function createHideEmailButton() {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'thea-hide-email-btn';
-    btn.title = 'Hide My Email';
-    btn.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-        <polyline points="22,6 12,13 2,6"/>
-      </svg>
-      Hide
-    `;
-    return btn;
-  }
-
-  async function showHideMyEmailPopup(emailField) {
-    closeCurrentPopup();
-
-    const domain = window.location.hostname;
-
-    const popup = document.createElement('div');
-    popup.className = 'thea-icloud-popup';
-
-    popup.innerHTML = `
-      <div class="thea-icloud-popup-header" style="background: linear-gradient(180deg, #34C759 0%, #28a745 100%); border-color: #28a745;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
-        <span style="color: white;">Hide My Email</span>
-        <span class="thea-badge" style="background: rgba(255,255,255,0.3);">iCloud+</span>
-      </div>
-      <div style="padding: 16px;">
-        <div style="font-size: 13px; color: #1d1d1f; margin-bottom: 12px;">
-          Create a unique, random @icloud.com address that forwards to your real inbox.
-        </div>
-        <div style="font-size: 12px; color: #8e8e93;">
-          Your real email address will stay private from <strong>${escapeHtml(domain)}</strong>
-        </div>
-      </div>
-      <div class="thea-icloud-popup-footer">
-        <button class="secondary" data-action="cancel">Cancel</button>
-        <button class="primary" data-action="create">Create Address</button>
-      </div>
-    `;
-
-    popup.querySelector('[data-action="cancel"]').addEventListener('click', closeCurrentPopup);
-
-    popup.querySelector('[data-action="create"]').addEventListener('click', async () => {
-      try {
-        const response = await chrome.runtime.sendMessage({
-          type: 'autofillHideMyEmail',
-          data: { domain }
-        });
-
-        if (response.success) {
-          emailField.value = response.data.email;
-          emailField.dispatchEvent(new Event('input', { bubbles: true }));
-          emailField.dispatchEvent(new Event('change', { bubbles: true }));
-          closeCurrentPopup();
-
-          showAliasCreatedNotification({
-            email: response.data.email,
-            isNew: response.data.isNew
-          });
-        }
-      } catch (e) {
-        console.error('Failed to create alias:', e);
-      }
-    });
-
-    positionPopup(popup, emailField);
-    document.body.appendChild(popup);
-    currentPopup = popup;
-
-    setTimeout(() => {
-      document.addEventListener('click', closePopupHandler);
-    }, 100);
+    return null;
   }
 
   // ============================================================================
@@ -880,71 +598,8 @@
   }
 
   // ============================================================================
-  // Connect to iCloud Prompt
+  // Notification (used by save banner and email module)
   // ============================================================================
-
-  async function connectToiCloud() {
-    try {
-      const response = await chrome.runtime.sendMessage({ type: 'connectiCloud' });
-      if (response.success) {
-        iCloudConnected = true;
-        return true;
-      }
-    } catch (e) {
-      console.error('Failed to connect to iCloud:', e);
-    }
-    return false;
-  }
-
-  function showConnectPrompt(anchorElement) {
-    const popup = document.createElement('div');
-    popup.className = 'thea-icloud-popup';
-
-    popup.innerHTML = `
-      <div class="thea-icloud-popup-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-        </svg>
-        <span>Connect to iCloud</span>
-      </div>
-      <div style="padding: 16px; font-size: 13px; color: #1d1d1f;">
-        Connect to iCloud to autofill passwords and use Hide My Email.
-      </div>
-      <div class="thea-icloud-popup-footer">
-        <button class="primary" data-action="connect" style="width: 100%;">Connect Now</button>
-      </div>
-    `;
-
-    popup.querySelector('[data-action="connect"]').addEventListener('click', async () => {
-      closeCurrentPopup();
-      await connectToiCloud();
-    });
-
-    positionPopup(popup, anchorElement);
-    document.body.appendChild(popup);
-    currentPopup = popup;
-
-    setTimeout(() => {
-      document.addEventListener('click', closePopupHandler);
-    }, 100);
-  }
-
-  // ============================================================================
-  // Notifications
-  // ============================================================================
-
-  function showAliasCreatedNotification(data) {
-    showNotification(
-      data.isNew
-        ? `Created: ${data.email}`
-        : `Using: ${data.email}`,
-      'success'
-    );
-  }
-
-  function showSaveConfirmation(data) {
-    showNotification(`Password saved for ${data.domain}`, 'success');
-  }
 
   function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -985,56 +640,123 @@
   }
 
   // ============================================================================
-  // Utility Functions
+  // iCloud Connection State
   // ============================================================================
 
-  function positionButtonInField(input, btn) {
-    const container = input.parentElement;
-    if (container) {
-      if (getComputedStyle(container).position === 'static') {
-        container.style.position = 'relative';
+  function isConnected() {
+    return iCloudConnected;
+  }
+
+  function setConnected(value) {
+    iCloudConnected = value;
+  }
+
+  async function connectToiCloud() {
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'connectiCloud' });
+      if (response.success) {
+        iCloudConnected = true;
+        return true;
       }
-      container.appendChild(btn);
+    } catch (e) {
+      console.error('Failed to connect to iCloud:', e);
+    }
+    return false;
+  }
+
+  // ============================================================================
+  // Initialization
+  // ============================================================================
+
+  function init() {
+    // Inject styles
+    const styleEl = document.createElement('style');
+    styleEl.id = 'thea-icloud-autofill-styles';
+    styleEl.textContent = STYLES;
+    document.head.appendChild(styleEl);
+
+    // Check iCloud connection status
+    checkiCloudStatus();
+
+    // Setup input observers (from forms module)
+    const forms = window.TheaModules.icloudForms;
+    if (forms) {
+      forms.observeInputFields();
+    }
+
+    // Listen for messages from background
+    chrome.runtime.onMessage.addListener(handleMessage);
+  }
+
+  async function checkiCloudStatus() {
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'getiCloudStatus' });
+      if (response.success) {
+        iCloudConnected = response.data.connected;
+      }
+    } catch (e) {
+      console.log('iCloud status check failed:', e);
     }
   }
 
-  function positionPopup(popup, anchorElement) {
-    const rect = anchorElement.getBoundingClientRect();
-    popup.style.position = 'fixed';
-    popup.style.top = `${rect.bottom + 4}px`;
-    popup.style.left = `${rect.left}px`;
-
-    // Adjust if off-screen
-    requestAnimationFrame(() => {
-      const popupRect = popup.getBoundingClientRect();
-      if (popupRect.right > window.innerWidth) {
-        popup.style.left = `${window.innerWidth - popupRect.width - 10}px`;
-      }
-      if (popupRect.bottom > window.innerHeight) {
-        popup.style.top = `${rect.top - popupRect.height - 4}px`;
-      }
-    });
-  }
-
-  function closeCurrentPopup() {
-    if (currentPopup) {
-      currentPopup.remove();
-      currentPopup = null;
+  function handleMessage(message, sender, sendResponse) {
+    // SECURITY: Verify message comes from our extension, not from web pages
+    if (!sender.id || sender.id !== chrome.runtime.id) {
+      console.warn('Thea: Rejected message from unauthorized sender');
+      sendResponse({ success: false, error: 'Unauthorized sender' });
+      return true;
     }
-    document.removeEventListener('click', closePopupHandler);
-  }
 
-  function closePopupHandler(e) {
-    if (currentPopup && !currentPopup.contains(e.target)) {
-      closeCurrentPopup();
+    const email = window.TheaModules.icloudEmail;
+
+    switch (message.type) {
+      case 'iCloudConnected':
+        iCloudConnected = true;
+        sendResponse({ success: true });
+        break;
+
+      case 'iCloudDisconnected':
+        iCloudConnected = false;
+        sendResponse({ success: true });
+        break;
+
+      case 'credentialSaved':
+        if (email) email.showSaveConfirmation(message.data);
+        sendResponse({ success: true });
+        break;
+
+      case 'aliasCreated':
+        if (email) email.showAliasCreatedNotification(message.data);
+        sendResponse({ success: true });
+        break;
+
+      default:
+        sendResponse({ success: false, error: 'Unknown message type' });
     }
+    return true;
   }
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
+  // ============================================================================
+  // Export to shared namespace
+  // ============================================================================
+
+  window.TheaModules.icloudUI = {
+    escapeHtml,
+    positionButtonInField,
+    positionPopup,
+    closeCurrentPopup,
+    closePopupHandler,
+    setCurrentPopup,
+    createCredentialPopup,
+    autofillCredential,
+    suggestStrongPassword,
+    showSavePasswordBanner,
+    closeSavePasswordBanner,
+    showNotification,
+    isConnected,
+    setConnected,
+    connectToiCloud
+  };
 
   // ============================================================================
   // Initialize
