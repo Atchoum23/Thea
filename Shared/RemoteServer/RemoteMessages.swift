@@ -39,6 +39,28 @@ public enum RemoteMessage: Codable, Sendable {
     case networkRequest(NetworkProxyRequest)
     case networkResponse(NetworkProxyResponse)
 
+    // Clipboard sync
+    case clipboardRequest(ClipboardRequest)
+    case clipboardResponse(ClipboardResponse)
+
+    // Session chat
+    case chatMessage(ChatMessageData)
+
+    // Annotations
+    case annotationRequest(AnnotationRequest)
+
+    // Recording
+    case recordingRequest(RecordingRequest)
+    case recordingResponse(RecordingResponse)
+
+    // Audio streaming
+    case audioRequest(AudioRequest)
+    case audioResponse(AudioResponse)
+
+    // Inventory
+    case inventoryRequest(InventoryRequest)
+    case inventoryResponse(InventoryResponse)
+
     // Connection management
     case ping
     case pong
@@ -64,6 +86,12 @@ public enum RemoteMessage: Codable, Sendable {
             default: .systemControl
             }
         case .networkRequest: .networkAccess
+        case .clipboardRequest, .clipboardResponse: .controlScreen
+        case .chatMessage: .viewScreen
+        case .annotationRequest: .viewScreen
+        case .recordingRequest, .recordingResponse: .viewScreen
+        case .audioRequest, .audioResponse: .viewScreen
+        case .inventoryRequest, .inventoryResponse: .viewScreen
         default: .viewScreen
         }
     }
@@ -126,6 +154,11 @@ public enum ScreenRequest: Codable, Sendable {
     case stopStream
     case getDisplayInfo
     case getWindowList
+    // Multi-monitor support
+    case captureDisplay(displayId: Int, quality: Float, scale: Float)
+    case startStreamForDisplay(displayId: Int, fps: Int, quality: Float, scale: Float)
+    // Video codec configuration
+    case configureStream(codec: VideoCodec, profile: StreamQualityProfile)
 }
 
 public enum ScreenResponse: Codable, Sendable {
@@ -325,6 +358,14 @@ public enum SystemRequest: Codable, Sendable {
     case setBrightness(level: Float)
     case getNotifications
     case dismissNotification(id: String)
+    // Privacy mode
+    case enablePrivacyMode
+    case disablePrivacyMode
+    // Wake-on-LAN
+    case wakeOnLan(macAddress: String)
+    // Asset inventory
+    case getHardwareInventory
+    case getSoftwareInventory
 }
 
 public enum SystemResponse: Codable, Sendable {
@@ -431,6 +472,266 @@ public struct NetworkDevice: Codable, Sendable, Identifiable {
         public let name: String
         public let type: String
         public let port: Int
+    }
+}
+
+// MARK: - Clipboard Messages
+
+public enum ClipboardRequest: Codable, Sendable {
+    case getClipboard
+    case setClipboard(ClipboardData)
+    case startSync
+    case stopSync
+}
+
+public enum ClipboardResponse: Codable, Sendable {
+    case clipboardData(ClipboardData)
+    case syncStarted
+    case syncStopped
+    case error(String)
+}
+
+public struct ClipboardData: Codable, Sendable {
+    public let type: ClipboardContentType
+    public let data: Data
+    public let uti: String?
+    public let timestamp: Date
+
+    public init(type: ClipboardContentType, data: Data, uti: String? = nil, timestamp: Date = Date()) {
+        self.type = type
+        self.data = data
+        self.uti = uti
+        self.timestamp = timestamp
+    }
+
+    public enum ClipboardContentType: String, Codable, Sendable {
+        case text
+        case image
+        case fileReference
+        case rtf
+    }
+}
+
+// MARK: - Chat Messages
+
+public struct ChatMessageData: Codable, Sendable, Identifiable {
+    public let id: String
+    public let senderId: String
+    public let senderName: String
+    public let text: String
+    public let timestamp: Date
+
+    public init(senderId: String, senderName: String, text: String) {
+        id = UUID().uuidString
+        self.senderId = senderId
+        self.senderName = senderName
+        self.text = text
+        timestamp = Date()
+    }
+}
+
+// MARK: - Annotation Messages
+
+public enum AnnotationRequest: Codable, Sendable {
+    case addAnnotation(AnnotationData)
+    case removeAnnotation(id: String)
+    case clearAnnotations
+    case undoLastAnnotation
+}
+
+public struct AnnotationData: Codable, Sendable, Identifiable {
+    public let id: String
+    public let shape: AnnotationShape
+    public let color: AnnotationColor
+    public let lineWidth: Float
+    public let points: [CGPoint]
+    public let text: String?
+    public let timestamp: Date
+
+    public init(shape: AnnotationShape, color: AnnotationColor, lineWidth: Float = 2.0, points: [CGPoint], text: String? = nil) {
+        id = UUID().uuidString
+        self.shape = shape
+        self.color = color
+        self.lineWidth = lineWidth
+        self.points = points
+        self.text = text
+        timestamp = Date()
+    }
+
+    public enum AnnotationShape: String, Codable, Sendable {
+        case freehand
+        case line
+        case arrow
+        case rectangle
+        case circle
+        case text
+        case highlight
+    }
+
+    public struct AnnotationColor: Codable, Sendable {
+        public let red: Float
+        public let green: Float
+        public let blue: Float
+        public let alpha: Float
+
+        public init(red: Float, green: Float, blue: Float, alpha: Float = 1.0) {
+            self.red = red
+            self.green = green
+            self.blue = blue
+            self.alpha = alpha
+        }
+
+        public static let red = AnnotationColor(red: 1, green: 0, blue: 0)
+        public static let blue = AnnotationColor(red: 0, green: 0, blue: 1)
+        public static let green = AnnotationColor(red: 0, green: 1, blue: 0)
+        public static let yellow = AnnotationColor(red: 1, green: 1, blue: 0, alpha: 0.5)
+    }
+}
+
+// MARK: - Recording Messages
+
+public enum RecordingRequest: Codable, Sendable {
+    case startRecording(sessionId: String)
+    case stopRecording
+    case listRecordings
+    case deleteRecording(id: String)
+}
+
+public enum RecordingResponse: Codable, Sendable {
+    case recordingStarted(recordingId: String)
+    case recordingStopped(recordingId: String, durationSeconds: Double, fileSizeBytes: Int64)
+    case recordingList([RecordingMetadata])
+    case error(String)
+}
+
+public struct RecordingMetadata: Codable, Sendable, Identifiable {
+    public let id: String
+    public let sessionId: String
+    public let startTime: Date
+    public let durationSeconds: Double
+    public let fileSizeBytes: Int64
+    public let resolution: String
+    public let codec: String
+    public let filePath: String
+
+    public init(id: String, sessionId: String, startTime: Date, durationSeconds: Double, fileSizeBytes: Int64, resolution: String, codec: String, filePath: String) {
+        self.id = id
+        self.sessionId = sessionId
+        self.startTime = startTime
+        self.durationSeconds = durationSeconds
+        self.fileSizeBytes = fileSizeBytes
+        self.resolution = resolution
+        self.codec = codec
+        self.filePath = filePath
+    }
+}
+
+// MARK: - Audio Messages
+
+public enum AudioRequest: Codable, Sendable {
+    case startAudioStream(sampleRate: Int, channels: Int)
+    case stopAudioStream
+    case setAudioVolume(Float)
+    case startMicrophoneForward
+    case stopMicrophoneForward
+}
+
+public enum AudioResponse: Codable, Sendable {
+    case audioFrame(AudioFrame)
+    case audioStreamStarted
+    case audioStreamStopped
+    case error(String)
+}
+
+public struct AudioFrame: Codable, Sendable {
+    public let data: Data
+    public let codec: AudioCodecType
+    public let sampleRate: Int
+    public let channels: Int
+    public let timestamp: Double
+
+    public init(data: Data, codec: AudioCodecType, sampleRate: Int, channels: Int, timestamp: Double) {
+        self.data = data
+        self.codec = codec
+        self.sampleRate = sampleRate
+        self.channels = channels
+        self.timestamp = timestamp
+    }
+
+    public enum AudioCodecType: String, Codable, Sendable {
+        case opus
+        case aac
+        case pcm
+    }
+}
+
+// MARK: - Inventory Messages
+
+public enum InventoryRequest: Codable, Sendable {
+    case getHardwareInventory
+    case getSoftwareInventory
+    case getFullInventory
+}
+
+public enum InventoryResponse: Codable, Sendable {
+    case hardwareInventory(HardwareInventory)
+    case softwareInventory(SoftwareInventory)
+    case error(String)
+}
+
+public struct HardwareInventory: Codable, Sendable {
+    public let model: String
+    public let serialNumber: String?
+    public let chipType: String
+    public let cpuCores: Int
+    public let totalMemoryGB: Double
+    public let storageDevices: [StorageDevice]
+    public let displays: [DisplayDevice]
+    public let networkInterfaces: [NetworkInterface]
+    public let peripherals: [PeripheralDevice]
+    public let collectedAt: Date
+
+    public struct StorageDevice: Codable, Sendable {
+        public let name: String
+        public let capacityGB: Double
+        public let availableGB: Double
+        public let type: String // SSD, HDD, etc.
+    }
+
+    public struct DisplayDevice: Codable, Sendable {
+        public let name: String
+        public let resolution: String
+        public let scaleFactor: Double
+        public let isBuiltIn: Bool
+    }
+
+    public struct NetworkInterface: Codable, Sendable {
+        public let name: String
+        public let type: String // Ethernet, WiFi, etc.
+        public let macAddress: String?
+        public let ipAddress: String?
+        public let isActive: Bool
+    }
+
+    public struct PeripheralDevice: Codable, Sendable {
+        public let name: String
+        public let type: String
+        public let vendor: String?
+    }
+}
+
+public struct SoftwareInventory: Codable, Sendable {
+    public let osVersion: String
+    public let osBuild: String
+    public let installedApps: [InstalledApp]
+    public let collectedAt: Date
+
+    public struct InstalledApp: Codable, Sendable {
+        public let name: String
+        public let version: String
+        public let bundleId: String?
+        public let path: String
+        public let lastModified: Date?
     }
 }
 
