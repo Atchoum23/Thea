@@ -431,15 +431,15 @@ public enum AuditResult: String, Codable, Sendable {
     case timeout
 }
 
-// MARK: - Audit Severity
+// MARK: - Remote Audit Severity
 
-public enum AuditSeverity: Int, Codable, Sendable, Comparable {
+public enum RemoteAuditSeverity: Int, Codable, Sendable, Comparable {
     case info = 0
     case elevated = 1
     case warning = 2
     case critical = 3
 
-    public static func < (lhs: AuditSeverity, rhs: AuditSeverity) -> Bool {
+    public static func < (lhs: RemoteAuditSeverity, rhs: RemoteAuditSeverity) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
 
