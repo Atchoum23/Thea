@@ -382,6 +382,7 @@
 		550E3E71CEF6674A9570AC78 /* CoworkContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2462375E2C0637F6F13B2C /* CoworkContext.swift */; };
 		553928F8C81FE6A34AB9003E /* ProviderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C86307C650BB9254C7061A8C /* ProviderRegistry.swift */; };
 		557DC55E3F82F05F97A2F185 /* WorkWithAppsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 959BCACCB17BD0CEA220C3F2 /* WorkWithAppsService.swift */; };
+		55BD573678051661066CE050 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 376303DA04EC95F86A836EAF /* AppIcon.icns */; };
 		55E23500FC3512B0E8C702E5 /* ShortcutsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 428F384A89E9245DCA91F64C /* ShortcutsSettingsView.swift */; };
 		563F08649809315A4CF6E70B /* PrivacyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2B1D7EA1270F8549A1343F /* PrivacyManager.swift */; };
 		56457C33A6B0B3F6588FCC1B /* KnowledgeSourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8E9DB2095CD2E63C86350D /* KnowledgeSourceManager.swift */; };
@@ -1350,6 +1351,7 @@
 		36961E79ECB7AEFC08F0720B /* MacSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSettingsView.swift; sourceTree = "<group>"; };
 		36AF7DA27F3CB1E987D640DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3706645721ACA3166BB1451F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		376303DA04EC95F86A836EAF /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		38C72B58751221A753F55B09 /* AgentSecKillSwitchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSecKillSwitchTests.swift; sourceTree = "<group>"; };
 		39037BEDEE29D1CE9E77BE5B /* OnDeviceAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceAIService.swift; sourceTree = "<group>"; };
 		39599F089C9590FCF0088F85 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
@@ -2301,6 +2303,14 @@
 			path = Notifications;
 			sourceTree = "<group>";
 		};
+		1D872D0BC662C0C5DFBCA637 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				376303DA04EC95F86A836EAF /* AppIcon.icns */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		1D98291E71052F1264D998AD /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -3012,6 +3022,7 @@
 		6631641E3C488D801DAB0B8C /* macOS */ = {
 			isa = PBXGroup;
 			children = (
+				1D872D0BC662C0C5DFBCA637 /* Resources */,
 				91D69E293C4DB7356C47C9DB /* Views */,
 				488B76EE2B406764414650DB /* Info.plist */,
 				A4ED55362CABA5F56C083B9F /* Thea-Full.entitlements */,
@@ -5079,6 +5090,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F528DD502683D22C0E98766F /* .vscodetasks.json in Resources */,
+				55BD573678051661066CE050 /* AppIcon.icns in Resources */,
 				07320B8E4DDF5A9929D378EC /* Assets.xcassets in Resources */,
 				3A822FBF0C722F7796DFE3B4 /* CLAUDE-SIMPLE-PROMPT.txt in Resources */,
 				85B409E3FD385FBF9FC9D8AE /* COMPLETE-CLAUDE-PROMPT.txt in Resources */,
