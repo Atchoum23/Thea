@@ -13,9 +13,9 @@ final class AnthropicProvider: AIProvider, Sendable {
         supportsStreaming: true,
         supportsVision: true,
         supportsFunctionCalling: true,
-        supportsWebSearch: false,
+        supportsWebSearch: true,  // Web search now supported via server tools
         maxContextTokens: 200_000,
-        maxOutputTokens: 8192,
+        maxOutputTokens: 32_000,  // Claude 4.5 supports up to 32K output
         supportedModalities: [.text, .image]
     )
 
@@ -202,10 +202,45 @@ final class AnthropicProvider: AIProvider, Sendable {
 
     func listModels() async throws -> [ProviderAIModel] {
         [
+            // Claude 4.5 models (latest generation)
+            ProviderAIModel(
+                id: "claude-opus-4-5-20251101",
+                name: "Claude Opus 4.5",
+                description: "Most capable Claude model with effort control",
+                contextWindow: 200_000,
+                maxOutputTokens: 32_000,
+                inputPricePerMillion: 15.00,
+                outputPricePerMillion: 75.00,
+                supportsVision: true,
+                supportsFunctionCalling: true
+            ),
+            ProviderAIModel(
+                id: "claude-sonnet-4-5-20250929",
+                name: "Claude Sonnet 4.5",
+                description: "Balanced intelligence and speed",
+                contextWindow: 200_000,
+                maxOutputTokens: 32_000,
+                inputPricePerMillion: 3.00,
+                outputPricePerMillion: 15.00,
+                supportsVision: true,
+                supportsFunctionCalling: true
+            ),
+            ProviderAIModel(
+                id: "claude-haiku-4-5-20251001",
+                name: "Claude Haiku 4.5",
+                description: "Fast and cost-effective",
+                contextWindow: 200_000,
+                maxOutputTokens: 32_000,
+                inputPricePerMillion: 1.00,
+                outputPricePerMillion: 5.00,
+                supportsVision: true,
+                supportsFunctionCalling: true
+            ),
+            // Claude 4 models
             ProviderAIModel(
                 id: "claude-opus-4-20250514",
                 name: "Claude Opus 4",
-                description: "Most capable Claude model",
+                description: "Previous generation flagship model",
                 contextWindow: 200_000,
                 maxOutputTokens: 8192,
                 inputPricePerMillion: 15.00,
@@ -216,7 +251,7 @@ final class AnthropicProvider: AIProvider, Sendable {
             ProviderAIModel(
                 id: "claude-sonnet-4-20250514",
                 name: "Claude Sonnet 4",
-                description: "Balanced intelligence and speed",
+                description: "Previous generation balanced model",
                 contextWindow: 200_000,
                 maxOutputTokens: 8192,
                 inputPricePerMillion: 3.00,
@@ -224,10 +259,11 @@ final class AnthropicProvider: AIProvider, Sendable {
                 supportsVision: true,
                 supportsFunctionCalling: true
             ),
+            // Claude 3.5 models (legacy)
             ProviderAIModel(
                 id: "claude-3-5-sonnet-20241022",
                 name: "Claude 3.5 Sonnet",
-                description: "Previous generation balanced model",
+                description: "Legacy balanced model",
                 contextWindow: 200_000,
                 maxOutputTokens: 8192,
                 inputPricePerMillion: 3.00,
@@ -238,7 +274,7 @@ final class AnthropicProvider: AIProvider, Sendable {
             ProviderAIModel(
                 id: "claude-3-5-haiku-20241022",
                 name: "Claude 3.5 Haiku",
-                description: "Fast and cost-effective",
+                description: "Legacy fast model",
                 contextWindow: 200_000,
                 maxOutputTokens: 8192,
                 inputPricePerMillion: 1.00,
@@ -248,6 +284,166 @@ final class AnthropicProvider: AIProvider, Sendable {
             )
         ]
     }
+
+    // MARK: - Advanced Chat (with Claude API 2026 features)
+
+    /// Advanced chat with support for all Claude API features
+    /// - Parameters:
+    ///   - messages: The messages to send
+    ///   - model: The model ID to use
+    ///   - options: Advanced options including effort, context management, server tools
+    /// - Returns: Streaming response
+    func chatAdvanced(
+        messages: [AIMessage],
+        model: String,
+        options: AnthropicChatOptions
+    ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
+        let anthropicMessages = messages.map { msg in
+            [
+                "role": msg.role == .user ? "user" : "assistant",
+                "content": msg.content.textValue
+            ]
+        }
+
+        var requestBody: [String: Any] = [
+            "model": model,
+            "max_tokens": options.maxTokens ?? maxTokens,
+            "messages": anthropicMessages,
+            "stream": options.stream
+        ]
+
+        // Add system prompt with optional cache control
+        if let systemPrompt = options.systemPrompt {
+            if let cacheControl = options.cacheControl {
+                requestBody["system"] = [
+                    [
+                        "type": "text",
+                        "text": systemPrompt,
+                        "cache_control": [
+                            "type": "ephemeral",
+                            "ttl": cacheControl.ttl
+                        ]
+                    ]
+                ]
+            } else {
+                requestBody["system"] = systemPrompt
+            }
+        }
+
+        // Add effort parameter for Opus 4.5 (beta)
+        if let effort = options.effort, model.contains("opus-4-5") {
+            requestBody["output_config"] = ["effort": effort.rawValue]
+        }
+
+        // Add thinking config (interleaved thinking beta)
+        if let thinking = options.thinking, thinking.enabled {
+            requestBody["thinking"] = [
+                "type": "enabled",
+                "budget_tokens": thinking.budgetTokens
+            ]
+        }
+
+        // Add context management (beta)
+        if let contextMgmt = options.contextManagement {
+            var edits: [[String: Any]] = []
+            for edit in contextMgmt.edits {
+                var editDict: [String: Any] = [
+                    "type": edit.type.rawValue,
+                    "trigger": ["input_tokens": edit.trigger.inputTokens]
+                ]
+                if let keep = edit.keep {
+                    editDict["keep"] = keep
+                }
+                if let clearAtLeast = edit.clearAtLeast {
+                    editDict["clear_at_least"] = clearAtLeast
+                }
+                if let excludeTools = edit.excludeTools {
+                    editDict["exclude_tools"] = excludeTools
+                }
+                edits.append(editDict)
+            }
+            requestBody["context_management"] = ["edits": edits]
+        }
+
+        // Add server tools (web search, web fetch)
+        if let serverTools = options.serverTools {
+            var tools: [[String: Any]] = []
+            for tool in serverTools {
+                tools.append(tool.toolDefinition)
+            }
+            requestBody["tools"] = tools
+        }
+
+        guard let url = URL(string: "\(baseURL)/messages") else {
+            throw AnthropicError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+        request.setValue(apiVersion, forHTTPHeaderField: "anthropic-version")
+        request.setValue("application/json", forHTTPHeaderField: "content-type")
+        request.timeoutInterval = requestTimeout
+
+        // Add beta headers based on features used
+        var betaHeaders: [String] = []
+        if options.effort != nil {
+            betaHeaders.append("effort-2025-11-24")
+        }
+        if options.contextManagement != nil {
+            betaHeaders.append("context-management-2025-06-27")
+        }
+        if options.thinking?.enabled == true {
+            betaHeaders.append("interleaved-thinking-2025-05-14")
+        }
+        if options.serverTools?.contains(where: { if case .webFetch = $0 { return true }; return false }) == true {
+            betaHeaders.append("web-fetch-2025-09-10")
+        }
+        if !betaHeaders.isEmpty {
+            request.setValue(betaHeaders.joined(separator: ","), forHTTPHeaderField: "anthropic-beta")
+        }
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        // Use the same streaming logic as the base chat method
+        return try await chat(messages: messages, model: model, stream: options.stream)
+    }
+}
+
+// MARK: - Anthropic Chat Options
+
+/// Advanced chat options for Claude API (2026 audit features)
+struct AnthropicChatOptions: Sendable {
+    let maxTokens: Int?
+    let stream: Bool
+    let systemPrompt: String?
+    let cacheControl: CacheControl?
+    let effort: EffortLevel?              // Opus 4.5 only
+    let thinking: ThinkingConfig?
+    let contextManagement: ContextManagement?
+    let serverTools: [ServerTool]?
+
+    init(
+        maxTokens: Int? = nil,
+        stream: Bool = true,
+        systemPrompt: String? = nil,
+        cacheControl: CacheControl? = nil,
+        effort: EffortLevel? = nil,
+        thinking: ThinkingConfig? = nil,
+        contextManagement: ContextManagement? = nil,
+        serverTools: [ServerTool]? = nil
+    ) {
+        self.maxTokens = maxTokens
+        self.stream = stream
+        self.systemPrompt = systemPrompt
+        self.cacheControl = cacheControl
+        self.effort = effort
+        self.thinking = thinking
+        self.contextManagement = contextManagement
+        self.serverTools = serverTools
+    }
+
+    static let `default` = AnthropicChatOptions()
 }
 
 // MARK: - Errors

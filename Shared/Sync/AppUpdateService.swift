@@ -41,21 +41,67 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - Private
 
     private var _container: CKContainer?
-    private var container: CKContainer? {
-        if _container == nil {
-            // Lazily create container - may fail if entitlements are missing
-            _container = CKContainer(identifier: containerIdentifier)
-        }
-        return _container
-    }
-
-    private var privateDatabase: CKDatabase? {
-        container?.privateCloudDatabase
-    }
-
-    private var cloudKitAvailable = true
+    private var cloudKitAvailable: Bool?
     private var subscriptionSetUp = false
     private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - CloudKit Access
+
+    /// Ensures CloudKit is available and returns the container, or nil if unavailable
+    private func getContainer() async -> CKContainer? {
+        // Already determined unavailable
+        if cloudKitAvailable == false {
+            return nil
+        }
+
+        // Already initialized
+        if let container = _container {
+            return container
+        }
+
+        // Check account status first using default container (safe, won't crash)
+        let defaultContainer = CKContainer.default()
+        do {
+            let status = try await defaultContainer.accountStatus()
+            switch status {
+            case .available:
+                // Account available, safe to create custom container
+                _container = CKContainer(identifier: containerIdentifier)
+                cloudKitAvailable = true
+                logger.info("CloudKit available, container initialized")
+                return _container
+            case .noAccount:
+                logger.warning("CloudKit unavailable: No iCloud account signed in")
+                cloudKitAvailable = false
+                return nil
+            case .restricted:
+                logger.warning("CloudKit unavailable: iCloud restricted")
+                cloudKitAvailable = false
+                return nil
+            case .couldNotDetermine:
+                logger.warning("CloudKit unavailable: Could not determine account status")
+                cloudKitAvailable = false
+                return nil
+            case .temporarilyUnavailable:
+                logger.info("CloudKit temporarily unavailable, will retry later")
+                // Don't set cloudKitAvailable = false, allow retry
+                return nil
+            @unknown default:
+                logger.warning("CloudKit unavailable: Unknown status")
+                cloudKitAvailable = false
+                return nil
+            }
+        } catch {
+            logger.error("Failed to check CloudKit account status: \(error.localizedDescription)")
+            cloudKitAvailable = false
+            return nil
+        }
+    }
+
+    /// Returns the private database if CloudKit is available
+    private func getPrivateDatabase() async -> CKDatabase? {
+        await getContainer()?.privateCloudDatabase
+    }
 
     // MARK: - Notification Category
 
@@ -82,11 +128,10 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - CloudKit Subscription
 
     private func setupSubscription() async {
-        guard !subscriptionSetUp, cloudKitAvailable else { return }
+        guard !subscriptionSetUp else { return }
 
-        guard let database = privateDatabase else {
-            cloudKitAvailable = false
-            logger.warning("CloudKit not available - update sync disabled")
+        guard let database = await getPrivateDatabase() else {
+            logger.debug("CloudKit not available - skipping subscription setup")
             return
         }
 
@@ -111,9 +156,6 @@ public final class AppUpdateService: ObservableObject {
         } catch let error as CKError where error.code == .serverRejectedRequest {
             subscriptionSetUp = true
             logger.debug("App update subscription already exists")
-        } catch let error as CKError where error.code == .notAuthenticated || error.code == .permissionFailure {
-            cloudKitAvailable = false
-            logger.warning("CloudKit not authenticated or permission denied - update sync disabled")
         } catch {
             logger.error("Failed to setup update subscription: \(error.localizedDescription)")
         }
@@ -128,7 +170,7 @@ public final class AppUpdateService: ObservableObject {
         commitHash: String,
         sourceDevice: String
     ) async throws {
-        guard cloudKitAvailable, let database = privateDatabase else {
+        guard let database = await getPrivateDatabase() else {
             logger.debug("CloudKit not available - skipping update publish")
             return
         }
@@ -154,7 +196,7 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - Check for Updates
 
     public func checkForUpdates() async {
-        guard cloudKitAvailable, let database = privateDatabase else {
+        guard let database = await getPrivateDatabase() else {
             logger.debug("CloudKit not available - skipping update check")
             return
         }
@@ -363,7 +405,7 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - Cleanup
 
     private func cleanupOldUpdateRecords() async {
-        guard cloudKitAvailable, let database = privateDatabase else { return }
+        guard let database = await getPrivateDatabase() else { return }
 
         let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
         let predicate = NSPredicate(format: "publishedAt < %@", cutoff as NSDate)
