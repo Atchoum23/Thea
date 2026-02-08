@@ -712,6 +712,7 @@
 		A692DBD96EAF604BD1752599 /* TheaRemoteServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA88CB3630D0278DA99046B6 /* TheaRemoteServer.swift */; };
 		A6EF5E36D39D197FBC0257C7 /* RemindersIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E9D82E9593330A9EC81607 /* RemindersIntegration.swift */; };
 		A712DC65BE0AC9915111A216 /* PriorityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B9081D50C18C318D7E018E /* PriorityManager.swift */; };
+		A714D586AD97FF7E60FA82B0 /* PermissionsTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA2EF92AFF6A8A09A41FC68 /* PermissionsTypes.swift */; };
 		A7314352CD6FCB01975E7C00 /* FolderAccessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D726B7DF87CB4FB2CF58E31 /* FolderAccessManager.swift */; };
 		A7459889C8D4450C66FE127F /* CareerServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E50B57FDC10C790FC93CDA94 /* CareerServiceTests.swift */; };
 		A7512F96E8ACEA2CDEBE4426 /* CoworkArtifact.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E78086A5E6DE8D3A133C4C /* CoworkArtifact.swift */; };
@@ -889,6 +890,7 @@
 		D3A007852896F72B930CB2D1 /* VisionIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2D478B467F0A89F2B424FC4 /* VisionIntelligence.swift */; };
 		D3ACF5753A69781E38CFD7D3 /* PowerStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3F022A5E096D79D240A108D /* PowerStateManager.swift */; };
 		D4074D4CAB3F35536133FB64 /* NotesIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC6D75910A21D1B143F3AB4 /* NotesIntegration.swift */; };
+		D42D57AF7D9984F31F840D02 /* PermissionsTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA2EF92AFF6A8A09A41FC68 /* PermissionsTypes.swift */; };
 		D468C5CE2CB0E89EE6280B6A /* AssessmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D9A711AEC2BF35FC6A06EC /* AssessmentViewModel.swift */; };
 		D5011D543D2721FF06B2970D /* MockProjectServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258BFB0C9618E73A5AC37B3B /* MockProjectServiceTests.swift */; };
 		D55DD384F6ED6A34064BDA4F /* SkillDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 470431AA074BE7A96CA0C146 /* SkillDefinition.swift */; };
@@ -1781,6 +1783,7 @@
 		DECDD9F2AA7C808068DAF255 /* SmartTriggerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartTriggerEngine.swift; sourceTree = "<group>"; };
 		DF1595E570BA8E5E4E8F5130 /* AgentSecPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSecPolicyTests.swift; sourceTree = "<group>"; };
 		DF41D7B50ADAD52B6CB74541 /* TheaFocusFilterExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TheaFocusFilterExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFA2EF92AFF6A8A09A41FC68 /* PermissionsTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsTypes.swift; sourceTree = "<group>"; };
 		E03DAA3CB62633E37D786623 /* AnthropicProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicProviderTests.swift; sourceTree = "<group>"; };
 		E07B93655FF8AAA4E0965339 /* AssessmentDataExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentDataExporter.swift; sourceTree = "<group>"; };
 		E0C0A3B85602C5963D7D0511 /* AssessmentServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentServiceTests.swift; sourceTree = "<group>"; };
@@ -4318,6 +4321,7 @@
 				4074CF308473917E27370DC8 /* KnowledgeManager.swift */,
 				C6B478CB9E95EF57A73E718D /* MigrationManager.swift */,
 				5C3B04EEB9870ABC2B1ACFDD /* PermissionsManager.swift */,
+				DFA2EF92AFF6A8A09A41FC68 /* PermissionsTypes.swift */,
 				954D1F5B8BA0920CC2DA1EAD /* PlanManager.swift */,
 				CBF9B29745B3455B7EB0D745 /* ProjectManager.swift */,
 				C86307C650BB9254C7061A8C /* ProviderRegistry.swift */,
@@ -5468,6 +5472,7 @@
 				8FE80ABD47E3FD9CB4338A6C /* PatternDetector.swift in Sources */,
 				519267961C3F248C4279A1C2 /* PermissionManager.swift in Sources */,
 				BE2D753A7CF4D7C11D050113 /* PermissionsManager.swift in Sources */,
+				A714D586AD97FF7E60FA82B0 /* PermissionsTypes.swift in Sources */,
 				F8BB8D8606EDAAB05BDBA693 /* PerplexityProvider.swift in Sources */,
 				FA130D998B768F192FC87C57 /* PersonalizedLearning.swift in Sources */,
 				683A7C2ED3E4048155019C9A /* PhotoIntelligenceProvider.swift in Sources */,
@@ -6091,6 +6096,7 @@
 				45FA8A57932E096B2160B468 /* PatternDetector.swift in Sources */,
 				BCEE1BCCE0DDC92B06279A8B /* PermissionManager.swift in Sources */,
 				BDCAD18108E714006E11B24D /* PermissionsManager.swift in Sources */,
+				D42D57AF7D9984F31F840D02 /* PermissionsTypes.swift in Sources */,
 				2ADFB1B273A889C9041CEF74 /* PerplexityProvider.swift in Sources */,
 				08AF7496FBA4D75C303FF0CD /* PersonalizedLearning.swift in Sources */,
 				4FB156D8EBE5FFECA73A3FE7 /* PhotosIntegration.swift in Sources */,
