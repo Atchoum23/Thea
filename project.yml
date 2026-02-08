@@ -1041,6 +1041,8 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Extensions/SafariExtension
+        excludes:
+          - "**/background/background.js"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.safari
@@ -1070,6 +1072,8 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Extensions/SafariExtension
+        excludes:
+          - "**/background/background.js"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.safari
