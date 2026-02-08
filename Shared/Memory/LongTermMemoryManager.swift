@@ -81,8 +81,8 @@ public actor LongTermMemoryManager {
 
     private init() {
         Task {
-            await loadFromStorage()
-            startDecayLoop()
+            await self.loadFromStorage()
+            await self.startDecayLoop()
         }
     }
 
@@ -357,7 +357,7 @@ public actor LongTermMemoryManager {
         keywordIndex = decoded.keywordIndex
         lastDecayTime = decoded.lastDecayTime
 
-        logger.info("Loaded \(memories.count) long-term memories from storage")
+        logger.info("Loaded \(self.memories.count) long-term memories from storage")
     }
 
     private func saveToStorage() async {
