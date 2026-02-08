@@ -282,12 +282,18 @@ final class ChatManager: ObservableObject {
 
     // MARK: - Orchestrator Integration
 
-    /// Select provider and model for the given query
-    /// Note: TaskClassifier and ModelRouter are currently excluded from builds.
-    /// When re-enabled in project.yml, orchestration code can be added here.
+    /// Select provider and model for the given query using Intelligence orchestration
     private func selectProviderAndModel(for query: String) async throws -> (AIProvider, String) {
-        // Use default provider which respects user's configured settings
-        _ = query // Reserved for future orchestration
+        // Classify the task and route to optimal model
+        let classification = try await TaskClassifier.shared.classify(query)
+        let decision = ModelRouter.shared.route(classification: classification)
+
+        // Try to get the provider for the routed model
+        if let provider = ProviderRegistry.shared.getProvider(id: decision.model.provider) {
+            return (provider, decision.model.id)
+        }
+
+        // Fallback to default if routed provider unavailable
         return try getDefaultProviderAndModel()
     }
 
