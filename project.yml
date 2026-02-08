@@ -363,6 +363,7 @@ targets:
           - "**/Managers/ResponseNotificationHandler.swift"
           - "**/DistributedTaskExecutor.swift"
           - "**/PatternLearning/**"
+          # Critical exclusions for macOS build
           - "**/LifeMonitoring/**"
           - "**/Routing/**"
           - "**/Classification/TaskClassifier.swift"
