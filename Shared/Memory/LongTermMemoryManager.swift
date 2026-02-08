@@ -464,13 +464,13 @@ private struct LongTermMemoryStorage: Codable {
 // MARK: - Integration with MemoryManager
 
 extension LongTermMemoryManager {
-    /// Import memories from MemoryManager
+    /// Import memories from MemoryManager via semantic search
     public func importFromMemoryManager() async {
-        let semanticMemories = await MemoryManager.shared.recallMemories(matching: "", limit: 100)
+        let semanticMemories = await MemoryManager.shared.getMemoriesByImportance(type: .semantic, limit: 100)
 
-        for memory in semanticMemories {
+        for record in semanticMemories {
             await storeFact(
-                memory.content,
+                "\(record.key): \(record.value)",
                 category: "imported",
                 initialStrength: 0.7,
                 keywords: [],
@@ -487,9 +487,11 @@ extension LongTermMemoryManager {
 
         for memory in strongMemories {
             await MemoryManager.shared.storeSemanticMemory(
-                content: memory.content,
-                category: memory.category,
-                tags: memory.keywords
+                category: .contextAssociation,
+                key: memory.category,
+                value: memory.content,
+                confidence: memory.strength,
+                source: .system
             )
         }
 

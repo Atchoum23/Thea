@@ -448,18 +448,27 @@ public final class ActiveMemoryRetrieval {
         """
 
         do {
-            let message = ChatMessage(role: "user", text: prompt)
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: "openai/gpt-4o-mini"
+            )
 
             var responseText = ""
             let stream = try await provider.chat(
                 messages: [message],
                 model: "openai/gpt-4o-mini",
-                options: ChatOptions(stream: false)
+                stream: false
             )
 
             for try await chunk in stream {
-                if case let .content(text) = chunk {
+                if case .delta(let text) = chunk.type {
                     responseText += text
+                } else if case .complete(let msg) = chunk.type {
+                    responseText = msg.content.textValue
                 }
             }
 
@@ -521,18 +530,27 @@ public final class ActiveMemoryRetrieval {
         """
 
         do {
-            let message = ChatMessage(role: "user", text: prompt)
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: "openai/gpt-4o-mini"
+            )
 
             var responseText = ""
             let stream = try await provider.chat(
                 messages: [message],
                 model: "openai/gpt-4o-mini",
-                options: ChatOptions(stream: false)
+                stream: false
             )
 
             for try await chunk in stream {
-                if case let .content(text) = chunk {
+                if case .delta(let text) = chunk.type {
                     responseText += text
+                } else if case .complete(let msg) = chunk.type {
+                    responseText = msg.content.textValue
                 }
             }
 

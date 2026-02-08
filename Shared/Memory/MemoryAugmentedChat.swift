@@ -32,7 +32,7 @@ public final class MemoryAugmentedChat {
         _ userMessage: String,
         conversationId: UUID,
         projectId: UUID? = nil,
-        existingMessages: [ChatMessage] = []
+        existingMessages: [AIMessage] = []
     ) async -> AugmentedMessage {
         logger.debug("Processing message with memory augmentation")
 
@@ -110,13 +110,13 @@ public final class MemoryAugmentedChat {
     /// Get context-aware suggestions based on current state
     public func getSuggestions(
         conversationId: UUID,
-        recentMessages: [ChatMessage],
+        recentMessages: [AIMessage],
         projectId: UUID? = nil
     ) async -> [ContextualSuggestion] {
         var suggestions: [ContextualSuggestion] = []
 
         // Get last user message for context
-        guard let lastUserMessage = recentMessages.last(where: { $0.role == "user" }) else {
+        guard let lastUserMessage = recentMessages.last(where: { $0.role == .user }) else {
             return suggestions
         }
 
