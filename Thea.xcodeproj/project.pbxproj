@@ -725,6 +725,7 @@
 		A687806325DDDFDB134D3814 /* IncomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 270E9C14561580AE91CD94C0 /* IncomeViewModel.swift */; };
 		A68968CE519B969E6D948D88 /* SystemPromptConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE9C5718A596C7319B00E186 /* SystemPromptConfiguration.swift */; };
 		A692DBD96EAF604BD1752599 /* TheaRemoteServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA88CB3630D0278DA99046B6 /* TheaRemoteServer.swift */; };
+		A6B1652A966151BC2FB27C76 /* PermissionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98179C2572BBED4C0F018C2 /* PermissionsSettingsView.swift */; };
 		A6EF5E36D39D197FBC0257C7 /* RemindersIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E9D82E9593330A9EC81607 /* RemindersIntegration.swift */; };
 		A712DC65BE0AC9915111A216 /* PriorityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B9081D50C18C318D7E018E /* PriorityManager.swift */; };
 		A714D586AD97FF7E60FA82B0 /* PermissionsTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA2EF92AFF6A8A09A41FC68 /* PermissionsTypes.swift */; };
@@ -1730,6 +1731,7 @@
 		B8A37894FB2C0AF72D6C96F9 /* IntelligenceOrchestratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntelligenceOrchestratorTests.swift; sourceTree = "<group>"; };
 		B8EFA3168C3B124902594976 /* RemoteClientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteClientView.swift; sourceTree = "<group>"; };
 		B97FE44F4D796289AD62ADC9 /* NotificationExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExtensions.swift; sourceTree = "<group>"; };
+		B98179C2572BBED4C0F018C2 /* PermissionsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsSettingsView.swift; sourceTree = "<group>"; };
 		B9E1A311BD215F434CD170C2 /* MemoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryManager.swift; sourceTree = "<group>"; };
 		BA4319DEFD2969DFD74645AD /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = popup.html; sourceTree = "<group>"; };
 		BA88CB3630D0278DA99046B6 /* TheaRemoteServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaRemoteServer.swift; sourceTree = "<group>"; };
@@ -2497,6 +2499,7 @@
 				60B75DBB338713F2D295F771 /* LifeTrackingSettingsView.swift */,
 				EED750FD427E77BFE04F76D0 /* ModelSettingsView.swift */,
 				A9A95D026B80FEF5D3FCC2FE /* MonitoringSettingsView.swift */,
+				B98179C2572BBED4C0F018C2 /* PermissionsSettingsView.swift */,
 				76870AAA7181E13E1E492F47 /* QASettingsView.swift */,
 				1440849497485EEC94CB16CA /* RemoteAccessSettingsView.swift */,
 				172E49CC6B5F5DC4F4C7086D /* SettingsCommonTypes.swift */,
@@ -5530,6 +5533,7 @@
 				8FE80ABD47E3FD9CB4338A6C /* PatternDetector.swift in Sources */,
 				519267961C3F248C4279A1C2 /* PermissionManager.swift in Sources */,
 				BE2D753A7CF4D7C11D050113 /* PermissionsManager.swift in Sources */,
+				A6B1652A966151BC2FB27C76 /* PermissionsSettingsView.swift in Sources */,
 				A714D586AD97FF7E60FA82B0 /* PermissionsTypes.swift in Sources */,
 				F8BB8D8606EDAAB05BDBA693 /* PerplexityProvider.swift in Sources */,
 				FA130D998B768F192FC87C57 /* PersonalizedLearning.swift in Sources */,

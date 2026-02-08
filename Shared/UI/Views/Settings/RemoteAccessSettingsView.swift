@@ -390,8 +390,8 @@ struct RemoteAccessSettingsView: View {
                         .foregroundStyle(qualityColor(monitor.quality))
                 }
                 LabeledContent("Latency", value: String(format: "%.0f ms", monitor.latencyMs))
-                LabeledContent("FPS", value: String(format: "%.1f", monitor.currentFPS))
-                LabeledContent("Bandwidth", value: formatBytes(Int64(monitor.bandwidthBytesPerSec)) + "/s")
+                LabeledContent("FPS", value: String(format: "%.1f", monitor.fps))
+                LabeledContent("Bandwidth", value: formatBytes(monitor.bandwidthBps) + "/s")
             #else
                 Text("Quality monitor available on macOS only")
                     .foregroundStyle(.secondary)
