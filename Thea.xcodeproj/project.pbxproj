@@ -202,6 +202,7 @@
 		2D94EB32A2BE606158407000 /* MigrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D519C71250884B37AAB18A /* MigrationView.swift */; };
 		2DA619C6388A01F9D9FAC01D /* AssessmentDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC51B6288778CA41EB24B0C /* AssessmentDashboardView.swift */; };
 		2DA74F32A2A66F847E102047 /* TheaWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADBFA4C4EE5C2B32A6710AA1 /* TheaWidgets.swift */; };
+		2DCE363B5F92B3BEFC4E18CE /* PermissionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98179C2572BBED4C0F018C2 /* PermissionsSettingsView.swift */; };
 		2E1A8ECDB21268CA1072B372 /* MCPServerGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A0533FDF295C764D86C843 /* MCPServerGeneratorTests.swift */; };
 		2E2962F3E018A8026A9A3414 /* MacSystemObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339927C307D1E770E3A63F42 /* MacSystemObserver.swift */; };
 		2E4BA466115CB98AD6BF1E2D /* CoworkArtifactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E94F6648B259AA8B80F84D /* CoworkArtifactsView.swift */; };
@@ -6171,6 +6172,7 @@
 				45FA8A57932E096B2160B468 /* PatternDetector.swift in Sources */,
 				BCEE1BCCE0DDC92B06279A8B /* PermissionManager.swift in Sources */,
 				BDCAD18108E714006E11B24D /* PermissionsManager.swift in Sources */,
+				2DCE363B5F92B3BEFC4E18CE /* PermissionsSettingsView.swift in Sources */,
 				D42D57AF7D9984F31F840D02 /* PermissionsTypes.swift in Sources */,
 				2ADFB1B273A889C9041CEF74 /* PerplexityProvider.swift in Sources */,
 				08AF7496FBA4D75C303FF0CD /* PersonalizedLearning.swift in Sources */,
