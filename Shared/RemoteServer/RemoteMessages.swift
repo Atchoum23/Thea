@@ -696,7 +696,7 @@ public struct HardwareInventory: Codable, Sendable {
     public let uptimeSeconds: TimeInterval
     public let storageDevices: [StorageDevice]
     public let displays: [DisplayDevice]
-    public let networkInterfaces: [NetworkInterface]
+    public let networkInterfaces: [AssetNetworkInterface]
     public let peripherals: [PeripheralDevice]
     public let batteryLevel: String?
     public let batteryHealth: String?
@@ -719,7 +719,7 @@ public struct DisplayDevice: Codable, Sendable {
     public let displayID: Int?
 }
 
-public struct NetworkInterface: Codable, Sendable {
+public struct AssetNetworkInterface: Codable, Sendable {
     public let name: String
     public let interfaceName: String
     public let ipAddress: String?

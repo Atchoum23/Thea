@@ -49,6 +49,15 @@ public enum SecurityEventType: String, Codable, Sendable {
     case suspiciousActivity
     case fileAccessBlocked
     case commandBlocked
+    case totpFailed
+    case totpVerified
+    case unattendedAccessUsed
+    case privacyModeEnabled
+    case privacyModeDisabled
+    case recordingStarted
+    case recordingStopped
+    case clipboardSynced
+    case configurationChanged
 }
 
 // MARK: - Authentication Method
@@ -59,6 +68,8 @@ public enum AuthenticationMethod: String, Codable, Sendable, CaseIterable {
     case certificate // Client certificate
     case iCloudIdentity // Same iCloud account
     case biometric // Require biometric on server
+    case unattendedPassword // Persistent password for unattended access
+    case totp // Time-based one-time password (2FA)
 
     public var displayName: String {
         switch self {
@@ -67,6 +78,8 @@ public enum AuthenticationMethod: String, Codable, Sendable, CaseIterable {
         case .certificate: "Client Certificate"
         case .iCloudIdentity: "iCloud Identity"
         case .biometric: "Biometric Verification"
+        case .unattendedPassword: "Unattended Password"
+        case .totp: "Two-Factor (TOTP)"
         }
     }
 }

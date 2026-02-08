@@ -26,6 +26,7 @@ public class AudioStreamService: ObservableObject {
 
     // MARK: - Callbacks
 
+    /// Called when a new audio frame is captured (uses AudioFrame from RemoteMessages)
     public var onAudioFrame: ((AudioFrame) -> Void)?
 
     // MARK: - Capture State
@@ -39,7 +40,6 @@ public class AudioStreamService: ObservableObject {
 
     public var sampleRate: Double = 48000
     public var channels: Int = 2
-    public var codec: AudioCodec = .aac
 
     // MARK: - Initialization
 
@@ -72,12 +72,12 @@ public class AudioStreamService: ObservableObject {
             // Disable video to save resources (audio-only stream)
             config.width = 2
             config.height = 2
-            config.minimumFrameInterval = CMTime(value: 1, timescale: 1) // 1 FPS minimum
+            config.minimumFrameInterval = CMTime(value: 1, timescale: 1)
 
-            let output = AudioCaptureOutput { [weak self] frame in
+            let output = AudioCaptureOutput { [weak self] frame, peakLevel in
                 Task { @MainActor in
                     guard let self, !self.isMuted else { return }
-                    self.audioLevel = frame.peakLevel
+                    self.audioLevel = peakLevel
                     self.onAudioFrame?(frame)
                 }
             }
@@ -131,7 +131,7 @@ public class AudioStreamService: ObservableObject {
     // MARK: - Playback (Client Side)
 
     /// Play received audio frames
-    public func playAudioFrame(_ frame: AudioFrame) {
+    public func playAudioFrame(_: AudioFrame) {
         #if os(macOS)
             // Client-side audio playback would use AVAudioEngine
             // This is a placeholder for the receiving end
@@ -143,9 +143,9 @@ public class AudioStreamService: ObservableObject {
 
 #if os(macOS)
     private class AudioCaptureOutput: NSObject, SCStreamOutput {
-        private let handler: (AudioFrame) -> Void
+        private let handler: (AudioFrame, Float) -> Void
 
-        init(handler: @escaping (AudioFrame) -> Void) {
+        init(handler: @escaping (AudioFrame, Float) -> Void) {
             self.handler = handler
         }
 
@@ -169,24 +169,20 @@ public class AudioStreamService: ObservableObject {
             guard let dataPointer, length > 0 else { return }
             let data = Data(bytes: dataPointer, count: length)
 
-            // Calculate peak level
             let peakLevel = calculatePeakLevel(data: data)
 
             let frame = AudioFrame(
                 data: data,
-                sampleRate: sampleRate,
-                channels: Int(channels),
                 codec: .pcm,
-                timestamp: timestamp.seconds,
-                peakLevel: peakLevel,
-                sequenceNumber: 0
+                sampleRate: Int(sampleRate),
+                channels: Int(channels),
+                timestamp: timestamp.seconds
             )
 
-            handler(frame)
+            handler(frame, peakLevel)
         }
 
         private func calculatePeakLevel(data: Data) -> Float {
-            // Assuming 32-bit float PCM
             let floatCount = data.count / 4
             guard floatCount > 0 else { return 0 }
 
@@ -202,14 +198,6 @@ public class AudioStreamService: ObservableObject {
         }
     }
 #endif
-
-// MARK: - Audio Codec
-
-public enum AudioCodec: String, Codable, Sendable {
-    case pcm
-    case aac
-    case opus
-}
 
 // MARK: - Audio Stream Error
 

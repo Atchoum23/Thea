@@ -170,6 +170,12 @@ public class SecureConnectionManager: ObservableObject {
 
         case .biometric:
             return await verifyBiometric()
+
+        case .unattendedPassword:
+            return verifyUnattendedPassword(response: response)
+
+        case .totp:
+            return verifyTOTPAuth(response: response)
         }
     }
 
@@ -378,6 +384,80 @@ public class SecureConnectionManager: ObservableObject {
         #else
             return false
         #endif
+    }
+
+    // MARK: - Unattended Password Authentication
+
+    private func verifyUnattendedPassword(response: AuthResponse) -> Bool {
+        guard let password = response.sharedSecret else {
+            logEvent(.authenticationFailed, "No unattended password provided")
+            return false
+        }
+
+        guard let storedHash = loadKeyFromKeychain(identifier: "thea.remote.unattended.hash"),
+              let storedSalt = loadKeyFromKeychain(identifier: "thea.remote.unattended.salt")
+        else {
+            logEvent(.authenticationFailed, "No unattended password configured")
+            return false
+        }
+
+        // Hash the provided password with the stored salt
+        let key = SymmetricKey(data: password)
+        let hmac = HMAC<SHA256>.authenticationCode(for: storedSalt, using: key)
+        let computedHash = Data(hmac)
+
+        // Constant-time comparison
+        guard computedHash.count == storedHash.count else { return false }
+        var result: UInt8 = 0
+        for i in 0 ..< computedHash.count {
+            result |= computedHash[i] ^ storedHash[i]
+        }
+
+        let isValid = result == 0
+        if isValid {
+            logEvent(.clientConnected, "Client authenticated via unattended password")
+        } else {
+            logEvent(.authenticationFailed, "Invalid unattended password")
+        }
+        return isValid
+    }
+
+    /// Set the unattended access password
+    public func setUnattendedPassword(_ password: String) {
+        var salt = Data(count: 32)
+        _ = salt.withUnsafeMutableBytes { SecRandomCopyBytes(kSecRandomDefault, 32, $0.baseAddress!) }
+
+        let key = SymmetricKey(data: Data(password.utf8))
+        let hmac = HMAC<SHA256>.authenticationCode(for: salt, using: key)
+
+        saveKeyToKeychain(Data(hmac), identifier: "thea.remote.unattended.hash")
+        saveKeyToKeychain(salt, identifier: "thea.remote.unattended.salt")
+    }
+
+    /// Check if unattended password is configured
+    public var hasUnattendedPassword: Bool {
+        loadKeyFromKeychain(identifier: "thea.remote.unattended.hash") != nil
+    }
+
+    // MARK: - TOTP Authentication
+
+    private func verifyTOTPAuth(response: AuthResponse) -> Bool {
+        guard let code = response.pairingCode else {
+            logEvent(.authenticationFailed, "No TOTP code provided")
+            return false
+        }
+
+        // Delegate to TOTPAuthenticator
+        // Note: The TOTPAuthenticator is @MainActor, so this is safe
+        let authenticator = TOTPAuthenticator()
+        let isValid = authenticator.verify(code: code)
+
+        if isValid {
+            logEvent(.clientConnected, "Client authenticated via TOTP")
+        } else {
+            logEvent(.authenticationFailed, "Invalid TOTP code")
+        }
+        return isValid
     }
 
     // MARK: - Whitelist Management

@@ -46,6 +46,21 @@ import Network
         public let connectionManager: SecureConnectionManager
         public let sessionManager: RemoteSessionManager
 
+        // Extended services
+        public let videoEncoder = VideoEncoderService()
+        public let qualityMonitor = ConnectionQualityMonitor()
+        public let clipboardSync = ClipboardSyncService()
+        public let unattendedAccess = UnattendedAccessManager()
+        public let privacyMode = PrivacyModeService()
+        public let sessionRecording = SessionRecordingService()
+        public let wakeOnLan = WakeOnLanService()
+        public let sessionChat = SessionChatService()
+        public let annotationOverlay = AnnotationOverlayService()
+        public let auditLog = AuditLogService()
+        public let totpAuth = TOTPAuthenticator()
+        public let audioStream = AudioStreamService()
+        public let assetInventory = AssetInventoryService()
+
         // MARK: - Network
 
         private var listener: NWListener?
@@ -301,7 +316,30 @@ import Network
                 let response = try await handleNetworkRequest(request)
                 try await session.send(message: .networkResponse(response))
 
+            case let .clipboardRequest(request):
+                let response = await handleClipboardRequest(request)
+                try await session.send(message: .clipboardResponse(response))
+
+            case let .chatMessage(chatMsg):
+                sessionChat.receiveMessage(chatMsg)
+
+            case let .annotationRequest(request):
+                handleAnnotationRequest(request)
+
+            case let .recordingRequest(request):
+                let response = await handleRecordingRequest(request)
+                try await session.send(message: .recordingResponse(response))
+
+            case let .audioRequest(request):
+                let response = await handleAudioRequest(request)
+                try await session.send(message: .audioResponse(response))
+
+            case let .inventoryRequest(request):
+                let response = await handleInventoryRequest(request)
+                try await session.send(message: .inventoryResponse(response))
+
             case .ping:
+                qualityMonitor.recordPing()
                 try await session.send(message: .pong)
 
             case .disconnect:
