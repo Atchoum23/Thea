@@ -349,6 +349,7 @@ targets:
           - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
           - "**/Settings/Privacy/**"
@@ -631,6 +632,7 @@ targets:
           - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
           - "**/Settings/Privacy/**"
@@ -1041,6 +1043,8 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Extensions/SafariExtension
+        excludes:
+          - "**/SafariExtensionActions.swift"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.safari
