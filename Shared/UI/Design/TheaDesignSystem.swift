@@ -934,7 +934,8 @@ public struct TheaTypingIndicator: View {
 
 #if DEBUG
 #Preview("THEA Design System") {
-    ScrollView(.vertical) {
+    let axes: Axis.Set = .vertical
+    ScrollView(axes) {
         VStack(spacing: TheaSpacing.xl) {
             // Brand Colors
             VStack(alignment: .leading, spacing: TheaSpacing.md) {
