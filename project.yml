@@ -290,9 +290,8 @@ targets:
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
-          # Also exclude AI/Providers files that depend on excluded Protocol types
-          - "**/AI/Providers/AnthropicFilesAPI.swift"
-          - "**/AI/Providers/AnthropicTokenCounter.swift"
+          # AnthropicFilesAPI.swift and AnthropicTokenCounter.swift are now active
+          # (ported to use AnthropicError/AIMessage from active layer)
           - "**/Providers/Anthropic/**"
           - "**/Providers/DeepSeek/**"
           - "**/Providers/Google/**"
@@ -444,9 +443,6 @@ targets:
           - "**/Integrations/ShortcutsIntegration.swift"
           - "**/Integrations/MessagesIntegration.swift"
           - "**/Integrations/XcodeIntegration.swift"
-          - "**/Memory/LongTermMemoryManager.swift"
-          - "**/Memory/ActiveMemoryRetrieval.swift"
-          - "**/Memory/MemoryAugmentedChat.swift"
           - "**/MetaAI/ModelBenchmarkService.swift"
           - "**/Platforms/PlatformFeaturesHub.swift"
           - "**/TextProcessing/LiveAutoCorrect.swift"
@@ -610,9 +606,8 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
-          # Exclude Anthropic files that depend on excluded ProviderError/ChatContentPart types
-          - "**/AI/Providers/AnthropicFilesAPI.swift"
-          - "**/AI/Providers/AnthropicTokenCounter.swift"
+          # AnthropicFilesAPI.swift and AnthropicTokenCounter.swift are now active
+          # (ported to use AnthropicError/AIMessage from active layer)
           # ARCHITECTURE DECISION: MetaAI excluded - see macOS target for full explanation
           - "**/AI/MetaAI/**"
           - "**/Integrations/NotesIntegration.swift"
@@ -656,7 +651,6 @@ targets:
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/AgentMode/AgentEnhancements.swift"
           - "**/Integrations/IntegrationModule.swift"
-          - "**/Memory/LongTermMemoryManager.swift"
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
@@ -687,7 +681,6 @@ targets:
           - "**/Search/SemanticSearchService.swift"
           - "**/Components/QuerySuggestionOverlay.swift"
           - "**/Settings/AIFeaturesSettingsView.swift"
-          - "**/Memory/ActiveMemoryRetrieval.swift"
           - "**/Components/MemoryContextView.swift"
           - "**/Components/StreamingTextView.swift"
           - "**/MCP/THEAMCPServer.swift"
@@ -727,7 +720,6 @@ targets:
           - "**/LocalModels/SupraModelSelector.swift"
           - "**/Core/TheaIntegrationHub.swift"
           - "**/Launcher/QuickLauncher.swift"
-          - "**/Memory/MemoryAugmentedChat.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           - "**/Components/TheaTextInputField.swift"
           - "**/Anticipatory/InterventionScheduler.swift"
@@ -856,6 +848,8 @@ targets:
         excludes:
           - "**/TVFeatures/**"
       - path: Shared/Resources/Assets.xcassets
+      # Shared inference relay protocol types (pure Foundation+Codable, no heavy deps)
+      - path: Shared/InferenceRelay/InferenceRelayProtocol.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.tvos
@@ -1043,6 +1037,9 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Extensions/SafariExtension
+        excludes:
+          - "Resources/background/**"
+          - "Resources/content/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.safari
@@ -1072,6 +1069,9 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Extensions/SafariExtension
+        excludes:
+          - "Resources/background/**"
+          - "Resources/content/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.safari
