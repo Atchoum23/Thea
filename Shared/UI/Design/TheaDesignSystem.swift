@@ -934,7 +934,7 @@ public struct TheaTypingIndicator: View {
 
 #if DEBUG
 #Preview("THEA Design System") {
-    SwiftUI.ScrollView {
+    SwiftUI.ScrollView(.vertical) {
         VStack(spacing: TheaSpacing.xl) {
             // Brand Colors
             VStack(alignment: .leading, spacing: TheaSpacing.md) {
