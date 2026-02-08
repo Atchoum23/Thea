@@ -16,7 +16,7 @@ final class CloudSyncManager: ObservableObject {
     private var modelContext: ModelContext?
 
     private init() {
-        container = CKContainer(identifier: "iCloud.app.teathe.thea")
+        container = CKContainer(identifier: "iCloud.app.theathe")
         privateDatabase = container.privateCloudDatabase
         loadLastSyncDate()
     }
