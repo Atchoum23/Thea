@@ -338,6 +338,28 @@ import Network
                 let response = await handleInventoryRequest(request)
                 try await session.send(message: .inventoryResponse(response))
 
+            case let .inferenceRelayRequest(relayData):
+                let relayMessage = try JSONDecoder().decode(InferenceRelayMessage.self, from: relayData)
+                switch relayMessage {
+                case let .inferenceRequest(request):
+                    await InferenceRelayHandler.shared.handleInferenceRequest(request) { response in
+                        let encoded = try JSONEncoder().encode(response)
+                        try await session.send(message: .inferenceRelayResponse(encoded))
+                    }
+                case .listModelsRequest:
+                    let models = await InferenceRelayHandler.shared.handleListModelsRequest()
+                    let response = InferenceRelayMessage.listModelsResponse(models)
+                    let encoded = try JSONEncoder().encode(response)
+                    try await session.send(message: .inferenceRelayResponse(encoded))
+                case .capabilitiesRequest:
+                    let caps = InferenceRelayHandler.shared.getServerCapabilities()
+                    let response = InferenceRelayMessage.capabilitiesResponse(caps)
+                    let encoded = try JSONEncoder().encode(response)
+                    try await session.send(message: .inferenceRelayResponse(encoded))
+                default:
+                    break
+                }
+
             case .ping:
                 qualityMonitor.recordPingSent()
                 try await session.send(message: .pong)
