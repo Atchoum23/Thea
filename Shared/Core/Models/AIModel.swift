@@ -407,11 +407,25 @@ public extension AIModel {
         name: "Llama 3.3 70B",
         provider: "groq",
         description: "Meta's capable open model via Groq",
-        contextWindow: 128_000,
-        maxOutputTokens: 32_768,
-        capabilities: [.chat, .codeGeneration],
+        contextWindow: 32_768,
+        maxOutputTokens: 8192,
+        capabilities: [.chat, .codeGeneration, .functionCalling],
         inputCostPer1K: Decimal(string: "0.00059"),
-        outputCostPer1K: Decimal(string: "0.00079")
+        outputCostPer1K: Decimal(string: "0.00079"),
+        supportsFunctionCalling: true
+    )
+
+    static let llama318b = AIModel(
+        id: "llama-3.1-8b-instant",
+        name: "Llama 3.1 8B Instant",
+        provider: "groq",
+        description: "Ultra-fast Llama model via Groq",
+        contextWindow: 32_768,
+        maxOutputTokens: 8192,
+        capabilities: [.chat, .codeGeneration, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.00005"),
+        outputCostPer1K: Decimal(string: "0.00008"),
+        supportsFunctionCalling: true
     )
 
     static let mixtral8x7b = AIModel(
@@ -420,10 +434,11 @@ public extension AIModel {
         provider: "groq",
         description: "Mistral's MoE model via Groq",
         contextWindow: 32_768,
-        maxOutputTokens: 32_768,
-        capabilities: [.chat, .codeGeneration],
+        maxOutputTokens: 8192,
+        capabilities: [.chat, .codeGeneration, .functionCalling],
         inputCostPer1K: Decimal(string: "0.00024"),
-        outputCostPer1K: Decimal(string: "0.00024")
+        outputCostPer1K: Decimal(string: "0.00024"),
+        supportsFunctionCalling: true
     )
 
     // MARK: - Perplexity Models
@@ -432,12 +447,106 @@ public extension AIModel {
         id: "sonar-pro",
         name: "Sonar Pro",
         provider: "perplexity",
-        description: "Perplexity's search-enhanced model",
+        description: "Perplexity's advanced search-enhanced model",
         contextWindow: 200_000,
         maxOutputTokens: 8192,
         capabilities: [.chat, .search],
         inputCostPer1K: Decimal(string: "0.003"),
         outputCostPer1K: Decimal(string: "0.015")
+    )
+
+    static let sonar = AIModel(
+        id: "sonar",
+        name: "Sonar",
+        provider: "perplexity",
+        description: "Fast search-enhanced model",
+        contextWindow: 127_072,
+        maxOutputTokens: 8192,
+        capabilities: [.chat, .search],
+        inputCostPer1K: Decimal(string: "0.001"),
+        outputCostPer1K: Decimal(string: "0.001")
+    )
+
+    static let sonarReasoning = AIModel(
+        id: "sonar-reasoning",
+        name: "Sonar Reasoning",
+        provider: "perplexity",
+        description: "Reasoning with search capabilities",
+        contextWindow: 127_072,
+        maxOutputTokens: 8192,
+        capabilities: [.chat, .search, .reasoning],
+        inputCostPer1K: Decimal(string: "0.001"),
+        outputCostPer1K: Decimal(string: "0.005")
+    )
+
+    // MARK: - OpenRouter Models
+    // Popular models accessible via OpenRouter (uses vendor/model ID format)
+
+    static let orClaude45Sonnet = AIModel(
+        id: "anthropic/claude-sonnet-4-5-20250929",
+        name: "Claude Sonnet 4.5 (OpenRouter)",
+        provider: "openrouter",
+        description: "Claude Sonnet 4.5 via OpenRouter",
+        contextWindow: 200_000,
+        maxOutputTokens: 64_000,
+        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.003"),
+        outputCostPer1K: Decimal(string: "0.015"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
+    static let orGpt4o = AIModel(
+        id: "openai/gpt-4o",
+        name: "GPT-4o (OpenRouter)",
+        provider: "openrouter",
+        description: "GPT-4o via OpenRouter",
+        contextWindow: 128_000,
+        maxOutputTokens: 16_384,
+        capabilities: [.chat, .vision, .codeGeneration, .functionCalling, .multimodal],
+        inputCostPer1K: Decimal(string: "0.005"),
+        outputCostPer1K: Decimal(string: "0.015"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
+    static let orGemini25Pro = AIModel(
+        id: "google/gemini-2.5-pro-preview",
+        name: "Gemini 2.5 Pro (OpenRouter)",
+        provider: "openrouter",
+        description: "Gemini 2.5 Pro via OpenRouter",
+        contextWindow: 1_000_000,
+        maxOutputTokens: 65_536,
+        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling, .multimodal],
+        inputCostPer1K: Decimal(string: "0.00125"),
+        outputCostPer1K: Decimal(string: "0.005"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
+    static let orDeepseekChat = AIModel(
+        id: "deepseek/deepseek-chat",
+        name: "DeepSeek V3.2 (OpenRouter)",
+        provider: "openrouter",
+        description: "DeepSeek V3.2 via OpenRouter",
+        contextWindow: 128_000,
+        maxOutputTokens: 8192,
+        capabilities: [.chat, .codeGeneration, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.00028"),
+        outputCostPer1K: Decimal(string: "0.00042"),
+        supportsFunctionCalling: true
+    )
+
+    static let orLlama370b = AIModel(
+        id: "meta-llama/llama-3.3-70b-instruct",
+        name: "Llama 3.3 70B (OpenRouter)",
+        provider: "openrouter",
+        description: "Llama 3.3 70B via OpenRouter",
+        contextWindow: 128_000,
+        maxOutputTokens: 32_768,
+        capabilities: [.chat, .codeGeneration],
+        inputCostPer1K: Decimal(string: "0.00039"),
+        outputCostPer1K: Decimal(string: "0.00039")
     )
 
     // MARK: - Common Model Lists

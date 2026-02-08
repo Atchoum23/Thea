@@ -666,12 +666,49 @@ public final class SmartModelRouter: ObservableObject {
     }
 
     private func setupDefaultModels() {
-        // Claude models
+        // MARK: Anthropic — Claude 4.5 (Latest)
         registerModel(RouterModelCapability(
-            modelId: "claude-opus-4",
+            modelId: "claude-opus-4-5-20251101",
             provider: "anthropic",
-            contextWindow: 200000,
-            maxOutputTokens: 32000,
+            contextWindow: 200_000,
+            maxOutputTokens: 64_000,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .creative, .vision, .functionCalling, .structuredOutput, .streaming, .longContext, .highQuality],
+            costPerInputToken: 15.0,
+            costPerOutputToken: 75.0,
+            averageLatency: 3.0,
+            qualityScore: 0.97
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "claude-sonnet-4-5-20250929",
+            provider: "anthropic",
+            contextWindow: 200_000,
+            maxOutputTokens: 64_000,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .creative, .vision, .functionCalling, .structuredOutput, .streaming, .longContext],
+            costPerInputToken: 3.0,
+            costPerOutputToken: 15.0,
+            averageLatency: 1.5,
+            qualityScore: 0.88
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "claude-haiku-4-5-20251001",
+            provider: "anthropic",
+            contextWindow: 200_000,
+            maxOutputTokens: 64_000,
+            capabilities: [.textGeneration, .codeGeneration, .analysis, .vision, .functionCalling, .streaming, .longContext, .fastResponse, .lowCost],
+            costPerInputToken: 1.0,
+            costPerOutputToken: 5.0,
+            averageLatency: 0.5,
+            qualityScore: 0.75
+        ))
+
+        // MARK: Anthropic — Claude 4 (Legacy)
+        registerModel(RouterModelCapability(
+            modelId: "claude-opus-4-20250514",
+            provider: "anthropic",
+            contextWindow: 200_000,
+            maxOutputTokens: 32_000,
             capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .creative, .vision, .functionCalling, .structuredOutput, .streaming, .longContext, .highQuality],
             costPerInputToken: 15.0,
             costPerOutputToken: 75.0,
@@ -680,10 +717,10 @@ public final class SmartModelRouter: ObservableObject {
         ))
 
         registerModel(RouterModelCapability(
-            modelId: "claude-sonnet-4",
+            modelId: "claude-sonnet-4-20250514",
             provider: "anthropic",
-            contextWindow: 200000,
-            maxOutputTokens: 64000,
+            contextWindow: 200_000,
+            maxOutputTokens: 16_000,
             capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .creative, .vision, .functionCalling, .structuredOutput, .streaming, .longContext],
             costPerInputToken: 3.0,
             costPerOutputToken: 15.0,
@@ -692,26 +729,26 @@ public final class SmartModelRouter: ObservableObject {
         ))
 
         registerModel(RouterModelCapability(
-            modelId: "claude-haiku-3.5",
+            modelId: "claude-3-5-haiku-20241022",
             provider: "anthropic",
-            contextWindow: 200000,
+            contextWindow: 200_000,
             maxOutputTokens: 8192,
-            capabilities: [.textGeneration, .codeGeneration, .analysis, .functionCalling, .streaming, .longContext, .fastResponse, .lowCost],
-            costPerInputToken: 0.25,
-            costPerOutputToken: 1.25,
-            averageLatency: 0.5,
+            capabilities: [.textGeneration, .codeGeneration, .analysis, .vision, .functionCalling, .streaming, .longContext, .fastResponse, .lowCost],
+            costPerInputToken: 1.0,
+            costPerOutputToken: 5.0,
+            averageLatency: 0.4,
             qualityScore: 0.70
         ))
 
-        // OpenAI models
+        // MARK: OpenAI
         registerModel(RouterModelCapability(
             modelId: "gpt-4o",
             provider: "openai",
-            contextWindow: 128000,
-            maxOutputTokens: 16384,
+            contextWindow: 128_000,
+            maxOutputTokens: 16_384,
             capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .creative, .vision, .audio, .functionCalling, .structuredOutput, .streaming],
-            costPerInputToken: 2.5,
-            costPerOutputToken: 10.0,
+            costPerInputToken: 5.0,
+            costPerOutputToken: 15.0,
             averageLatency: 1.2,
             qualityScore: 0.88
         ))
@@ -719,8 +756,8 @@ public final class SmartModelRouter: ObservableObject {
         registerModel(RouterModelCapability(
             modelId: "gpt-4o-mini",
             provider: "openai",
-            contextWindow: 128000,
-            maxOutputTokens: 16384,
+            contextWindow: 128_000,
+            maxOutputTokens: 16_384,
             capabilities: [.textGeneration, .codeGeneration, .analysis, .vision, .functionCalling, .streaming, .fastResponse, .lowCost],
             costPerInputToken: 0.15,
             costPerOutputToken: 0.60,
@@ -728,20 +765,155 @@ public final class SmartModelRouter: ObservableObject {
             qualityScore: 0.72
         ))
 
-        // Gemini models
+        registerModel(RouterModelCapability(
+            modelId: "o1",
+            provider: "openai",
+            contextWindow: 200_000,
+            maxOutputTokens: 100_000,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .highQuality],
+            costPerInputToken: 15.0,
+            costPerOutputToken: 60.0,
+            averageLatency: 8.0,
+            qualityScore: 0.93
+        ))
+
+        // MARK: Google — Gemini
+        registerModel(RouterModelCapability(
+            modelId: "gemini-3-pro-preview",
+            provider: "google",
+            contextWindow: 1_000_000,
+            maxOutputTokens: 65_536,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .creative, .vision, .functionCalling, .structuredOutput, .streaming, .longContext, .highQuality],
+            costPerInputToken: 2.0,
+            costPerOutputToken: 12.0,
+            averageLatency: 2.0,
+            qualityScore: 0.90
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "gemini-3-flash-preview",
+            provider: "google",
+            contextWindow: 1_000_000,
+            maxOutputTokens: 65_536,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .vision, .functionCalling, .streaming, .longContext, .fastResponse, .lowCost],
+            costPerInputToken: 0.5,
+            costPerOutputToken: 3.0,
+            averageLatency: 0.5,
+            qualityScore: 0.80
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "gemini-2.5-pro",
+            provider: "google",
+            contextWindow: 1_000_000,
+            maxOutputTokens: 65_536,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .vision, .functionCalling, .structuredOutput, .streaming, .longContext],
+            costPerInputToken: 1.25,
+            costPerOutputToken: 5.0,
+            averageLatency: 1.5,
+            qualityScore: 0.87
+        ))
+
         registerModel(RouterModelCapability(
             modelId: "gemini-2.0-flash",
             provider: "google",
-            contextWindow: 1000000,
+            contextWindow: 1_000_000,
             maxOutputTokens: 8192,
             capabilities: [.textGeneration, .codeGeneration, .analysis, .vision, .audio, .functionCalling, .streaming, .longContext, .fastResponse, .lowCost],
-            costPerInputToken: 0.075,
-            costPerOutputToken: 0.30,
+            costPerInputToken: 0.1,
+            costPerOutputToken: 0.4,
             averageLatency: 0.3,
             qualityScore: 0.75
         ))
 
-        // Local models placeholder
+        // MARK: DeepSeek
+        registerModel(RouterModelCapability(
+            modelId: "deepseek-chat",
+            provider: "deepseek",
+            contextWindow: 128_000,
+            maxOutputTokens: 8192,
+            capabilities: [.textGeneration, .codeGeneration, .functionCalling, .streaming, .lowCost],
+            costPerInputToken: 0.28,
+            costPerOutputToken: 0.42,
+            averageLatency: 1.0,
+            qualityScore: 0.78
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "deepseek-reasoner",
+            provider: "deepseek",
+            contextWindow: 128_000,
+            maxOutputTokens: 65_536,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .functionCalling, .streaming, .lowCost],
+            costPerInputToken: 0.28,
+            costPerOutputToken: 0.42,
+            averageLatency: 5.0,
+            qualityScore: 0.83
+        ))
+
+        // MARK: Groq (ultra-fast inference)
+        registerModel(RouterModelCapability(
+            modelId: "llama-3.3-70b-versatile",
+            provider: "groq",
+            contextWindow: 32_768,
+            maxOutputTokens: 8192,
+            capabilities: [.textGeneration, .codeGeneration, .functionCalling, .streaming, .fastResponse, .lowCost],
+            costPerInputToken: 0.59,
+            costPerOutputToken: 0.79,
+            averageLatency: 0.2,
+            qualityScore: 0.73
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "llama-3.1-8b-instant",
+            provider: "groq",
+            contextWindow: 32_768,
+            maxOutputTokens: 8192,
+            capabilities: [.textGeneration, .codeGeneration, .functionCalling, .streaming, .fastResponse, .lowCost],
+            costPerInputToken: 0.05,
+            costPerOutputToken: 0.08,
+            averageLatency: 0.1,
+            qualityScore: 0.60
+        ))
+
+        // MARK: Perplexity (search-enhanced)
+        registerModel(RouterModelCapability(
+            modelId: "sonar-pro",
+            provider: "perplexity",
+            contextWindow: 200_000,
+            maxOutputTokens: 8192,
+            capabilities: [.textGeneration, .analysis, .streaming],
+            costPerInputToken: 3.0,
+            costPerOutputToken: 15.0,
+            averageLatency: 2.0,
+            qualityScore: 0.80
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "sonar",
+            provider: "perplexity",
+            contextWindow: 127_072,
+            maxOutputTokens: 8192,
+            capabilities: [.textGeneration, .analysis, .streaming, .fastResponse, .lowCost],
+            costPerInputToken: 1.0,
+            costPerOutputToken: 1.0,
+            averageLatency: 1.0,
+            qualityScore: 0.72
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "sonar-reasoning",
+            provider: "perplexity",
+            contextWindow: 127_072,
+            maxOutputTokens: 8192,
+            capabilities: [.textGeneration, .reasoning, .analysis, .streaming],
+            costPerInputToken: 1.0,
+            costPerOutputToken: 5.0,
+            averageLatency: 3.0,
+            qualityScore: 0.78
+        ))
+
+        // MARK: Local models placeholder
         registerModel(RouterModelCapability(
             modelId: "local-llama",
             provider: "local",
