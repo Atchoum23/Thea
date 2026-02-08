@@ -102,7 +102,7 @@ public actor LongTermMemoryManager {
         category: String,
         initialStrength: Double = 0.8,
         keywords: [String] = [],
-        source: MemorySource = .conversation
+        source: LongTermMemorySource = .conversation
     ) async -> UUID {
         let memory = LongTermMemory(
             content: fact,
@@ -383,7 +383,7 @@ public struct LongTermMemory: Identifiable, Codable, Sendable {
     public let category: String
     public var strength: Double
     public let keywords: [String]
-    public let source: MemorySource
+    public let source: LongTermMemorySource
     public let createdAt: Date
     public var lastReinforcedAt: Date?
     public var reinforcementCount: Int
@@ -394,7 +394,7 @@ public struct LongTermMemory: Identifiable, Codable, Sendable {
         category: String,
         strength: Double = 0.8,
         keywords: [String] = [],
-        source: MemorySource = .conversation,
+        source: LongTermMemorySource = .conversation,
         createdAt: Date = Date(),
         lastReinforcedAt: Date? = nil,
         reinforcementCount: Int = 0
@@ -428,7 +428,7 @@ public struct LongTermMemory: Identifiable, Codable, Sendable {
 }
 
 /// Source of a memory
-public enum MemorySource: String, Codable, Sendable {
+public enum LongTermMemorySource: String, Codable, Sendable {
     case conversation   // From AI conversation
     case userInput      // Explicitly provided by user
     case inference      // Inferred from context

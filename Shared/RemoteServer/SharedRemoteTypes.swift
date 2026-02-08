@@ -116,6 +116,7 @@ public struct RemoteClient: Identifiable, Codable, Sendable {
         case mac
         case iPhone
         case iPad
+        case tv
         case unknown
     }
 

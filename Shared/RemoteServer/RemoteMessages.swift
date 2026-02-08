@@ -61,6 +61,10 @@ public enum RemoteMessage: Codable, Sendable {
     case inventoryRequest(InventoryRequest)
     case inventoryResponse(InventoryResponse)
 
+    // Inference relay (tvOS ↔ macOS AI pipeline)
+    case inferenceRelayRequest(Data)
+    case inferenceRelayResponse(Data)
+
     // Connection management
     case ping
     case pong
@@ -92,6 +96,7 @@ public enum RemoteMessage: Codable, Sendable {
         case .recordingRequest, .recordingResponse: .viewScreen
         case .audioRequest, .audioResponse: .viewScreen
         case .inventoryRequest, .inventoryResponse: .viewScreen
+        case .inferenceRelayRequest, .inferenceRelayResponse: .inferenceRelay
         default: .viewScreen
         }
     }

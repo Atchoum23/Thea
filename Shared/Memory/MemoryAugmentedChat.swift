@@ -28,7 +28,7 @@ public final class MemoryAugmentedChat {
     // MARK: - Public API
 
     /// Process a user message with memory augmentation
-    public func processMessage(
+    func processMessage(
         _ userMessage: String,
         conversationId: UUID,
         projectId: UUID? = nil,
@@ -108,7 +108,7 @@ public final class MemoryAugmentedChat {
     }
 
     /// Get context-aware suggestions based on current state
-    public func getSuggestions(
+    func getSuggestions(
         conversationId: UUID,
         recentMessages: [AIMessage],
         projectId: UUID? = nil
