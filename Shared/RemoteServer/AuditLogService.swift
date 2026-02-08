@@ -89,6 +89,15 @@ public class AuditLogService: ObservableObject {
         case .serverStarted: .serverStarted
         case .serverStopped: .serverStopped
         case .serverError: .serverError
+        case .totpFailed: .totpFailed
+        case .totpVerified: .totpVerified
+        case .unattendedAccessUsed: .sessionStarted
+        case .privacyModeEnabled: .privacyModeEnabled
+        case .privacyModeDisabled: .privacyModeDisabled
+        case .recordingStarted: .screenRecordingStarted
+        case .recordingStopped: .screenRecordingStopped
+        case .clipboardSynced: .clipboardSynced
+        case .configurationChanged: .configurationChanged
         }
 
         log(
