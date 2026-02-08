@@ -59,6 +59,7 @@
         "content/content-core.js",
         "content/content-actions.js",
         "content/icloud-autofill-ui.js",
+        "content/icloud-autofill-totp.js",
         "content/icloud-autofill-forms.js",
         "content/icloud-email-ui.js",
         "content/dark-mode-engine.js",
@@ -87,6 +88,7 @@
       ],
       "js": [
         "content/icloud-autofill-ui.js",
+        "content/icloud-autofill-totp.js",
         "content/icloud-autofill-forms.js",
         "content/icloud-email-ui.js"
       ],
