@@ -2,7 +2,7 @@
  * iCloud Autofill UI - Core Module
  *
  * Styles, state, init, message handling, credential popup,
- * autofill, save password banner, popup utilities.
+ * autofill, popup utilities, iCloud connection state.
  *
  * Loaded first. Other iCloud modules depend on this.
  */
@@ -33,14 +33,8 @@
     }
 
     @keyframes thea-popup-appear {
-      from {
-        opacity: 0;
-        transform: translateY(-8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Header with iCloud branding */
@@ -182,90 +176,6 @@
       background: #d1d1d6;
     }
 
-    /* Save Password Prompt (Safari-style banner) */
-    .thea-save-password-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(180deg, #f8f8f8 0%, #f0f0f0 100%);
-      border-bottom: 1px solid #d1d1d6;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      z-index: 2147483647;
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      animation: thea-banner-slide 0.2s ease-out;
-    }
-
-    @keyframes thea-banner-slide {
-      from {
-        transform: translateY(-100%);
-      }
-      to {
-        transform: translateY(0);
-      }
-    }
-
-    .thea-save-password-banner-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(180deg, #007AFF 0%, #0056CC 100%);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .thea-save-password-banner-icon svg {
-      width: 24px;
-      height: 24px;
-      color: white;
-    }
-
-    .thea-save-password-banner-content {
-      flex: 1;
-    }
-
-    .thea-save-password-banner-title {
-      font-weight: 600;
-      font-size: 14px;
-      color: #1d1d1f;
-    }
-
-    .thea-save-password-banner-subtitle {
-      font-size: 12px;
-      color: #8e8e93;
-      margin-top: 2px;
-    }
-
-    .thea-save-password-banner-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .thea-save-password-banner-actions button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .thea-save-password-banner-actions button.save {
-      background: #007AFF;
-      color: white;
-    }
-
-    .thea-save-password-banner-actions button.never {
-      background: #e5e5ea;
-      color: #1d1d1f;
-    }
-
     /* Hide My Email Inline Button */
     .thea-hide-email-btn {
       position: absolute;
@@ -361,7 +271,6 @@
   // ============================================================================
 
   let currentPopup = null;
-  let currentBanner = null;
   let iCloudConnected = false;
 
   // ============================================================================
@@ -390,7 +299,6 @@
     popup.style.top = `${rect.bottom + 4}px`;
     popup.style.left = `${rect.left}px`;
 
-    // Adjust if off-screen
     requestAnimationFrame(() => {
       const popupRect = popup.getBoundingClientRect();
       if (popupRect.right > window.innerWidth) {
@@ -428,7 +336,6 @@
     const popup = document.createElement('div');
     popup.className = 'thea-icloud-popup';
 
-    // Header
     const header = document.createElement('div');
     header.className = 'thea-icloud-popup-header';
     header.innerHTML = `
@@ -441,7 +348,6 @@
     `;
     popup.appendChild(header);
 
-    // Credential items
     credentials.forEach(cred => {
       const item = document.createElement('div');
       item.className = 'thea-icloud-item';
@@ -474,7 +380,6 @@
       popup.appendChild(item);
     });
 
-    // Footer with "Suggest Password" option
     const footer = document.createElement('div');
     footer.className = 'thea-icloud-popup-footer';
     footer.innerHTML = `
@@ -484,11 +389,14 @@
 
     footer.querySelector('[data-action="suggest"]').addEventListener('click', async () => {
       const password = await suggestStrongPassword();
-      if (password) {
+      if (password && passwordField) {
         passwordField.value = password;
         passwordField.dispatchEvent(new Event('input', { bubbles: true }));
         closeCurrentPopup();
-        showSavePasswordBanner(usernameField.value, password, domain);
+        const totp = window.TheaModules.icloudTOTP;
+        if (totp) {
+          totp.showSavePasswordBanner(usernameField.value, password, domain);
+        }
       }
     });
 
@@ -498,7 +406,6 @@
     });
 
     popup.appendChild(footer);
-
     return popup;
   }
 
@@ -507,17 +414,14 @@
   // ============================================================================
 
   function autofillCredential(credential, usernameField, passwordField) {
-    // Fill username
     usernameField.value = credential.username;
     usernameField.dispatchEvent(new Event('input', { bubbles: true }));
     usernameField.dispatchEvent(new Event('change', { bubbles: true }));
 
-    // Fill password
     passwordField.value = credential.password;
     passwordField.dispatchEvent(new Event('input', { bubbles: true }));
     passwordField.dispatchEvent(new Event('change', { bubbles: true }));
 
-    // Notify background for stats
     chrome.runtime.sendMessage({
       type: 'updateStats',
       data: { passwordsAutofilled: 1 }
@@ -541,64 +445,7 @@
   }
 
   // ============================================================================
-  // Save Password Banner (Safari-style)
-  // ============================================================================
-
-  function showSavePasswordBanner(username, password, domain) {
-    closeSavePasswordBanner();
-
-    const banner = document.createElement('div');
-    banner.className = 'thea-save-password-banner';
-    banner.innerHTML = `
-      <div class="thea-save-password-banner-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-      </div>
-      <div class="thea-save-password-banner-content">
-        <div class="thea-save-password-banner-title">Save this password in iCloud Keychain?</div>
-        <div class="thea-save-password-banner-subtitle">
-          ${escapeHtml(username || 'This password')} for ${escapeHtml(domain)}
-        </div>
-      </div>
-      <div class="thea-save-password-banner-actions">
-        <button class="never" data-action="never">Not Now</button>
-        <button class="save" data-action="save">Save Password</button>
-      </div>
-    `;
-
-    banner.querySelector('[data-action="never"]').addEventListener('click', closeSavePasswordBanner);
-
-    banner.querySelector('[data-action="save"]').addEventListener('click', async () => {
-      try {
-        await chrome.runtime.sendMessage({
-          type: 'saveiCloudCredential',
-          data: { username, password, domain }
-        });
-        showNotification('Password saved to iCloud Keychain');
-      } catch (e) {
-        showNotification('Failed to save password');
-      }
-      closeSavePasswordBanner();
-    });
-
-    document.body.appendChild(banner);
-    currentBanner = banner;
-
-    // Auto-hide after 30 seconds
-    setTimeout(closeSavePasswordBanner, 30000);
-  }
-
-  function closeSavePasswordBanner() {
-    if (currentBanner) {
-      currentBanner.remove();
-      currentBanner = null;
-    }
-  }
-
-  // ============================================================================
-  // Notification (used by save banner and email module)
+  // Notification
   // ============================================================================
 
   function showNotification(message, type = 'info') {
@@ -629,7 +476,6 @@
       }
     `;
     notification.appendChild(style);
-
     document.body.appendChild(notification);
 
     setTimeout(() => {
@@ -669,22 +515,18 @@
   // ============================================================================
 
   function init() {
-    // Inject styles
     const styleEl = document.createElement('style');
     styleEl.id = 'thea-icloud-autofill-styles';
     styleEl.textContent = STYLES;
     document.head.appendChild(styleEl);
 
-    // Check iCloud connection status
     checkiCloudStatus();
 
-    // Setup input observers (from forms module)
     const forms = window.TheaModules.icloudForms;
     if (forms) {
       forms.observeInputFields();
     }
 
-    // Listen for messages from background
     chrome.runtime.onMessage.addListener(handleMessage);
   }
 
@@ -700,7 +542,6 @@
   }
 
   function handleMessage(message, sender, sendResponse) {
-    // SECURITY: Verify message comes from our extension, not from web pages
     if (!sender.id || sender.id !== chrome.runtime.id) {
       console.warn('Thea: Rejected message from unauthorized sender');
       sendResponse({ success: false, error: 'Unauthorized sender' });
@@ -750,8 +591,6 @@
     createCredentialPopup,
     autofillCredential,
     suggestStrongPassword,
-    showSavePasswordBanner,
-    closeSavePasswordBanner,
     showNotification,
     isConnected,
     setConnected,
