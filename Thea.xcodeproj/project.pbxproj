@@ -423,6 +423,7 @@
 		62618BADD23D99EC708CB0C6 /* SuggestionChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7145143259590A9E6D9C71 /* SuggestionChipView.swift */; };
 		626F7C30AEF968141EEA7482 /* AdaptiveModelRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56B851219F6C9A71A90F6833 /* AdaptiveModelRouter.swift */; };
 		630A827A4798C8FE654D36B9 /* ConversationListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98E47FDB0A16348C0DC36728 /* ConversationListViewModel.swift */; };
+		6387E4D031AD49F566C2A991 /* SemanticSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3BC5C9E938BDAA7A3D93D75 /* SemanticSearchService.swift */; };
 		63D5B3A0DACC3D05B9425541 /* CoworkArtifact.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E78086A5E6DE8D3A133C4C /* CoworkArtifact.swift */; };
 		63E32C1AF30AAF6FBDEEF4A1 /* RemoteMacBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD76F0C50307B9122381B9B /* RemoteMacBridge.swift */; };
 		63F67DBFEB327552545BD491 /* KnowledgeSourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8E9DB2095CD2E63C86350D /* KnowledgeSourceManager.swift */; };
@@ -1627,6 +1628,7 @@
 		A3902B30CDC25FBD064860BE /* CrossDeviceNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossDeviceNotificationService.swift; sourceTree = "<group>"; };
 		A39A485B529A1FB622C9D3F4 /* CommandPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPalette.swift; sourceTree = "<group>"; };
 		A3B615BE9D19A79D578EF42A /* FinancialIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialIntegration.swift; sourceTree = "<group>"; };
+		A3BC5C9E938BDAA7A3D93D75 /* SemanticSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticSearchService.swift; sourceTree = "<group>"; };
 		A3E94F6648B259AA8B80F84D /* CoworkArtifactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkArtifactsView.swift; sourceTree = "<group>"; };
 		A3F7F71CF714685FE8710E13 /* MCPServerGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPServerGeneratorTests.swift; sourceTree = "<group>"; };
 		A4D114B98EBFAE02888E15B4 /* CognitiveDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitiveDashboardView.swift; sourceTree = "<group>"; };
@@ -2167,6 +2169,7 @@
 				810C3C28CB454F2AFD59E047 /* Reliability */,
 				587368E9F073C5A9F5545DDD /* Routing */,
 				637DF0306CAF020536EDEE91 /* Safety */,
+				4C8262986A5427CAA761ED84 /* Search */,
 				FE49EC793A357CA464426616 /* Skills */,
 				9250433B522D7FB4738B3B73 /* Squads */,
 				BC4877582879486805A97DF4 /* Subagents */,
@@ -2768,6 +2771,14 @@
 				DECDD9F2AA7C808068DAF255 /* SmartTriggerEngine.swift */,
 			);
 			path = SmartTriggers;
+			sourceTree = "<group>";
+		};
+		4C8262986A5427CAA761ED84 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				A3BC5C9E938BDAA7A3D93D75 /* SemanticSearchService.swift */,
+			);
+			path = Search;
 			sourceTree = "<group>";
 		};
 		4CC679EBA09709226142A3BD /* Views */ = {
@@ -6133,6 +6144,7 @@
 				ADA74DB0BCC1B583C85C7393 /* SecurityHardening.swift in Sources */,
 				CE084FF525CBB4713ED02ADD /* SemanticCodeIndexer.swift in Sources */,
 				28F3421626813093A0EDC180 /* SemanticContextPreFetcher.swift in Sources */,
+				6387E4D031AD49F566C2A991 /* SemanticSearchService.swift in Sources */,
 				AAEEA70E3A0D869FEED5040C /* SendableValue.swift in Sources */,
 				99A742B47C698ECCCC5C45F3 /* ServiceContainer.swift in Sources */,
 				D9638B7C118FA7C2C7FB1F1E /* ServicesHandler.swift in Sources */,

@@ -462,7 +462,6 @@ targets:
           - "**/RemoteServer/RemoteCommandService.swift"
           - "**/Launcher/QuickLauncher.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
-          - "**/Intelligence/Search/SemanticSearchService.swift"
           - "**/Intelligence/Subagents/**"
           # Settings views with missing dependencies
           - "**/Settings/OrchestratorSettingsView.swift"

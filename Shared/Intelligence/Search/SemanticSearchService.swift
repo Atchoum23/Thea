@@ -310,7 +310,7 @@ public final class SemanticSearchService: ObservableObject {
     @Published public private(set) var isSearching = false
     @Published public private(set) var isIndexing = false
     @Published public private(set) var indexingProgress: Double = 0.0
-    @Published public private(set) var lastSearchResults: [SemanticSearchResult] = []
+    @Published private(set) var lastSearchResults: [SemanticSearchResult] = []
     @Published public private(set) var indexStats: EmbeddingIndexStats?
     @Published public private(set) var lastError: SemanticSearchError?
 
@@ -879,7 +879,7 @@ public final class SemanticSearchService: ObservableObject {
 
     private func getOpenAIKey() -> String? {
         // Try THEA-prefixed key first
-        return try? SecureStorage.shared.loadAPIKey(for: "openai")
+        try? SecureStorage.shared.loadAPIKey(for: "openai")
     }
 
     // MARK: - Background Tasks
