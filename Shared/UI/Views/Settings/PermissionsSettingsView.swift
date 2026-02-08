@@ -2,8 +2,7 @@
 //  PermissionsSettingsView.swift
 //  Thea
 //
-//  Comprehensive permissions management across all Apple platforms
-//  Based on 2026 best practices
+//  Permissions management matching macOS Privacy & Security layout
 //
 
 import SwiftUI
@@ -12,39 +11,35 @@ import SwiftUI
 
 struct PermissionsSettingsView: View {
     @State private var permissionsManager = PermissionsManager.shared
-    @State private var expandedCategories: Set<PermissionCategory> = []
     @State private var isRefreshing = false
     @State private var showingRequestAlert = false
     @State private var requestAlertMessage = ""
 
     var body: some View {
         Form {
-            overviewSection
-            permissionCategoriesSection
+            headerSection
+            permissionListSection
         }
         .formStyle(.grouped)
         .padding()
-        .onAppear {
-            // Expand all categories by default
-            expandedCategories = Set(PermissionCategory.allCases)
-        }
     }
 
-    // MARK: - Overview Section
+    // MARK: - Header Section
 
-    private var overviewSection: some View {
+    private var headerSection: some View {
         Section {
             HStack {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Image(systemName: "hand.raised.fill")
+                        Image(systemName: "lock.shield.fill")
                             .font(.title2)
                             .foregroundStyle(.blue)
-                        Text("App Permissions")
+                        Text("System Permissions")
                             .font(.headline)
                     }
 
-                    Text("Manage what Thea can access on your device. All permissions respect your privacy choices.")
+                    Text("Thea needs certain permissions to function fully. "
+                         + "Grant or check status below.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -67,101 +62,24 @@ struct PermissionsSettingsView: View {
                 .buttonStyle(.bordered)
                 .disabled(isRefreshing)
             }
-
-            // Permission summary
-            HStack(spacing: 20) {
-                PermissionStatView(
-                    count: permissionsManager.allPermissions.filter { $0.status == .authorized }.count,
-                    total: permissionsManager.allPermissions.count,
-                    label: "Authorized",
-                    color: .green
-                )
-
-                PermissionStatView(
-                    count: permissionsManager.allPermissions.filter { $0.status == .denied }.count,
-                    total: permissionsManager.allPermissions.count,
-                    label: "Denied",
-                    color: .red
-                )
-
-                PermissionStatView(
-                    count: permissionsManager.allPermissions.filter { $0.status == .notDetermined }.count,
-                    total: permissionsManager.allPermissions.count,
-                    label: "Not Set",
-                    color: .gray
-                )
-            }
-            .padding(.vertical, 8)
-
-            if let lastRefresh = permissionsManager.lastRefreshDate {
-                Text("Last checked: \(lastRefresh, style: .relative) ago")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
-        } header: {
-            Text("Overview")
         }
     }
 
-    // MARK: - Permission Categories Section
+    // MARK: - Permission List Section
 
-    private var permissionCategoriesSection: some View {
+    private var permissionListSection: some View {
         ForEach(permissionsManager.availableCategories) { category in
             Section {
-                DisclosureGroup(isExpanded: Binding(
-                    get: { expandedCategories.contains(category) },
-                    set: { isExpanded in
-                        if isExpanded {
-                            expandedCategories.insert(category)
-                        } else {
-                            expandedCategories.remove(category)
+                ForEach(permissionsManager.permissions(for: category), id: \.id) { permission in
+                    PermissionRowView(permission: permission) {
+                        Task {
+                            await handlePermissionAction(permission)
                         }
                     }
-                )) {
-                    ForEach(permissionsManager.permissions(for: category), id: \.id) { permission in
-                        PermissionRowView(
-                            permission: permission,
-                            onRequest: {
-                                Task {
-                                    await requestPermission(permission.type)
-                                }
-                            },
-                            onOpenSettings: {
-                                permissionsManager.openSettings(for: permission.type)
-                            }
-                        )
-                    }
-                } label: {
-                    categoryHeader(category)
                 }
+            } header: {
+                Text(category.rawValue)
             }
-        }
-    }
-
-    private func categoryHeader(_ category: PermissionCategory) -> some View {
-        HStack {
-            Image(systemName: category.icon)
-                .font(.title3)
-                .foregroundStyle(.blue)
-                .frame(width: 24)
-
-            Text(category.rawValue)
-                .font(.subheadline)
-                .fontWeight(.medium)
-
-            Spacer()
-
-            // Category summary badge
-            let categoryPermissions = permissionsManager.permissions(for: category)
-            let authorizedCount = categoryPermissions.filter { $0.status == .authorized }.count
-
-            Text("\(authorizedCount)/\(categoryPermissions.count)")
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 2)
-                .background(authorizedCount == categoryPermissions.count ? Color.green.opacity(0.2) : Color.gray.opacity(0.2))
-                .foregroundStyle(authorizedCount == categoryPermissions.count ? .green : .secondary)
-                .cornerRadius(8)
         }
     }
 
@@ -175,12 +93,21 @@ struct PermissionsSettingsView: View {
         }
     }
 
-    private func requestPermission(_ type: PermissionType) async {
-        let status = await permissionsManager.requestPermission(for: type)
-
-        if status == .denied {
-            requestAlertMessage = "Permission was denied. You can change this in System Settings."
-            showingRequestAlert = true
+    /// Unified action handler: requests permission programmatically if possible,
+    /// otherwise opens the relevant System Settings pane.
+    private func handlePermissionAction(_ permission: PermissionInfo) async {
+        if permission.type.canRequestProgrammatically && permission.status == .notDetermined {
+            let status = await permissionsManager.requestPermission(for: permission.type)
+            if status == .denied {
+                requestAlertMessage =
+                    "\(permission.type.rawValue) was denied. "
+                    + "You can change this in System Settings."
+                showingRequestAlert = true
+            }
+        } else {
+            // For denied, restricted, unknown, or non-requestable permissions:
+            // open System Settings to the correct pane
+            permissionsManager.openSettings(for: permission.type)
         }
     }
 }
@@ -189,15 +116,14 @@ struct PermissionsSettingsView: View {
 
 private struct PermissionRowView: View {
     let permission: PermissionInfo
-    let onRequest: () -> Void
-    let onOpenSettings: () -> Void
+    let onAction: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
-            // Status indicator
-            Image(systemName: permission.status.icon)
+            // Permission type icon
+            Image(systemName: permission.type.icon)
                 .font(.title3)
-                .foregroundStyle(statusColor)
+                .foregroundStyle(iconColor)
                 .frame(width: 24)
 
             // Permission info
@@ -224,23 +150,40 @@ private struct PermissionRowView: View {
                 .cornerRadius(4)
 
             // Action button
-            if permission.canRequest {
-                Button("Request") {
-                    onRequest()
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-            } else if permission.canOpenSettings {
-                Button {
-                    onOpenSettings()
-                } label: {
-                    Image(systemName: "gear")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-            }
+            actionButton
         }
         .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private var actionButton: some View {
+        if permission.canRequest {
+            // Permission can be requested programmatically
+            Button("Request") {
+                onAction()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+        } else if permission.status != .authorized && permission.status != .notAvailable {
+            // Open System Settings for this permission
+            Button {
+                onAction()
+            } label: {
+                Image(systemName: "arrow.up.forward.app")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .help("Open in System Settings")
+        }
+    }
+
+    private var iconColor: Color {
+        switch permission.status {
+        case .authorized: return .green
+        case .denied: return .red
+        case .restricted: return .orange
+        default: return .secondary
+        }
     }
 
     private var statusColor: Color {
@@ -252,95 +195,10 @@ private struct PermissionRowView: View {
         case .provisional: return .blue
         case .notDetermined: return .gray
         case .notAvailable: return .gray
+        case .unknown: return .gray
         }
     }
 }
-
-// MARK: - Permission Stat View
-
-private struct PermissionStatView: View {
-    let count: Int
-    let total: Int
-    let label: String
-    let color: Color
-
-    var body: some View {
-        VStack(spacing: 4) {
-            Text("\(count)")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundStyle(color)
-
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-// MARK: - Quick Actions Section (macOS specific)
-
-#if os(macOS)
-    struct MacPermissionsQuickActionsView: View {
-        @State private var permissionsManager = PermissionsManager.shared
-
-        var body: some View {
-            Section("Quick Actions") {
-                HStack(spacing: 12) {
-                    PermissionQuickActionButton(
-                        title: "Privacy Settings",
-                        icon: "hand.raised.fill"
-                    )                        {
-                            permissionsManager.openSystemSettings()
-                        }
-
-                    PermissionQuickActionButton(
-                        title: "Accessibility",
-                        icon: "accessibility"
-                    )                        {
-                            permissionsManager.openSettings(for: .accessibility)
-                        }
-
-                    PermissionQuickActionButton(
-                        title: "Full Disk Access",
-                        icon: "internaldrive"
-                    )                        {
-                            permissionsManager.openSettings(for: .fullDiskAccess)
-                        }
-
-                    PermissionQuickActionButton(
-                        title: "Screen Recording",
-                        icon: "rectangle.dashed.badge.record"
-                    )                        {
-                            permissionsManager.openSettings(for: .screenRecording)
-                        }
-                }
-            }
-        }
-    }
-
-    private struct PermissionQuickActionButton: View {
-        let title: String
-        let icon: String
-        let action: () -> Void
-
-        var body: some View {
-            Button(action: action) {
-                VStack(spacing: 8) {
-                    Image(systemName: icon)
-                        .font(.title2)
-                    Text(title)
-                        .font(.caption)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-            }
-            .buttonStyle(.bordered)
-        }
-    }
-#endif
 
 // MARK: - Preview
 
