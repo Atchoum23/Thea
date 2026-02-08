@@ -403,7 +403,7 @@ public enum AuditAction: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    public var severity: AuditSeverity {
+    public var severity: RemoteAuditSeverity {
         switch self {
         case .authenticationFailed, .connectionRejected, .permissionDenied,
              .rateLimitExceeded, .suspiciousActivity, .fileAccessBlocked,
