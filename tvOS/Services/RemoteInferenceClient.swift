@@ -57,6 +57,8 @@ struct DiscoveredInferenceServer: Identifiable, Equatable {
 
 @MainActor
 final class RemoteInferenceClient: ObservableObject {
+    static let shared = RemoteInferenceClient()
+
     // MARK: - Published State
 
     @Published var connectionState: InferenceConnectionState = .disconnected

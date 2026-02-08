@@ -465,6 +465,7 @@ targets:
           - "**/Intelligence/Subagents/**"
           # Settings views with missing dependencies
           - "**/Settings/OrchestratorSettingsView.swift"
+          - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"

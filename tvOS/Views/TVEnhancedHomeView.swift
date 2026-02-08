@@ -6,6 +6,7 @@ import SwiftUI
 struct TVEnhancedHomeView: View {
     @State private var selectedTab: TVTab = .dashboard
     @StateObject private var healthService = HealthMonitorService.shared
+    @StateObject private var inferenceClient = RemoteInferenceClient()
 
     enum TVTab: String, CaseIterable {
         case dashboard = "Dashboard"
@@ -46,13 +47,13 @@ struct TVEnhancedHomeView: View {
         case .dashboard:
             TVDashboardView()
         case .chat:
-            TVEnhancedChatView()
+            TVEnhancedChatView(inferenceClient: inferenceClient)
         case .streaming:
             TVStreamingView()
         case .media:
             TVMediaAutomationView()
         case .settings:
-            TVEnhancedSettingsView()
+            TVEnhancedSettingsView(inferenceClient: inferenceClient)
         }
     }
 
