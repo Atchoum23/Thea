@@ -60,7 +60,7 @@ public class AssetInventoryService: ObservableObject {
             let hw = parseHardwareProfile(hardwareData)
             let storage = parseStorageDevices(storageData)
             let displays = parseDisplayDevices(displayData)
-            let network = parseNetworkInterfaces(networkData)
+            let network = parseAssetNetworkInterfaces(networkData)
             let memoryDetails = parseMemoryDetails(memoryData)
             let battery = parseBatteryInfo(powerData)
 
@@ -260,7 +260,7 @@ public class AssetInventoryService: ObservableObject {
             return displays
         }
 
-        private func parseNetworkInterfaces(_ json: [String: Any]) -> [NetworkInterface] {
+        private func parseAssetNetworkInterfaces(_ json: [String: Any]) -> [AssetNetworkInterface] {
             guard let items = json["SPNetworkDataType"] as? [[String: Any]] else { return [] }
 
             return items.compactMap { item in
@@ -269,7 +269,7 @@ public class AssetInventoryService: ObservableObject {
                 let ipv4 = (item["IPv4"] as? [String: Any])?["Addresses"] as? [String]
                 let macAddress = item["Ethernet"] as? [String: Any]
 
-                return NetworkInterface(
+                return AssetNetworkInterface(
                     name: name,
                     interfaceName: interface,
                     ipAddress: ipv4?.first,
