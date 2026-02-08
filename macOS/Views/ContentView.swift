@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var selectedProject: Project?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var welcomeInputText = ""
+    @State private var isListeningForVoice = false
     @State private var showingNewProjectDialog = false
     @State private var newProjectTitle = ""
 
@@ -96,19 +97,26 @@ struct ContentView: View {
                 // Input bar always visible even on welcome screen
                 ChatInputView(
                     text: $welcomeInputText,
-                    isStreaming: false
-                ) {
-                    guard !welcomeInputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                    let prompt = welcomeInputText.trimmingCharacters(in: .whitespacesAndNewlines)
-                    welcomeInputText = ""
-                    let conversation = chatManager.createConversation(title: "New Conversation")
-                    selectedConversation = conversation
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        Task {
-                            try? await chatManager.sendMessage(prompt, in: conversation)
+                    isStreaming: false,
+                    onSend: {
+                        guard !welcomeInputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        else { return }
+                        let prompt = welcomeInputText.trimmingCharacters(in: .whitespacesAndNewlines)
+                        welcomeInputText = ""
+                        let conversation = chatManager.createConversation(title: "New Conversation")
+                        selectedConversation = conversation
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            Task {
+                                try? await chatManager.sendMessage(prompt, in: conversation)
+                            }
                         }
-                    }
-                }
+                    },
+                    onVoiceToggle: {
+                        isListeningForVoice.toggle()
+                        handleVoiceInput()
+                    },
+                    isListening: isListeningForVoice
+                )
             }
         }
     }
@@ -198,6 +206,18 @@ struct ContentView: View {
         let title = newProjectTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         let project = projectManager.createProject(title: title.isEmpty ? "New Project" : title)
         selectedProject = project
+    }
+
+    private func handleVoiceInput() {
+        if isListeningForVoice {
+            try? voiceManager.startVoiceCommand()
+            voiceManager.onTranscriptionComplete = { (transcription: String) in
+                welcomeInputText = transcription
+                isListeningForVoice = false
+            }
+        } else {
+            voiceManager.stopVoiceCommand()
+        }
     }
 
     // MARK: - Theme & Settings
