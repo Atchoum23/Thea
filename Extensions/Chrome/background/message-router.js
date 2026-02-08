@@ -37,6 +37,9 @@ import {
   handleAnalyzeContent
 } from './message-handlers.js';
 
+// Re-export for service-worker.js (which imports handleAutofillHideMyEmail from here)
+export { handleAutofillHideMyEmail };
+
 // ============================================================================
 // Main Message Handler
 // ============================================================================
