@@ -340,13 +340,13 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
           # Verification + Anticipatory: excluded as tightly-coupled subsystems.
           # All files in each folder depend on each other; must be enabled together.
           - "**/ResourceManagement/**"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
@@ -415,6 +415,7 @@ targets:
           # ============================================================
           - "**/Configuration/ConfigurationManager.swift"
           - "**/Components/ConfidenceIndicatorViews.swift"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/THEAThinkingView.swift"
@@ -465,7 +466,6 @@ targets:
           # Settings views with missing dependencies
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
@@ -629,6 +629,7 @@ targets:
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
           - "**/ResourceManagement/**"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
