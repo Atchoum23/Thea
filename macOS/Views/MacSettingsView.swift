@@ -87,6 +87,7 @@ struct MacSettingsView: View {
         case general = "General"
         case ai = "AI & Models"
         case voice = "Voice & Input"
+        case configuration = "Configuration"
         case permissions = "Permissions"
         case syncPrivacy = "Sync & Privacy"
         case advanced = "Advanced"
@@ -96,6 +97,7 @@ struct MacSettingsView: View {
             case .general: "gear"
             case .ai: "brain.head.profile"
             case .voice: "mic.fill"
+            case .configuration: "gearshape.2"
             case .permissions: "hand.raised.fill"
             case .syncPrivacy: "lock.icloud.fill"
             case .advanced: "slider.horizontal.3"
@@ -127,6 +129,8 @@ struct MacSettingsView: View {
             aiSettings
         case .voice:
             voiceSettings
+        case .configuration:
+            configurationSettings
         case .permissions:
             permissionsSettings
         case .syncPrivacy:
@@ -665,6 +669,70 @@ struct MacSettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
+    }
+
+    // MARK: - Configuration Settings
+
+    private var configurationSettings: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Text("Fine-tune THEA's subsystems")
+                        .font(.theaCaption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("AI Providers") {
+                    NavigationLink("API Endpoints & Timeouts") {
+                        ProviderConfigurationView()
+                    }
+
+                    NavigationLink("API Key Validation Models") {
+                        APIValidationConfigurationView()
+                    }
+
+                    NavigationLink("External APIs") {
+                        ExternalAPIsConfigurationView()
+                    }
+                }
+
+                Section("Intelligence") {
+                    NavigationLink("Memory Capacity & Decay") {
+                        MemoryConfigurationView()
+                    }
+
+                    NavigationLink("Agent Behavior & Limits") {
+                        AgentConfigurationView()
+                    }
+
+                    NavigationLink("Knowledge Scanner") {
+                        KnowledgeScannerConfigurationView()
+                    }
+
+                    NavigationLink("Code Intelligence") {
+                        CodeIntelligenceConfigurationView()
+                    }
+                }
+
+                Section("Appearance") {
+                    NavigationLink("Voice Recognition & Synthesis") {
+                        VoiceConfigurationView()
+                    }
+
+                    NavigationLink("Theme & Typography") {
+                        ThemeConfigurationView()
+                    }
+                }
+
+                Section {
+                    Button("Reset All Configuration to Defaults", role: .destructive) {
+                        AppConfiguration.shared.resetAllToDefaults()
+                    }
+                }
+            }
+            .formStyle(.grouped)
+            .padding()
+        }
     }
 
     // MARK: - Advanced Settings
