@@ -454,21 +454,25 @@ public final class StaticAnalysisVerifier {
             """
 
         do {
-            let message = ChatMessage(role: "user", text: prompt)
+            let message = AIMessage(
+                id: UUID(), conversationID: UUID(), role: .user,
+                content: .text(prompt),
+                timestamp: Date(), model: "openai/gpt-4o-mini"
+            )
 
             var responseText = ""
             let stream = try await provider.chat(
                 messages: [message],
                 model: "openai/gpt-4o-mini",
-                options: ChatOptions(stream: false)
+                stream: false
             )
 
             for try await chunk in stream {
-                switch chunk {
-                case let .content(text):
+                switch chunk.type {
+                case let .delta(text):
                     responseText += text
-                case .done:
-                    break
+                case let .complete(msg):
+                    responseText = msg.content.textValue
                 case .error:
                     break
                 }
