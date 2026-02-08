@@ -879,10 +879,6 @@ public final class SemanticSearchService: ObservableObject {
 
     private func getOpenAIKey() -> String? {
         // Try THEA-prefixed key first
-        if let key = SecureStorage.shared.theaAPIKey(for: .openai) {
-            return key
-        }
-        // Fallback to legacy key storage
         return try? SecureStorage.shared.loadAPIKey(for: "openai")
     }
 
@@ -909,28 +905,28 @@ public final class SemanticSearchService: ObservableObject {
 
 // MARK: - Search Result
 
-public struct SemanticSearchResult: Identifiable, Sendable {
-    public let id: UUID
-    public let messageID: UUID
-    public let conversationID: UUID
-    public let conversationTitle: String
-    public let messageContent: String
-    public let messageRole: MessageRole
-    public var score: Double
-    public var matchType: MatchType
-    public let highlightRanges: [Range<String.Index>]
+struct SemanticSearchResult: Identifiable, Sendable {
+    let id: UUID
+    let messageID: UUID
+    let conversationID: UUID
+    let conversationTitle: String
+    let messageContent: String
+    let messageRole: MessageRole
+    var score: Double
+    var matchType: MatchType
+    let highlightRanges: [Range<String.Index>]
 
-    public enum MatchType: Sendable {
+    enum MatchType: Sendable {
         case text
         case semantic
         case hybrid
     }
 
-    public var preview: String {
+    var preview: String {
         String(messageContent.prefix(200)) + (messageContent.count > 200 ? "..." : "")
     }
 
-    public init(
+    init(
         messageID: UUID,
         conversationID: UUID,
         conversationTitle: String,

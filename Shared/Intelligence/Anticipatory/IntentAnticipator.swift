@@ -150,7 +150,8 @@ public final class IntentAnticipator {
     private func predictFromContext(_ context: AmbientContext) -> [PredictedUserIntent] {
         var predictions: [PredictedUserIntent] = []
 
-        if context.isWorkHours {
+        let hour = Calendar.current.component(.hour, from: Date())
+        if (9...17).contains(hour) {
             predictions.append(PredictedUserIntent(
                 actionType: "work_task",
                 description: "Work-related activity expected",
@@ -158,7 +159,7 @@ public final class IntentAnticipator {
             ))
         }
 
-        if context.recentActivity.contains("code") {
+        if context.recentActivityTypes.contains("code") {
             predictions.append(PredictedUserIntent(
                 actionType: "code_action",
                 description: "Coding activity expected",
