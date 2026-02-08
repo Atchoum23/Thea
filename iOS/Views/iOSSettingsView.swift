@@ -2168,7 +2168,7 @@ private struct iOSPermissionRow: View {
         case .restricted: .orange
         case .limited: .yellow
         case .provisional: .blue
-        case .notDetermined, .notAvailable: .gray
+        case .notDetermined, .notAvailable, .unknown: .gray
         }
     }
 }
