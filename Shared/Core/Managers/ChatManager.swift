@@ -182,12 +182,20 @@ final class ChatManager: ObservableObject {
         let deviceContext = buildDeviceContextPrompt()
         var apiMessages: [AIMessage] = []
 
-        // Inject device context as system message at the start
+        // Build system prompt: user's custom prompt + device context
+        var systemPromptParts: [String] = []
+        if let customPrompt = conversation.metadata.systemPrompt, !customPrompt.isEmpty {
+            systemPromptParts.append(customPrompt)
+        }
+        systemPromptParts.append(deviceContext)
+        let fullSystemPrompt = systemPromptParts.joined(separator: "\n\n")
+
+        // Inject combined system message at the start
         apiMessages.append(AIMessage(
             id: UUID(),
             conversationID: conversation.id,
             role: .system,
-            content: .text(deviceContext),
+            content: .text(fullSystemPrompt),
             timestamp: Date.distantPast,
             model: model
         ))

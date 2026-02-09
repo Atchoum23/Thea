@@ -21,6 +21,8 @@ struct MacChatDetailView: View {
     @State private var isSearching = false
     @State private var searchText = ""
     @State private var searchMatchIndex = 0
+    @State private var showingSystemPrompt = false
+    @State private var systemPromptText = ""
     @FocusState private var isInputFocused: Bool
     @FocusState private var isSearchFocused: Bool
 
@@ -76,6 +78,59 @@ struct MacChatDetailView: View {
         }
         .keyboardShortcut("f", modifiers: .command)  // Note: handled via toolbar below
         .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    systemPromptText = conversation.metadata.systemPrompt ?? ""
+                    showingSystemPrompt.toggle()
+                } label: {
+                    Image(systemName: "text.bubble")
+                }
+                .help("Edit system prompt")
+                .popover(isPresented: $showingSystemPrompt, arrowEdge: .bottom) {
+                    VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+                        Text("System Prompt")
+                            .font(.theaSubhead)
+                            .fontWeight(.semibold)
+
+                        Text("Custom instructions for the AI in this conversation.")
+                            .font(.theaCaption1)
+                            .foregroundStyle(.secondary)
+
+                        TextEditor(text: $systemPromptText)
+                            .font(.theaBody)
+                            .frame(minHeight: 100, maxHeight: 200)
+                            .scrollContentBackground(.hidden)
+                            .padding(TheaSpacing.xs)
+                            .background(Color.theaSurface)
+                            .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.sm))
+
+                        HStack {
+                            Button("Clear") {
+                                systemPromptText = ""
+                                var metadata = conversation.metadata
+                                metadata.systemPrompt = nil
+                                conversation.metadata = metadata
+                                try? modelContext.save()
+                            }
+                            .foregroundStyle(.secondary)
+
+                            Spacer()
+
+                            Button("Save") {
+                                var metadata = conversation.metadata
+                                metadata.systemPrompt = systemPromptText.isEmpty ? nil : systemPromptText
+                                conversation.metadata = metadata
+                                try? modelContext.save()
+                                showingSystemPrompt = false
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+                    .padding(TheaSpacing.md)
+                    .frame(width: 350)
+                }
+            }
+
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     isSearching.toggle()
