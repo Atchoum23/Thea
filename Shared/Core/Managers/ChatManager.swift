@@ -134,6 +134,28 @@ final class ChatManager: ObservableObject {
             throw ChatError.noModelContext
         }
 
+        // Check if offline — queue the message for later if no network
+        if !OfflineQueueService.shared.isOnline {
+            debugLog("📴 Offline — queuing message for later")
+            let nextIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
+            let currentDevice = DeviceRegistry.shared.currentDevice
+            let userMessage = Message(
+                conversationID: conversation.id,
+                role: .user,
+                content: .text(text),
+                orderIndex: nextIndex,
+                deviceID: currentDevice.id,
+                deviceName: currentDevice.name,
+                deviceType: currentDevice.type.rawValue
+            )
+            conversation.messages.append(userMessage)
+            context.insert(userMessage)
+            try context.save()
+            // Queue for retry when online
+            messageQueue.append((text: text, conversation: conversation))
+            return
+        }
+
         // Use the orchestrator system: classify task → route to optimal model
         debugLog("🔄 Selecting provider and model...")
         let (provider, model) = try await selectProviderAndModel(for: text)
