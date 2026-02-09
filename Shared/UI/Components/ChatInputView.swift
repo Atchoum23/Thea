@@ -147,6 +147,7 @@ struct ChatInputView: View {
                         handlePastedImage(imageData)
                     }
                 )
+                .frame(minHeight: 36, maxHeight: 200)
                 .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
                     handleDrop(providers: providers)
                     return true

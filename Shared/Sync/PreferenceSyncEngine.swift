@@ -375,7 +375,7 @@ public final class PreferenceSyncEngine: ObservableObject {
     // MARK: Private
 
     private let cloud = NSUbiquitousKeyValueStore.default
-    private let deviceProfile = DeviceProfile.current()
+    private lazy var deviceProfile = DeviceProfile.current()
     private var observers: Set<AnyCancellable> = []
     private let scopeOverridesKey = "com.thea.syncScopeOverrides"
     private let devicesKey = "com.thea.registeredDevices"
@@ -385,11 +385,14 @@ public final class PreferenceSyncEngine: ObservableObject {
 
     private init() {
         loadScopeOverrides()
-        checkCloudAvailability()
         observeCloudChanges()
 
-        // Defer device registration and initial cloud pull to avoid blocking view layout
+        // Defer ALL potentially blocking operations (iCloud checks, device registration,
+        // cloud sync) so the view can render immediately without beachballing.
+        // Even though this Task runs on @MainActor, it defers to the next run loop
+        // iteration, allowing SwiftUI to finish layout first.
         Task { [weak self] in
+            self?.checkCloudAvailability()
             self?.registerDevice()
             self?.cloud.synchronize()
         }

@@ -58,33 +58,33 @@ public class CloudKitService: ObservableObject {
         // Load initial sync state from SettingsManager
         syncEnabled = SettingsManager.shared.iCloudSyncEnabled
 
-        // Initialize CloudKit container safely — CKContainer(identifier:) can
-        // trigger an assertion if the container isn't in the entitlements/provisioning profile.
-        do {
-            let ckContainer = try Self.createContainer(identifier: containerIdentifier)
-            container = ckContainer
-            privateDatabase = ckContainer.privateCloudDatabase
-            sharedDatabase = ckContainer.sharedCloudDatabase
-            publicDatabase = ckContainer.publicCloudDatabase
-        } catch {
-            container = nil
-            privateDatabase = nil
-            sharedDatabase = nil
-            publicDatabase = nil
-            iCloudAvailable = false
-            syncStatus = .error("CloudKit container not configured")
-        }
-
-        // Load saved change tokens for delta sync
-        loadChangeTokens()
-
-        Task {
-            await checkiCloudStatus()
-            await setupSubscriptions()
-        }
-
-        // Observe settings changes
+        // Observe settings changes (lightweight, non-blocking)
         setupSettingsObserver()
+
+        // Defer all heavy CloudKit operations to avoid blocking view layout.
+        // Container creation, change token loading, and subscription setup
+        // all happen on the next run loop iteration.
+        Task { [weak self] in
+            guard let self else { return }
+
+            // Initialize CloudKit container safely
+            do {
+                let ckContainer = try Self.createContainer(identifier: self.containerIdentifier)
+                self.container = ckContainer
+                self.privateDatabase = ckContainer.privateCloudDatabase
+                self.sharedDatabase = ckContainer.sharedCloudDatabase
+                self.publicDatabase = ckContainer.publicCloudDatabase
+            } catch {
+                self.iCloudAvailable = false
+                self.syncStatus = .error("CloudKit container not configured")
+            }
+
+            // Load saved change tokens for delta sync
+            self.loadChangeTokens()
+
+            await self.checkiCloudStatus()
+            await self.setupSubscriptions()
+        }
     }
 
     /// Create a CKContainer, catching any assertion failures from misconfigured entitlements.

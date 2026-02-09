@@ -229,6 +229,12 @@ struct TheamacOSApp: App {
             }
         }
 
+        // Pre-initialize sync singletons so Settings > Sync doesn't beachball.
+        // Their inits now defer heavy work to Tasks, so this is non-blocking.
+        _ = CloudKitService.shared
+        _ = PreferenceSyncEngine.shared
+        _ = AppUpdateService.shared
+
         // Existing managers
         ChatManager.shared.setModelContext(context)
         ProjectManager.shared.setModelContext(context)
