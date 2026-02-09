@@ -897,18 +897,16 @@ public extension Notification.Name {
 public extension UNUserNotificationCenter {
     /// Register notification categories for cross-device notifications
     func registerTheaCrossDeviceCategories() {
-        var categories = Set<UNNotificationCategory>()
-
-        for category in CrossDeviceNotificationCategory.allCases {
-            let actions = actionsForCategory(category)
-            let unCategory = UNNotificationCategory(
-                identifier: category.identifier,
-                actions: actions,
-                intentIdentifiers: [],
-                options: optionsForCategory(category)
-            )
-            categories.insert(unCategory)
-        }
+        let categories: Set<UNNotificationCategory> = Set(
+            CrossDeviceNotificationCategory.allCases.map { category in
+                UNNotificationCategory(
+                    identifier: category.identifier,
+                    actions: actionsForCategory(category),
+                    intentIdentifiers: [],
+                    options: optionsForCategory(category)
+                )
+            }
+        )
 
         // Merge with existing categories
         getNotificationCategories { existingCategories in

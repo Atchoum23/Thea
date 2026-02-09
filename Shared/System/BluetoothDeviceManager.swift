@@ -385,7 +385,6 @@ public final class BluetoothDeviceManager {
         }
 
         private func getMacOSDeviceName(_ deviceID: AudioDeviceID) -> String {
-            var name: CFString = "" as CFString
             var propertySize = UInt32(MemoryLayout<CFString>.size)
             var address = AudioObjectPropertyAddress(
                 mSelector: kAudioDevicePropertyDeviceNameCFString,
@@ -393,15 +392,19 @@ public final class BluetoothDeviceManager {
                 mElement: kAudioObjectPropertyElementMain
             )
 
-            AudioObjectGetPropertyData(
-                deviceID,
-                &address,
-                0, nil,
-                &propertySize,
-                &name
-            )
+            var nameUnmanaged: Unmanaged<CFString>?
+            withUnsafeMutablePointer(to: &nameUnmanaged) { ptr in
+                propertySize = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+                AudioObjectGetPropertyData(
+                    deviceID,
+                    &address,
+                    0, nil,
+                    &propertySize,
+                    ptr
+                )
+            }
 
-            return name as String
+            return (nameUnmanaged?.takeUnretainedValue() as String?) ?? "Unknown"
         }
 
         private func getMacOSTransportType(_ deviceID: AudioDeviceID) -> UInt32 {
