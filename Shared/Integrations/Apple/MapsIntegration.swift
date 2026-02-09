@@ -623,7 +623,11 @@ public actor MapsIntegration {
         let mapItem = MKMapItem(placemark: placemark)
         mapItem.name = location.name
         if #available(macOS 14.0, iOS 17.0, *) {
-            return mapItem.openInMaps(launchOptions: nil)
+            #if os(macOS)
+                return await mapItem.openInMaps(launchOptions: nil)
+            #else
+                return mapItem.openInMaps(launchOptions: nil)
+            #endif
         } else {
             return await MainActor.run {
                 mapItem.openInMaps(launchOptions: nil)
@@ -670,7 +674,11 @@ public actor MapsIntegration {
         ]
 
         if #available(macOS 14.0, iOS 17.0, *) {
-            return MKMapItem.openMaps(with: mapItems, launchOptions: launchOptions)
+            #if os(macOS)
+                return await MKMapItem.openMaps(with: mapItems, launchOptions: launchOptions)
+            #else
+                return MKMapItem.openMaps(with: mapItems, launchOptions: launchOptions)
+            #endif
         } else {
             return await MainActor.run {
                 MKMapItem.openMaps(with: mapItems, launchOptions: launchOptions)
