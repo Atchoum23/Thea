@@ -417,7 +417,13 @@ public final class AdaptiveUIEngine: ObservableObject {
         let screenSize = NSScreen.main?.frame.size ?? CGSize(width: 1920, height: 1080)
         #elseif os(iOS)
         let deviceType: UIContext.DeviceType = UIDevice.current.userInterfaceIdiom == .pad ? .iPad : .iPhone
-        let screenSize = UIScreen.main.bounds.size
+        let screenSize: CGSize = {
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            if let windowScene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first {
+                return windowScene.screen.bounds.size
+            }
+            return CGSize(width: 390, height: 844) // Reasonable iPhone default
+        }()
         #elseif os(watchOS)
         let deviceType: UIContext.DeviceType = .watch
         let screenSize = CGSize(width: 184, height: 224)
