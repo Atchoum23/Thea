@@ -346,6 +346,7 @@ targets:
           # Verification + Anticipatory: excluded as tightly-coupled subsystems.
           # All files in each folder depend on each other; must be enabled together.
           - "**/ResourceManagement/**"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
@@ -420,7 +421,6 @@ targets:
           - "**/Components/QuerySuggestionOverlay.swift"
           - "**/Components/MemoryContextView.swift"
           - "**/Components/StreamingTextView.swift"
-          - "**/Components/MentionAutocomplete.swift"
           - "**/Views/PhaseProgressView.swift"
           - "**/Views/SelfExecutionView.swift"
           - "**/Views/DeviceSwitcherView.swift"
@@ -625,6 +625,7 @@ targets:
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
           - "**/ResourceManagement/**"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
@@ -722,7 +723,6 @@ targets:
           - "**/Launcher/QuickLauncher.swift"
           - "**/Memory/MemoryAugmentedChat.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
-          - "**/Components/MentionAutocomplete.swift"
           - "**/Anticipatory/InterventionScheduler.swift"
           - "**/Views/KeyboardShortcutsHelpView.swift"
           - "**/Anticipatory/AnticipatoryIntelligenceCore.swift"

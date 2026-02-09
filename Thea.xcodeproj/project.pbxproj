@@ -334,6 +334,7 @@
 		46C546CF4FDBB2D98F1EAED1 /* ModelSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED750FD427E77BFE04F76D0 /* ModelSettingsView.swift */; };
 		470A24FE95C664E4AFC57554 /* AnnotationOverlayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319A195F298A8425CEB3FC43 /* AnnotationOverlayService.swift */; };
 		4724E5F883A98247D3F8A828 /* CodeIntelligenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CCBC9AE92AB2A7D38E15728 /* CodeIntelligenceManager.swift */; };
+		474021DEAA1E65ED676C23E3 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 486BC32B716867D5ADB20B23 /* background.js */; };
 		4765218564DDFAE10642188A /* ContinuityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448A78CF8B99616DFED708D5 /* ContinuityService.swift */; };
 		4784D4479DC0BAB6CA98F7CA /* icon.json in Resources */ = {isa = PBXBuildFile; fileRef = 888DEF38D59F024A9E21B35C /* icon.json */; };
 		478F902A4914293FA97C6C3B /* ResourceDiscoveryEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF84AB734B7E8CD378E9E23 /* ResourceDiscoveryEngine.swift */; };
@@ -644,6 +645,7 @@
 		8AD098C1F176D9FC181D427B /* AgentSecKillSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30C4EA8445522942279912B /* AgentSecKillSwitch.swift */; };
 		8AF3D530BA6A31CB3C970C09 /* BranchNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FFA2724F57F9B3A5C5502A6 /* BranchNavigator.swift */; };
 		8B1AD3C52C306E10D19312B1 /* OrchestrationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCDFC2E314AF65AA1419EA43 /* OrchestrationTypes.swift */; };
+		8C1038AB6562C5797489C793 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 486BC32B716867D5ADB20B23 /* background.js */; };
 		8C4328245AB3B5F7742CC5A4 /* blocking-rules.json in Resources */ = {isa = PBXBuildFile; fileRef = E7AB1E478B64D738B19D2451 /* blocking-rules.json */; };
 		8C6DC708F7BE9DAA52639BA8 /* CoworkContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2462375E2C0637F6F13B2C /* CoworkContext.swift */; };
 		8C71E14032CC47504921AE29 /* HandoffService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7279FAB1D028DD8804694B21 /* HandoffService.swift */; };
@@ -1510,6 +1512,7 @@
 		47A07DB3FD30E3BF63305DC7 /* CodebaseSearchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodebaseSearchEngine.swift; sourceTree = "<group>"; };
 		47D519C71250884B37AAB18A /* MigrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationView.swift; sourceTree = "<group>"; };
 		47FA930F3546CC4B8C104497 /* content-styles.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = "content-styles.css"; sourceTree = "<group>"; };
+		486BC32B716867D5ADB20B23 /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
 		488B76EE2B406764414650DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4923E812F3E20D70C880215A /* Thea-tvOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Thea-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AB52A8EEE4C9B4152809DC0 /* DraftSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftSyncManager.swift; sourceTree = "<group>"; };
@@ -4719,6 +4722,7 @@
 			isa = PBXGroup;
 			children = (
 				2F8BD919B5D8B320CB2CCA8C /* ad-block-handler.js */,
+				486BC32B716867D5ADB20B23 /* background.js */,
 				131452B38E17871B1E964B1D /* dark-mode-handler.js */,
 				B6E6800154BD7400FB4EDF50 /* memory-handler.js */,
 				3397357642CFBAC664B73ED5 /* message-router.js */,
@@ -5342,6 +5346,7 @@
 				F71AD1B2B4928CD70A123580 /* ai-sidebar.css in Resources */,
 				54F95B1D71D53F5A3287062C /* ai-sidebar.js in Resources */,
 				FD6C766236484C795EDB4869 /* background.js in Resources */,
+				8C1038AB6562C5797489C793 /* background.js in Resources */,
 				E07338613283928BF24B9460 /* blocking-rules.json in Resources */,
 				3BD696515862E78CF57BA3C8 /* content-core.js in Resources */,
 				3ADC6FA6E0EF35FC8CB06A4D /* content-styles.css in Resources */,
@@ -5436,6 +5441,7 @@
 				42B2B3D4726D41B7CC14D218 /* ai-sidebar.css in Resources */,
 				B2DBE28E04DEC0C52A560D70 /* ai-sidebar.js in Resources */,
 				BD5751B6F60B175AD82BDDC9 /* background.js in Resources */,
+				474021DEAA1E65ED676C23E3 /* background.js in Resources */,
 				8C4328245AB3B5F7742CC5A4 /* blocking-rules.json in Resources */,
 				1337B9308725F73B3C479657 /* content-core.js in Resources */,
 				20BD79E3D48F02CF1AC0B444 /* content-styles.css in Resources */,
