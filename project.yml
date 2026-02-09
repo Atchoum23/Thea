@@ -850,6 +850,7 @@ targets:
         excludes:
           - "**/TVFeatures/**"
       - path: Shared/Resources/Assets.xcassets
+      - path: Shared/InferenceRelay
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.tvos
