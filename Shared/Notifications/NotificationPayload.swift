@@ -247,13 +247,9 @@ public enum CrossDeviceType: String, Codable, Sendable, CaseIterable {
     }
 
     /// Current device type based on platform
-    @MainActor
     public static var current: CrossDeviceType {
         #if os(iOS)
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                return .iPad
-            }
-            return .iPhone
+            return _currentIOS
         #elseif os(macOS)
             return .mac
         #elseif os(watchOS)
@@ -266,6 +262,16 @@ public enum CrossDeviceType: String, Codable, Sendable, CaseIterable {
             return .mac
         #endif
     }
+
+    #if os(iOS)
+    @MainActor
+    private static var _currentIOS: CrossDeviceType {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return .iPad
+        }
+        return .iPhone
+    }
+    #endif
 }
 
 // MARK: - Cross-Device Registration
