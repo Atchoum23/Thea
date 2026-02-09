@@ -581,8 +581,6 @@ public actor CrossDeviceNotificationService {
 
         #if os(iOS)
             await MainActor.run {
-                let generator: UIFeedbackGenerator
-
                 switch haptic {
                 case .none:
                     return
