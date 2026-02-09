@@ -5,29 +5,8 @@ import os.log
 
 private let chatLogger = Logger(subsystem: "ai.thea.app", category: "ChatManager")
 
-// File-based logging for debugging (writes to ~/Desktop/thea_debug.log on macOS)
 private func debugLog(_ message: String) {
-    #if os(macOS)
-    let logFile = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Desktop/thea_debug.log")
-    let timestamp = ISO8601DateFormatter().string(from: Date())
-    let line = "[\(timestamp)] [ChatManager] \(message)\n"
-
-    if let data = line.data(using: .utf8) {
-        if FileManager.default.fileExists(atPath: logFile.path) {
-            if let handle = try? FileHandle(forUpdating: logFile) {
-                _ = try? handle.seekToEnd()
-                _ = try? handle.write(contentsOf: data)
-                try? handle.close()
-            }
-        } else {
-            try? data.write(to: logFile)
-        }
-    }
-    #else
-    // On iOS/watchOS/tvOS, use os.log
     chatLogger.debug("\(message)")
-    #endif
 }
 
 @MainActor
