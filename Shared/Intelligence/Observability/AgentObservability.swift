@@ -752,7 +752,7 @@ public final class ObservabilityManager: ObservableObject {
 
         do {
             let data = try Data(contentsOf: storageURL)
-            let state = try JSONDecoder().decode(ObservabilityState.self, from: data)
+            _ = try JSONDecoder().decode(ObservabilityState.self, from: data)
             // Restore daily usage for current month
             logger.info("Loaded observability state")
         } catch {
