@@ -183,50 +183,25 @@ struct TheamacOSApp: App {
     private func setupManagers(container: ModelContainer) {
         let context = container.mainContext
 
-        // Debug: Write to file to verify this code is running
-        let debugPath = FileManager.default.temporaryDirectory.appendingPathComponent("thea_startup.log")
-        let timestamp = ISO8601DateFormatter().string(from: Date())
-        try? "[\(timestamp)] setupManagers called\n".write(to: debugPath, atomically: true, encoding: .utf8)
+        logger.info("setupManagers called")
 
         // SKIP heavy initialization when running tests to prevent memory issues and timeouts
         guard !isUITesting && !isUnitTesting else {
             let mode = isUITesting ? "UI testing" : "unit testing"
-            let logMsg = "[\(ISO8601DateFormatter().string(from: Date()))] Skipping MLX/model initialization (\(mode) mode)\n"
-            if let handle = try? FileHandle(forWritingTo: debugPath) {
-                handle.seekToEndOfFile()
-                handle.write(logMsg.data(using: .utf8)!)
-                handle.closeFile()
-            }
+            logger.info("Skipping MLX/model initialization (\(mode, privacy: .public) mode)")
             return
         }
 
         // PRIORITY: Initialize local model discovery FIRST (no Keychain required)
-        // This ensures local models are available even if user hasn't approved Keychain access
         Task {
-            // Give the UI a moment to appear before starting discovery
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 
-            // Start local model discovery immediately (no Keychain needed)
             _ = LocalModelManager.shared
             _ = MLXModelManager.shared
+            logger.info("Local model managers initialized")
 
-            let logMsg1 = "[\(ISO8601DateFormatter().string(from: Date()))] Local model managers initialized\n"
-            if let handle = try? FileHandle(forWritingTo: debugPath) {
-                handle.seekToEndOfFile()
-                handle.write(logMsg1.data(using: .utf8)!)
-                handle.closeFile()
-            }
-
-            // Then initialize ProviderRegistry (which may trigger Keychain prompt)
-            // Doing this in a Task allows the UI to remain responsive
             _ = ProviderRegistry.shared
-
-            let logMsg2 = "[\(ISO8601DateFormatter().string(from: Date()))] ProviderRegistry initialized\n"
-            if let handle = try? FileHandle(forWritingTo: debugPath) {
-                handle.seekToEndOfFile()
-                handle.write(logMsg2.data(using: .utf8)!)
-                handle.closeFile()
-            }
+            logger.info("ProviderRegistry initialized")
         }
 
         // Pre-initialize sync singletons so Settings > Sync doesn't beachball.
@@ -273,94 +248,37 @@ struct TheamacOSApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    private let logFile = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Desktop/thea_debug.log")
-
-    private func log(_ message: String) {
-        let timestamp = ISO8601DateFormatter().string(from: Date())
-        let line = "[\(timestamp)] \(message)\n"
-
-        // Always append to file - use Data append for reliability
-        do {
-            let data = line.data(using: .utf8)!
-            if FileManager.default.fileExists(atPath: logFile.path) {
-                let handle = try FileHandle(forUpdating: logFile)
-                try handle.seekToEnd()
-                try handle.write(contentsOf: data)
-                try handle.close()
-            } else {
-                try data.write(to: logFile)
-            }
-        } catch {
-            // Fallback: print to stderr which shows in Xcode console
-            fputs("LOG WRITE ERROR: \(error) - \(line)", stderr)
-        }
-
-        // Also send to unified log (view with: log stream --predicate 'subsystem == "ai.thea.app"')
-        logger.notice("\(message, privacy: .public)")
-    }
-
     func applicationDidFinishLaunching(_: Notification) {
-        log("🚀 applicationDidFinishLaunching called")
+        logger.info("applicationDidFinishLaunching")
 
-        // Register for remote notifications (CloudKit subscriptions)
         NSApplication.shared.registerForRemoteNotifications()
         AppUpdateService.registerNotificationCategory()
-        log("📡 Registered for remote notifications and update category")
 
-        // Initialize AppUpdateService (triggers subscription setup + initial check)
         _ = AppUpdateService.shared
-
-        // Enable native macOS window tabbing (View > Show Tab Bar, Cmd+T)
         NSWindow.allowsAutomaticWindowTabbing = true
 
-        // SKIP heavy initialization when running tests to prevent memory issues and timeouts
         guard !isUITesting && !isUnitTesting else {
-            log("⚡ Testing mode - skipping MLX/model initialization")
+            logger.info("Testing mode - skipping MLX/model initialization")
             return
         }
 
-        // Initialize local model managers immediately (no Keychain needed)
         Task { @MainActor in
-            self.log("📦 Starting local model discovery...")
-
-            // Trigger LocalModelManager initialization and wait for discovery to complete
             await LocalModelManager.shared.waitForDiscovery()
-
             let localCount = LocalModelManager.shared.availableModels.count
-            self.log("✅ LocalModelManager: \(localCount) models discovered")
+            logger.info("LocalModelManager: \(localCount) models discovered")
 
-            // Trigger MLXModelManager initialization and wait for scan
             await MLXModelManager.shared.waitForScan()
-
             let mlxCount = MLXModelManager.shared.scannedModels.count
-            self.log("✅ MLXModelManager: \(mlxCount) models scanned")
+            logger.info("MLXModelManager: \(mlxCount) models scanned")
 
-            // Log the actual model names
-            for model in LocalModelManager.shared.availableModels {
-                self.log("  📂 Local model: \(model.name)")
-            }
-
-            // Initialize ProviderRegistry and register local models
-            self.log("🔌 Initializing ProviderRegistry...")
             _ = ProviderRegistry.shared
-            // Give it time to register local models
-            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
 
-            let registeredLocalModels = ProviderRegistry.shared.getAvailableLocalModels()
-            self.log("📊 ProviderRegistry: \(registeredLocalModels.count) local models registered")
-
-            for modelName in registeredLocalModels.prefix(5) {
-                self.log("  ✅ Registered: \(modelName)")
-            }
-            if registeredLocalModels.count > 5 {
-                self.log("  ... and \(registeredLocalModels.count - 5) more")
-            }
-
-            self.log("🏁 Startup complete - ready to chat!")
+            let registeredCount = ProviderRegistry.shared.getAvailableLocalModels().count
+            logger.info("ProviderRegistry: \(registeredCount) local models registered")
+            logger.info("Startup complete")
         }
 
-        // Enable voice activation if configured
         if VoiceActivationManager.shared.isEnabled {
             Task {
                 try? await VoiceActivationManager.shared.requestPermissions()
@@ -373,18 +291,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func application(_: NSApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        log("📡 Registered for remote notifications: \(tokenString.prefix(12))...")
+        logger.info("Registered for remote notifications: \(tokenString.prefix(12), privacy: .private)")
     }
 
     func application(_: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        log("⚠️ Failed to register for remote notifications: \(error.localizedDescription)")
+        logger.warning("Failed to register for remote notifications: \(error.localizedDescription)")
     }
 
     func application(
         _: NSApplication,
         didReceiveRemoteNotification userInfo: [String: Any]
     ) {
-        log("📩 Received remote notification")
+        logger.info("Received remote notification")
 
         let anyHashableUserInfo: [AnyHashable: Any] = Dictionary(
             uniqueKeysWithValues: userInfo.map { ($0.key as AnyHashable, $0.value) }
