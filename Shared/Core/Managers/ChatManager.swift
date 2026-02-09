@@ -111,6 +111,20 @@ final class ChatManager: ObservableObject {
         try? modelContext?.save()
     }
 
+    func toggleArchive(_ conversation: Conversation) {
+        conversation.isArchived.toggle()
+        try? modelContext?.save()
+    }
+
+    func toggleRead(_ conversation: Conversation) {
+        if conversation.isRead {
+            conversation.markAsUnread()
+        } else {
+            conversation.markAsViewed()
+        }
+        try? modelContext?.save()
+    }
+
     // MARK: - Message Management
 
     func sendMessage(_ text: String, in conversation: Conversation) async throws {

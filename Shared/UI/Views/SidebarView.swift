@@ -119,12 +119,12 @@ struct SidebarView: View {
     }
 
     private var filteredConversations: [Conversation] {
-        // Only show conversations that have at least one message
-        let withMessages = conversations.filter { !$0.messages.isEmpty }
+        // Only show non-archived conversations that have at least one message
+        let active = conversations.filter { !$0.messages.isEmpty && !$0.isArchived }
         if searchText.isEmpty {
-            return withMessages
+            return active
         }
-        return withMessages.filter {
+        return active.filter {
             $0.title.localizedCaseInsensitiveContains(searchText)
         }
     }
@@ -141,6 +141,8 @@ struct ConversationRow: View {
     let conversation: Conversation
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @StateObject private var projectManager = ProjectManager.shared
+    @State private var isRenaming = false
+    @State private var renameText = ""
 
     var body: some View {
         HStack(spacing: TheaSpacing.sm) {
@@ -166,10 +168,18 @@ struct ConversationRow: View {
                     .font(.theaCaption2)
                     .foregroundStyle(.tertiary)
 
-                if conversation.isPinned {
-                    Image(systemName: "pin.fill")
-                        .font(.theaCaption2)
-                        .foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    if conversation.isPinned {
+                        Image(systemName: "pin.fill")
+                            .font(.theaCaption2)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if !conversation.isRead {
+                        Circle()
+                            .fill(Color.theaPrimaryDefault)
+                            .frame(width: 8, height: 8)
+                    }
                 }
 
                 // Show message count as a subtle badge
@@ -189,7 +199,29 @@ struct ConversationRow: View {
                 )
             }
 
+            Button {
+                renameText = conversation.title
+                isRenaming = true
+            } label: {
+                Label("Rename", systemImage: "pencil")
+            }
+
+            Button {
+                ChatManager.shared.toggleRead(conversation)
+            } label: {
+                Label(
+                    conversation.isRead ? "Mark as Unread" : "Mark as Read",
+                    systemImage: conversation.isRead ? "envelope.badge" : "envelope.open"
+                )
+            }
+
             Divider()
+
+            Button {
+                ChatManager.shared.toggleArchive(conversation)
+            } label: {
+                Label("Archive", systemImage: "archivebox")
+            }
 
             // Project/workspace operations
             if !projectManager.projects.isEmpty {
@@ -216,6 +248,13 @@ struct ConversationRow: View {
                 ChatManager.shared.deleteConversation(conversation)
             } label: {
                 Label("Delete", systemImage: "trash")
+            }
+        }
+        .alert("Rename Conversation", isPresented: $isRenaming) {
+            TextField("Title", text: $renameText)
+            Button("Cancel", role: .cancel) {}
+            Button("Rename") {
+                ChatManager.shared.updateConversationTitle(conversation, title: renameText)
             }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
