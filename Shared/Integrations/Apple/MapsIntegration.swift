@@ -871,7 +871,10 @@ public actor MapsIntegration {
     #endif
 
     #if canImport(MapKit)
-    private func formatAddress(from placemark: MKPlacemark) -> String {
+    private func formatAddress(from mapItem: MKMapItem) -> String {
+        // Use MKMapItem's placemark (CLPlacemark) properties for address formatting
+        // This avoids direct MKPlacemark usage deprecated in iOS 26
+        let placemark = mapItem.placemark as CLPlacemark
         var components: [String] = []
 
         if let thoroughfare = placemark.thoroughfare {

@@ -173,7 +173,6 @@ public final class UnifiedSuggestionCoordinator {
         }
 
         // Apply time sensitivity filtering
-        let now = Date()
         filtered = filtered.filter { suggestion in
             switch suggestion.timeSensitivity {
             case .immediate:
