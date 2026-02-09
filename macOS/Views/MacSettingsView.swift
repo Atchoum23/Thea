@@ -289,10 +289,20 @@ struct MacSettingsView: View {
             Section("Behavior") {
                 Toggle("Launch at Login", isOn: $settingsManager.launchAtLogin)
                 Toggle("Show in Menu Bar", isOn: $settingsManager.showInMenuBar)
-                Toggle("Enable Notifications", isOn: $settingsManager.notificationsEnabled)
                 Toggle("Auto-Scroll to Latest", isOn: $settingsManager.autoScrollToBottom)
                 Toggle("Show Sidebar on Launch", isOn: $settingsManager.showSidebarOnLaunch)
                 Toggle("Restore Last Session", isOn: $settingsManager.restoreLastSession)
+            }
+
+            Section("Notifications") {
+                Toggle("Enable Notifications", isOn: $settingsManager.notificationsEnabled)
+
+                if settingsManager.notificationsEnabled {
+                    Toggle("Notify When Response Complete", isOn: $settingsManager.notifyOnResponseComplete)
+                    Toggle("Notify When Attention Required", isOn: $settingsManager.notifyOnAttentionRequired)
+                    Toggle("Play Notification Sound", isOn: $settingsManager.playNotificationSound)
+                    Toggle("Show Dock Badge", isOn: $settingsManager.showDockBadge)
+                }
             }
         }
         .formStyle(.grouped)
@@ -317,6 +327,11 @@ struct MacSettingsView: View {
             }
 
             Section("Local Models") {
+                Toggle("Prefer Local Models", isOn: $settingsManager.preferLocalModels)
+                    .help("Prioritize local MLX/Ollama models over cloud providers when capable")
+
+                Toggle("Enable Ollama", isOn: $settingsManager.ollamaEnabled)
+
                 LabeledContent("Ollama URL") {
                     TextField("http://localhost:11434", text: $localModelConfig.ollamaBaseURL)
                         .textFieldStyle(.roundedBorder)
@@ -489,9 +504,29 @@ struct MacSettingsView: View {
                         value: $settingsManager.maxConcurrentTasks, in: 1 ... 10)
             }
 
+            Section("Execution") {
+                Toggle("Prevent Sleep During Execution", isOn: $settingsManager.preventSleepDuringExecution)
+                    .help("Keep your Mac awake during long-running AI tasks")
+
+                Toggle("Enable Semantic Search", isOn: $settingsManager.enableSemanticSearch)
+                    .help("Use embedding-based search across conversations")
+
+                LabeledContent("Default Export Format") {
+                    Picker("Format", selection: $settingsManager.defaultExportFormat) {
+                        Text("Markdown").tag("markdown")
+                        Text("JSON").tag("json")
+                        Text("Plain Text").tag("plaintext")
+                    }
+                    .labelsHidden()
+                    .frame(width: 200)
+                }
+            }
+
             Section("Development") {
                 Toggle("Enable Debug Mode", isOn: $settingsManager.debugMode)
                 Toggle("Show Performance Metrics", isOn: $settingsManager.showPerformanceMetrics)
+                Toggle("Beta Features", isOn: $settingsManager.betaFeaturesEnabled)
+                    .help("Enable experimental features that may be unstable")
             }
 
             Section("Cache") {
