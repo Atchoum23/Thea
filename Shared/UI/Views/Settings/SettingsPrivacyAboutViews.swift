@@ -97,12 +97,44 @@ struct DataExportDocument: FileDocument, @unchecked Sendable {
 // MARK: - About
 
 struct AboutView: View {
+    @State private var localModelCount = 0
+    @State private var apiKeyCount = 0
+
     var body: some View {
         Form {
-            Section("THEA") {
+            Section {
+                HStack {
+                    Spacer()
+                    VStack(spacing: TheaSpacing.sm) {
+                        TheaSpiralIconView(size: 48, isThinking: false, showGlow: true)
+                        Text("THEA")
+                            .font(.theaTitle1)
+                        Text("Omni-AI Life Companion")
+                            .font(.theaCaption1)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .listRowBackground(Color.clear)
+            }
+
+            Section("App Info") {
                 LabeledContent("Version", value: "\(AppConfiguration.AppInfo.version) (\(AppConfiguration.AppInfo.buildType))")
                 LabeledContent("Bundle ID", value: AppConfiguration.AppInfo.bundleIdentifier)
-                LabeledContent("Domain", value: AppConfiguration.AppInfo.domain)
+                #if os(macOS)
+                LabeledContent("Platform", value: "macOS \(ProcessInfo.processInfo.operatingSystemVersionString)")
+                LabeledContent("Architecture", value: machineArchitecture)
+                #endif
+            }
+
+            Section("System") {
+                #if os(macOS)
+                LabeledContent("Hostname", value: ProcessInfo.processInfo.hostName)
+                LabeledContent("Memory", value: formatBytes(Int64(ProcessInfo.processInfo.physicalMemory)))
+                LabeledContent("Processors", value: "\(ProcessInfo.processInfo.processorCount) cores")
+                #endif
+                LabeledContent("Local Models", value: "\(localModelCount)")
+                LabeledContent("API Keys Configured", value: "\(apiKeyCount)")
             }
 
             Section("Links") {
@@ -110,8 +142,40 @@ struct AboutView: View {
                 Link("Privacy Policy", destination: AppConfiguration.AppInfo.privacyPolicyURL)
                 Link("Terms of Service", destination: AppConfiguration.AppInfo.termsOfServiceURL)
             }
+
+            Section("Legal") {
+                Text("Built with Swift, SwiftUI, and SwiftData. Uses MLX for on-device inference.")
+                    .font(.theaCaption2)
+                    .foregroundStyle(.tertiary)
+                Text("© 2026 THEA. All rights reserved.")
+                    .font(.theaCaption2)
+                    .foregroundStyle(.tertiary)
+            }
         }
         .formStyle(.grouped)
+        .task {
+            localModelCount = ProviderRegistry.shared.getAvailableLocalModels().count
+            let providers = ["openai", "anthropic", "google", "perplexity", "groq", "openrouter"]
+            apiKeyCount = providers.filter { SettingsManager.shared.hasAPIKey(for: $0) }.count
+        }
+    }
+
+    #if os(macOS)
+    private var machineArchitecture: String {
+        #if arch(arm64)
+        "Apple Silicon (arm64)"
+        #elseif arch(x86_64)
+        "Intel (x86_64)"
+        #else
+        "Unknown"
+        #endif
+    }
+    #endif
+
+    private func formatBytes(_ bytes: Int64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .memory
+        return formatter.string(fromByteCount: bytes)
     }
 }
 
