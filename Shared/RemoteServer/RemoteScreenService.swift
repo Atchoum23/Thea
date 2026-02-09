@@ -247,7 +247,7 @@ public class RemoteScreenService: ObservableObject {
                 return .error("Display \(displayId) not found")
             }
 
-            let filter = SCContentFilter(display: display, excludingWindows: [])
+            _ = SCContentFilter(display: display, excludingWindows: [])
 
             let config = SCStreamConfiguration()
             config.width = Int(CGFloat(display.width) * CGFloat(scale))
