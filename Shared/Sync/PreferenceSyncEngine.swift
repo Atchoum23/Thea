@@ -23,6 +23,7 @@ public enum TheaDeviceClass: String, Codable, CaseIterable, Sendable {
     case appleWatch
 
     /// The class of the device we are currently running on.
+    @MainActor
     public static var current: TheaDeviceClass {
         #if os(macOS)
         .mac

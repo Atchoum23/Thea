@@ -438,8 +438,6 @@ public final class SafetyGuardrailsManager: ObservableObject {
 
     /// Classify an action
     public func classifyAction(_ action: String, context: [String: String] = [:]) -> ActionClassification {
-        let lowercased = action.lowercased()
-
         // Determine category
         let category = determineCategory(action)
 

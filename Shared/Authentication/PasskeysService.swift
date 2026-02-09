@@ -317,7 +317,7 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                     return UIWindow(windowScene: firstScene)
                 }
                 // Final fallback: create a plain UIWindow (auth will still work)
-                let fallbackWindow = UIWindow(frame: UIScreen.main.bounds)
+                let fallbackWindow = UIWindow(frame: .zero)
                 fallbackWindow.makeKeyAndVisible()
                 return fallbackWindow
             #elseif os(macOS)
@@ -475,7 +475,7 @@ public struct SignInWithAppleButton: View {
                 if let firstScene = scenes.first {
                     return UIWindow(windowScene: firstScene)
                 }
-                let fallbackWindow = UIWindow(frame: UIScreen.main.bounds)
+                let fallbackWindow = UIWindow(frame: .zero)
                 fallbackWindow.makeKeyAndVisible()
                 return fallbackWindow
             }
