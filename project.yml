@@ -1042,7 +1042,7 @@ targets:
     sources:
       - path: Extensions/SafariExtension
         excludes:
-          - "**/background/background.js"
+          - "**/background/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.safari
@@ -1073,7 +1073,7 @@ targets:
     sources:
       - path: Extensions/SafariExtension
         excludes:
-          - "**/background/background.js"
+          - "**/background/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.safari
