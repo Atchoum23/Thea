@@ -281,7 +281,7 @@ final class WakeWordEngine {
         try audioSession.setCategory(
             .playAndRecord,
             mode: .measurement,
-            options: [.allowBluetooth, .defaultToSpeaker, .mixWithOthers]
+            options: [.allowBluetoothHFP, .defaultToSpeaker, .mixWithOthers]
         )
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         #endif
@@ -289,9 +289,13 @@ final class WakeWordEngine {
 
     private func requestMicrophonePermission() async -> Bool {
         #if os(iOS) || os(watchOS) || os(tvOS)
-        return await withCheckedContinuation { continuation in
-            AVAudioSession.sharedInstance().requestRecordPermission { granted in
-                continuation.resume(returning: granted)
+        if #available(iOS 17.0, *) {
+            return await AVAudioApplication.requestRecordPermission()
+        } else {
+            return await withCheckedContinuation { continuation in
+                AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                    continuation.resume(returning: granted)
+                }
             }
         }
         #elseif os(macOS)
