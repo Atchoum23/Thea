@@ -73,7 +73,7 @@ struct ChatInputView: View {
                 // Attachment count badge
                 if !attachmentManager.attachments.isEmpty {
                     Text("\(attachmentManager.attachments.count) files")
-                        .font(.caption)
+                        .font(.theaCaption1)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Color.theaPrimary.opacity(0.2))
@@ -125,6 +125,7 @@ struct ChatInputView: View {
                 // Text input — Enter sends, Shift+Enter inserts newline
                 // Enabled during streaming to allow message queuing
                 TextField("Message Thea...", text: $text, axis: .vertical)
+                    .font(.theaBody)
                     .lineLimit(1 ... 8)
                     .focused($isFocused)
                     .onSubmit {
@@ -223,7 +224,7 @@ struct ChatInputView: View {
         let count = text.count
         let color: Color = count > 10_000 ? .red : (count > 5_000 ? .orange : .secondary)
         return Text("\(count)")
-            .font(.caption2.monospacedDigit())
+            .font(.theaCaption2)
             .foregroundStyle(color)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
@@ -306,7 +307,7 @@ struct ChatInputView: View {
                         attachmentManager.clearAllAttachments()
                     } label: {
                         Label("Clear All", systemImage: "xmark.circle.fill")
-                            .font(.caption)
+                            .font(.theaCaption1)
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
@@ -399,10 +400,10 @@ struct AttachmentChip: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 Text(attachment.name)
-                    .font(.caption)
+                    .font(.theaCaption1)
                     .lineLimit(1)
                 Text(attachment.formattedSize)
-                    .font(.caption2)
+                    .font(.theaCaption2)
                     .foregroundStyle(.secondary)
             }
 

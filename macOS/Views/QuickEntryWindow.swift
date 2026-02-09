@@ -151,13 +151,13 @@
                 HStack(spacing: 12) {
                     // Thea icon
                     Image(systemName: "brain.head.profile")
-                        .font(.system(size: 24))
+                        .font(.theaTitle2)
                         .foregroundStyle(Color.theaPrimaryDefault)
 
                     // Text field
                     TextField("Ask THEA anything...", text: $inputText)
                         .textFieldStyle(.plain)
-                        .font(.system(size: 16))
+                        .font(.theaBody)
                         .focused($isFocused)
                         .onSubmit {
                             submitIfNotEmpty()
@@ -168,7 +168,7 @@
                         captureScreenshot()
                     } label: {
                         Image(systemName: "camera.viewfinder")
-                            .font(.system(size: 16))
+                            .font(.theaBody)
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
@@ -179,7 +179,7 @@
                         submitIfNotEmpty()
                     } label: {
                         Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 24))
+                            .font(.theaTitle2)
                             .foregroundStyle(inputText.isEmpty ? .secondary : Color.theaPrimaryDefault)
                     }
                     .buttonStyle(.plain)
@@ -219,7 +219,7 @@
                     Text("•")
                     Text("⌥⌥ Toggle")
                 }
-                .font(.system(size: 10))
+                .font(.theaCaption2)
                 .foregroundStyle(.tertiary)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 8)

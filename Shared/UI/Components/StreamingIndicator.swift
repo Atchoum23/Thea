@@ -73,13 +73,13 @@ struct StreamingIndicatorView: View {
             HStack(spacing: 8) {
                 // Animated icon
                 Image(systemName: status.icon)
-                    .font(.system(size: 14))
+                    .font(.theaCallout)
                     .foregroundStyle(.secondary)
                     .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion && isActive)
 
                 // Status text with shimmer effect
                 Text(status.displayText)
-                    .font(.caption)
+                    .font(.theaCaption1)
                     .foregroundStyle(.secondary)
                     .overlay {
                         if !reduceMotion && isActive {
@@ -88,7 +88,7 @@ struct StreamingIndicatorView: View {
                     }
                     .mask {
                         Text(status.displayText)
-                            .font(.caption)
+                            .font(.theaCaption1)
                     }
             }
             .padding(.horizontal, 12)

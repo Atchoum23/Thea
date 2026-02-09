@@ -49,7 +49,7 @@ public struct PrivacyControlsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(type.displayName)
                                 Text(type.description)
-                                    .font(.caption)
+                                    .font(.theaCaption1)
                                     .foregroundStyle(.secondary)
                             }
                         } icon: {
@@ -160,7 +160,7 @@ private struct PermissionRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(permission.displayName)
                     Text(permission.description)
-                        .font(.caption)
+                        .font(.theaCaption1)
                         .foregroundStyle(.secondary)
                 }
             } icon: {
@@ -187,7 +187,7 @@ private struct PermissionRow: View {
         HStack(spacing: 4) {
             Image(systemName: status.icon)
             Text(status.displayName)
-                .font(.caption)
+                .font(.theaCaption1)
         }
         .foregroundStyle(statusColor)
     }
@@ -256,7 +256,7 @@ public struct ActivityStatsView: View {
                 if !stats.topApps.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Top Apps")
-                            .font(.headline)
+                            .font(.theaHeadline)
 
                         ForEach(stats.topApps, id: \.0) { app, duration in
                             HStack {
@@ -315,7 +315,7 @@ private struct PrivacyStatCard: View {
                 .fontWeight(.semibold)
 
             Text(title)
-                .font(.caption)
+                .font(.theaCaption1)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)

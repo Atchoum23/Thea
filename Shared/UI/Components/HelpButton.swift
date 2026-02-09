@@ -28,17 +28,17 @@ struct HelpButton: View {
         Button(action: { showingPopover.toggle() }) {
             Image(systemName: "info.circle")
                 .foregroundColor(.secondary)
-                .font(.caption)
+                .font(.theaCaption1)
         }
         .buttonStyle(.plain)
         .popover(isPresented: $showingPopover, arrowEdge: .trailing) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(title)
-                    .font(.headline)
+                    .font(.theaHeadline)
                     .foregroundColor(.primary)
 
                 Text(explanation)
-                    .font(.body)
+                    .font(.theaBody)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

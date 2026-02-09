@@ -19,7 +19,7 @@ import SwiftUI
                 // Header
                 HStack {
                     Text("Screenshot Captured")
-                        .font(.headline)
+                        .font(.theaHeadline)
 
                     Spacer()
 
@@ -41,7 +41,7 @@ import SwiftUI
                 // Image info
                 HStack {
                     Label("\(Int(image.size.width)) × \(Int(image.size.height))", systemImage: "photo")
-                        .font(.caption)
+                        .font(.theaCaption1)
                         .foregroundColor(.secondary)
 
                     Spacer()
@@ -50,7 +50,7 @@ import SwiftUI
                 // Annotation field
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Add context (optional)")
-                        .font(.caption)
+                        .font(.theaCaption1)
                         .foregroundColor(.secondary)
 
                     TextField("Describe what you'd like help with...", text: $annotation, axis: .vertical)

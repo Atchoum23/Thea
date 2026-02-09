@@ -43,7 +43,7 @@ public struct QuerySuggestionOverlay: View {
                     ProgressView()
                         .scaleEffect(0.7)
                     Text("Loading suggestions...")
-                        .font(.caption)
+                        .font(.theaCaption1)
                         .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, 12)
@@ -153,11 +153,11 @@ private struct SuggestionRow: View {
         Button(action: onTap) {
             HStack(spacing: 8) {
                 Image(systemName: suggestion.source.icon)
-                    .font(.caption)
+                    .font(.theaCaption1)
                     .foregroundColor(.secondary)
 
                 Text(suggestion.text)
-                    .font(.subheadline)
+                    .font(.theaSubhead)
                     .foregroundColor(.primary)
                     .lineLimit(2)
 
