@@ -131,7 +131,6 @@ struct ChatInputView: View {
 
                 // Text input
                 TextField("Message Thea...", text: $text, axis: .vertical)
-                    .textFieldStyle(.plain)
                     .lineLimit(1 ... 8)
                     .focused($isFocused)
                     .disabled(isStreaming)
@@ -141,10 +140,8 @@ struct ChatInputView: View {
                             onSend()
                         }
                     }
+                    .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: .infinity, minHeight: 36)
-                    .padding(.horizontal, TheaSpacing.lg)
-                    .padding(.vertical, TheaSpacing.sm)
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
                 #if os(macOS)
                 .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
                     handleDrop(providers: providers)
