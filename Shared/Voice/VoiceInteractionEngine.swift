@@ -347,7 +347,7 @@ final class VoiceInteractionEngine {
         // Wait for final transcription or timeout
         let result = try await withTimeout(seconds: timeout) { [weak self] in
             await withCheckedContinuation { continuation in
-                let observer = NotificationCenter.default.addObserver(
+                _ = NotificationCenter.default.addObserver(
                     forName: .voiceTranscriptionComplete,
                     object: nil,
                     queue: .main
@@ -355,11 +355,6 @@ final class VoiceInteractionEngine {
                     if let text = notification.userInfo?["text"] as? String {
                         continuation.resume(returning: text)
                     }
-                }
-
-                // Store observer for cleanup
-                Task { @MainActor [weak self] in
-                    // Will be cleaned up when stopListening is called
                 }
             }
         }
