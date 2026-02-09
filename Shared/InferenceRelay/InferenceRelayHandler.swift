@@ -20,7 +20,7 @@ private let logger = Logger(subsystem: "app.thea", category: "InferenceRelay")
 /// Processes inference requests from remote tvOS clients by routing through
 /// the macOS AI orchestrator and streaming responses back.
 @MainActor
-public final class InferenceRelayHandler { // swiftlint:disable:this redundant_sendable
+public final class InferenceRelayHandler {
     public static let shared = InferenceRelayHandler()
 
     private init() {}
