@@ -340,13 +340,13 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
           # Verification + Anticipatory: excluded as tightly-coupled subsystems.
           # All files in each folder depend on each other; must be enabled together.
           - "**/ResourceManagement/**"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
@@ -421,7 +421,6 @@ targets:
           - "**/Components/QuerySuggestionOverlay.swift"
           - "**/Components/MemoryContextView.swift"
           - "**/Components/StreamingTextView.swift"
-          - "**/Components/TheaTextInputField.swift"
           - "**/Views/PhaseProgressView.swift"
           - "**/Views/SelfExecutionView.swift"
           - "**/Views/DeviceSwitcherView.swift"
@@ -443,7 +442,6 @@ targets:
           - "**/Integrations/ShortcutsIntegration.swift"
           - "**/Integrations/MessagesIntegration.swift"
           - "**/Integrations/XcodeIntegration.swift"
-          - "**/Memory/LongTermMemoryManager.swift"
           - "**/Memory/ActiveMemoryRetrieval.swift"
           - "**/Memory/MemoryAugmentedChat.swift"
           - "**/MetaAI/ModelBenchmarkService.swift"
@@ -465,7 +463,6 @@ targets:
           # Settings views with missing dependencies
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
@@ -624,11 +621,11 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PermissionsSettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
           - "**/ResourceManagement/**"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
@@ -654,7 +651,6 @@ targets:
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/AgentMode/AgentEnhancements.swift"
           - "**/Integrations/IntegrationModule.swift"
-          - "**/Memory/LongTermMemoryManager.swift"
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
@@ -727,7 +723,6 @@ targets:
           - "**/Launcher/QuickLauncher.swift"
           - "**/Memory/MemoryAugmentedChat.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
-          - "**/Components/TheaTextInputField.swift"
           - "**/Anticipatory/InterventionScheduler.swift"
           - "**/Views/KeyboardShortcutsHelpView.swift"
           - "**/Anticipatory/AnticipatoryIntelligenceCore.swift"
@@ -1041,6 +1036,8 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Extensions/SafariExtension
+        excludes:
+          - "**/background/background.js"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.safari
@@ -1070,6 +1067,8 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Extensions/SafariExtension
+        excludes:
+          - "**/background/background.js"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.safari
