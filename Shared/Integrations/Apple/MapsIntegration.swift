@@ -407,8 +407,10 @@ public actor MapsIntegration {
     }
 
     /// Reverse geocode coordinates to an address
+    @available(iOS, deprecated: 26.0, message: "Migrate to MKReverseGeocodingRequest when minimum target is iOS 26")
     public func reverseGeocode(coordinate: TheaCoordinate) async throws -> TheaLocation? {
         #if canImport(CoreLocation)
+        let geocoder = CLGeocoder()
         let clLocation = CLLocation(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
