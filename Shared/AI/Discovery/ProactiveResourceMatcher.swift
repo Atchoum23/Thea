@@ -426,7 +426,7 @@ public final class ProactiveResourceMatcher: ObservableObject {
 
         // Pattern: URLs or API references
         let urlPattern = try? NSRegularExpression(pattern: "https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=]+", options: [])
-        if let range = urlPattern?.firstMatch(in: text, options: [], range: NSRange(text.startIndex..., in: text)) {
+        if urlPattern?.firstMatch(in: text, options: [], range: NSRange(text.startIndex..., in: text)) != nil {
             let webResources = discoveryEngine.findByCapability(.web)
             for resource in webResources.prefix(2) {
                 let match = ResourceMatch(
