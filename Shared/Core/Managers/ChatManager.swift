@@ -105,6 +105,42 @@ final class ChatManager: ObservableObject {
         try? modelContext?.save()
     }
 
+    // MARK: - Auto Title Generation
+
+    /// Generates a short title from the first user message when conversation still has the default title.
+    private func autoGenerateTitle(for conversation: Conversation) {
+        guard conversation.title == "New Conversation" else { return }
+
+        // Find the first user message
+        guard let firstUserMessage = conversation.messages
+            .sorted(by: { $0.orderIndex < $1.orderIndex })
+            .first(where: { $0.messageRole == .user })
+        else { return }
+
+        let text = firstUserMessage.content.textValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+
+        // Generate a concise title: take the first sentence or first ~50 chars
+        let title: String
+        let sentenceEnd = text.firstIndex { ".!?".contains($0) }
+        if let sentenceEnd, text.distance(from: text.startIndex, to: sentenceEnd) < 60 {
+            title = String(text[...sentenceEnd])
+        } else if text.count <= 50 {
+            title = text
+        } else {
+            // Truncate at word boundary
+            let truncated = String(text.prefix(50))
+            if let lastSpace = truncated.lastIndex(of: " ") {
+                title = String(truncated[..<lastSpace]) + "…"
+            } else {
+                title = truncated + "…"
+            }
+        }
+
+        conversation.title = title
+        debugLog("📝 Auto-generated title: '\(title)'")
+    }
+
     // MARK: - Message Management
 
     func sendMessage(_ text: String, in conversation: Conversation) async throws {
@@ -279,6 +315,10 @@ final class ChatManager: ObservableObject {
             }
 
             conversation.updatedAt = Date()
+
+            // Auto-generate title from first user message if still default
+            autoGenerateTitle(for: conversation)
+
             try context.save()
             debugLog("✅ Message saved successfully")
 

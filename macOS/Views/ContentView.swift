@@ -196,6 +196,16 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigation) {
                     Button {
+                        let conversation = chatManager.createConversation(title: "New Conversation")
+                        selectedConversation = conversation
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .help("New Conversation (⇧⌘N)")
+                }
+
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
                         withAnimation {
                             columnVisibility = columnVisibility == .detailOnly ? .all : .detailOnly
                         }
@@ -203,16 +213,6 @@ struct ContentView: View {
                         Image(systemName: columnVisibility == .detailOnly ? "sidebar.left" : "sidebar.right")
                     }
                     .help(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar")
-                }
-
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        let conversation = chatManager.createConversation(title: "New Conversation")
-                        selectedConversation = conversation
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    .help("New Conversation (⇧⌘N)")
                 }
             }
     }
