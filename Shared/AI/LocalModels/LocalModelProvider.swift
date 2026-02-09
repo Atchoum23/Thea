@@ -207,15 +207,23 @@ final class LocalModelManager {
 
     private func discoverMLXModels() async {
         #if os(macOS)
+            let home = FileManager.default.homeDirectoryForCurrentUser
+
+            // HuggingFace cache: check HF_HOME env, then standard default
+            let hfHome = ProcessInfo.processInfo.environment["HF_HOME"]
+                .map { URL(fileURLWithPath: $0) }
+                ?? home.appendingPathComponent(".cache/huggingface")
+
             // Check multiple locations for MLX models
+            // The scanner expects a "hub" subdirectory with HF Hub structure (models--org--name/snapshots/hash/)
             let mlxPaths = [
+                // Standard HuggingFace cache (contains hub/ with models--org--name/ dirs)
+                hfHome,
                 // SharedLLMs models-mlx (primary location with HuggingFace Hub structure)
-                FileManager.default.homeDirectoryForCurrentUser
-                    .appendingPathComponent(config.sharedLLMsDirectory)
+                home.appendingPathComponent(config.sharedLLMsDirectory)
                     .appendingPathComponent("models-mlx"),
                 // Legacy mlx-models directory
-                FileManager.default.homeDirectoryForCurrentUser
-                    .appendingPathComponent(config.mlxModelsDirectory)
+                home.appendingPathComponent(config.mlxModelsDirectory)
             ]
 
             print("🔍 Searching for MLX models in paths:")

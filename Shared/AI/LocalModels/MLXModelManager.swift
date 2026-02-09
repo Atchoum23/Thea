@@ -70,11 +70,25 @@ final class MLXModelManager {
         {
             modelDirectories = urls
         } else {
-            // Default to SharedLLMs directory if it exists
-            let defaultDir = getDefaultModelDirectory()
-            if FileManager.default.fileExists(atPath: defaultDir.path) {
-                modelDirectories = [defaultDir]
+            var defaults: [URL] = []
+
+            // Standard HuggingFace cache (where `huggingface-cli download` stores models)
+            let home = FileManager.default.homeDirectoryForCurrentUser
+            let hfHome = ProcessInfo.processInfo.environment["HF_HOME"]
+                .map { URL(fileURLWithPath: $0) }
+                ?? home.appendingPathComponent(".cache/huggingface")
+            let hfHub = hfHome.appendingPathComponent("hub")
+            if FileManager.default.fileExists(atPath: hfHub.path) {
+                defaults.append(hfHub)
             }
+
+            // SharedLLMs directory
+            let sharedDir = getDefaultModelDirectory()
+            if FileManager.default.fileExists(atPath: sharedDir.path) {
+                defaults.append(sharedDir)
+            }
+
+            modelDirectories = defaults
         }
     }
 
