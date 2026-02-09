@@ -78,17 +78,24 @@ public final class ModelRouter: ObservableObject {
         let selectedModel: AIModel
         let reason: String
 
-        if shouldExplore {
+        if shouldExplore, let random = candidates.randomElement() {
             // Exploration: try a random candidate
-            selectedModel = candidates.randomElement()!
+            selectedModel = random
             reason = "Exploration: trying alternative model"
             logger.debug("Exploration: selected \(selectedModel.id)")
         } else {
             // Exploitation: use best performing model
             let scored = scoreModels(candidates, for: classification.taskType, context: context)
-            selectedModel = scored.first!.model
-            reason = "Best score: \(String(format: "%.2f", scored.first!.score))"
-            logger.debug("Exploitation: selected \(selectedModel.id) with score \(scored.first!.score)")
+            if let best = scored.first {
+                selectedModel = best.model
+                reason = "Best score: \(String(format: "%.2f", best.score))"
+                logger.debug("Exploitation: selected \(selectedModel.id) with score \(best.score)")
+            } else {
+                // Fallback to first candidate if scoring returns empty
+                selectedModel = candidates[0]
+                reason = "Fallback: scoring returned no results"
+                logger.warning("scoreModels returned empty, falling back to first candidate")
+            }
         }
 
         let duration = Date().timeIntervalSince(startTime)

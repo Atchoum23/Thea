@@ -333,10 +333,21 @@ public final class SmartModelRouter: ObservableObject {
 
         guard !candidates.isEmpty else {
             // Fallback to cheapest available
-            let cheapest = availableModels.min { $0.costPerInputToken < $1.costPerInputToken }
+            guard let fallbackModel = availableModels.min(by: { $0.costPerInputToken < $1.costPerInputToken }) ?? availableModels.first else {
+                // No models at all — return a placeholder decision
+                return SmartRoutingDecision(
+                    taskType: complexity,
+                    selectedModel: RouterModelCapability(modelId: "none", provider: "none", contextWindow: 0, maxOutputTokens: 0, capabilities: [], costPerInputToken: 0, costPerOutputToken: 0, averageLatency: 0, qualityScore: 0),
+                    estimatedCost: 0,
+                    estimatedLatency: 1.0,
+                    confidence: 0.0,
+                    reasoning: "No models available",
+                    strategy: strategy
+                )
+            }
             return SmartRoutingDecision(
                 taskType: complexity,
-                selectedModel: cheapest ?? availableModels.first!,
+                selectedModel: fallbackModel,
                 estimatedCost: 0,
                 estimatedLatency: 1.0,
                 confidence: 0.3,
@@ -356,7 +367,9 @@ public final class SmartModelRouter: ObservableObject {
             return (model, score)
         }.sorted { $0.1 > $1.1 }
 
-        let selected = scoredCandidates.first!.0
+        // Safe access — candidates is non-empty so scoredCandidates is non-empty
+        let best = scoredCandidates[0]
+        let selected = best.0
         let alternatives = scoredCandidates.dropFirst().prefix(3).map { $0.0 }
 
         let estimatedCost = estimateCost(model: selected, inputTokens: estimatedInputTokens, outputTokens: 1000)
@@ -368,7 +381,7 @@ public final class SmartModelRouter: ObservableObject {
             alternativeModels: Array(alternatives),
             estimatedCost: estimatedCost,
             estimatedLatency: estimatedLatency,
-            confidence: scoredCandidates.first!.1,
+            confidence: best.1,
             reasoning: generateReasoning(strategy: strategy, model: selected, complexity: complexity),
             strategy: strategy
         )
