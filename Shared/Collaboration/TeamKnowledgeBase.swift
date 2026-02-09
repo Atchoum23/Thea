@@ -90,7 +90,7 @@ public actor TeamKnowledgeBase {
             content: memory.content,
             category: memory.category,
             keywords: memory.keywords,
-            sharedBy: getCurrentUserId(),
+            sharedBy: await getCurrentUserId(),
             sharedAt: Date(),
             visibility: configuration.defaultVisibility,
             version: 1
@@ -176,7 +176,7 @@ public actor TeamKnowledgeBase {
     /// Delete a shared knowledge item
     public func deleteItem(_ item: SharedKnowledgeItem) async throws {
         // Only the creator can delete
-        guard item.sharedBy == getCurrentUserId() else {
+        guard item.sharedBy == await getCurrentUserId() else {
             throw TeamKnowledgeError.notAuthorized
         }
 
@@ -276,12 +276,13 @@ public actor TeamKnowledgeBase {
         return Array(merged.values).sorted { $0.sharedAt > $1.sharedAt }
     }
 
-    @MainActor
-    private func getCurrentUserId() -> String {
+    private func getCurrentUserId() async -> String {
         #if os(macOS)
         return ProcessInfo.processInfo.hostName
         #else
-        return UIDevice.current.identifierForVendor?.uuidString ?? "unknown"
+        return await MainActor.run {
+            UIDevice.current.identifierForVendor?.uuidString ?? "unknown"
+        }
         #endif
     }
 
