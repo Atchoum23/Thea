@@ -24,8 +24,8 @@ private struct WindowResizableHelper: NSViewRepresentable {
             window.styleMask.insert(.resizable)
 
             observation = window.observe(\.styleMask, options: [.new]) { win, _ in
-                if !win.styleMask.contains(.resizable) {
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async { @MainActor in
+                    if !win.styleMask.contains(.resizable) {
                         win.styleMask.insert(.resizable)
                     }
                 }

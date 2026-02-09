@@ -305,21 +305,17 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
         MainActor.assumeIsolated {
             #if os(iOS)
                 let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+                // Return key window if available
                 if let keyWindow = scenes.flatMap(\.windows).first(where: { $0.isKeyWindow }) {
                     return keyWindow
                 }
-                // Fallback: create window with first available scene
-                if let scene = scenes.first {
-                    return UIWindow(windowScene: scene)
+                // Return any existing window from any scene
+                if let existingWindow = scenes.flatMap(\.windows).first {
+                    return existingWindow
                 }
-                // Last resort: create a minimal window to prevent crash
-                if let firstScene = scenes.first {
-                    return UIWindow(windowScene: firstScene)
-                }
-                // Final fallback: create a plain UIWindow (auth will still work)
-                let fallbackWindow = UIWindow()
-                fallbackWindow.makeKeyAndVisible()
-                return fallbackWindow
+                // Create new window from first available scene
+                let scene = scenes.first!  // Scene must exist during foreground auth
+                return UIWindow(windowScene: scene)
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -464,20 +460,17 @@ public struct SignInWithAppleButton: View {
 
             func presentationAnchor(for _: ASAuthorizationController) -> ASPresentationAnchor {
                 let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+                // Return key window if available
                 if let keyWindow = scenes.flatMap(\.windows).first(where: { $0.isKeyWindow }) {
                     return keyWindow
                 }
-                // Fallback: create window with first available scene
-                if let scene = scenes.first {
-                    return UIWindow(windowScene: scene)
+                // Return any existing window from any scene
+                if let existingWindow = scenes.flatMap(\.windows).first {
+                    return existingWindow
                 }
-                // Last resort: create a minimal window to prevent crash
-                if let firstScene = scenes.first {
-                    return UIWindow(windowScene: firstScene)
-                }
-                let fallbackWindow = UIWindow()
-                fallbackWindow.makeKeyAndVisible()
-                return fallbackWindow
+                // Create new window from first available scene
+                let scene = scenes.first!  // Scene must exist during foreground auth
+                return UIWindow(windowScene: scene)
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {

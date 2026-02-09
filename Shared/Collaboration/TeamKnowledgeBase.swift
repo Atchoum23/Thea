@@ -282,7 +282,8 @@ public actor TeamKnowledgeBase {
         #if os(macOS)
         return ProcessInfo.processInfo.hostName
         #else
-        return UIDevice.current.identifierForVendor?.uuidString ?? "unknown"
+        nonisolated(unsafe) let vendorId = UIDevice.current.identifierForVendor
+        return vendorId?.uuidString ?? "unknown"
         #endif
     }
 
