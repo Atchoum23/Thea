@@ -242,6 +242,28 @@ struct ConversationRow: View {
                 }
             }
 
+            #if os(macOS)
+            Menu("Export") {
+                Button {
+                    exportConversation(conversation, format: .markdown)
+                } label: {
+                    Label("Markdown", systemImage: "doc.richtext")
+                }
+
+                Button {
+                    exportConversation(conversation, format: .json)
+                } label: {
+                    Label("JSON", systemImage: "curlybraces")
+                }
+
+                Button {
+                    exportConversation(conversation, format: .plainText)
+                } label: {
+                    Label("Plain Text", systemImage: "doc.plaintext")
+                }
+            }
+            #endif
+
             Divider()
 
             Button(role: .destructive) {
@@ -316,4 +338,84 @@ struct ConversationRow: View {
         }
         return label
     }
+
+    // MARK: - Export
+
+    #if os(macOS)
+    enum ExportFormat {
+        case markdown, json, plainText
+
+        var fileExtension: String {
+            switch self {
+            case .markdown: "md"
+            case .json: "json"
+            case .plainText: "txt"
+            }
+        }
+    }
+
+    private func exportConversation(_ conversation: Conversation, format: ExportFormat) {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = "\(conversation.title).\(format.fileExtension)"
+        panel.allowedContentTypes = [.plainText]
+        panel.canCreateDirectories = true
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        let messages = conversation.messages.sorted { $0.timestamp < $1.timestamp }
+        let content: String
+
+        switch format {
+        case .markdown:
+            var lines = ["# \(conversation.title)", ""]
+            lines.append("*Exported \(Date().formatted(.dateTime))*")
+            lines.append("")
+            for msg in messages {
+                let role = msg.messageRole == .user ? "**You**" : "**Thea**"
+                let time = msg.timestamp.formatted(.dateTime.hour().minute())
+                lines.append("### \(role) — \(time)")
+                lines.append("")
+                lines.append(msg.content.textValue)
+                lines.append("")
+                lines.append("---")
+                lines.append("")
+            }
+            content = lines.joined(separator: "\n")
+
+        case .json:
+            let exportData: [[String: String]] = messages.map { msg in
+                [
+                    "role": msg.role,
+                    "content": msg.content.textValue,
+                    "timestamp": msg.timestamp.ISO8601Format(),
+                    "model": msg.model ?? ""
+                ]
+            }
+            let wrapper: [String: Any] = [
+                "title": conversation.title,
+                "exportedAt": Date().ISO8601Format(),
+                "messages": exportData
+            ]
+            if let data = try? JSONSerialization.data(withJSONObject: wrapper, options: [.prettyPrinted, .sortedKeys]),
+               let json = String(data: data, encoding: .utf8) {
+                content = json
+            } else {
+                content = "[]"
+            }
+
+        case .plainText:
+            var lines = [conversation.title, String(repeating: "=", count: conversation.title.count), ""]
+            for msg in messages {
+                let role = msg.messageRole == .user ? "You" : "Thea"
+                let time = msg.timestamp.formatted(.dateTime.hour().minute())
+                lines.append("[\(time)] \(role):")
+                lines.append(msg.content.textValue)
+                lines.append("")
+            }
+            content = lines.joined(separator: "\n")
+        }
+
+        try? content.write(to: url, atomically: true, encoding: .utf8)
+    }
+    #endif
 }

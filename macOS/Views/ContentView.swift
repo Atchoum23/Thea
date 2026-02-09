@@ -86,6 +86,26 @@ struct ContentView: View {
             selectedItem = .chat
             selectedConversation = conversation
         }
+        .onReceive(NotificationCenter.default.publisher(for: .exportConversation)) { _ in
+            guard let conversation = selectedConversation else { return }
+            let panel = NSSavePanel()
+            panel.nameFieldStringValue = "\(conversation.title).md"
+            panel.allowedContentTypes = [.plainText]
+            guard panel.runModal() == .OK, let url = panel.url else { return }
+            let messages = conversation.messages.sorted { $0.timestamp < $1.timestamp }
+            var lines = ["# \(conversation.title)", "", "*Exported \(Date().formatted(.dateTime))*", ""]
+            for msg in messages {
+                let role = msg.messageRole == .user ? "**You**" : "**Thea**"
+                let time = msg.timestamp.formatted(.dateTime.hour().minute())
+                lines.append("### \(role) — \(time)")
+                lines.append("")
+                lines.append(msg.content.textValue)
+                lines.append("")
+                lines.append("---")
+                lines.append("")
+            }
+            try? lines.joined(separator: "\n").write(to: url, atomically: true, encoding: .utf8)
+        }
     }
 
     // MARK: - Sidebar
