@@ -385,12 +385,14 @@ public final class PreferenceSyncEngine: ObservableObject {
 
     private init() {
         loadScopeOverrides()
-        registerDevice()
         checkCloudAvailability()
         observeCloudChanges()
 
-        // Initial pull
-        cloud.synchronize()
+        // Defer device registration and initial cloud pull to avoid blocking view layout
+        Task { [weak self] in
+            self?.registerDevice()
+            self?.cloud.synchronize()
+        }
     }
 
     // MARK: - Scope Resolution

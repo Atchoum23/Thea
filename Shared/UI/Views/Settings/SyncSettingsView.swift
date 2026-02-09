@@ -18,6 +18,7 @@ struct SyncSettingsView: View {
     @State private var showingDeviceList = false
     @State private var isSyncing = false
     @State private var lastSyncError: String?
+    @State private var cachedDeviceProfile = DeviceProfile.current()
     #if os(macOS)
     @State private var isUpdating = false
     @State private var updateResult: UpdateResult?
@@ -413,7 +414,7 @@ struct SyncSettingsView: View {
     }
 
     private func deviceRow(_ device: DeviceProfile) -> some View {
-        let isCurrentDevice = device.id == DeviceProfile.current().id
+        let isCurrentDevice = device.id == cachedDeviceProfile.id
 
         return HStack(spacing: 12) {
             Image(systemName: device.deviceClass.systemImage)
@@ -593,10 +594,10 @@ struct SyncSettingsView: View {
     private func publishCurrentBuild() async {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
-        let deviceName = DeviceProfile.current().name
+        let deviceName = cachedDeviceProfile.name
 
-        // Get current git commit hash
-        let commitHash = currentCommitHash()
+        // Get current git commit hash (runs on background thread)
+        let commitHash = await currentCommitHash()
 
         do {
             try await updateService.publishUpdate(
@@ -612,24 +613,27 @@ struct SyncSettingsView: View {
         }
     }
 
-    private func currentCommitHash() -> String {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
-        process.arguments = ["rev-parse", "--short", "HEAD"]
-        process.currentDirectoryURL = Bundle.main.bundleURL
+    private func currentCommitHash() async -> String {
+        let bundleURL = Bundle.main.bundleURL
+        return await Task.detached {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+            process.arguments = ["rev-parse", "--short", "HEAD"]
+            process.currentDirectoryURL = bundleURL
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            process.standardError = FileHandle.nullDevice
 
-        do {
-            try process.run()
-            process.waitUntilExit()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "unknown"
-        } catch {
-            return "unknown"
-        }
+            do {
+                try process.run()
+                process.waitUntilExit()
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "unknown"
+            } catch {
+                return "unknown"
+            }
+        }.value
     }
     #endif
 
@@ -763,7 +767,7 @@ struct SyncSettingsView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(syncEngine.registeredDevices) { device in
-                        let isCurrentDevice = device.id == DeviceProfile.current().id
+                        let isCurrentDevice = device.id == cachedDeviceProfile.id
 
                         HStack(spacing: 12) {
                             Image(systemName: device.deviceClass.systemImage)

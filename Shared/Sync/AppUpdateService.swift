@@ -302,47 +302,54 @@ public final class AppUpdateService: ObservableObject {
             return false
         }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/bash")
-        process.arguments = [syncScript.path, "--build-install"]
-        process.environment = [
-            "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
-            "HOME": FileManager.default.homeDirectoryForCurrentUser.path
-        ]
+        let scriptPath = syncScript.path
+        let homePath = FileManager.default.homeDirectoryForCurrentUser.path
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
+        // Run the process on a background thread to avoid blocking the main actor
+        let result: (success: Bool, output: String, status: Int32) = await Task.detached {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/bin/bash")
+            process.arguments = [scriptPath, "--build-install"]
+            process.environment = [
+                "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+                "HOME": homePath
+            ]
 
-        do {
-            try process.run()
-            process.waitUntilExit()
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            process.standardError = pipe
 
-            let outputData = pipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(data: outputData, encoding: .utf8) ?? ""
+            do {
+                try process.run()
+                process.waitUntilExit()
 
-            if process.terminationStatus == 0 {
-                logger.info("Update completed successfully")
-                availableUpdate = nil
-
-                // Record in history
-                if let update = availableUpdate {
-                    var info = update
-                    info.installedAt = Date()
-                    updateHistory.insert(info, at: 0)
-                    saveUpdateHistory()
-                }
-
-                // Cleanup old CloudKit records
-                await cleanupOldUpdateRecords()
-
-                return true
-            } else {
-                logger.error("Update failed (exit \(process.terminationStatus)): \(output)")
-                return false
+                let outputData = pipe.fileHandleForReading.readDataToEndOfFile()
+                let output = String(data: outputData, encoding: .utf8) ?? ""
+                return (process.terminationStatus == 0, output, process.terminationStatus)
+            } catch {
+                return (false, error.localizedDescription, -1)
             }
-        } catch {
-            logger.error("Failed to run sync script: \(error.localizedDescription)")
+        }.value
+
+        if result.success {
+            logger.info("Update completed successfully")
+
+            // Record in history before clearing
+            if let update = availableUpdate {
+                var info = update
+                info.installedAt = Date()
+                updateHistory.insert(info, at: 0)
+                saveUpdateHistory()
+            }
+
+            availableUpdate = nil
+
+            // Cleanup old CloudKit records
+            await cleanupOldUpdateRecords()
+
+            return true
+        } else {
+            logger.error("Update failed (exit \(result.status)): \(result.output)")
             return false
         }
         #else
