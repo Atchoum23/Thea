@@ -469,8 +469,6 @@ struct AgentNetworkView: View {
     }
 
     private func positionForAgent(_ agent: CollaborationAgent) -> CGPoint {
-        let index = agents.firstIndex { $0.id == agent.id } ?? 0
-        let count = agents.count
         let centerX = size.width / 2
         let centerY = size.height / 2
 
