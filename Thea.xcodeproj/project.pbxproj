@@ -634,7 +634,6 @@
 		88974666AB896411B98FA3BC /* InferenceRelayProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38385F32DD8062479DDD388C /* InferenceRelayProtocol.swift */; };
 		890D4A8AFE45CAFB7F2BC42F /* ConfidenceSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4087B713EA7AC7006F571AED /* ConfidenceSystem.swift */; };
 		890E3DA6E1B8E7C114FBA747 /* MultiAgentCollaborationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69BB871466FFD38D9226F022 /* MultiAgentCollaborationView.swift */; };
-		8975F571EC66687DC1F44228 /* DynamicResourceAllocatorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13511D0BD0909B08B905BF1E /* DynamicResourceAllocatorTypes.swift */; };
 		897AC2B551E065A1C34557F5 /* NutritionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB158CDCC0DA1BB2D5E1386 /* NutritionService.swift */; };
 		89E760BEEAF826391CB95100 /* CodeExecutionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 676210A492C6B5EFA8D46F2B /* CodeExecutionManager.swift */; };
 		8A598A004C692FC2D5EEC30C /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFAA9201F8C18C52CFECD5DF /* AnalyticsManager.swift */; };
@@ -1018,7 +1017,6 @@
 		DFD17ED6AE34784CA55D5EF3 /* TeamKnowledgeBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE51307ED09B45F20868722 /* TeamKnowledgeBase.swift */; };
 		E0032DFFA099174B6BB2F3AC /* SafetyGuardrails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11735366A6599014F09F411B /* SafetyGuardrails.swift */; };
 		E041BB61282D31195FFC5CD0 /* HealthMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044B524336BE4030659DA0D4 /* HealthMonitorService.swift */; };
-		E04A1DD86C36D326A638E2EE /* DynamicResourceAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A370F41AF3D13C8686F664 /* DynamicResourceAllocator.swift */; };
 		E07338613283928BF24B9460 /* blocking-rules.json in Resources */ = {isa = PBXBuildFile; fileRef = E7AB1E478B64D738B19D2451 /* blocking-rules.json */; };
 		E0773161C213E6DABC684711 /* OpenAIProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DB401C60376452D736B68A /* OpenAIProviderTests.swift */; };
 		E0B4BDAF43AB66C96BB8AB9E /* video-controller-ui.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E2329D66E4889E871E8E1B /* video-controller-ui.js */; };
@@ -1337,7 +1335,6 @@
 		1217BC528F6264D7B6BF3423 /* BluetoothDeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDeviceManager.swift; sourceTree = "<group>"; };
 		12D843CD7F24B89C084064F2 /* iOSSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSettingsView.swift; sourceTree = "<group>"; };
 		12DB9E79785FE91D74B85AC4 /* PluginSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginSystemTests.swift; sourceTree = "<group>"; };
-		13511D0BD0909B08B905BF1E /* DynamicResourceAllocatorTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicResourceAllocatorTypes.swift; sourceTree = "<group>"; };
 		1376B06D380D1E325F43CEE7 /* NutritionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionModels.swift; sourceTree = "<group>"; };
 		13B8D77416E6AFF278F16B57 /* FinderSyncExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FinderSyncExtension.entitlements; sourceTree = "<group>"; };
 		1440849497485EEC94CB16CA /* RemoteAccessSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteAccessSettingsView.swift; sourceTree = "<group>"; };
@@ -1560,7 +1557,6 @@
 		5909E7EB51E6633C5691F827 /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
 		5915F5D74F8946C40FA0A6DF /* FinancialDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialDashboardView.swift; sourceTree = "<group>"; };
 		594D11D71005D36E3F863A19 /* NetworkObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkObserver.swift; sourceTree = "<group>"; };
-		59A370F41AF3D13C8686F664 /* DynamicResourceAllocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicResourceAllocator.swift; sourceTree = "<group>"; };
 		59D01CB815FD0204BAF0FF30 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		59DD2B2F94B22F5D6F2975D3 /* SessionChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionChatService.swift; sourceTree = "<group>"; };
 		5A1D5DA4E452EC166813574C /* TheaSafariExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TheaSafariExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2883,7 +2879,6 @@
 				73C1044E233A22EF71EFCC3D /* ModelSelection */,
 				09EE860348B8C7B5AC34071B /* PromptEngineering */,
 				433251FF750FD39B383A9706 /* Providers */,
-				AE99885BB6FEF462D28143E9 /* ResourceManagement */,
 				383ED4181D66788DFA08E435 /* Speech */,
 				8F5E19BA3B19EA5E5CC37FA2 /* Vision */,
 				BC4217F145F7CA3DFEF9ACB6 /* Voice */,
@@ -3905,15 +3900,6 @@
 				5915F5D74F8946C40FA0A6DF /* FinancialDashboardView.swift */,
 			);
 			path = Financial;
-			sourceTree = "<group>";
-		};
-		AE99885BB6FEF462D28143E9 /* ResourceManagement */ = {
-			isa = PBXGroup;
-			children = (
-				59A370F41AF3D13C8686F664 /* DynamicResourceAllocator.swift */,
-				13511D0BD0909B08B905BF1E /* DynamicResourceAllocatorTypes.swift */,
-			);
-			path = ResourceManagement;
 			sourceTree = "<group>";
 		};
 		AEDD450EC63184111F4F4B81 /* KeyboardExtension */ = {
@@ -5654,8 +5640,6 @@
 				2FAD36AFCC44FE8FD123ECB3 /* DocumentationGrounding.swift in Sources */,
 				2B2BFB6522AA76AF5ACFF13E /* DraftSyncManager.swift in Sources */,
 				03F7B08A2B7EDF810B51D034 /* DynamicConfig.swift in Sources */,
-				E04A1DD86C36D326A638E2EE /* DynamicResourceAllocator.swift in Sources */,
-				8975F571EC66687DC1F44228 /* DynamicResourceAllocatorTypes.swift in Sources */,
 				7B1534C2B489D0F416B0261E /* EmotionAwareAdapter.swift in Sources */,
 				FAFF0DE1CA99D45A66D9F16F /* EnhancedSubagentSystem.swift in Sources */,
 				6E3C2FD07745D66DB0016D25 /* EnvironmentContextProvider.swift in Sources */,

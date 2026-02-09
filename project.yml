@@ -345,6 +345,7 @@ targets:
           - "**/Settings/AIProvidersSettingsView.swift"
           # Verification + Anticipatory: excluded as tightly-coupled subsystems.
           # All files in each folder depend on each other; must be enabled together.
+          - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/MentionAutocomplete.swift"
           - "**/Components/ExecutableCodeBlock.swift"
@@ -622,6 +623,7 @@ targets:
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
+          - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/MentionAutocomplete.swift"
           - "**/Components/ExecutableCodeBlock.swift"
