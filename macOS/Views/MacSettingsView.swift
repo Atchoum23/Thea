@@ -130,6 +130,7 @@ struct MacSettingsView: View {
     @State private var openRouterKey: String = ""
     @State private var apiKeysLoaded: Bool = false
     @State private var localModelConfig = AppConfiguration.shared.localModelConfig
+    @State private var cacheSize: String = "Calculating…"
 
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
@@ -497,12 +498,16 @@ struct MacSettingsView: View {
                 HStack {
                     Text("Cache Size")
                     Spacer()
-                    Text("~50 MB")
+                    Text(cacheSize)
                         .font(.theaCaption1)
                         .foregroundStyle(.secondary)
                 }
-                Button("Clear Cache") { clearCache() }
+                Button("Clear Cache") {
+                    clearCache()
+                    Task { cacheSize = await calculateCacheSize() }
+                }
             }
+            .task { cacheSize = await calculateCacheSize() }
 
             Section("Privacy") {
                 Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
@@ -673,4 +678,42 @@ struct MacSettingsView: View {
         successAlert.runModal()
     }
 
+    private func calculateCacheSize() async -> String {
+        let fm = FileManager.default
+        var totalBytes = Int64(URLCache.shared.currentDiskUsage)
+
+        // Application Support caches
+        if let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            let cacheDir = appSupport.appendingPathComponent("Thea/Cache")
+            totalBytes += directorySize(at: cacheDir)
+        }
+
+        // System Caches directory
+        if let cachesDir = fm.urls(for: .cachesDirectory, in: .userDomainMask).first {
+            let theaCaches = cachesDir.appendingPathComponent(AppConfiguration.AppInfo.bundleIdentifier)
+            totalBytes += directorySize(at: theaCaches)
+        }
+
+        // Temp directory
+        let tempDir = fm.temporaryDirectory.appendingPathComponent("Thea")
+        totalBytes += directorySize(at: tempDir)
+
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: totalBytes)
+    }
+
+    private func directorySize(at url: URL) -> Int64 {
+        let fm = FileManager.default
+        guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: [.fileSizeKey], options: [.skipsHiddenFiles]) else {
+            return 0
+        }
+        var total: Int64 = 0
+        for case let fileURL as URL in enumerator {
+            if let size = try? fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                total += Int64(size)
+            }
+        }
+        return total
+    }
 }
