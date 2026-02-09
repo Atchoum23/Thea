@@ -33,7 +33,7 @@ struct ContentView: View {
         } detail: {
             detailContent
         }
-        .navigationSplitViewStyle(.balanced)
+        .navigationSplitViewStyle(.prominentDetail)
         .toolbarTitleDisplayMode(.inline)
         .textSelection(.enabled)
         .preferredColorScheme(colorSchemeForTheme)
