@@ -129,10 +129,6 @@ struct SidebarView: View {
         }
     }
 
-    private func createNewConversation() {
-        let conversation = ChatManager.shared.createConversation()
-        selection = conversation
-    }
 }
 
 // MARK: - Conversation Row
