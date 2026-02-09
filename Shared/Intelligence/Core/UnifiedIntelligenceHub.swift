@@ -673,7 +673,7 @@ public final class UnifiedIntelligenceHub {
         // Update goal progress if relevant
         for (index, goal) in inferredGoals.enumerated() {
             if isTaskRelatedToGoal(taskType: taskType, goal: goal) {
-                var updatedGoal = goal
+                let updatedGoal = goal
                 let progressIncrement = success ? 0.1 : 0.02
                 inferredGoals[index] = InferredGoal(
                     id: updatedGoal.id,
