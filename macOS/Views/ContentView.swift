@@ -50,6 +50,12 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .showKeyboardShortcuts)) { _ in
             showingKeyboardShortcuts = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .selectNewConversation)) { notification in
+            if let conversation = notification.object as? Conversation {
+                selectedItem = .chat
+                selectedConversation = conversation
+            }
+        }
     }
 
     // MARK: - Sidebar

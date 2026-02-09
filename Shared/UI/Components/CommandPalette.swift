@@ -474,6 +474,7 @@ extension Notification.Name {
     static let switchModel = Notification.Name("commandPalette.switchModel")
     static let toggleDarkMode = Notification.Name("commandPalette.toggleDarkMode")
     static let showKeyboardShortcuts = Notification.Name("commandPalette.showKeyboardShortcuts")
+    static let selectNewConversation = Notification.Name("thea.selectNewConversation")
 }
 
 // MARK: - Array Extension

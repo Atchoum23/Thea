@@ -135,7 +135,11 @@ struct TheamacOSApp: App {
                 Divider()
 
                 Button("New Conversation") {
-                    _ = ChatManager.shared.createConversation(title: "New Conversation")
+                    let conversation = ChatManager.shared.createConversation(title: "New Conversation")
+                    NotificationCenter.default.post(
+                        name: .selectNewConversation,
+                        object: conversation
+                    )
                 }
                 .keyboardShortcut("n", modifiers: [.command, .shift])
 
