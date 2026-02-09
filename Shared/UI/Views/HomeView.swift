@@ -13,7 +13,13 @@ struct HomeView: View {
             if let conversation = selectedConversation {
                 ChatView(conversation: conversation)
             } else {
-                WelcomeView()
+                WelcomeView { prompt in
+                    let conversation = ChatManager.shared.createConversation(title: "New Conversation")
+                    selectedConversation = conversation
+                    Task {
+                        try? await ChatManager.shared.sendMessage(prompt, in: conversation)
+                    }
+                }
             }
         }
         .sheet(isPresented: $showingSettings) {

@@ -169,7 +169,16 @@ struct ContentView: View {
         } else {
             // Welcome view with input bar always visible at bottom
             VStack(spacing: 0) {
-                WelcomeView()
+                WelcomeView { prompt in
+                    welcomeInputText = ""
+                    let conversation = chatManager.createConversation(title: "New Conversation")
+                    selectedConversation = conversation
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        Task {
+                            try? await chatManager.sendMessage(prompt, in: conversation)
+                        }
+                    }
+                }
 
                 // Input bar always visible even on welcome screen
                 ChatInputView(
