@@ -1,5 +1,8 @@
 import Combine
 import Foundation
+#if os(macOS)
+import ServiceManagement
+#endif
 
 @MainActor
 final class SettingsManager: ObservableObject {
@@ -56,7 +59,21 @@ final class SettingsManager: ObservableObject {
     // MARK: - Behavior Settings
 
     @Published var launchAtLogin: Bool {
-        didSet { persist(launchAtLogin, forKey: "launchAtLogin") }
+        didSet {
+            persist(launchAtLogin, forKey: "launchAtLogin")
+            #if os(macOS)
+            do {
+                if launchAtLogin {
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                // Registration can fail if not properly entitled; log but don't crash
+                print("Login item registration failed: \(error.localizedDescription)")
+            }
+            #endif
+        }
     }
 
     @Published var showInMenuBar: Bool {
