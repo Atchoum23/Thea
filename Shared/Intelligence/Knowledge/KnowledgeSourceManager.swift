@@ -491,12 +491,8 @@ public final class KnowledgeSourceManager: ObservableObject {
                 appliesTo: []
             )
 
-            do {
-                try await knowledgeManager.add(knowledgeItem)
-                logger.debug("Added knowledge item: \(knowledgeItem.title)")
-            } catch {
-                logger.error("Failed to add knowledge item: \(error.localizedDescription)")
-            }
+            knowledgeManager.add(knowledgeItem)
+            logger.debug("Added knowledge item: \(knowledgeItem.title)")
         }
     }
 
