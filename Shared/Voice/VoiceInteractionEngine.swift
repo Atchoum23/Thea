@@ -228,7 +228,7 @@ final class VoiceInteractionEngine {
     private func detectLanguage(from result: SFSpeechRecognitionResult) {
         // Use the locale from the speech recognizer or infer from content
         // For more accurate detection, WhisperKit provides better multilingual support
-        if let firstSegment = result.bestTranscription.segments.first {
+        if result.bestTranscription.segments.first != nil {
             // The recognizer's locale gives us the detected language
             detectedLanguage = speechRecognizer?.locale
         }

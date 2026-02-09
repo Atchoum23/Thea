@@ -11,7 +11,7 @@ import CloudKit
 import Combine
 import Foundation
 import OSLog
-import UserNotifications
+@preconcurrency import UserNotifications
 
 #if canImport(AppKit)
     import AppKit
