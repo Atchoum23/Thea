@@ -158,6 +158,13 @@ struct TheamacOSApp: App {
                 }
                 .keyboardShortcut("s", modifiers: [.command, .control])
             }
+
+            CommandGroup(replacing: .help) {
+                Button("Keyboard Shortcuts") {
+                    NotificationCenter.default.post(name: .showKeyboardShortcuts, object: nil)
+                }
+                .keyboardShortcut("/", modifiers: .command)
+            }
         }
 
         // LIFE TRACKING DASHBOARD WINDOW

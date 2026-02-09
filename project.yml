@@ -427,7 +427,7 @@ targets:
           - "**/Views/SelfExecutionView.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Views/KeyboardShortcutsView.swift"
-          - "**/Views/KeyboardShortcutsHelpView.swift"
+          # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/Managers/IntegrationsManager.swift"
           - "**/Managers/ResponseNotificationHandler.swift"
@@ -724,7 +724,7 @@ targets:
           - "**/Memory/MemoryAugmentedChat.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           - "**/Anticipatory/InterventionScheduler.swift"
-          - "**/Views/KeyboardShortcutsHelpView.swift"
+          # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
           - "**/Anticipatory/AnticipatoryIntelligenceCore.swift"
           - "**/LocalModels/**"
           - "**/Focus/FocusOrchestrator.swift"

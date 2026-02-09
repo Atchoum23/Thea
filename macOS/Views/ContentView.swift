@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var welcomeInputText = ""
     @State private var isListeningForVoice = false
     @State private var showingNewProjectDialog = false
+    @State private var showingKeyboardShortcuts = false
     @State private var newProjectTitle = ""
 
     var body: some View {
@@ -41,6 +42,13 @@ struct ContentView: View {
         }
         .onChange(of: settingsManager.windowFloatOnTop) { _, floatOnTop in
             NSApp.keyWindow?.level = floatOnTop ? .floating : .normal
+        }
+        .sheet(isPresented: $showingKeyboardShortcuts) {
+            KeyboardShortcutsHelpView()
+                .frame(minWidth: 500, minHeight: 400)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showKeyboardShortcuts)) { _ in
+            showingKeyboardShortcuts = true
         }
     }
 

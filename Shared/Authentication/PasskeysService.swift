@@ -196,7 +196,8 @@ public class PasskeysService: NSObject, ObservableObject {
     // MARK: - Helpers
 
     #if os(iOS)
-        @available(iOS, deprecated: 26.0)
+        /// Bare UIWindow fallback — unreachable in practice since a windowScene should always exist.
+        @available(iOS, deprecated: 26.0, message: "UIWindow() has no non-deprecated replacement without a scene")
         fileprivate static func makeFallbackWindow() -> UIWindow {
             UIWindow()
         }
@@ -487,7 +488,7 @@ public struct SignInWithAppleButton: View {
                 return Self.makeFallbackWindow()
             }
 
-            @available(iOS, deprecated: 26.0)
+            @available(iOS, deprecated: 26.0, message: "UIWindow() has no non-deprecated replacement without a scene")
             private static func makeFallbackWindow() -> UIWindow {
                 UIWindow()
             }
