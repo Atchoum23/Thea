@@ -249,7 +249,11 @@ public enum CrossDeviceType: String, Codable, Sendable, CaseIterable {
     /// Current device type based on platform
     public static var current: CrossDeviceType {
         #if os(iOS)
-            return _currentIOS
+            // UIDevice.current.userInterfaceIdiom is effectively constant per process
+            // and safe to read off the main actor, but Swift 6 strict concurrency
+            // flags it. We use nonisolated(unsafe) to suppress the diagnostic.
+            nonisolated(unsafe) let idiom = UIDevice.current.userInterfaceIdiom
+            return idiom == .pad ? .iPad : .iPhone
         #elseif os(macOS)
             return .mac
         #elseif os(watchOS)
@@ -262,16 +266,6 @@ public enum CrossDeviceType: String, Codable, Sendable, CaseIterable {
             return .mac
         #endif
     }
-
-    #if os(iOS)
-    @MainActor
-    private static var _currentIOS: CrossDeviceType {
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            return .iPad
-        }
-        return .iPhone
-    }
-    #endif
 }
 
 // MARK: - Cross-Device Registration
