@@ -148,6 +148,8 @@ struct ChatInputView: View {
                     }
                 )
                 .frame(minHeight: 36, maxHeight: 200)
+                .background(dragOver ? TheaBrandColors.gold.opacity(0.15) : .clear)
+                .liquidGlassRounded(cornerRadius: TheaCornerRadius.xl)
                 .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
                     handleDrop(providers: providers)
                     return true
