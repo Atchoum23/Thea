@@ -8,6 +8,30 @@ import OSLog
 import SwiftUI
 
 struct SyncSettingsView: View {
+    @State private var isReady = false
+
+    var body: some View {
+        if isReady {
+            SyncSettingsContentView()
+        } else {
+            ProgressView("Loading sync settings…")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .task {
+                    // Trigger singleton initialization off the view layout path.
+                    // This lets SwiftUI render the ProgressView immediately while
+                    // the heavy iCloud/CloudKit init happens in the background.
+                    _ = CloudKitService.shared
+                    _ = PreferenceSyncEngine.shared
+                    #if os(macOS)
+                    _ = AppUpdateService.shared
+                    #endif
+                    isReady = true
+                }
+        }
+    }
+}
+
+private struct SyncSettingsContentView: View {
     @StateObject private var cloudKitService = CloudKitService.shared
     @StateObject private var syncEngine = PreferenceSyncEngine.shared
     #if os(macOS)

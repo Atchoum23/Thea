@@ -129,33 +129,7 @@ struct ChatInputView: View {
                     .disabled(isStreaming)
                 #endif
 
-                // Text input — use TheaTextInputField on macOS for configurable shortcuts
-                #if os(macOS)
-                TheaTextInputField(
-                    text: $text,
-                    placeholder: "Message Thea...",
-                    isFocused: _isFocused,
-                    isDisabled: isStreaming,
-                    dragOver: dragOver,
-                    onSubmit: {
-                        inputLog("onSubmit triggered via TheaTextInputField")
-                        if canSend {
-                            onSend()
-                        }
-                    },
-                    onPasteImage: { imageData in
-                        handlePastedImage(imageData)
-                    }
-                )
-                .frame(minHeight: 36, maxHeight: 200)
-                .background(dragOver ? TheaBrandColors.gold.opacity(0.15) : .clear)
-                .liquidGlassRounded(cornerRadius: TheaCornerRadius.xl)
-                .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
-                    handleDrop(providers: providers)
-                    return true
-                }
-                #else
-                // iOS/watchOS/tvOS: standard TextField
+                // Text input
                 HStack(alignment: .bottom, spacing: TheaSpacing.sm) {
                     TextField("Message Thea...", text: $text, axis: .vertical)
                         .textFieldStyle(.plain)
@@ -172,6 +146,11 @@ struct ChatInputView: View {
                 .padding(.horizontal, TheaSpacing.lg)
                 .padding(.vertical, TheaSpacing.md)
                 .liquidGlassRounded(cornerRadius: TheaCornerRadius.xl)
+                #if os(macOS)
+                .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
+                    handleDrop(providers: providers)
+                    return true
+                }
                 #endif
 
                 // Microphone button (inline voice input)
