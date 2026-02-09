@@ -80,6 +80,17 @@ struct SidebarView: View {
                     }
                 }
             }
+            .overlay {
+                if filteredConversations.isEmpty {
+                    ContentUnavailableView(
+                        searchText.isEmpty ? "No Conversations" : "No Results",
+                        systemImage: searchText.isEmpty ? "message" : "magnifyingglass",
+                        description: Text(searchText.isEmpty
+                            ? "Start a new conversation to begin."
+                            : "No conversations match \"\(searchText)\".")
+                    )
+                }
+            }
         }
         .navigationTitle("Conversations")
     }
