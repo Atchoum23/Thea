@@ -428,7 +428,7 @@ public actor VisualAnalysisService {
             }
 
             let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
-            guard let display = content.displays.first else {
+            guard content.displays.first != nil else {
                 throw IntegrationError.notSupported
             }
 
