@@ -311,14 +311,8 @@ struct MacChatDetailView: View {
         let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
         messageText = ""
 
-        Task {
-            do {
-                try await chatManager.sendMessage(text, in: conversation)
-            } catch {
-                print("Failed to send message: \(error)")
-                messageText = text
-            }
-        }
+        // Use queue-aware send: if already streaming, message is queued
+        chatManager.queueOrSendMessage(text, in: conversation)
     }
 
     private func navigateSearch(forward: Bool) {

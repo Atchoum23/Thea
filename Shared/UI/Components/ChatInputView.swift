@@ -82,6 +82,19 @@ struct ChatInputView: View {
             }
             .padding(.horizontal, 16)
 
+            // Queue indicator (shows count of queued messages)
+            if !ChatManager.shared.messageQueue.isEmpty {
+                HStack(spacing: TheaSpacing.sm) {
+                    Image(systemName: "tray.full")
+                        .foregroundStyle(.theaPrimary)
+                    Text("\(ChatManager.shared.messageQueue.count) message\(ChatManager.shared.messageQueue.count == 1 ? "" : "s") queued")
+                        .font(.theaCaption2)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, TheaSpacing.lg)
+            }
+
             // Input row
             HStack(alignment: .bottom, spacing: TheaSpacing.md) {
                 // Attach file button
@@ -110,10 +123,10 @@ struct ChatInputView: View {
                 #endif
 
                 // Text input — Enter sends, Shift+Enter inserts newline
+                // Enabled during streaming to allow message queuing
                 TextField("Message Thea...", text: $text, axis: .vertical)
                     .lineLimit(1 ... 8)
                     .focused($isFocused)
-                    .disabled(isStreaming)
                     .onSubmit {
                         if canSend {
                             onSend()
@@ -155,18 +168,19 @@ struct ChatInputView: View {
                 }
 
                 // Send / Stop button
+                // During streaming: sends queues the message; stop only via cancel
                 Button {
                     onSend()
                 } label: {
-                    Image(systemName: isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
+                    Image(systemName: isStreaming && !canSend ? "stop.circle.fill" : "arrow.up.circle.fill")
                         .font(.system(size: 32))
                         .foregroundStyle(canSend || isStreaming ? Color.theaPrimaryDefault : .secondary)
                         .contentTransition(.symbolEffect(.replace))
                 }
                 .buttonStyle(.plain)
                 .disabled(!canSend && !isStreaming)
-                .accessibilityLabel(isStreaming ? "Stop generating" : "Send message")
-                .accessibilityHint(isStreaming ? "Stops the AI response" : "Sends your message to the AI")
+                .accessibilityLabel(canSend && isStreaming ? "Queue message" : (isStreaming ? "Stop generating" : "Send message"))
+                .accessibilityHint(canSend && isStreaming ? "Queues your message to send after current response" : (isStreaming ? "Stops the AI response" : "Sends your message to the AI"))
             }
             .padding(.horizontal, TheaSpacing.lg)
         }

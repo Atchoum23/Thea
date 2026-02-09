@@ -38,6 +38,7 @@ final class ChatManager: ObservableObject {
     @Published var isStreaming: Bool = false
     @Published var streamingText: String = ""
     @Published private(set) var conversations: [Conversation] = []
+    @Published private(set) var messageQueue: [(text: String, conversation: Conversation)] = []
 
     private var modelContext: ModelContext?
 
@@ -284,11 +285,44 @@ final class ChatManager: ObservableObject {
             if AudioOutputRouter.shared.isVoiceOutputActive {
                 AudioOutputRouter.shared.routeResponse(streamingText)
             }
+
+            // Process next queued message if any
+            processQueue()
         } catch {
             debugLog("❌ Error during chat: \(error)")
             context.delete(assistantMessage)
             conversation.messages.removeLast()
+            // Still process queue on error so queued messages aren't lost
+            processQueue()
             throw error
+        }
+    }
+
+    /// Queue a message for sending. If currently streaming, it will be sent after the
+    /// current response completes. If idle, sends immediately.
+    func queueOrSendMessage(_ text: String, in conversation: Conversation) {
+        if isStreaming {
+            messageQueue.append((text: text, conversation: conversation))
+            chatLogger.info("Queued message (\(self.messageQueue.count) pending)")
+        } else {
+            Task {
+                try? await sendMessage(text, in: conversation)
+            }
+        }
+    }
+
+    /// Remove a queued message at the given index
+    func removeQueuedMessage(at index: Int) {
+        guard messageQueue.indices.contains(index) else { return }
+        messageQueue.remove(at: index)
+    }
+
+    /// Process the next queued message after streaming completes
+    private func processQueue() {
+        guard !messageQueue.isEmpty else { return }
+        let next = messageQueue.removeFirst()
+        Task {
+            try? await sendMessage(next.text, in: next.conversation)
         }
     }
 
