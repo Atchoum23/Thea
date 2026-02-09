@@ -1,3 +1,4 @@
+@preconcurrency import SwiftData
 import SwiftUI
 
 // MARK: - Window Resizable Helper
@@ -112,6 +113,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
 /// Consolidated macOS settings with a System Settings-style sidebar/detail layout.
 struct MacSettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var settingsManager = SettingsManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
 
@@ -563,12 +565,63 @@ struct MacSettingsView: View {
 
     private func exportAllData() {
         let panel = NSSavePanel()
-        panel.nameFieldStringValue = "thea-export-\(Date().ISO8601Format()).json"
+        let dateString = ISO8601DateFormatter().string(from: Date())
+        panel.nameFieldStringValue = "thea-export-\(dateString).json"
         panel.allowedContentTypes = [.json]
 
-        panel.begin { response in
-            if response == .OK, let url = panel.url {
-                print("Exporting data to: \(url)")
+        panel.begin { [modelContext] response in
+            guard response == .OK, let url = panel.url else { return }
+
+            Task { @MainActor in
+                do {
+                    let conversations = try modelContext.fetch(FetchDescriptor<Conversation>())
+                    let messages = try modelContext.fetch(FetchDescriptor<Message>())
+                    let projects = try modelContext.fetch(FetchDescriptor<Project>())
+
+                    let export: [String: Any] = [
+                        "exportDate": dateString,
+                        "version": AppConfiguration.AppInfo.version,
+                        "conversations": conversations.map { conv in
+                            [
+                                "id": conv.id.uuidString,
+                                "title": conv.title,
+                                "createdAt": ISO8601DateFormatter().string(from: conv.createdAt),
+                                "isArchived": conv.isArchived
+                            ] as [String: Any]
+                        },
+                        "messages": messages.map { msg in
+                            [
+                                "id": msg.id.uuidString,
+                                "conversationID": msg.conversationID.uuidString,
+                                "role": msg.role,
+                                "content": msg.content.textValue,
+                                "timestamp": ISO8601DateFormatter().string(from: msg.timestamp)
+                            ] as [String: Any]
+                        },
+                        "projects": projects.map { proj in
+                            [
+                                "id": proj.id.uuidString,
+                                "title": proj.title,
+                                "createdAt": ISO8601DateFormatter().string(from: proj.createdAt)
+                            ] as [String: Any]
+                        },
+                        "settings": [
+                            "theme": SettingsManager.shared.theme,
+                            "fontSize": SettingsManager.shared.fontSize,
+                            "messageDensity": SettingsManager.shared.messageDensity,
+                            "defaultProvider": SettingsManager.shared.defaultProvider
+                        ]
+                    ]
+
+                    let jsonData = try JSONSerialization.data(withJSONObject: export, options: [.prettyPrinted, .sortedKeys])
+                    try jsonData.write(to: url)
+                } catch {
+                    let errorAlert = NSAlert()
+                    errorAlert.messageText = "Export Failed"
+                    errorAlert.informativeText = error.localizedDescription
+                    errorAlert.alertStyle = .warning
+                    errorAlert.runModal()
+                }
             }
         }
     }
@@ -576,18 +629,48 @@ struct MacSettingsView: View {
     private func clearAllData() {
         let alert = NSAlert()
         alert.messageText = "Clear All Data?"
-        alert.informativeText = "This will permanently delete all conversations, projects, and settings. This action cannot be undone."
+        alert.informativeText = "This will permanently delete all conversations, projects, and messages. Settings will be reset to defaults. This action cannot be undone."
         alert.alertStyle = .critical
         alert.addButton(withTitle: "Cancel")
         alert.addButton(withTitle: "Clear All Data")
 
-        if alert.runModal() == .alertSecondButtonReturn {
-            print("Clearing all data")
+        guard alert.runModal() == .alertSecondButtonReturn else { return }
+
+        do {
+            try modelContext.delete(model: Message.self)
+            try modelContext.delete(model: Conversation.self)
+            try modelContext.delete(model: Project.self)
+            try modelContext.save()
+            settingsManager.resetToDefaults()
+            AppConfiguration.shared.resetAllToDefaults()
+        } catch {
+            let errorAlert = NSAlert()
+            errorAlert.messageText = "Clear Failed"
+            errorAlert.informativeText = error.localizedDescription
+            errorAlert.alertStyle = .warning
+            errorAlert.runModal()
         }
     }
 
     private func clearCache() {
-        print("Clearing cache")
+        // Clear URLCache
+        URLCache.shared.removeAllCachedResponses()
+
+        // Clear Thea-specific caches in Application Support
+        if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            let cacheDir = appSupport.appendingPathComponent("Thea/Cache")
+            try? FileManager.default.removeItem(at: cacheDir)
+        }
+
+        // Clear temporary files
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("Thea")
+        try? FileManager.default.removeItem(at: tempDir)
+
+        let successAlert = NSAlert()
+        successAlert.messageText = "Cache Cleared"
+        successAlert.informativeText = "All cached data has been removed."
+        successAlert.alertStyle = .informational
+        successAlert.runModal()
     }
 
 }
