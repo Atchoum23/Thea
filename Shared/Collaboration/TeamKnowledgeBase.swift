@@ -176,7 +176,8 @@ public actor TeamKnowledgeBase {
     /// Delete a shared knowledge item
     public func deleteItem(_ item: SharedKnowledgeItem) async throws {
         // Only the creator can delete
-        guard item.sharedBy == await getCurrentUserId() else {
+        let currentUser = await getCurrentUserId()
+        guard item.sharedBy == currentUser else {
             throw TeamKnowledgeError.notAuthorized
         }
 
