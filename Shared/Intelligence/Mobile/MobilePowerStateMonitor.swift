@@ -200,8 +200,8 @@ public final class MobilePowerStateMonitor {
         monitoringTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(60))
-                await self?.updateMobilePowerState()
-                await self?.recordDrainSample()
+                self?.updateMobilePowerState()
+                self?.recordDrainSample()
             }
         }
     }
