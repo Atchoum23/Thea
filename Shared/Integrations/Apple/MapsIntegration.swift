@@ -267,10 +267,6 @@ public actor MapsIntegration {
 
     private let logger = Logger(subsystem: "com.thea.integrations", category: "Maps")
 
-    #if canImport(CoreLocation)
-    private let geocoder = CLGeocoder()
-    #endif
-
     private init() {}
 
     // MARK: - Location Search
@@ -378,24 +374,32 @@ public actor MapsIntegration {
 
     // MARK: - Geocoding
 
-    /// Forward geocode an address to coordinates
+    /// Forward geocode an address to coordinates using MKLocalSearch
     public func geocode(address: String) async throws -> TheaLocation? {
-        #if canImport(CoreLocation)
-        let placemarks = try await geocoder.geocodeAddressString(address)
+        #if canImport(MapKit)
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = address
+        if #available(macOS 12.0, iOS 15.0, *) {
+            request.resultTypes = .address
+        }
 
-        guard let placemark = placemarks.first,
-              let location = placemark.location else {
+        let search = MKLocalSearch(request: request)
+        let response = try await search.start()
+
+        guard let mapItem = response.mapItems.first else {
             return nil
         }
 
+        let coordinate = TheaCoordinate(
+            latitude: mapItem.placemark.coordinate.latitude,
+            longitude: mapItem.placemark.coordinate.longitude
+        )
+
         return TheaLocation(
-            name: placemark.name ?? address,
-            address: formatAddress(from: placemark),
-            coordinate: TheaCoordinate(
-                latitude: location.coordinate.latitude,
-                longitude: location.coordinate.longitude
-            ),
-            timeZone: placemark.timeZone?.identifier
+            name: mapItem.name ?? address,
+            address: formatAddress(from: mapItem),
+            coordinate: coordinate,
+            timeZone: mapItem.timeZone?.identifier
         )
         #else
         throw MapsError.unavailable
@@ -682,7 +686,7 @@ public actor MapsIntegration {
             id: mapItem.placemark.coordinate.latitude.description +
                 mapItem.placemark.coordinate.longitude.description,
             name: mapItem.name ?? "Unknown",
-            address: formatAddress(from: mapItem.placemark),
+            address: formatAddress(from: mapItem),
             coordinate: coordinate,
             category: category,
             phoneNumber: mapItem.phoneNumber,

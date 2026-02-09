@@ -247,6 +247,7 @@ public enum CrossDeviceType: String, Codable, Sendable, CaseIterable {
     }
 
     /// Current device type based on platform
+    @MainActor
     public static var current: CrossDeviceType {
         #if os(iOS)
             if UIDevice.current.userInterfaceIdiom == .pad {
