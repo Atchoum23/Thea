@@ -236,13 +236,22 @@ struct TheamacOSApp: App {
     }
 
     private func configureWindow() {
-        if let window = NSApp.windows.first {
-            window.titlebarAppearsTransparent = true
-            window.styleMask.insert(.fullSizeContentView)
-            // Remove titlebar separator for seamless glass integration
-            if #available(macOS 26, *) {
-                window.titlebarSeparatorStyle = .none
-            }
+        guard let window = NSApp.windows.first else { return }
+
+        window.titlebarAppearsTransparent = true
+        window.styleMask.insert(.fullSizeContentView)
+        if #available(macOS 26, *) {
+            window.titlebarSeparatorStyle = .none
+        }
+
+        let settings = SettingsManager.shared
+
+        // Apply float-on-top setting
+        window.level = settings.windowFloatOnTop ? .floating : .normal
+
+        // Restore saved window position/size
+        if settings.rememberWindowPosition {
+            window.setFrameAutosaveName("TheaMainWindow")
         }
     }
 }

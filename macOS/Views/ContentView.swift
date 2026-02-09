@@ -39,6 +39,9 @@ struct ContentView: View {
         .onAppear {
             setupManagers()
         }
+        .onChange(of: settingsManager.windowFloatOnTop) { _, floatOnTop in
+            NSApp.keyWindow?.level = floatOnTop ? .floating : .normal
+        }
     }
 
     // MARK: - Sidebar
