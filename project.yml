@@ -345,7 +345,6 @@ targets:
           - "**/Settings/AIProvidersSettingsView.swift"
           # Verification + Anticipatory: excluded as tightly-coupled subsystems.
           # All files in each folder depend on each other; must be enabled together.
-          - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/MentionAutocomplete.swift"
           - "**/Components/ExecutableCodeBlock.swift"
@@ -414,7 +413,6 @@ targets:
           # need to be excluded due to missing types or dependencies.
           # ============================================================
           - "**/Configuration/ConfigurationManager.swift"
-          - "**/Components/ConfidenceIndicatorViews.swift"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/MentionAutocomplete.swift"
           - "**/Components/ExecutableCodeBlock.swift"
@@ -484,7 +482,6 @@ targets:
           - "**/ViewModels/SettingsViewModel.swift"
           # Theme exclusions
           - "**/Theme/DesignTokens.swift"
-          - "**/Theme/TheaAnimations.swift"
           # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
           - "**/Design/DesignSystemStubs.swift"
       - path: macOS
@@ -625,7 +622,6 @@ targets:
           - "**/Settings/PrivacySettingsView.swift"
           - "**/Settings/AdvancedSettingsView.swift"
           - "**/Settings/AIProvidersSettingsView.swift"
-          - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/MentionAutocomplete.swift"
           - "**/Components/ExecutableCodeBlock.swift"
@@ -647,7 +643,6 @@ targets:
           - "**/AI/Context/**"
           - "**/Configuration/ConfigurationManager.swift"
           - "**/Settings/Advanced/**"
-          - "**/Components/ConfidenceIndicatorViews.swift"
           - "**/Views/PhaseProgressView.swift"
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/AgentMode/AgentEnhancements.swift"
@@ -710,7 +705,6 @@ targets:
           - "**/Views/LifeTracking/**"
           - "**/Settings/TerminalSettingsView.swift"
           - "**/Execution/Testing/TestGenerator.swift"
-          - "**/Theme/TheaAnimations.swift"
           - "**/Automation/WorkflowEngine.swift"
           - "**/Settings/WorkflowSettingsView.swift"
           - "**/Integrations/XcodeIntegration.swift"
