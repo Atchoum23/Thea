@@ -319,7 +319,19 @@ struct iOSChatView: View {
                     }
                 } else {
                     LazyVStack(spacing: messageSpacing) {
-                        ForEach(conversation.messages) { message in
+                        // When streaming, hide the last assistant message to avoid duplicate display
+                        let allMessages = conversation.messages.sorted { $0.timestamp < $1.timestamp }
+                        let displayMessages = chatManager.isStreaming
+                            ? allMessages.filter { msg in
+                                if msg.messageRole == .assistant,
+                                   msg.id == allMessages.last(where: { $0.messageRole == .assistant })?.id {
+                                    return false
+                                }
+                                return true
+                            }
+                            : allMessages
+
+                        ForEach(displayMessages) { message in
                             MessageBubble(message: message)
                                 .id(message.id)
                         }
