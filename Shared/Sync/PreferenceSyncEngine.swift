@@ -265,6 +265,7 @@ public struct DeviceProfile: Codable, Identifiable, Sendable, Equatable {
     public var osVersion: String
     public var lastActive: Date
 
+    @MainActor
     public static func current() -> DeviceProfile {
         let stored = load()
         if let existing = stored { return existing }
@@ -273,6 +274,7 @@ public struct DeviceProfile: Codable, Identifiable, Sendable, Equatable {
         return profile
     }
 
+    @MainActor
     private static func detect() -> DeviceProfile {
         let id = identifierForVendor()
         let name: String
