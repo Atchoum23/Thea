@@ -164,6 +164,11 @@ struct TheamacOSApp: App {
             }
 
             CommandGroup(replacing: .help) {
+                Button("Command Palette") {
+                    NotificationCenter.default.post(name: .showCommandPalette, object: nil)
+                }
+                .keyboardShortcut("k", modifiers: .command)
+
                 Button("Keyboard Shortcuts") {
                     NotificationCenter.default.post(name: .showKeyboardShortcuts, object: nil)
                 }

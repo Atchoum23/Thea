@@ -474,6 +474,7 @@ extension Notification.Name {
     static let switchModel = Notification.Name("commandPalette.switchModel")
     static let toggleDarkMode = Notification.Name("commandPalette.toggleDarkMode")
     static let showKeyboardShortcuts = Notification.Name("commandPalette.showKeyboardShortcuts")
+    static let showCommandPalette = Notification.Name("commandPalette.show")
     static let selectNewConversation = Notification.Name("thea.selectNewConversation")
 }
 
@@ -487,7 +488,7 @@ private extension Array {
 
 // MARK: - View Modifier
 
-/// View modifier to add command palette support
+/// View modifier to add command palette overlay (shortcut is registered in app commands)
 struct CommandPaletteModifier: ViewModifier {
     @StateObject private var manager = CommandPaletteManager.shared
 
@@ -501,12 +502,11 @@ struct CommandPaletteModifier: ViewModifier {
                     )
                 }
             }
-            .keyboardShortcut("k", modifiers: .command)
     }
 }
 
 extension View {
-    /// Add command palette support with Cmd+K shortcut
+    /// Add command palette overlay support
     func commandPalette() -> some View {
         modifier(CommandPaletteModifier())
     }

@@ -22,6 +22,7 @@ struct ContentView: View {
     @State private var isListeningForVoice = false
     @State private var showingNewProjectDialog = false
     @State private var showingKeyboardShortcuts = false
+    @State private var showingCommandPalette = false
     @State private var newProjectTitle = ""
 
     var body: some View {
@@ -47,6 +48,17 @@ struct ContentView: View {
             KeyboardShortcutsHelpView()
                 .frame(minWidth: 500, minHeight: 400)
         }
+        .overlay {
+            if showingCommandPalette {
+                CommandPaletteView(
+                    isPresented: $showingCommandPalette,
+                    commands: CommandPaletteManager.shared.commands
+                )
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showCommandPalette)) { _ in
+            showingCommandPalette = true
+        }
         .onReceive(NotificationCenter.default.publisher(for: .showKeyboardShortcuts)) { _ in
             showingKeyboardShortcuts = true
         }
@@ -55,6 +67,24 @@ struct ContentView: View {
                 selectedItem = .chat
                 selectedConversation = conversation
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToSection)) { notification in
+            if let section = notification.object as? String {
+                switch section {
+                case "chat": selectedItem = .chat
+                case "projects": selectedItem = .projects
+                case "knowledge": selectedItem = .knowledge
+                default: break
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .toggleDarkMode)) { _ in
+            settingsManager.theme = settingsManager.theme == "dark" ? "light" : "dark"
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .newConversation)) { _ in
+            let conversation = chatManager.createConversation(title: "New Conversation")
+            selectedItem = .chat
+            selectedConversation = conversation
         }
     }
 
