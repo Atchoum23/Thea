@@ -317,7 +317,7 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                return UIWindow(frame: .zero)
+                return UIWindow()
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -474,7 +474,7 @@ public struct SignInWithAppleButton: View {
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                return UIWindow(frame: .zero)
+                return UIWindow()
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {

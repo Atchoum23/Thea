@@ -276,14 +276,12 @@ public actor TeamKnowledgeBase {
         return Array(merged.values).sorted { $0.sharedAt > $1.sharedAt }
     }
 
+    @MainActor
     private func getCurrentUserId() -> String {
-        // This would use actual user authentication
-        // For now, use device identifier
         #if os(macOS)
         return ProcessInfo.processInfo.hostName
         #else
-        nonisolated(unsafe) let vendorId = UIDevice.current.identifierForVendor
-        return vendorId?.uuidString ?? "unknown"
+        return UIDevice.current.identifierForVendor?.uuidString ?? "unknown"
         #endif
     }
 
