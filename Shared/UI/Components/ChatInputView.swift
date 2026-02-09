@@ -1,29 +1,9 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-// Debug logging for ChatInputView
-private func inputLog(_ msg: String) {
-    #if os(macOS)
-    let logFile = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Desktop/thea_debug.log")
-    let timestamp = ISO8601DateFormatter().string(from: Date())
-    let line = "[\(timestamp)] [ChatInputView] \(msg)\n"
-    if let data = line.data(using: .utf8) {
-        if FileManager.default.fileExists(atPath: logFile.path) {
-            if let handle = try? FileHandle(forUpdating: logFile) {
-                _ = try? handle.seekToEnd()
-                _ = try? handle.write(contentsOf: data)
-                try? handle.close()
-            }
-        } else {
-            try? data.write(to: logFile)
-        }
-    }
-    #else
-    // On iOS/watchOS/tvOS, use os.log instead
-    print("[ChatInputView] \(msg)")
-    #endif
-}
+import os.log
+
+private let chatInputLogger = Logger(subsystem: "ai.thea.app", category: "ChatInput")
 
 struct ChatInputView: View {
     @Binding var text: String
@@ -129,25 +109,33 @@ struct ChatInputView: View {
                     .disabled(isStreaming)
                 #endif
 
-                // Text input
+                // Text input — Enter sends, Shift+Enter inserts newline
                 TextField("Message Thea...", text: $text, axis: .vertical)
                     .lineLimit(1 ... 8)
                     .focused($isFocused)
                     .disabled(isStreaming)
                     .onSubmit {
-                        inputLog("onSubmit triggered")
                         if canSend {
                             onSend()
                         }
                     }
+                    #if os(macOS)
+                    .onKeyPress(.return, phases: .down) { press in
+                        if press.modifiers.contains(.shift) {
+                            return .ignored
+                        }
+                        if canSend {
+                            onSend()
+                        }
+                        return .handled
+                    }
+                    .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
+                        handleDrop(providers: providers)
+                        return true
+                    }
+                    #endif
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: .infinity, minHeight: 36)
-                #if os(macOS)
-                .onDrop(of: [.fileURL, .image, .text], isTargeted: $dragOver) { providers in
-                    handleDrop(providers: providers)
-                    return true
-                }
-                #endif
 
                 // Microphone button (inline voice input)
                 if let onVoiceToggle {
@@ -168,7 +156,6 @@ struct ChatInputView: View {
 
                 // Send / Stop button
                 Button {
-                    inputLog("Send button pressed")
                     onSend()
                 } label: {
                     Image(systemName: isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
@@ -237,7 +224,7 @@ struct ChatInputView: View {
     private func handleSlashCommand(_ command: SlashCommand) {
         // Replace the "/" prefix with the command text and a trailing space
         text = "/\(command.name) "
-        inputLog("Slash command selected: /\(command.name)")
+        chatInputLogger.debug("Slash command selected: /\(command.name)")
     }
 
     // MARK: - Mention Handling
@@ -248,7 +235,7 @@ struct ChatInputView: View {
             text = String(text[text.startIndex..<atRange.lowerBound]) + "@\(item.name) "
         }
         showMentionOverlay = false
-        inputLog("Mention selected: @\(item.name)")
+        chatInputLogger.debug("Mention selected: @\(item.name)")
     }
 
     // MARK: - Overlay State Management
@@ -281,9 +268,9 @@ struct ChatInputView: View {
             do {
                 try imageData.write(to: tempURL)
                 try await attachmentManager.addAttachment(from: tempURL)
-                inputLog("Pasted image attached: \(fileName)")
+                chatInputLogger.debug("Pasted image attached: \(fileName)")
             } catch {
-                inputLog("Failed to attach pasted image: \(error)")
+                chatInputLogger.debug("Failed to attach pasted image: \(error.localizedDescription)")
             }
         }
     }
@@ -330,12 +317,12 @@ struct ChatInputView: View {
                     do {
                         try await attachmentManager.addAttachment(from: url)
                     } catch {
-                        inputLog("Failed to attach file: \(error)")
+                        chatInputLogger.debug("Failed to attach file: \(error.localizedDescription)")
                     }
                 }
             }
         case .failure(let error):
-            inputLog("File picker error: \(error)")
+            chatInputLogger.debug("File picker error: \(error.localizedDescription)")
         }
     }
 
@@ -351,7 +338,7 @@ struct ChatInputView: View {
                         do {
                             try await attachmentManager.addAttachment(from: url)
                         } catch {
-                            inputLog("Drop attachment failed: \(error)")
+                            chatInputLogger.debug("Drop attachment failed: \(error.localizedDescription)")
                         }
                     }
                 }
