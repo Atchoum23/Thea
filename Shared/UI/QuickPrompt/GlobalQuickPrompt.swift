@@ -575,14 +575,14 @@ public struct QuickPromptOverlayView: View {
         HStack(spacing: 12) {
             // App icon
             Image(systemName: "sparkles")
-                .font(.system(size: 24))
+                .font(.theaTitle2)
                 .foregroundStyle(.tint)
                 .frame(width: 36, height: 36)
 
             // Text input
             TextField("Ask Thea anything...", text: $manager.promptText, axis: .vertical)
                 .textFieldStyle(.plain)
-                .font(.system(size: 16))
+                .font(.theaBody)
                 .lineLimit(1 ... 5)
                 .focused($isTextFieldFocused)
                 .onSubmit {
@@ -608,7 +608,7 @@ public struct QuickPromptOverlayView: View {
                         }
                     }) {
                         Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 28))
+                            .font(.theaTitle1)
                             .foregroundStyle(manager.promptText.isEmpty ? AnyShapeStyle(.secondary) : AnyShapeStyle(.tint))
                     }
                     .buttonStyle(.plain)
@@ -621,7 +621,7 @@ public struct QuickPromptOverlayView: View {
                     manager.openInMainApp()
                 }) {
                     Image(systemName: "arrow.up.forward.square")
-                        .font(.system(size: 20))
+                        .font(.theaTitle3)
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
@@ -636,7 +636,7 @@ public struct QuickPromptOverlayView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Response")
-                    .font(.caption)
+                    .font(.theaCaption1)
                     .foregroundStyle(.secondary)
 
                 Spacer()
@@ -644,7 +644,7 @@ public struct QuickPromptOverlayView: View {
                 // Action buttons
                 Button(action: { manager.copyResponse() }) {
                     Image(systemName: "doc.on.doc")
-                        .font(.caption)
+                        .font(.theaCaption1)
                 }
                 .buttonStyle(.plain)
                 .help("Copy response")
@@ -653,7 +653,7 @@ public struct QuickPromptOverlayView: View {
                     manager.openInMainApp(prompt: manager.promptText, response: manager.response?.text)
                 }) {
                     Image(systemName: "arrow.up.forward.square")
-                        .font(.caption)
+                        .font(.theaCaption1)
                 }
                 .buttonStyle(.plain)
                 .help("Continue in Thea")
@@ -666,7 +666,7 @@ public struct QuickPromptOverlayView: View {
                     #endif
                 }) {
                     Image(systemName: "xmark.circle")
-                        .font(.caption)
+                        .font(.theaCaption1)
                 }
                 .buttonStyle(.plain)
                 .help("Dismiss response")
@@ -674,7 +674,7 @@ public struct QuickPromptOverlayView: View {
 
             ScrollView {
                 Text(manager.response?.text ?? "")
-                    .font(.system(size: 14))
+                    .font(.theaCallout)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -688,7 +688,7 @@ public struct QuickPromptOverlayView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text("Recent")
-                    .font(.caption)
+                    .font(.theaCaption1)
                     .foregroundStyle(.secondary)
 
                 Spacer()
@@ -696,7 +696,7 @@ public struct QuickPromptOverlayView: View {
                 Button("Clear") {
                     manager.clearRecentPrompts()
                 }
-                .font(.caption)
+                .font(.theaCaption1)
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
             }
@@ -709,11 +709,11 @@ public struct QuickPromptOverlayView: View {
                         Button(action: { manager.useRecentPrompt(prompt) }) {
                             HStack {
                                 Image(systemName: "clock.arrow.circlepath")
-                                    .font(.caption)
+                                    .font(.theaCaption1)
                                     .foregroundStyle(.secondary)
 
                                 Text(prompt.text)
-                                    .font(.system(size: 13))
+                                    .font(.theaFootnote)
                                     .lineLimit(1)
 
                                 Spacer()
@@ -850,7 +850,7 @@ public struct QuickPromptSettingsView: View {
         var body: some View {
             VStack(spacing: 20) {
                 Text("Press your desired key combination")
-                    .font(.headline)
+                    .font(.theaHeadline)
 
                 Text("Current: \(displayString)")
                     .font(.title2)
