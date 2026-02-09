@@ -304,8 +304,6 @@ public final class IntentDisambiguator: ObservableObject {
 
     /// Parse a user query into intent
     public func parseIntent(_ query: String) -> UserIntent {
-        let lowercased = query.lowercased()
-
         // Classify primary intent
         let (category, categoryConfidence) = classifyIntent(query)
 
@@ -597,7 +595,7 @@ public final class IntentDisambiguator: ObservableObject {
 
         // For missing file target
         if intent.primaryIntent == .codeModification &&
-           !intent.extractedEntities.contains { $0.type == .fileName } {
+           !intent.extractedEntities.contains(where: { $0.type == .fileName }) {
             questions.append(ClarifyingQuestion(
                 question: "Which file should I modify?",
                 context: "Please specify the target file",
