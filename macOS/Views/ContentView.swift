@@ -37,7 +37,7 @@ struct ContentView: View {
         .toolbarTitleDisplayMode(.inline)
         .textSelection(.enabled)
         .preferredColorScheme(colorSchemeForTheme)
-        .dynamicTypeSize(dynamicTypeSizeForFontSize)
+        .id(settingsManager.fontSize)
         .onAppear {
             setupManagers()
         }
@@ -154,8 +154,18 @@ struct ContentView: View {
     private var detailContent: some View {
         if let conversation = selectedConversation {
             MacChatDetailView(conversation: conversation)
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        sidebarToggleButton
+                    }
+                }
         } else if let project = selectedProject {
             MacProjectDetailView(project: project)
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        sidebarToggleButton
+                    }
+                }
         } else {
             // Welcome view with input bar always visible at bottom
             VStack(spacing: 0) {
@@ -185,7 +195,24 @@ struct ContentView: View {
                     isListening: isListeningForVoice
                 )
             }
+            .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    sidebarToggleButton
+                }
+            }
         }
+    }
+
+    /// Sidebar toggle button — shown in detail column toolbar so it's always accessible
+    private var sidebarToggleButton: some View {
+        Button {
+            withAnimation {
+                columnVisibility = columnVisibility == .detailOnly ? .all : .detailOnly
+            }
+        } label: {
+            Image(systemName: columnVisibility == .detailOnly ? "sidebar.left" : "sidebar.right")
+        }
+        .help(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar")
     }
 
     // MARK: - Chat List
@@ -194,7 +221,7 @@ struct ContentView: View {
         SidebarView(selection: $selectedConversation)
             .frame(minWidth: 250)
             .toolbar {
-                ToolbarItem(placement: .navigation) {
+                ToolbarItem(placement: .primaryAction) {
                     Button {
                         let conversation = chatManager.createConversation(title: "New Conversation")
                         selectedConversation = conversation
@@ -202,17 +229,6 @@ struct ContentView: View {
                         Image(systemName: "plus")
                     }
                     .help("New Conversation (⇧⌘N)")
-                }
-
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        withAnimation {
-                            columnVisibility = columnVisibility == .detailOnly ? .all : .detailOnly
-                        }
-                    } label: {
-                        Image(systemName: columnVisibility == .detailOnly ? "sidebar.left" : "sidebar.right")
-                    }
-                    .help(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar")
                 }
             }
     }
@@ -305,14 +321,6 @@ struct ContentView: View {
         case "light": .light
         case "dark": .dark
         default: nil
-        }
-    }
-
-    private var dynamicTypeSizeForFontSize: DynamicTypeSize {
-        switch settingsManager.fontSize {
-        case "small": .small
-        case "large": .xxxLarge
-        default: .medium
         }
     }
 
