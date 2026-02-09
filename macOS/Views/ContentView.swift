@@ -144,6 +144,17 @@ struct ContentView: View {
         SidebarView(selection: $selectedConversation)
             .frame(minWidth: 250)
             .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    Button {
+                        withAnimation {
+                            columnVisibility = columnVisibility == .detailOnly ? .all : .detailOnly
+                        }
+                    } label: {
+                        Image(systemName: columnVisibility == .detailOnly ? "sidebar.left" : "sidebar.right")
+                    }
+                    .help(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar")
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         let conversation = chatManager.createConversation(title: "New Conversation")
