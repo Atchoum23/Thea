@@ -18,25 +18,48 @@ struct TheamacOSApp: App {
     @State private var showingFallbackAlert = false
 
     init() {
-        do {
-            // Configure for local-only storage (no CloudKit sync)
-            // This avoids CloudKit requirements for relationships and unique constraints
-            let schema = Schema([Conversation.self, Message.self, Project.self])
-            // Use in-memory storage during tests to speed up initialization
-            let useInMemory = isUITesting || isUnitTesting
-            let modelConfiguration = ModelConfiguration(
+        let schema = Schema([Conversation.self, Message.self, Project.self])
+        let useInMemory = isUITesting || isUnitTesting
+
+        func makeConfig() -> ModelConfiguration {
+            ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: useInMemory,
-                cloudKitDatabase: .none // Disable CloudKit to avoid sync requirements
+                cloudKitDatabase: .none
             )
-            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+        }
+
+        do {
+            let container = try ModelContainer(for: schema, configurations: [makeConfig()])
             _modelContainer = State(initialValue: container)
             if useInMemory {
                 print("⚡ Testing mode: Using in-memory storage")
             }
         } catch {
-            _storageError = State(initialValue: error)
-            print("❌ Failed to initialize ModelContainer: \(error)")
+            // Migration failed — delete the old store and retry
+            logger.warning("Store migration failed, recreating: \(error.localizedDescription)")
+            Self.deleteStoreFiles()
+            do {
+                let container = try ModelContainer(for: schema, configurations: [makeConfig()])
+                _modelContainer = State(initialValue: container)
+                logger.info("Store recreated successfully after migration failure")
+            } catch {
+                _storageError = State(initialValue: error)
+                print("❌ Failed to initialize ModelContainer: \(error)")
+            }
+        }
+    }
+
+    /// Remove all SwiftData store files to allow a fresh start after migration failures
+    private static func deleteStoreFiles() {
+        guard let groupURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
+        ) else { return }
+        let supportDir = groupURL.appendingPathComponent("Library/Application Support")
+        let storeName = "default.store"
+        for suffix in ["", "-shm", "-wal"] {
+            let url = supportDir.appendingPathComponent(storeName + suffix)
+            try? FileManager.default.removeItem(at: url)
         }
     }
 
