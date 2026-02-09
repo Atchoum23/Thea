@@ -309,9 +309,18 @@ struct IPadChatDetailView: View {
 
     @Query private var allMessages: [Message]
 
+    @StateObject private var settingsManager = SettingsManager.shared
     @State private var messageText = ""
     @State private var isListeningForVoice = false
     @FocusState private var isInputFocused: Bool
+
+    private var messageSpacing: CGFloat {
+        switch settingsManager.messageDensity {
+        case "compact": TheaSpacing.sm
+        case "spacious": TheaSpacing.xxl
+        default: TheaSpacing.lg
+        }
+    }
 
     private var messages: [Message] {
         allMessages
@@ -381,7 +390,7 @@ struct IPadChatDetailView: View {
                         sendMessage()
                     }
                 } else {
-                    LazyVStack(spacing: TheaSpacing.lg) {
+                    LazyVStack(spacing: messageSpacing) {
                         ForEach(messages) { message in
                             MessageBubble(message: message)
                                 .id(message.id)

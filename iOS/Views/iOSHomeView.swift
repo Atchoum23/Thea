@@ -259,9 +259,18 @@ struct iOSChatView: View {
     @State private var chatManager = ChatManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
 
+    @StateObject private var settingsManager = SettingsManager.shared
     @State private var messageText = ""
     @State private var isListeningForVoice = false
     @FocusState private var isInputFocused: Bool
+
+    private var messageSpacing: CGFloat {
+        switch settingsManager.messageDensity {
+        case "compact": TheaSpacing.xs
+        case "spacious": TheaSpacing.xl
+        default: TheaSpacing.md
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -309,7 +318,7 @@ struct iOSChatView: View {
                         sendMessage()
                     }
                 } else {
-                    LazyVStack(spacing: TheaSpacing.md) {
+                    LazyVStack(spacing: messageSpacing) {
                         ForEach(conversation.messages) { message in
                             MessageBubble(message: message)
                                 .id(message.id)

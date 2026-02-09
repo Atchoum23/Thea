@@ -462,12 +462,13 @@ struct MessageBubble: View {
     // MARK: - Markdown Theme
 
     private var theaMarkdownTheme: MarkdownUI.Theme {
-        MarkdownUI.Theme()
+        let config = AppConfiguration.shared.themeConfig
+        return MarkdownUI.Theme()
             .text {
-                FontSize(.em(1))
+                FontSize(config.bodySize)
             }
             .code {
-                FontSize(.em(0.9))
+                FontSize(config.codeInlineSize)
                 BackgroundColor(colorScheme == .dark ? Color(white: 0.15) : Color(white: 0.95))
             }
             .codeBlock { configuration in
@@ -477,7 +478,7 @@ struct MessageBubble: View {
                 configuration.label
                     .markdownTextStyle {
                         FontWeight(.bold)
-                        FontSize(.em(1.5))
+                        FontSize(config.title1Size)
                     }
                     .padding(.bottom, 8)
             }
@@ -485,7 +486,7 @@ struct MessageBubble: View {
                 configuration.label
                     .markdownTextStyle {
                         FontWeight(.semibold)
-                        FontSize(.em(1.3))
+                        FontSize(config.title2Size)
                     }
                     .padding(.bottom, 6)
             }
@@ -493,7 +494,7 @@ struct MessageBubble: View {
                 configuration.label
                     .markdownTextStyle {
                         FontWeight(.semibold)
-                        FontSize(.em(1.15))
+                        FontSize(config.title3Size)
                     }
                     .padding(.bottom, 4)
             }

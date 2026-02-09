@@ -19,6 +19,7 @@ struct ChatView: View {
     @State private var showingExportDialog = false
     @State private var showingAPIKeySetup = false
     @State private var newTitle = ""
+    @StateObject private var settingsManager = SettingsManager.shared
 
     @Query private var allMessages: [Message]
 
@@ -116,6 +117,24 @@ struct ChatView: View {
             }
     }
 
+    // MARK: - Density-Aware Spacing
+
+    private var messageSpacing: CGFloat {
+        switch settingsManager.messageDensity {
+        case "compact": TheaSpacing.sm
+        case "spacious": TheaSpacing.xxl
+        default: TheaSpacing.lg
+        }
+    }
+
+    private var messagePadding: CGFloat {
+        switch settingsManager.messageDensity {
+        case "compact": TheaSpacing.sm
+        case "spacious": TheaSpacing.xxl
+        default: TheaSpacing.lg
+        }
+    }
+
     // MARK: - Message List
 
     private var messageList: some View {
@@ -127,7 +146,7 @@ struct ChatView: View {
                         sendMessage()
                     }
                 } else {
-                    LazyVStack(spacing: TheaSpacing.lg) {
+                    LazyVStack(spacing: messageSpacing) {
                         // When streaming, hide the last assistant message to avoid duplicate display
                         let displayMessages = chatManager.isStreaming
                             ? messages.filter { msg in
@@ -156,7 +175,7 @@ struct ChatView: View {
                         }
                     }
                     .padding(.horizontal, TheaSpacing.xxl)
-                    .padding(.vertical, TheaSpacing.lg)
+                    .padding(.vertical, messagePadding)
                 }
             }
             .scrollContentBackground(.hidden)
