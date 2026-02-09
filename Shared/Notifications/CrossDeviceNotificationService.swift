@@ -105,7 +105,7 @@ public actor CrossDeviceNotificationService {
 
         let registration = CrossDeviceRegistration(
             deviceToken: tokenString,
-            deviceType: CrossDeviceType.current,
+            deviceType: await CrossDeviceType.current,
             deviceName: await getDeviceName(),
             modelIdentifier: await getModelIdentifier(),
             osVersion: await getOSVersion(),
