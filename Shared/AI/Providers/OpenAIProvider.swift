@@ -47,11 +47,11 @@ final class OpenAIProvider: AIProvider, Sendable {
         model: String,
         stream: Bool
     ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
-        let openAIMessages = messages.map { msg in
+        let openAIMessages = messages.compactMap { msg in
             ChatQuery.ChatCompletionMessageParam(
                 role: convertRole(msg.role),
                 content: msg.content.textValue
-            )!
+            )
         }
 
         let query = ChatQuery(

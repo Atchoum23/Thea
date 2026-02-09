@@ -235,6 +235,9 @@ struct TheamacOSApp: App {
         _ = PreferenceSyncEngine.shared
         _ = AppUpdateService.shared
 
+        // Apply saved font-size preference to theme config on startup
+        AppConfiguration.applyFontSize(SettingsManager.shared.fontSize)
+
         // Existing managers
         ChatManager.shared.setModelContext(context)
         ProjectManager.shared.setModelContext(context)

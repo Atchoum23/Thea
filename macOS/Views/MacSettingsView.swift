@@ -251,7 +251,7 @@ struct MacSettingsView: View {
                     .labelsHidden()
                     .frame(width: pickerWidth)
                     .onChange(of: settingsManager.fontSize) { _, newSize in
-                        applyFontSizeToThemeConfig(newSize)
+                        AppConfiguration.applyFontSize(newSize)
                     }
                 }
 
@@ -590,30 +590,4 @@ struct MacSettingsView: View {
         print("Clearing cache")
     }
 
-    // MARK: - Font Size Scaling
-
-    private func applyFontSizeToThemeConfig(_ size: String) {
-        var config = AppConfiguration.shared.themeConfig
-        let scale: CGFloat = switch size {
-        case "small": 0.85
-        case "large": 1.25
-        default: 1.0
-        }
-
-        config.displaySize = round(34 * scale)
-        config.title1Size = round(28 * scale)
-        config.title2Size = round(22 * scale)
-        config.title3Size = round(20 * scale)
-        config.headlineSize = round(17 * scale)
-        config.bodySize = round(17 * scale)
-        config.calloutSize = round(16 * scale)
-        config.subheadSize = round(15 * scale)
-        config.footnoteSize = round(13 * scale)
-        config.caption1Size = round(12 * scale)
-        config.caption2Size = round(11 * scale)
-        config.codeSize = round(14 * scale)
-        config.codeInlineSize = round(16 * scale)
-
-        AppConfiguration.shared.themeConfig = config
-    }
 }

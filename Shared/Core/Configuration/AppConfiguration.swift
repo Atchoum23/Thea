@@ -24,6 +24,28 @@ final class AppConfiguration {
         } else {
             themeConfigStored = ThemeConfiguration()
         }
+
+        // Apply the saved font-size preference so scaled sizes survive restarts.
+        // SettingsManager stores the choice under "fontSize" (small/medium/large).
+        let savedFontSize = UserDefaults.standard.string(forKey: "fontSize") ?? "medium"
+        if savedFontSize != "medium" {
+            // Defer to after init completes so `shared` is available.
+            // At this point themeConfigStored is set, so we can mutate it directly.
+            let scale: CGFloat = savedFontSize == "small" ? 0.85 : 1.25
+            themeConfigStored.displaySize = round(34 * scale)
+            themeConfigStored.title1Size = round(28 * scale)
+            themeConfigStored.title2Size = round(22 * scale)
+            themeConfigStored.title3Size = round(20 * scale)
+            themeConfigStored.headlineSize = round(17 * scale)
+            themeConfigStored.bodySize = round(17 * scale)
+            themeConfigStored.calloutSize = round(16 * scale)
+            themeConfigStored.subheadSize = round(15 * scale)
+            themeConfigStored.footnoteSize = round(13 * scale)
+            themeConfigStored.caption1Size = round(12 * scale)
+            themeConfigStored.caption2Size = round(11 * scale)
+            themeConfigStored.codeSize = round(14 * scale)
+            themeConfigStored.codeInlineSize = round(16 * scale)
+        }
     }
 
     // MARK: - App Info
@@ -161,6 +183,35 @@ final class AppConfiguration {
                 defaults.set(data, forKey: "AppConfiguration.themeConfig")
             }
         }
+    }
+
+    // MARK: - Font Size Application
+
+    /// Apply the user's font-size preference ("small", "medium", "large") to the
+    /// theme configuration.  Call this at startup and whenever the picker changes.
+    static func applyFontSize(_ size: String) {
+        var config = shared.themeConfig
+        let scale: CGFloat = switch size {
+        case "small": 0.85
+        case "large": 1.25
+        default: 1.0
+        }
+
+        config.displaySize = round(34 * scale)
+        config.title1Size = round(28 * scale)
+        config.title2Size = round(22 * scale)
+        config.title3Size = round(20 * scale)
+        config.headlineSize = round(17 * scale)
+        config.bodySize = round(17 * scale)
+        config.calloutSize = round(16 * scale)
+        config.subheadSize = round(15 * scale)
+        config.footnoteSize = round(13 * scale)
+        config.caption1Size = round(12 * scale)
+        config.caption2Size = round(11 * scale)
+        config.codeSize = round(14 * scale)
+        config.codeInlineSize = round(16 * scale)
+
+        shared.themeConfig = config
     }
 
     // MARK: - Voice Configuration

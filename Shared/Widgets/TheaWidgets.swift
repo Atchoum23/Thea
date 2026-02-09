@@ -243,14 +243,16 @@ struct MediumWidgetView: View {
                     .foregroundStyle(.secondary)
 
                 ForEach(entry.data.quickSuggestions.prefix(3), id: \.self) { suggestion in
-                    Link(destination: URL(string: "thea://ask?q=\(suggestion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")")!) {
-                        HStack {
-                            Image(systemName: "arrow.right.circle.fill")
-                                .font(.caption)
-                            Text(suggestion)
-                                .font(.caption)
+                    if let url = URL(string: "thea://ask?q=\(suggestion.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") {
+                        Link(destination: url) {
+                            HStack {
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .font(.caption)
+                                Text(suggestion)
+                                    .font(.caption)
+                            }
+                            .foregroundStyle(.blue)
                         }
-                        .foregroundStyle(.blue)
                     }
                 }
 
@@ -518,16 +520,18 @@ struct QuickActionButton: View {
     let label: String
 
     var body: some View {
-        Link(destination: URL(string: "thea://action/\(label.lowercased())")!) {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.title3)
-                Text(label)
-                    .font(.caption2)
+        if let url = URL(string: "thea://action/\(label.lowercased())") {
+            Link(destination: url) {
+                VStack(spacing: 4) {
+                    Image(systemName: icon)
+                        .font(.title3)
+                    Text(label)
+                        .font(.caption2)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(8)
+                .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
             }
-            .frame(maxWidth: .infinity)
-            .padding(8)
-            .background(.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
         }
     }
 }

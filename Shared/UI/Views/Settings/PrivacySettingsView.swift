@@ -798,9 +798,11 @@ struct PrivacySettingsView: View {
 
             Spacer()
 
-            Link(destination: URL(string: privacyUrl)!) {
-                Text("Privacy Policy")
-                    .font(.caption2)
+            if let url = URL(string: privacyUrl) {
+                Link(destination: url) {
+                    Text("Privacy Policy")
+                        .font(.caption2)
+                }
             }
         }
     }

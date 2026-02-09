@@ -352,27 +352,31 @@
 
         /// Open a specific system preference pane
         public func openSystemPreference(_ preference: SystemPreference) async throws {
-            let url = switch preference {
+            let urlString = switch preference {
             case .general:
-                URL(string: "x-apple.systempreferences:com.apple.preference.general")!
+                "x-apple.systempreferences:com.apple.preference.general"
             case .appearance:
-                URL(string: "x-apple.systempreferences:com.apple.preference.general?Appearance")!
+                "x-apple.systempreferences:com.apple.preference.general?Appearance"
             case .accessibility:
-                URL(string: "x-apple.systempreferences:com.apple.preference.universalaccess")!
+                "x-apple.systempreferences:com.apple.preference.universalaccess"
             case .security:
-                URL(string: "x-apple.systempreferences:com.apple.preference.security")!
+                "x-apple.systempreferences:com.apple.preference.security"
             case .notifications:
-                URL(string: "x-apple.systempreferences:com.apple.preference.notifications")!
+                "x-apple.systempreferences:com.apple.preference.notifications"
             case .sound:
-                URL(string: "x-apple.systempreferences:com.apple.preference.sound")!
+                "x-apple.systempreferences:com.apple.preference.sound"
             case .keyboard:
-                URL(string: "x-apple.systempreferences:com.apple.preference.keyboard")!
+                "x-apple.systempreferences:com.apple.preference.keyboard"
             case .displays:
-                URL(string: "x-apple.systempreferences:com.apple.preference.displays")!
+                "x-apple.systempreferences:com.apple.preference.displays"
             case .network:
-                URL(string: "x-apple.systempreferences:com.apple.preference.network")!
+                "x-apple.systempreferences:com.apple.preference.network"
             case .bluetooth:
-                URL(string: "x-apple.systempreferences:com.apple.preference.Bluetooth")!
+                "x-apple.systempreferences:com.apple.preference.Bluetooth"
+            }
+
+            guard let url = URL(string: urlString) else {
+                throw SystemAutomationError.operationFailed("Invalid system preference URL: \(urlString)")
             }
 
             NSWorkspace.shared.open(url)

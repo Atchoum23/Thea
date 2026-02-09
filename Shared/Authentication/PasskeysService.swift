@@ -313,9 +313,11 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                 if let existingWindow = scenes.flatMap(\.windows).first {
                     return existingWindow
                 }
-                // Create new window from first available scene
-                let scene = scenes.first!  // Scene must exist during foreground auth
-                return UIWindow(windowScene: scene)
+                // Create new window from first available scene, or a bare window as last resort
+                if let scene = scenes.first {
+                    return UIWindow(windowScene: scene)
+                }
+                return UIWindow(frame: .zero)
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -468,9 +470,11 @@ public struct SignInWithAppleButton: View {
                 if let existingWindow = scenes.flatMap(\.windows).first {
                     return existingWindow
                 }
-                // Create new window from first available scene
-                let scene = scenes.first!  // Scene must exist during foreground auth
-                return UIWindow(windowScene: scene)
+                // Create new window from first available scene, or a bare window as last resort
+                if let scene = scenes.first {
+                    return UIWindow(windowScene: scene)
+                }
+                return UIWindow(frame: .zero)
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {

@@ -377,7 +377,11 @@ final class TraktService: ObservableObject {
     private func get<T: Decodable>(endpoint: String) async throws -> T {
         guard let clientID else { throw TraktError.notConfigured }
 
-        var request = URLRequest(url: URL(string: TraktConfig.baseURL + endpoint)!)
+        guard let url = URL(string: TraktConfig.baseURL + endpoint) else {
+            throw TraktError.invalidURL(endpoint)
+        }
+
+        var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("2", forHTTPHeaderField: "trakt-api-version")
@@ -403,7 +407,11 @@ final class TraktService: ObservableObject {
     }
 
     private func post<T: Decodable>(endpoint: String, body: Any, authenticated: Bool) async throws -> T {
-        var request = URLRequest(url: URL(string: TraktConfig.baseURL + endpoint)!)
+        guard let url = URL(string: TraktConfig.baseURL + endpoint) else {
+            throw TraktError.invalidURL(endpoint)
+        }
+
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
@@ -468,6 +476,7 @@ final class TraktService: ObservableObject {
 enum TraktError: LocalizedError {
     case notConfigured
     case invalidResponse
+    case invalidURL(String)
     case httpError(Int)
     case decodingError
 
@@ -475,6 +484,7 @@ enum TraktError: LocalizedError {
         switch self {
         case .notConfigured: "Trakt is not configured"
         case .invalidResponse: "Invalid response from server"
+        case .invalidURL(let endpoint): "Invalid URL for endpoint: \(endpoint)"
         case .httpError(let code): "HTTP error: \(code)"
         case .decodingError: "Failed to decode response"
         }
