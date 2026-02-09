@@ -400,12 +400,14 @@ struct KeyboardShortcutsHelpView: View {
             title: "General",
             icon: "command",
             shortcuts: [
-                KeyboardShortcutItem("Cmd+N", "New Conversation"),
+                KeyboardShortcutItem("Cmd+N", "New Window"),
+                KeyboardShortcutItem("Cmd+T", "New Tab"),
+                KeyboardShortcutItem("Cmd+Shift+N", "New Conversation"),
+                KeyboardShortcutItem("Cmd+Shift+P", "New Project"),
                 KeyboardShortcutItem("Cmd+W", "Close Window"),
                 KeyboardShortcutItem("Cmd+,", "Open Settings"),
                 KeyboardShortcutItem("Cmd+/", "Show Keyboard Shortcuts"),
-                KeyboardShortcutItem("Cmd+Q", "Quit Thea"),
-                KeyboardShortcutItem("Cmd+M", "Minimize Window")
+                KeyboardShortcutItem("Cmd+Q", "Quit Thea")
             ]
         )
     }
@@ -504,8 +506,8 @@ struct KeyboardShortcutsHelpView: View {
                 KeyboardShortcutItem("Cmd++", "Zoom In"),
                 KeyboardShortcutItem("Cmd+-", "Zoom Out"),
                 KeyboardShortcutItem("Cmd+Ctrl+F", "Toggle Full Screen"),
-                KeyboardShortcutItem("Cmd+Option+S", "Toggle Sidebar"),
-                KeyboardShortcutItem("Cmd+Shift+N", "New Window")
+                KeyboardShortcutItem("Cmd+Ctrl+S", "Toggle Sidebar"),
+                KeyboardShortcutItem("Cmd+M", "Minimize Window")
             ]
         )
     }
