@@ -348,6 +348,7 @@ targets:
           # All files in each folder depend on each other; must be enabled together.
           - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
@@ -416,6 +417,7 @@ targets:
           - "**/Configuration/ConfigurationManager.swift"
           - "**/Components/ConfidenceIndicatorViews.swift"
           - "**/Components/EnhancedMessageBubble.swift"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/THEAThinkingView.swift"
           - "**/Components/QuerySuggestionOverlay.swift"
@@ -630,6 +632,7 @@ targets:
           - "**/Settings/AIProvidersSettingsView.swift"
           - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
+          - "**/Components/MentionAutocomplete.swift"
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
