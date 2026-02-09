@@ -390,12 +390,8 @@ public final class IntelligenceOrchestrator: ObservableObject {
             appliesTo: []
         )
 
-        do {
-            try await knowledgeManager.add(item)
-            logger.info("Added discovered knowledge: \(knowledge.title)")
-        } catch {
-            logger.error("Failed to add discovered knowledge: \(error.localizedDescription)")
-        }
+        knowledgeManager.add(item)
+        logger.info("Added discovered knowledge: \(knowledge.title)")
     }
 
     // MARK: - Event Handlers
