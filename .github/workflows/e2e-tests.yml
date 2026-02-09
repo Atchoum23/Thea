@@ -36,7 +36,13 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Select Xcode ${{ env.XCODE_VERSION }}
-        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          else
+            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
+            xcodebuild -version
+          fi
 
       - name: Cache XcodeGen
         id: xcodegen-cache
@@ -77,7 +83,7 @@ jobs:
           xcodebuild build \
             -project Thea.xcodeproj \
             -scheme Thea-iOS \
-            -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -configuration Debug \
             -derivedDataPath build \
             -arch arm64 \
@@ -186,13 +192,19 @@ jobs:
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" app/Thea.app/Info.plist || echo "CFBundleVersion not found"
 
       - name: Select Xcode ${{ env.XCODE_VERSION }}
-        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          else
+            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
+            xcodebuild -version
+          fi
 
       - name: Boot Simulator
         id: simulator
         run: |
-          # Get available iPhone 15 Pro simulator - extract UUID from format: "iPhone 15 Pro (UUID) (State)"
-          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro" | head -1 | grep -oE '[A-F0-9-]{36}')
+          # Get available iPhone 16 Pro simulator - extract UUID from format: "iPhone 16 Pro (UUID) (State)"
+          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16 Pro" | head -1 | grep -oE '[A-F0-9-]{36}')
           if [ -z "$DEVICE_ID" ]; then
             # Fallback to any available iPhone
             DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')

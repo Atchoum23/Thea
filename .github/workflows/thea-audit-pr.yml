@@ -54,7 +54,7 @@ jobs:
       - name: Build thea-audit
         working-directory: Tools/thea-audit
         run: |
-          swift build -c release
+          xcrun swift build -c release
           echo "THEA_AUDIT=$(pwd)/.build/release/thea-audit" >> $GITHUB_ENV
 
       - name: Get Changed Files
