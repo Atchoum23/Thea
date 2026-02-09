@@ -193,6 +193,15 @@ public class PasskeysService: NSObject, ObservableObject {
         currentUser = nil
     }
 
+    // MARK: - Helpers
+
+    #if os(iOS)
+        @available(iOS, deprecated: 26.0)
+        fileprivate static func makeFallbackWindow() -> UIWindow {
+            UIWindow()
+        }
+    #endif
+
     // MARK: - Token Management
 
     /// Validate and refresh authentication token
@@ -313,11 +322,12 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                 if let existingWindow = scenes.flatMap(\.windows).first {
                     return existingWindow
                 }
-                // Create new window from first available scene, or a bare window as last resort
+                // Create new window from first available scene
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                return UIWindow()
+                // Last resort: bare UIWindow — unreachable in practice (a scene always exists)
+                return PasskeysService.makeFallbackWindow()
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -474,7 +484,12 @@ public struct SignInWithAppleButton: View {
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                return UIWindow()
+                return Self.makeFallbackWindow()
+            }
+
+            @available(iOS, deprecated: 26.0)
+            private static func makeFallbackWindow() -> UIWindow {
+                UIWindow()
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
