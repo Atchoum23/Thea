@@ -345,7 +345,7 @@ final class VoiceInteractionEngine {
         try await startListening()
 
         // Wait for final transcription or timeout
-        let result = try await withTimeout(seconds: timeout) { [weak self] in
+        let result = try await withTimeout(seconds: timeout) {
             await withCheckedContinuation { continuation in
                 _ = NotificationCenter.default.addObserver(
                     forName: .voiceTranscriptionComplete,
