@@ -536,20 +536,20 @@ protocol LocalModelInstance: Sendable {
 
 struct OllamaModelInstance: LocalModelInstance {
     let model: LocalModel
-    let ollamaURL: String
+    let ollamaBaseURL: String
 
     init(model: LocalModel) {
         self.model = model
         // Capture config value at init time for Sendable compliance
-        ollamaURL = LocalModelConfiguration().ollamaBaseURL + LocalModelConfiguration().ollamaAPIEndpoint
+        ollamaBaseURL = LocalModelConfiguration().ollamaBaseURL
     }
 
     func generate(prompt: String, maxTokens _: Int) async throws -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
+        let generateURL = ollamaBaseURL + "/api/generate"
+        return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    // Call Ollama API
-                    guard let url = URL(string: ollamaURL) else {
+                    guard let url = URL(string: generateURL) else {
                         throw LocalModelError.notImplemented
                     }
                     var request = URLRequest(url: url)
@@ -572,6 +572,52 @@ struct OllamaModelInstance: LocalModelInstance {
                            let response = json["response"] as? String
                         {
                             continuation.yield(response)
+                        }
+                    }
+
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+
+    /// Chat with proper message format using Ollama's /api/chat endpoint.
+    /// This ensures the model receives properly formatted chat templates.
+    func chat(messages: [AIMessage]) async throws -> AsyncThrowingStream<String, Error> {
+        let chatURL = ollamaBaseURL + "/api/chat"
+        return AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    guard let url = URL(string: chatURL) else {
+                        throw LocalModelError.notImplemented
+                    }
+                    var request = URLRequest(url: url)
+                    request.httpMethod = "POST"
+                    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+                    let formattedMessages = messages.map { msg -> [String: String] in
+                        ["role": msg.role.rawValue, "content": msg.content.textValue]
+                    }
+
+                    let body: [String: Any] = [
+                        "model": model.name,
+                        "messages": formattedMessages,
+                        "stream": true
+                    ]
+
+                    request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+                    let (bytes, _) = try await URLSession.shared.bytes(for: request)
+
+                    for try await line in bytes.lines {
+                        if let data = line.data(using: .utf8),
+                           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                           let message = json["message"] as? [String: Any],
+                           let content = message["content"] as? String
+                        {
+                            continuation.yield(content)
                         }
                     }
 
@@ -768,10 +814,34 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
                     }
                     #endif
 
-                    // Fallback for non-MLX models (Ollama, GGUF): use raw prompt
+                    // Fallback for non-MLX models (Ollama, GGUF)
+                    // For Ollama: use /api/chat endpoint with proper message format
+                    if let ollamaInstance = self.instance as? OllamaModelInstance {
+                        let stream = try await ollamaInstance.chat(messages: messages)
+
+                        var fullText = ""
+                        for try await text in stream {
+                            fullText += text
+                            continuation.yield(.delta(text))
+                        }
+
+                        let completeMessage = AIMessage(
+                            id: UUID(),
+                            conversationID: conversationID,
+                            role: .assistant,
+                            content: .text(fullText),
+                            timestamp: Date(),
+                            model: model
+                        )
+                        continuation.yield(.complete(completeMessage))
+                        continuation.finish()
+                        return
+                    }
+
+                    // Final fallback: raw prompt (GGUF or unknown instance type)
                     let prompt = messages.map { message in
-                        "\(message.role.rawValue.capitalized): \(message.content.textValue)"
-                    }.joined(separator: "\n\n")
+                        "<|\(message.role.rawValue)|>\n\(message.content.textValue)"
+                    }.joined(separator: "\n")
 
                     let stream = try await self.instance.generate(prompt: prompt, maxTokens: 2048)
 
