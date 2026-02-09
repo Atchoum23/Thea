@@ -420,23 +420,13 @@ extension NWBrowser.Result.Metadata {
 extension NWTXTRecord {
     /// Convert TXT record to dictionary by extracting key-value pairs
     var dictionary: [String: String] {
-        // NWTXTRecord in modern Network framework uses a simpler model
-        // The record is essentially a collection of key-value entries
-        // For tvOS relay discovery, we primarily need version and capabilities
         var result: [String: String] = [:]
-
-        // Try known keys used by Thea's inference relay protocol
-        let knownKeys = ["version", "capabilities", "models", "status"]
+        let knownKeys = ["version", "capabilities", "models", "status", "platform", "deviceId"]
         for key in knownKeys {
-            if let entry = getEntry(for: key) {
-                switch entry {
-                case let .keyValue(recordKey, data):
-                    _ = recordKey  // Silence unused warning
-                    if let value = String(data: data, encoding: .utf8) {
-                        result[key] = value
-                    }
-                case let .string(value):
-                    result[key] = value
+            if let value = getEntry(for: key) {
+                switch value {
+                case let .string(str):
+                    result[key] = str
                 @unknown default:
                     break
                 }
