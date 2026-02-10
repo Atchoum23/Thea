@@ -454,7 +454,7 @@ final class UnifiedDeviceAwareness {
         // Synchronous connectivity check using NWPathMonitor snapshot
         let monitor = NWPathMonitor()
         let semaphore = DispatchSemaphore(value: 0)
-        var isConnected = false
+        nonisolated(unsafe) var isConnected = false
 
         monitor.pathUpdateHandler = { path in
             isConnected = path.status == .satisfied
