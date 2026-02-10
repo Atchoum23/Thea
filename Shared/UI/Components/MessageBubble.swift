@@ -274,6 +274,7 @@ struct MessageBubble: View {
             }
             .buttonStyle(.plain)
             .help(help)
+            .accessibilityLabel(help)
         }
     #endif
 
