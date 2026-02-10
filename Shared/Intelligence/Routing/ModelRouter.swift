@@ -132,10 +132,22 @@ public final class ModelRouter: ObservableObject {
         return decision
     }
 
+    // MARK: - Dynamic Model Updates
+
+    /// Dynamically registered models from online sources.
+    /// When populated, these override the static `AIModel.allKnownModels`.
+    private var dynamicModels: [AIModel]?
+
+    /// Update the available model list from DynamicModelRegistry.
+    public func updateAvailableModels(_ models: [AIModel]) {
+        dynamicModels = models
+        logger.info("ModelRouter updated with \(models.count) dynamic models")
+    }
+
     // MARK: - Candidate Selection
 
     private func getCandidateModels(for taskType: TaskType) -> [AIModel] {
-        let allModels = AIModel.allKnownModels
+        let allModels = dynamicModels ?? AIModel.allKnownModels
 
         // Filter by required capabilities
         let requiredCapabilities = taskType.preferredCapabilities
@@ -275,7 +287,8 @@ public final class ModelRouter: ObservableObject {
         let defaultProvider = TheaConfig.shared.ai.defaultProvider
 
         // Try to find the default model
-        if let found = AIModel.allKnownModels.first(where: { $0.id == defaultModel }) {
+        let allModels = dynamicModels ?? AIModel.allKnownModels
+        if let found = allModels.first(where: { $0.id == defaultModel }) {
             return RoutingDecision(
                 model: found,
                 provider: defaultProvider,

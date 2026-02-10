@@ -218,6 +218,9 @@ struct TheamacOSApp: App {
 
             _ = ProviderRegistry.shared
             logger.info("ProviderRegistry initialized")
+
+            // Refresh dynamic model registry (fetches fresh pricing/capabilities)
+            await DynamicModelRegistry.shared.refreshIfNeeded()
         }
 
         // Pre-initialize sync singletons so Settings > Sync doesn't beachball.
