@@ -46,7 +46,6 @@ public final class AppUsageMonitor: ObservableObject {
     // MARK: - Internal State
 
     private var currentSessionStart: Date?
-    private var cancellables = Set<AnyCancellable>()
     private var appSwitchObserver: Any?
     private var sessionTimer: Timer?
 

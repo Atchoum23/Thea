@@ -37,7 +37,6 @@ public final class GlobalQuickPromptManager: ObservableObject {
         private var globalHotkeyMonitor: Any?
     #endif
 
-    private var cancellables = Set<AnyCancellable>()
     private let maxRecentPrompts = 10
 
     // MARK: - Initialization

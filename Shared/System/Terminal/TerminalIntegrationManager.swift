@@ -52,7 +52,6 @@
         private let windowReader = TerminalWindowReader()
         nonisolated(unsafe) private var executor: TerminalCommandExecutor
         private var monitorTask: Task<Void, Never>?
-        private var cancellables = Set<AnyCancellable>()
         private let commandHistoryURL: URL
 
         // MARK: - Quick Commands

@@ -29,7 +29,6 @@ public class PhotosMonitor: NSObject, ObservableObject {
     @Published public private(set) var lastPhotoDate: Date?
 
     #if canImport(Photos)
-        private var photoLibraryObserver: PHPhotoLibraryChangeObserver?
         private var knownAssetIdentifiers: Set<String> = []
     #endif
 

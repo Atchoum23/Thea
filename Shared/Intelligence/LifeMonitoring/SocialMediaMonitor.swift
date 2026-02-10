@@ -47,8 +47,6 @@ public final class SocialMediaMonitor: ObservableObject {
     // MARK: - Internal State
 
     private var notificationObserver: Any?
-    private var cancellables = Set<AnyCancellable>()
-    private var interactionBuffer: [SocialInteraction] = []
 
     // Known social app bundle identifiers
     private let socialAppIdentifiers: [String: SocialPlatform] = [

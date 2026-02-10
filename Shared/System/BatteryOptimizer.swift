@@ -19,7 +19,6 @@ public final class BatteryOptimizer {
     // MARK: - Dependencies
 
     private let powerManager = PowerStateManager.shared
-    private let throttlingEngine = ThrottlingEngine.shared
 
     // MARK: - State
 

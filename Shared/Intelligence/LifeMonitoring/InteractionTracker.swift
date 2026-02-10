@@ -37,7 +37,6 @@ public final class InteractionTracker: ObservableObject {
     // MARK: - Internal State
 
     private var cancellables = Set<AnyCancellable>()
-    private var interactionBuffer: [UnifiedInteraction] = []
 
     // MARK: - Configuration
 

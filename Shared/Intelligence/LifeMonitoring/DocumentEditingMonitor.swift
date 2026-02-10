@@ -59,14 +59,6 @@ public final class DocumentEditingMonitor: ObservableObject {
         "org.vim.MacVim"
     ]
 
-    /// File extensions we're interested in tracking
-    private let trackedExtensions: Set<String> = [
-        "txt", "rtf", "rtfd", "md", "markdown",
-        "doc", "docx", "pages",
-        "tex", "latex", "org", "rst",
-        "json", "xml", "yaml", "yml", "toml"
-    ]
-
     // MARK: - Initialization
 
     private init() {

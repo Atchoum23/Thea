@@ -69,7 +69,6 @@ public final class BlueprintExecutor {
     // MARK: - Private
 
     private let buildVerifier = BuildVerificationAgent()
-    private let contextManager = BlueprintContextManager()
     private var startTime: Date?
     private var currentTask: Task<BlueprintExecutionResult, Never>?
 
@@ -520,8 +519,6 @@ public final class BlueprintExecutor {
 /// Verifies builds and runs tests with error parsing
 @MainActor
 final class BuildVerificationAgent {
-    private let logger = Logger(subsystem: "com.thea.execution", category: "BuildVerification")
-
     func verifyBuild(scheme: String, configuration: String = "Debug") async -> BlueprintBuildResult {
         #if os(macOS)
         let command = "xcodebuild -scheme \(scheme) -configuration \(configuration) build 2>&1"

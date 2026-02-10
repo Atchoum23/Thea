@@ -309,8 +309,6 @@ public final class AutonomyPolicyManager: ObservableObject {
 
     // MARK: - Private State
 
-    private var cancellables = Set<AnyCancellable>()
-
     // MARK: - Initialization
 
     private init() {

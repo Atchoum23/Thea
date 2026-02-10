@@ -495,7 +495,6 @@ public actor ScreenTimeMonitor: ActivityMonitor {
 
     private let logger: ActivityLogger
     private var sessionStart: Date?
-    private var totalActiveTime: TimeInterval = 0
 
     init(logger: ActivityLogger) {
         self.logger = logger

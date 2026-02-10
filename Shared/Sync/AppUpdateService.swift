@@ -43,8 +43,6 @@ public final class AppUpdateService: ObservableObject {
     private var _container: CKContainer?
     private var cloudKitAvailable: Bool?
     private var subscriptionSetUp = false
-    private var cancellables = Set<AnyCancellable>()
-
     // MARK: - CloudKit Access
 
     /// Ensures CloudKit is available and returns the container, or nil if unavailable

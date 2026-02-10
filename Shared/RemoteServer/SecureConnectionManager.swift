@@ -33,8 +33,6 @@ public class SecureConnectionManager: ObservableObject {
 
     private var serverPrivateKey: P256.Signing.PrivateKey?
     private var serverPublicKey: P256.Signing.PublicKey?
-    private var sharedSecret: SymmetricKey?
-
     // MARK: - Rate Limiting
 
     private var connectionAttempts: [String: [Date]] = [:]

@@ -41,8 +41,6 @@ public class MediaMonitor: ObservableObject {
     // Track last known state to detect changes
     private var lastKnownTrack: String?
     private var lastKnownService: MediaService?
-    private var lastMediaPlaybackState: MediaPlaybackState = .stopped
-
     private init() {}
 
     // MARK: - Lifecycle

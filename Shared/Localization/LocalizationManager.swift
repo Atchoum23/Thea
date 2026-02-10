@@ -36,7 +36,6 @@ public final class LocalizationManager: ObservableObject {
     // MARK: - String Tables
 
     private var stringTables: [String: [String: String]] = [:]
-    private var pluralRules: [String: PluralRule] = [:]
 
     // MARK: - Initialization
 

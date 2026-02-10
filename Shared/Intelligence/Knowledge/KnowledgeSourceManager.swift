@@ -237,7 +237,6 @@ public final class KnowledgeSourceManager: ObservableObject {
     public static let shared = KnowledgeSourceManager()
 
     private let logger = Logger(subsystem: "com.thea.v2", category: "KnowledgeSourceManager")
-    private let storageKey = "knowledge_sources"
 
     @Published public private(set) var sources: [KnowledgeSource] = []
     @Published public private(set) var isAuditing: Bool = false

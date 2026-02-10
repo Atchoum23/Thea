@@ -379,9 +379,7 @@ public final class PreferenceSyncEngine: ObservableObject {
 
     private let cloud = NSUbiquitousKeyValueStore.default
     private lazy var deviceProfile = DeviceProfile.current()
-    private var observers: Set<AnyCancellable> = []
     private let scopeOverridesKey = "com.thea.syncScopeOverrides"
-    private let devicesKey = "com.thea.registeredDevices"
     private var isSyncing = false
 
     // MARK: Init

@@ -124,9 +124,7 @@ public final class DraftSyncManager: ObservableObject {
 
     private let defaults = UserDefaults.standard
     private let cloudKeyValueStore = NSUbiquitousKeyValueStore.default
-    private var pendingSyncTask: Task<Void, Never>?
     private var syncDebounceTask: Task<Void, Never>?
-    private var cancellables = Set<AnyCancellable>()
 
     private let deviceId: String
     private let localStorageKey = "thea.drafts.local"

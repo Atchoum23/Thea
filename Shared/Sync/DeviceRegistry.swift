@@ -38,7 +38,6 @@ public final class DeviceRegistry {
     // MARK: - Storage
 
     private let defaults = UserDefaults.standard
-    private let deviceIdKey = "DeviceRegistry.deviceId"
     private let devicesKey = "DeviceRegistry.registeredDevices"
 
     // MARK: - Initialization

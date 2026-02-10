@@ -37,8 +37,6 @@ public final class AppClipManager: ObservableObject {
     // MARK: - Configuration
 
     private let appStoreId = "123456789" // Replace with actual App Store ID
-    private let appClipBundleId = "com.thea.app.Clip"
-
     // MARK: - Initialization
 
     private init() {

@@ -170,8 +170,6 @@ public actor Context7Client {
 
     private var apiKey: String?
     private let baseURL = URL(string: "https://context7.com/api/v2")!
-    private let mcpURL = URL(string: "https://mcp.context7.com/mcp")!
-
     private let urlSession: URLSession
     private var cache: [String: CachedResult] = [:]
     private let cacheExpiration: TimeInterval = 3600 // 1 hour

@@ -200,7 +200,6 @@ public final class PredictiveLifeEngine: ObservableObject {
 
     private var predictionHistory: [LifePrediction] = []
     private var contextWindow: [LifeContextSnapshot] = []
-    private var userPreferences = UserPredictionPreferences()
 
     // MARK: - Tasks
 

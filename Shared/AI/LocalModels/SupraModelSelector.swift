@@ -23,8 +23,6 @@ import OSLog
 /// Selects and manages the optimal Supra-Model (always-present anchor)
 /// Now uses adaptive hyperparameters for scoring weights instead of fixed values
 final class SupraModelSelector: Sendable {
-    private let logger = Logger(subsystem: "ai.thea.app", category: "SupraModelSelector")
-
     /// Reference to adaptive orchestrator for hyperparameter access
     private let adaptiveOrchestrator: AdaptiveGovernanceOrchestrator?
 
