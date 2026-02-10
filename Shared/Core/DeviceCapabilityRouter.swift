@@ -53,7 +53,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     // MARK: - Task Routing
 
     /// Find the best device to execute a task
-    public func findBestDevice(for task: TaskRequirements) -> RoutingDecision {
+    public func findBestDevice(for task: TaskRequirements) -> DeviceRoutingDecision {
         updateAvailableDevices()
 
         // Score each device
@@ -69,7 +69,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
 
         guard let best = deviceScores.first else {
             // Fallback to current device
-            return RoutingDecision(
+            return DeviceRoutingDecision(
                 targetDevice: currentDevice,
                 score: 0.5,
                 reasoning: "No other devices available, using current device"
@@ -78,7 +78,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
 
         let reasoning = generateReasoning(device: best.0, task: task)
 
-        return RoutingDecision(
+        return DeviceRoutingDecision(
             targetDevice: best.0,
             score: best.1,
             reasoning: reasoning
@@ -214,7 +214,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     // MARK: - Quick Routing Methods
 
     /// Route AI processing task
-    public func routeAITask() -> RoutingDecision {
+    public func routeAITask() -> DeviceRoutingDecision {
         let requirements = TaskRequirements(
             requiresHighCPU: true,
             requiresGPU: true,
@@ -226,7 +226,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     }
 
     /// Route lightweight query
-    public func routeLightweightTask() -> RoutingDecision {
+    public func routeLightweightTask() -> DeviceRoutingDecision {
         let requirements = TaskRequirements(
             requiresHighCPU: false,
             requiresNetwork: true
@@ -235,7 +235,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     }
 
     /// Route file processing task
-    public func routeFileProcessingTask(estimatedSize: Int) -> RoutingDecision {
+    public func routeFileProcessingTask(estimatedSize: Int) -> DeviceRoutingDecision {
         let requirements = TaskRequirements(
             requiresHighCPU: estimatedSize > 10_000_000, // > 10MB
             requiresHighMemory: estimatedSize > 50_000_000, // > 50MB
@@ -246,7 +246,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     }
 
     /// Route background sync task
-    public func routeBackgroundTask() -> RoutingDecision {
+    public func routeBackgroundTask() -> DeviceRoutingDecision {
         let requirements = TaskRequirements(
             requiresHighCPU: false,
             requiresNetwork: true,
@@ -291,7 +291,7 @@ public struct TaskRequirements: Sendable {
 
 // MARK: - Routing Decision
 
-public struct RoutingDecision: Sendable {
+public struct DeviceRoutingDecision: Sendable {
     public let targetDevice: DeviceInfo
     public let score: Double // 0-1 confidence score
     public let reasoning: String
