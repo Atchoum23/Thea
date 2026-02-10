@@ -7,6 +7,7 @@
 import Foundation
 import Network
 import OSLog
+import UserNotifications
 
 // MARK: - Offline Queue Service
 
@@ -186,25 +187,44 @@ public final class OfflineQueueService {
             }
 
         case .sync:
-            // Trigger sync
-            // This would integrate with sync services
-            break
+            // Trigger CloudKit sync
+            await try? await CloudKitService.shared.syncAll()
 
         case .analytics:
-            // Send analytics
-            break
+            // Analytics events are non-critical; log and discard
+            logger.info("Replaying analytics event (no-op)")
 
         case .notification:
-            // Resend notification
-            break
+            // Re-post local notification from payload
+            if let payload = request.payload,
+               let info = try? JSONDecoder().decode([String: String].self, from: payload),
+               let title = info["title"],
+               let body = info["body"]
+            {
+                let content = UNMutableNotificationContent()
+                content.title = title
+                content.body = body
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+                let notifRequest = UNNotificationRequest(
+                    identifier: request.id.uuidString,
+                    content: content,
+                    trigger: trigger
+                )
+                try? await UNUserNotificationCenter.current().add(notifRequest)
+            }
 
         case .memory:
-            // Sync memory
-            break
+            // Trigger memory sync via CloudKit
+            await try? await CloudKitService.shared.syncAll()
 
         case .custom:
-            // Custom request handling
-            break
+            // Custom requests post a generic notification for app-level handling
+            if let payload = request.payload {
+                NotificationCenter.default.post(
+                    name: .offlineRequestReplay,
+                    object: payload
+                )
+            }
         }
     }
 
