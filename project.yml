@@ -341,13 +341,13 @@ targets:
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
-          - "**/Settings/AdvancedSettingsView.swift"
+          # AdvancedSettingsView — ACTIVATED (self-contained, only uses SettingsManager)
           - "**/Settings/AIProvidersSettingsView.swift"
           # Verification + Anticipatory: excluded as tightly-coupled subsystems.
           # All files in each folder depend on each other; must be enabled together.
           - "**/ResourceManagement/**"
           # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
-          - "**/Components/MentionAutocomplete.swift"
+          - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
@@ -416,7 +416,7 @@ targets:
           - "**/Configuration/ConfigurationManager.swift"
           # EnhancedMessageBubble — ACTIVATED (uses ExecutableCodeBlock + MarkdownUI)
           # ExecutableCodeBlock — ACTIVATED (uses CodeExecutionManager)
-          - "**/Components/MentionAutocomplete.swift"
+          - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
           - "**/Components/THEAThinkingView.swift"
           # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)
@@ -465,7 +465,7 @@ targets:
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
-          - "**/Settings/AdvancedSettingsView.swift"
+          # AdvancedSettingsView — ACTIVATED (self-contained)
           - "**/Settings/AIProvidersSettingsView.swift"
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
@@ -622,11 +622,11 @@ targets:
           - "**/Settings/Orchestrator/**"
           - "**/Settings/MemorySettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
-          - "**/Settings/AdvancedSettingsView.swift"
+          # AdvancedSettingsView — ACTIVATED (self-contained)
           - "**/Settings/AIProvidersSettingsView.swift"
           - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
-          - "**/Components/MentionAutocomplete.swift"
+          - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/TheaTextInputField.swift"
           - "**/Code/CodeIntelligence.swift"
