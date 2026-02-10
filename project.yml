@@ -324,9 +324,9 @@ targets:
           # See git history for type renames already done (MetaAIMCPServerInfo, etc.)
           # ============================================================
           - "**/AI/MetaAI/**"
-          # Exclude duplicate Integrations (use Apple subfolder)
-          - "**/Integrations/NotesIntegration.swift"
-          - "**/Integrations/RemindersIntegration.swift"
+          # ACTIVATED: NotesIntegration + RemindersIntegration (macOS)
+          # - "**/Integrations/NotesIntegration.swift"
+          # - "**/Integrations/RemindersIntegration.swift"
           # Exclude duplicate Memory (use Memory folder not AI/Memory)
           - "**/AI/Memory/**"
           # Exclude DesignTokens (duplicates TheaDesignSystem definitions)
