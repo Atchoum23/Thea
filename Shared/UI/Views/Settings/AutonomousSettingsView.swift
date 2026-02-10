@@ -537,25 +537,25 @@ struct ConsentRequestView: View {
 
                     // Features
                     VStack(alignment: .leading, spacing: 16) {
-                        FeatureRow(
+                        AutonomousFeatureRow(
                             icon: "arrow.down.circle",
                             title: "Smart Model Downloads",
                             description: "Automatically download optimal models for your tasks based on AI analysis"
                         )
 
-                        FeatureRow(
+                        AutonomousFeatureRow(
                             icon: "trash.circle",
                             title: "Intelligent Cleanup",
                             description: "Remove low-value models based on actual usage, not arbitrary time limits"
                         )
 
-                        FeatureRow(
+                        AutonomousFeatureRow(
                             icon: "gauge.high",
                             title: "Dynamic Resources",
                             description: "AI-optimized GPU, CPU, and memory allocation based on current workload"
                         )
 
-                        FeatureRow(
+                        AutonomousFeatureRow(
                             icon: "chart.line.uptrend.xyaxis",
                             title: "Continuous Learning",
                             description: "Proactivity increases over time based on your feedback"
@@ -600,7 +600,7 @@ struct ConsentRequestView: View {
     }
 }
 
-struct FeatureRow: View {
+struct AutonomousFeatureRow: View {
     let icon: String
     let title: String
     let description: String

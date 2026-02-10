@@ -580,8 +580,8 @@ targets:
           - "**/AI/Providers/AnthropicTokenCounter.swift"
           # ARCHITECTURE DECISION: MetaAI excluded - see macOS target for full explanation
           - "**/AI/MetaAI/**"
-          - "**/Integrations/NotesIntegration.swift"
-          - "**/Integrations/RemindersIntegration.swift"
+          # NotesIntegration — ACTIVATED (no file in Shared/, cleanup only)
+          # RemindersIntegration — ACTIVATED (no file in Shared/, cleanup only)
           - "**/AI/Memory/**"
           # LocalModelsSettingsView — no file at this path
           # AutonomousTaskSettingsView — no file at this path
@@ -619,7 +619,7 @@ targets:
           - "**/Views/PhaseProgressView.swift"
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           # AgentMode — FULLY ACTIVATED
-          - "**/Integrations/IntegrationModule.swift"
+          # IntegrationModule — ACTIVATED (protocol + registry, has #if os(macOS) guards)
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
@@ -629,48 +629,45 @@ targets:
           - "**/Integrations/MusicIntegration.swift"
           - "**/Integrations/SystemIntegration.swift"
           # AI/Adaptive/AdaptivePromptEngine — ACTIVATED (AI/Adaptive now active)
-          - "**/LocalModels/ProactiveModelManager.swift"
-          - "**/LocalModels/LocalModelRecommendationEngine.swift"
-          - "**/LocalModels/LocalModelRecommendationEngine+*.swift"
-          - "**/LocalModels/LocalModelRecommendationTypes.swift"
-          - "**/LocalModels/AIModelGovernor.swift"
-          - "**/LocalModels/ModelGovernanceEngine.swift"
-          - "**/LocalModels/UnifiedLocalModelOrchestrator.swift"
+          # LocalModels governance — ACTIVATED (all governance files enabled for iOS)
+          # ProactiveModelManager, LocalModelRecommendationEngine (+extensions),
+          # LocalModelRecommendationTypes, AIModelGovernor, ModelGovernanceEngine,
+          # UnifiedLocalModelOrchestrator — all use Foundation/OSLog with platform guards
           - "**/MetaAI/ModelBenchmarkService.swift"
           # ProactivityEngine — ACTIVATED
-          - "**/Settings/AutonomousSettingsView.swift"
+          # AutonomousSettingsView — ACTIVATED (governance deps now active)
           - "**/Settings/LocalModels/**"
           - "**/Integrations/FinderIntegration.swift"
           - "**/Views/LocalModels/**"
-          - "**/Platforms/PlatformFeaturesHub.swift"
+          # PlatformFeaturesHub — ACTIVATED (has #if canImport(UIKit) guards)
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
           # AutoCorrectSettingsView — ACTIVATED
           - "**/Integrations/SafariIntegration.swift"
           - "**/Components/ChatInputView.swift"
           - "**/Search/SemanticSearchService.swift"
-          - "**/Components/QuerySuggestionOverlay.swift"
+          # QuerySuggestionOverlay — ACTIVATED (pure SwiftUI)
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
           # ActiveMemoryRetrieval — ACTIVATED
           # MemoryContextView — ACTIVATED
-          - "**/Components/StreamingTextView.swift"
-          - "**/MCP/THEAMCPServer.swift"
-          - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
+          # StreamingTextView — ACTIVATED (pure SwiftUI with platform guards)
+          # THEAMCPServer — ACTIVATED (has #if os(macOS) guard, compiles empty on iOS)
+          # UnifiedDeviceAwareness — ACTIVATED (has IOKit guards)
           # Prediction — ACTIVATED (ModelPrewarmingService)
           # ModelRouter — ACTIVATED
           # Autonomous/BlueprintExecutor — ACTIVATED
-          - "**/Integrations/CalendarIntegration.swift"
-          - "**/Integrations/ShortcutsIntegration.swift"
+          # CalendarIntegration — ACTIVATED (EventKit works on iOS)
+          # ShortcutsIntegration — ACTIVATED (has platform guards)
           # ShortcutsOrchestrator — ACTIVATED (proper #if canImport guards)
           # SettingsPrivacyAboutViews — ACTIVATED
           # SettingsViewModel — ACTIVATED
-          - "**/V1Parity/MessageRegeneration.swift"
+          # MessageRegeneration — ACTIVATED (uses AIMessage, active types)
           - "**/Integrations/MessagesIntegration.swift"
           # PromptOptimizer — ACTIVATED (SubAgentOrchestrator.AgentType→String)
-          - "**/RemoteServer/RemoteCommandService.swift"
+          # RemoteCommandService — ACTIVATED (CloudKit works on iOS)
           # SettingsConfigurationViews — ACTIVATED
           # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
           # AutomaticPromptEngineering — ACTIVATED (PromptEngineering folder now active)
-          - "**/Settings/AutomationSettingsView.swift"
+          # AutomationSettingsView — ACTIVATED (stub-based, self-contained)
           # AgentMode — FULLY ACTIVATED
           # SelfEvolution — ACTIVATED
           # KeyboardShortcutsView — ACTIVATED
@@ -685,14 +682,17 @@ targets:
           # Automation/AutonomousTaskExecutor — ACTIVATED (has #if os(macOS) guard)
           - "**/Settings/AutonomousTasks/**"
           # SquadOrchestrator — ACTIVATED
-          - "**/LocalModels/SupraModelSelector.swift"
+          # SupraModelSelector — ACTIVATED (governance files active)
           - "**/Core/TheaIntegrationHub.swift"
           - "**/Launcher/QuickLauncher.swift"
           # MemoryAugmentedChat — ACTIVATED
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           # Anticipatory — ACTIVATED (all files)
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
-          - "**/LocalModels/**"
+          # LocalModels — ACTIVATED (governance files enabled for iOS, MLX files remain excluded)
+          - "**/LocalModels/MLXModelManager.swift"
+          - "**/LocalModels/MLXInferenceEngine.swift"
+          - "**/LocalModels/MLXModelScanner.swift"
           - "**/Focus/FocusOrchestrator.swift"
           - "**/V1Parity/SiriIntegration.swift"
           # Exclude macOS-only browser automation files
