@@ -346,9 +346,8 @@ targets:
           # Verification + Anticipatory: excluded as tightly-coupled subsystems.
           # All files in each folder depend on each other; must be enabled together.
           - "**/ResourceManagement/**"
-          - "**/Components/EnhancedMessageBubble.swift"
+          # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
           - "**/Components/MentionAutocomplete.swift"
-          - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/TheaTextInputField.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
@@ -415,9 +414,9 @@ targets:
           # need to be excluded due to missing types or dependencies.
           # ============================================================
           - "**/Configuration/ConfigurationManager.swift"
-          - "**/Components/EnhancedMessageBubble.swift"
+          # EnhancedMessageBubble — ACTIVATED (uses ExecutableCodeBlock + MarkdownUI)
+          # ExecutableCodeBlock — ACTIVATED (uses CodeExecutionManager)
           - "**/Components/MentionAutocomplete.swift"
-          - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/TheaTextInputField.swift"
           - "**/Components/THEAThinkingView.swift"
           # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)

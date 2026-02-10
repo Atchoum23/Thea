@@ -73,8 +73,10 @@ final class DynamicModelRegistry: ObservableObject {
         // Cache to disk
         saveCache(merged)
 
-        // Update ModelRouter with fresh data
+        // Update ModelRouter with fresh data (macOS only — ModelRouter excluded from iOS)
+        #if os(macOS)
         ModelRouter.shared.updateAvailableModels(merged)
+        #endif
 
         logger.info("Model registry refreshed: \(merged.count) models available")
     }
