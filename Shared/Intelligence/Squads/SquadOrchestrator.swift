@@ -363,7 +363,7 @@ public final class SquadOrchestrator {
 
         // Execute in parallel with task group
         var results: [SquadTaskResult] = []
-        results = try await withThrowingTaskGroup(of: SquadTaskResult.self) { group in
+        results = await withThrowingTaskGroup(of: SquadTaskResult.self) { group in
             for operation in operations {
                 group.addTask { try await operation() }
             }

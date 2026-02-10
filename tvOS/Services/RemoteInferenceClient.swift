@@ -427,7 +427,7 @@ extension NWTXTRecord {
                 switch value {
                 case let .string(str):
                     result[key] = str
-                @unknown default:
+                default:
                     break
                 }
             }

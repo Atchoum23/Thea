@@ -250,7 +250,7 @@ final class HealthMonitorService: ObservableObject {
             let endpoint = NWEndpoint.hostPort(host: host, port: 443)
 
             // Create a brief connection test
-            let connection = NWConnection(to: endpoint, using: .tcp)
+            _ = NWConnection(to: endpoint, using: .tcp)
             let latency = Date().timeIntervalSince(startTime)
 
             return ServiceHealthCheck(

@@ -327,8 +327,13 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                // Last resort: bare UIWindow — unreachable in practice (a scene always exists)
-                return PasskeysService.makeFallbackWindow()
+                // Last resort — unreachable in practice (a scene always exists)
+                if #available(iOS 26.0, *) {
+                    // On iOS 26+ a UIWindowScene always exists; this path is truly unreachable
+                    fatalError("No UIWindowScene available for presentation anchor")
+                } else {
+                    return PasskeysService.makeFallbackWindow()
+                }
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -485,9 +490,15 @@ public struct SignInWithAppleButton: View {
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                return Self.makeFallbackWindow()
+                if #available(iOS 26.0, *) {
+                    // On iOS 26+ a UIWindowScene always exists; this path is truly unreachable
+                    fatalError("No UIWindowScene available for presentation anchor")
+                } else {
+                    return Self.makeFallbackWindow()
+                }
             }
 
+            /// Bare UIWindow fallback — unreachable in practice since a windowScene should always exist.
             @available(iOS, deprecated: 26.0, message: "UIWindow() has no non-deprecated replacement without a scene")
             private static func makeFallbackWindow() -> UIWindow {
                 UIWindow()
