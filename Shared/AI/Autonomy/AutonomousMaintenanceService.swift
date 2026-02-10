@@ -144,37 +144,31 @@ public actor AutonomousMaintenanceService {
         logger.info("Starting cache pruning")
         status.cachePrune = .running
 
-        do {
-            var bytesReclaimed: UInt64 = 0
+        var bytesReclaimed: UInt64 = 0
 
-            // Prune model cache
-            #if os(macOS)
-            let modelCacheURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
-                .appendingPathComponent("ai.thea.app")
-                .appendingPathComponent("models")
+        // Prune model cache
+        #if os(macOS)
+        let modelCacheURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("ai.thea.app")
+            .appendingPathComponent("models")
 
-            if let cacheURL = modelCacheURL {
-                bytesReclaimed += await pruneDirectory(cacheURL, maxSizeMB: configuration.maxCacheSizeMB / 2)
-            }
-            #endif
-
-            // Prune temporary files
-            let tempURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("ai.thea.app")
-
-            bytesReclaimed += await pruneDirectory(tempURL, maxAgeDays: 7)
-
-            lastCachePrune = Date()
-            status.cachePrune = .completed(Date())
-            status.bytesReclaimed += bytesReclaimed
-
-            let mbReclaimed = Double(bytesReclaimed) / 1_048_576
-            logger.info("Cache pruning complete: \(String(format: "%.1f", mbReclaimed)) MB reclaimed")
-
-        } catch {
-            status.cachePrune = .failed(error.localizedDescription)
-            logger.error("Cache pruning failed: \(error.localizedDescription)")
+        if let cacheURL = modelCacheURL {
+            bytesReclaimed += await pruneDirectory(cacheURL, maxSizeMB: configuration.maxCacheSizeMB / 2)
         }
+        #endif
+
+        // Prune temporary files
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ai.thea.app")
+
+        bytesReclaimed += await pruneDirectory(tempURL, maxAgeDays: 7)
+
+        lastCachePrune = Date()
+        status.cachePrune = .completed(Date())
+        status.bytesReclaimed += bytesReclaimed
+
+        let mbReclaimed = Double(bytesReclaimed) / 1_048_576
+        logger.info("Cache pruning complete: \(String(format: "%.1f", mbReclaimed)) MB reclaimed")
 
         saveLastExecutionTimes()
     }
@@ -187,35 +181,29 @@ public actor AutonomousMaintenanceService {
         // NOTE: DraftSyncManager has a "never auto-delete" policy
         // We only clean drafts that are explicitly marked for cleanup
 
-        do {
-            let draftManager = await MainActor.run {
-                DraftSyncManager.shared
-            }
-
-            // Get drafts and clean empty ones
-            // Note: Draft cleanup is limited to empty drafts to respect user data
-            // The DraftSyncManager uses clearDraft for explicit cleanup
-            let drafts = await draftManager.drafts
-            var cleanedCount = 0
-
-            for (conversationId, draft) in drafts {
-                // Only clean empty drafts
-                if draft.isEmpty {
-                    await draftManager.clearDraft(for: conversationId)
-                    cleanedCount += 1
-                }
-            }
-
-            lastDraftCleanup = Date()
-            status.draftCleanup = .completed(Date())
-            status.draftsCleanedUp += cleanedCount
-
-            logger.info("Draft cleanup complete: \(cleanedCount) empty drafts removed")
-
-        } catch {
-            status.draftCleanup = .failed(error.localizedDescription)
-            logger.error("Draft cleanup failed: \(error.localizedDescription)")
+        let draftManager = await MainActor.run {
+            DraftSyncManager.shared
         }
+
+        // Get drafts and clean empty ones
+        // Note: Draft cleanup is limited to empty drafts to respect user data
+        // The DraftSyncManager uses clearDraft for explicit cleanup
+        let drafts = await draftManager.drafts
+        var cleanedCount = 0
+
+        for (conversationId, draft) in drafts {
+            // Only clean empty drafts
+            if draft.isEmpty {
+                await draftManager.clearDraft(for: conversationId)
+                cleanedCount += 1
+            }
+        }
+
+        lastDraftCleanup = Date()
+        status.draftCleanup = .completed(Date())
+        status.draftsCleanedUp += cleanedCount
+
+        logger.info("Draft cleanup complete: \(cleanedCount) empty drafts removed")
 
         saveLastExecutionTimes()
     }

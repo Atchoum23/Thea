@@ -218,7 +218,7 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
         }
 
         // Find sequences that repeat at least 3 times
-        for (signature, data) in sequenceCounts where data.count >= 3 {
+        for (_, data) in sequenceCounts where data.count >= 3 {
             let description = describeSequence(data.sequence)
             patterns.append(BehaviorPattern(
                 id: UUID(),

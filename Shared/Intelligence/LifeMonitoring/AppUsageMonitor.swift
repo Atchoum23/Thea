@@ -329,10 +329,10 @@ public final class AppUsageMonitor: ObservableObject {
     }
 
     private func updateCurrentSession() {
-        guard let app = currentApp, let start = currentSessionStart else { return }
+        guard let _ = currentApp, let start = currentSessionStart else { return }
 
         // Update duration for current session
-        let duration = Date().timeIntervalSince(start)
+        _ = Date().timeIntervalSince(start)
 
         // Update stats every 10 seconds
         var stats = todayStats
@@ -466,7 +466,7 @@ public final class AppUsageMonitor: ObservableObject {
         // Calculate productivity score
         let productiveTime = (stats.categoryBreakdown[.productivity] ?? 0) +
             (stats.categoryBreakdown[.development] ?? 0)
-        let distractionTime = (stats.categoryBreakdown[.social] ?? 0) +
+        _ = (stats.categoryBreakdown[.social] ?? 0) +
             (stats.categoryBreakdown[.entertainment] ?? 0)
 
         if stats.totalScreenTime > 0 {

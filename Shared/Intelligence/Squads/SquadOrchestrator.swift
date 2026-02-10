@@ -280,7 +280,7 @@ public final class SquadOrchestrator {
             allResults.append(contentsOf: phaseResults)
 
             // Check for handoffs
-            for result in phaseResults {
+            for _ in phaseResults {
                 if let handoff = executionState.handoffHistory.last,
                    !handoffs.contains(where: { $0.toMember.id == handoff.toMember.id }) {
                     handoffs.append(handoff)
@@ -290,7 +290,7 @@ public final class SquadOrchestrator {
 
         // Clean up communication
         if enableCommunication {
-            for member in selectedSquad.members {
+            for _ in selectedSquad.members {
                 let memberId = UUID()
                 await communicationBus.unregister(agentId: memberId)
             }

@@ -578,7 +578,7 @@ public final class ProactivityEngine: ObservableObject {
 
         // Query MemoryManager for recent memories matching keywords
         for keyword in watch.keywords {
-            let memories = await MemoryManager.shared.keywordSearch(
+            let memories = MemoryManager.shared.keywordSearch(
                 query: keyword,
                 limit: 5
             )

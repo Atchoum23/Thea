@@ -189,7 +189,7 @@ final class DynamicResourceAllocator {
         }
         defer { IOObjectRelease(iterator) }
 
-        var service: io_object_t = IOIteratorNext(iterator)
+        let service: io_object_t = IOIteratorNext(iterator)
         defer { if service != 0 { IOObjectRelease(service) } }
 
         guard service != 0 else { return (0, 0, 0) }

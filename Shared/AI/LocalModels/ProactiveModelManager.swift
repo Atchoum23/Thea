@@ -545,12 +545,13 @@ final class ProactiveModelManager {
         logger.info("Local models using \(String(format: "%.1f", totalUsedGB))GB of disk space")
 
         // Identify potential cleanup candidates
-        await checkAndPerformCleanup()
+        await performAIGuidedCleanup()
     }
 
     // MARK: - User Consent
 
     /// Request user consent for autonomous model management
+    @available(*, deprecated, message: "Use AIModelGovernor for consent management")
     func requestAutonomousConsent() -> AutonomousConsentRequest {
         AutonomousConsentRequest(
             enableAutoDownload: enableAutoDownload,
@@ -560,6 +561,7 @@ final class ProactiveModelManager {
         )
     }
 
+    @available(*, deprecated, message: "Use AIModelGovernor for consent management")
     func applyConsentSettings(_ settings: AutonomousConsentRequest) {
         enableAutoDownload = settings.enableAutoDownload
         enableAutoCleanup = settings.enableAutoCleanup

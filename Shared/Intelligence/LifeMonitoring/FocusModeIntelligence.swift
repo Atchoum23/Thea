@@ -41,6 +41,7 @@ import AppKit
 #if canImport(UIKit)
 import UIKit
 #endif
+import UserNotifications
 #if os(iOS)
 import CallKit
 #endif
@@ -2948,13 +2949,12 @@ public actor FocusModeIntelligence {
     private func notifyUserOfUrgentContact(contactKey: String) async {
         // Send notification to user about urgent contact
         // This could be a push notification, sound alert, etc.
-        #if os(macOS)
-        let notification = NSUserNotification()
-        notification.title = "⚠️ Urgent Message"
-        notification.informativeText = "Contact \(contactKey) has confirmed this is urgent."
-        notification.soundName = NSUserNotificationDefaultSoundName
-        NSUserNotificationCenter.default.deliver(notification)
-        #endif
+        let content = UNMutableNotificationContent()
+        content.title = "⚠️ Urgent Message"
+        content.body = "Contact \(contactKey) has confirmed this is urgent."
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        try? await UNUserNotificationCenter.current().add(request)
 
         print("[Escalation] User notified about urgent contact: \(contactKey)")
     }
@@ -3046,7 +3046,7 @@ public actor FocusModeIntelligence {
 
     /// Internal: Adjust response behavior based on location (without revealing it)
     private func getLocationBasedResponseDelay() async -> TimeInterval {
-        guard let behavior = await getCurrentLocationBehavior() else {
+        guard let _ = await getCurrentLocationBehavior() else {
             return globalSettings.autoReplyDelay
         }
 
@@ -3593,13 +3593,12 @@ public actor FocusModeIntelligence {
     }
 
     private func notifyUserOfFailedAction(_ actionType: PendingAction.ActionType) async {
-        #if os(macOS)
-        let notification = NSUserNotification()
-        notification.title = "⚠️ THEA Action Failed"
-        notification.informativeText = "Failed to execute: \(actionType.rawValue). Please check manually."
-        notification.soundName = NSUserNotificationDefaultSoundName
-        NSUserNotificationCenter.default.deliver(notification)
-        #endif
+        let content = UNMutableNotificationContent()
+        content.title = "⚠️ THEA Action Failed"
+        content.body = "Failed to execute: \(actionType.rawValue). Please check manually."
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        try? await UNUserNotificationCenter.current().add(request)
 
         print("[Reliability] ❌ Action failed after all retries: \(actionType.rawValue)")
     }
@@ -3933,15 +3932,13 @@ public actor FocusModeIntelligence {
             print("[AutoFocus] High-confidence prediction to enable '\(modeName)' Focus")
 
             // Could auto-enable or just notify user
-            #if os(macOS)
-            let notification = NSUserNotification()
-            notification.title = "💡 Focus Mode Suggestion"
-            notification.informativeText = "Should I enable \(modeName) Focus? Reason: \(prediction.signals.first?.reason ?? "detected pattern")"
-            notification.hasActionButton = true
-            notification.actionButtonTitle = "Enable"
-            notification.otherButtonTitle = "Not Now"
-            NSUserNotificationCenter.default.deliver(notification)
-            #endif
+            let content = UNMutableNotificationContent()
+            content.title = "💡 Focus Mode Suggestion"
+            content.body = "Should I enable \(modeName) Focus? Reason: \(prediction.signals.first?.reason ?? "detected pattern")"
+            content.sound = .default
+            content.categoryIdentifier = "FOCUS_SUGGESTION"
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+            try? await UNUserNotificationCenter.current().add(request)
         }
     }
 

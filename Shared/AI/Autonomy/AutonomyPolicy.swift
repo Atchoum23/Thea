@@ -818,7 +818,7 @@ public struct AutonomySettingsView: View {
                     HStack {
                         VStack(alignment: .leading) {
                             Text(category.displayName)
-                            Text("Risk: \(category.riskLevel)")
+                            Text("Risk: \(String(describing: category.riskLevel))")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }

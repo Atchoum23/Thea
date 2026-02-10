@@ -1,5 +1,5 @@
 import Foundation
-import SystemConfiguration
+import Network
 #if os(macOS)
 import AppKit
 import IOKit
@@ -322,41 +322,27 @@ final class AutonomousTaskExecutor {
     }
 
     private func checkNetworkConnected(type: NetworkType) async -> Bool {
-        // Check basic reachability via SCNetworkReachability
-        var zeroAddress = sockaddr_in()
-        zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
-        zeroAddress.sin_family = sa_family_t(AF_INET)
+        // Use NWPathMonitor for modern network reachability check
+        await withCheckedContinuation { continuation in
+            let monitor = NWPathMonitor()
+            monitor.pathUpdateHandler = { path in
+                monitor.cancel()
 
-        guard let reachability = withUnsafePointer(to: &zeroAddress, {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                SCNetworkReachabilityCreateWithAddress(nil, $0)
+                guard path.status == .satisfied else {
+                    continuation.resume(returning: false)
+                    return
+                }
+
+                switch type {
+                case .any:
+                    continuation.resume(returning: true)
+                case .wifi:
+                    continuation.resume(returning: path.usesInterfaceType(.wifi) || path.usesInterfaceType(.wiredEthernet))
+                case .cellular:
+                    continuation.resume(returning: path.usesInterfaceType(.cellular))
+                }
             }
-        }) else { return false }
-
-        var flags: SCNetworkReachabilityFlags = []
-        guard SCNetworkReachabilityGetFlags(reachability, &flags) else { return false }
-
-        let isReachable = flags.contains(.reachable)
-        let needsConnection = flags.contains(.connectionRequired)
-        guard isReachable && !needsConnection else { return false }
-
-        switch type {
-        case .any:
-            return true
-        case .wifi:
-            // On macOS, non-cellular reachable means WiFi/Ethernet
-            // On iOS, check that WWAN flag is NOT set
-            #if os(iOS)
-            return !flags.contains(.isWWAN)
-            #else
-            return true
-            #endif
-        case .cellular:
-            #if os(iOS)
-            return flags.contains(.isWWAN)
-            #else
-            return false // macOS has no cellular
-            #endif
+            monitor.start(queue: DispatchQueue.global(qos: .utility))
         }
     }
 

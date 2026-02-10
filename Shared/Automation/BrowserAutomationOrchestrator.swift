@@ -180,7 +180,7 @@
             logger.info("Starting automation task: \(taskDescription)")
 
             // Create plan for visibility in Plan Mode
-            PlanManager.shared.createSimplePlan(
+            _ = PlanManager.shared.createSimplePlan(
                 title: "Automation: \(String(taskDescription.prefix(40)))",
                 steps: [
                     "Observe current screen state",

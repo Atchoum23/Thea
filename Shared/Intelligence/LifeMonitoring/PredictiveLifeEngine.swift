@@ -642,7 +642,7 @@ public final class PredictiveLifeEngine: ObservableObject {
 
         // Build context summary for LLM
         let contextSummary = buildContextSummary()
-        let patternSummary = buildPatternSummary()
+        _ = buildPatternSummary()
 
         // For now, generate heuristic-based predictions
         // In full implementation, this would call the AI provider
@@ -779,7 +779,7 @@ public final class PredictiveLifeEngine: ObservableObject {
     public func recordOutcome(for predictionId: UUID, wasAccurate: Bool, userTookAction: Bool, feedback: String? = nil) {
         guard let index = predictionHistory.firstIndex(where: { $0.id == predictionId }) else { return }
 
-        var prediction = predictionHistory[index]
+        let prediction = predictionHistory[index]
         let outcome = PredictionOutcome(
             wasAccurate: wasAccurate,
             userTookAction: userTookAction,
