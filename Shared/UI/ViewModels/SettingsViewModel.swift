@@ -108,7 +108,7 @@ final class SettingsViewModel {
     // MARK: - Provider Management
 
     /// Get all available providers
-    var availableProviderInfo: [any AIProvider] {
+    var availableProviderInfo: [ProviderRegistry.ProviderInfo] {
         providerRegistry.availableProviders
     }
 

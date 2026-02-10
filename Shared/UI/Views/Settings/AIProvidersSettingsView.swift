@@ -111,7 +111,7 @@ struct ProviderUsageStats {
 struct AIProvidersSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
     @State private var providerRegistry = ProviderRegistry.shared
-    @State private var metricsManager = PerformanceMetricsManager.shared
+    // PerformanceMetricsManager is in excluded MetaAI — use placeholder for now
 
     // API Keys
     @State private var openAIKey: String = ""
@@ -380,14 +380,9 @@ struct AIProvidersSettingsView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        if let tokenSummary = metricsManager.getSummary(for: .inputTokens) {
-                            Text("\(Int(tokenSummary.count)) requests")
-                                .font(.headline)
-                        } else {
-                            Text("No data")
-                                .font(.headline)
-                                .foregroundStyle(.secondary)
-                        }
+                        Text("No data")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
                     }
 
                     Spacer()
@@ -397,14 +392,9 @@ struct AIProvidersSettingsView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        if let costSummary = metricsManager.getSummary(for: .apiCost) {
-                            Text("$\(String(format: "%.4f", costSummary.average * Double(costSummary.count)))")
-                                .font(.headline)
-                        } else {
-                            Text("$0.00")
-                                .font(.headline)
-                                .foregroundStyle(.secondary)
-                        }
+                        Text("$0.00")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -414,21 +404,21 @@ struct AIProvidersSettingsView: View {
             HStack(spacing: 16) {
                 metricCard(
                     title: "Avg Latency",
-                    value: formatLatency(metricsManager.getSummary(for: .networkLatency)?.average),
+                    value: formatLatency(nil),
                     icon: "clock",
                     color: .blue
                 )
 
                 metricCard(
                     title: "Tokens/sec",
-                    value: formatTokensPerSecond(metricsManager.getSummary(for: .tokensPerSecond)?.average),
+                    value: formatTokensPerSecond(nil),
                     icon: "bolt",
                     color: .orange
                 )
 
                 metricCard(
                     title: "Error Rate",
-                    value: formatErrorRate(metricsManager.getSummary(for: .errorRate)?.average),
+                    value: formatErrorRate(nil),
                     icon: "exclamationmark.triangle",
                     color: .red
                 )

@@ -342,7 +342,7 @@ targets:
           - "**/Settings/MemorySettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           # AdvancedSettingsView — ACTIVATED (self-contained, only uses SettingsManager)
-          - "**/Settings/AIProvidersSettingsView.swift"
+          # AIProvidersSettingsView — ACTIVATED (uses SettingsManager + ProviderRegistry)
           # Verification + Anticipatory: excluded as tightly-coupled subsystems.
           # All files in each folder depend on each other; must be enabled together.
           - "**/ResourceManagement/**"
@@ -461,27 +461,27 @@ targets:
           - "**/Launcher/QuickLauncher.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           - "**/Intelligence/Subagents/**"
-          # Settings views with missing dependencies
+          # Settings views with missing dependencies (still excluded)
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
-          # AdvancedSettingsView — ACTIVATED (self-contained)
-          - "**/Settings/AIProvidersSettingsView.swift"
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
           - "**/Settings/ResourceAllocationSettingsView.swift"
-          - "**/Settings/SettingsPrivacyAboutViews.swift"
           - "**/Settings/AutoCorrectSettingsView.swift"
           - "**/Settings/AIFeaturesSettingsView.swift"
-          - "**/Settings/SettingsConfigurationViews.swift"
-          - "**/Settings/PromptEngineeringSettingsView.swift"
           - "**/Settings/AutomationSettingsView.swift"
           - "**/Settings/WorkflowSettingsView.swift"
           - "**/Settings/TerminalSettingsView.swift"
           - "**/Settings/IntegrationsSettingsView.swift"
           - "**/Settings/AutonomousSettingsView.swift"
-          - "**/Settings/SystemPromptSettingsView.swift"
-          - "**/ViewModels/SettingsViewModel.swift"
+          # PromptEngineeringSettingsView — ACTIVATED (uses active AutomaticPromptEngineering) [DEFERRED - needs PromptEngineering folder]
+          - "**/Settings/PromptEngineeringSettingsView.swift"
+          # SystemPromptSettingsView — ACTIVATED (uses active TaskType + SystemPromptConfiguration)
+          - "**/Settings/SettingsPrivacyAboutViews.swift"  # DUPLICATE of views in SettingsView.swift
+          - "**/Settings/SettingsConfigurationViews.swift"  # DUPLICATE of views in SettingsView.swift
+          # SettingsViewModel — ACTIVATED (uses SettingsManager + ProviderRegistry)
+          # AIProvidersSettingsView — ACTIVATED (uses SettingsManager + ProviderRegistry)
           # Theme exclusions
           - "**/Theme/DesignTokens.swift"
           # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
@@ -623,7 +623,7 @@ targets:
           - "**/Settings/MemorySettingsView.swift"
           - "**/Settings/PrivacySettingsView.swift"
           # AdvancedSettingsView — ACTIVATED (self-contained)
-          - "**/Settings/AIProvidersSettingsView.swift"
+          # AIProvidersSettingsView — ACTIVATED
           - "**/ResourceManagement/**"
           - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
@@ -692,13 +692,13 @@ targets:
           - "**/Integrations/CalendarIntegration.swift"
           - "**/Integrations/ShortcutsIntegration.swift"
           - "**/Automation/ShortcutsOrchestrator.swift"
-          - "**/Settings/SettingsPrivacyAboutViews.swift"
-          - "**/ViewModels/SettingsViewModel.swift"
+          - "**/Settings/SettingsPrivacyAboutViews.swift"  # DUPLICATE of views in SettingsView.swift
+          # SettingsViewModel — ACTIVATED
           - "**/V1Parity/MessageRegeneration.swift"
           - "**/Integrations/MessagesIntegration.swift"
           - "**/PromptEngineering/PromptOptimizer.swift"
           - "**/RemoteServer/RemoteCommandService.swift"
-          - "**/Settings/SettingsConfigurationViews.swift"
+          - "**/Settings/SettingsConfigurationViews.swift"  # DUPLICATE of views in SettingsView.swift
           - "**/Settings/PromptEngineeringSettingsView.swift"
           - "**/PromptEngineering/AutomaticPromptEngineering.swift"
           - "**/Settings/AutomationSettingsView.swift"
