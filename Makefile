@@ -1,6 +1,6 @@
 .PHONY: help generate build build-ios build-watchos build-tvos build-all \
-       build-release test test-spm test-asan test-tsan lint audit \
-       clean clean-derived check summary watch install xcode hooks qa
+       build-release test test-spm test-asan test-tsan lint audit security \
+       clean clean-derived check summary watch install xcode hooks qa qa-full
 
 # Default target
 help:
@@ -26,7 +26,9 @@ help:
 	@echo "  Quality:"
 	@echo "    make lint           - Run SwiftLint"
 	@echo "    make audit          - Build and run thea-audit security scanner"
+	@echo "    make security       - Run gitleaks secret scan"
 	@echo "    make qa             - Full QA: lint + test + build-all"
+	@echo "    make qa-full        - Full QA + sanitizers + security"
 	@echo "    make check          - Run build error scan script"
 	@echo ""
 	@echo "  Maintenance:"
@@ -189,3 +191,16 @@ clean-derived:
 	@echo "Cleaning Thea DerivedData..."
 	@find ~/Library/Developer/Xcode/DerivedData -maxdepth 1 -name "Thea-*" -type d -exec rm -rf {} + 2>/dev/null || true
 	@echo "Done."
+
+# Run gitleaks secret scan
+security:
+	@echo "Running gitleaks secret scan..."
+	@if command -v gitleaks >/dev/null 2>&1; then \
+		gitleaks detect --source . --verbose; \
+	else \
+		echo "gitleaks not installed. Install with: brew install gitleaks"; \
+	fi
+
+# Full QA pipeline with sanitizers and security
+qa-full: lint test test-asan test-tsan audit security build-all
+	@echo "Full QA passed: lint + test + sanitizers + audit + security + all platforms."
