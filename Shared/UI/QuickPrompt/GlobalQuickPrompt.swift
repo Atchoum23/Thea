@@ -350,14 +350,11 @@ public final class GlobalQuickPromptManager: ObservableObject {
     }
 
     private func processPrompt(_ text: String) async throws -> String {
-        // Use the default provider from SettingsManager
-        let settings = SettingsManager.shared
-        let providerID = settings.selectedProvider
-        let model = settings.selectedModel
-
-        guard let provider = ProviderRegistry.shared.getProvider(id: providerID) else {
+        // Use the default provider from ProviderRegistry
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             throw QuickPromptError.noProvider
         }
+        let model = AppConfiguration.shared.providerConfig.defaultModel
 
         let message = AIMessage(
             id: UUID(),
@@ -381,6 +378,8 @@ public final class GlobalQuickPromptManager: ObservableObject {
                 result += delta
             case let .complete(finalMessage):
                 result = finalMessage.content.textValue
+            case let .error(error):
+                throw error
             }
         }
 
