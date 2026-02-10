@@ -194,7 +194,7 @@ final class ChatManager: ObservableObject {
 
         // Use the orchestrator system: classify task → route to optimal model
         debugLog("🔄 Selecting provider and model...")
-        let (provider, model) = try await selectProviderAndModel(for: text)
+        let (provider, model, taskType) = try await selectProviderAndModel(for: text)
         debugLog("✅ Selected provider '\(provider.metadata.name)' with model '\(model)'")
 
         // Calculate next order index for proper message ordering
@@ -220,8 +220,17 @@ final class ChatManager: ObservableObject {
         let deviceContext = buildDeviceContextPrompt()
         var apiMessages: [AIMessage] = []
 
-        // Build system prompt: user's custom prompt + device context
+        // Build system prompt: task-specific instructions + user's custom prompt + device context
         var systemPromptParts: [String] = []
+
+        // Automatic prompt engineering: add task-specific instructions based on classification
+        if let taskType {
+            let taskPrompt = Self.buildTaskSpecificPrompt(for: taskType)
+            if !taskPrompt.isEmpty {
+                systemPromptParts.append(taskPrompt)
+            }
+        }
+
         if let customPrompt = conversation.metadata.systemPrompt, !customPrompt.isEmpty {
             systemPromptParts.append(customPrompt)
         }
@@ -482,15 +491,15 @@ final class ChatManager: ObservableObject {
 
     // MARK: - Orchestrator Integration
 
-    /// Select provider and model using TaskClassifier + ModelRouter orchestration (macOS)
-    /// Falls back to default provider on other platforms
-    private func selectProviderAndModel(for query: String) async throws -> (AIProvider, String) {
+    /// Select provider and model using TaskClassifier + ModelRouter orchestration (macOS).
+    /// Returns the classification result for automatic prompt engineering.
+    private func selectProviderAndModel(for query: String) async throws -> (AIProvider, String, TaskType?) {
         #if os(macOS)
         do {
             let classification = try await TaskClassifier.shared.classify(query)
             let decision = ModelRouter.shared.route(classification: classification)
             if let provider = ProviderRegistry.shared.getProvider(id: decision.model.provider) {
-                return (provider, decision.model.id)
+                return (provider, decision.model.id, classification.taskType)
             }
         } catch {
             debugLog("⚠️ Orchestrator fallback: \(error.localizedDescription)")
@@ -498,7 +507,8 @@ final class ChatManager: ObservableObject {
         #else
         _ = query
         #endif
-        return try getDefaultProviderAndModel()
+        let (provider, model) = try getDefaultProviderAndModel()
+        return (provider, model, nil)
     }
 
     /// Fallback: get default provider and model (original behavior)
@@ -544,6 +554,98 @@ final class ChatManager: ObservableObject {
         lines.append("- User prompts from this conversation may originate from different devices (check message context).")
 
         return lines.joined(separator: "\n")
+    }
+
+    // MARK: - Automatic Prompt Engineering
+
+    /// Generates task-specific system prompt instructions based on the classified task type.
+    /// This enables the AI to respond more effectively without the user needing to craft prompts.
+    static func buildTaskSpecificPrompt(for taskType: TaskType) -> String {
+        switch taskType {
+        case .codeGeneration, .appDevelopment:
+            return """
+            You are a senior software engineer. Write clean, production-ready code. \
+            Follow best practices for the language. Include error handling. \
+            Explain your design decisions briefly.
+            """
+        case .codeAnalysis:
+            return """
+            Analyze the code thoroughly. Identify potential bugs, performance issues, \
+            security vulnerabilities, and style improvements. Be specific with line references.
+            """
+        case .codeDebugging, .debugging:
+            return """
+            Debug systematically. Identify the root cause, not just symptoms. \
+            Explain why the bug occurs and provide a targeted fix. \
+            Verify the fix doesn't introduce regressions.
+            """
+        case .codeExplanation:
+            return """
+            Explain the code clearly at the appropriate level of detail. \
+            Walk through the logic step by step. Highlight key patterns and design decisions.
+            """
+        case .codeRefactoring:
+            return """
+            Refactor for clarity, maintainability, and performance. \
+            Preserve existing behavior. Explain each change and its benefit. \
+            Follow SOLID principles where applicable.
+            """
+        case .factual, .simpleQA:
+            return """
+            Provide accurate, well-sourced factual information. \
+            Distinguish between established facts and your reasoning. \
+            If uncertain, say so.
+            """
+        case .creative, .creativeWriting, .contentCreation, .creation:
+            return """
+            Be creative and engaging. Match the requested tone and style. \
+            Offer multiple options or approaches when appropriate.
+            """
+        case .analysis, .complexReasoning:
+            return """
+            Analyze thoroughly with structured reasoning. Consider multiple perspectives. \
+            Support conclusions with evidence. Identify assumptions and limitations.
+            """
+        case .research, .informationRetrieval:
+            return """
+            Research comprehensively. Organize findings clearly. \
+            Cite sources when possible. Distinguish between primary and secondary information. \
+            Note gaps in available information.
+            """
+        case .conversation, .general:
+            return "" // No special instructions for casual conversation
+        case .system, .workflowAutomation:
+            return """
+            Provide precise system commands and configurations. \
+            Warn about potentially destructive operations. \
+            Include verification steps.
+            """
+        case .math, .mathLogic:
+            return """
+            Show your work step by step. Use precise mathematical notation. \
+            Verify your answer with a sanity check. Explain the approach before calculating.
+            """
+        case .translation:
+            return """
+            Translate accurately while preserving meaning, tone, and cultural nuance. \
+            Note any idioms or phrases that don't translate directly. \
+            Provide context where the translation might be ambiguous.
+            """
+        case .summarization:
+            return """
+            Summarize concisely while preserving key information. \
+            Organize by importance. Include the main conclusions and supporting points. \
+            Note any critical details that shouldn't be omitted.
+            """
+        case .planning:
+            return """
+            Create actionable plans with clear steps, dependencies, and priorities. \
+            Identify risks and mitigation strategies. \
+            Include time estimates where possible. Consider resource constraints.
+            """
+        case .unknown:
+            return ""
+        }
     }
 }
 
