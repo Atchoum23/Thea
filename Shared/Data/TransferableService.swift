@@ -296,7 +296,7 @@ public struct TransferableAIResponse: Codable, Transferable, Sendable {
 
 // MARK: - Image with AI Analysis Transferable
 
-public struct TransferableAnalyzedImage: Transferable, @unchecked Sendable {
+public struct TransferableAnalyzedImage: Transferable, Sendable {
     public let imageData: Data
     public let analysis: String
     public let tags: [String]

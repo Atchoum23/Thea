@@ -4,7 +4,7 @@ import Foundation
 
 // Curated library of Swift 6.0 best practices for code generation
 
-final class SwiftBestPracticesLibrary: @unchecked Sendable {
+final class SwiftBestPracticesLibrary: Sendable {
     static let shared = SwiftBestPracticesLibrary()
 
     private let practices: [SwiftBestPractice]

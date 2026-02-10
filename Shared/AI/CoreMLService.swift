@@ -414,7 +414,7 @@ public struct CoreMLSentimentResult: Sendable {
     public let confidence: Double
 }
 
-public struct CoreMLExtractedEntity: @unchecked Sendable {
+public struct CoreMLExtractedEntity: Sendable {
     public let text: String
     public let type: CoreMLEntityType
     public let startOffset: Int
@@ -450,7 +450,7 @@ public struct LanguageDetectionResult: Sendable {
     public let alternatives: [(NLLanguage, Double)]
 }
 
-public struct PartOfSpeechTag: @unchecked Sendable {
+public struct PartOfSpeechTag: Sendable {
     public let word: String
     public let tag: NLTag
     public let startOffset: Int

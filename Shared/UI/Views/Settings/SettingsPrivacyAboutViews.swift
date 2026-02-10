@@ -69,7 +69,7 @@ struct ConfigurationPrivacySettingsView: View {
 
 // MARK: - Data Export Document
 
-struct DataExportDocument: FileDocument, @unchecked Sendable {
+struct DataExportDocument: FileDocument, Sendable {
     static var readableContentTypes: [UTType] { [.json] }
 
     init() {}

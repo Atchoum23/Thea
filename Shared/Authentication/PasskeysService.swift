@@ -366,7 +366,7 @@ public struct PasskeyUser: Identifiable, Sendable {
     public let fullName: String?
 }
 
-public enum PasskeyError: Error, LocalizedError, @unchecked Sendable {
+public enum PasskeyError: Error, LocalizedError, Sendable {
     case userCancelled
     case invalidResponse
     case notHandled
