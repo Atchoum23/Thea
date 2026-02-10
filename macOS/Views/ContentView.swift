@@ -87,6 +87,13 @@ struct ContentView: View {
             selectedItem = .chat
             selectedConversation = conversation
         }
+        .onReceive(NotificationCenter.default.publisher(for: .quickEntrySubmit)) { notification in
+            guard let text = notification.object as? String, !text.isEmpty else { return }
+            let conversation = selectedConversation ?? chatManager.createConversation(title: "New Conversation")
+            selectedItem = .chat
+            selectedConversation = conversation
+            chatManager.queueOrSendMessage(text, in: conversation)
+        }
         .onReceive(NotificationCenter.default.publisher(for: .exportConversation)) { _ in
             guard let conversation = selectedConversation else { return }
             let panel = NSSavePanel()

@@ -150,7 +150,7 @@
                 // Main input area
                 HStack(spacing: 12) {
                     // Thea icon
-                    Image(systemName: "brain.head.profile")
+                    Image(systemName: "sparkles")
                         .font(.theaTitle2)
                         .foregroundStyle(Color.theaPrimaryDefault)
 
