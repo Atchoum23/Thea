@@ -803,6 +803,7 @@
 		8EBF8D0B214DE6FD0D113951 /* ParallelQueryExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A02AF552BAE23CC5463F9B4 /* ParallelQueryExecutorTests.swift */; };
 		8EC6E93EB6FE53008BFA6F2E /* AsanaIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E5C88083E415FCCBBF131E /* AsanaIntegration.swift */; };
 		8F0787E172A44DCB61BB01B0 /* PreferenceSyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B22A03578915E3A117AB6AA /* PreferenceSyncEngine.swift */; };
+		8F3CBCDC803592960C7D23F9 /* QuickLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 431BB17DEF544CAEE48D0FC4 /* QuickLauncher.swift */; };
 		8F55E50F4B110C5FD5A81EF5 /* ProactivityEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81DA97D1CC9C765F9F4D697 /* ProactivityEngine.swift */; };
 		8F656D03B4EF178B74E86D04 /* GlobalQuickPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2C2A762C04F970B3690A37 /* GlobalQuickPrompt.swift */; };
 		8F6999B5FFAFC467862C68DC /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332DC6FE76C7F880C4C2736 /* SettingsViewModel.swift */; };
@@ -1769,6 +1770,7 @@
 		42A5A43EC2AC0F5AC21DA5BD /* InterfaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceTests.swift; sourceTree = "<group>"; };
 		42E38CA55E7F4FD63FF4AE8E /* DisplayProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayProtocols.swift; sourceTree = "<group>"; };
 		4318671F8DE98472EC663FBF /* FinancialModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialModels.swift; sourceTree = "<group>"; };
+		431BB17DEF544CAEE48D0FC4 /* QuickLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLauncher.swift; sourceTree = "<group>"; };
 		4382A4B2FD4D63FC611BC0C3 /* GoalInferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalInferenceEngine.swift; sourceTree = "<group>"; };
 		43BFDB048804A6C8CC1D372B /* ContextualMultiArmedBandit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextualMultiArmedBandit.swift; sourceTree = "<group>"; };
 		4426F38C76B0F6E7C82122D0 /* XcodeBuildRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeBuildRunnerTests.swift; sourceTree = "<group>"; };
@@ -3119,6 +3121,14 @@
 			path = BrowserAutomation;
 			sourceTree = "<group>";
 		};
+		36BB7FEF147B313E1D98CCF1 /* Launcher */ = {
+			isa = PBXGroup;
+			children = (
+				431BB17DEF544CAEE48D0FC4 /* QuickLauncher.swift */,
+			);
+			path = Launcher;
+			sourceTree = "<group>";
+		};
 		373347A165CE4ACE223BB71D /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
@@ -3380,6 +3390,7 @@
 				6758B08968E0E4F409984762 /* Health */,
 				45FB3F5179D73084FFB6995C /* HomeKit */,
 				A5EB3B5DE0154E217F3705E0 /* Income */,
+				36BB7FEF147B313E1D98CCF1 /* Launcher */,
 				F70EA50F6B336D7C5495C026 /* Nutrition */,
 				499D4ACDD5D30E3AAE53EEB5 /* Spotlight */,
 				A920EE7C4A32A5C1D37E5C19 /* TaskManagement */,
@@ -7263,6 +7274,7 @@
 				C570829328395FB088C8C7DF /* QuerySuggestionOverlay.swift in Sources */,
 				FB229D00153697A4CA5D1FB2 /* QueuedMessage.swift in Sources */,
 				A066F39A26CA5E28ECD7FBF3 /* QuickEntryWindow.swift in Sources */,
+				8F3CBCDC803592960C7D23F9 /* QuickLauncher.swift in Sources */,
 				5354895FD0D64B902827A1FB /* ReflexionEngine.swift in Sources */,
 				82D8A07E5C2D8409B15A8210 /* RelationshipIntelligence.swift in Sources */,
 				BDC4D9C81BCE35AEAD1EF3AB /* ReliabilityMonitor.swift in Sources */,

@@ -345,7 +345,7 @@ public final class QuickLauncher: ObservableObject {
                 icon: "arrow.triangle.2.circlepath",
                 keywords: ["sync", "icloud", "refresh"],
                 action: .run {
-                    try? await TheaIntegrationHub.shared.performSync()
+                    try? await CloudKitService.shared.syncAll()
                 }
             ),
 

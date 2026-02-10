@@ -437,7 +437,7 @@ targets:
           # TestGenerator — ACTIVATED (AI-powered test generation, AIProviderHelpers replaced with direct streaming)
           - "**/V1Parity/MessageRegeneration.swift"
           # RemoteCommandService — ACTIVATED (CloudKit-based remote commands)
-          - "**/Launcher/QuickLauncher.swift"
+          # QuickLauncher — ACTIVATED (Raycast-style command palette, TheaIntegrationHub replaced with CloudKitService)
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           # Intelligence/Subagents — ACTIVATED
           # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
