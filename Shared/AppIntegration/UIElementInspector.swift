@@ -234,7 +234,6 @@ public struct UIElementInfo: @unchecked Sendable, Identifiable {
     public let frame: CGRect
 
     #if os(macOS)
-        // swiftlint:disable:next modifier_order
         public nonisolated(unsafe) let axElement: AXUIElement?
     #else
         public let axElement: AnyObject? = nil

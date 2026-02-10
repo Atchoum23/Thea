@@ -27,11 +27,59 @@ excluded:
   - Carthage
   - DerivedData
   - .backup*
+  - .v1-archive
   - Package.swift
   - "**/.build"
   - "**/Backups"
   - "**/*.legacy"
   - "**/*.wip"
+  # Excluded from build targets (dead code) — no point linting
+  - Shared/AI/MetaAI
+  - Shared/AI/Context
+  - Shared/AI/Adaptive
+  - Shared/AI/MultiModal
+  - Shared/AI/Proactive
+  - Shared/AI/PromptEngineering
+  - Shared/AI/Providers
+  - Shared/AI/Memory
+  - Shared/AI/LocalModels/ProactiveModelManager.swift
+  - Shared/AI/LocalModels/LocalModelRecommendationEngine.swift
+  - Shared/AI/LocalModels/LocalModelRecommendationEngine+Hardware.swift
+  - Shared/AI/LocalModels/AIModelGovernor.swift
+  - Shared/AI/LocalModels/ModelGovernanceEngine.swift
+  - Shared/AI/LocalModels/UnifiedLocalModelOrchestrator.swift
+  - Shared/AI/LocalModels/SupraModelSelector.swift
+  - Shared/AI/LocalModels/OllamaAgentLoop.swift
+  - Shared/AI/LocalModels/ModelQualityBenchmark.swift
+  - Shared/AI/LocalModels/PredictivePreloader.swift
+  - Shared/Autonomy
+  - Shared/Automation
+  - Shared/Autonomous
+  - Shared/AgentMode
+  - Shared/SelfEvolution
+  - Shared/PatternLearning
+  - Shared/LifeMonitoring
+  - Shared/LifeAssistant
+  - Shared/Integrations
+  - Shared/Anticipatory
+  - Shared/Prediction
+  - Shared/ResourceManagement
+  - Shared/Intelligence/Squads
+  - Shared/Intelligence/LifeMonitoring
+  - Shared/Intelligence/LifeAssistant
+  - Shared/Intelligence/PatternLearning
+  - Shared/Execution/Terminal
+  - Shared/Widgets
+  - Shared/UI/Views/MetaAI
+  - Shared/UI/Views/Settings/Orchestrator
+  - Shared/UI/Views/Settings/LocalModels
+  - Shared/UI/Views/Settings/Privacy
+  - Shared/UI/Views/Settings/Advanced
+  - Shared/UI/Views/Settings/AutonomousTasks
+  - Shared/UI/Views/Code
+  - Shared/UI/Views/LocalModels
+  - Shared/UI/Views/LifeTracking
+  - Tools
 
 # ============================================
 # DISABLED RULES
@@ -144,21 +192,27 @@ analyzer_rules:
 # RULE CONFIGURATIONS
 # ============================================
 
-# File Length - relaxed
+# File Length - aspirational: 500, error at current max + buffer
+# Worst active file: OrchestratorSettingsView.swift (936 lines)
+# Ratchet down error threshold as files are decomposed
 file_length:
-  warning: 1200
-  error: 2000
+  warning: 500
+  error: 950
   ignore_comment_only_lines: true
 
-# Type Body Length - relaxed for comprehensive SwiftUI views
+# Type Body Length - aspirational: 400, error at current max + buffer
+# Worst active type: OrchestratorSettingsView (871 lines)
+# Ratchet down error threshold as types are decomposed
 type_body_length:
-  warning: 1200
-  error: 1500
+  warning: 400
+  error: 880
 
-# Function Body Length - relaxed for data libraries
+# Function Body Length - aspirational: 80, error at current max + buffer
+# Worst active function: SwiftBestPracticesLibrary (274 lines)
+# Ratchet down error threshold as functions are decomposed
 function_body_length:
-  warning: 300
-  error: 500
+  warning: 80
+  error: 280
 
 # Function Parameter Count
 function_parameter_count:
@@ -166,10 +220,12 @@ function_parameter_count:
   error: 10
   ignores_default_parameters: true
 
-# Cyclomatic Complexity - relaxed for parsers
+# Cyclomatic Complexity - aspirational: 15, error at current max + buffer
+# Worst active function: AnthropicProvider (25)
+# Ratchet down error threshold as functions are simplified
 cyclomatic_complexity:
-  warning: 30
-  error: 50
+  warning: 15
+  error: 26
   ignores_case_statements: true
 
 # Nesting - relaxed
@@ -293,8 +349,8 @@ type_name:
 trailing_comma:
   mandatory_comma: false
 
-# Warning Threshold - increased for large project
-warning_threshold: 1000
+# Warning Threshold - gradually tighten as code improves
+warning_threshold: 200
 
 # ============================================
 # CUSTOM RULES (Quality Focused)

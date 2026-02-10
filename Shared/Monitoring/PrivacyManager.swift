@@ -132,7 +132,6 @@ public actor PrivacyManager {
     }
 
     #if os(macOS)
-        // swiftlint:disable:next modifier_order
         private nonisolated func requestMacOSPermission(_ permission: PrivacyPermission) async -> PrivacyPermissionStatus {
             switch permission {
             case .accessibility, .inputMonitoring:

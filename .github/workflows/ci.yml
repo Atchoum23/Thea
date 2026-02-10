@@ -52,8 +52,8 @@ jobs:
           fi
           command -v swiftlint || brew install swiftlint
 
-      - name: Run SwiftLint (Strict)
-        run: swiftlint lint --strict --reporter github-actions-logging
+      - name: Run SwiftLint
+        run: swiftlint lint --reporter github-actions-logging
 
       - name: Generate Report
         if: always()
