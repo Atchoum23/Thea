@@ -23,7 +23,7 @@ final class UnifiedDeviceAwareness {
     private(set) var deviceInfo = DeviceHardwareInfo()
     private(set) var systemState = SystemState()
     private(set) var sensorData = SensorData()
-    private(set) var installedApps: [InstalledApp] = []
+    private(set) var installedApps: [DeviceInstalledApp] = []
     private(set) var runningProcesses: [RunningProcess] = []
     private(set) var storageInfo = StorageInfo()
     private(set) var networkInfo = NetworkInfo()
@@ -65,7 +65,7 @@ final class UnifiedDeviceAwareness {
         await gatherTheaInfo()
 
         if configuration.enableAppMonitoring {
-            await gatherInstalledApps()
+            await gatherDeviceInstalledApps()
         }
 
         if configuration.enableProcessMonitoring {
@@ -240,14 +240,14 @@ final class UnifiedDeviceAwareness {
 
     // MARK: - Installed Apps
 
-    private func gatherInstalledApps() async {
+    private func gatherDeviceInstalledApps() async {
         #if os(macOS)
         let appDirectories = [
             "/Applications",
             FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications").path
         ]
 
-        var apps: [InstalledApp] = []
+        var apps: [DeviceInstalledApp] = []
 
         for directory in appDirectories {
             let url = URL(fileURLWithPath: directory)
@@ -260,7 +260,7 @@ final class UnifiedDeviceAwareness {
             for fileURL in contents ?? [] {
                 if fileURL.pathExtension == "app" {
                     if let bundle = Bundle(url: fileURL) {
-                        let app = InstalledApp(
+                        let app = DeviceInstalledApp(
                             name: bundle.infoDictionary?["CFBundleName"] as? String ?? fileURL.deletingPathExtension().lastPathComponent,
                             bundleId: bundle.bundleIdentifier ?? "",
                             version: bundle.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown",
@@ -676,7 +676,7 @@ struct NetworkInfo: Sendable {
     var ipAddress: String?
 }
 
-struct InstalledApp: Identifiable, Sendable {
+struct DeviceInstalledApp: Identifiable, Sendable {
     let id = UUID()
     let name: String
     let bundleId: String

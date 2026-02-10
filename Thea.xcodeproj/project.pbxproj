@@ -640,6 +640,7 @@
 		715D83863D631E8CDB326D1F /* BluetoothDeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1217BC528F6264D7B6BF3423 /* BluetoothDeviceManager.swift */; };
 		7179A14E7F40B5FF16E8C236 /* RealFunctionalTestPlan.md in Resources */ = {isa = PBXBuildFile; fileRef = D048DBA179ABE3C2DE61D862 /* RealFunctionalTestPlan.md */; };
 		71B108C84478FEBA1C36EBD0 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FACB88E06141C872453645 /* NotificationManager.swift */; };
+		71B546297E18BAE5D0B23A73 /* UnifiedDeviceAwareness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12A0524C0078CC2979B4539A /* UnifiedDeviceAwareness.swift */; };
 		71E521AB019C50B0FD8EE925 /* AutonomousMaintenanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1607048049ED97533AA3720 /* AutonomousMaintenanceService.swift */; };
 		72073E1E1CEC7B4D411C81F2 /* FinancialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BC9C279C462E946AAE1891 /* FinancialManager.swift */; };
 		726ED12E9ACC925084D24357 /* DisplayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 889FB92A9705B5E8700BB983 /* DisplayService.swift */; };
@@ -1584,6 +1585,7 @@
 		119E655F208CE7BAFF433FBC /* SiriShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriShortcuts.swift; sourceTree = "<group>"; };
 		11E5AC4907463FDE7AB36F48 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		1217BC528F6264D7B6BF3423 /* BluetoothDeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDeviceManager.swift; sourceTree = "<group>"; };
+		12A0524C0078CC2979B4539A /* UnifiedDeviceAwareness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedDeviceAwareness.swift; sourceTree = "<group>"; };
 		12D843CD7F24B89C084064F2 /* iOSSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSettingsView.swift; sourceTree = "<group>"; };
 		12DB9E79785FE91D74B85AC4 /* PluginSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginSystemTests.swift; sourceTree = "<group>"; };
 		13511D0BD0909B08B905BF1E /* DynamicResourceAllocatorTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicResourceAllocatorTypes.swift; sourceTree = "<group>"; };
@@ -2535,6 +2537,14 @@
 				E28FDE22253DFFF30780E372 /* CausalPatternAnalyzer.swift */,
 			);
 			path = Analysis;
+			sourceTree = "<group>";
+		};
+		0759C447DEFCAC40424C88ED /* DeviceAwareness */ = {
+			isa = PBXGroup;
+			children = (
+				12A0524C0078CC2979B4539A /* UnifiedDeviceAwareness.swift */,
+			);
+			path = DeviceAwareness;
 			sourceTree = "<group>";
 		};
 		07DD1E5249552FBB3B53EDDB /* Display */ = {
@@ -4845,6 +4855,7 @@
 			isa = PBXGroup;
 			children = (
 				B6CB93ABDC5BCABB68B35A09 /* Analysis */,
+				0759C447DEFCAC40424C88ED /* DeviceAwareness */,
 				F6BEE39BB214CE70CC701769 /* Providers */,
 				AE45FE9B289218509A56ACB3 /* ContextProvider.swift */,
 				23D0EE4ED3810385EA23620E /* ContextSnapshot.swift */,
@@ -7382,6 +7393,7 @@
 				B6133AAAB68E85373776F3D7 /* UnifiedContextEngine.swift in Sources */,
 				6B2BDD1AE3AA30C2B9B78015 /* UnifiedContextSync.swift in Sources */,
 				C1E7AD25990EB351D2DAC699 /* UnifiedDashboardView.swift in Sources */,
+				71B546297E18BAE5D0B23A73 /* UnifiedDeviceAwareness.swift in Sources */,
 				5ED9D1079793715E22E48B6D /* UnifiedFeedbackAggregator.swift in Sources */,
 				F5E9CA51786F2F28E8A4CDFF /* UnifiedIntelligenceHub.swift in Sources */,
 				C7685956709CDE7445DF0235 /* UnifiedLocalModelOrchestrator.swift in Sources */,

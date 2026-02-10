@@ -428,7 +428,7 @@ targets:
           # PlatformFeaturesHub — ACTIVATED (Platform enum, PlatformFeature, platform detection)
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
           # THEAMCPServer — ACTIVATED (MCP server with THEA-prefixed types)
-          - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
+          # UnifiedDeviceAwareness — ACTIVATED (device hardware, system state, storage, network info)
           # CodeIntelligence — ACTIVATED (see above)
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
