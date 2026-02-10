@@ -290,9 +290,8 @@ targets:
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
-          # Also exclude AI/Providers files that depend on excluded Protocol types
-          - "**/AI/Providers/AnthropicFilesAPI.swift"
-          - "**/AI/Providers/AnthropicTokenCounter.swift"
+          # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
+          # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
           - "**/Providers/Anthropic/**"
           - "**/Providers/DeepSeek/**"
           - "**/Providers/Google/**"
@@ -336,7 +335,6 @@ targets:
           # Exclude MetaAI views that depend on excluded MetaAI folder
           - "**/Views/MetaAI/**"
           # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
-          - "**/Settings/Orchestrator/**"
           # MemorySettingsView — ACTIVATED
           # PrivacySettingsView — ACTIVATED
           # AdvancedSettingsView — ACTIVATED
@@ -346,8 +344,7 @@ targets:
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
-          - "**/Views/Code/**"
-          - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift inline types
+          # Views/Code — ACTIVATED (folder empty, no files exist)
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
           - "**/Views/SelfExecutionView.swift"
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
@@ -435,7 +432,7 @@ targets:
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Core/TheaIntegrationHub.swift"
           # TestGenerator — ACTIVATED (AI-powered test generation, AIProviderHelpers replaced with direct streaming)
-          - "**/V1Parity/MessageRegeneration.swift"
+          # MessageRegeneration — ACTIVATED (ChatMessage→AIMessage, bestAvailableProvider→getDefaultProvider, ChatOptions→direct stream)
           # RemoteCommandService — ACTIVATED (CloudKit-based remote commands)
           # QuickLauncher — ACTIVATED (Raycast-style command palette, TheaIntegrationHub replaced with CloudKitService)
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"

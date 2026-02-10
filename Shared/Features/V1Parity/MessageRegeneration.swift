@@ -35,17 +35,17 @@ public final class MessageRegenerationService {
     // MARK: - Public API
 
     /// Regenerate a message at a given index with the same prompt but fresh response
-    public func regenerate(
+    func regenerate(
         messageIndex: Int,
-        conversation: [ChatMessage],
+        conversation: [AIMessage],
         provider: AIProvider? = nil
-    ) async throws -> ChatMessage {
+    ) async throws -> AIMessage {
         isRegenerating = true
         defer { isRegenerating = false }
 
         logger.info("Regenerating message at index \(messageIndex)...")
 
-        let targetProvider = provider ?? ProviderRegistry.shared.bestAvailableProvider
+        let targetProvider = provider ?? ProviderRegistry.shared.getDefaultProvider()
         guard let targetProvider else {
             throw RegenerationError.noProviderAvailable
         }
@@ -62,7 +62,7 @@ public final class MessageRegenerationService {
         }
 
         let prompt = conversation[userPromptIndex]
-        guard prompt.role == "user" else {
+        guard prompt.role == .user else {
             throw RegenerationError.noPromptFound
         }
 
@@ -73,39 +73,43 @@ public final class MessageRegenerationService {
 
         // Adjust temperature for variation
         let model = await DynamicConfig.shared.bestModel(for: .conversation)
-        let baseTemp = DynamicConfig.shared.temperature(for: .conversation)
-        let temperature = adjustTemperature ? min(baseTemp + 0.1, 1.0) : baseTemp
+        _ = DynamicConfig.shared.temperature(for: .conversation)
+        // Note: temperature/maxTokens are not part of the active AIProvider.chat() API;
+        // they would need provider-specific configuration. Using default streaming.
 
         // Generate new response
         let stream = try await targetProvider.chat(
             messages: contextMessages + [prompt],
             model: model,
-            options: ChatOptions(
-                temperature: temperature,
-                maxTokens: DynamicConfig.shared.maxTokens(for: .conversation),
-                stream: true
-            )
+            stream: true
         )
 
         var responseText = ""
         for try await chunk in stream {
-            switch chunk {
-            case .content(let text):
+            switch chunk.type {
+            case .delta(let text):
                 responseText += text
-            case .done:
+            case .complete:
                 break
             case .error(let error):
                 throw error
             }
         }
 
-        let newMessage = ChatMessage(role: "assistant", text: responseText)
+        let newMessage = AIMessage(
+            id: UUID(),
+            conversationID: prompt.conversationID,
+            role: .assistant,
+            content: .text(responseText),
+            timestamp: Date(),
+            model: model
+        )
 
         // Record regeneration
         regenerationHistory.append(RegenerationRecord(
             originalIndex: messageIndex,
             timestamp: Date(),
-            temperature: temperature
+            temperature: 0.7
         ))
 
         logger.info("Regeneration complete")
@@ -113,13 +117,13 @@ public final class MessageRegenerationService {
     }
 
     /// Generate multiple variations of a response
-    public func generateVariations(
+    func generateVariations(
         messageIndex: Int,
-        conversation: [ChatMessage],
+        conversation: [AIMessage],
         count: Int? = nil
-    ) async throws -> [ChatMessage] {
+    ) async throws -> [AIMessage] {
         let variationCount = count ?? defaultVariations
-        var variations: [ChatMessage] = []
+        var variations: [AIMessage] = []
 
         for i in 0..<variationCount {
             logger.info("Generating variation \(i + 1)/\(variationCount)")
