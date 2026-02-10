@@ -1095,7 +1095,6 @@
 		BFC31A6A566EC0E895347049 /* SystemPromptSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D0B9C9258F4B2B582055A8 /* SystemPromptSettingsView.swift */; };
 		BFC402CB6C4147506218649C /* CloudKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A092B851A3F64DCAC0E8CF57 /* CloudKitService.swift */; };
 		C0A4954CA50D937248D2B272 /* LifeTrackingDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F75B783D4DF4E372CAE8123 /* LifeTrackingDashboardView.swift */; };
-		C0B4EC5C6782615CD1349388 /* LegacyScreenCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793C4EF801100996337F7D2E /* LegacyScreenCapture.swift */; };
 		C0F098600365628733178A06 /* PrivacyModeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE531DCD5B8951FE256555E /* PrivacyModeService.swift */; };
 		C1044F5E6A72F228532A306E /* password-enhancer-ui.js in Resources */ = {isa = PBXBuildFile; fileRef = F6499FE68779A3AFD04CE2BE /* password-enhancer-ui.js */; };
 		C111667F3BD89F361B5F671F /* AssertionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F136C9853E8EAD371566DE /* AssertionManager.swift */; };
@@ -1303,7 +1302,6 @@
 		E55148C3BDD56A6479335C86 /* MonitoringServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869C2003D88EA036B1AB6C71 /* MonitoringServiceTests.swift */; };
 		E560CAF3259B0E850A2A1713 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5011E824D5AA897623BF1B5B /* NotificationService.swift */; };
 		E57D19BE3955FE023E760A6F /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6CC5E0D15B290AB6A0123A1 /* ChatView.swift */; };
-		E5803DBCDCA7DE133FEAC3AF /* LegacyScreenCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793C4EF801100996337F7D2E /* LegacyScreenCapture.swift */; };
 		E5A60409D2E8868B59F269B1 /* ScreenCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684768C04676C9A1135926BC /* ScreenCapture.swift */; };
 		E5B12448A9E700C245693F8C /* AdaptiveLearningEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29330D84476AE8FBF3A37D6D /* AdaptiveLearningEngine.swift */; };
 		E5B666085AC3BC2A429FDFC2 /* CallMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F25101759D9FF0F8AE57B57 /* CallMonitor.swift */; };
@@ -2007,7 +2005,6 @@
 		78D8989577E7DA11AC93CEC5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		78E5C88083E415FCCBBF131E /* AsanaIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsanaIntegration.swift; sourceTree = "<group>"; };
 		78E6203C2845080FEA998CD3 /* APIGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIGenerator.swift; sourceTree = "<group>"; };
-		793C4EF801100996337F7D2E /* LegacyScreenCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyScreenCapture.swift; sourceTree = "<group>"; };
 		79566CE26059D4FBFCD18233 /* FileAttachmentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileAttachmentManager.swift; sourceTree = "<group>"; };
 		796D0D921AA301E604F98088 /* CredentialsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CredentialsExtension.entitlements; sourceTree = "<group>"; };
 		79FDB0F45191FC92BF378C75 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
@@ -5084,7 +5081,6 @@
 				02DF88A0D9B3677236656455 /* GitSavepoint.swift */,
 				BD07330219E6C53C3EE6C740 /* GUIVerifier.swift */,
 				0B5B6B96B5575DBA93C9EA9B /* install-automatic-checks.sh */,
-				793C4EF801100996337F7D2E /* LegacyScreenCapture.swift */,
 				36243B4C002476BB08F4A7A0 /* Makefile */,
 				615C40704209149E9345C411 /* NotificationCategories.swift */,
 				F3F022A5E096D79D240A108D /* PowerStateManager.swift */,
@@ -6447,7 +6443,6 @@
 				DA6ACE255ACB7E88236C0F65 /* KnowledgeManager.swift in Sources */,
 				56457C33A6B0B3F6588FCC1B /* KnowledgeSourceManager.swift in Sources */,
 				B6C888AF6A47FEFBEF7370F6 /* KnowledgeSourcesView.swift in Sources */,
-				C0B4EC5C6782615CD1349388 /* LegacyScreenCapture.swift in Sources */,
 				4E7F50942C6B275D18103A91 /* LifeAssistantService.swift in Sources */,
 				77E37E7A7AAC5E1AA5399D8C /* LifeInsightsAnalyzer.swift in Sources */,
 				BA070FD54714B4AD30ED6A5A /* LifeIntelligenceCoordinator.swift in Sources */,
@@ -7221,7 +7216,6 @@
 				B335BE04D5330578E5E74E66 /* KnowledgeManager.swift in Sources */,
 				63F67DBFEB327552545BD491 /* KnowledgeSourceManager.swift in Sources */,
 				D7DCDC82834189287004A860 /* KnowledgeSourcesView.swift in Sources */,
-				E5803DBCDCA7DE133FEAC3AF /* LegacyScreenCapture.swift in Sources */,
 				45B991A7BD9FDE6B0409C7F4 /* LifeAssistantService.swift in Sources */,
 				56A85D28B5E8D3EED11A75EF /* LifeInsightsAnalyzer.swift in Sources */,
 				10FD15BBBD9C8FDAF8E34AAF /* LifeIntelligenceCoordinator.swift in Sources */,
