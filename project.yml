@@ -427,7 +427,7 @@ targets:
           - "**/MetaAI/ModelBenchmarkService.swift"
           - "**/Platforms/PlatformFeaturesHub.swift"
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
-          - "**/MCP/THEAMCPServer.swift"
+          # THEAMCPServer — ACTIVATED (MCP server with THEA-prefixed types)
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
           # CodeIntelligence — ACTIVATED (see above)
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
@@ -440,16 +440,15 @@ targets:
           - "**/Launcher/QuickLauncher.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           # Intelligence/Subagents — ACTIVATED
-          # Settings views with missing dependencies (still excluded)
-          - "**/Settings/OrchestratorSettingsView.swift"
+          # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
           # MemorySettingsView — ACTIVATED
           # PrivacySettingsView — ACTIVATED
-          - "**/Settings/LocalModelsSettingsView.swift"
-          - "**/Settings/AutonomousTaskSettingsView.swift"
+          # LocalModelsSettingsView — no file at this path
+          # AutonomousTaskSettingsView — no file at this path
           # ResourceAllocationSettingsView — ACTIVATED (see above)
           # AutoCorrectSettingsView — ACTIVATED (uses active LiveAutoCorrect)
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
-          - "**/Settings/AutomationSettingsView.swift"
+          # AutomationSettingsView — ACTIVATED (WorkflowTemplates replaced with stub)
           # WorkflowSettingsView — ACTIVATED
           # TerminalSettingsView — ACTIVATED (macOS only, uses active TerminalIntegrationManager)
           - "**/Settings/IntegrationsSettingsView.swift"
@@ -592,11 +591,11 @@ targets:
           - "**/Integrations/NotesIntegration.swift"
           - "**/Integrations/RemindersIntegration.swift"
           - "**/AI/Memory/**"
-          - "**/Settings/LocalModelsSettingsView.swift"
-          - "**/Settings/AutonomousTaskSettingsView.swift"
+          # LocalModelsSettingsView — no file at this path
+          # AutonomousTaskSettingsView — no file at this path
           # Same exclusions as macOS for missing dependencies
           - "**/Views/MetaAI/**"
-          - "**/Settings/OrchestratorSettingsView.swift"
+          # OrchestratorSettingsView — ACTIVATED (macOS-only via #if os(macOS), safe on iOS)
           - "**/Settings/Orchestrator/**"
           # MemorySettingsView — ACTIVATED
           # PrivacySettingsView — ACTIVATED
