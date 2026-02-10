@@ -91,9 +91,10 @@ public final class AnticipatoryIntelligenceCore {
 
     /// Record a user action for learning
     public func recordUserAction(_ action: AnticipatedUserAction) {
-        temporalEngine.recordAction(action)
-        intentAnticipator.recordAction(action)
-        ambientSystem.recordActivity(action)
+        let userAction = UserAction(type: action.type, metadata: ["details": action.details])
+        temporalEngine.recordAction(userAction)
+        intentAnticipator.recordAction(userAction)
+        ambientSystem.recordActivity(userAction)
 
         // Update mental model based on action
         updateMentalModel(from: action)

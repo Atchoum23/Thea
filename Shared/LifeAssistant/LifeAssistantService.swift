@@ -416,7 +416,7 @@ public final class LifeAssistantService {
     }
 
     private func processGeneralQuery(_ query: String) async -> AssistantResponse {
-        guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             return AssistantResponse(message: "No AI provider available", suggestions: [])
         }
 
@@ -431,18 +431,38 @@ public final class LifeAssistantService {
 
         do {
             let model = await DynamicConfig.shared.bestModel(for: .assistance)
-            let response = try await AIProviderHelpers.singleResponse(
-                provider: provider,
-                prompt: query,
-                model: model,
-                systemPrompt: contextPrompt
-            )
+            let fullPrompt = contextPrompt + "\n\nUser query: " + query
+            let response = try await streamToString(provider: provider, prompt: fullPrompt, model: model)
 
             return AssistantResponse(message: response, suggestions: [])
         } catch {
             logger.warning("AI query failed: \(error.localizedDescription)")
             return AssistantResponse(message: "I couldn't process that request. Please try again.", suggestions: [])
         }
+    }
+
+    private func streamToString(provider: AIProvider, prompt: String, model: String) async throws -> String {
+        let message = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(prompt),
+            timestamp: Date(),
+            model: model
+        )
+        let stream = try await provider.chat(messages: [message], model: model, stream: false)
+        var result = ""
+        for try await response in stream {
+            switch response.type {
+            case .delta(let text):
+                result += text
+            case .complete(let msg):
+                result = msg.content.textValue
+            case .error(let error):
+                throw error
+            }
+        }
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func getWeatherForecast() async -> String? {

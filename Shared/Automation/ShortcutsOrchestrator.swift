@@ -86,14 +86,14 @@ public final class ShortcutsOrchestrator: ObservableObject {
     private func suggestedShortcuts() -> [OrchestratorShortcutInfo] {
         // Common shortcuts that users might have
         [
-            OrchestratorShortcutInfo(name: "Do Not Disturb", category: ShortcutCategory.focus, description: "Toggle Do Not Disturb"),
-            OrchestratorShortcutInfo(name: "Get Current Weather", category: ShortcutCategory.utility, description: "Get weather for current location"),
-            OrchestratorShortcutInfo(name: "Start Timer", category: ShortcutCategory.productivity, description: "Start a timer"),
-            OrchestratorShortcutInfo(name: "Send Message", category: ShortcutCategory.communication, description: "Send a message to a contact"),
-            OrchestratorShortcutInfo(name: "Play Playlist", category: ShortcutCategory.media, description: "Play a music playlist"),
-            OrchestratorShortcutInfo(name: "Home Automation", category: ShortcutCategory.home, description: "Control HomeKit devices"),
-            OrchestratorShortcutInfo(name: "Daily Briefing", category: ShortcutCategory.productivity, description: "Get your daily summary"),
-            OrchestratorShortcutInfo(name: "Log Health", category: ShortcutCategory.health, description: "Log health data")
+            OrchestratorShortcutInfo(name: "Do Not Disturb", category: AutomationShortcutCategory.focus, description: "Toggle Do Not Disturb"),
+            OrchestratorShortcutInfo(name: "Get Current Weather", category: AutomationShortcutCategory.utility, description: "Get weather for current location"),
+            OrchestratorShortcutInfo(name: "Start Timer", category: AutomationShortcutCategory.productivity, description: "Start a timer"),
+            OrchestratorShortcutInfo(name: "Send Message", category: AutomationShortcutCategory.communication, description: "Send a message to a contact"),
+            OrchestratorShortcutInfo(name: "Play Playlist", category: AutomationShortcutCategory.media, description: "Play a music playlist"),
+            OrchestratorShortcutInfo(name: "Home Automation", category: AutomationShortcutCategory.home, description: "Control HomeKit devices"),
+            OrchestratorShortcutInfo(name: "Daily Briefing", category: AutomationShortcutCategory.productivity, description: "Get your daily summary"),
+            OrchestratorShortcutInfo(name: "Log Health", category: AutomationShortcutCategory.health, description: "Log health data")
         ]
     }
 
@@ -106,7 +106,7 @@ public final class ShortcutsOrchestrator: ObservableObject {
         }
 
         let shortcut = availableShortcuts.first { $0.name == name } ??
-            OrchestratorShortcutInfo(name: name, category: ShortcutCategory.custom, description: "")
+            OrchestratorShortcutInfo(name: name, category: AutomationShortcutCategory.custom, description: "")
 
         return try await executeShortcut(shortcut, input: input)
     }
@@ -228,27 +228,27 @@ public final class ShortcutsOrchestrator: ObservableObject {
         switch context.situationType {
         case .morning:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == ShortcutCategory.productivity || $0.category == ShortcutCategory.health
+                $0.category == AutomationShortcutCategory.productivity || $0.category == AutomationShortcutCategory.health
             })
 
         case .commute:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == ShortcutCategory.media || $0.category == ShortcutCategory.communication
+                $0.category == AutomationShortcutCategory.media || $0.category == AutomationShortcutCategory.communication
             })
 
         case .work:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == ShortcutCategory.productivity || $0.category == ShortcutCategory.focus
+                $0.category == AutomationShortcutCategory.productivity || $0.category == AutomationShortcutCategory.focus
             })
 
         case .home:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == ShortcutCategory.home || $0.category == ShortcutCategory.media
+                $0.category == AutomationShortcutCategory.home || $0.category == AutomationShortcutCategory.media
             })
 
         case .bedtime:
             suggestions.append(contentsOf: availableShortcuts.filter {
-                $0.category == ShortcutCategory.focus || $0.category == ShortcutCategory.health
+                $0.category == AutomationShortcutCategory.focus || $0.category == AutomationShortcutCategory.health
             })
 
         case .custom:
@@ -321,13 +321,13 @@ public final class ShortcutsOrchestrator: ObservableObject {
 public struct OrchestratorShortcutInfo: Identifiable, Codable, Sendable {
     public var id: String { name }
     public let name: String
-    public let category: ShortcutCategory
+    public let category: AutomationShortcutCategory
     public let description: String
     public var parameters: [ShortcutParameter]
 
     public init(
         name: String,
-        category: ShortcutCategory,
+        category: AutomationShortcutCategory,
         description: String,
         parameters: [ShortcutParameter] = []
     ) {
@@ -338,7 +338,7 @@ public struct OrchestratorShortcutInfo: Identifiable, Codable, Sendable {
     }
 }
 
-public enum ShortcutCategory: String, Codable, Sendable, CaseIterable {
+public enum AutomationShortcutCategory: String, Codable, Sendable, CaseIterable {
     case productivity
     case communication
     case media

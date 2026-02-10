@@ -1,7 +1,9 @@
 import Foundation
+import SystemConfiguration
 #if os(macOS)
 import AppKit
 import IOKit
+import IOKit.ps
 #elseif os(iOS)
 import UIKit
 import BackgroundTasks
@@ -286,8 +288,27 @@ final class AutonomousTaskExecutor {
     }
 
     private func checkBatteryLevel(below: Int) async -> Bool {
-        guard let level = UnifiedDeviceAwareness.shared.systemState.batteryLevel else { return false }
-        return Int(level) < below
+        #if os(macOS)
+        let snapshot = IOPSCopyPowerSourcesInfo().takeRetainedValue()
+        let sources = IOPSCopyPowerSourcesList(snapshot).takeRetainedValue() as [CFTypeRef]
+        for source in sources {
+            if let info = IOPSGetPowerSourceDescription(snapshot, source).takeUnretainedValue() as? [String: Any],
+               let capacity = info[kIOPSCurrentCapacityKey] as? Int,
+               let maxCapacity = info[kIOPSMaxCapacityKey] as? Int, maxCapacity > 0 {
+                let level = capacity * 100 / maxCapacity
+                return level < below
+            }
+        }
+        return false
+        #elseif os(iOS)
+        let device = UIDevice.current
+        device.isBatteryMonitoringEnabled = true
+        let level = Int(device.batteryLevel * 100)
+        guard level >= 0 else { return false } // -1 means unknown
+        return level < below
+        #else
+        return false
+        #endif
     }
 
     private func checkDeviceLocked() async -> Bool {

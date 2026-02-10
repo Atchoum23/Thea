@@ -132,9 +132,8 @@ public actor ModelPrewarmingService {
         stats.successfulPredictions += warmModelIDs.contains(modelID) ? 1 : 0
         stats.totalUsages += 1
 
-        // Record to PredictivePreloader for learning
-        let preloader = PredictivePreloader()
-        preloader.recordTaskRequest(taskType)
+        // Record task type for local prediction tracking
+        recordTaskForPrediction(taskType)
 
         logger.debug("Recorded model usage: \(modelID) for \(taskType.rawValue)")
     }
@@ -160,9 +159,8 @@ public actor ModelPrewarmingService {
         lastCheckTime = Date()
         stats.checksPerformed += 1
 
-        // Get predictions from PredictivePreloader
-        let preloader = PredictivePreloader()
-        let predictions = preloader.predictNextTasks()
+        // Generate predictions from local task history
+        let predictions = predictNextTasks()
 
         guard !predictions.isEmpty else {
             logger.debug("No predictions available")
@@ -249,6 +247,41 @@ public actor ModelPrewarmingService {
         }
 
         persistState()
+    }
+
+    // MARK: - Local Prediction (replaces PredictivePreloader)
+
+    private let taskHistoryKey = "ModelPrewarming.taskHistory"
+    private let maxHistorySize = 100
+
+    private func recordTaskForPrediction(_ taskType: TaskType) {
+        var history = loadTaskHistory()
+        history.append(taskType.rawValue)
+        if history.count > maxHistorySize {
+            history = Array(history.suffix(maxHistorySize))
+        }
+        UserDefaults.standard.set(history, forKey: taskHistoryKey)
+    }
+
+    private func loadTaskHistory() -> [String] {
+        UserDefaults.standard.stringArray(forKey: taskHistoryKey) ?? []
+    }
+
+    private func predictNextTasks() -> [(taskType: TaskType, probability: Double)] {
+        let history = loadTaskHistory()
+        guard !history.isEmpty else { return [] }
+
+        // Count frequency of each task type in recent history
+        var counts: [String: Int] = [:]
+        for raw in history.suffix(20) {
+            counts[raw, default: 0] += 1
+        }
+
+        let total = Double(min(history.count, 20))
+        return counts.compactMap { raw, count in
+            guard let taskType = TaskType(rawValue: raw) else { return nil }
+            return (taskType: taskType, probability: Double(count) / total)
+        }.sorted { $0.probability > $1.probability }
     }
 
     // MARK: - Persistence

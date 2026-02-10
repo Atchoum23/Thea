@@ -270,7 +270,7 @@ public final class AutonomousAgentV3 {
         logger.info("Creating plan for goal: \(goal)")
 
         // Use AI to decompose goal into steps
-        guard let provider = ProviderRegistry.shared.defaultProvider ??
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() ??
               ProviderRegistry.shared.configuredProviders.first else {
             throw AutonomousAgentError.noProviderAvailable
         }
@@ -292,11 +292,7 @@ public final class AutonomousAgentV3 {
         Format your response as a structured plan with clear step boundaries.
         """
 
-        let planText = try await AIProviderHelpers.streamToString(
-            provider: provider,
-            prompt: planningPrompt,
-            model: "gpt-4"
-        )
+        let planText = try await streamToString(provider: provider, prompt: planningPrompt)
 
         // Parse plan (simplified - in production would use structured output)
         let steps = parsePlanSteps(from: planText, goal: goal)
@@ -579,7 +575,7 @@ public final class AutonomousAgentV3 {
     // MARK: - Action Implementations
 
     private func generateCode(language: String, requirements: String) async throws -> String {
-        guard let provider = ProviderRegistry.shared.defaultProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             throw AutonomousAgentError.noProviderAvailable
         }
 
@@ -590,11 +586,7 @@ public final class AutonomousAgentV3 {
         Provide only the code, no explanations.
         """
 
-        return try await AIProviderHelpers.streamToString(
-            provider: provider,
-            prompt: prompt,
-            model: "gpt-4"
-        )
+        return try await streamToString(provider: provider, prompt: prompt)
     }
 
     private func modifyFile(path: String, changes: String) async throws {
@@ -633,15 +625,11 @@ public final class AutonomousAgentV3 {
     }
 
     private func executeAIQuery(prompt: String) async throws -> String {
-        guard let provider = ProviderRegistry.shared.defaultProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             throw AutonomousAgentError.noProviderAvailable
         }
 
-        return try await AIProviderHelpers.streamToString(
-            provider: provider,
-            prompt: prompt,
-            model: "gpt-4"
-        )
+        return try await streamToString(provider: provider, prompt: prompt)
     }
 
     private func createSubAgent(spec: AgentSpecification) async throws -> BuiltAgent {
@@ -708,7 +696,7 @@ public final class AutonomousAgentV3 {
         error: Error,
         state: inout AutonomousExecutionState
     ) async throws {
-        guard let provider = ProviderRegistry.shared.defaultProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             throw AutonomousAgentError.noProviderAvailable
         }
 
@@ -721,11 +709,7 @@ public final class AutonomousAgentV3 {
         Suggest a fix for this error. Be specific and actionable.
         """
 
-        let suggestion = try await AIProviderHelpers.streamToString(
-            provider: provider,
-            prompt: fixPrompt,
-            model: "gpt-4"
-        )
+        let suggestion = try await streamToString(provider: provider, prompt: fixPrompt)
 
         logger.info("AI suggested fix: \(suggestion.prefix(100))...")
 
@@ -757,6 +741,35 @@ public final class AutonomousAgentV3 {
         state.status = .executing
         executionState = state
         logger.info("Execution resumed")
+    }
+
+    // MARK: - AI Helper
+
+    /// Stream a prompt to completion and return the full text
+    private func streamToString(provider: AIProvider, prompt: String) async throws -> String {
+        let messages = [
+            AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: ""
+            )
+        ]
+        let stream = try await provider.chat(messages: messages, model: "", stream: true)
+        var result = ""
+        for try await response in stream {
+            switch response.type {
+            case .delta(let text):
+                result += text
+            case .complete:
+                break
+            case .error(let error):
+                throw error
+            }
+        }
+        return result
     }
 
     /// Stop and rollback

@@ -20,7 +20,7 @@ public final class PatternLearningEngine: ObservableObject {
 
     // MARK: - State
 
-    @Published public private(set) var detectedPatterns: [LearnedPattern] = []
+    @Published public private(set) var detectedPatterns: [BehavioralPattern] = []
     @Published public private(set) var userProfile: UserBehaviorProfile = .init()
     @Published public private(set) var predictions: [PatternPrediction] = []
     @Published public private(set) var isLearning = true
@@ -199,7 +199,7 @@ public final class PatternLearningEngine: ObservableObject {
             }
         } else if userProfile.activityByHour[hour, default: 0] >= minPatternOccurrences {
             // Create new pattern
-            let pattern = LearnedPattern(
+            let pattern = BehavioralPattern(
                 id: patternKey,
                 type: .timeBased,
                 name: "Activity at \(hour):00 on day \(weekday)",
@@ -390,7 +390,7 @@ public final class PatternLearningEngine: ObservableObject {
 
         // Load patterns
         if let data = UserDefaults.standard.data(forKey: "thea.patterns.learned"),
-           let patterns = try? JSONDecoder().decode([LearnedPattern].self, from: data)
+           let patterns = try? JSONDecoder().decode([BehavioralPattern].self, from: data)
         {
             detectedPatterns = patterns
         }
@@ -478,11 +478,11 @@ public struct UserBehaviorProfile: Codable, Sendable {
     public var frequentLocations: [String: Int] = [:]
 }
 
-public struct LearnedPattern: Identifiable, Codable, Sendable {
+public struct BehavioralPattern: Identifiable, Codable, Sendable {
     public let id: String
     public let type: PatternType
     public let name: String
-    public let trigger: PatternTrigger
+    public let trigger: BehavioralPatternTrigger
     public let action: UserActivity.ActivityType
     public var occurrences: Int
     public var confidence: Double
@@ -500,7 +500,7 @@ public struct LearnedPattern: Identifiable, Codable, Sendable {
         id: String,
         type: PatternType,
         name: String,
-        trigger: PatternTrigger,
+        trigger: BehavioralPatternTrigger,
         action: UserActivity.ActivityType,
         occurrences: Int,
         confidence: Double
@@ -516,7 +516,7 @@ public struct LearnedPattern: Identifiable, Codable, Sendable {
     }
 }
 
-public enum PatternTrigger: Codable, Sendable {
+public enum BehavioralPatternTrigger: Codable, Sendable {
     case timeOfDay(hour: Int, weekday: Int)
     case location(name: String)
     case afterApp(bundleId: String)
@@ -529,7 +529,7 @@ public struct PatternPrediction: Identifiable, Sendable {
     public let type: PredictionType
     public let content: String
     public let confidence: Double
-    public let relatedPattern: LearnedPattern?
+    public let relatedPattern: BehavioralPattern?
     public let metadata: [String: String]
     public let createdAt: Date
 
@@ -546,7 +546,7 @@ public struct PatternPrediction: Identifiable, Sendable {
         type: PredictionType,
         content: String,
         confidence: Double,
-        relatedPattern: LearnedPattern? = nil,
+        relatedPattern: BehavioralPattern? = nil,
         metadata: [String: String] = [:]
     ) {
         self.id = id

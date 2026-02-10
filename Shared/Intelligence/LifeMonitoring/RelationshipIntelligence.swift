@@ -163,11 +163,11 @@ public actor RelationshipIntelligence {
         let wasUrgent: Bool
         let wasActuallyUrgent: Bool?
 
-        enum Direction: String, Codable, Sendable {
+        public enum Direction: String, Codable, Sendable {
             case incoming, outgoing
         }
 
-        enum EventType: String, Codable, Sendable {
+        public enum EventType: String, Codable, Sendable {
             case message, call, email, meeting
         }
     }

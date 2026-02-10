@@ -62,24 +62,24 @@ public final class IntentAnticipator {
         context: AmbientContext,
         patterns: [TemporalPattern]
     ) async -> [PredictedUserIntent] {
-        var intents: [IntentCandidate] = []
+        var intents: [WeightedIntentCandidate] = []
 
         // Temporal signal
         let temporalIntents = predictFromPatterns(patterns)
         intents.append(contentsOf: temporalIntents.map { intent in
-            IntentCandidate(intent: intent, weight: temporalWeight)
+            WeightedIntentCandidate(intent: intent, weight: temporalWeight)
         })
 
         // Sequence signal
         let sequenceIntents = predictFromSequence()
         intents.append(contentsOf: sequenceIntents.map { intent in
-            IntentCandidate(intent: intent, weight: sequenceWeight)
+            WeightedIntentCandidate(intent: intent, weight: sequenceWeight)
         })
 
         // Context signal
         let contextIntents = predictFromContext(context)
         intents.append(contentsOf: contextIntents.map { intent in
-            IntentCandidate(intent: intent, weight: contextWeight)
+            WeightedIntentCandidate(intent: intent, weight: contextWeight)
         })
 
         // Fuse signals
@@ -170,7 +170,7 @@ public final class IntentAnticipator {
         return predictions
     }
 
-    private func fuseIntents(_ candidates: [IntentCandidate]) -> [PredictedUserIntent] {
+    private func fuseIntents(_ candidates: [WeightedIntentCandidate]) -> [PredictedUserIntent] {
         // Group by action type
         let grouped = Dictionary(grouping: candidates) { $0.intent.actionType }
 
@@ -192,7 +192,7 @@ public final class IntentAnticipator {
 
 // MARK: - Supporting Types
 
-private struct IntentCandidate {
+private struct WeightedIntentCandidate {
     let intent: PredictedUserIntent
     let weight: Double
 }

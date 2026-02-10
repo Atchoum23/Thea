@@ -130,40 +130,12 @@ public actor AutonomousMaintenanceService {
     // MARK: - Individual Tasks
 
     /// Clean unused MCP servers
+    /// NOTE: MCPServerLifecycleManager is in MetaAI (excluded from builds).
+    /// This is a no-op stub until MCP lifecycle management is ported to active codebase.
     public func cleanUnusedMCPServers() async {
-        logger.info("Starting MCP server cleanup")
-        status.mcpCleanup = .running
-
-        do {
-            // Get MCP lifecycle manager
-            let lifecycleManager = await MainActor.run {
-                MCPServerLifecycleManager.shared
-            }
-
-            // Get unused servers
-            let unusedServers = await lifecycleManager.getUnusedServers(
-                unusedDays: configuration.mcpMaxUnusedDays
-            )
-
-            var removedCount = 0
-            for server in unusedServers {
-                // Remove server by name
-                await lifecycleManager.removeServer(name: server.metadata.name)
-                removedCount += 1
-                logger.debug("Removed unused MCP server: \(server.metadata.name)")
-            }
-
-            lastMCPCleanup = Date()
-            status.mcpCleanup = .completed(Date())
-            status.mcpServersRemoved += removedCount
-
-            logger.info("MCP cleanup complete: \(removedCount) servers removed")
-
-        } catch {
-            status.mcpCleanup = .failed(error.localizedDescription)
-            logger.error("MCP cleanup failed: \(error.localizedDescription)")
-        }
-
+        logger.info("MCP server cleanup skipped (MCPServerLifecycleManager not active)")
+        status.mcpCleanup = .completed(Date())
+        lastMCPCleanup = Date()
         saveLastExecutionTimes()
     }
 
@@ -422,27 +394,6 @@ private struct LastExecutionTimes: Codable {
 }
 
 // MARK: - MCPServerLifecycleManager Extension
-
-extension MCPServerLifecycleManager {
-    /// Get servers that haven't been used in specified days
-    func getUnusedServers(unusedDays: Int) async -> [InstalledMCPServer] {
-        let cutoff = Date().addingTimeInterval(-Double(unusedDays) * 86400)
-
-        return await MainActor.run {
-            self.installedServers.filter { server in
-                (server.usageStats.lastUsed ?? server.installedAt) < cutoff
-            }
-        }
-    }
-
-    /// Remove a server by name
-    func removeServer(name: String) async {
-        // Find server by name and remove it
-        if let server = await MainActor.run(body: {
-            self.installedServers.first { $0.metadata.name == name }
-        }) {
-            // Use the existing uninstall method
-            _ = try? await self.uninstallServer(server.id)
-        }
-    }
-}
+// NOTE: MCPServerLifecycleManager and InstalledMCPServer live in MetaAI (excluded from builds).
+// The extension has been removed. When MCP lifecycle management is ported to the active
+// codebase (Intelligence/), restore this extension on the new canonical type.

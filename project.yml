@@ -361,25 +361,20 @@ targets:
           # ResponseNotificationHandler.swift — ACTIVATED
           - "**/DistributedTaskExecutor.swift"
           # ============================================================
-          # BLANKET DIRECTORY EXCLUSIONS (macOS)
-          # These entire folders are excluded because they contain
-          # abandoned, incomplete, or duplicate implementations.
-          # Using blanket patterns prevents new files in these dirs
-          # from accidentally breaking the build.
+          # BLANKET DIRECTORY ACTIVATIONS (macOS)
+          # Most blanket exclusions REMOVED — files now compile.
           # ============================================================
-          - "**/PatternLearning/**"
-          - "**/LifeMonitoring/**"
-          - "**/LifeAssistant/**"
-          - "**/Anticipatory/**"
-          - "**/Prediction/**"
-          - "**/Autonomy/**"
-          - "**/Automation/**"
-          - "**/Autonomous/**"
-          # AgentMode — PARTIALLY ACTIVATED (AgentMode.swift, AutonomousAgent.swift now active)
-          - "**/AgentMode/AgentEnhancements.swift"
-          - "**/AgentMode/AutonomousAgentV3.swift"
+          # PatternLearning — ACTIVATED (self-contained)
+          # LifeMonitoring — ACTIVATED (35 files, self-contained ecosystem)
+          # LifeAssistant — ACTIVATED (single file, system frameworks only)
+          # Anticipatory — ACTIVATED (14 files, self-contained)
+          # Prediction — ACTIVATED (ModelPrewarmingService)
+          # Autonomy — ACTIVATED (AutonomyController + AutonomousMaintenanceService)
+          # Automation — ACTIVATED (13 files, macOS-only with platform guards)
+          # Autonomous — ACTIVATED (BlueprintExecutor)
+          # AgentMode — FULLY ACTIVATED (all files)
           - "**/Intelligence/Orchestration/IntelligenceOrchestrator.swift"
-          - "**/SelfEvolution/**"
+          # SelfEvolution — ACTIVATED (2 files, self-contained)
           # Squads — ACTIVATED
           # PromptEngineering — ACTIVATED (SubAgentOrchestrator.AgentType replaced with String, TaskContext moved to Intelligence/Classification)
           # LocalModels: selective exclusion (LocalModelManager, MLXModelManager,
@@ -635,21 +630,21 @@ targets:
           # THEAThinkingView — ACTIVATED
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           - "**/DistributedTaskExecutor.swift"
-          - "**/LifeMonitoring/**"
-          - "**/PatternLearning/**"
+          # LifeMonitoring — ACTIVATED (35 files, self-contained)
+          # PatternLearning — ACTIVATED (single file, self-contained)
           # AI/Context — ACTIVATED
           - "**/Configuration/ConfigurationManager.swift"  # Duplicate types conflict with TheaConfig.swift
           - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView.swift
           - "**/Views/PhaseProgressView.swift"
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
-          - "**/AgentMode/AgentEnhancements.swift"
+          # AgentMode — FULLY ACTIVATED
           - "**/Integrations/IntegrationModule.swift"
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
-          - "**/Anticipatory/IntentAnticipator.swift"
+          # Anticipatory — ACTIVATED (all files)
           # TaskClassifier — ACTIVATED
-          - "**/LifeMonitoring/TaskIntelligence.swift"
+          # LifeMonitoring — ACTIVATED (all files including TaskIntelligence)
           - "**/Integrations/MusicIntegration.swift"
           - "**/Integrations/SystemIntegration.swift"
           # AI/Adaptive/AdaptivePromptEngine — ACTIVATED (AI/Adaptive now active)
@@ -679,12 +674,12 @@ targets:
           - "**/Components/StreamingTextView.swift"
           - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
-          - "**/Prediction/ModelPrewarmingService.swift"
+          # Prediction — ACTIVATED (ModelPrewarmingService)
           # ModelRouter — ACTIVATED
-          - "**/Autonomous/BlueprintExecutor.swift"
+          # Autonomous/BlueprintExecutor — ACTIVATED
           - "**/Integrations/CalendarIntegration.swift"
           - "**/Integrations/ShortcutsIntegration.swift"
-          - "**/Automation/ShortcutsOrchestrator.swift"
+          # ShortcutsOrchestrator — ACTIVATED (proper #if canImport guards)
           # SettingsPrivacyAboutViews — ACTIVATED
           # SettingsViewModel — ACTIVATED
           - "**/V1Parity/MessageRegeneration.swift"
@@ -695,19 +690,18 @@ targets:
           # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
           # AutomaticPromptEngineering — ACTIVATED (PromptEngineering folder now active)
           - "**/Settings/AutomationSettingsView.swift"
-          - "**/AgentMode/AutonomousAgentV3.swift"
-          - "**/SelfEvolution/AutonomousImprovement.swift"
+          # AgentMode — FULLY ACTIVATED
+          # SelfEvolution — ACTIVATED
           # KeyboardShortcutsView — ACTIVATED
-          - "**/LifeAssistant/LifeAssistantService.swift"
+          # LifeAssistant — ACTIVATED
           - "**/Views/LifeTracking/**"
           # TerminalSettingsView — ACTIVATED
           - "**/Execution/Testing/TestGenerator.swift"
-          - "**/Automation/WorkflowEngine.swift"
+          # Automation/WorkflowEngine — ACTIVATED
           # WorkflowSettingsView — ACTIVATED
           - "**/Integrations/XcodeIntegration.swift"
-          - "**/Autonomy/AutonomousMaintenanceService.swift"
-          - "**/Automation/AutonomousTaskExecutor.swift"
-          - "**/Autonomy/AutonomyController.swift"
+          # Autonomy — ACTIVATED (all files)
+          # Automation/AutonomousTaskExecutor — ACTIVATED (has #if os(macOS) guard)
           - "**/Settings/AutonomousTasks/**"
           # SquadOrchestrator — ACTIVATED
           - "**/LocalModels/SupraModelSelector.swift"
@@ -715,9 +709,8 @@ targets:
           - "**/Launcher/QuickLauncher.swift"
           # MemoryAugmentedChat — ACTIVATED
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
-          - "**/Anticipatory/InterventionScheduler.swift"
+          # Anticipatory — ACTIVATED (all files)
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
-          - "**/Anticipatory/AnticipatoryIntelligenceCore.swift"
           - "**/LocalModels/**"
           - "**/Focus/FocusOrchestrator.swift"
           - "**/V1Parity/SiriIntegration.swift"
