@@ -61,18 +61,114 @@ final class OpenRouterProvider: AIProvider, Sendable {
         model: String,
         stream: Bool
     ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
-        let openRouterMessages = messages.map { msg in
+        try await chatWithOptions(messages: messages, model: model, stream: stream)
+    }
+
+    /// Advanced chat with Anthropic-specific features forwarded through OpenRouter.
+    /// When routing to a Claude model, forwards: system prompts, cache control, thinking, effort.
+    func chatAdvanced(
+        messages: [AIMessage],
+        model: String,
+        options: AnthropicChatOptions
+    ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
+        try await chatWithOptions(messages: messages, model: model, stream: options.stream, anthropicOptions: options)
+    }
+
+    private func chatWithOptions(
+        messages: [AIMessage],
+        model: String,
+        stream: Bool,
+        anthropicOptions: AnthropicChatOptions? = nil
+    ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
+        let isClaudeModel = model.contains("claude") || model.contains("anthropic")
+
+        // Build messages — extract system messages separately for Claude
+        var systemMessages: [AIMessage] = []
+        var chatMessages: [AIMessage] = []
+        for msg in messages {
+            if msg.role == .system {
+                systemMessages.append(msg)
+            } else {
+                chatMessages.append(msg)
+            }
+        }
+
+        let openRouterMessages: [[String: Any]] = chatMessages.map { msg in
             [
                 "role": convertRole(msg.role),
                 "content": msg.content.textValue
             ]
         }
 
-        let requestBody: [String: Any] = [
+        var requestBody: [String: Any] = [
             "model": model,
             "messages": openRouterMessages,
             "stream": stream
         ]
+
+        // Forward Anthropic-specific features for Claude models
+        if isClaudeModel {
+            // System prompt: combine system messages + options system prompt
+            var systemParts: [String] = systemMessages.map(\.content.textValue)
+            if let optionSystem = anthropicOptions?.systemPrompt {
+                systemParts.append(optionSystem)
+            }
+
+            if !systemParts.isEmpty {
+                let systemText = systemParts.joined(separator: "\n\n")
+
+                // Apply cache control if specified
+                if let cacheControl = anthropicOptions?.cacheControl {
+                    requestBody["system"] = [[
+                        "type": "text",
+                        "text": systemText,
+                        "cache_control": [
+                            "type": "ephemeral",
+                            "ttl": cacheControl.ttl
+                        ]
+                    ]]
+                } else {
+                    requestBody["system"] = systemText
+                }
+            }
+
+            // Thinking configuration
+            if let thinking = anthropicOptions?.thinking, thinking.enabled {
+                requestBody["thinking"] = [
+                    "type": "enabled",
+                    "budget_tokens": thinking.budgetTokens
+                ]
+            }
+
+            // Effort level (Opus 4.5)
+            if let effort = anthropicOptions?.effort {
+                requestBody["output_config"] = [
+                    "effort": effort.rawValue
+                ]
+            }
+
+            // Max tokens
+            if let maxTokens = anthropicOptions?.maxTokens {
+                requestBody["max_tokens"] = maxTokens
+            }
+
+            // Provider-specific routing preferences
+            requestBody["provider"] = [
+                "order": ["Anthropic"],
+                "allow_fallbacks": false
+            ]
+        } else {
+            // Non-Claude: include system messages inline
+            if !systemMessages.isEmpty {
+                let allMessages = systemMessages + chatMessages
+                requestBody["messages"] = allMessages.map { msg in
+                    [
+                        "role": convertRole(msg.role),
+                        "content": msg.content.textValue
+                    ] as [String: Any]
+                }
+            }
+        }
 
         guard let url = URL(string: "\(baseURL)/chat/completions") else {
             throw OpenRouterError.invalidResponse
