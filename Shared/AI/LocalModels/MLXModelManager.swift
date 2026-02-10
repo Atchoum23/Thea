@@ -88,6 +88,18 @@ final class MLXModelManager {
                 defaults.append(sharedDir)
             }
 
+            // User-configured MLX models path from Settings
+            let userPath = SettingsManager.shared.mlxModelsPath
+            if !userPath.isEmpty {
+                let expanded = NSString(string: userPath).expandingTildeInPath
+                let userURL = URL(fileURLWithPath: expanded)
+                if FileManager.default.fileExists(atPath: userURL.path),
+                   !defaults.contains(userURL)
+                {
+                    defaults.append(userURL)
+                }
+            }
+
             modelDirectories = defaults
         }
     }

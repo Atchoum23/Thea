@@ -839,9 +839,12 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
                     }
 
                     // Final fallback: raw prompt (GGUF or unknown instance type)
+                    // WARNING: Raw template may not match the model's expected format.
+                    // Prefer loading models via Ollama or MLX for proper chat template handling.
                     let prompt = messages.map { message in
-                        "<|\(message.role.rawValue)|>\n\(message.content.textValue)"
-                    }.joined(separator: "\n")
+                        let role = message.role == .user ? "user" : "assistant"
+                        return "### \(role.capitalized)\n\(message.content.textValue)"
+                    }.joined(separator: "\n\n") + "\n\n### Assistant\n"
 
                     let stream = try await self.instance.generate(prompt: prompt, maxTokens: 2048)
 
