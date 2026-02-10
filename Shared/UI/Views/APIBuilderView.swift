@@ -12,7 +12,6 @@ import SwiftUI
 
 /// Main view for building and managing APIs and MCP servers
 public struct APIBuilderView: View {
-    @State private var selectedTab: BuilderTab = .mcp
     @State private var mcpServers: [GeneratedMCPServer] = []
     @State private var apis: [GeneratedAPI] = []
     @State private var showNewMCPSheet = false
@@ -84,13 +83,6 @@ public struct APIBuilderView: View {
             }
         }
     }
-}
-
-// MARK: - Builder Tab
-
-private enum BuilderTab: String, CaseIterable {
-    case mcp = "MCP Servers"
-    case api = "REST APIs"
 }
 
 // MARK: - Builder Item

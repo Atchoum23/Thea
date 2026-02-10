@@ -112,10 +112,6 @@ public enum SendableValue: Codable, Sendable, Equatable, Hashable {
         case type, value
     }
 
-    private enum ValueType: String, Codable {
-        case string, int, double, bool, date, data, uuid, url, array, dictionary, null
-    }
-
     public init(from decoder: Decoder) throws {
         // First, try single-value decoding for simple JSON compatibility
         let container = try decoder.singleValueContainer()

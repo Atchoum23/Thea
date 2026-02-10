@@ -328,16 +328,3 @@ public extension View {
     }
 }
 
-// MARK: - Environment Key
-
-private struct FontManagerKey: @preconcurrency EnvironmentKey {
-    @MainActor static var defaultValue: FontManager { FontManager.shared }
-}
-
-public extension EnvironmentValues {
-    @MainActor
-    var fontManager: FontManager {
-        get { self[FontManagerKey.self] }
-        set { self[FontManagerKey.self] = newValue }
-    }
-}
