@@ -470,7 +470,7 @@ struct MessageBubble: View {
             }
             .code {
                 FontSize(config.codeInlineSize)
-                BackgroundColor(colorScheme == .dark ? Color(white: 0.15) : Color(white: 0.95))
+                BackgroundColor(.theaSurface)
             }
             .codeBlock { configuration in
                 CodeBlockView(configuration: configuration)
@@ -680,15 +680,15 @@ struct CodeBlockView: View {
     }
 
     private var headerBackground: Color {
-        colorScheme == .dark ? Color(white: 0.12) : Color(white: 0.92)
+        Color.theaSurface.opacity(0.8)
     }
 
     private var codeBackground: Color {
-        colorScheme == .dark ? Color(white: 0.08) : Color(white: 0.97)
+        Color.theaSurface.opacity(0.5)
     }
 
     private var borderColor: Color {
-        colorScheme == .dark ? Color(white: 0.2) : Color(white: 0.85)
+        Color.secondary.opacity(0.2)
     }
 }
 
