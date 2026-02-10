@@ -34,6 +34,7 @@ struct ContentView: View {
             detailContent
         }
         .navigationSplitViewStyle(.prominentDetail)
+        .toolbar(removing: .sidebarToggle)
         .toolbarTitleDisplayMode(.inline)
         .textSelection(.enabled)
         .preferredColorScheme(colorSchemeForTheme)
