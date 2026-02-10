@@ -518,29 +518,23 @@ public class CloudKitService: ObservableObject {
 
     // MARK: - Merge Operations
 
-    /// Merge a remote conversation with local data
+    /// Merge a remote conversation with local data using intelligent conflict resolution
     private func mergeConversation(_ remote: CloudConversation) async {
-        // Check if we have a local version
         let localConversation = await getLocalConversation(remote.id)
 
         if let local = localConversation {
-            // Compare timestamps for conflict resolution
-            if remote.modifiedAt > local.modifiedAt {
-                // Remote is newer - use remote but preserve any local-only messages
-                var merged = remote
-                let localOnlyMessages = local.messages.filter { localMsg in
-                    !remote.messages.contains { $0.id == localMsg.id }
-                }
-                merged.messages = (remote.messages + localOnlyMessages)
-                    .sorted { $0.timestamp < $1.timestamp }
-                await saveLocalConversation(merged)
-            } else if local.modifiedAt > remote.modifiedAt {
-                // Local is newer - push to cloud
-                try? await saveConversation(local)
+            // Always merge to preserve messages from both sides
+            let merged = mergeConversations(local: local, remote: remote)
+            await saveLocalConversation(merged)
+
+            // If local had changes not in remote, push the merged version
+            let hasLocalOnlyMessages = local.messages.contains { localMsg in
+                !remote.messages.contains { $0.id == localMsg.id }
             }
-            // If equal, no action needed
+            if hasLocalOnlyMessages || local.modifiedAt > remote.modifiedAt {
+                try? await saveConversation(merged)
+            }
         } else {
-            // No local version - save the remote
             await saveLocalConversation(remote)
         }
     }
@@ -578,34 +572,58 @@ public class CloudKitService: ObservableObject {
         }
     }
 
-    /// Apply synced settings to local storage
+    /// Apply synced settings to local storage with field-level merge
     private func applySettings(_ remote: CloudSettings) async {
-        // Apply remote settings - the CloudSettings struct handles the merge
-        // Use Last-Write-Wins based on modifiedAt timestamp
         let localLastSync = lastSyncDate ?? .distantPast
 
-        if remote.modifiedAt > localLastSync {
-            // Apply settings via notification
-            NotificationCenter.default.post(
-                name: .cloudKitApplySettings,
-                object: nil,
-                userInfo: ["settings": remote]
-            )
-        }
+        guard remote.modifiedAt > localLastSync else { return }
+
+        // Apply remote settings — the receiving end should apply only
+        // fields that differ from its current values
+        NotificationCenter.default.post(
+            name: .cloudKitApplySettings,
+            object: nil,
+            userInfo: [
+                "settings": remote,
+                "syncTimestamp": remote.modifiedAt
+            ]
+        )
+
+        lastSyncDate = Date()
     }
 
     // MARK: - Local Storage Helpers
 
+    /// Thread-safe local conversation fetch via notification.
+    /// Uses nonisolated(unsafe) flag to track whether the continuation has already resumed.
     private func getLocalConversation(_ id: UUID) async -> CloudConversation? {
-        // Fetch from local storage via notification
         await withCheckedContinuation { continuation in
+            nonisolated(unsafe) var hasResumed = false
+            let observer = NotificationCenter.default.addObserver(
+                forName: .cloudKitLocalConversationResponse,
+                object: nil,
+                queue: .main
+            ) { notification in
+                guard !hasResumed,
+                      let responseID = notification.userInfo?["id"] as? UUID,
+                      responseID == id
+                else { return }
+                hasResumed = true
+                let conversation = notification.userInfo?["conversation"] as? CloudConversation
+                continuation.resume(returning: conversation)
+            }
+
             NotificationCenter.default.post(
                 name: .cloudKitRequestLocalConversation,
                 object: nil,
-                userInfo: ["id": id, "continuation": continuation]
+                userInfo: ["id": id]
             )
-            // If no response within 100ms, return nil
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+
+            // Timeout after 500ms if no response
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                guard !hasResumed else { return }
+                hasResumed = true
+                NotificationCenter.default.removeObserver(observer)
                 continuation.resume(returning: nil)
             }
         }
@@ -620,8 +638,35 @@ public class CloudKitService: ObservableObject {
     }
 
     private func getLocalKnowledgeItem(_ id: UUID) async -> CloudKnowledgeItem? {
-        // Similar pattern as conversation
-        nil // Placeholder - implement based on local storage
+        await withCheckedContinuation { continuation in
+            nonisolated(unsafe) var hasResumed = false
+            let observer = NotificationCenter.default.addObserver(
+                forName: .cloudKitLocalKnowledgeItemResponse,
+                object: nil,
+                queue: .main
+            ) { notification in
+                guard !hasResumed,
+                      let responseID = notification.userInfo?["id"] as? UUID,
+                      responseID == id
+                else { return }
+                hasResumed = true
+                let item = notification.userInfo?["item"] as? CloudKnowledgeItem
+                continuation.resume(returning: item)
+            }
+
+            NotificationCenter.default.post(
+                name: .cloudKitRequestLocalKnowledgeItem,
+                object: nil,
+                userInfo: ["id": id]
+            )
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                guard !hasResumed else { return }
+                hasResumed = true
+                NotificationCenter.default.removeObserver(observer)
+                continuation.resume(returning: nil)
+            }
+        }
     }
 
     private func saveLocalKnowledgeItem(_ item: CloudKnowledgeItem) async {
@@ -633,7 +678,35 @@ public class CloudKitService: ObservableObject {
     }
 
     private func getLocalProject(_ id: UUID) async -> CloudProject? {
-        nil // Placeholder - implement based on local storage
+        await withCheckedContinuation { continuation in
+            nonisolated(unsafe) var hasResumed = false
+            let observer = NotificationCenter.default.addObserver(
+                forName: .cloudKitLocalProjectResponse,
+                object: nil,
+                queue: .main
+            ) { notification in
+                guard !hasResumed,
+                      let responseID = notification.userInfo?["id"] as? UUID,
+                      responseID == id
+                else { return }
+                hasResumed = true
+                let project = notification.userInfo?["project"] as? CloudProject
+                continuation.resume(returning: project)
+            }
+
+            NotificationCenter.default.post(
+                name: .cloudKitRequestLocalProject,
+                object: nil,
+                userInfo: ["id": id]
+            )
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                guard !hasResumed else { return }
+                hasResumed = true
+                NotificationCenter.default.removeObserver(observer)
+                continuation.resume(returning: nil)
+            }
+        }
     }
 
     private func saveLocalProject(_ project: CloudProject) async {
@@ -662,15 +735,52 @@ public class CloudKitService: ObservableObject {
             try await saveConversation(local)
             return local
         case .keepRemote:
+            await saveLocalConversation(remote)
             return remote
         case .merge:
-            // Intelligent merge - combine messages, keep newest metadata
-            var merged = local
-            merged.messages = Array(Set(local.messages + remote.messages)).sorted { $0.timestamp < $1.timestamp }
-            merged.modifiedAt = max(local.modifiedAt, remote.modifiedAt)
+            let merged = mergeConversations(local: local, remote: remote)
             try await saveConversation(merged)
+            await saveLocalConversation(merged)
             return merged
         }
+    }
+
+    /// Merge two conversations by combining messages (deduplicated by ID),
+    /// taking the newest metadata fields, and union of device/tag lists.
+    private func mergeConversations(local: CloudConversation, remote: CloudConversation) -> CloudConversation {
+        // Deduplicate messages by ID, preferring the newer version of each
+        var messagesByID: [UUID: CloudMessage] = [:]
+        for msg in local.messages {
+            messagesByID[msg.id] = msg
+        }
+        for msg in remote.messages {
+            if let existing = messagesByID[msg.id] {
+                // Keep whichever version is newer
+                if msg.timestamp > existing.timestamp {
+                    messagesByID[msg.id] = msg
+                }
+            } else {
+                messagesByID[msg.id] = msg
+            }
+        }
+        let mergedMessages = messagesByID.values.sorted { $0.timestamp < $1.timestamp }
+
+        // Merge metadata: newest title, newest model, union of tags/devices
+        let newestTitle = local.modifiedAt >= remote.modifiedAt ? local.title : remote.title
+        let newestModel = local.modifiedAt >= remote.modifiedAt ? local.aiModel : remote.aiModel
+        let mergedTags = Array(Set(local.tags + remote.tags)).sorted()
+        let mergedDevices = Array(Set(local.participatingDeviceIDs + remote.participatingDeviceIDs))
+
+        return CloudConversation(
+            id: local.id,
+            title: newestTitle,
+            messages: mergedMessages,
+            aiModel: newestModel,
+            createdAt: min(local.createdAt, remote.createdAt),
+            modifiedAt: max(local.modifiedAt, remote.modifiedAt),
+            tags: mergedTags,
+            participatingDeviceIDs: mergedDevices
+        )
     }
 
     // MARK: - Sharing
@@ -966,6 +1076,17 @@ public extension Notification.Name {
 
     /// Posted to save a merged project locally
     static let cloudKitSaveLocalProject = Notification.Name("cloudKitSaveLocalProject")
+
+    /// Response notifications for local storage lookups
+    static let cloudKitLocalConversationResponse = Notification.Name("cloudKitLocalConversationResponse")
+    static let cloudKitLocalKnowledgeItemResponse = Notification.Name("cloudKitLocalKnowledgeItemResponse")
+    static let cloudKitLocalProjectResponse = Notification.Name("cloudKitLocalProjectResponse")
+
+    /// Posted to request a local knowledge item for merge
+    static let cloudKitRequestLocalKnowledgeItem = Notification.Name("cloudKitRequestLocalKnowledgeItem")
+
+    /// Posted to request a local project for merge
+    static let cloudKitRequestLocalProject = Notification.Name("cloudKitRequestLocalProject")
 
     /// Posted when sync completes successfully
     static let cloudKitSyncCompleted = Notification.Name("cloudKitSyncCompleted")
