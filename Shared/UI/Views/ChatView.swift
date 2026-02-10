@@ -27,6 +27,11 @@ struct ChatView: View {
     /// Tracks which branch index is selected for each parent message ID
     @State private var selectedBranches: [UUID: Int] = [:]
 
+    /// Search state
+    @State private var isSearching = false
+    @State private var searchText = ""
+    @State private var searchMatchIndex = 0
+
     @Query private var allMessages: [Message]
 
     /// All messages for this conversation, sorted by time
@@ -77,8 +82,20 @@ struct ChatView: View {
         _allMessages = Query(sort: \Message.timestamp)
     }
 
+    /// Messages matching the current search query
+    private var searchMatches: [Message] {
+        guard !searchText.isEmpty else { return [] }
+        let query = searchText.lowercased()
+        return messages.filter { $0.content.textValue.lowercased().contains(query) }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
+            #if os(macOS)
+            if isSearching {
+                chatSearchBar
+            }
+            #endif
             messageList
             chatInput
         }
@@ -110,6 +127,22 @@ struct ChatView: View {
                         .help("Toggle plan panel")
                     }
                 }
+
+                #if os(macOS)
+                ToolbarItem {
+                    Button {
+                        isSearching.toggle()
+                        if !isSearching {
+                            searchText = ""
+                            searchMatchIndex = 0
+                        }
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .keyboardShortcut("f", modifiers: .command)
+                    .help("Search in conversation (⌘F)")
+                }
+                #endif
 
                 ToolbarItem {
                     Menu {
@@ -236,6 +269,16 @@ struct ChatView: View {
                                 branchInfo: branchInfo(for: message)
                             )
                             .id(message.id)
+                            #if os(macOS)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: TheaCornerRadius.lg)
+                                    .stroke(
+                                        isCurrentSearchMatch(message) ? Color.accentColor : .clear,
+                                        lineWidth: 2
+                                    )
+                            )
+                            .opacity(searchDimOpacity(for: message))
+                            #endif
                             .transition(.asymmetric(
                                 insertion: .opacity.combined(with: .move(edge: .bottom)),
                                 removal: .opacity
@@ -260,6 +303,13 @@ struct ChatView: View {
             }
             .onChange(of: chatManager.streamingText) { _, _ in
                 scrollToBottom(proxy: proxy)
+            }
+            .onChange(of: searchMatchIndex) { _, newIndex in
+                if newIndex < searchMatches.count {
+                    withAnimation(TheaAnimation.smooth) {
+                        proxy.scrollTo(searchMatches[newIndex].id, anchor: .center)
+                    }
+                }
             }
         }
     }
@@ -315,6 +365,76 @@ struct ChatView: View {
             .padding(.vertical, TheaSpacing.md)
         #endif
     }
+
+    // MARK: - Search
+
+    #if os(macOS)
+    private var chatSearchBar: some View {
+        HStack(spacing: TheaSpacing.sm) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+
+            TextField("Search messages…", text: $searchText)
+                .textFieldStyle(.plain)
+                .onSubmit {
+                    navigateSearch(forward: true)
+                }
+
+            if !searchText.isEmpty {
+                Text("\(searchMatches.isEmpty ? 0 : searchMatchIndex + 1)/\(searchMatches.count)")
+                    .font(.theaCaption1)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+
+                Button { navigateSearch(forward: false) } label: {
+                    Image(systemName: "chevron.up")
+                }
+                .buttonStyle(.plain)
+                .disabled(searchMatches.isEmpty)
+
+                Button { navigateSearch(forward: true) } label: {
+                    Image(systemName: "chevron.down")
+                }
+                .buttonStyle(.plain)
+                .disabled(searchMatches.isEmpty)
+            }
+
+            Button {
+                isSearching = false
+                searchText = ""
+                searchMatchIndex = 0
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, TheaSpacing.lg)
+        .padding(.vertical, TheaSpacing.sm)
+        .background(.bar)
+    }
+
+    private func navigateSearch(forward: Bool) {
+        guard !searchMatches.isEmpty else { return }
+        if forward {
+            searchMatchIndex = (searchMatchIndex + 1) % searchMatches.count
+        } else {
+            searchMatchIndex = (searchMatchIndex - 1 + searchMatches.count) % searchMatches.count
+        }
+    }
+
+    private func isCurrentSearchMatch(_ message: Message) -> Bool {
+        !searchMatches.isEmpty
+            && searchMatchIndex < searchMatches.count
+            && searchMatches[searchMatchIndex].id == message.id
+    }
+
+    private func searchDimOpacity(for message: Message) -> Double {
+        guard isSearching, !searchText.isEmpty else { return 1.0 }
+        let isMatch = message.content.textValue.localizedCaseInsensitiveContains(searchText)
+        return isMatch ? 1.0 : 0.4
+    }
+    #endif
 
     // MARK: - Branching
 
