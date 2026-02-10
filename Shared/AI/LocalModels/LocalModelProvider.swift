@@ -871,7 +871,6 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
             }
         }
     }
-}
 
     // MARK: - Chat Template Helpers
 
@@ -893,13 +892,11 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
         } else if name.contains("gemma") {
             return buildGemmaPrompt(messages: messages)
         } else {
-            // Generic ChatML template — widely compatible fallback
             return buildChatMLPrompt(messages: messages)
         }
     }
 
     private static func buildLlamaPrompt(messages: [AIMessage]) -> String {
-        // Llama 3 chat template
         var prompt = "<|begin_of_text|>"
         for msg in messages {
             let role = msg.role == .user ? "user" : (msg.role == .system ? "system" : "assistant")
@@ -910,7 +907,6 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
     }
 
     private static func buildMistralPrompt(messages: [AIMessage]) -> String {
-        // Mistral instruct template
         var prompt = "<s>"
         for msg in messages {
             if msg.role == .user {
@@ -931,7 +927,6 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
     }
 
     private static func buildPhiPrompt(messages: [AIMessage]) -> String {
-        // Phi-3 chat template
         var prompt = ""
         for msg in messages {
             if msg.role == .user {
@@ -947,7 +942,6 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
     }
 
     private static func buildGemmaPrompt(messages: [AIMessage]) -> String {
-        // Gemma chat template
         var prompt = ""
         for msg in messages {
             if msg.role == .user {
@@ -961,7 +955,6 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
     }
 
     private static func buildChatMLPrompt(messages: [AIMessage]) -> String {
-        // ChatML — used by Qwen, DeepSeek, and many other models
         var prompt = ""
         for msg in messages {
             let role = msg.role == .user ? "user" : (msg.role == .system ? "system" : "assistant")
