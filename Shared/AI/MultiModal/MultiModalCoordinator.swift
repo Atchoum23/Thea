@@ -431,12 +431,7 @@ public struct MultiModalContext {
 
 // MARK: - Supporting Types for Context Awareness
 
-public enum TimeOfDay: String, Sendable {
-    case morning
-    case afternoon
-    case evening
-    case night
-}
+// TimeOfDay is defined in AmbientIntelligenceSystem.swift (superset: earlyMorning, morning, midday, afternoon, evening, night)
 
 public struct SimpleLocationContext: Sendable {
     public let isHome: Bool
@@ -452,7 +447,7 @@ public enum UserActivityState: String, Sendable {
     case coding
 }
 
-public struct ProactiveSuggestion: Identifiable, Sendable {
+public struct MultiModalProactiveSuggestion: Identifiable, Sendable {
     public let id: String
     public let title: String
     public let description: String
@@ -600,13 +595,13 @@ public final class ContextAwarenessService: ObservableObject {
     // MARK: - Proactive Suggestions
 
     /// Get proactive suggestions based on context
-    public func getProactiveSuggestions() -> [ProactiveSuggestion] {
-        var suggestions: [ProactiveSuggestion] = []
+    public func getProactiveSuggestions() -> [MultiModalProactiveSuggestion] {
+        var suggestions: [MultiModalProactiveSuggestion] = []
 
         // Time-based suggestions
         if let time = timeContext {
             if time.timeOfDay == .morning, !time.isWeekend {
-                suggestions.append(ProactiveSuggestion(
+                suggestions.append(MultiModalProactiveSuggestion(
                     id: "morning-briefing",
                     title: "Morning Briefing",
                     description: "Get a summary of your day ahead",
@@ -615,7 +610,7 @@ public final class ContextAwarenessService: ObservableObject {
             }
 
             if time.timeOfDay == .evening {
-                suggestions.append(ProactiveSuggestion(
+                suggestions.append(MultiModalProactiveSuggestion(
                     id: "day-review",
                     title: "Day Review",
                     description: "Review what you accomplished today",
@@ -627,7 +622,7 @@ public final class ContextAwarenessService: ObservableObject {
         // Activity-based suggestions
         switch userActivity {
         case .coding:
-            suggestions.append(ProactiveSuggestion(
+            suggestions.append(MultiModalProactiveSuggestion(
                 id: "code-review",
                 title: "Code Review",
                 description: "Get AI feedback on your code",
@@ -635,7 +630,7 @@ public final class ContextAwarenessService: ObservableObject {
             ))
 
         case .working:
-            suggestions.append(ProactiveSuggestion(
+            suggestions.append(MultiModalProactiveSuggestion(
                 id: "focus-timer",
                 title: "Focus Session",
                 description: "Start a 25-minute focus session",

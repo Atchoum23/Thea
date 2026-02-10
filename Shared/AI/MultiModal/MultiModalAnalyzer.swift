@@ -77,7 +77,7 @@ public actor MultiModalAnalyzer {
     // MARK: - Public API
 
     /// Analyze a file attachment
-    public func analyze(attachment: FileAttachment) async throws -> AnalysisResult {
+    func analyze(attachment: FileAttachment) async throws -> AnalysisResult {
         logger.info("Analyzing attachment: \(attachment.name)")
 
         // Check cache

@@ -344,17 +344,15 @@ targets:
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
-          # Views/Code — ACTIVATED (folder empty, no files exist)
+          - "**/Views/Code/**"  # CodeProjectView extracted sub-view, duplicates types in parent
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
-          - "**/Views/SelfExecutionView.swift"
-          - "**/AI/MultiModal/MultiModalCoordinator.swift"
-          - "**/AI/MultiModal/MultiModalAnalyzer.swift"
-          - "**/Theme/DesignTokens.swift"
+          # SelfExecutionView — excluded below with explanation
+          # MultiModal — ACTIVATED (VisionIntelligence, SpeechIntelligence, DocumentIntelligence all active)
           # DeviceCapabilityRouter — ACTIVATED
           # DeviceSwitcherView — ACTIVATED
           # THEAThinkingView — ACTIVATED
           # ResponseNotificationHandler.swift — ACTIVATED
-          - "**/DistributedTaskExecutor.swift"
+          # DistributedTaskExecutor — ACTIVATED (DeviceCapabilityRouter + CloudKit active)
           # ============================================================
           # BLANKET DIRECTORY ACTIVATIONS (macOS)
           # Most blanket exclusions REMOVED — files now compile.
@@ -368,7 +366,7 @@ targets:
           # Automation — ACTIVATED (13 files, macOS-only with platform guards)
           # Autonomous — ACTIVATED (BlueprintExecutor)
           # AgentMode — FULLY ACTIVATED (all files)
-          - "**/Intelligence/Orchestration/IntelligenceOrchestrator.swift"
+          # IntelligenceOrchestrator — ACTIVATED (all deps in Intelligence/ are active)
           # SelfEvolution — ACTIVATED (2 files, self-contained)
           # Squads — ACTIVATED
           # PromptEngineering — ACTIVATED (SubAgentOrchestrator.AgentType replaced with String, TaskContext moved to Intelligence/Classification)
@@ -382,14 +380,14 @@ targets:
           # AI/Proactive — ACTIVATED (MemoryManager is active)
           # ResourceManagement — ACTIVATED
           - "**/Widgets/**"
-          - "**/Views/Code/**"
-          - "**/Views/LocalModels/**"
-          - "**/Views/LifeTracking/**"
-          - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView.swift inline types
-          - "**/Settings/LocalModels/**"
-          - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift inline types
-          - "**/Settings/Orchestrator/**"
-          - "**/Settings/AutonomousTasks/**"
+          - "**/Views/Code/**"  # CodeProjectView extracted sub-view (duplicate at UI/Views/Code/)
+          - "**/Views/LocalModels/**"  # LocalModelsView extracted sub-view (duplicate at UI/Views/LocalModels/)
+          # Views/LifeTracking — ACTIVATED (LifeTrackingDashboardView, LifeMonitoring active)
+          - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView inline types
+          - "**/Settings/LocalModels/**"  # Extracted sub-views duplicate LocalModelsSettingsView inline types
+          - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView inline types
+          - "**/Settings/Orchestrator/**"  # Extracted sub-views duplicate OrchestratorSettingsView inline types
+          - "**/Settings/AutonomousTasks/**"  # Extracted sub-views duplicate AutonomousTaskSettingsView inline types
           # ============================================================
           # INDIVIDUAL FILE EXCLUSIONS (macOS)
           # Files outside the blanket-excluded directories that still
@@ -398,19 +396,18 @@ targets:
           - "**/Configuration/ConfigurationManager.swift"  # Duplicate types: AIConfiguration, PrivacyConfiguration conflict with TheaConfig.swift
           # EnhancedMessageBubble — ACTIVATED (uses ExecutableCodeBlock + MarkdownUI)
           # ExecutableCodeBlock — ACTIVATED (uses CodeExecutionManager)
-          - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
-          - "**/Components/TheaTextInputField.swift"
+          # MentionAutocomplete + TheaTextInputField — excluded above (see line ~342)
           # THEAThinkingView — ACTIVATED
           # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)
           # MemoryContextView — ACTIVATED
           # StreamingTextView — ACTIVATED (StreamingStatus from StreamingIndicator)
-          - "**/Views/PhaseProgressView.swift"
-          - "**/Views/SelfExecutionView.swift"
+          - "**/Views/PhaseProgressView.swift"  # Depends on ExecutionProgress/ProgressTracker in MetaAI (excluded)
+          - "**/Views/SelfExecutionView.swift"  # Depends on SelfExecutionService in MetaAI (excluded)
           # DeviceSwitcherView — ACTIVATED
           # KeyboardShortcutsView — ACTIVATED
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
-          - "**/Managers/ErrorKnowledgeBaseManager.swift"
-          - "**/Managers/IntegrationsManager.swift"
+          - "**/Managers/ErrorKnowledgeBaseManager.swift"  # Depends on ErrorKnowledgeBase in MetaAI (excluded)
+          # IntegrationsManager — ACTIVATED (all service deps in Integrations/ are active)
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           # IntegrationModule — ACTIVATED (protocol + registry for all integrations)
           - "**/Integrations/MCPConnectionManager.swift"  # Duplicate MCPConnection type in MCPServerGenerator
@@ -427,15 +424,14 @@ targets:
           # THEAMCPServer — ACTIVATED (MCP server with THEA-prefixed types)
           # UnifiedDeviceAwareness — ACTIVATED (device hardware, system state, storage, network info)
           # CodeIntelligence — ACTIVATED (see above)
-          - "**/AI/MultiModal/MultiModalCoordinator.swift"
-          - "**/AI/MultiModal/MultiModalAnalyzer.swift"
-          - "**/Core/DeviceCapabilityRouter.swift"
-          - "**/Core/TheaIntegrationHub.swift"
+          # MultiModal — ACTIVATED (see above, both copies removed)
+          # DeviceCapabilityRouter — ACTIVATED (see above)
+          - "**/Core/TheaIntegrationHub.swift"  # References ConfigurationManager (excluded) + many cross-deps
           # TestGenerator — ACTIVATED (AI-powered test generation, AIProviderHelpers replaced with direct streaming)
-          # MessageRegeneration — ACTIVATED (ChatMessage→AIMessage, bestAvailableProvider→getDefaultProvider, ChatOptions→direct stream)
+          - "**/V1Parity/MessageRegeneration.swift"  # Uses ChatMessage/ChatOptions/DynamicConfig from excluded Providers layer
           # RemoteCommandService — ACTIVATED (CloudKit-based remote commands)
-          # QuickLauncher — ACTIVATED (Raycast-style command palette, TheaIntegrationHub replaced with CloudKitService)
-          - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
+          # QuickLauncher — ACTIVATED (Raycast-style command palette)
+          - "**/Integration/TheaIntegrationHub+NewFeatures.swift"  # Extension on excluded TheaIntegrationHub
           # Intelligence/Subagents — ACTIVATED
           # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
           # MemorySettingsView — ACTIVATED
@@ -448,16 +444,15 @@ targets:
           # AutomationSettingsView — ACTIVATED (WorkflowTemplates replaced with stub)
           # WorkflowSettingsView — ACTIVATED
           # TerminalSettingsView — ACTIVATED (macOS only, uses active TerminalIntegrationManager)
-          - "**/Settings/IntegrationsSettingsView.swift"
-          - "**/Settings/AutonomousSettingsView.swift"
+          # IntegrationsSettingsView — ACTIVATED (IntegrationsManager, FeatureFlags active)
+          # AutonomousSettingsView — ACTIVATED (AIModelGovernor, ProactiveModelManager, UnifiedLocalModelOrchestrator active)
           # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
           # SystemPromptSettingsView — ACTIVATED (uses active TaskType + SystemPromptConfiguration)
           # SettingsPrivacyAboutViews — ACTIVATED (supplementary settings views)
           # SettingsConfigurationViews — ACTIVATED (supplementary settings views)
           # SettingsViewModel — ACTIVATED (uses SettingsManager + ProviderRegistry)
           # AIProvidersSettingsView — ACTIVATED (uses SettingsManager + ProviderRegistry)
-          # Theme exclusions
-          - "**/Theme/DesignTokens.swift"
+          # Theme exclusions (canonical DesignTokens exclusion is at line 333)
           # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
           - "**/Design/DesignSystemStubs.swift"
       - path: macOS
