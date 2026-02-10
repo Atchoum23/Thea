@@ -381,7 +381,7 @@ targets:
           - "**/Intelligence/Orchestration/IntelligenceOrchestrator.swift"
           - "**/SelfEvolution/**"
           - "**/Squads/**"
-          - "**/PromptEngineering/**"
+          # PromptEngineering — ACTIVATED (SubAgentOrchestrator.AgentType replaced with String, TaskContext moved to Intelligence/Classification)
           # LocalModels: selective exclusion (LocalModelManager, MLXModelManager,
           # MLXInferenceEngine, MLXModelScanner, LocalModelProvider are actively used)
           - "**/LocalModels/ProactiveModelManager.swift"
@@ -475,8 +475,7 @@ targets:
           # TerminalSettingsView — ACTIVATED (macOS only, uses active TerminalIntegrationManager)
           - "**/Settings/IntegrationsSettingsView.swift"
           - "**/Settings/AutonomousSettingsView.swift"
-          # PromptEngineeringSettingsView — ACTIVATED (uses active AutomaticPromptEngineering) [DEFERRED - needs PromptEngineering folder]
-          - "**/Settings/PromptEngineeringSettingsView.swift"
+          # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
           # SystemPromptSettingsView — ACTIVATED (uses active TaskType + SystemPromptConfiguration)
           - "**/Settings/SettingsPrivacyAboutViews.swift"  # DUPLICATE of views in SettingsView.swift
           - "**/Settings/SettingsConfigurationViews.swift"  # DUPLICATE of views in SettingsView.swift
@@ -696,11 +695,11 @@ targets:
           # SettingsViewModel — ACTIVATED
           - "**/V1Parity/MessageRegeneration.swift"
           - "**/Integrations/MessagesIntegration.swift"
-          - "**/PromptEngineering/PromptOptimizer.swift"
+          # PromptOptimizer — ACTIVATED (SubAgentOrchestrator.AgentType→String)
           - "**/RemoteServer/RemoteCommandService.swift"
           - "**/Settings/SettingsConfigurationViews.swift"  # DUPLICATE of views in SettingsView.swift
-          - "**/Settings/PromptEngineeringSettingsView.swift"
-          - "**/PromptEngineering/AutomaticPromptEngineering.swift"
+          # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
+          # AutomaticPromptEngineering — ACTIVATED (PromptEngineering folder now active)
           - "**/Settings/AutomationSettingsView.swift"
           - "**/AgentMode/AutonomousAgentV3.swift"
           - "**/SelfEvolution/AutonomousImprovement.swift"

@@ -33,7 +33,7 @@ final class PromptOptimizer {
     /// Optimizes a prompt for a given task type and agent type
     func optimizePrompt(
         for taskInstruction: String,
-        agentType: SubAgentOrchestrator.AgentType,
+        agentType: String,
         context: TaskContext,
         originalPrompt: String? = nil
     ) async -> String {
@@ -60,7 +60,7 @@ final class PromptOptimizer {
 
         // 3. Apply user preference learning
         if config.enableUserPreferenceLearning {
-            let preferences = await userPreferenceModel.getPreferences(for: agentType.rawValue)
+            let preferences = await userPreferenceModel.getPreferences(for: agentType)
             optimizedPrompt = applyUserPreferences(optimizedPrompt, preferences: preferences)
         }
 
@@ -75,11 +75,11 @@ final class PromptOptimizer {
     // MARK: - Template Selection
 
     private func selectBestTemplate(
-        for agentType: SubAgentOrchestrator.AgentType,
+        for agentType: String,
         taskInstruction _: String
     ) async -> PromptTemplate? {
         await templateLibrary.selectBestTemplate(
-            for: agentType.rawValue,
+            for: agentType,
             minSuccessRate: config.minTemplateSuccessRate
         )
     }
@@ -116,7 +116,7 @@ final class PromptOptimizer {
 
     // MARK: - Few-Shot Learning
 
-    private func getCodeFewShotExamples(for agentType: SubAgentOrchestrator.AgentType, limit: Int) async -> [CodeFewShotExample] {
+    private func getCodeFewShotExamples(for agentType: String, limit: Int) async -> [CodeFewShotExample] {
         guard let context = modelContext else { return [] }
 
         // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
@@ -125,7 +125,7 @@ final class PromptOptimizer {
         do {
             let allExamples = try context.fetch(descriptor)
             let examples = allExamples
-                .filter { $0.taskType == agentType.rawValue }
+                .filter { $0.taskType == agentType }
                 .sorted { ($0.quality, $0.usageCount) > ($1.quality, $1.usageCount) }
             return Array(examples.prefix(limit))
         } catch {
