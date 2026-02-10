@@ -819,12 +819,13 @@ public struct TheaSpiralIconView: View {
                 .frame(width: size * 2.4, height: size * 2.4)
             }
 
-            // Extracted spiral artwork (transparent background)
+            // Spiral artwork — mask to a slightly inset circle to hide
+            // the dark rounded-rect corners of the source image asset.
             Image("TheaSpiral")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
-                .clipShape(Circle())
+                .mask(Circle().frame(width: size * 0.92, height: size * 0.92))
                 .rotationEffect(.degrees(rotation))
                 .scaleEffect(beatScale)
         }
