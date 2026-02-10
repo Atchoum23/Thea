@@ -418,7 +418,7 @@ final class WorkflowEngine {
         let interpolatedPrompt = interpolate(prompt, with: context)
 
         // Get provider from registry
-        guard let provider = await ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = await ProviderRegistry.shared.getDefaultProvider() else {
             throw AutomationWorkflowError.executionFailed("No AI provider available")
         }
 
@@ -430,14 +430,30 @@ final class WorkflowEngine {
             model = modelName
         }
 
-        // Execute LLM call using V2 API helpers
-        return try await AIProviderHelpers.streamToString(
-            provider: provider,
-            prompt: interpolatedPrompt,
-            model: model,
-            systemPrompt: systemPrompt,
-            temperature: temperature
-        )
+        // Build messages
+        var messages: [AIMessage] = []
+        if let systemPrompt, !systemPrompt.isEmpty {
+            messages.append(AIMessage(
+                id: UUID(), conversationID: UUID(), role: .system,
+                content: .text(systemPrompt), timestamp: Date(), model: model
+            ))
+        }
+        messages.append(AIMessage(
+            id: UUID(), conversationID: UUID(), role: .user,
+            content: .text(interpolatedPrompt), timestamp: Date(), model: model
+        ))
+
+        // Execute LLM call
+        let stream = try await provider.chat(messages: messages, model: model, stream: false)
+        var result = ""
+        for try await chunk in stream {
+            switch chunk.type {
+            case .delta(let text): result += text
+            case .complete(let msg): result = msg.content.textValue
+            case .error(let err): throw err
+            }
+        }
+        return result
     }
 
     private func executeHTTPRequest(_ node: AutomationNode, context: [String: Any]) async throws -> String {
