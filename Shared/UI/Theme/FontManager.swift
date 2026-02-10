@@ -327,4 +327,3 @@ public extension View {
         font(FontManager.shared.font(style))
     }
 }
-
