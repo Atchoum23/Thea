@@ -359,7 +359,7 @@ targets:
           - "**/Theme/DesignTokens.swift"
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
-          - "**/Components/THEAThinkingView.swift"
+          # THEAThinkingView — ACTIVATED (THEADecision types in Intelligence/Core/THEATypes.swift)
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           - "**/DistributedTaskExecutor.swift"
           # ============================================================
@@ -420,9 +420,9 @@ targets:
           # ExecutableCodeBlock — ACTIVATED (uses CodeExecutionManager)
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
-          - "**/Components/THEAThinkingView.swift"
+          # THEAThinkingView — ACTIVATED (types in Intelligence/Core/THEATypes.swift)
           # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)
-          - "**/Components/MemoryContextView.swift"
+          # MemoryContextView — ACTIVATED (deps: ActiveMemoryRetrieval, MemoryAugmentedChat)
           # StreamingTextView — ACTIVATED (StreamingStatus from StreamingIndicator)
           - "**/Views/PhaseProgressView.swift"
           - "**/Views/SelfExecutionView.swift"
@@ -626,9 +626,9 @@ targets:
           # AdvancedSettingsView — ACTIVATED (self-contained)
           # AIProvidersSettingsView — ACTIVATED
           - "**/ResourceManagement/**"
-          - "**/Components/EnhancedMessageBubble.swift"
+          # EnhancedMessageBubble — ACTIVATED (iOS, cross-platform with #if guards)
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
-          - "**/Components/ExecutableCodeBlock.swift"
+          # ExecutableCodeBlock — ACTIVATED (iOS, cross-platform with #if guards)
           - "**/Components/TheaTextInputField.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
@@ -640,7 +640,7 @@ targets:
           # LiquidGlassStyle and DesignTokens kept for iOS/iPadHomeView
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
-          - "**/Components/THEAThinkingView.swift"
+          # THEAThinkingView — ACTIVATED (THEADecision types in Intelligence/Core/THEATypes.swift)
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           - "**/DistributedTaskExecutor.swift"
           - "**/LifeMonitoring/**"
@@ -656,7 +656,7 @@ targets:
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
           - "**/Anticipatory/IntentAnticipator.swift"
-          - "**/Classification/TaskClassifier.swift"
+          # TaskClassifier — ACTIVATED (iOS, no macOS-specific APIs)
           - "**/LifeMonitoring/TaskIntelligence.swift"
           - "**/Integrations/MusicIntegration.swift"
           - "**/Integrations/SystemIntegration.swift"
@@ -680,15 +680,15 @@ targets:
           - "**/Integrations/SafariIntegration.swift"
           - "**/Components/ChatInputView.swift"
           - "**/Search/SemanticSearchService.swift"
-          - "**/Components/QuerySuggestionOverlay.swift"
+          # QuerySuggestionOverlay — ACTIVATED (iOS)
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
           # ActiveMemoryRetrieval — ACTIVATED
           # MemoryContextView — ACTIVATED
-          - "**/Components/StreamingTextView.swift"
+          # StreamingTextView — ACTIVATED (iOS, uses StreamingIndicator)
           - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
           - "**/Prediction/ModelPrewarmingService.swift"
-          - "**/Routing/ModelRouter.swift"
+          # ModelRouter — ACTIVATED (iOS, no macOS-specific APIs)
           - "**/Autonomous/BlueprintExecutor.swift"
           - "**/Integrations/CalendarIntegration.swift"
           - "**/Integrations/ShortcutsIntegration.swift"

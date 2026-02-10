@@ -191,6 +191,7 @@ public struct THEAThinkingView: View {
         case .decomposed: return "Decomposed"
         case .multiModel: return "Multi-Model"
         case .localFallback: return "Local"
+        case .planMode: return "Plan Mode"
         }
     }
 }
