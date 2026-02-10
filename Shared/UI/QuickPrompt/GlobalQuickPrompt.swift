@@ -349,17 +349,53 @@ public final class GlobalQuickPromptManager: ObservableObject {
         isProcessing = false
     }
 
-    private func processPrompt(_: String) async throws -> String {
-        // Use the AI service to process the prompt
-        // This would integrate with your existing AI infrastructure
+    private func processPrompt(_ text: String) async throws -> String {
+        // Use the default provider from SettingsManager
+        let settings = SettingsManager.shared
+        let providerID = settings.selectedProvider
+        let model = settings.selectedModel
 
-        // For now, simulate processing
-        try await Task.sleep(nanoseconds: 500_000_000)
+        guard let provider = ProviderRegistry.shared.getProvider(id: providerID) else {
+            throw QuickPromptError.noProvider
+        }
 
-        // In real implementation:
-        // return try await AIService.shared.quickPrompt(text)
+        let message = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(text),
+            timestamp: Date(),
+            model: model
+        )
 
-        return "This is a simulated response. In production, this would connect to the AI backend."
+        let stream = try await provider.chat(
+            messages: [message],
+            model: model,
+            stream: false
+        )
+
+        var result = ""
+        for try await chunk in stream {
+            switch chunk.type {
+            case let .delta(delta):
+                result += delta
+            case let .complete(finalMessage):
+                result = finalMessage.content.textValue
+            }
+        }
+
+        return result.isEmpty ? "No response received." : result
+    }
+
+    private enum QuickPromptError: LocalizedError {
+        case noProvider
+
+        var errorDescription: String? {
+            switch self {
+            case .noProvider:
+                "No AI provider configured. Please set up a provider in Settings."
+            }
+        }
     }
 
     /// Open prompt in main Thea app
