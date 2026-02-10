@@ -722,7 +722,7 @@ public struct MCPConnection: Sendable, Identifiable {
     }
 }
 
-public struct MCPRequest: @unchecked Sendable {
+public struct MCPRequest: Sendable {
     public let id: String
     public let method: String
     public let params: [String: Any]?
@@ -734,7 +734,7 @@ public struct MCPRequest: @unchecked Sendable {
     }
 }
 
-public struct MCPResponse: @unchecked Sendable {
+public struct MCPResponse: Sendable {
     public let id: String
     public let result: [String: Any]?
     public let error: MCPError?

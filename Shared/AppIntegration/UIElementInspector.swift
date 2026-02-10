@@ -226,7 +226,7 @@ public actor UIElementInspector {
 
 // MARK: - UI Element Info
 
-public struct UIElementInfo: @unchecked Sendable, Identifiable {
+public struct UIElementInfo: Sendable, Identifiable {
     public let id = UUID()
     public let role: String
     public let title: String?

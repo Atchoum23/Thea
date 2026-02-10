@@ -681,8 +681,7 @@ struct MCPToolCallParams: Codable, Sendable {
 }
 
 /// Type-erased Codable wrapper for heterogeneous dictionary values in MCP context
-/// Uses @unchecked Sendable since values are only primitive types
-struct MCPAnyCodable: Codable, @unchecked Sendable {
+struct MCPAnyCodable: Codable, Sendable {
     let value: Any
 
     init(_ value: Any) {

@@ -450,7 +450,7 @@ public final class AnalyticsTimer: @unchecked Sendable {
 
 // MARK: - Types
 
-public struct AnalyticsEvent: Identifiable, Codable, @unchecked Sendable {
+public struct AnalyticsEvent: Identifiable, Codable, Sendable {
     public var id = UUID()
     public let name: String
     public let properties: [String: AnyCodable]

@@ -464,7 +464,7 @@ public enum TrackedActivityType: String, Codable, Sendable {
 }
 
 /// A pattern of actions to detect
-public struct ActionPattern: @unchecked Sendable {
+public struct ActionPattern: Sendable {
     public let name: String
     public let description: String
     public let actionSequence: [TrackedActionType]
