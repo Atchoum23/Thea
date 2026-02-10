@@ -12,6 +12,7 @@
 		00973C01482A55465625E6DA /* MonitoringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF9DFD2DFC42DA9042D9252 /* MonitoringService.swift */; };
 		00C7FB8E93455C448CF1CD0F /* icon-128.png in Resources */ = {isa = PBXBuildFile; fileRef = 1D9AA980B677EDBCF2151C5C /* icon-128.png */; };
 		00F57877811D67F0157561E5 /* ContactsIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161F38E0994A9F6040AF9548 /* ContactsIntegration.swift */; };
+		010E2A97291EAF4C2645318F /* FocusModeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD288E2F8C0F9E0BD8C5A90 /* FocusModeModels.swift */; };
 		017921869EF633B4B4ED5490 /* ContextSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D0EE4ED3810385EA23620E /* ContextSnapshot.swift */; };
 		01849EADB67552298B0C7A24 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44CA10441E6DFEB6D0F795C3 /* LocalizationManager.swift */; };
 		01BBE640E1008D7D4BA8D4EB /* IncomeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2399A72F2DD972AA55018D /* IncomeModels.swift */; };
@@ -21,6 +22,7 @@
 		023BDDEAB2303FBB4A941EE1 /* LocationTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E987E8F72EC93271972697 /* LocationTrackingManager.swift */; };
 		026ADE6C5F995C7836FAB500 /* SpeechIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = F986AEBE7FF75D00C39B08A7 /* SpeechIntelligence.swift */; };
 		027A09DFAB1959BFDBC626C6 /* RemoteInputService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A28044E9B7C1138161B04E /* RemoteInputService.swift */; };
+		029B4B3175E38ED35E4A0C2E /* FocusModeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD288E2F8C0F9E0BD8C5A90 /* FocusModeModels.swift */; };
 		02A79A7BE605EB5C35D9DA5D /* LiquidGlassDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98619978619098637F8B6449 /* LiquidGlassDesign.swift */; };
 		02D21C0A5961A5809B579C0A /* MonitoringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF9DFD2DFC42DA9042D9252 /* MonitoringService.swift */; };
 		02E0D4120591FF4426537E25 /* CollaborativeMemorySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48BF2393DFCBE59636EB062 /* CollaborativeMemorySystem.swift */; };
@@ -852,6 +854,7 @@
 		953E9A3395AF31C6D0E439ED /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3579242B3BC082722588D04E /* BrowserAutomationService.swift */; };
 		955D09776429208AF47BBAD9 /* AppUsageMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5981EE45534F8BD517361F83 /* AppUsageMonitor.swift */; };
 		957FCBD45BA949980B256E31 /* writing-assistant.js in Resources */ = {isa = PBXBuildFile; fileRef = 1D395678DA91951D20705A95 /* writing-assistant.js */; };
+		95A840B0DB91BB3B8DDE77FC /* FocusModeTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDFADF41C672BD8282A4DD0 /* FocusModeTemplates.swift */; };
 		95C1ED0B0435BD6C2B8D0EF5 /* DynamicResourceAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A370F41AF3D13C8686F664 /* DynamicResourceAllocator.swift */; };
 		95C530925CCDC2AFEB8FCB68 /* KeyboardShortcutsSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E91815F223C3127334E69AE /* KeyboardShortcutsSystem.swift */; };
 		95EB31D1960CAD87F3ADDB2B /* WorkflowRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3493F8A22652BAC7D2FD476D /* WorkflowRecorder.swift */; };
@@ -1198,6 +1201,7 @@
 		D613B320E82F3BF41BA927E9 /* DeviceSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA82EC0C5E5B467BA04314 /* DeviceSwitcherView.swift */; };
 		D64513E2B19980F1FEB13ADE /* WakeWordEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEA59212F9459C7FC20C6C79 /* WakeWordEngine.swift */; };
 		D64679B2B86320B753E231EE /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89ADBB04DD5856B19A5115C3 /* HelpButton.swift */; };
+		D68FAE0C7ADD11446E15C094 /* FocusModeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F818AA92AC0A6993C7B7F954 /* FocusModeSettings.swift */; };
 		D6F71A4079EB210DFF329D49 /* UIElementInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EE31955DBC99AB204F007FF /* UIElementInspector.swift */; };
 		D716CB00E92652B2213727BD /* ActivityTrendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030E9BDAC62F715DC991F8BE /* ActivityTrendsView.swift */; };
 		D7214CF5040877EDEC961578 /* ProactiveErrorPrevention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D1AD90D77B9B284D0B447D3 /* ProactiveErrorPrevention.swift */; };
@@ -1245,11 +1249,13 @@
 		DD6C0EAEE1B9AD059CC07B4A /* ThrottlingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB879C3AB26803AC14A800C /* ThrottlingEngine.swift */; };
 		DD97385F9D8576815519D018 /* MacSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36961E79ECB7AEFC08F0720B /* MacSettingsView.swift */; };
 		DE01AA8572D757756FA641C2 /* PriorityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B9081D50C18C318D7E018E /* PriorityManager.swift */; };
+		DE23EBBC5FC460AEF42EF6EF /* FocusModeTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDFADF41C672BD8282A4DD0 /* FocusModeTemplates.swift */; };
 		DE272C5581CF659146DF4416 /* TaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0246474BE394BAC7D70F8D0F /* TaskScheduler.swift */; };
 		DE37A4E3D9AEDB7D2E419B41 /* DynamicModelRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F35459ADE32AF53AE872D7 /* DynamicModelRegistry.swift */; };
 		DE7534BF5D7E730089CC9FC3 /* writing-assistant.css in Resources */ = {isa = PBXBuildFile; fileRef = ED326855F3028D3D54F741E1 /* writing-assistant.css */; };
 		DF183DB849CB4A78902EA0C4 /* LocalModelRecommendationEngine+Scanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A992417D188F2F723B13A886 /* LocalModelRecommendationEngine+Scanning.swift */; };
 		DF3FAADA7D286996CAFBC911 /* QAToolsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD3F97B247B7F411AEEBE44F /* QAToolsManager.swift */; };
+		DFA8E977AA09AB84F5A68328 /* FocusModeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F818AA92AC0A6993C7B7F954 /* FocusModeSettings.swift */; };
 		DFC17A6C9EA601406008B5FA /* ModelSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED750FD427E77BFE04F76D0 /* ModelSettingsView.swift */; };
 		DFD17ED6AE34784CA55D5EF3 /* TeamKnowledgeBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE51307ED09B45F20868722 /* TeamKnowledgeBase.swift */; };
 		DFE3B8BF1B2C6FEA4AFEC4D7 /* ExecutableCodeBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6521A7211CF1DA843D08C4C8 /* ExecutableCodeBlock.swift */; };
@@ -1830,6 +1836,7 @@
 		4D6D5FBB7192E759D6966F4A /* AnthropicProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicProviderTests.swift; sourceTree = "<group>"; };
 		4D775C9ABE402AA785CDF7C8 /* AnthropicFilesAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicFilesAPI.swift; sourceTree = "<group>"; };
 		4D872BAFDDE2885E56AB67AA /* IntegrationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationCoordinator.swift; sourceTree = "<group>"; };
+		4DDFADF41C672BD8282A4DD0 /* FocusModeTemplates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModeTemplates.swift; sourceTree = "<group>"; };
 		4E24E037F60BC671AFDA581C /* WebSocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketServer.swift; sourceTree = "<group>"; };
 		4E7C84858BC690020A141A0E /* IntelligentAutoComplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntelligentAutoComplete.swift; sourceTree = "<group>"; };
 		4E8CF739C24EBEB4FD3D9011 /* LocalModelRecommendationEngine+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocalModelRecommendationEngine+Helpers.swift"; sourceTree = "<group>"; };
@@ -1841,6 +1848,7 @@
 		4F02095E4726D071A1B0EC8A /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
 		4FA6C7A4F8E1CEE83639FB06 /* CalendarContextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarContextProvider.swift; sourceTree = "<group>"; };
 		4FB5C8EEF65B9FE928E53EDA /* OllamaAgentLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaAgentLoop.swift; sourceTree = "<group>"; };
+		4FD288E2F8C0F9E0BD8C5A90 /* FocusModeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModeModels.swift; sourceTree = "<group>"; };
 		50092464704D1A5143426EA5 /* AutonomousAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomousAgent.swift; sourceTree = "<group>"; };
 		5011E824D5AA897623BF1B5B /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		50207830375DF465B9FF47B2 /* StoreKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitService.swift; sourceTree = "<group>"; };
@@ -2373,6 +2381,7 @@
 		F78B278CF94AE39A10D05321 /* MessageRegeneration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageRegeneration.swift; sourceTree = "<group>"; };
 		F7D263A49EDCC79B973E539D /* TheaSharePlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaSharePlay.swift; sourceTree = "<group>"; };
 		F804EEDA7F3B3DFEA138BABD /* COPY-PASTE-COMMANDS.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "COPY-PASTE-COMMANDS.sh"; sourceTree = "<group>"; };
+		F818AA92AC0A6993C7B7F954 /* FocusModeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModeSettings.swift; sourceTree = "<group>"; };
 		F846091AD67C1A9C70CE3A74 /* CognitiveProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitiveProtocols.swift; sourceTree = "<group>"; };
 		F887FAC64684B0348141357B /* FocusModeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModeService.swift; sourceTree = "<group>"; };
 		F8971C9CB1631EF6F27458F3 /* AgentEnhancements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentEnhancements.swift; sourceTree = "<group>"; };
@@ -3466,7 +3475,10 @@
 				F3CEBDD99A456EBA6D9E2DA7 /* EfficiencySuggestionEngine.swift */,
 				3679C6E470EF6E7258051796 /* FileSystemMonitor.swift */,
 				6246213A28348B1A8935B89D /* FocusModeIntelligence.swift */,
+				4FD288E2F8C0F9E0BD8C5A90 /* FocusModeModels.swift */,
+				F818AA92AC0A6993C7B7F954 /* FocusModeSettings.swift */,
 				FB11CBC6AF2E42B7D4CC987A /* FocusModeShortcutsIntegration.swift */,
+				4DDFADF41C672BD8282A4DD0 /* FocusModeTemplates.swift */,
 				A3F9CD7849F754B7FEC21512 /* HealthIntelligence.swift */,
 				83A8A95327B2A4EB28FB4D10 /* HolisticPatternIntelligence.swift */,
 				213DB857F500AF121B9B8CB2 /* HomeKitMonitor.swift */,
@@ -6335,8 +6347,11 @@
 				AE822AE0A564A1B08D12874A /* FocusFilterManager.swift in Sources */,
 				DD5D3F34A361D37AD93B3A6B /* FocusForestService.swift in Sources */,
 				6FF7CB82CB6340306A0B8B03 /* FocusModeIntelligence.swift in Sources */,
+				010E2A97291EAF4C2645318F /* FocusModeModels.swift in Sources */,
 				F42CF90B9C614135977CFB84 /* FocusModeService.swift in Sources */,
+				D68FAE0C7ADD11446E15C094 /* FocusModeSettings.swift in Sources */,
 				C3F88CDF91D6011E74A43824 /* FocusModeShortcutsIntegration.swift in Sources */,
+				95A840B0DB91BB3B8DDE77FC /* FocusModeTemplates.swift in Sources */,
 				605BF925CD86715EA49177EF /* FontManager.swift in Sources */,
 				29DBF10440D8972988B0C67C /* Fonts.swift in Sources */,
 				1B8D3CE1226B484F2801D324 /* GDPRDataExporter.swift in Sources */,
@@ -7097,8 +7112,11 @@
 				0BA2667569BA2E83362E9DAA /* FocusFilterManager.swift in Sources */,
 				1231A9CF067386C5F5918BC4 /* FocusForestService.swift in Sources */,
 				EAB79EC3C7DF5E4AB1BA07EB /* FocusModeIntelligence.swift in Sources */,
+				029B4B3175E38ED35E4A0C2E /* FocusModeModels.swift in Sources */,
 				A46191935FD4368CD7C29EC8 /* FocusModeService.swift in Sources */,
+				DFA8E977AA09AB84F5A68328 /* FocusModeSettings.swift in Sources */,
 				34E9EBC45080165765EFAC79 /* FocusModeShortcutsIntegration.swift in Sources */,
+				DE23EBBC5FC460AEF42EF6EF /* FocusModeTemplates.swift in Sources */,
 				1112AB5DB17CAF54B89252E9 /* FocusOrchestrator.swift in Sources */,
 				A7314352CD6FCB01975E7C00 /* FolderAccessManager.swift in Sources */,
 				E8020D26CDC9AED37F5FD83B /* FontManager.swift in Sources */,
