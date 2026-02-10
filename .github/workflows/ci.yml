@@ -133,7 +133,7 @@ jobs:
       - name: Cache DerivedData
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: ~/Library/Developer/Xcode/DerivedData
+          path: build
           key: ${{ runner.os }}-derived-${{ matrix.platform }}-${{ hashFiles('**/*.swift') }}
           restore-keys: |
             ${{ runner.os }}-derived-${{ matrix.platform }}-
@@ -163,6 +163,7 @@ jobs:
             -scheme ${{ matrix.scheme }} \
             -destination '${{ matrix.destination }}' \
             -configuration ${{ inputs.configuration || 'Debug' }} \
+            -derivedDataPath build \
             -resultBundlePath build/results-${{ matrix.platform }}.xcresult \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
@@ -257,6 +258,7 @@ jobs:
             -scheme Thea-macOS \
             -destination 'platform=macOS' \
             -configuration Debug \
+            -derivedDataPath build \
             -resultBundlePath build/test-results-macos.xcresult \
             -enableCodeCoverage YES \
             CODE_SIGN_IDENTITY="" \
@@ -278,6 +280,7 @@ jobs:
             -scheme Thea-iOS \
             -destination "platform=iOS Simulator,id=$SIMULATOR" \
             -configuration Debug \
+            -derivedDataPath build \
             -resultBundlePath build/test-results-ios.xcresult \
             -enableCodeCoverage YES \
             CODE_SIGN_IDENTITY="" \
