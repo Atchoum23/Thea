@@ -327,6 +327,20 @@ final class ChatManager: ObservableObject {
                 AudioOutputRouter.shared.routeResponse(streamingText)
             }
 
+            // Notify when response is complete (local + cross-device)
+            let responsePreview = streamingText
+            Task {
+                await ResponseNotificationHandler.shared.notifyResponseComplete(
+                    conversationId: conversation.id,
+                    conversationTitle: conversation.title,
+                    previewText: responsePreview
+                )
+                try? await CrossDeviceNotificationService.shared.notifyAIResponseReady(
+                    conversationId: conversation.id.uuidString,
+                    preview: responsePreview
+                )
+            }
+
             // Process next queued message if any
             processQueue()
         } catch {

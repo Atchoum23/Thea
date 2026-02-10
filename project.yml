@@ -361,7 +361,7 @@ targets:
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"
-          - "**/Managers/ResponseNotificationHandler.swift"
+          # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           - "**/DistributedTaskExecutor.swift"
           # ============================================================
           # BLANKET DIRECTORY EXCLUSIONS (macOS)
@@ -430,7 +430,7 @@ targets:
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/Managers/IntegrationsManager.swift"
-          - "**/Managers/ResponseNotificationHandler.swift"
+          # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           - "**/Integrations/IntegrationModule.swift"
           - "**/Integrations/MCPConnectionManager.swift"
           - "**/Integrations/MCPGateway.swift"
@@ -641,7 +641,7 @@ targets:
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
           - "**/Components/THEAThinkingView.swift"
-          - "**/Managers/ResponseNotificationHandler.swift"
+          # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           - "**/DistributedTaskExecutor.swift"
           - "**/LifeMonitoring/**"
           - "**/PatternLearning/**"
