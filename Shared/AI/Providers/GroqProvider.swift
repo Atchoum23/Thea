@@ -5,7 +5,9 @@ final class GroqProvider: AIProvider, Sendable {
         name: "groq",
         displayName: "Groq",
         logoURL: URL(string: "https://groq.com/wp-content/uploads/2024/03/PBG-mark1-color01-p-500.png"),
+        // swiftlint:disable:next force_unwrapping
         websiteURL: URL(string: "https://groq.com")!,
+        // swiftlint:disable:next force_unwrapping
         documentationURL: URL(string: "https://console.groq.com/docs")!
     )
 

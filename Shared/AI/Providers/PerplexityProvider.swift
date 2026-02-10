@@ -5,7 +5,9 @@ final class PerplexityProvider: AIProvider, Sendable {
         name: "perplexity",
         displayName: "Perplexity",
         logoURL: URL(string: "https://www.perplexity.ai/favicon.ico"),
+        // swiftlint:disable:next force_unwrapping
         websiteURL: URL(string: "https://www.perplexity.ai")!,
+        // swiftlint:disable:next force_unwrapping
         documentationURL: URL(string: "https://docs.perplexity.ai")!
     )
 

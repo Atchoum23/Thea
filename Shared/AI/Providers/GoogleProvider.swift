@@ -5,7 +5,9 @@ final class GoogleProvider: AIProvider, Sendable {
         name: "google",
         displayName: "Google (Gemini)",
         logoURL: URL(string: "https://ai.google.dev/static/site-assets/images/marketing/gemini.svg"),
+        // swiftlint:disable:next force_unwrapping
         websiteURL: URL(string: "https://ai.google.dev")!,
+        // swiftlint:disable:next force_unwrapping
         documentationURL: URL(string: "https://ai.google.dev/docs")!
     )
 

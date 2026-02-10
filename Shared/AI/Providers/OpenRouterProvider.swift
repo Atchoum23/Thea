@@ -5,7 +5,9 @@ final class OpenRouterProvider: AIProvider, Sendable {
         name: "openrouter",
         displayName: "OpenRouter",
         logoURL: URL(string: "https://openrouter.ai/favicon.ico"),
+        // swiftlint:disable:next force_unwrapping
         websiteURL: URL(string: "https://openrouter.ai")!,
+        // swiftlint:disable:next force_unwrapping
         documentationURL: URL(string: "https://openrouter.ai/docs")!
     )
 

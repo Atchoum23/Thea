@@ -6,7 +6,9 @@ final class OpenAIProvider: AIProvider, Sendable {
         name: "openai",
         displayName: "OpenAI",
         logoURL: URL(string: "https://openai.com/favicon.ico"),
+        // swiftlint:disable:next force_unwrapping
         websiteURL: URL(string: "https://openai.com")!,
+        // swiftlint:disable:next force_unwrapping
         documentationURL: URL(string: "https://platform.openai.com/docs")!
     )
 

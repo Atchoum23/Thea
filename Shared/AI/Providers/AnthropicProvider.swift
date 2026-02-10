@@ -5,7 +5,9 @@ final class AnthropicProvider: AIProvider, Sendable {
         name: "anthropic",
         displayName: "Anthropic (Claude)",
         logoURL: URL(string: "https://anthropic.com/favicon.ico"),
+        // swiftlint:disable:next force_unwrapping
         websiteURL: URL(string: "https://anthropic.com")!,
+        // swiftlint:disable:next force_unwrapping
         documentationURL: URL(string: "https://docs.anthropic.com")!
     )
 
