@@ -522,7 +522,7 @@ struct AgentNode: View {
                 if agent.progress > 0 && agent.progress < 1 {
                     Circle()
                         .trim(from: 0, to: agent.progress)
-                        .stroke(Color.white, lineWidth: 4)
+                        .stroke(Color.primary, lineWidth: 4)
                         .frame(width: 80, height: 80)
                         .rotationEffect(.degrees(-90))
                 }

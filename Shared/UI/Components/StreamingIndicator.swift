@@ -113,7 +113,7 @@ struct StreamingIndicatorView: View {
         LinearGradient(
             colors: [
                 .clear,
-                Color.white.opacity(0.4),
+                Color.primary.opacity(0.4),
                 .clear
             ],
             startPoint: .leading,
