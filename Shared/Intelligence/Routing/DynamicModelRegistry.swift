@@ -53,7 +53,7 @@ final class DynamicModelRegistry: ObservableObject {
         var fetchedModels: [AIModel] = []
 
         // Fetch from OpenRouter (aggregates many providers)
-        if let openRouterKey = AppConfiguration.shared.providerConfig.openRouterAPIKey,
+        if let openRouterKey = SettingsManager.shared.getAPIKey(for: "openrouter"),
            !openRouterKey.isEmpty
         {
             do {
