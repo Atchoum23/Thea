@@ -38,7 +38,7 @@ struct ContentView: View {
         .toolbarTitleDisplayMode(.inline)
         .textSelection(.enabled)
         .preferredColorScheme(colorSchemeForTheme)
-        .id(settingsManager.fontSize)
+        .id("\(settingsManager.fontSize)_\(settingsManager.theme)")
         .onAppear {
             setupManagers()
         }

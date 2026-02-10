@@ -393,6 +393,9 @@ final class SettingsManager: ObservableObject {
         if let savedFavorites = d.array(forKey: "favoriteModels") as? [String] {
             favoriteModels = Set(savedFavorites)
         }
+
+        // Re-apply font size after iCloud sync pull so AppConfiguration stays in sync
+        AppConfiguration.applyFontSize(fontSize)
     }
 
     // MARK: - API Key Management (Keychain - NEVER synced to iCloud KVS)
