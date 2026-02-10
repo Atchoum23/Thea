@@ -152,6 +152,34 @@ final class OpenRouterProvider: AIProvider, Sendable {
                 requestBody["max_tokens"] = maxTokens
             }
 
+            // Context management (auto-clear old tool results)
+            if let contextMgmt = anthropicOptions?.contextManagement {
+                var edits: [[String: Any]] = []
+                for edit in contextMgmt.edits {
+                    var editDict: [String: Any] = [
+                        "type": edit.type.rawValue,
+                        "trigger": ["input_tokens": edit.trigger.inputTokens]
+                    ]
+                    if let keep = edit.keep {
+                        editDict["keep"] = keep
+                    }
+                    if let exclude = edit.excludeTools {
+                        editDict["exclude_tools"] = exclude
+                    }
+                    edits.append(editDict)
+                }
+                requestBody["context_management"] = ["edits": edits]
+            }
+
+            // Server tools (web search, web fetch)
+            if let serverTools = anthropicOptions?.serverTools {
+                var tools: [[String: Any]] = []
+                for tool in serverTools {
+                    tools.append(tool.toolDefinition)
+                }
+                requestBody["tools"] = tools
+            }
+
             // Provider-specific routing preferences
             requestBody["provider"] = [
                 "order": ["Anthropic"],
