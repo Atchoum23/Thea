@@ -229,6 +229,17 @@ final class ChatManager: ObservableObject {
             if !taskPrompt.isEmpty {
                 systemPromptParts.append(taskPrompt)
             }
+
+            // Plan Mode: ask AI to structure response with numbered steps
+            if taskType == .planning {
+                systemPromptParts.append(
+                    """
+                    IMPORTANT: Structure your response as a numbered plan with clear steps.
+                    Start each step on its own line with a number and period (e.g., "1. Step description").
+                    Keep each step concise and actionable.
+                    """
+                )
+            }
         }
 
         if let customPrompt = conversation.metadata.systemPrompt, !customPrompt.isEmpty {
@@ -330,6 +341,23 @@ final class ChatManager: ObservableObject {
 
             try context.save()
             debugLog("✅ Message saved successfully")
+
+            // Plan Mode: auto-create plan from planning-classified responses
+            if taskType == .planning, PlanManager.shared.activePlan == nil {
+                let responseText = streamingText
+                let planSteps = Self.extractPlanSteps(from: responseText)
+                if planSteps.count >= 2 {
+                    let planTitle = String(text.prefix(60))
+                    _ = PlanManager.shared.createSimplePlan(
+                        title: planTitle,
+                        steps: planSteps,
+                        conversationId: conversation.id
+                    )
+                    PlanManager.shared.startExecution()
+                    PlanManager.shared.showPanel()
+                    debugLog("📋 Auto-created plan with \(planSteps.count) steps")
+                }
+            }
 
             // Route response through voice if BT audio device is active
             if AudioOutputRouter.shared.isVoiceOutputActive {
@@ -646,6 +674,26 @@ final class ChatManager: ObservableObject {
         case .unknown:
             return ""
         }
+    }
+
+    /// Extract numbered steps from an AI response for plan creation.
+    /// Matches lines like "1. Do something" or "- Step one"
+    static func extractPlanSteps(from text: String) -> [String] {
+        let lines = text.components(separatedBy: .newlines)
+        var steps: [String] = []
+
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            // Match "1. Step" or "1) Step"
+            if let range = trimmed.range(of: #"^\d+[\.\)]\s+"#, options: .regularExpression) {
+                let stepText = String(trimmed[range.upperBound...]).trimmingCharacters(in: .whitespaces)
+                if !stepText.isEmpty {
+                    steps.append(stepText)
+                }
+            }
+        }
+
+        return steps
     }
 }
 
