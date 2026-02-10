@@ -1,6 +1,6 @@
 # Thea Release Workflow
-# Version: 2.2.0 - Added watchOS/tvOS builds, updated action versions, improved DMG
-# Last Updated: January 31, 2026
+# Version: 2.3.0 - Graceful Xcode selection, swift package resolve, updated version reqs
+# Last Updated: February 10, 2026
 
 name: Release
 
@@ -57,7 +57,13 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Select Xcode ${{ env.XCODE_VERSION }}
-        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          else
+            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
+            xcodebuild -version
+          fi
 
       - name: Cache XcodeGen
         id: xcodegen-cache
@@ -85,6 +91,12 @@ jobs:
 
       - name: Generate Xcode Project
         run: xcodegen generate
+
+      - name: Resolve SPM Dependencies
+        run: |
+          swift package resolve 2>&1 || {
+            echo "::warning::swift package resolve failed, xcodebuild will handle resolution"
+          }
 
       - name: Extract Version
         id: version
@@ -199,10 +211,10 @@ jobs:
           - Requires Xcode for ad-hoc installation or TestFlight
 
           ### Requirements
-          - macOS 14.0 (Sonoma) or later
-          - iOS 17.0 or later
-          - watchOS 10.0 or later
-          - tvOS 17.0 or later
+          - macOS 26.0 (Tahoe) or later
+          - iOS 26.0 or later
+          - watchOS 26.0 or later
+          - tvOS 26.0 or later
 
           ---
           *Built with zero warnings, zero errors*

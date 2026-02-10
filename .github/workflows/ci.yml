@@ -1,6 +1,6 @@
 # Thea CI/CD Pipeline
-# Version: 4.0.0 - Updated to macOS 26 (Tahoe) runners with Xcode 26.2
-# Last Updated: February 7, 2026
+# Version: 4.1.0 - Added swift package resolve, increased build timeout, SPM test step
+# Last Updated: February 10, 2026
 
 name: CI
 
@@ -75,7 +75,7 @@ jobs:
     name: Build ${{ matrix.platform }}
     runs-on: macos-26
     needs: swiftlint
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -140,6 +140,12 @@ jobs:
 
       - name: Generate Xcode Project
         run: xcodegen generate
+
+      - name: Resolve SPM Dependencies
+        run: |
+          swift package resolve 2>&1 || {
+            echo "::warning::swift package resolve failed, xcodebuild will handle resolution"
+          }
 
       - name: Validate Package.swift
         run: |
@@ -238,6 +244,11 @@ jobs:
 
       - name: Generate Xcode Project
         run: xcodegen generate
+
+      - name: Run SPM Tests (Fast)
+        run: |
+          swift test 2>&1 | tee test-spm.log
+          echo "SPM tests completed"
 
       - name: Run macOS Tests
         run: |

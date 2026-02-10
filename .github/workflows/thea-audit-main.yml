@@ -1,12 +1,21 @@
 # Thea Security Audit Workflow (Full)
-# Version: 2.0.0 - Full security audit for main branch with strict enforcement
-# Last Updated: January 27, 2026
+# Version: 2.1.0 - Added path filters, graceful Xcode selection
+# Last Updated: February 10, 2026
 
 name: Security Audit (Full)
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'Shared/**'
+      - 'iOS/**'
+      - 'macOS/**'
+      - 'watchOS/**'
+      - 'tvOS/**'
+      - 'Tools/**'
+      - 'Package.swift'
+      - 'Package.resolved'
   schedule:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'

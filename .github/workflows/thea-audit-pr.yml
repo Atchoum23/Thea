@@ -1,10 +1,11 @@
 # Thea Security Audit Workflow (PR)
-# Version: 2.0.0 - Delta security audit for Pull Requests with strict enforcement
-# Last Updated: January 27, 2026
+# Version: 2.1.0 - Added workflow_dispatch, updated to macOS 26
+# Last Updated: February 10, 2026
 
 name: Security Audit (PR)
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [main, develop]
     paths:

@@ -1,6 +1,6 @@
 # Thea E2E Tests Workflow
-# Version: 1.3.0 - Fixed arm64 build target and added install retry logic
-# Last Updated: January 31, 2026
+# Version: 1.4.0 - Updated to macOS 26 runners, added swift package resolve
+# Last Updated: February 10, 2026
 
 name: E2E Tests
 
@@ -71,6 +71,12 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
+      - name: Resolve SPM Dependencies
+        run: |
+          swift package resolve 2>&1 || {
+            echo "::warning::swift package resolve failed, xcodebuild will handle resolution"
+          }
+
       - name: List Available Simulators
         run: |
           echo "Available iOS Simulators:"
@@ -78,7 +84,7 @@ jobs:
 
       - name: Build for Simulator
         run: |
-          # Build for arm64 simulator explicitly (GitHub macos-14 runners are arm64)
+          # Build for arm64 simulator explicitly (GitHub macos-26 runners are arm64)
           # This avoids "Failed to get FD to bundle executable" errors
           xcodebuild build \
             -project Thea.xcodeproj \
