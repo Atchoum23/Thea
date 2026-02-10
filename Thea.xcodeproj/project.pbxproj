@@ -795,7 +795,6 @@
 		AEC805FDC9FF9B7B4B865675 /* Scriptsauto-build-check.sh in Resources */ = {isa = PBXBuildFile; fileRef = BF2FC2452F4073DE14D592B3 /* Scriptsauto-build-check.sh */; };
 		AEEB7AD57AEE0711415B85CF /* video-controller.js in Resources */ = {isa = PBXBuildFile; fileRef = 9AE34D251C3DFA4BF532CD7A /* video-controller.js */; };
 		AEEC6DE0AD9ECB6FFF86F095 /* selection-handler.js in Resources */ = {isa = PBXBuildFile; fileRef = 14C1BCBD01F1D39B130FCA60 /* selection-handler.js */; };
-		AF4B03AAFA43594E65EA7FF1 /* SettingsView.swift.bak in Resources */ = {isa = PBXBuildFile; fileRef = 6FE8C97F842AECC4F53AB8FE /* SettingsView.swift.bak */; };
 		AF51E36D2F06F35D2B3C6AF7 /* CoworkSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD81309BBB16200ABB14BF9 /* CoworkSession.swift */; };
 		AF5E4C46EEC04363E68BBE31 /* HomeKitOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B1DF305D563FC78DC28065 /* HomeKitOrchestrator.swift */; };
 		AF6DBD531D7CA25B2174DB1D /* ai-sidebar-ui.js in Resources */ = {isa = PBXBuildFile; fileRef = A23B790CAC6CFE5F0A63F2EF /* ai-sidebar-ui.js */; };
@@ -1022,7 +1021,6 @@
 		E0F4E830AAB74510D016AF2D /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79FDB0F45191FC92BF378C75 /* Message.swift */; };
 		E1086DE25EBC6C706DB97695 /* CoworkStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D346A7EA72A30F824A5B4BD /* CoworkStep.swift */; };
 		E124FD2F63EB3EDCC40945F7 /* MediaContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B39A0163DC7AFE89CF85697 /* MediaContextProvider.swift */; };
-		E13441F9B133DD4032594E19 /* SettingsView.swift.bak in Resources */ = {isa = PBXBuildFile; fileRef = 6FE8C97F842AECC4F53AB8FE /* SettingsView.swift.bak */; };
 		E17EBDEA07D15A43ED31B0CC /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047875E449994016D285AA /* EventStore.swift */; };
 		E198937FCD459228079D576C /* TheaiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED0FBEB4B88C4C6457FAE9C /* TheaiOSApp.swift */; };
 		E20E5EFA675F93960B37D69A /* TrustScoreSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7956A6A63A1EE069548E9 /* TrustScoreSystem.swift */; };
@@ -1621,7 +1619,6 @@
 		6DB66A72703EA94C865C8271 /* VoiceFirstModeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceFirstModeManager.swift; sourceTree = "<group>"; };
 		6F1D529663D235ED1CE630B7 /* AIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIModel.swift; sourceTree = "<group>"; };
 		6FBAC801F87D5C9FF66525A3 /* VisualTimerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualTimerService.swift; sourceTree = "<group>"; };
-		6FE8C97F842AECC4F53AB8FE /* SettingsView.swift.bak */ = {isa = PBXFileReference; path = SettingsView.swift.bak; sourceTree = "<group>"; };
 		6FF86F27F0214F1E41B24F47 /* QueuedMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueuedMessage.swift; sourceTree = "<group>"; };
 		7074C624F79E21F8CD4F86E2 /* Thea-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Thea-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		709B89EF2F7499C7F1037829 /* SpotlightIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIntegration.swift; sourceTree = "<group>"; };
@@ -2513,7 +2510,6 @@
 				747AC9EF7F809BA6D151EB42 /* KeyboardShortcutsHelpView.swift */,
 				170D6FC3243952374F0BE162 /* PrivacyControlsView.swift */,
 				8C01C4C607C750D6280C839D /* SettingsView.swift */,
-				6FE8C97F842AECC4F53AB8FE /* SettingsView.swift.bak */,
 				59D01CB815FD0204BAF0FF30 /* SidebarView.swift */,
 				FDA73D8A062838B6AFF06B6D /* UnifiedDashboardView.swift */,
 				5E91EEB1BBF14E9ECDD7995B /* WelcomeView.swift */,
@@ -5378,7 +5374,6 @@
 				8DCCCD57FAF216E1F1E73B47 /* Scriptserror-summary.sh in Resources */,
 				61E08D75703E6380C4C4D6A1 /* Scriptswatch-and-check.sh in Resources */,
 				B37E334539AF02376008A7DD /* Scriptsxcode-build-phase.sh in Resources */,
-				E13441F9B133DD4032594E19 /* SettingsView.swift.bak in Resources */,
 				4784D4479DC0BAB6CA98F7CA /* icon.json in Resources */,
 				0C0C0AFF82DA57A21B123BD3 /* install-automatic-checks.sh in Resources */,
 				3F1731842FD18B97D9B4DC6A /* setup.sh in Resources */,
@@ -5465,7 +5460,6 @@
 				0B38947FFB175728E7B139F7 /* Scriptserror-summary.sh in Resources */,
 				A23D46C2C9331EDC90F8F726 /* Scriptswatch-and-check.sh in Resources */,
 				5796672E77FBCEC0B08BB224 /* Scriptsxcode-build-phase.sh in Resources */,
-				AF4B03AAFA43594E65EA7FF1 /* SettingsView.swift.bak in Resources */,
 				D389B55D09D7A6E59A83A3A7 /* icon.json in Resources */,
 				1018BA87ED2E6686BD9ECF79 /* install-automatic-checks.sh in Resources */,
 				504B86DB7145B3A950ACF628 /* setup.sh in Resources */,
