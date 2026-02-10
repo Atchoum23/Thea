@@ -207,8 +207,8 @@ struct MacChatDetailView: View {
                         messageText = prompt
                         sendMessage()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .containerRelativeFrame(.vertical) { length, _ in length }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .containerRelativeFrame([.horizontal, .vertical]) { length, _ in length }
                 } else {
                     LazyVStack(spacing: messageSpacing) {
                         // When streaming, hide the last assistant message to avoid duplicate display
