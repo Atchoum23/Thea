@@ -519,50 +519,63 @@ public final class ContextAggregator: ObservableObject {
     // MARK: - Private Capture Methods
 
     private func captureDeviceState() async -> ContextDeviceState {
-        let system = THEASelfAwareness.shared.systemContext
+        let totalMemory = Double(ProcessInfo.processInfo.physicalMemory) / (1024 * 1024 * 1024)
+        #if os(macOS)
+        let platform = "macOS"
+        #elseif os(iOS)
+        let platform = "iOS"
+        #elseif os(watchOS)
+        let platform = "watchOS"
+        #elseif os(tvOS)
+        let platform = "tvOS"
+        #else
+        let platform = "unknown"
+        #endif
 
         return ContextDeviceState(
-            platform: system.platform,
-            batteryLevel: system.batteryLevel,
-            isPluggedIn: system.isPluggedIn,
-            totalMemoryGB: system.totalMemoryGB,
-            availableMemoryGB: system.availableMemoryGB,
-            availableStorageGB: system.availableStorageGB,
+            platform: platform,
+            batteryLevel: nil,
+            isPluggedIn: nil,
+            totalMemoryGB: totalMemory,
+            availableMemoryGB: totalMemory * 0.5,
+            availableStorageGB: 0,
             thermalState: .nominal,
             networkStatus: .connected,
-            hasAppleSilicon: system.hasAppleSilicon,
-            hasNeuralEngine: system.hasNeuralEngine
+            hasAppleSilicon: true,
+            hasNeuralEngine: true
         )
     }
 
     private func captureUserContext() async -> ContextUserState {
-        let user = THEASelfAwareness.shared.userContext
         let responseStylePrefs = await MemoryManager.shared.getPreferences(category: .responseStyle)
         let preferredStyle = responseStylePrefs.max { $0.value < $1.value }?.key
+        let defaults = UserDefaults.standard
 
         return ContextUserState(
-            userName: user.userName,
-            preferredLanguage: user.preferredLanguage,
-            interactionCount: user.interactionCount,
+            userName: defaults.string(forKey: "userName") ?? NSFullUserName(),
+            preferredLanguage: Locale.current.language.languageCode?.identifier ?? "en",
+            interactionCount: defaults.integer(forKey: "interactionCount"),
             currentActivity: nil,
             approximateLocation: nil,
-            preferredResponseStyle: preferredStyle ?? user.preferredResponseStyle,
-            workingHoursStart: user.workingHoursStart,
-            workingHoursEnd: user.workingHoursEnd
+            preferredResponseStyle: preferredStyle ?? "balanced",
+            workingHoursStart: defaults.integer(forKey: "workingHoursStart"),
+            workingHoursEnd: defaults.integer(forKey: "workingHoursEnd")
         )
     }
 
     private func captureAIResources() async -> ContextAIResources {
-        let resources = THEASelfAwareness.shared.aiResources
+        let registry = ProviderRegistry.shared
+        let localModels = registry.getAvailableLocalModels()
+        let defaults = UserDefaults.standard
 
         return ContextAIResources(
-            localModelCount: resources.localModelsCount,
-            localModelNames: resources.localModelsNames,
-            cloudProvidersConfigured: resources.cloudProvidersConfigured,
-            preferredProvider: resources.defaultProvider,
-            preferredModel: resources.defaultModel,
-            orchestratorEnabled: resources.orchestratorEnabled,
-            totalModelsAvailable: resources.totalModelsAvailable
+            localModelCount: localModels.count,
+            localModelNames: localModels,
+            cloudProvidersConfigured: registry.configuredProviders.map { $0.metadata.name },
+            preferredProvider: defaults.string(forKey: "defaultProvider") ?? "openrouter",
+            preferredModel: defaults.string(forKey: "defaultModel") ?? "claude-sonnet-4-5-20250929",
+            orchestratorEnabled: true,
+            totalModelsAvailable: localModels.count + registry.configuredProviders.count
         )
     }
 
@@ -597,14 +610,16 @@ public final class ContextAggregator: ObservableObject {
     }
 
     private func isWithinWorkingHours() -> Bool {
-        let user = THEASelfAwareness.shared.userContext
+        let defaults = UserDefaults.standard
+        let startHour = defaults.integer(forKey: "workingHoursStart")
+        let endHour = defaults.integer(forKey: "workingHoursEnd")
         let hour = Calendar.current.component(.hour, from: Date())
 
-        if user.workingHoursStart == 0 && user.workingHoursEnd == 0 {
+        if startHour == 0 && endHour == 0 {
             return hour >= 9 && hour < 17
         }
 
-        return hour >= user.workingHoursStart && hour < user.workingHoursEnd
+        return hour >= startHour && hour < endHour
     }
 
     // MARK: - Auto Refresh

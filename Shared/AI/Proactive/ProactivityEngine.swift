@@ -340,8 +340,8 @@ public final class ProactivityEngine: ObservableObject {
         }
 
         // Check if action is allowed
-        let settings = SettingsManager.shared
-        guard settings.autonomousActionsEnabled else {
+        let defaults = UserDefaults.standard
+        guard defaults.bool(forKey: "autonomousActionsEnabled") else {
             return ProactiveActionResult(
                 success: false,
                 message: "Autonomous actions are disabled in settings"
@@ -349,8 +349,8 @@ public final class ProactivityEngine: ObservableObject {
         }
 
         // Check hourly limit
-        // (In production, would track actual execution count)
-        guard settings.maxAutonomousActionsPerHour > 0 else {
+        let maxActions = defaults.integer(forKey: "maxAutonomousActionsPerHour")
+        guard maxActions > 0 else {
             return ProactiveActionResult(
                 success: false,
                 message: "Autonomous action limit reached"
@@ -358,7 +358,7 @@ public final class ProactivityEngine: ObservableObject {
         }
 
         // If requires confirmation, queue as suggestion instead
-        if requiresConfirmation && settings.requireAutonomousConfirmation {
+        if requiresConfirmation && defaults.bool(forKey: "requireAutonomousConfirmation") {
             await queueSuggestion(AIProactivitySuggestion(
                 type: "autonomous_\(action.type)",
                 title: action.description,
@@ -730,9 +730,16 @@ public actor BatteryAmbientAgent: AmbientAgent {
     public init() {}
 
     public func check() async {
-        // Get current battery level from MainActor
-        let batteryLevel = await MainActor.run {
-            THEASelfAwareness.shared.systemContext.batteryLevel
+        // Get current battery level
+        let batteryLevel: Int? = await MainActor.run {
+            #if os(macOS)
+            // macOS: read battery via IOKit (simplified)
+            nil
+            #elseif os(iOS)
+            Int(UIDevice.current.batteryLevel * 100)
+            #else
+            nil
+            #endif
         }
         lastBatteryLevel = batteryLevel
     }

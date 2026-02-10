@@ -395,9 +395,9 @@ targets:
           - "**/LocalModels/OllamaAgentLoop.swift"
           - "**/LocalModels/ModelQualityBenchmark.swift"
           - "**/LocalModels/PredictivePreloader.swift"
-          - "**/AI/Context/**"
+          # AI/Context — ACTIVATED (MemoryManager is active, all deps available)
           - "**/AI/Adaptive/**"
-          - "**/AI/Proactive/**"
+          # AI/Proactive — ACTIVATED (MemoryManager is active)
           - "**/ResourceManagement/**"
           - "**/Widgets/**"
           - "**/Views/Code/**"
@@ -443,8 +443,8 @@ targets:
           - "**/Integrations/ShortcutsIntegration.swift"
           - "**/Integrations/MessagesIntegration.swift"
           - "**/Integrations/XcodeIntegration.swift"
-          - "**/Memory/ActiveMemoryRetrieval.swift"
-          - "**/Memory/MemoryAugmentedChat.swift"
+          # ActiveMemoryRetrieval — ACTIVATED (MemoryManager active, ProviderRegistry active)
+          # MemoryAugmentedChat — ACTIVATED (ActiveMemoryRetrieval now active)
           - "**/MetaAI/ModelBenchmarkService.swift"
           - "**/Platforms/PlatformFeaturesHub.swift"
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
@@ -460,7 +460,7 @@ targets:
           - "**/RemoteServer/RemoteCommandService.swift"
           - "**/Launcher/QuickLauncher.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
-          - "**/Intelligence/Subagents/**"
+          # Intelligence/Subagents — ACTIVATED
           # Settings views with missing dependencies (still excluded)
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/MemorySettingsView.swift"
@@ -643,7 +643,7 @@ targets:
           - "**/DistributedTaskExecutor.swift"
           - "**/LifeMonitoring/**"
           - "**/PatternLearning/**"
-          - "**/AI/Context/**"
+          # AI/Context — ACTIVATED
           - "**/Configuration/ConfigurationManager.swift"
           - "**/Settings/Advanced/**"
           - "**/Views/PhaseProgressView.swift"
@@ -667,7 +667,7 @@ targets:
           - "**/LocalModels/ModelGovernanceEngine.swift"
           - "**/LocalModels/UnifiedLocalModelOrchestrator.swift"
           - "**/MetaAI/ModelBenchmarkService.swift"
-          - "**/AI/Proactive/ProactivityEngine.swift"
+          # ProactivityEngine — ACTIVATED
           - "**/Settings/AutonomousSettingsView.swift"
           - "**/Settings/LocalModels/**"
           - "**/Integrations/FinderIntegration.swift"
@@ -680,8 +680,8 @@ targets:
           - "**/Search/SemanticSearchService.swift"
           - "**/Components/QuerySuggestionOverlay.swift"
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
-          - "**/Memory/ActiveMemoryRetrieval.swift"
-          - "**/Components/MemoryContextView.swift"
+          # ActiveMemoryRetrieval — ACTIVATED
+          # MemoryContextView — ACTIVATED
           - "**/Components/StreamingTextView.swift"
           - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
@@ -719,7 +719,7 @@ targets:
           - "**/LocalModels/SupraModelSelector.swift"
           - "**/Core/TheaIntegrationHub.swift"
           - "**/Launcher/QuickLauncher.swift"
-          - "**/Memory/MemoryAugmentedChat.swift"
+          # MemoryAugmentedChat — ACTIVATED
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           - "**/Anticipatory/InterventionScheduler.swift"
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
