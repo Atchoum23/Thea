@@ -428,54 +428,9 @@ public actor CodeGenerator {
         )
     }
 
-    private func callLocalModel(prompt: String) async throws -> GenerationResult {
-        // Use ProviderRegistry to get local MLX provider via public method
-        let localProvider: AIProvider = try await MainActor.run {
-            let registry = ProviderRegistry.shared
-            guard let provider = registry.getLocalProvider() else {
-                throw GenerationError.noProvidersConfigured
-            }
-            return provider
-        }
-
-        // Find a suitable code model (prefer code-specific models)
-        let modelList = try await localProvider.listModels()
-        let modelNames = modelList.map { $0.name }
-        let codeModel = modelNames.first { $0.lowercased().contains("code") || $0.lowercased().contains("deepseek") }
-            ?? modelNames.first ?? "default"
-
-        logger.info("Using local model: \(codeModel) from provider: \(localProvider.metadata.name)")
-
-        // Create message for chat
-        let message = AIMessage(
-            id: UUID(),
-            conversationID: UUID(),
-            role: .user,
-            content: .text(prompt),
-            timestamp: Date(),
-            model: codeModel
-        )
-
-        var response = ""
-        let stream = try await localProvider.chat(
-            messages: [message],
-            model: codeModel,
-            stream: false
-        )
-
-        for try await chunk in stream {
-            if case let .delta(text) = chunk.type {
-                response += text
-            }
-        }
-
-        return GenerationResult(
-            success: !response.isEmpty,
-            code: cleanGeneratedCode(response),
-            tokensUsed: 0,
-            provider: "local-mlx",
-            error: response.isEmpty ? "Empty response from local model" : nil
-        )
+    private func callLocalModel(prompt _: String) async throws -> GenerationResult {
+        // TODO: Implement local MLX model integration
+        throw GenerationError.noProvidersConfigured
     }
 
     private func cleanGeneratedCode(_ code: String) -> String {

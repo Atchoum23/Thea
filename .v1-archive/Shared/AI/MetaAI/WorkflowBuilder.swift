@@ -881,7 +881,7 @@ struct NodeTemplate {
     let outputs: [NodePort]
 }
 
-public enum WorkflowNodeType: String, Sendable {
+public enum WorkflowNodeType: String {
     case input = "Input"
     case output = "Output"
     case aiInference = "AI Inference"

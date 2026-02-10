@@ -90,7 +90,6 @@ public final class ModelBenchmarkService {
             }
 
             // Add local models with zero cost
-            #if os(macOS)
             let localModels = LocalModelManager.shared.availableModels
             for local in localModels {
                 let localID = "local-\(local.name)"
@@ -106,10 +105,6 @@ public final class ModelBenchmarkService {
                     lastUpdated: Date()
                 )
             }
-            let localModelCount = localModels.count
-            #else
-            let localModelCount = 0
-            #endif
 
             benchmarks = merged
             lastUpdateDate = Date()
@@ -118,7 +113,7 @@ public final class ModelBenchmarkService {
             print("✅ ModelBenchmarkService: Updated \(merged.count) model benchmarks")
             print("   - OpenRouter: \(orModels.count) models")
             print("   - Direct providers: \(configuredModels.map { "\($0.key):\($0.value.count)" }.joined(separator: ", "))")
-            print("   - Local: \(localModelCount) models")
+            print("   - Local: \(localModels.count) models")
 
         } catch {
             updateError = error
@@ -409,7 +404,6 @@ public final class ModelBenchmarkService {
         return (contextFactor + priceFactor) / 2.0
     }
 
-    #if os(macOS)
     private func estimateLocalQualityScore(for model: LocalModel) -> Double {
         let name = model.name.lowercased()
 
@@ -434,7 +428,6 @@ public final class ModelBenchmarkService {
 
         return 0.45
     }
-    #endif
 
     // MARK: - Capability Inference
 
@@ -465,7 +458,6 @@ public final class ModelBenchmarkService {
         return caps
     }
 
-    #if os(macOS)
     private func inferLocalCapabilities(from model: LocalModel) -> Set<BenchmarkCapability> {
         var caps: Set<BenchmarkCapability> = [.textGeneration]
         let name = model.name.lowercased()
@@ -484,7 +476,6 @@ public final class ModelBenchmarkService {
 
         return caps
     }
-    #endif
 
     // MARK: - Task Suitability Scoring
 

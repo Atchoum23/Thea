@@ -211,76 +211,11 @@
         }
 
         private func addAsyncAwait(to error: ErrorParser.ParsedError) async throws -> FixResult {
-            // Load the file and analyze for simple async/await patterns
-            var lines = try loadFile(error.file).components(separatedBy: .newlines)
-
-            guard error.line > 0 && error.line <= lines.count else {
-                return FixResult(
-                    applied: false,
-                    fileModified: error.file,
-                    changeDescription: "Invalid line number",
-                    linesChanged: 0
-                )
-            }
-
-            let lineIndex = error.line - 1
-            var line = lines[lineIndex]
-
-            // Check for common patterns and apply simple fixes
-
-            // Pattern 1: Missing 'await' before async call
-            if error.message.contains("'async'") && error.message.contains("synchronous context") {
-                // Try adding 'await' before function calls
-                if let match = line.range(of: #"\.\w+\("#, options: .regularExpression) {
-                    let methodStart = line.index(match.lowerBound, offsetBy: 1)
-                    line = String(line[..<methodStart]) + "await " + String(line[methodStart...])
-                    lines[lineIndex] = line
-                    try saveFile(error.file, content: lines.joined(separator: "\n"))
-
-                    return FixResult(
-                        applied: true,
-                        fileModified: error.file,
-                        changeDescription: "Added 'await' keyword before async call",
-                        linesChanged: 1
-                    )
-                }
-            }
-
-            // Pattern 2: Missing 'async' in function signature
-            if error.message.contains("'await' in a function that does not support concurrency") {
-                // Find the containing function and add 'async'
-                for i in stride(from: lineIndex, through: 0, by: -1) {
-                    if lines[i].contains("func ") && lines[i].contains("->") && !lines[i].contains("async") {
-                        // Add async before the return arrow
-                        lines[i] = lines[i].replacingOccurrences(of: "->", with: "async ->")
-                        try saveFile(error.file, content: lines.joined(separator: "\n"))
-
-                        return FixResult(
-                            applied: true,
-                            fileModified: error.file,
-                            changeDescription: "Added 'async' to function signature",
-                            linesChanged: 1
-                        )
-                    } else if lines[i].contains("func ") && lines[i].contains("{") && !lines[i].contains("async") {
-                        // Function without return type - add async before {
-                        lines[i] = lines[i].replacingOccurrences(of: "{", with: "async {")
-                        try saveFile(error.file, content: lines.joined(separator: "\n"))
-
-                        return FixResult(
-                            applied: true,
-                            fileModified: error.file,
-                            changeDescription: "Added 'async' to function signature",
-                            linesChanged: 1
-                        )
-                    }
-                }
-            }
-
-            // For complex cases, delegate to AI assistance
-            return FixResult(
+            // This is a placeholder - actual implementation would need more sophisticated analysis
+            FixResult(
                 applied: false,
                 fileModified: error.file,
-                changeDescription: "Complex async/await pattern requires AI assistance - use applyAIGeneratedFix",
+                changeDescription: "async/await fixes require AI assistance",
                 linesChanged: 0
             )
         }
@@ -392,35 +327,14 @@
                     surroundingCode: surroundingCode
                 )
 
-                // Apply the AI-generated fix if we have valid fixed code
-                guard !generatedFix.fixedCode.isEmpty else {
-                    return FixResult(
-                        applied: false,
-                        fileModified: error.file,
-                        changeDescription: "AI could not generate a fix: \(generatedFix.explanation)",
-                        linesChanged: 0
-                    )
-                }
-
-                // Apply the fix by replacing the surrounding code section
-                let fixedLines = generatedFix.fixedCode.components(separatedBy: .newlines)
-                var allLines = lines
-
-                // Replace the lines from startLine to endLine with the fixed code
-                let replaceRange = startLine ..< endLine
-                allLines.replaceSubrange(replaceRange, with: fixedLines)
-
-                // Save the modified file
-                try saveFile(error.file, content: allLines.joined(separator: "\n"))
-
-                let linesChanged = abs(fixedLines.count - (endLine - startLine))
-                logger.info("Applied AI fix to \(error.file): \(generatedFix.explanation)")
+                // TODO: Apply the generated fix
+                // For now, just report what would be done
 
                 return FixResult(
-                    applied: true,
+                    applied: false,
                     fileModified: error.file,
-                    changeDescription: "AI fix applied: \(generatedFix.explanation) (confidence: \(Int(generatedFix.confidence * 100))%)",
-                    linesChanged: linesChanged
+                    changeDescription: "AI generated fix: \(generatedFix.explanation) (not auto-applied yet)",
+                    linesChanged: 0
                 )
             } catch let aiError {
                 logger.warning("AI fix generation failed: \(aiError.localizedDescription)")

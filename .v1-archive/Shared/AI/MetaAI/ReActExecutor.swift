@@ -244,33 +244,30 @@ public final class ReActExecutor {
         context: [String: Any],
         previousSteps: [ReActStep]
     ) async throws -> ReActThought {
-        guard let provider = providerRegistry.getProviderForTask(complexity: .moderate) ??
-            providerRegistry.getDefaultProvider()
-        else {
+        // Get a configured provider
+        guard let provider = providerRegistry.defaultProvider ?? providerRegistry.configuredProviders.first else {
             throw ReActError.providerNotAvailable
         }
 
         let prompt = buildThoughtPrompt(task: task, context: context, previousSteps: previousSteps)
 
-        let message = AIMessage(
-            id: UUID(),
-            conversationID: UUID(),
-            role: .user,
-            content: .text(prompt),
-            timestamp: Date(),
-            model: "react-thinker"
-        )
+        let message = ChatMessage(role: "user", text: prompt)
 
         var response = ""
         let stream = try await provider.chat(
             messages: [message],
             model: config.reasoningModel,
-            stream: false
+            options: ChatOptions(stream: false)
         )
 
         for try await chunk in stream {
-            if case .delta(let text) = chunk.type {
+            switch chunk {
+            case let .content(text):
                 response += text
+            case .done:
+                break
+            case let .error(error):
+                throw error
             }
         }
 
@@ -409,7 +406,7 @@ public final class ReActExecutor {
 
     // MARK: - Action Execution
 
-    private func executeAction(_ action: ReActAction) async throws -> ActionResult {
+    private func executeAction(_ action: ReActAction) async throws -> ReActActionResult {
         let startTime = Date()
 
         switch action.name {
@@ -419,25 +416,25 @@ public final class ReActExecutor {
             if let searchTool = toolFramework.registeredTools.first(where: { $0.name == "web_search" }) {
                 let result = try await toolFramework.executeTool(searchTool, parameters: ["query": query])
                 let outputStr = (result.output as? String) ?? String(describing: result.output ?? "No results")
-                return ActionResult(
+                return ReActActionResult(
                     success: result.success,
                     output: outputStr,
                     duration: Date().timeIntervalSince(startTime)
                 )
             }
-            return ActionResult(success: false, output: "Search tool not available", duration: 0)
+            return ReActActionResult(success: false, output: "Search tool not available", duration: 0)
 
         case "read_file":
             let path = action.parameters["path"] as? String ?? ""
             do {
                 let content = try String(contentsOfFile: path, encoding: .utf8)
-                return ActionResult(
+                return ReActActionResult(
                     success: true,
                     output: content,
                     duration: Date().timeIntervalSince(startTime)
                 )
             } catch {
-                return ActionResult(
+                return ReActActionResult(
                     success: false,
                     output: "Failed to read file: \(error.localizedDescription)",
                     duration: Date().timeIntervalSince(startTime)
@@ -455,13 +452,13 @@ public final class ReActExecutor {
                 language: language,
                 timeout: self.config.actionTimeout
             )
-            return ActionResult(
+            return ReActActionResult(
                 success: result.success,
                 output: result.output ?? result.error ?? "No output",
                 duration: Date().timeIntervalSince(startTime)
             )
             #else
-            return ActionResult(
+            return ReActActionResult(
                 success: false,
                 output: "Code execution only available on macOS",
                 duration: 0
@@ -471,11 +468,11 @@ public final class ReActExecutor {
         case "api_call":
             let urlString = action.parameters["url"] as? String ?? ""
             guard let url = URL(string: urlString) else {
-                return ActionResult(success: false, output: "Invalid URL", duration: 0)
+                return ReActActionResult(success: false, output: "Invalid URL", duration: 0)
             }
             let (data, _) = try await URLSession.shared.data(from: url)
             let output = String(data: data, encoding: .utf8) ?? "Binary response"
-            return ActionResult(
+            return ReActActionResult(
                 success: true,
                 output: String(output.prefix(5000)),  // Limit output size
                 duration: Date().timeIntervalSince(startTime)
@@ -484,7 +481,7 @@ public final class ReActExecutor {
         case "ask_user":
             let question = action.parameters["question"] as? String ?? "Need clarification"
             // This would trigger a user prompt in production
-            return ActionResult(
+            return ReActActionResult(
                 success: true,
                 output: "[WAITING FOR USER INPUT: \(question)]",
                 duration: 0
@@ -495,14 +492,14 @@ public final class ReActExecutor {
             if let tool = toolFramework.registeredTools.first(where: { $0.name == action.name }) {
                 let result = try await toolFramework.executeTool(tool, parameters: action.parameters)
                 let outputStr = (result.output as? String) ?? String(describing: result.output ?? "Action completed")
-                return ActionResult(
+                return ReActActionResult(
                     success: result.success,
                     output: outputStr,
                     duration: Date().timeIntervalSince(startTime)
                 )
             }
 
-            return ActionResult(
+            return ReActActionResult(
                 success: false,
                 output: "Unknown action: \(action.name)",
                 duration: 0
@@ -512,7 +509,7 @@ public final class ReActExecutor {
 
     // MARK: - Observation Processing
 
-    private func processObservation(_ result: ActionResult) -> ReActObservation {
+    private func processObservation(_ result: ReActActionResult) -> ReActObservation {
         let severity: ObservationSeverity
         if !result.success {
             if result.output.lowercased().contains("critical") ||
@@ -540,9 +537,8 @@ public final class ReActExecutor {
         task: String,
         steps: [ReActStep]
     ) async throws -> String {
-        guard let provider = providerRegistry.getProviderForTask(complexity: .moderate) ??
-            providerRegistry.getDefaultProvider()
-        else {
+        // Get a configured provider
+        guard let provider = providerRegistry.defaultProvider ?? providerRegistry.configuredProviders.first else {
             throw ReActError.providerNotAvailable
         }
 
@@ -567,25 +563,23 @@ public final class ReActExecutor {
         Provide a comprehensive final answer:
         """
 
-        let message = AIMessage(
-            id: UUID(),
-            conversationID: UUID(),
-            role: .user,
-            content: .text(prompt),
-            timestamp: Date(),
-            model: "react-synthesizer"
-        )
+        let message = ChatMessage(role: "user", text: prompt)
 
         var response = ""
         let stream = try await provider.chat(
             messages: [message],
             model: config.reasoningModel,
-            stream: false
+            options: ChatOptions(stream: false)
         )
 
         for try await chunk in stream {
-            if case .delta(let text) = chunk.type {
+            switch chunk {
+            case let .content(text):
                 response += text
+            case .done:
+                break
+            case let .error(error):
+                throw error
             }
         }
 
@@ -664,8 +658,8 @@ public struct ReActThought: Sendable {
     public let answer: String?
 }
 
-/// Result of action execution
-public struct ActionResult: Sendable {
+/// Result of ReAct action execution (distinct from AutomationAction.ReActActionResult)
+public struct ReActActionResult: Sendable {
     public let success: Bool
     public let output: String
     public let duration: TimeInterval

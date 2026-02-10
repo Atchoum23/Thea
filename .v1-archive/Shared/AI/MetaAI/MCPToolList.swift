@@ -5,7 +5,7 @@ import SwiftUI
 // Displays tools available from a specific MCP server
 
 struct MCPToolList: View {
-    let server: MCPServerInfo
+    let server: MetaAIMCPServerInfo
     @State private var tools: [MCPToolInfo] = []
     @State private var searchText = ""
 
@@ -299,7 +299,7 @@ private struct ToolCard: View {
 // MARK: - Preview
 
 #Preview {
-    MCPToolList(server: MCPServerInfo(
+    MCPToolList(server: MetaAIMCPServerInfo(
         id: UUID(),
         name: "filesystem",
         description: "File system operations",

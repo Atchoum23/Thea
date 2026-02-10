@@ -273,9 +273,8 @@ public final class ParallelQueryExecutor {
         let startTime = Date()
 
         // Route to appropriate model
-        let classification = TaskClassification(
-            primaryType: subQuery.taskType,
-            secondaryTypes: [],
+        let classification = ClassificationResult(
+            taskType: subQuery.taskType,
             confidence: 0.9,
             reasoning: "From decomposition"
         )
@@ -286,25 +285,18 @@ public final class ParallelQueryExecutor {
             throw ParallelExecutionError.providerNotAvailable(modelSelection.providerID)
         }
 
-        // Execute the query
-        let message = AIMessage(
-            id: UUID(),
-            conversationID: UUID(),
-            role: .user,
-            content: .text(subQuery.query),
-            timestamp: Date(),
-            model: modelSelection.modelID
-        )
+        // Execute the query using V2 API
+        let message = ChatMessage(role: "user", text: subQuery.query)
 
         var response = ""
         let stream = try await provider.chat(
             messages: [message],
             model: modelSelection.modelID,
-            stream: false
+            options: ChatOptions(stream: false)
         )
 
         for try await chunk in stream {
-            if case .delta(let text) = chunk.type {
+            if case let .content(text) = chunk {
                 response += text
             }
         }

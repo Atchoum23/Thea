@@ -35,7 +35,7 @@ public final class ResilienceManager {
 
     /// Execute a chat request with full resilience: circuit breaker, retries, fallbacks
     func executeChat(
-        messages: [AIMessage],
+        messages: [ChatMessage],
         model: String,
         primaryProvider: String,
         fallbackProviders: [String] = [],
@@ -91,7 +91,7 @@ public final class ResilienceManager {
     // MARK: - Retry Logic
 
     private func executeChatWithRetry(
-        messages: [AIMessage],
+        messages: [ChatMessage],
         model: String,
         providerId: String,
         stream: Bool
@@ -112,12 +112,17 @@ public final class ResilienceManager {
                     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                 }
 
-                // Execute the chat request with timeout
+                // Execute the chat request with timeout (V2 API)
                 var response = ""
-                let chatStream = try await provider.chat(messages: messages, model: model, stream: stream)
+                let chatStream = try await provider.chat(messages: messages, model: model, options: ChatOptions(stream: stream))
                 for try await chunk in chatStream {
-                    if case .delta(let text) = chunk.type {
+                    switch chunk {
+                    case let .content(text):
                         response += text
+                    case .done:
+                        break
+                    case let .error(error):
+                        throw error
                     }
                 }
 
@@ -263,33 +268,41 @@ public final class ResilienceManager {
         // Get available providers
         let registry = ProviderRegistry.shared
 
+        // Get local models from providers that are local (MLX, Ollama, etc.)
+        let localProviders = registry.configuredProviders.filter {
+            $0.name.lowercased().contains("local") ||
+            $0.name.lowercased().contains("mlx") ||
+            $0.name.lowercased().contains("ollama")
+        }
+        let localModels = localProviders.flatMap { $0.supportedModels.map { "local:\($0.id)" } }
+
         // Based on preference, order providers
         switch preference {
         case .always:
             // Only local models
-            chain = registry.getAvailableLocalModels().map { "local:\($0)" }
+            chain = localModels
 
         case .prefer:
             // Local first, then cloud by health
-            chain = registry.getAvailableLocalModels().map { "local:\($0)" }
+            chain = localModels
             chain += getCloudProvidersByHealth()
 
         case .balanced:
             // Mix based on task type
             if taskType.isSimple {
                 // Simple tasks: local first
-                chain = registry.getAvailableLocalModels().map { "local:\($0)" }
+                chain = localModels
                 chain += getCloudProvidersByHealth()
             } else {
                 // Complex tasks: cloud first
                 chain = getCloudProvidersByHealth()
-                chain += registry.getAvailableLocalModels().map { "local:\($0)" }
+                chain += localModels
             }
 
         case .cloudFirst:
             // Cloud first, local as fallback
             chain = getCloudProvidersByHealth()
-            chain += registry.getAvailableLocalModels().map { "local:\($0)" }
+            chain += localModels
         }
 
         // Filter out providers with open circuit breakers
@@ -539,14 +552,4 @@ public enum ResilienceError: LocalizedError {
 }
 
 // MARK: - TaskType Extension
-
-extension TaskType {
-    var isSimple: Bool {
-        switch self {
-        case .simpleQA, .factual, .summarization:
-            return true
-        default:
-            return false
-        }
-    }
-}
+// Note: isSimple is defined in TaskType.swift

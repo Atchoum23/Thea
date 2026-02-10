@@ -303,24 +303,10 @@ targets:
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
           # ============================================================
-          # ARCHITECTURE DECISION (2026-02-07):
-          # MetaAI folder is EXCLUDED - use Intelligence folder as canonical source.
-          #
-          # Context: MetaAI (~73 files) and Intelligence folders had duplicate
-          # type definitions causing build conflicts. Rather than maintaining
-          # two parallel implementations, Intelligence folder was chosen as
-          # the canonical source because:
-          #   1. It has cleaner separation of concerns (Core, Intent, Knowledge, etc.)
-          #   2. It follows protocol-based design patterns
-          #   3. It integrates better with the existing codebase
-          #
-          # If MetaAI files are needed in the future:
-          #   1. Check for type conflicts with Intelligence folder
-          #   2. Rename conflicting types with MetaAI prefix
-          #   3. Remove specific exclusions below rather than the blanket exclusion
-          #
-          # DO NOT remove this blanket exclusion without resolving all type conflicts.
-          # See git history for type renames already done (MetaAIMCPServerInfo, etc.)
+          # MetaAI ARCHIVED to .v1-archive/ on 2026-02-11.
+          # 73 source files + 10 test files (~30K LOC) moved to .v1-archive/Shared/AI/MetaAI/
+          # Superseded by Shared/Intelligence/ (canonical implementation).
+          # Exclusion kept as safety net in case files are restored.
           # ============================================================
           - "**/AI/MetaAI/**"
           # ACTIVATED: NotesIntegration + RemindersIntegration (macOS)
@@ -332,7 +318,7 @@ targets:
           - "**/Theme/DesignTokens.swift"
           # LocalModelsSettingsView — no file at this path (subfolder version at Settings/LocalModels/ separately excluded)
           # AutonomousTaskSettingsView — no file at this path
-          # Exclude MetaAI views that depend on excluded MetaAI folder
+          # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11. Exclusion kept as safety net.
           - "**/Views/MetaAI/**"
           # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
           # MemorySettingsView — ACTIVATED
@@ -401,12 +387,12 @@ targets:
           # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)
           # MemoryContextView — ACTIVATED
           # StreamingTextView — ACTIVATED (StreamingStatus from StreamingIndicator)
-          - "**/Views/PhaseProgressView.swift"  # Depends on ExecutionProgress/ProgressTracker in MetaAI (excluded)
-          - "**/Views/SelfExecutionView.swift"  # Depends on SelfExecutionService in MetaAI (excluded)
+          - "**/Views/PhaseProgressView.swift"  # Depends on MetaAI (archived to .v1-archive)
+          - "**/Views/SelfExecutionView.swift"  # Depends on MetaAI (archived to .v1-archive)
           # DeviceSwitcherView — ACTIVATED
           # KeyboardShortcutsView — ACTIVATED
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
-          - "**/Managers/ErrorKnowledgeBaseManager.swift"  # Depends on ErrorKnowledgeBase in MetaAI (excluded)
+          - "**/Managers/ErrorKnowledgeBaseManager.swift"  # Depends on MetaAI (archived to .v1-archive)
           # IntegrationsManager — ACTIVATED (all service deps in Integrations/ are active)
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           # IntegrationModule — ACTIVATED (protocol + registry for all integrations)
@@ -418,7 +404,7 @@ targets:
           # MessagesIntegration, XcodeIntegration — all macOS-only with AppKit
           # ActiveMemoryRetrieval — ACTIVATED (MemoryManager active, ProviderRegistry active)
           # MemoryAugmentedChat — ACTIVATED (ActiveMemoryRetrieval now active)
-          - "**/MetaAI/ModelBenchmarkService.swift"
+          - "**/MetaAI/ModelBenchmarkService.swift"  # Archived to .v1-archive on 2026-02-11
           # PlatformFeaturesHub — ACTIVATED (Platform enum, PlatformFeature, platform detection)
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
           # THEAMCPServer — ACTIVATED (MCP server with THEA-prefixed types)
@@ -578,14 +564,14 @@ targets:
           # Exclude Anthropic files that depend on excluded ProviderError/ChatContentPart types
           - "**/AI/Providers/AnthropicFilesAPI.swift"
           - "**/AI/Providers/AnthropicTokenCounter.swift"
-          # ARCHITECTURE DECISION: MetaAI excluded - see macOS target for full explanation
+          # MetaAI ARCHIVED to .v1-archive/ on 2026-02-11. Exclusion kept as safety net.
           - "**/AI/MetaAI/**"
           # NotesIntegration — ACTIVATED (no file in Shared/, cleanup only)
           # RemindersIntegration — ACTIVATED (no file in Shared/, cleanup only)
           - "**/AI/Memory/**"
           # LocalModelsSettingsView — no file at this path
           # AutonomousTaskSettingsView — no file at this path
-          # Same exclusions as macOS for missing dependencies
+          # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11. Exclusion kept as safety net.
           - "**/Views/MetaAI/**"
           # OrchestratorSettingsView — ACTIVATED (macOS-only via #if os(macOS), safe on iOS)
           - "**/Settings/Orchestrator/**"
@@ -633,7 +619,7 @@ targets:
           # ProactiveModelManager, LocalModelRecommendationEngine (+extensions),
           # LocalModelRecommendationTypes, AIModelGovernor, ModelGovernanceEngine,
           # UnifiedLocalModelOrchestrator — all use Foundation/OSLog with platform guards
-          - "**/MetaAI/ModelBenchmarkService.swift"
+          - "**/MetaAI/ModelBenchmarkService.swift"  # Archived to .v1-archive on 2026-02-11
           # ProactivityEngine — ACTIVATED
           # AutonomousSettingsView — ACTIVATED (governance deps now active)
           - "**/Settings/LocalModels/**"

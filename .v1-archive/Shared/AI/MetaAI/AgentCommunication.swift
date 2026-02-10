@@ -10,7 +10,7 @@ public final class AgentCommunication {
 
     // MARK: - State
 
-    private(set) var messageQueue: [AgentMessage] = []
+    private(set) var messageQueue: [CommunicationMessage] = []
     private(set) var sharedContext: [String: Any] = [:]
     private(set) var subscriptions: [UUID: Set<MessageType>] = [:]
 
@@ -31,7 +31,7 @@ public final class AgentCommunication {
         type: MessageType,
         payload: MessagePayload
     ) {
-        let message = AgentMessage(
+        let message = CommunicationMessage(
             id: UUID(),
             senderID: senderID,
             recipientID: recipientID,
@@ -52,7 +52,7 @@ public final class AgentCommunication {
     }
 
     /// Receive messages for a specific agent
-    public func receive(for agentID: UUID, since: Date? = nil) -> [AgentMessage] {
+    public func receive(for agentID: UUID, since: Date? = nil) -> [CommunicationMessage] {
         let cutoffDate = since ?? Date.distantPast
 
         return messageQueue.filter { message in
@@ -70,12 +70,12 @@ public final class AgentCommunication {
     }
 
     /// Get all messages of a specific type
-    public func getMessages(ofType type: MessageType) -> [AgentMessage] {
+    public func getMessages(ofType type: MessageType) -> [CommunicationMessage] {
         messageQueue.filter { $0.type == type }
     }
 
     /// Get latest message from an agent
-    public func getLatestMessage(from senderID: UUID, type: MessageType? = nil) -> AgentMessage? {
+    public func getLatestMessage(from senderID: UUID, type: MessageType? = nil) -> CommunicationMessage? {
         var messages = messageQueue.filter { $0.senderID == senderID }
 
         if let type {
@@ -269,7 +269,7 @@ public final class AgentCommunication {
 // MARK: - Supporting Types
 
 /// Agent message
-public struct AgentMessage: Identifiable {
+public struct CommunicationMessage: Identifiable {
     public let id: UUID
     public let senderID: UUID
     public let recipientID: UUID? // nil = broadcast

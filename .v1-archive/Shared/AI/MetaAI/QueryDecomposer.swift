@@ -271,10 +271,10 @@ public final class QueryDecomposer {
         _ results: [SubQueryResult],
         originalQuery: String
     ) async throws -> String {
-        // Get a provider for aggregation (needs reasoning capability)
+        // Get a provider for aggregation
         guard let provider = getDecompositionProvider() else {
-            // Fallback to simple concatenation if no provider available
-            return simpleConcatenation(results, originalQuery: originalQuery)
+            // Fallback to simple aggregation
+            return aggregateSimple(results, originalQuery: originalQuery)
         }
 
         let prompt = createAggregationPrompt(results: results, originalQuery: originalQuery)
@@ -302,22 +302,43 @@ public final class QueryDecomposer {
                 }
             }
 
+            // Return the synthesized response
             return response.trimmingCharacters(in: .whitespacesAndNewlines)
 
         } catch {
-            print("⚠️ AI aggregation failed: \(error), using simple concatenation")
-            return simpleConcatenation(results, originalQuery: originalQuery)
+            print("⚠️ AI aggregation failed: \(error), using simple aggregation")
+            return aggregateSimple(results, originalQuery: originalQuery)
         }
     }
 
-    private func simpleConcatenation(
+    private func aggregateSimple(
         _ results: [SubQueryResult],
         originalQuery: String
     ) -> String {
-        var aggregated = "Query: \(originalQuery)\n\n"
+        // Simple fallback aggregation
+        var aggregated = ""
 
-        for (index, result) in results.enumerated() {
-            aggregated += "Result \(index + 1):\n\(result.response)\n\n"
+        // Check if all results are successful
+        let successfulResults = results.filter(\.success)
+        let failedResults = results.filter { !$0.success }
+
+        if successfulResults.count == 1 {
+            return successfulResults[0].response
+        }
+
+        if successfulResults.count > 1 {
+            // Combine responses with clear separation
+            for (index, result) in successfulResults.enumerated() {
+                if successfulResults.count > 2 {
+                    aggregated += "**Part \(index + 1):**\n"
+                }
+                aggregated += result.response + "\n\n"
+            }
+        }
+
+        // Append failure notes if any
+        if !failedResults.isEmpty {
+            aggregated += "\n---\n*Note: \(failedResults.count) sub-task(s) could not be completed.*"
         }
 
         return aggregated.trimmingCharacters(in: .whitespacesAndNewlines)

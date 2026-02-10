@@ -11,8 +11,8 @@ public struct Hypothesis: Sendable, Codable, Identifiable {
     public let type: HypothesisType
     public var status: HypothesisStatus
     public var confidence: Double
-    public var supportingEvidence: [Evidence]
-    public var contradictingEvidence: [Evidence]
+    public var supportingHypothesisEvidence: [HypothesisEvidence]
+    public var contradictingHypothesisEvidence: [HypothesisEvidence]
     public let createdAt: Date
     public var testedAt: Date?
 
@@ -27,8 +27,8 @@ public struct Hypothesis: Sendable, Codable, Identifiable {
     public enum HypothesisStatus: String, Codable, Sendable {
         case proposed // Initial hypothesis
         case testing // Currently being tested
-        case supported // Evidence supports it
-        case refuted // Evidence contradicts it
+        case supported // HypothesisEvidence supports it
+        case refuted // HypothesisEvidence contradicts it
         case inconclusive // Mixed evidence
         case modified // Revised based on evidence
     }
@@ -39,8 +39,8 @@ public struct Hypothesis: Sendable, Codable, Identifiable {
         type: HypothesisType = .predictive,
         status: HypothesisStatus = .proposed,
         confidence: Double = 0.5,
-        supportingEvidence: [Evidence] = [],
-        contradictingEvidence: [Evidence] = [],
+        supportingHypothesisEvidence: [HypothesisEvidence] = [],
+        contradictingHypothesisEvidence: [HypothesisEvidence] = [],
         createdAt: Date = Date(),
         testedAt: Date? = nil
     ) {
@@ -49,41 +49,41 @@ public struct Hypothesis: Sendable, Codable, Identifiable {
         self.type = type
         self.status = status
         self.confidence = confidence
-        self.supportingEvidence = supportingEvidence
-        self.contradictingEvidence = contradictingEvidence
+        self.supportingHypothesisEvidence = supportingHypothesisEvidence
+        self.contradictingHypothesisEvidence = contradictingHypothesisEvidence
         self.createdAt = createdAt
         self.testedAt = testedAt
     }
 
     /// Calculate evidence ratio
     public var evidenceRatio: Double {
-        let supporting = Double(supportingEvidence.count)
-        let contradicting = Double(contradictingEvidence.count)
+        let supporting = Double(supportingHypothesisEvidence.count)
+        let contradicting = Double(contradictingHypothesisEvidence.count)
         guard supporting + contradicting > 0 else { return 0.5 }
         return supporting / (supporting + contradicting)
     }
 
     /// Calculate weighted evidence score
     public var weightedScore: Double {
-        let supportingWeight = supportingEvidence.reduce(0.0) { $0 + $1.weight * $1.reliability }
-        let contradictingWeight = contradictingEvidence.reduce(0.0) { $0 + $1.weight * $1.reliability }
+        let supportingWeight = supportingHypothesisEvidence.reduce(0.0) { $0 + $1.weight * $1.reliability }
+        let contradictingWeight = contradictingHypothesisEvidence.reduce(0.0) { $0 + $1.weight * $1.reliability }
         let total = supportingWeight + contradictingWeight
         guard total > 0 else { return 0.5 }
         return supportingWeight / total
     }
 }
 
-/// Evidence supporting or contradicting a hypothesis
-public struct Evidence: Sendable, Codable, Identifiable {
+/// HypothesisEvidence supporting or contradicting a hypothesis
+public struct HypothesisEvidence: Sendable, Codable, Identifiable {
     public let id: UUID
     public let description: String
     public let source: String
-    public let type: EvidenceType
+    public let type: HypothesisEvidenceType
     public let weight: Double // 0-1, importance of evidence
     public let reliability: Double // 0-1, trustworthiness of source
     public let timestamp: Date
 
-    public enum EvidenceType: String, Codable, Sendable {
+    public enum HypothesisEvidenceType: String, Codable, Sendable {
         case observation // Direct observation
         case experiment // Experimental result
         case analysis // Data analysis
@@ -96,7 +96,7 @@ public struct Evidence: Sendable, Codable, Identifiable {
         id: UUID = UUID(),
         description: String,
         source: String,
-        type: EvidenceType = .observation,
+        type: HypothesisEvidenceType = .observation,
         weight: Double = 0.5,
         reliability: Double = 0.8,
         timestamp: Date = Date()
@@ -181,8 +181,8 @@ public struct HypothesisTestResult: Sendable {
     public let hypothesis: Hypothesis
     public let verdict: Verdict
     public let confidence: Double
-    public let supportingEvidenceCount: Int
-    public let contradictingEvidenceCount: Int
+    public let supportingHypothesisEvidenceCount: Int
+    public let contradictingHypothesisEvidenceCount: Int
     public let testsRun: Int
     public let testsPassed: Int
     public let summary: String
@@ -200,8 +200,8 @@ public struct HypothesisTestResult: Sendable {
         hypothesis: Hypothesis,
         verdict: Verdict,
         confidence: Double,
-        supportingEvidenceCount: Int,
-        contradictingEvidenceCount: Int,
+        supportingHypothesisEvidenceCount: Int,
+        contradictingHypothesisEvidenceCount: Int,
         testsRun: Int,
         testsPassed: Int,
         summary: String,
@@ -210,8 +210,8 @@ public struct HypothesisTestResult: Sendable {
         self.hypothesis = hypothesis
         self.verdict = verdict
         self.confidence = confidence
-        self.supportingEvidenceCount = supportingEvidenceCount
-        self.contradictingEvidenceCount = contradictingEvidenceCount
+        self.supportingHypothesisEvidenceCount = supportingHypothesisEvidenceCount
+        self.contradictingHypothesisEvidenceCount = contradictingHypothesisEvidenceCount
         self.testsRun = testsRun
         self.testsPassed = testsPassed
         self.summary = summary
@@ -266,16 +266,16 @@ public final class HypothesisTestingEngine {
     }
 
     /// Add supporting evidence to a hypothesis
-    public func addSupportingEvidence(_ evidence: Evidence, to hypothesisId: UUID) {
+    public func addSupportingHypothesisEvidence(_ evidence: HypothesisEvidence, to hypothesisId: UUID) {
         guard let index = hypotheses.firstIndex(where: { $0.id == hypothesisId }) else { return }
-        hypotheses[index].supportingEvidence.append(evidence)
+        hypotheses[index].supportingHypothesisEvidence.append(evidence)
         updateHypothesisStatus(at: index)
     }
 
     /// Add contradicting evidence to a hypothesis
-    public func addContradictingEvidence(_ evidence: Evidence, to hypothesisId: UUID) {
+    public func addContradictingHypothesisEvidence(_ evidence: HypothesisEvidence, to hypothesisId: UUID) {
         guard let index = hypotheses.firstIndex(where: { $0.id == hypothesisId }) else { return }
-        hypotheses[index].contradictingEvidence.append(evidence)
+        hypotheses[index].contradictingHypothesisEvidence.append(evidence)
         updateHypothesisStatus(at: index)
     }
 
@@ -374,7 +374,7 @@ public final class HypothesisTestingEngine {
         if passedTests < plan.tests.count {
             recommendations.append("Investigate why some tests failed")
         }
-        if hypothesis.supportingEvidence.isEmpty {
+        if hypothesis.supportingHypothesisEvidence.isEmpty {
             recommendations.append("Collect supporting evidence from multiple sources")
         }
 
@@ -382,8 +382,8 @@ public final class HypothesisTestingEngine {
             hypothesis: hypothesis,
             verdict: verdict,
             confidence: combinedScore,
-            supportingEvidenceCount: hypothesis.supportingEvidence.count,
-            contradictingEvidenceCount: hypothesis.contradictingEvidence.count,
+            supportingHypothesisEvidenceCount: hypothesis.supportingHypothesisEvidence.count,
+            contradictingHypothesisEvidenceCount: hypothesis.contradictingHypothesisEvidence.count,
             testsRun: plan.tests.count,
             testsPassed: passedTests,
             summary: "Hypothesis '\(hypothesis.statement)' is \(verdict.rawValue) with \(String(format: "%.0f%%", combinedScore * 100)) confidence",
@@ -405,7 +405,7 @@ public final class HypothesisTestingEngine {
     // MARK: - Bayesian Update
 
     /// Update hypothesis confidence using Bayesian reasoning
-    public func bayesianUpdate(hypothesisId: UUID, newEvidence: Evidence, likelihoodRatio: Double) {
+    public func bayesianUpdate(hypothesisId: UUID, newHypothesisEvidence: HypothesisEvidence, likelihoodRatio: Double) {
         guard let index = hypotheses.firstIndex(where: { $0.id == hypothesisId }) else { return }
 
         let priorOdds = hypotheses[index].confidence / (1 - hypotheses[index].confidence)
@@ -415,9 +415,9 @@ public final class HypothesisTestingEngine {
         hypotheses[index].confidence = min(max(posteriorProbability, 0.01), 0.99)
 
         if likelihoodRatio > 1 {
-            hypotheses[index].supportingEvidence.append(newEvidence)
+            hypotheses[index].supportingHypothesisEvidence.append(newHypothesisEvidence)
         } else {
-            hypotheses[index].contradictingEvidence.append(newEvidence)
+            hypotheses[index].contradictingHypothesisEvidence.append(newHypothesisEvidence)
         }
 
         updateHypothesisStatus(at: index)

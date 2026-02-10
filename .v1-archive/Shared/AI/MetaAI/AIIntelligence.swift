@@ -209,19 +209,19 @@ public final class AIIntelligence {
 
     private func defaultModelFor(taskType: TaskType) -> String {
         switch taskType {
-        case .codeGeneration, .debugging, .appDevelopment:
+        case .codeGeneration, .debugging, .codeDebugging, .appDevelopment, .codeRefactoring, .codeExplanation, .codeAnalysis:
             return "anthropic/claude-sonnet-4"
-        case .simpleQA, .factual, .informationRetrieval, .general:
+        case .simpleQA, .factual, .informationRetrieval, .general, .conversation, .unknown:
             return "openai/gpt-4o-mini"
         case .complexReasoning, .planning, .research:
             return "anthropic/claude-opus-4-5"
-        case .creativeWriting, .contentCreation, .creation:
+        case .creativeWriting, .contentCreation, .creation, .creative:
             return "anthropic/claude-sonnet-4"
-        case .summarization:
+        case .summarization, .translation:
             return "openai/gpt-4o"
-        case .mathLogic:
+        case .mathLogic, .math:
             return "openai/gpt-4o"
-        case .analysis, .workflowAutomation:
+        case .analysis, .workflowAutomation, .system:
             return "anthropic/claude-sonnet-4"
         }
     }
@@ -359,7 +359,7 @@ public final class AIIntelligence {
             role: .user,
             content: .text(prompt),
             timestamp: Date(),
-            model: "ai-intelligence"
+            model: "openai/gpt-4o-mini"
         )
 
         var response = ""
@@ -370,8 +370,13 @@ public final class AIIntelligence {
         )
 
         for try await chunk in stream {
-            if case .delta(let text) = chunk.type {
+            switch chunk.type {
+            case .delta(let text):
                 response += text
+            case .complete:
+                break
+            case .error(let error):
+                throw error
             }
         }
 
@@ -693,7 +698,8 @@ public struct AIWorkflowContext: Sendable {
     }
 }
 
-public struct ErrorContext: Sendable {
+/// Error context for AI intelligence system (distinct from ProactiveErrorPrevention's ErrorContext)
+public struct AIErrorContext: Sendable {
     public let filePath: String?
     public let functionName: String?
     public let recentActions: [String]

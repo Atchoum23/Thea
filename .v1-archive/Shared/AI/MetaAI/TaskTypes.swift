@@ -52,70 +52,35 @@ public struct SubtaskResultSnapshot: Sendable, Codable {
     }
 }
 
-/// Task classification for decomposition and orchestration
-public enum TaskType: String, Codable, Sendable, CaseIterable {
-    // Orchestration task types
-    case simpleQA
-    case codeGeneration
-    case complexReasoning
-    case creativeWriting
-    case mathLogic
-    case summarization
-    case factual
-    case analysis
-    case planning
-    case debugging
+// TaskType is now defined in Intelligence/Classification/TaskType.swift
+// Use that canonical version throughout the codebase
 
-    // Legacy task types
-    case appDevelopment
-    case research
-    case contentCreation
-    case workflowAutomation
-    case informationRetrieval
-    case creation
-    case general
-
-    public var displayName: String {
-        switch self {
-        case .simpleQA: "Simple Q&A"
-        case .codeGeneration: "Code Generation"
-        case .complexReasoning: "Complex Reasoning"
-        case .creativeWriting: "Creative Writing"
-        case .mathLogic: "Math & Logic"
-        case .summarization: "Summarization"
-        case .factual: "Factual Lookup"
-        case .analysis: "Analysis"
-        case .planning: "Planning"
-        case .debugging: "Debugging"
-        case .appDevelopment: "App Development"
-        case .research: "Research"
-        case .contentCreation: "Content Creation"
-        case .workflowAutomation: "Workflow Automation"
-        case .informationRetrieval: "Information Retrieval"
-        case .creation: "Creation"
-        case .general: "General"
-        }
-    }
-
-    public var icon: String {
+/// Extension to add icons used by MetaAI components
+public extension TaskType {
+    var icon: String {
         switch self {
         case .simpleQA: "questionmark.circle"
         case .codeGeneration: "chevron.left.forwardslash.chevron.right"
         case .complexReasoning: "brain.head.profile"
         case .creativeWriting: "pencil.and.outline"
-        case .mathLogic: "function"
+        case .mathLogic, .math: "function"
         case .summarization: "text.alignleft"
         case .factual: "book"
         case .analysis: "chart.bar"
         case .planning: "list.bullet.clipboard"
-        case .debugging: "ant"
+        case .debugging, .codeDebugging: "ant"
         case .appDevelopment: "hammer"
         case .research: "magnifyingglass"
         case .contentCreation: "doc.text"
-        case .workflowAutomation: "gearshape.2"
+        case .workflowAutomation, .system: "gearshape.2"
         case .informationRetrieval: "doc.text.magnifyingglass"
-        case .creation: "plus.circle"
-        case .general: "circle"
+        case .creation, .creative: "plus.circle"
+        case .general, .conversation: "circle"
+        case .codeAnalysis: "doc.text.magnifyingglass"
+        case .codeExplanation: "text.bubble"
+        case .codeRefactoring: "arrow.triangle.2.circlepath"
+        case .translation: "globe"
+        case .unknown: "questionmark"
         }
     }
 }
