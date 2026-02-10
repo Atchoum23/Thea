@@ -290,7 +290,7 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
         var insights = ProductivityInsights.empty
 
         // Get input activity data
-        let inputStats = InputActivityMonitor.shared.todayStats
+        let inputStats = InputActivityMonitor.shared.todayMetrics
 
         // Determine peak hours
         let sortedHours = inputStats.activityByHour.sorted { $0.value > $1.value }
@@ -298,14 +298,16 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
 
         // Calculate productivity metrics
         insights.averageTypingSpeed = inputStats.averageTypingSpeed
-        insights.averageFocusScore = inputStats.averageFocusScore
+        // Derive focus score from typing consistency (typing speed / baseline 60 WPM, clamped to 0-1)
+        let focusScore = min(1.0, inputStats.averageTypingSpeed / 60.0)
+        insights.averageFocusScore = focusScore
         insights.totalActiveTime = inputStats.totalActiveTime
         insights.totalKeystrokes = inputStats.totalKeystrokes
 
         // Determine productivity level
-        if inputStats.averageFocusScore >= 0.7 && inputStats.averageTypingSpeed >= 40 {
+        if focusScore >= 0.7 && inputStats.averageTypingSpeed >= 40 {
             insights.overallProductivityLevel = .high
-        } else if inputStats.averageFocusScore >= 0.4 && inputStats.averageTypingSpeed >= 25 {
+        } else if focusScore >= 0.4 && inputStats.averageTypingSpeed >= 25 {
             insights.overallProductivityLevel = .medium
         } else {
             insights.overallProductivityLevel = .low
@@ -358,7 +360,7 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
     private func detectTimePatterns() -> [BehaviorPattern] {
         var patterns: [BehaviorPattern] = []
 
-        let inputStats = InputActivityMonitor.shared.todayStats
+        let inputStats = InputActivityMonitor.shared.todayMetrics
 
         // Find the most productive hour
         if let (peakHour, activity) = inputStats.activityByHour.max(by: { $0.value < $1.value }),
@@ -379,10 +381,11 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
         }
 
         // Detect late-night work (potential burnout risk)
-        let lateNightActivity = (inputStats.activityByHour[22] ?? 0) +
-            (inputStats.activityByHour[23] ?? 0) +
-            (inputStats.activityByHour[0] ?? 0) +
-            (inputStats.activityByHour[1] ?? 0)
+        let hour22: Int = inputStats.activityByHour[22] ?? 0
+        let hour23: Int = inputStats.activityByHour[23] ?? 0
+        let hour0: Int = inputStats.activityByHour[0] ?? 0
+        let hour1: Int = inputStats.activityByHour[1] ?? 0
+        let lateNightActivity = hour22 + hour23 + hour0 + hour1
 
         if lateNightActivity > 200 {
             patterns.append(BehaviorPattern(
