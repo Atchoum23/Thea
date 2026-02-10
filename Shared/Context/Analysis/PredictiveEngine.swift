@@ -442,4 +442,3 @@ private struct PredictiveData: Codable {
     let transitionMatrix: [String: [String: Int]]
     let timeBasedPatterns: [Int: [String: Int]]
 }
-
