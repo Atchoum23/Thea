@@ -143,7 +143,7 @@ public final class AutonomousImprovementEngine {
     }
 
     private func checkForNewModels() async -> [AIDiscovery]? {
-        guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             return nil
         }
 
@@ -163,16 +163,15 @@ public final class AutonomousImprovementEngine {
         """
 
         do {
-            let response = try await AIProviderHelpers.singleResponse(
+            let model = await DynamicConfig.shared.bestModel(for: .analysis)
+            let response = try await streamToString(
                 provider: provider,
                 prompt: prompt,
-                model: await DynamicConfig.shared.bestModel(for: .analysis),
-                temperature: 0.1,
-                maxTokens: 1000
+                model: model
             )
 
             // Parse JSON response
-            if let data = response.data(using: .utf8),
+            if let data = response.data(using: String.Encoding.utf8),
                let models = try? JSONDecoder().decode([ModelDiscoveryJSON].self, from: data) {
                 return models.map { model in
                     AIDiscovery(
@@ -193,7 +192,7 @@ public final class AutonomousImprovementEngine {
     }
 
     private func checkForNewTechniques() async -> [AIDiscovery]? {
-        guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             return nil
         }
 
@@ -214,15 +213,14 @@ public final class AutonomousImprovementEngine {
         """
 
         do {
-            let response = try await AIProviderHelpers.singleResponse(
+            let model = await DynamicConfig.shared.bestModel(for: .analysis)
+            let response = try await streamToString(
                 provider: provider,
                 prompt: prompt,
-                model: await DynamicConfig.shared.bestModel(for: .analysis),
-                temperature: 0.1,
-                maxTokens: 1000
+                model: model
             )
 
-            if let data = response.data(using: .utf8),
+            if let data = response.data(using: String.Encoding.utf8),
                let techniques = try? JSONDecoder().decode([TechniqueDiscoveryJSON].self, from: data) {
                 return techniques.map { tech in
                     AIDiscovery(
@@ -325,7 +323,7 @@ public final class AutonomousImprovementEngine {
     // MARK: - Proposal Generation
 
     private func generateImprovementProposals() async -> [ImprovementProposal] {
-        guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             return []
         }
 
@@ -357,15 +355,14 @@ public final class AutonomousImprovementEngine {
             """
 
             do {
-                let response = try await AIProviderHelpers.singleResponse(
+                let model = await DynamicConfig.shared.bestModel(for: .codeGeneration)
+                let response = try await streamToString(
                     provider: provider,
                     prompt: prompt,
-                    model: await DynamicConfig.shared.bestModel(for: .codeGeneration),
-                    temperature: 0.2,
-                    maxTokens: 1500
+                    model: model
                 )
 
-                if let data = response.data(using: .utf8),
+                if let data = response.data(using: String.Encoding.utf8),
                    let proposalJSON = try? JSONDecoder().decode(ProposalJSON.self, from: data) {
                     proposals.append(ImprovementProposal(
                         id: UUID(),
@@ -386,6 +383,40 @@ public final class AutonomousImprovementEngine {
         }
 
         return proposals
+    }
+
+    // MARK: - AI Helper
+
+    /// Sends a prompt to the given provider and collects the full response text.
+    private func streamToString(
+        provider: AIProvider,
+        prompt: String,
+        model: String
+    ) async throws -> String {
+        let message = AIMessage(
+            id: UUID(), conversationID: UUID(), role: .user,
+            content: .text(prompt),
+            timestamp: Date(), model: model
+        )
+
+        let stream = try await provider.chat(
+            messages: [message],
+            model: model,
+            stream: false
+        )
+
+        var result = ""
+        for try await chunk in stream {
+            switch chunk.type {
+            case let .delta(text):
+                result += text
+            case let .complete(msg):
+                result = msg.content.textValue
+            case .error:
+                break
+            }
+        }
+        return result
     }
 
     // MARK: - Blueprint Generation
