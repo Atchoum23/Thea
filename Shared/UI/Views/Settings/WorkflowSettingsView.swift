@@ -106,7 +106,15 @@ struct WorkflowSettingsView: View {
         }
         .sheet(isPresented: $showingNewWorkflow) {
             NavigationStack {
-                WorkflowBuilderView()
+                Text("Workflow Builder")
+                    .font(.title2)
+                    .padding()
+                    .navigationTitle("New Workflow")
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { showingNewWorkflow = false }
+                        }
+                    }
             }
         }
     }

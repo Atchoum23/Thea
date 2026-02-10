@@ -343,13 +343,13 @@ targets:
           # PrivacySettingsView — ACTIVATED
           # AdvancedSettingsView — ACTIVATED
           # AIProvidersSettingsView — ACTIVATED
-          - "**/ResourceManagement/**"
+          # ResourceManagement — ACTIVATED
           # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
-          - "**/Settings/Privacy/**"
+          - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift inline types
           - "**/Settings/ResourceAllocationSettingsView.swift"
           - "**/Views/SelfExecutionView.swift"
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
@@ -396,16 +396,16 @@ targets:
           - "**/LocalModels/ModelQualityBenchmark.swift"
           - "**/LocalModels/PredictivePreloader.swift"
           # AI/Context — ACTIVATED (MemoryManager is active, all deps available)
-          - "**/AI/Adaptive/**"
+          # AI/Adaptive — ACTIVATED (self-contained, no external deps)
           # AI/Proactive — ACTIVATED (MemoryManager is active)
-          - "**/ResourceManagement/**"
+          # ResourceManagement — ACTIVATED
           - "**/Widgets/**"
           - "**/Views/Code/**"
           - "**/Views/LocalModels/**"
           - "**/Views/LifeTracking/**"
-          - "**/Settings/Advanced/**"
+          - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView.swift inline types
           - "**/Settings/LocalModels/**"
-          - "**/Settings/Privacy/**"
+          - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift inline types
           - "**/Settings/Orchestrator/**"
           - "**/Settings/AutonomousTasks/**"
           # ============================================================
@@ -418,14 +418,14 @@ targets:
           # ExecutableCodeBlock — ACTIVATED (uses CodeExecutionManager)
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
-          - "**/Components/THEAThinkingView.swift"
+          # THEAThinkingView — ACTIVATED
           # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)
-          - "**/Components/MemoryContextView.swift"
+          # MemoryContextView — ACTIVATED
           # StreamingTextView — ACTIVATED (StreamingStatus from StreamingIndicator)
           - "**/Views/PhaseProgressView.swift"
           - "**/Views/SelfExecutionView.swift"
-          - "**/Views/DeviceSwitcherView.swift"
-          - "**/Views/KeyboardShortcutsView.swift"
+          # DeviceSwitcherView — ACTIVATED
+          # KeyboardShortcutsView — ACTIVATED
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/Managers/IntegrationsManager.swift"
@@ -463,22 +463,22 @@ targets:
           # Intelligence/Subagents — ACTIVATED
           # Settings views with missing dependencies (still excluded)
           - "**/Settings/OrchestratorSettingsView.swift"
-          - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PrivacySettingsView.swift"
+          # MemorySettingsView — ACTIVATED
+          # PrivacySettingsView — ACTIVATED
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
           - "**/Settings/ResourceAllocationSettingsView.swift"
           # AutoCorrectSettingsView — ACTIVATED (uses active LiveAutoCorrect)
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
           - "**/Settings/AutomationSettingsView.swift"
-          - "**/Settings/WorkflowSettingsView.swift"
+          # WorkflowSettingsView — ACTIVATED
           # TerminalSettingsView — ACTIVATED (macOS only, uses active TerminalIntegrationManager)
           - "**/Settings/IntegrationsSettingsView.swift"
           - "**/Settings/AutonomousSettingsView.swift"
           # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
           # SystemPromptSettingsView — ACTIVATED (uses active TaskType + SystemPromptConfiguration)
-          - "**/Settings/SettingsPrivacyAboutViews.swift"  # DUPLICATE of views in SettingsView.swift
-          - "**/Settings/SettingsConfigurationViews.swift"  # DUPLICATE of views in SettingsView.swift
+          # SettingsPrivacyAboutViews — ACTIVATED (supplementary settings views)
+          # SettingsConfigurationViews — ACTIVATED (supplementary settings views)
           # SettingsViewModel — ACTIVATED (uses SettingsManager + ProviderRegistry)
           # AIProvidersSettingsView — ACTIVATED (uses SettingsManager + ProviderRegistry)
           # Theme exclusions
@@ -619,33 +619,33 @@ targets:
           - "**/Views/MetaAI/**"
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
-          - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PrivacySettingsView.swift"
+          # MemorySettingsView — ACTIVATED
+          # PrivacySettingsView — ACTIVATED
           # AdvancedSettingsView — ACTIVATED (self-contained)
           # AIProvidersSettingsView — ACTIVATED
-          - "**/ResourceManagement/**"
-          - "**/Components/EnhancedMessageBubble.swift"
+          # ResourceManagement — ACTIVATED
+          # EnhancedMessageBubble — ACTIVATED
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
-          - "**/Components/ExecutableCodeBlock.swift"
+          # ExecutableCodeBlock — ACTIVATED
           - "**/Components/TheaTextInputField.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
-          - "**/Settings/Privacy/**"
+          - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift
           - "**/Settings/ResourceAllocationSettingsView.swift"
           - "**/Views/SelfExecutionView.swift"
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
           # LiquidGlassStyle and DesignTokens kept for iOS/iPadHomeView
-          - "**/Core/DeviceCapabilityRouter.swift"
-          - "**/Views/DeviceSwitcherView.swift"
-          - "**/Components/THEAThinkingView.swift"
+          # DeviceCapabilityRouter — ACTIVATED
+          # DeviceSwitcherView — ACTIVATED
+          # THEAThinkingView — ACTIVATED
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           - "**/DistributedTaskExecutor.swift"
           - "**/LifeMonitoring/**"
           - "**/PatternLearning/**"
           # AI/Context — ACTIVATED
           - "**/Configuration/ConfigurationManager.swift"
-          - "**/Settings/Advanced/**"
+          - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView.swift
           - "**/Views/PhaseProgressView.swift"
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/AgentMode/AgentEnhancements.swift"
@@ -658,7 +658,7 @@ targets:
           - "**/LifeMonitoring/TaskIntelligence.swift"
           - "**/Integrations/MusicIntegration.swift"
           - "**/Integrations/SystemIntegration.swift"
-          - "**/AI/Adaptive/AdaptivePromptEngine.swift"
+          # AI/Adaptive/AdaptivePromptEngine — ACTIVATED (AI/Adaptive now active)
           - "**/LocalModels/ProactiveModelManager.swift"
           - "**/LocalModels/LocalModelRecommendationEngine.swift"
           - "**/LocalModels/LocalModelRecommendationEngine+*.swift"
@@ -691,31 +691,31 @@ targets:
           - "**/Integrations/CalendarIntegration.swift"
           - "**/Integrations/ShortcutsIntegration.swift"
           - "**/Automation/ShortcutsOrchestrator.swift"
-          - "**/Settings/SettingsPrivacyAboutViews.swift"  # DUPLICATE of views in SettingsView.swift
+          # SettingsPrivacyAboutViews — ACTIVATED
           # SettingsViewModel — ACTIVATED
           - "**/V1Parity/MessageRegeneration.swift"
           - "**/Integrations/MessagesIntegration.swift"
           # PromptOptimizer — ACTIVATED (SubAgentOrchestrator.AgentType→String)
           - "**/RemoteServer/RemoteCommandService.swift"
-          - "**/Settings/SettingsConfigurationViews.swift"  # DUPLICATE of views in SettingsView.swift
+          # SettingsConfigurationViews — ACTIVATED
           # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
           # AutomaticPromptEngineering — ACTIVATED (PromptEngineering folder now active)
           - "**/Settings/AutomationSettingsView.swift"
           - "**/AgentMode/AutonomousAgentV3.swift"
           - "**/SelfEvolution/AutonomousImprovement.swift"
-          - "**/Views/KeyboardShortcutsView.swift"
+          # KeyboardShortcutsView — ACTIVATED
           - "**/LifeAssistant/LifeAssistantService.swift"
           - "**/Views/LifeTracking/**"
-          - "**/Settings/TerminalSettingsView.swift"
+          # TerminalSettingsView — ACTIVATED
           - "**/Execution/Testing/TestGenerator.swift"
           - "**/Automation/WorkflowEngine.swift"
-          - "**/Settings/WorkflowSettingsView.swift"
+          # WorkflowSettingsView — ACTIVATED
           - "**/Integrations/XcodeIntegration.swift"
           - "**/Autonomy/AutonomousMaintenanceService.swift"
           - "**/Automation/AutonomousTaskExecutor.swift"
           - "**/Autonomy/AutonomyController.swift"
           - "**/Settings/AutonomousTasks/**"
-          - "**/Squads/SquadOrchestrator.swift"
+          # SquadOrchestrator — ACTIVATED
           - "**/LocalModels/SupraModelSelector.swift"
           - "**/Core/TheaIntegrationHub.swift"
           - "**/Launcher/QuickLauncher.swift"

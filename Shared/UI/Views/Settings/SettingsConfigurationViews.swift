@@ -284,7 +284,7 @@ struct ExtensionListEditor: View {
 // MARK: - Memory Configuration View
 
 struct MemoryConfigurationView: View {
-    @State private var config = AppConfiguration.shared.memoryConfig
+    @State private var config = TheaConfig.shared.memory
 
     var body: some View {
         Form {
@@ -336,7 +336,7 @@ struct MemoryConfigurationView: View {
         .formStyle(.grouped)
         .navigationTitle("Memory Configuration")
         .onChange(of: config) { _, newValue in
-            AppConfiguration.shared.memoryConfig = newValue
+            TheaConfig.shared.memory = newValue
         }
     }
 }
