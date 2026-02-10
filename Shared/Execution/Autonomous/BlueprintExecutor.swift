@@ -346,29 +346,41 @@ public final class BlueprintExecutor {
     }
 
     private func executeAITask(_ task: BlueprintAITask) async -> BlueprintStepResult {
-        guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             return BlueprintStepResult(step: task.description, success: false, error: "No AI provider available")
         }
 
         do {
-            // Use dynamic config if model not specified
             let model: String
             if let specifiedModel = task.model {
                 model = specifiedModel
             } else {
                 model = await DynamicConfig.shared.bestModel(for: .codeGeneration)
             }
-            let maxTokens = task.maxTokens ?? DynamicConfig.shared.maxTokens(for: .codeGeneration)
 
-            let response = try await AIProviderHelpers.streamToString(
-                provider: provider,
-                prompt: task.prompt,
-                model: model,
-                systemPrompt: task.systemPrompt,
-                maxTokens: maxTokens
-            )
+            var messages: [AIMessage] = []
+            if let systemPrompt = task.systemPrompt, !systemPrompt.isEmpty {
+                messages.append(AIMessage(
+                    id: UUID(), conversationID: UUID(), role: .system,
+                    content: .text(systemPrompt), timestamp: Date(), model: model
+                ))
+            }
+            messages.append(AIMessage(
+                id: UUID(), conversationID: UUID(), role: .user,
+                content: .text(task.prompt), timestamp: Date(), model: model
+            ))
 
-            return BlueprintStepResult(step: task.description, success: true, output: response)
+            let stream = try await provider.chat(messages: messages, model: model, stream: false)
+            var result = ""
+            for try await chunk in stream {
+                switch chunk.type {
+                case .delta(let text): result += text
+                case .complete(let msg): result = msg.content.textValue
+                case .error(let err): throw err
+                }
+            }
+
+            return BlueprintStepResult(step: task.description, success: true, output: result)
         } catch {
             return BlueprintStepResult(step: task.description, success: false, error: error.localizedDescription)
         }
@@ -434,7 +446,7 @@ public final class BlueprintExecutor {
         }
 
         // Use AI for complex recovery
-        guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             return nil
         }
 
@@ -448,13 +460,20 @@ public final class BlueprintExecutor {
 
         do {
             let model = await DynamicConfig.shared.bestModel(for: .classification)
-            let suggestion = try await AIProviderHelpers.singleResponse(
-                provider: provider,
-                prompt: prompt,
-                model: model,
-                maxTokens: DynamicConfig.shared.maxTokens(for: .classification)
-            )
-            return suggestion.trimmingCharacters(in: .whitespacesAndNewlines)
+            let messages = [AIMessage(
+                id: UUID(), conversationID: UUID(), role: .user,
+                content: .text(prompt), timestamp: Date(), model: model
+            )]
+            let stream = try await provider.chat(messages: messages, model: model, stream: false)
+            var suggestion = ""
+            for try await chunk in stream {
+                switch chunk.type {
+                case .delta(let text): suggestion += text
+                case .complete(let msg): suggestion = msg.content.textValue
+                case .error(let err): throw err
+                }
+            }
+            return suggestion.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         } catch {
             return nil
         }
