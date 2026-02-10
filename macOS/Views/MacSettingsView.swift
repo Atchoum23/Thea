@@ -3,7 +3,8 @@ import SwiftUI
 
 // MARK: - Window Resizable Helper
 
-/// Invisible NSView that forces its host NSWindow to accept the `.resizable` style mask.
+/// Invisible NSView that forces its host NSWindow to accept the `.resizable` style mask
+/// and persists its frame (position + size) across relaunches.
 /// SwiftUI's `Settings` scene actively strips `.resizable` — we use KVO to re-inject
 /// it every time the system removes it, ensuring the resize handle always appears.
 private struct WindowResizableHelper: NSViewRepresentable {
@@ -23,6 +24,9 @@ private struct WindowResizableHelper: NSViewRepresentable {
                 return
             }
             window.styleMask.insert(.resizable)
+
+            // Persist window frame across launches
+            window.setFrameAutosaveName("TheaSettingsWindow")
 
             observation = window.observe(\.styleMask, options: [.new]) { win, _ in
                 DispatchQueue.main.async { @MainActor in
