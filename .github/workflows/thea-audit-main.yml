@@ -82,7 +82,7 @@ jobs:
           fi
 
           # Run full audit with multiple output formats
-          $THEA_AUDIT audit \
+          $THEA_AUDIT scan \
             --path . \
             --format yaml \
             --output audit-results.yaml \
@@ -90,14 +90,14 @@ jobs:
             --policy thea-policy.json \
             $VERBOSE_FLAG || true
 
-          $THEA_AUDIT audit \
+          $THEA_AUDIT scan \
             --path . \
             --format json \
             --output audit-results.json \
             --severity "$SEVERITY" \
             --policy thea-policy.json || true
 
-          $THEA_AUDIT audit \
+          $THEA_AUDIT scan \
             --path . \
             --format markdown \
             --output audit-report.md \
@@ -118,7 +118,7 @@ jobs:
       - name: Generate SARIF Output
         if: always()
         run: |
-          $THEA_AUDIT audit \
+          $THEA_AUDIT scan \
             --path . \
             --format sarif \
             --output audit-results.sarif \

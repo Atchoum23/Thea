@@ -1,7 +1,4 @@
 {
-  "version": "1.0.0",
-  "name": "Thea AgentSec Strict Mode Policy",
-  "description": "Security policy for AI agent operations in Thea",
   "network": {
     "blockedHosts": [
       "localhost",
@@ -10,15 +7,29 @@
       "0.0.0.0",
       "169.254.169.254",
       "metadata.google.internal",
-      "metadata.internal"
+      "metadata.internal",
+      "169.254.170.2",
+      "10.*",
+      "172.16.*",
+      "172.17.*",
+      "172.18.*",
+      "172.19.*",
+      "172.20.*",
+      "172.21.*",
+      "172.22.*",
+      "172.23.*",
+      "172.24.*",
+      "172.25.*",
+      "172.26.*",
+      "172.27.*",
+      "172.28.*",
+      "172.29.*",
+      "172.30.*",
+      "172.31.*",
+      "192.168.*"
     ],
-    "blockedIPRanges": [
-      "10.0.0.0/8",
-      "172.16.0.0/12",
-      "192.168.0.0/16"
-    ],
-    "allowedProtocols": ["https"],
-    "requireTLS": true
+    "allowExternalRequests": true,
+    "maxRequestTimeout": 30
   },
   "filesystem": {
     "blockedPaths": [
@@ -36,54 +47,64 @@
       ".kube",
       "Keychain",
       ".env",
-      ".credentials"
+      ".credentials",
+      ".git/config",
+      ".gitconfig"
     ],
-    "allowedWorkspaceOnly": true,
-    "blockHiddenFiles": true
+    "allowedWritePaths": [],
+    "allowExternalReads": false
   },
   "terminal": {
     "blockedPatterns": [
       "rm -rf /",
       "rm -rf /*",
+      "rm -rf ~",
       ":(){ :|:& };:",
-      "dd if=/dev/zero",
-      "> /dev/sda",
+      "dd if=/dev/zero of=/dev/",
       "mkfs",
+      "> /dev/sda",
+      "chmod -R 777 /",
       "curl.*\\|.*sh",
       "curl.*\\|.*bash",
       "wget.*\\|.*sh",
-      "wget.*\\|.*bash"
+      "wget.*\\|.*bash",
+      "curl.*\\|.*python",
+      "nc\\s+-e",
+      "bash\\s+-i.*>&",
+      "/dev/tcp/"
     ],
-    "blockedCommands": [
+    "requireApprovalPatterns": [
       "sudo",
-      "su",
-      "passwd",
-      "visudo",
-      "chmod 777",
-      "chown root"
+      "rm -r",
+      "chmod",
+      "chown",
+      "kill",
+      "pkill",
+      "killall",
+      "osascript",
+      "shutdown",
+      "reboot"
     ],
-    "requireApproval": true,
-    "sandboxEnabled": true
+    "maxExecutionTime": 120,
+    "allowSudo": false
   },
   "approval": {
     "requiredForTypes": [
       "fileWrite",
+      "fileDelete",
       "terminalExec",
       "networkRequest",
-      "systemConfig"
+      "systemConfig",
+      "processKill",
+      "credentialAccess"
     ],
     "autoApproveLowRisk": false,
-    "timeout": 300
+    "approvalTimeout": 300
   },
   "killSwitch": {
     "enabled": true,
     "triggerOnCritical": true,
     "notifyUser": true,
     "logToAudit": true
-  },
-  "audit": {
-    "enabled": true,
-    "logAllOperations": true,
-    "retentionDays": 90
   }
 }

@@ -131,7 +131,7 @@ audit:
 	@echo "Building thea-audit..."
 	@cd Tools/thea-audit && xcrun swift build -c release
 	@echo "Running security audit..."
-	@Tools/thea-audit/.build/release/thea-audit audit \
+	@Tools/thea-audit/.build/release/thea-audit scan \
 		--path . \
 		--format markdown \
 		--output audit-report.md \

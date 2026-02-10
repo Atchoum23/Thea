@@ -81,7 +81,7 @@ jobs:
         id: audit
         run: |
           # Run delta audit
-          $THEA_AUDIT audit \
+          $THEA_AUDIT scan \
             --path . \
             --delta \
             --base-branch origin/${{ github.base_ref }} \
@@ -93,7 +93,7 @@ jobs:
           AUDIT_EXIT_CODE=$?
 
           # Generate markdown summary
-          $THEA_AUDIT audit \
+          $THEA_AUDIT scan \
             --path . \
             --delta \
             --base-branch origin/${{ github.base_ref }} \
@@ -102,7 +102,7 @@ jobs:
             --policy thea-policy.json || true
 
           # Generate JSON for counting
-          $THEA_AUDIT audit \
+          $THEA_AUDIT scan \
             --path . \
             --delta \
             --base-branch origin/${{ github.base_ref }} \
