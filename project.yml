@@ -436,7 +436,7 @@ targets:
           - "**/Core/TheaIntegrationHub.swift"
           - "**/Execution/Testing/TestGenerator.swift"
           - "**/V1Parity/MessageRegeneration.swift"
-          - "**/RemoteServer/RemoteCommandService.swift"
+          # RemoteCommandService — ACTIVATED (CloudKit-based remote commands)
           - "**/Launcher/QuickLauncher.swift"
           - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           # Intelligence/Subagents — ACTIVATED

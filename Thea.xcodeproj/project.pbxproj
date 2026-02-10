@@ -282,6 +282,7 @@
 		325F1B802ED1BE46F5642F5C /* VideoEncoderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DB4FC0AB8685C4ECE6205A /* VideoEncoderService.swift */; };
 		32B905652B314D928BF49D00 /* PasskeysService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FD981DA6AD30BA5CB78032 /* PasskeysService.swift */; };
 		32D0301F84611957190B55E5 /* visionOSFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 539DEA2F73D942A71225C839 /* visionOSFeatures.swift */; };
+		32EF7212E2A7C7B830AB8ED4 /* RemoteCommandService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF92391A43F9CDEA1B9EC19 /* RemoteCommandService.swift */; };
 		33065E924912679036B08118 /* content.css in Resources */ = {isa = PBXBuildFile; fileRef = 23793F6CB5F10F76A86448EB /* content.css */; };
 		3353C32EE0E974413821FF28 /* MemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E1A311BD215F434CD170C2 /* MemoryManager.swift */; };
 		3399E5E478131C44850E27D0 /* iOSProjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557907F0E5C4825634A1F740 /* iOSProjectsView.swift */; };
@@ -1673,6 +1674,7 @@
 		2BC4EF9E0AE7045062A1CC30 /* ModelCatalogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalogManager.swift; sourceTree = "<group>"; };
 		2CDA7757850F5850A7CAFC5E /* ai-sidebar.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = "ai-sidebar.css"; sourceTree = "<group>"; };
 		2CDF2EA438169E6889F22888 /* tvOSHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tvOSHomeView.swift; sourceTree = "<group>"; };
+		2CF92391A43F9CDEA1B9EC19 /* RemoteCommandService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommandService.swift; sourceTree = "<group>"; };
 		2D1131DF82F36E3117BD7462 /* PromptOptimizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptOptimizer.swift; sourceTree = "<group>"; };
 		2D8F6F61175B72933E7BA4A1 /* IncomeDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeDashboardView.swift; sourceTree = "<group>"; };
 		2DBA82EC0C5E5B467BA04314 /* DeviceSwitcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSwitcherView.swift; sourceTree = "<group>"; };
@@ -3237,6 +3239,7 @@
 				3BE3F4288C165F9736A02094 /* DeviceDiscovery.swift */,
 				88E698F95E65BD37E781DA91 /* NetworkDiscoveryService.swift */,
 				DAE531DCD5B8951FE256555E /* PrivacyModeService.swift */,
+				2CF92391A43F9CDEA1B9EC19 /* RemoteCommandService.swift */,
 				074E07BC454AAE5357088F19 /* RemoteFileService.swift */,
 				04A28044E9B7C1138161B04E /* RemoteInputService.swift */,
 				65791F2F7974019D1F5C6D1D /* RemoteMessages.swift */,
@@ -7249,6 +7252,7 @@
 				D8180DB731717E997B4AFC54 /* RemindersMonitor.swift in Sources */,
 				3F739FE750ACBDAA6F43A33C /* RemoteAccessSettingsView.swift in Sources */,
 				CDD7CD77B236B01C41798D18 /* RemoteClientView.swift in Sources */,
+				32EF7212E2A7C7B830AB8ED4 /* RemoteCommandService.swift in Sources */,
 				972AA302C1C0403F2093FE01 /* RemoteFileService.swift in Sources */,
 				027A09DFAB1959BFDBC626C6 /* RemoteInputService.swift in Sources */,
 				63E32C1AF30AAF6FBDEEF4A1 /* RemoteMacBridge.swift in Sources */,
