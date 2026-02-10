@@ -1,4 +1,3 @@
-// swiftlint:disable file_length type_name
 import SwiftUI
 
 // MARK: - iOS Settings View
@@ -316,5 +315,3 @@ private struct SettingsRow: View {
         .padding(.vertical, 2)
     }
 }
-
-// swiftlint:enable file_length type_name
