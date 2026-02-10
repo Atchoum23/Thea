@@ -40,7 +40,7 @@ struct ExtendedThinkingView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(Color.theaPrimaryDefault.opacity(0.3), lineWidth: 1)
         )
     }
 
@@ -84,7 +84,7 @@ struct ExtendedThinkingView: View {
     private func thinkingContent(content: String) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Divider()
-                .background(Color.orange.opacity(0.2))
+                .background(Color.theaPrimaryDefault.opacity(0.2))
 
             ScrollView {
                 Text(content)
@@ -102,7 +102,7 @@ struct ExtendedThinkingView: View {
     // MARK: - Helpers
 
     private var thinkingBackground: Color {
-        Color.orange.opacity(0.08)
+        Color.theaPrimaryDefault.opacity(0.08)
     }
 
     private func formatElapsedTime(_ seconds: TimeInterval) -> String {
@@ -118,41 +118,16 @@ struct ExtendedThinkingView: View {
 
 // MARK: - Thinking Icon
 
-/// Animated brain/thinking icon
+/// Animated thinking icon using Thea spiral
 struct ThinkingIcon: View {
     let isAnimating: Bool
 
-    @State private var rotation: Double = 0
-    @State private var scale: CGFloat = 1.0
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     var body: some View {
-        ZStack {
-            // Background glow
-            Circle()
-                .fill(Color.orange.opacity(0.2))
-                .frame(width: 28, height: 28)
-                .scaleEffect(isAnimating && !reduceMotion ? scale : 1.0)
-
-            // Brain icon
-            Image(systemName: "brain")
-                .font(.system(size: 14))
-                .foregroundStyle(Color.orange)
-                .rotationEffect(.degrees(isAnimating && !reduceMotion ? rotation : 0))
-        }
-        .onAppear {
-            guard isAnimating, !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                rotation = 10
-                scale = 1.1
-            }
-        }
-        .onChange(of: isAnimating) { _, newValue in
-            if !newValue || reduceMotion {
-                rotation = 0
-                scale = 1.0
-            }
-        }
+        TheaSpiralIconView(
+            size: 24,
+            isThinking: isAnimating,
+            showGlow: isAnimating
+        )
     }
 }
 

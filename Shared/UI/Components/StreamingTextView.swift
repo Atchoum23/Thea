@@ -66,7 +66,7 @@ public enum StreamingContentType: Equatable, Sendable {
         switch self {
         case .text: return "text.alignleft"
         case .code: return "chevron.left.forwardslash.chevron.right"
-        case .thinking: return "brain"
+        case .thinking: return "sparkles"
         case .toolCall: return "wrench.and.screwdriver"
         case .markdown: return "doc.richtext"
         case .mixed: return "square.stack.3d.up"

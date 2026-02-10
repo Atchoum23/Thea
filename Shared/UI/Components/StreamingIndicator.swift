@@ -44,7 +44,7 @@ public enum StreamingStatus: Equatable, Sendable {
         case .idle:
             return ""
         case .thinking:
-            return "brain"
+            return "sparkles"
         case .searching:
             return "magnifyingglass"
         case .generating:
