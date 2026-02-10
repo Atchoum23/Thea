@@ -25,7 +25,7 @@ public struct DeviceSwitcherView: View {
             // Current Device Section
             if let current = currentDevice {
                 Section("This Device") {
-                    DeviceRow(device: current, isCurrent: true)
+                    DeviceSwitcherRow(device: current, isCurrent: true)
                 }
             }
 
@@ -39,7 +39,7 @@ public struct DeviceSwitcherView: View {
                     )
                 } else {
                     ForEach(otherDevices) { device in
-                        DeviceRow(device: device, isCurrent: false)
+                        DeviceSwitcherRow(device: device, isCurrent: false)
                     }
                 }
             }
@@ -119,7 +119,7 @@ public struct DeviceSwitcherView: View {
 
 // MARK: - Device Row
 
-private struct DeviceRow: View {
+private struct DeviceSwitcherRow: View {
     let device: DeviceInfo
     let isCurrent: Bool
 

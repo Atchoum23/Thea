@@ -339,12 +339,10 @@ targets:
           # Exclude views that depend on missing types
           - "**/Settings/OrchestratorSettingsView.swift"
           - "**/Settings/Orchestrator/**"
-          - "**/Settings/MemorySettingsView.swift"
-          - "**/Settings/PrivacySettingsView.swift"
-          # AdvancedSettingsView — ACTIVATED (self-contained, only uses SettingsManager)
-          # AIProvidersSettingsView — ACTIVATED (uses SettingsManager + ProviderRegistry)
-          # Verification + Anticipatory: excluded as tightly-coupled subsystems.
-          # All files in each folder depend on each other; must be enabled together.
+          # MemorySettingsView — ACTIVATED
+          # PrivacySettingsView — ACTIVATED
+          # AdvancedSettingsView — ACTIVATED
+          # AIProvidersSettingsView — ACTIVATED
           - "**/ResourceManagement/**"
           # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
@@ -357,10 +355,10 @@ targets:
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
           - "**/Theme/DesignTokens.swift"
-          - "**/Core/DeviceCapabilityRouter.swift"
-          - "**/Views/DeviceSwitcherView.swift"
-          # THEAThinkingView — ACTIVATED (THEADecision types in Intelligence/Core/THEATypes.swift)
-          # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
+          # DeviceCapabilityRouter — ACTIVATED
+          # DeviceSwitcherView — ACTIVATED
+          # THEAThinkingView — ACTIVATED
+          # ResponseNotificationHandler.swift — ACTIVATED
           - "**/DistributedTaskExecutor.swift"
           # ============================================================
           # BLANKET DIRECTORY EXCLUSIONS (macOS)
@@ -382,7 +380,7 @@ targets:
           - "**/AgentMode/AutonomousAgentV3.swift"
           - "**/Intelligence/Orchestration/IntelligenceOrchestrator.swift"
           - "**/SelfEvolution/**"
-          # Squads — ACTIVATED (AIProviderHelpers→AIProvider.chat, withParallelTimeout→withThrowingTaskGroup, stub types added)
+          # Squads — ACTIVATED
           # PromptEngineering — ACTIVATED (SubAgentOrchestrator.AgentType replaced with String, TaskContext moved to Intelligence/Classification)
           # LocalModels: selective exclusion (LocalModelManager, MLXModelManager,
           # MLXInferenceEngine, MLXModelScanner, LocalModelProvider are actively used)
@@ -420,9 +418,9 @@ targets:
           # ExecutableCodeBlock — ACTIVATED (uses CodeExecutionManager)
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
-          # THEAThinkingView — ACTIVATED (types in Intelligence/Core/THEATypes.swift)
+          - "**/Components/THEAThinkingView.swift"
           # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)
-          # MemoryContextView — ACTIVATED (deps: ActiveMemoryRetrieval, MemoryAugmentedChat)
+          - "**/Components/MemoryContextView.swift"
           # StreamingTextView — ACTIVATED (StreamingStatus from StreamingIndicator)
           - "**/Views/PhaseProgressView.swift"
           - "**/Views/SelfExecutionView.swift"
@@ -626,9 +624,9 @@ targets:
           # AdvancedSettingsView — ACTIVATED (self-contained)
           # AIProvidersSettingsView — ACTIVATED
           - "**/ResourceManagement/**"
-          # EnhancedMessageBubble — ACTIVATED (iOS, cross-platform with #if guards)
+          - "**/Components/EnhancedMessageBubble.swift"
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
-          # ExecutableCodeBlock — ACTIVATED (iOS, cross-platform with #if guards)
+          - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/TheaTextInputField.swift"
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
@@ -640,7 +638,7 @@ targets:
           # LiquidGlassStyle and DesignTokens kept for iOS/iPadHomeView
           - "**/Core/DeviceCapabilityRouter.swift"
           - "**/Views/DeviceSwitcherView.swift"
-          # THEAThinkingView — ACTIVATED (THEADecision types in Intelligence/Core/THEATypes.swift)
+          - "**/Components/THEAThinkingView.swift"
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           - "**/DistributedTaskExecutor.swift"
           - "**/LifeMonitoring/**"
@@ -656,7 +654,7 @@ targets:
           - "**/Integrations/MCPGateway.swift"
           - "**/Integrations/MailIntegration.swift"
           - "**/Anticipatory/IntentAnticipator.swift"
-          # TaskClassifier — ACTIVATED (iOS, no macOS-specific APIs)
+          # TaskClassifier — ACTIVATED
           - "**/LifeMonitoring/TaskIntelligence.swift"
           - "**/Integrations/MusicIntegration.swift"
           - "**/Integrations/SystemIntegration.swift"
@@ -680,15 +678,15 @@ targets:
           - "**/Integrations/SafariIntegration.swift"
           - "**/Components/ChatInputView.swift"
           - "**/Search/SemanticSearchService.swift"
-          # QuerySuggestionOverlay — ACTIVATED (iOS)
+          - "**/Components/QuerySuggestionOverlay.swift"
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
           # ActiveMemoryRetrieval — ACTIVATED
           # MemoryContextView — ACTIVATED
-          # StreamingTextView — ACTIVATED (iOS, uses StreamingIndicator)
+          - "**/Components/StreamingTextView.swift"
           - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
           - "**/Prediction/ModelPrewarmingService.swift"
-          # ModelRouter — ACTIVATED (iOS, no macOS-specific APIs)
+          # ModelRouter — ACTIVATED
           - "**/Autonomous/BlueprintExecutor.swift"
           - "**/Integrations/CalendarIntegration.swift"
           - "**/Integrations/ShortcutsIntegration.swift"
@@ -717,7 +715,7 @@ targets:
           - "**/Automation/AutonomousTaskExecutor.swift"
           - "**/Autonomy/AutonomyController.swift"
           - "**/Settings/AutonomousTasks/**"
-          # Squads/SquadOrchestrator — ACTIVATED (iOS)
+          - "**/Squads/SquadOrchestrator.swift"
           - "**/LocalModels/SupraModelSelector.swift"
           - "**/Core/TheaIntegrationHub.swift"
           - "**/Launcher/QuickLauncher.swift"
