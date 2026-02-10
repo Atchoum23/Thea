@@ -23,6 +23,15 @@ final class ChatManager: ObservableObject {
 
     private init() {}
 
+    /// Save model context with error logging instead of silent `try?`
+    private func saveContext(operation: String = #function) {
+        do {
+            try modelContext?.save()
+        } catch {
+            chatLogger.error("❌ Save failed in \(operation): \(error.localizedDescription)")
+        }
+    }
+
     // MARK: - Setup
 
     func setModelContext(_ context: ModelContext) {
@@ -40,7 +49,12 @@ final class ChatManager: ObservableObject {
         guard let context = modelContext else { return }
         var descriptor = FetchDescriptor<Conversation>()
         descriptor.sortBy = [SortDescriptor(\.updatedAt, order: .reverse)]
-        conversations = (try? context.fetch(descriptor)) ?? []
+        do {
+            conversations = try context.fetch(descriptor)
+        } catch {
+            chatLogger.error("❌ Failed to load conversations: \(error.localizedDescription)")
+            conversations = []
+        }
     }
 
     func selectConversation(_ conversation: Conversation) {
@@ -50,14 +64,14 @@ final class ChatManager: ObservableObject {
     func createConversation(title: String = "New Conversation") -> Conversation {
         let conversation = Conversation(title: title)
         modelContext?.insert(conversation)
-        try? modelContext?.save()
+        saveContext()
         conversations.insert(conversation, at: 0)
         return conversation
     }
 
     func deleteConversation(_ conversation: Conversation) {
         modelContext?.delete(conversation)
-        try? modelContext?.save()
+        saveContext()
         conversations.removeAll { $0.id == conversation.id }
 
         if activeConversation?.id == conversation.id {
@@ -83,17 +97,17 @@ final class ChatManager: ObservableObject {
     func updateConversationTitle(_ conversation: Conversation, title: String) {
         conversation.title = title
         conversation.updatedAt = Date()
-        try? modelContext?.save()
+        saveContext()
     }
 
     func togglePin(_ conversation: Conversation) {
         conversation.isPinned.toggle()
-        try? modelContext?.save()
+        saveContext()
     }
 
     func toggleArchive(_ conversation: Conversation) {
         conversation.isArchived.toggle()
-        try? modelContext?.save()
+        saveContext()
     }
 
     func toggleRead(_ conversation: Conversation) {
@@ -102,7 +116,7 @@ final class ChatManager: ObservableObject {
         } else {
             conversation.markAsViewed()
         }
-        try? modelContext?.save()
+        saveContext()
     }
 
     // MARK: - Auto Title Generation
@@ -426,7 +440,7 @@ final class ChatManager: ObservableObject {
 
     func deleteMessage(_ message: Message, from _: Conversation) {
         modelContext?.delete(message)
-        try? modelContext?.save()
+        saveContext()
     }
 
     func regenerateLastMessage(in conversation: Conversation) async throws {
