@@ -377,10 +377,12 @@ targets:
           - "**/Autonomy/**"
           - "**/Automation/**"
           - "**/Autonomous/**"
-          - "**/AgentMode/**"
+          # AgentMode — PARTIALLY ACTIVATED (AgentMode.swift, AutonomousAgent.swift now active)
+          - "**/AgentMode/AgentEnhancements.swift"
+          - "**/AgentMode/AutonomousAgentV3.swift"
           - "**/Intelligence/Orchestration/IntelligenceOrchestrator.swift"
           - "**/SelfEvolution/**"
-          - "**/Squads/**"
+          # Squads — ACTIVATED (AIProviderHelpers→AIProvider.chat, withParallelTimeout→withThrowingTaskGroup, stub types added)
           # PromptEngineering — ACTIVATED (SubAgentOrchestrator.AgentType replaced with String, TaskContext moved to Intelligence/Classification)
           # LocalModels: selective exclusion (LocalModelManager, MLXModelManager,
           # MLXInferenceEngine, MLXModelScanner, LocalModelProvider are actively used)
@@ -715,7 +717,7 @@ targets:
           - "**/Automation/AutonomousTaskExecutor.swift"
           - "**/Autonomy/AutonomyController.swift"
           - "**/Settings/AutonomousTasks/**"
-          - "**/Squads/SquadOrchestrator.swift"
+          # Squads/SquadOrchestrator — ACTIVATED (iOS)
           - "**/LocalModels/SupraModelSelector.swift"
           - "**/Core/TheaIntegrationHub.swift"
           - "**/Launcher/QuickLauncher.swift"

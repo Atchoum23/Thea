@@ -394,43 +394,4 @@ public struct SubagentResult: Sendable {
     }
 }
 
-// MARK: - Agent Mode Artifact (portable type, originally from AgentMode)
-
-/// Artifact produced by agent execution
-public struct AgentModeArtifact: Identifiable, Codable, Sendable {
-    public let id: UUID
-    public var type: AgentArtifactType
-    public var title: String
-    public var content: String
-    public var filePath: String?
-    public var createdAt: Date
-
-    public init(
-        id: UUID = UUID(),
-        type: AgentArtifactType,
-        title: String,
-        content: String,
-        filePath: String? = nil,
-        createdAt: Date = Date()
-    ) {
-        self.id = id
-        self.type = type
-        self.title = title
-        self.content = content
-        self.filePath = filePath
-        self.createdAt = createdAt
-    }
-}
-
-/// Types of artifacts an agent can produce
-public enum AgentArtifactType: String, Codable, Sendable, CaseIterable {
-    case implementationPlan
-    case taskList
-    case walkthrough
-    case codeSnippet
-    case documentation
-    case analysis
-    case screenshot
-    case recording
-    case knowledge
-}
+// AgentModeArtifact and AgentArtifactType now defined in AgentMode/AgentMode.swift (activated)

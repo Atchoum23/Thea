@@ -361,31 +361,17 @@ public final class SquadOrchestrator {
             }
         }
 
-        // Execute in parallel with timeout
-        let parallelResults = try await withParallelTimeout(
-            operations: operations,
-            timeout: memberTaskTimeout,
-            continueOnError: true
-        )
-
-        // Collect results
+        // Execute in parallel with task group
         var results: [SquadTaskResult] = []
-        for parallelResult in parallelResults {
-            if let value = parallelResult.value {
-                results.append(value)
-            } else if let error = parallelResult.error {
-                // Create failure result
-                let memberId = memberIds[parallelResult.index]
-                let failureResult = SquadTaskResult(
-                    taskId: task.id,
-                    squadId: squad.id,
-                    memberId: memberId,
-                    output: "Task failed: \(error.localizedDescription)",
-                    success: false,
-                    executionTime: 0
-                )
-                results.append(failureResult)
+        results = try await withThrowingTaskGroup(of: SquadTaskResult.self) { group in
+            for operation in operations {
+                group.addTask { try await operation() }
             }
+            var collected: [SquadTaskResult] = []
+            while let result = try? await group.next() {
+                collected.append(result)
+            }
+            return collected
         }
 
         return results
@@ -455,8 +441,7 @@ public final class SquadOrchestrator {
         }
 
         // Get provider
-        guard let provider = providerRegistry.defaultProvider ??
-              providerRegistry.configuredProviders.first else {
+        guard let provider = providerRegistry.getDefaultProvider() else {
             throw SquadOrchestratorError.noProviderAvailable
         }
 
@@ -468,12 +453,24 @@ public final class SquadOrchestrator {
         )
 
         // Execute with the provider
-        let model = member.model ?? (provider.name == "local" ? provider.name : "gpt-4")
-        let response = try await AIProviderHelpers.streamToString(
-            provider: provider,
-            prompt: prompt,
+        let model = member.model ?? "claude-sonnet-4-5-20250929"
+        let message = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(prompt),
+            timestamp: Date(),
             model: model
         )
+        let stream = try await provider.chat(messages: [message], model: model, stream: false)
+        var response = ""
+        for try await chunk in stream {
+            switch chunk.type {
+            case .delta(let text): response += text
+            case .complete(let msg): response = msg.content.textValue
+            case .error(let error): throw error
+            }
+        }
 
         // Broadcast result if communication enabled
         if enableCommunication {
@@ -492,7 +489,7 @@ public final class SquadOrchestrator {
             output: response,
             success: true,
             executionTime: Date().timeIntervalSince(startTime),
-            metadata: ["model": model, "provider": provider.name]
+            metadata: ["model": model, "provider": provider.metadata.name]
         )
     }
 
