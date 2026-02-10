@@ -435,9 +435,6 @@ public struct PulsingGlowModifier: ViewModifier {
     }
 }
 
-// Use internal Color references
-private let defaultPrimaryColor = Color(hex: "0066FF")
-
 /// Gradient border for highlighted elements
 public struct GradientBorderModifier: ViewModifier {
     let gradient: LinearGradient

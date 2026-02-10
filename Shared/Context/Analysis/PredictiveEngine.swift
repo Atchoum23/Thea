@@ -35,12 +35,6 @@ public final class PredictiveEngine: ObservableObject {
     public var minimumConfidence: Double = 0.5
     public var learningEnabled = true
 
-    // MARK: - Models
-
-    private var appUsageModel: AppUsagePredictionModel?
-    private var activityModel: ActivityPredictionModel?
-    private var contextModel: ContextPredictionModel?
-
     // MARK: - Historical Data
 
     // These are accessed from dataQueue, so mark as nonisolated(unsafe)
@@ -449,16 +443,3 @@ private struct PredictiveData: Codable {
     let timeBasedPatterns: [Int: [String: Int]]
 }
 
-// MARK: - ML Model Protocols (Placeholder for CoreML)
-
-protocol AppUsagePredictionModel {
-    func predict(currentApp: String, hour: Int, weekday: Int) -> [(bundleId: String, probability: Double)]
-}
-
-protocol ActivityPredictionModel {
-    func predict(context: ContextSnapshot) -> [(activity: String, probability: Double)]
-}
-
-protocol ContextPredictionModel {
-    func predict(context: ContextSnapshot) -> [(need: String, probability: Double)]
-}
