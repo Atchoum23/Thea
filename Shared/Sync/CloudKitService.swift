@@ -414,13 +414,27 @@ public class CloudKitService: ObservableObject {
 
     // MARK: - Save Operations
 
-    /// Save a conversation to CloudKit
+    /// Save a conversation to CloudKit with conflict resolution
     public func saveConversation(_ conversation: CloudConversation) async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let record = conversation.toRecord()
-        try await privateDatabase.save(record)
-        pendingChanges = max(0, pendingChanges - 1)
+        do {
+            try await privateDatabase.save(record)
+            pendingChanges = max(0, pendingChanges - 1)
+        } catch let error as CKError where error.code == .serverRecordChanged {
+            // Server has a newer version — merge and retry using the server record as base
+            if let serverRecord = error.serverRecord {
+                let remote = CloudConversation(from: serverRecord)
+                let merged = mergeConversations(local: conversation, remote: remote)
+                // Apply merged data onto the server record (preserves change tag)
+                merged.applyTo(serverRecord)
+                try await privateDatabase.save(serverRecord)
+                pendingChanges = max(0, pendingChanges - 1)
+            } else {
+                throw error
+            }
+        }
     }
 
     /// Save settings to CloudKit
@@ -566,7 +580,10 @@ public class CloudKitService: ObservableObject {
             } else if local.lastModified > remote.lastModified {
                 try? await saveProject(local)
             }
-            // If equal timestamps, no action needed
+            // Equal timestamps: prefer remote (other device's version) to ensure convergence
+            else {
+                await saveLocalProject(remote)
+            }
         } else {
             await saveLocalProject(remote)
         }
@@ -857,13 +874,18 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
     func toRecord() -> CKRecord {
         let recordID = CKRecord.ID(recordName: "conversation-\(id.uuidString)")
         let record = CKRecord(recordType: "Conversation", recordID: recordID)
+        applyTo(record)
+        return record
+    }
+
+    /// Apply this conversation's fields onto an existing CKRecord (preserves change tag for conflict resolution)
+    func applyTo(_ record: CKRecord) {
         record["title"] = title as CKRecordValue
         record["aiModel"] = aiModel as CKRecordValue
         record["createdAt"] = createdAt as CKRecordValue
         record["modifiedAt"] = modifiedAt as CKRecordValue
         record["tags"] = tags as CKRecordValue
         record["participatingDeviceIDs"] = participatingDeviceIDs as CKRecordValue
-        return record
     }
 }
 
@@ -1096,4 +1118,7 @@ public extension Notification.Name {
 
     /// Posted to apply synced settings
     static let cloudKitApplySettings = Notification.Name("cloudKitApplySettings")
+
+    /// Posted by CrossDeviceService to apply a remote sync change to local storage
+    static let crossDeviceApplyRemoteChange = Notification.Name("crossDeviceApplyRemoteChange")
 }

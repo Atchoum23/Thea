@@ -183,8 +183,18 @@ public actor CrossDeviceService {
         }
     }
 
-    private func applyRemoteChange(_: SyncChange) async {
-        // Apply the remote change to local storage
+    private func applyRemoteChange(_ change: SyncChange) async {
+        // Notify the app to apply this remote change to local storage
+        NotificationCenter.default.post(
+            name: .crossDeviceApplyRemoteChange,
+            object: nil,
+            userInfo: [
+                "change": change,
+                "recordType": change.recordType,
+                "recordId": change.recordId,
+                "timestamp": change.timestamp
+            ]
+        )
     }
 
     // MARK: - Configuration
