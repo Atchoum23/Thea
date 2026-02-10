@@ -347,10 +347,10 @@ targets:
           # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
-          - "**/Code/CodeIntelligence.swift"
+          # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
           - "**/Views/Code/**"
           - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift inline types
-          - "**/Settings/ResourceAllocationSettingsView.swift"
+          # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
           - "**/Views/SelfExecutionView.swift"
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
@@ -413,7 +413,7 @@ targets:
           # Files outside the blanket-excluded directories that still
           # need to be excluded due to missing types or dependencies.
           # ============================================================
-          - "**/Configuration/ConfigurationManager.swift"
+          - "**/Configuration/ConfigurationManager.swift"  # Duplicate types: AIConfiguration, PrivacyConfiguration conflict with TheaConfig.swift
           # EnhancedMessageBubble — ACTIVATED (uses ExecutableCodeBlock + MarkdownUI)
           # ExecutableCodeBlock — ACTIVATED (uses CodeExecutionManager)
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
@@ -430,19 +430,13 @@ targets:
           - "**/Managers/ErrorKnowledgeBaseManager.swift"
           - "**/Managers/IntegrationsManager.swift"
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
-          - "**/Integrations/IntegrationModule.swift"
-          - "**/Integrations/MCPConnectionManager.swift"
-          - "**/Integrations/MCPGateway.swift"
-          - "**/Integrations/MailIntegration.swift"
-          - "**/Integrations/TerminalIntegration.swift"
-          - "**/Integrations/MusicIntegration.swift"
-          - "**/Integrations/SystemIntegration.swift"
-          - "**/Integrations/FinderIntegration.swift"
-          - "**/Integrations/SafariIntegration.swift"
-          - "**/Integrations/CalendarIntegration.swift"
-          - "**/Integrations/ShortcutsIntegration.swift"
-          - "**/Integrations/MessagesIntegration.swift"
-          - "**/Integrations/XcodeIntegration.swift"
+          # IntegrationModule — ACTIVATED (protocol + registry for all integrations)
+          - "**/Integrations/MCPConnectionManager.swift"  # Duplicate MCPConnection type in MCPServerGenerator
+          - "**/Integrations/MCPGateway.swift"  # Duplicate MCPRequest/MCPError types in MCPServerGenerator
+          # Integration modules — ALL ACTIVATED (macOS, use AppKit/AppleScript)
+          # MailIntegration, TerminalIntegration, MusicIntegration, SystemIntegration,
+          # FinderIntegration, SafariIntegration, CalendarIntegration, ShortcutsIntegration,
+          # MessagesIntegration, XcodeIntegration — all macOS-only with AppKit
           # ActiveMemoryRetrieval — ACTIVATED (MemoryManager active, ProviderRegistry active)
           # MemoryAugmentedChat — ACTIVATED (ActiveMemoryRetrieval now active)
           - "**/MetaAI/ModelBenchmarkService.swift"
@@ -450,7 +444,7 @@ targets:
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
           - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
-          - "**/Code/CodeIntelligence.swift"
+          # CodeIntelligence — ACTIVATED (see above)
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
           - "**/Core/DeviceCapabilityRouter.swift"
@@ -467,7 +461,7 @@ targets:
           # PrivacySettingsView — ACTIVATED
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
-          - "**/Settings/ResourceAllocationSettingsView.swift"
+          # ResourceAllocationSettingsView — ACTIVATED (see above)
           # AutoCorrectSettingsView — ACTIVATED (uses active LiveAutoCorrect)
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
           - "**/Settings/AutomationSettingsView.swift"
@@ -631,7 +625,7 @@ targets:
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
           - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift
-          - "**/Settings/ResourceAllocationSettingsView.swift"
+          # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
           - "**/Views/SelfExecutionView.swift"
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
@@ -644,7 +638,7 @@ targets:
           - "**/LifeMonitoring/**"
           - "**/PatternLearning/**"
           # AI/Context — ACTIVATED
-          - "**/Configuration/ConfigurationManager.swift"
+          - "**/Configuration/ConfigurationManager.swift"  # Duplicate types conflict with TheaConfig.swift
           - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView.swift
           - "**/Views/PhaseProgressView.swift"
           - "**/Managers/ErrorKnowledgeBaseManager.swift"

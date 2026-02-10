@@ -478,17 +478,7 @@
         }
     }
 
-    enum ProgrammingLanguage: String, Codable {
-        case swift = "Swift"
-        case python = "Python"
-        case javascript = "JavaScript"
-        case typescript = "TypeScript"
-        case go = "Go"
-        case rust = "Rust"
-        case java = "Java"
-        case kotlin = "Kotlin"
-        case unknown = "Unknown"
-    }
+    // ProgrammingLanguage is defined in Intelligence/Codebase/SemanticCodeIndexer.swift
 
     struct CodebaseIndex {
         let projectId: UUID

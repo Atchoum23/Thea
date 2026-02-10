@@ -96,23 +96,21 @@ public actor IntegrationRegistry {
 
     /// Initialize and register default modules
     public func initializeDefaultModules() async {
-        // Register built-in modules (cross-platform)
-        await registerModule(SafariIntegration.shared)
-        await registerModule(MailIntegration.shared)
-        await registerModule(CalendarIntegration.shared)
-        await registerModule(NotesIntegration.shared)
-        await registerModule(RemindersIntegration.shared)
-        await registerModule(MessagesIntegration.shared)
-        await registerModule(MusicIntegration.shared)
-        await registerModule(ShortcutsIntegration.shared)
-
-        // macOS-only modules
+        // All integration modules use AppKit/AppleScript — macOS only
         #if os(macOS)
+            await registerModule(SafariIntegration.shared)
+            await registerModule(MailIntegration.shared)
+            await registerModule(CalendarIntegration.shared)
+            await registerModule(MessagesIntegration.shared)
+            await registerModule(MusicIntegration.shared)
+            await registerModule(ShortcutsIntegration.shared)
             await registerModule(FinderIntegration.shared)
             await registerModule(TerminalIntegration.shared)
             await registerModule(XcodeIntegration.shared)
             await registerModule(SystemIntegration.shared)
         #endif
+        // NotesIntegration and RemindersIntegration use a different actor API
+        // (not AppIntegrationModule conformance) — access them via their singletons directly
     }
 
     private func registerModule(_ module: any AppIntegrationModule) async {
