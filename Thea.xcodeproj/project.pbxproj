@@ -702,6 +702,7 @@
 		7BEC7D20188D3D0F9404C52A /* BloodPressureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF14D014A8C53ADF0933911 /* BloodPressureView.swift */; };
 		7C08878A7E79D4FB14E7B1B1 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 637130673210A50F403CA48F /* SafariWebExtensionHandler.swift */; };
 		7C2D203E151C2A1576447CCB /* HealthInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE9A221A8692389679B0A9B /* HealthInsightsView.swift */; };
+		7C89EAAAD01EF7C678AF0594 /* PlatformFeaturesHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F920B459B19605A0B81579E /* PlatformFeaturesHub.swift */; };
 		7C8E29B62068328C89C7C49E /* AgentSecAuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E8C9279803BFF26AF774C4 /* AgentSecAuditLog.swift */; };
 		7CA70B80ED1CD5A593BE7ECE /* CognitiveModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62D1AE6F6053576C4D4D182 /* CognitiveModels.swift */; };
 		7D0D59B512E6CE17A33A882A /* TheaLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA05A04C9029841AE749334A /* TheaLiveActivity.swift */; };
@@ -1748,6 +1749,7 @@
 		3F38F8AACB3311713FA335FB /* WorkflowSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowSettingsView.swift; sourceTree = "<group>"; };
 		3F44FB30A541E1F4C048941F /* AdvancedSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsView.swift; sourceTree = "<group>"; };
 		3F56C9644636B9DCEC29B084 /* password-enhancer.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "password-enhancer.js"; sourceTree = "<group>"; };
+		3F920B459B19605A0B81579E /* PlatformFeaturesHub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformFeaturesHub.swift; sourceTree = "<group>"; };
 		3FB04230C7F12DA8C9D36AC2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3FFA2724F57F9B3A5C5502A6 /* BranchNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BranchNavigator.swift; sourceTree = "<group>"; };
 		4049FEB96EC7834FF1DF9B0A /* NotificationPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
@@ -4257,6 +4259,7 @@
 				8A4870939BF272E02520766C /* iOS */,
 				081EE3DC5434ADFEBA771BFB /* macOS */,
 				7C21EB8907B2589B23B7F92E /* visionOS */,
+				3F920B459B19605A0B81579E /* PlatformFeaturesHub.swift */,
 			);
 			path = Platforms;
 			sourceTree = "<group>";
@@ -7209,6 +7212,7 @@
 				075F88D01AC7818F14E789AF /* PlanState.swift in Sources */,
 				7A2B137C146894B76E345D1E /* PlanViews.swift in Sources */,
 				1F4CFE5A1EDDCD3A5333B45A /* PlatformColors.swift in Sources */,
+				7C89EAAAD01EF7C678AF0594 /* PlatformFeaturesHub.swift in Sources */,
 				38C76FF9D185B75E17C8DFE2 /* PowerObserver.swift in Sources */,
 				927D3E4C8B67CDE642913E5E /* PowerStateManager.swift in Sources */,
 				DC274DC7263D6B1801EF2616 /* PredictiveEngine.swift in Sources */,

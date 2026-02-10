@@ -425,7 +425,7 @@ targets:
           # ActiveMemoryRetrieval — ACTIVATED (MemoryManager active, ProviderRegistry active)
           # MemoryAugmentedChat — ACTIVATED (ActiveMemoryRetrieval now active)
           - "**/MetaAI/ModelBenchmarkService.swift"
-          - "**/Platforms/PlatformFeaturesHub.swift"
+          # PlatformFeaturesHub — ACTIVATED (Platform enum, PlatformFeature, platform detection)
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
           # THEAMCPServer — ACTIVATED (MCP server with THEA-prefixed types)
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
