@@ -281,7 +281,7 @@ public struct SuggestionAction: Identifiable, Sendable {
 }
 
 /// Type-erased Sendable wrapper
-public struct AnySendable: Sendable {
+public struct AnySendable: @unchecked Sendable {
     public let value: Any
 
     public init(_ value: Any) {

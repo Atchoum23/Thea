@@ -531,7 +531,7 @@ struct ChatView: View {
 
 // MARK: - Conversation Document
 
-struct ConversationDocument: FileDocument, Sendable {
+struct ConversationDocument: FileDocument, @unchecked Sendable {
     static var readableContentTypes: [UTType] { [.json] }
 
     let conversation: Conversation

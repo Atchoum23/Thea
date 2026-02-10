@@ -960,7 +960,7 @@ public struct TodoistNotification: Codable, Identifiable, Sendable {
     }
 }
 
-public struct TodoistCommand: Sendable {
+public struct TodoistCommand: @unchecked Sendable {
     public let type: String
     public let uuid: String
     public let tempId: String?
