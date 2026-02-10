@@ -8,6 +8,7 @@
 import CloudKit
 import Combine
 import Foundation
+import os.log
 
 // MARK: - CloudKit Service
 
@@ -15,6 +16,8 @@ import Foundation
 @MainActor
 public class CloudKitService: ObservableObject {
     public static let shared = CloudKitService()
+
+    private let logger = Logger(subsystem: "app.theathe", category: "CloudKitService")
 
     // MARK: - Published State
 
@@ -104,21 +107,28 @@ public class CloudKitService: ObservableObject {
     // MARK: - Change Token Persistence
 
     private func loadChangeTokens() {
-        guard let data = UserDefaults.standard.data(forKey: changeTokenKey),
-              let tokens = try? NSKeyedUnarchiver.unarchivedObject(
-                  ofClasses: [NSDictionary.self, NSString.self, CKServerChangeToken.self],
-                  from: data
-              ) as? [String: CKServerChangeToken]
-        else { return }
-        changeTokens = tokens
+        guard let data = UserDefaults.standard.data(forKey: changeTokenKey) else { return }
+        do {
+            guard let tokens = try NSKeyedUnarchiver.unarchivedObject(
+                ofClasses: [NSDictionary.self, NSString.self, CKServerChangeToken.self],
+                from: data
+            ) as? [String: CKServerChangeToken] else { return }
+            changeTokens = tokens
+        } catch {
+            logger.error("Failed to load CloudKit change tokens: \(error.localizedDescription)")
+        }
     }
 
     private func saveChangeTokens() {
-        guard let data = try? NSKeyedArchiver.archivedData(
-            withRootObject: changeTokens as NSDictionary,
-            requiringSecureCoding: true
-        ) else { return }
-        UserDefaults.standard.set(data, forKey: changeTokenKey)
+        do {
+            let data = try NSKeyedArchiver.archivedData(
+                withRootObject: changeTokens as NSDictionary,
+                requiringSecureCoding: true
+            )
+            UserDefaults.standard.set(data, forKey: changeTokenKey)
+        } catch {
+            logger.error("Failed to save CloudKit change tokens: \(error.localizedDescription)")
+        }
     }
 
     private func getChangeToken(for zoneID: CKRecordZone.ID) -> CKServerChangeToken? {
@@ -522,9 +532,17 @@ public class CloudKitService: ObservableObject {
 
         switch queryNotification.subscriptionID {
         case "conversation-changes":
-            try? await syncConversations()
+            do {
+                try await syncConversations()
+            } catch {
+                logger.error("Failed to sync conversations from notification: \(error.localizedDescription)")
+            }
         case "settings-changes":
-            try? await syncSettings()
+            do {
+                try await syncSettings()
+            } catch {
+                logger.error("Failed to sync settings from notification: \(error.localizedDescription)")
+            }
         default:
             break
         }
@@ -546,7 +564,11 @@ public class CloudKitService: ObservableObject {
                 !remote.messages.contains { $0.id == localMsg.id }
             }
             if hasLocalOnlyMessages || local.modifiedAt > remote.modifiedAt {
-                try? await saveConversation(merged)
+                do {
+                    try await saveConversation(merged)
+                } catch {
+                    logger.error("Failed to push merged conversation \(merged.id): \(error.localizedDescription)")
+                }
             }
         } else {
             await saveLocalConversation(remote)
@@ -562,7 +584,11 @@ public class CloudKitService: ObservableObject {
             if remote.createdAt > local.createdAt {
                 await saveLocalKnowledgeItem(remote)
             } else if local.createdAt > remote.createdAt {
-                try? await saveKnowledgeItem(local)
+                do {
+                    try await saveKnowledgeItem(local)
+                } catch {
+                    logger.error("Failed to push knowledge item \(local.id): \(error.localizedDescription)")
+                }
             }
         } else {
             await saveLocalKnowledgeItem(remote)
@@ -578,7 +604,11 @@ public class CloudKitService: ObservableObject {
             if remote.lastModified > local.lastModified {
                 await saveLocalProject(remote)
             } else if local.lastModified > remote.lastModified {
-                try? await saveProject(local)
+                do {
+                    try await saveProject(local)
+                } catch {
+                    logger.error("Failed to push project \(local.id): \(error.localizedDescription)")
+                }
             }
             // Equal timestamps: prefer remote (other device's version) to ensure convergence
             else {
