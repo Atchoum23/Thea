@@ -319,7 +319,6 @@
 		389DF1B7A0137F5135629091 /* UserPreferenceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7671DAA4A40F6CE6E80A3F /* UserPreferenceModel.swift */; };
 		38BE919ABC91178F0C015359 /* CarPlayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3984ED5374CAD335E9CEB703 /* CarPlayService.swift */; };
 		38C76FF9D185B75E17C8DFE2 /* PowerObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53F5F83B70EB65CF4FED7 /* PowerObserver.swift */; };
-		38EAC1E5F5E13BA183B90862 /* BUILD_FIXES_SUMMARY.md in Resources */ = {isa = PBXBuildFile; fileRef = A7CDA49A8510DEC80883DA88 /* BUILD_FIXES_SUMMARY.md */; };
 		3909730AC944BEC0CC8E276F /* HealthDataSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DBD23D8EE88E6F7D86442A /* HealthDataSync.swift */; };
 		3925A1A997B75969CCB66373 /* WellnessViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081CC3DBD0AE36EAD887D490 /* WellnessViewModel.swift */; };
 		392CDE0A8C6AA248F94D7F8B /* GDPRDataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF467C34A028512D49539FE /* GDPRDataExporter.swift */; };
@@ -2156,7 +2155,6 @@
 		A7047AD0E73555E4F0F12F2C /* APIGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIGeneratorTests.swift; sourceTree = "<group>"; };
 		A712C3E48FB1FACB36F858BF /* MissionOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionOrchestrator.swift; sourceTree = "<group>"; };
 		A729AAAF6EC8A259362E6DFE /* ReflexionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReflexionEngine.swift; sourceTree = "<group>"; };
-		A7CDA49A8510DEC80883DA88 /* BUILD_FIXES_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BUILD_FIXES_SUMMARY.md; sourceTree = "<group>"; };
 		A7E78086A5E6DE8D3A133C4C /* CoworkArtifact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkArtifact.swift; sourceTree = "<group>"; };
 		A7F42D3A3FB644BCBC33E638 /* iOSFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSFeatures.swift; sourceTree = "<group>"; };
 		A91CA65311E7DC81A6217974 /* macOSFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = macOSFeatures.swift; sourceTree = "<group>"; };
@@ -4656,7 +4654,6 @@
 			isa = PBXGroup;
 			children = (
 				9979F651A8D53FB1EF5458E3 /* AdaptiveHomeView.swift */,
-				A7CDA49A8510DEC80883DA88 /* BUILD_FIXES_SUMMARY.md */,
 				589B2CFE5D8C4A3AC0E3FD50 /* CompactModelSelectorView.swift */,
 				DDE7B8A478508233697E1E58 /* iOSFinancialView.swift */,
 				4774C2AF97CFA36451C01EF7 /* iOSHomeView.swift */,
@@ -6139,7 +6136,6 @@
 			files = (
 				7FB9734EDA280D9CCE96CBE1 /* .vscodetasks.json in Resources */,
 				EFC2D372ED54A2F0053AC6D8 /* Assets.xcassets in Resources */,
-				38EAC1E5F5E13BA183B90862 /* BUILD_FIXES_SUMMARY.md in Resources */,
 				A1B6EC73E4962A7189A81AD0 /* CLAUDE-SIMPLE-PROMPT.txt in Resources */,
 				8068FD874442CB3C6185F678 /* COMPLETE-CLAUDE-PROMPT.txt in Resources */,
 				E73C154274A9527CC0FE35CE /* COPY-PASTE-COMMANDS.sh in Resources */,
