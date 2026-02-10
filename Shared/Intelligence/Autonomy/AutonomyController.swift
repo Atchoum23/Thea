@@ -15,7 +15,7 @@ import os.log
 // MARK: - THEA Autonomy Level
 
 /// Defines how autonomous THEA should be for different actions
-public enum THEATHEAAutonomyLevel: String, Codable, Sendable, CaseIterable {
+public enum THEAAutonomyLevel: String, Codable, Sendable, CaseIterable {
     case disabled       // Always ask, never auto-complete
     case conservative   // Only auto-complete very safe actions
     case balanced       // Auto-complete medium-risk actions
@@ -276,7 +276,7 @@ public final class AutonomyController: ObservableObject {
     @Published public var isPaused: Bool = false
 
     /// Action history
-    @Published public private(set) var actionHistory: [ActionHistoryEntry] = []
+    @Published public private(set) var actionHistory: [AutonomyActionHistoryEntry] = []
 
     // MARK: - Settings
 
@@ -467,7 +467,7 @@ public final class AutonomyController: ObservableObject {
     }
 
     private func recordHistory(action: AutonomousAction, result: AutonomousAction.ActionResult) {
-        let entry = ActionHistoryEntry(
+        let entry = AutonomyActionHistoryEntry(
             id: action.id,
             category: action.category,
             title: action.title,
@@ -548,7 +548,7 @@ public final class AutonomyController: ObservableObject {
 
     private func loadHistory() {
         if let data = UserDefaults.standard.data(forKey: "thea.autonomy.history"),
-           let decoded = try? JSONDecoder().decode([ActionHistoryEntry].self, from: data) {
+           let decoded = try? JSONDecoder().decode([AutonomyActionHistoryEntry].self, from: data) {
             actionHistory = decoded
         }
     }
@@ -567,7 +567,7 @@ public struct ExecutedAction {
     let rollback: @Sendable () async throws -> Void
 }
 
-public struct ActionHistoryEntry: Identifiable, Codable, Sendable {
+public struct AutonomyActionHistoryEntry: Identifiable, Codable, Sendable {
     public let id: UUID
     public let category: THEAActionCategory
     public let title: String
@@ -580,7 +580,7 @@ public struct ActionHistoryEntry: Identifiable, Codable, Sendable {
 
 /// UI for configuring autonomy settings
 public struct THEAAutonomySettingsView: View {
-    @ObservedObject var controller = AutonomyController.shared
+    @StateObject private var controller = AutonomyController.shared
 
     public init() {}
 
@@ -828,7 +828,7 @@ private struct RiskBadge: View {
 
 /// Shows all pending actions awaiting approval
 public struct THEAPendingActionsView: View {
-    @ObservedObject var controller = AutonomyController.shared
+    @StateObject private var controller = AutonomyController.shared
 
     public init() {}
 
