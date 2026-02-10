@@ -69,6 +69,8 @@ struct WelcomeView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(title)
+                .accessibilityHint("Sends the prompt: \(prompt)")
             }
         }
         .frame(maxWidth: 500)

@@ -93,6 +93,8 @@ struct ChatInputView: View {
                     Spacer()
                 }
                 .padding(.horizontal, TheaSpacing.lg)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("\(ChatManager.shared.messageQueue.count) messages queued for sending")
             }
 
             // Input row

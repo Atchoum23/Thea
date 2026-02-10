@@ -174,12 +174,14 @@ struct MacChatDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(searchMatches.isEmpty)
+                .accessibilityLabel("Previous match")
 
                 Button { navigateSearch(forward: true) } label: {
                     Image(systemName: "chevron.down")
                 }
                 .buttonStyle(.plain)
                 .disabled(searchMatches.isEmpty)
+                .accessibilityLabel("Next match")
             }
 
             Button {
@@ -191,6 +193,7 @@ struct MacChatDetailView: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Close search")
         }
         .padding(.horizontal, TheaSpacing.lg)
         .padding(.vertical, TheaSpacing.sm)
