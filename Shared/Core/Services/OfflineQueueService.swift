@@ -187,8 +187,8 @@ public final class OfflineQueueService {
             }
 
         case .sync:
-            // Trigger CloudKit sync
-            await try? await CloudKitService.shared.syncAll()
+            // Trigger sync via notification (CloudKitService observes this)
+            NotificationCenter.default.post(name: .offlineRequestReplay, object: ["type": "sync"])
 
         case .analytics:
             // Analytics events are non-critical; log and discard
@@ -214,8 +214,8 @@ public final class OfflineQueueService {
             }
 
         case .memory:
-            // Trigger memory sync via CloudKit
-            await try? await CloudKitService.shared.syncAll()
+            // Trigger memory sync via notification
+            NotificationCenter.default.post(name: .offlineRequestReplay, object: ["type": "memory"])
 
         case .custom:
             // Custom requests post a generic notification for app-level handling
