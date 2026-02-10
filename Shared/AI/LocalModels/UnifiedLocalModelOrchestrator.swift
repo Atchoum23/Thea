@@ -105,10 +105,10 @@ final class UnifiedLocalModelOrchestrator {
         uname(&sysinfo)
         let machine = withUnsafePointer(to: &sysinfo.machine) {
             $0.withMemoryRebound(to: CChar.self, capacity: 1) {
-                String(validatingCString: $0)
+                String(cString: $0)
             }
         }
-        return machine?.contains("arm64") == true
+        return machine.contains("arm64")
         #else
         return false
         #endif
@@ -484,19 +484,9 @@ final class UnifiedLocalModelOrchestrator {
 
     /// Register local models with the ProviderRegistry
     func registerWithProviderRegistry() async {
-        let manager = LocalModelManager.shared
-        await manager.waitForDiscovery()
-
-        for model in manager.availableModels {
-            do {
-                let instance = try await manager.loadModel(model)
-                let provider = LocalModelProvider(modelName: model.name, instance: instance)
-                ProviderRegistry.shared.register(provider)
-                logger.info("Registered local model: \(model.name)")
-            } catch {
-                logger.error("Failed to register local model \(model.name): \(error.localizedDescription)")
-            }
-        }
+        // Delegate to ProviderRegistry's built-in local model refresh
+        await ProviderRegistry.shared.refreshLocalProviders()
+        logger.info("Refreshed local model registrations via ProviderRegistry")
     }
 
     // MARK: - Persistence

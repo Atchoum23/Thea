@@ -331,13 +331,11 @@ targets:
           - "**/AI/Memory/**"
           # Exclude DesignTokens (duplicates TheaDesignSystem definitions)
           - "**/Theme/DesignTokens.swift"
-          # Exclude duplicate Settings views (use subfolder versions)
-          - "**/Settings/LocalModelsSettingsView.swift"
-          - "**/Settings/AutonomousTaskSettingsView.swift"
+          # LocalModelsSettingsView — no file at this path (subfolder version at Settings/LocalModels/ separately excluded)
+          # AutonomousTaskSettingsView — no file at this path
           # Exclude MetaAI views that depend on excluded MetaAI folder
           - "**/Views/MetaAI/**"
-          # Exclude views that depend on missing types
-          - "**/Settings/OrchestratorSettingsView.swift"
+          # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
           - "**/Settings/Orchestrator/**"
           # MemorySettingsView — ACTIVATED
           # PrivacySettingsView — ACTIVATED
@@ -377,19 +375,11 @@ targets:
           # SelfEvolution — ACTIVATED (2 files, self-contained)
           # Squads — ACTIVATED
           # PromptEngineering — ACTIVATED (SubAgentOrchestrator.AgentType replaced with String, TaskContext moved to Intelligence/Classification)
-          # LocalModels: selective exclusion (LocalModelManager, MLXModelManager,
-          # MLXInferenceEngine, MLXModelScanner, LocalModelProvider are actively used)
-          - "**/LocalModels/ProactiveModelManager.swift"
-          - "**/LocalModels/LocalModelRecommendationEngine.swift"
-          - "**/LocalModels/LocalModelRecommendationEngine+*.swift"
-          - "**/LocalModels/LocalModelRecommendationTypes.swift"
-          - "**/LocalModels/AIModelGovernor.swift"
-          - "**/LocalModels/ModelGovernanceEngine.swift"
-          - "**/LocalModels/UnifiedLocalModelOrchestrator.swift"
-          - "**/LocalModels/SupraModelSelector.swift"
-          - "**/LocalModels/OllamaAgentLoop.swift"
-          - "**/LocalModels/ModelQualityBenchmark.swift"
-          - "**/LocalModels/PredictivePreloader.swift"
+          # LocalModels — ALL ACTIVATED (governance files enabled for macOS)
+          # ProactiveModelManager, LocalModelRecommendationEngine (+extensions),
+          # LocalModelRecommendationTypes, AIModelGovernor, ModelGovernanceEngine,
+          # UnifiedLocalModelOrchestrator, SupraModelSelector, OllamaAgentLoop,
+          # ModelQualityBenchmark, PredictivePreloader
           # AI/Context — ACTIVATED (MemoryManager is active, all deps available)
           # AI/Adaptive — ACTIVATED (self-contained, no external deps)
           # AI/Proactive — ACTIVATED (MemoryManager is active)

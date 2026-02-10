@@ -3,13 +3,39 @@
 
 import SwiftUI
 
-// MARK: - Orchestrator Settings View
+// MARK: - Benchmark Service Stub (ModelBenchmarkService is in excluded MetaAI folder)
 
 #if os(macOS)
+
+/// Lightweight stub replacing excluded MetaAI/ModelBenchmarkService
+/// Provides the same interface used by OrchestratorSettingsView
+@MainActor
+@Observable
+private final class BenchmarkServiceStub {
+    static let shared = BenchmarkServiceStub()
+
+    struct BenchmarkEntry {
+        let isLocal: Bool
+    }
+
+    private(set) var benchmarks: [String: BenchmarkEntry] = [:]
+    private(set) var lastUpdateDate: Date?
+    private(set) var updateError: Error?
+
+    private init() {}
+
+    func updateBenchmarks() async {
+        // No-op stub — real benchmarks require MetaAI infrastructure
+        lastUpdateDate = Date()
+    }
+}
+
+// MARK: - Orchestrator Settings View
+
 struct OrchestratorSettingsView: View {
     @State private var config = OrchestratorConfiguration.load()
     @State private var showingSaveConfirmation = false
-    @State private var benchmarkService = ModelBenchmarkService.shared
+    @State private var benchmarkService = BenchmarkServiceStub.shared
     @State private var isRefreshingBenchmarks = false
     @State private var showingRoutingRuleEditor = false
     @State private var showingExecutionHistory = false

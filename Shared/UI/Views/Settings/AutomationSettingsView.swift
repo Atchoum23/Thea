@@ -3,6 +3,25 @@
 
 import SwiftUI
 
+// MARK: - Workflow Template Stub (WorkflowTemplates is in excluded MetaAI folder)
+
+/// Lightweight stub replacing excluded MetaAI/WorkflowTemplates
+private struct WorkflowTemplateStub: Identifiable {
+    let id = UUID()
+    let name: String
+    let description: String
+    let nodeCount: Int
+    let isActive: Bool
+}
+
+private enum WorkflowTemplateProvider {
+    static let all: [WorkflowTemplateStub] = [
+        WorkflowTemplateStub(name: "Code Review", description: "Automated code review with AI analysis", nodeCount: 4, isActive: true),
+        WorkflowTemplateStub(name: "Research", description: "Multi-source research and summarization", nodeCount: 5, isActive: false),
+        WorkflowTemplateStub(name: "Analysis", description: "Data analysis and insight extraction", nodeCount: 3, isActive: false)
+    ]
+}
+
 struct AutomationSettingsView: View {
     @State private var config = AppConfiguration.shared.executionMode
     @State private var settingsManager = SettingsManager.shared
@@ -243,7 +262,7 @@ struct AutomationSettingsView: View {
                     Text("Pre-built Workflows")
                         .font(.body)
 
-                    Text("\(WorkflowTemplates.all.count) templates available")
+                    Text("\(WorkflowTemplateProvider.all.count) templates available")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -291,7 +310,7 @@ struct AutomationSettingsView: View {
     private var workflowTemplatesSheet: some View {
         NavigationStack {
             List {
-                ForEach(WorkflowTemplates.all, id: \.id) { workflow in
+                ForEach(WorkflowTemplateProvider.all) { workflow in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(workflow.name)
                             .font(.headline)
@@ -301,7 +320,7 @@ struct AutomationSettingsView: View {
                             .foregroundStyle(.secondary)
 
                         HStack {
-                            Label("\(workflow.nodes.count) nodes", systemImage: "circle.grid.2x2")
+                            Label("\(workflow.nodeCount) nodes", systemImage: "circle.grid.2x2")
                                 .font(.caption2)
 
                             Label(workflow.isActive ? "Active" : "Inactive", systemImage: workflow.isActive ? "checkmark.circle.fill" : "circle")
