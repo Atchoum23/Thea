@@ -584,6 +584,7 @@
 		7D7305563EDDDF1A33F025B7 /* DeviceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE3F4288C165F9736A02094 /* DeviceDiscovery.swift */; };
 		7D9B68C626DB10420C00668D /* ContinuityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448A78CF8B99616DFED708D5 /* ContinuityService.swift */; };
 		7E35F20DC5B6DCA3A41A42BC /* ClipboardSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CCD191D66EBCE2FE015189 /* ClipboardSyncService.swift */; };
+		7E9277480864CF85CBE148F6 /* StreamingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39456DAC2FE8CA973598CB90 /* StreamingTextView.swift */; };
 		7E9AF99ACC84DF7E7DA073F5 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C28597903749D947CF54F1 /* HealthKitService.swift */; };
 		7ECDD08AA2FA30A114372971 /* ActionTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C6AEF2AFC09AC89E09B8DF /* ActionTracker.swift */; };
 		7F0486C9D1E4B9BB4A850AC2 /* UnifiedContextSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD68D6416E308F43865C790 /* UnifiedContextSync.swift */; };
@@ -897,6 +898,7 @@
 		C3F6724F304421DA49C0DCEC /* CrossDeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7710713218AA8C2E59D66B3 /* CrossDeviceService.swift */; };
 		C483DBB904D4AFC18BA588B9 /* ProjectKnowledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFB0818D878F283B3234A6D /* ProjectKnowledge.swift */; };
 		C4D914BD2E8422646F6F609A /* ToolComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F7F949E955655D924D72F1 /* ToolComposition.swift */; };
+		C570829328395FB088C8C7DF /* QuerySuggestionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6BDEA69B67DAD3E651D9340 /* QuerySuggestionOverlay.swift */; };
 		C57E302F5DC68DA3FDDD9ADD /* CrossDeviceNotificationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BDCBE66C3F083E7753E465A /* CrossDeviceNotificationTypes.swift */; };
 		C61D00AAD8BE9268768B7B4F /* OpenAIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2388FEAE2CAC4AB7DE3EEE /* OpenAIProvider.swift */; };
 		C6390C960796FA7E682A3084 /* TransferableService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0F2B235FB63C4FFAD580D5 /* TransferableService.swift */; };
@@ -1446,6 +1448,7 @@
 		38385F32DD8062479DDD388C /* InferenceRelayProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceRelayProtocol.swift; sourceTree = "<group>"; };
 		38C72B58751221A753F55B09 /* AgentSecKillSwitchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSecKillSwitchTests.swift; sourceTree = "<group>"; };
 		39037BEDEE29D1CE9E77BE5B /* OnDeviceAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceAIService.swift; sourceTree = "<group>"; };
+		39456DAC2FE8CA973598CB90 /* StreamingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingTextView.swift; sourceTree = "<group>"; };
 		39599F089C9590FCF0088F85 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
 		3984ED5374CAD335E9CEB703 /* CarPlayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayService.swift; sourceTree = "<group>"; };
 		3A31D5A95202A25306AF85DA /* ModelSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSelectorView.swift; sourceTree = "<group>"; };
@@ -1768,6 +1771,7 @@
 		A5138888D101E482D329EEF8 /* SecurityHardening.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityHardening.swift; sourceTree = "<group>"; };
 		A5FD981DA6AD30BA5CB78032 /* PasskeysService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeysService.swift; sourceTree = "<group>"; };
 		A6AF93650026D5BF21AE0F38 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A6BDEA69B67DAD3E651D9340 /* QuerySuggestionOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuerySuggestionOverlay.swift; sourceTree = "<group>"; };
 		A6CC5E0D15B290AB6A0123A1 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		A7047AD0E73555E4F0F12F2C /* APIGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIGeneratorTests.swift; sourceTree = "<group>"; };
 		A712C3E48FB1FACB36F858BF /* MissionOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionOrchestrator.swift; sourceTree = "<group>"; };
@@ -3454,9 +3458,11 @@
 				E14F8A7E506BDB64D5D2B5DF /* MessageBubble.swift */,
 				3A31D5A95202A25306AF85DA /* ModelSelectorView.swift */,
 				E70A13852CF90D93A5AA39F8 /* PlanViews.swift */,
+				A6BDEA69B67DAD3E651D9340 /* QuerySuggestionOverlay.swift */,
 				BEC53BAD4FF4D60020E98F59 /* ScreenshotPreview.swift */,
 				5B8D518EFE8428202D570119 /* SlashCommandOverlay.swift */,
 				F31B883CFBAD460B87029FB6 /* StreamingIndicator.swift */,
+				39456DAC2FE8CA973598CB90 /* StreamingTextView.swift */,
 				4B7145143259590A9E6D9C71 /* SuggestionChipView.swift */,
 			);
 			path = Components;
@@ -6459,6 +6465,7 @@
 				A60B637063BFF86378677BAC /* ProviderRegistry.swift in Sources */,
 				3433ED144CB16FAC859B8055 /* QASettingsView.swift in Sources */,
 				8DF1EBAB8070FF35229D1824 /* QAToolsManager.swift in Sources */,
+				C570829328395FB088C8C7DF /* QuerySuggestionOverlay.swift in Sources */,
 				FB229D00153697A4CA5D1FB2 /* QueuedMessage.swift in Sources */,
 				A066F39A26CA5E28ECD7FBF3 /* QuickEntryWindow.swift in Sources */,
 				5354895FD0D64B902827A1FB /* ReflexionEngine.swift in Sources */,
@@ -6513,6 +6520,7 @@
 				620E24F399526E853AE00878 /* StaticAnalysisVerifier.swift in Sources */,
 				D78C34241F5E2DCB9C1CE24D /* StoreKitService.swift in Sources */,
 				FDA5E5A2D2A7C40A6295D24A /* StreamingIndicator.swift in Sources */,
+				7E9277480864CF85CBE148F6 /* StreamingTextView.swift in Sources */,
 				62618BADD23D99EC708CB0C6 /* SuggestionChipView.swift in Sources */,
 				B3C180ABE78BCA534A00F602 /* SwiftBestPracticesLibrary.swift in Sources */,
 				1A67C73681A47301B29FDF5F /* SwiftKnowledgeLearner.swift in Sources */,

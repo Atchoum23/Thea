@@ -420,9 +420,9 @@ targets:
           - "**/Components/ExecutableCodeBlock.swift"
           - "**/Components/TheaTextInputField.swift"
           - "**/Components/THEAThinkingView.swift"
-          - "**/Components/QuerySuggestionOverlay.swift"
+          # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)
           - "**/Components/MemoryContextView.swift"
-          - "**/Components/StreamingTextView.swift"
+          # StreamingTextView — ACTIVATED (StreamingStatus from StreamingIndicator)
           - "**/Views/PhaseProgressView.swift"
           - "**/Views/SelfExecutionView.swift"
           - "**/Views/DeviceSwitcherView.swift"
