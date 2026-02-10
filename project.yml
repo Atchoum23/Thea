@@ -447,7 +447,7 @@ targets:
           - "**/Memory/MemoryAugmentedChat.swift"
           - "**/MetaAI/ModelBenchmarkService.swift"
           - "**/Platforms/PlatformFeaturesHub.swift"
-          - "**/TextProcessing/LiveAutoCorrect.swift"
+          # LiveAutoCorrect — ACTIVATED (system frameworks only)
           - "**/MCP/THEAMCPServer.swift"
           - "**/DeviceAwareness/UnifiedDeviceAwareness.swift"
           - "**/Code/CodeIntelligence.swift"
@@ -468,11 +468,11 @@ targets:
           - "**/Settings/LocalModelsSettingsView.swift"
           - "**/Settings/AutonomousTaskSettingsView.swift"
           - "**/Settings/ResourceAllocationSettingsView.swift"
-          - "**/Settings/AutoCorrectSettingsView.swift"
-          - "**/Settings/AIFeaturesSettingsView.swift"
+          # AutoCorrectSettingsView — ACTIVATED (uses active LiveAutoCorrect)
+          # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
           - "**/Settings/AutomationSettingsView.swift"
           - "**/Settings/WorkflowSettingsView.swift"
-          - "**/Settings/TerminalSettingsView.swift"
+          # TerminalSettingsView — ACTIVATED (macOS only, uses active TerminalIntegrationManager)
           - "**/Settings/IntegrationsSettingsView.swift"
           - "**/Settings/AutonomousSettingsView.swift"
           # PromptEngineeringSettingsView — ACTIVATED (uses active AutomaticPromptEngineering) [DEFERRED - needs PromptEngineering folder]
@@ -674,13 +674,13 @@ targets:
           - "**/Integrations/FinderIntegration.swift"
           - "**/Views/LocalModels/**"
           - "**/Platforms/PlatformFeaturesHub.swift"
-          - "**/TextProcessing/LiveAutoCorrect.swift"
-          - "**/Settings/AutoCorrectSettingsView.swift"
+          # LiveAutoCorrect — ACTIVATED (system frameworks only)
+          # AutoCorrectSettingsView — ACTIVATED
           - "**/Integrations/SafariIntegration.swift"
           - "**/Components/ChatInputView.swift"
           - "**/Search/SemanticSearchService.swift"
           - "**/Components/QuerySuggestionOverlay.swift"
-          - "**/Settings/AIFeaturesSettingsView.swift"
+          # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
           - "**/Memory/ActiveMemoryRetrieval.swift"
           - "**/Components/MemoryContextView.swift"
           - "**/Components/StreamingTextView.swift"

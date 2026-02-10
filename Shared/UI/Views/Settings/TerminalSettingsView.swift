@@ -8,7 +8,7 @@
         @State private var newConfirmCommand = ""
         @State private var newSandboxDirectory: URL?
         @State private var showingDirectoryPicker = false
-        @State private var selectedSecurityLevel: SecurityLevel = .standard
+        @State private var selectedTerminalSecurityLevel: TerminalSecurityLevel = .standard
 
         var body: some View {
             Form {
@@ -35,11 +35,11 @@
             .onAppear {
                 // Determine current security level
                 if manager.securityPolicy == .unrestricted {
-                    selectedSecurityLevel = .unrestricted
+                    selectedTerminalSecurityLevel = .unrestricted
                 } else if manager.securityPolicy == .sandboxed {
-                    selectedSecurityLevel = .sandboxed
+                    selectedTerminalSecurityLevel = .sandboxed
                 } else {
-                    selectedSecurityLevel = .standard
+                    selectedTerminalSecurityLevel = .standard
                 }
             }
         }
@@ -128,20 +128,20 @@
 
         private var securitySection: some View {
             Section {
-                Picker("Security Level", selection: $selectedSecurityLevel) {
-                    ForEach(SecurityLevel.allCases, id: \.self) { level in
+                Picker("Security Level", selection: $selectedTerminalSecurityLevel) {
+                    ForEach(TerminalSecurityLevel.allCases, id: \.self) { level in
                         VStack(alignment: .leading) {
                             Text(level.rawValue)
                         }
                         .tag(level)
                     }
                 }
-                .onChange(of: selectedSecurityLevel) { _, newLevel in
+                .onChange(of: selectedTerminalSecurityLevel) { _, newLevel in
                     manager.securityPolicy = newLevel.policy
                     manager.saveConfiguration()
                 }
 
-                Text(selectedSecurityLevel.description)
+                Text(selectedTerminalSecurityLevel.description)
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -250,7 +250,7 @@
                 }
 
                 // Sandboxed directories
-                if selectedSecurityLevel == .sandboxed || !manager.securityPolicy.sandboxedDirectories.isEmpty {
+                if selectedTerminalSecurityLevel == .sandboxed || !manager.securityPolicy.sandboxedDirectories.isEmpty {
                     DisclosureGroup("Sandboxed Directories (\(manager.securityPolicy.sandboxedDirectories.count))") {
                         ForEach(manager.securityPolicy.sandboxedDirectories, id: \.self) { dir in
                             HStack {
@@ -386,7 +386,7 @@
 
                 Button("Reset Security Policy to Standard") {
                     manager.securityPolicy = .default
-                    selectedSecurityLevel = .standard
+                    selectedTerminalSecurityLevel = .standard
                     manager.saveConfiguration()
                 }
 

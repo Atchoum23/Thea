@@ -331,12 +331,12 @@ struct AIFeaturesSettingsView: View {
     // MARK: - Actions
 
     private func loadCurrentSettings() {
-        // Load from actual AI system instances
+        // Load from actual AI system instances (active) and UserDefaults (excluded systems)
         Task { @MainActor in
             useSemanticClassification = TaskClassifier.shared.useSemanticClassification
             useAdaptiveRouting = ModelRouter.shared.useAdaptiveRouting
-            useAICodeAnalysis = SwiftCodeAnalyzer.shared.useAIAnalysis
-            useAIDynamicPrompts = WorkflowTemplates.shared.useAIDynamicPrompts
+            useAICodeAnalysis = UserDefaults.standard.bool(forKey: "ai_code_analysis")
+            useAIDynamicPrompts = UserDefaults.standard.bool(forKey: "ai_dynamic_prompts")
         }
     }
 
@@ -355,16 +355,12 @@ struct AIFeaturesSettingsView: View {
     }
 
     private func applyAICodeAnalysis(_ enabled: Bool) {
-        Task { @MainActor in
-            SwiftCodeAnalyzer.shared.useAIAnalysis = enabled
-        }
+        // SwiftCodeAnalyzer is in excluded MetaAI — store preference in UserDefaults
         UserDefaults.standard.set(enabled, forKey: "ai_code_analysis")
     }
 
     private func applyAIDynamicPrompts(_ enabled: Bool) {
-        Task { @MainActor in
-            WorkflowTemplates.shared.useAIDynamicPrompts = enabled
-        }
+        // WorkflowTemplates is in excluded MetaAI — store preference in UserDefaults
         UserDefaults.standard.set(enabled, forKey: "ai_dynamic_prompts")
     }
 

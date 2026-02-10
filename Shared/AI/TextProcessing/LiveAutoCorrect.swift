@@ -391,7 +391,7 @@ public final class LiveAutoCorrect {
     }
 
     private func correctWithAI(_ text: String, language: String) async -> [Correction]? {
-        guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             return nil
         }
 
@@ -404,15 +404,28 @@ public final class LiveAutoCorrect {
 
         do {
             let model = await DynamicConfig.shared.bestModel(for: .correction)
-            let corrected = try await AIProviderHelpers.singleResponse(
-                provider: provider,
-                prompt: prompt,
-                model: model,
-                temperature: DynamicConfig.shared.temperature(for: .correction),
-                maxTokens: DynamicConfig.shared.maxTokens(for: .correction, inputLength: text.count)
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: model
             )
+            let stream = try await provider.chat(messages: [message], model: model, stream: false)
+            var corrected = ""
+            for try await response in stream {
+                switch response.type {
+                case .delta(let text):
+                    corrected += text
+                case .complete(let msg):
+                    corrected = msg.content.textValue
+                case .error(let error):
+                    throw error
+                }
+            }
 
-            let trimmedCorrected = corrected.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedCorrected = corrected.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
             if trimmedCorrected != text && !trimmedCorrected.isEmpty {
                 return [Correction(
