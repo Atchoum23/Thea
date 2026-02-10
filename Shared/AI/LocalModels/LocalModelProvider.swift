@@ -839,12 +839,11 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
                     }
 
                     // Final fallback: raw prompt (GGUF or unknown instance type)
-                    // WARNING: Raw template may not match the model's expected format.
-                    // Prefer loading models via Ollama or MLX for proper chat template handling.
-                    let prompt = messages.map { message in
-                        let role = message.role == .user ? "user" : "assistant"
-                        return "### \(role.capitalized)\n\(message.content.textValue)"
-                    }.joined(separator: "\n\n") + "\n\n### Assistant\n"
+                    // Use model-family-aware chat templates for better results
+                    let prompt = Self.buildChatPrompt(
+                        messages: messages,
+                        modelName: model
+                    )
 
                     let stream = try await self.instance.generate(prompt: prompt, maxTokens: 2048)
 
@@ -871,6 +870,105 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
                 }
             }
         }
+    }
+}
+
+    // MARK: - Chat Template Helpers
+
+    /// Build a chat prompt using model-family-aware templates.
+    /// Different model families (Llama, Mistral, Qwen, etc.) expect different chat formats.
+    private static func buildChatPrompt(messages: [AIMessage], modelName: String) -> String {
+        let name = modelName.lowercased()
+
+        if name.contains("llama") || name.contains("codellama") {
+            return buildLlamaPrompt(messages: messages)
+        } else if name.contains("mistral") || name.contains("mixtral") {
+            return buildMistralPrompt(messages: messages)
+        } else if name.contains("qwen") {
+            return buildQwenPrompt(messages: messages)
+        } else if name.contains("deepseek") {
+            return buildDeepSeekPrompt(messages: messages)
+        } else if name.contains("phi") {
+            return buildPhiPrompt(messages: messages)
+        } else if name.contains("gemma") {
+            return buildGemmaPrompt(messages: messages)
+        } else {
+            // Generic ChatML template — widely compatible fallback
+            return buildChatMLPrompt(messages: messages)
+        }
+    }
+
+    private static func buildLlamaPrompt(messages: [AIMessage]) -> String {
+        // Llama 3 chat template
+        var prompt = "<|begin_of_text|>"
+        for msg in messages {
+            let role = msg.role == .user ? "user" : (msg.role == .system ? "system" : "assistant")
+            prompt += "<|start_header_id|>\(role)<|end_header_id|>\n\n\(msg.content.textValue)<|eot_id|>"
+        }
+        prompt += "<|start_header_id|>assistant<|end_header_id|>\n\n"
+        return prompt
+    }
+
+    private static func buildMistralPrompt(messages: [AIMessage]) -> String {
+        // Mistral instruct template
+        var prompt = "<s>"
+        for msg in messages {
+            if msg.role == .user {
+                prompt += "[INST] \(msg.content.textValue) [/INST]"
+            } else if msg.role == .assistant {
+                prompt += " \(msg.content.textValue)</s>"
+            }
+        }
+        return prompt
+    }
+
+    private static func buildQwenPrompt(messages: [AIMessage]) -> String {
+        buildChatMLPrompt(messages: messages)
+    }
+
+    private static func buildDeepSeekPrompt(messages: [AIMessage]) -> String {
+        buildChatMLPrompt(messages: messages)
+    }
+
+    private static func buildPhiPrompt(messages: [AIMessage]) -> String {
+        // Phi-3 chat template
+        var prompt = ""
+        for msg in messages {
+            if msg.role == .user {
+                prompt += "<|user|>\n\(msg.content.textValue)<|end|>\n"
+            } else if msg.role == .assistant {
+                prompt += "<|assistant|>\n\(msg.content.textValue)<|end|>\n"
+            } else if msg.role == .system {
+                prompt += "<|system|>\n\(msg.content.textValue)<|end|>\n"
+            }
+        }
+        prompt += "<|assistant|>\n"
+        return prompt
+    }
+
+    private static func buildGemmaPrompt(messages: [AIMessage]) -> String {
+        // Gemma chat template
+        var prompt = ""
+        for msg in messages {
+            if msg.role == .user {
+                prompt += "<start_of_turn>user\n\(msg.content.textValue)<end_of_turn>\n"
+            } else if msg.role == .assistant {
+                prompt += "<start_of_turn>model\n\(msg.content.textValue)<end_of_turn>\n"
+            }
+        }
+        prompt += "<start_of_turn>model\n"
+        return prompt
+    }
+
+    private static func buildChatMLPrompt(messages: [AIMessage]) -> String {
+        // ChatML — used by Qwen, DeepSeek, and many other models
+        var prompt = ""
+        for msg in messages {
+            let role = msg.role == .user ? "user" : (msg.role == .system ? "system" : "assistant")
+            prompt += "<|im_start|>\(role)\n\(msg.content.textValue)<|im_end|>\n"
+        }
+        prompt += "<|im_start|>assistant\n"
+        return prompt
     }
 }
 
