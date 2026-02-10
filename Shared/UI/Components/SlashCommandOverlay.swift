@@ -79,7 +79,6 @@ struct SlashCommandOverlay: View {
     let onSelect: (SlashCommand) -> Void
 
     @State private var selectedIndex: Int = 0
-    @Environment(\.colorScheme) private var colorScheme
 
     /// Whether the overlay should be visible based on current input
     var isVisible: Bool {

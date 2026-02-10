@@ -110,7 +110,6 @@ struct ProviderUsageStats {
 
 struct AIProvidersSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
-    @State private var providerRegistry = ProviderRegistry.shared
     // PerformanceMetricsManager is in excluded MetaAI — use placeholder for now
 
     // API Keys
@@ -130,7 +129,6 @@ struct AIProvidersSettingsView: View {
     // UI State
     @State private var showingProviderDetail: ProviderDisplayInfo?
     @State private var showingUsageHistory = false
-    @State private var expandedSections: Set<String> = ["default", "providers"]
 
     // Fallback configuration
     @State private var fallbackOrder: [String] = []

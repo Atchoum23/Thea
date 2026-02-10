@@ -6,7 +6,6 @@
         @StateObject private var manager = TerminalIntegrationManager.shared
         @State private var newBlockedCommand = ""
         @State private var newConfirmCommand = ""
-        @State private var newSandboxDirectory: URL?
         @State private var showingDirectoryPicker = false
         @State private var selectedTerminalSecurityLevel: TerminalSecurityLevel = .standard
 

@@ -34,12 +34,10 @@ private final class BenchmarkServiceStub {
 
 struct OrchestratorSettingsView: View {
     @State private var config = OrchestratorConfiguration.load()
-    @State private var showingSaveConfirmation = false
     @State private var benchmarkService = BenchmarkServiceStub.shared
     @State private var isRefreshingBenchmarks = false
     @State private var showingRoutingRuleEditor = false
     @State private var showingExecutionHistory = false
-    @State private var selectedTaskType: String?
     @State private var executionStats = ExecutionStatistics()
 
     var body: some View {

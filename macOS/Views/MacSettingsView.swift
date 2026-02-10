@@ -116,7 +116,6 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
 
 /// Consolidated macOS settings with a System Settings-style sidebar/detail layout.
 struct MacSettingsView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @StateObject private var settingsManager = SettingsManager.shared
     @State private var voiceManager = VoiceActivationManager.shared

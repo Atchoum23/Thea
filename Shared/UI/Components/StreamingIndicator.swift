@@ -194,8 +194,6 @@ struct StreamingMessageView: View {
     let streamingText: String
     let status: StreamingStatus
 
-    @Environment(\.colorScheme) private var colorScheme
-
     var body: some View {
         HStack(alignment: .top, spacing: TheaSpacing.md) {
             // Assistant avatar

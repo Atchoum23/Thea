@@ -6,7 +6,6 @@
         @StateObject private var manager = TerminalIntegrationManager.shared
         @State private var commandInput = ""
         @State private var isExecuting = false
-        @State private var showingHistory = false
         @State private var showingQuickCommands = false
         @State private var selectedTab: TerminalTab = .output
 

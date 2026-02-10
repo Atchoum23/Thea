@@ -5,7 +5,6 @@ import SwiftUI
 
 struct VoiceSettingsView: View {
     @State private var engine = VoiceInteractionEngine.shared
-    @State private var selectedVoice: VoiceInfo?
     @State private var isTestingVoice = false
     @State private var isTestingMic = false
     @State private var testTranscript = ""

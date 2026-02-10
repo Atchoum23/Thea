@@ -15,7 +15,6 @@ public struct LifeTrackingDashboardView: View {
     @StateObject private var viewModel = LifeTrackingDashboardViewModel()
 
     @State private var selectedTimeRange: LifeTrackingTimeRange = .today
-    @State private var selectedCategory: LifeActivityCategory?
     @State private var showingSettings = false
 
     public init() {}

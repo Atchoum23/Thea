@@ -50,7 +50,6 @@ struct KeyboardShortcutsHelpView: View {
 
     @State private var searchText = ""
     @State private var hasAppeared = false
-    @State private var selectedCategory: String?
 
     // MARK: - Body
 

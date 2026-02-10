@@ -13,7 +13,6 @@ struct AutoCorrectSettingsView: View {
     @Bindable private var autoCorrect = LiveAutoCorrect.shared
 
     @State private var showUserDictionary = false
-    @State private var newWord = ""
 
     var body: some View {
         Form {

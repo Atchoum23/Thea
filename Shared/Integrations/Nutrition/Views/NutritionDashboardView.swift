@@ -4,8 +4,6 @@ import SwiftUI
 public struct NutritionDashboardView: View {
     @State private var viewModel = NutritionViewModel()
     @State private var showingMealLogger = false
-    @State private var showingFoodSearch = false
-    @State private var selectedMealType: MealType = .breakfast
 
     public init() {}
 

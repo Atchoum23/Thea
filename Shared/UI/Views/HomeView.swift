@@ -2,7 +2,6 @@
 import SwiftUI
 
 struct HomeView: View {
-    @Environment(\.modelContext) private var modelContext
     @State private var selectedConversation: Conversation?
     @State private var showingSettings = false
 

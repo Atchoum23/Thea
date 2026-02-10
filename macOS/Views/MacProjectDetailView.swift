@@ -8,8 +8,6 @@ import SwiftUI
 struct MacProjectDetailView: View {
     let project: Project
 
-    @StateObject private var projectManager = ProjectManager.shared
-
     @State private var isEditing = false
     @State private var editedTitle: String
     @State private var editedInstructions: String

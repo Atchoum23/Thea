@@ -9,7 +9,6 @@ struct ModelSelectorView: View {
     @State private var catalogManager = ModelCatalogManager.shared
     @State private var config = AppConfiguration.shared.modelSelectionConfig
     @State private var selectedCategory: ModelSelectionConfiguration.ModelCategory
-    @State private var showingCategoryPicker = false
 
     init(selectedModel: Binding<String>) {
         _selectedModel = selectedModel

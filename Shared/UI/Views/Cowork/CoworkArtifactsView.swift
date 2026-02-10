@@ -9,7 +9,6 @@
     struct CoworkArtifactsView: View {
         @State private var manager = CoworkManager.shared
         @State private var selectedArtifact: CoworkArtifact?
-        @State private var showingQuickLook = false
         @State private var viewMode: ViewMode = .grid
         @State private var filterType: CoworkArtifact.ArtifactType?
         @State private var showIntermediates = false

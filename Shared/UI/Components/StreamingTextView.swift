@@ -405,8 +405,6 @@ public struct ToolCallDisplayView: View {
     var isExecuting: Bool = true
     var result: String?
 
-    @State private var isExpanded: Bool = false
-
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Tool execution header
@@ -488,8 +486,6 @@ public struct EnhancedStreamingMessageView: View {
 
     /// Configuration
     var config: StreamingTextConfig = .default
-
-    @Environment(\.colorScheme) private var colorScheme
 
     public var body: some View {
         HStack(alignment: .top, spacing: 12) {

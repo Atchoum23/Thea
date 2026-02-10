@@ -32,7 +32,6 @@ struct MessageBubble: View {
 
     @State private var isHovering = false
     @State private var showCopiedFeedback = false
-    @Environment(\.colorScheme) private var colorScheme
     @StateObject private var settingsManager = SettingsManager.shared
 
     /// Info about branches for this message position

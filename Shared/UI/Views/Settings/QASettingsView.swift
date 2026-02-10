@@ -6,9 +6,6 @@
     struct QASettingsView: View {
         @State private var config = AppConfiguration.shared.qaToolsConfig
         @State private var qaManager = QAToolsManager.shared
-        @State private var selectedTab = 0
-        @State private var showingRunConfirmation = false
-        @State private var toolToRun: QATool?
         @State private var runAllInProgress = false
 
         var body: some View {
