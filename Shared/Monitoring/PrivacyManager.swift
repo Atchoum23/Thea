@@ -132,7 +132,7 @@ public actor PrivacyManager {
     }
 
     #if os(macOS)
-        private nonisolated func requestMacOSPermission(_ permission: PrivacyPermission) async -> PrivacyPermissionStatus {
+        nonisolated private func requestMacOSPermission(_ permission: PrivacyPermission) async -> PrivacyPermissionStatus {
             switch permission {
             case .accessibility, .inputMonitoring:
                 // Open System Settings to Accessibility

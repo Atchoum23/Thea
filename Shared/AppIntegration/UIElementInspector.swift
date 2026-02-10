@@ -234,7 +234,7 @@ public struct UIElementInfo: Sendable, Identifiable {
     public let frame: CGRect
 
     #if os(macOS)
-        public nonisolated(unsafe) let axElement: AXUIElement?
+        nonisolated(unsafe) public let axElement: AXUIElement?
     #else
         public let axElement: AnyObject? = nil
     #endif
