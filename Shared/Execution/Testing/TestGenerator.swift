@@ -179,7 +179,7 @@ public final class TestGenerator {
         ))
 
         // Get AI provider
-        guard let provider = ProviderRegistry.shared.defaultProvider ??
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() ??
               ProviderRegistry.shared.configuredProviders.first else {
             throw TestGeneratorError.noProviderAvailable
         }
@@ -199,12 +199,32 @@ public final class TestGenerator {
             analysis: analysis
         )
 
-        // Generate tests using AI
-        let aiResponse = try await AIProviderHelpers.streamToString(
-            provider: provider,
-            prompt: prompt,
-            model: "gpt-4"
+        // Generate tests using AI - stream response and collect into string
+        let userMessage = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(prompt),
+            timestamp: Date(),
+            model: ""
         )
+        let model = AppConfiguration.shared.providerConfig.defaultModel
+        let stream = try await provider.chat(
+            messages: [userMessage],
+            model: model.isEmpty ? "gpt-4" : model,
+            stream: true
+        )
+        var aiResponse = ""
+        for try await chunk in stream {
+            switch chunk.type {
+            case .delta(let text):
+                aiResponse += text
+            case .complete:
+                break
+            case .error(let error):
+                throw error
+            }
+        }
 
         progressHandler?(TestGenerationProgress(
             phase: .parsing,
