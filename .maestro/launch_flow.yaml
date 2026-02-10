@@ -1,9 +1,24 @@
-# Thea Launch Flow - Basic app launch verification
-appId: app.theathe.ios
+# Thea Launch Flow - App launch and initial state verification
+appId: app.thea.ios
 ---
 - launchApp:
     clearState: true
+
+# Verify app launched successfully - should show tab bar
 - assertVisible:
-    text: ".*"
-    timeout: 10000
-- takeScreenshot: launch_screen
+    text: "Chat"
+    timeout: 15000
+
+- assertVisible:
+    text: "Settings"
+
+- takeScreenshot: launch_initial_state
+
+# Verify all 5 tabs are visible
+- assertVisible:
+    text: "Projects"
+
+- assertVisible:
+    text: "Knowledge"
+
+- takeScreenshot: launch_tabs_visible

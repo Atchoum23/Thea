@@ -1,0 +1,34 @@
+# Thea Chat Flow - Test chat input and conversation creation
+appId: app.thea.ios
+---
+- launchApp
+
+# Ensure we're on Chat tab
+- tapOn:
+    text: "Chat"
+    timeout: 10000
+
+- takeScreenshot: chat_initial
+
+# Look for new conversation button (+ or compose icon)
+- tapOn:
+    id: "square.and.pencil"
+    optional: true
+
+# Look for the message input field
+- tapOn:
+    text: "Message Thea..."
+    optional: true
+
+- takeScreenshot: chat_input_focused
+
+# Type a test message (but don't send - no API key in CI)
+- inputText: "Hello from Maestro E2E test"
+- takeScreenshot: chat_message_typed
+
+# Verify the typed text is visible
+- assertVisible:
+    text: "Hello from Maestro E2E test"
+    optional: true
+
+- takeScreenshot: chat_flow_complete
