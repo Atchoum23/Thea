@@ -108,7 +108,7 @@ public actor LifeIntelligenceCoordinator {
         // Start all subsystems
         await focusIntelligence.start()
         await taskIntelligence.loadTasks()
-        await taskIntelligence.requestAccess()
+        _ = await taskIntelligence.requestAccess()
         await taskIntelligence.startDeadlineMonitoring()
         await relationshipIntelligence.loadData()
 

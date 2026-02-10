@@ -400,8 +400,13 @@ public struct CloudLifeEvent: Identifiable, Sendable {
             self.sourceDeviceID = Host.current().localizedName ?? "unknown"
             self.sourceDeviceName = Host.current().localizedName ?? "Mac"
         #elseif canImport(UIKit)
-            self.sourceDeviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown"
-            self.sourceDeviceName = UIDevice.current.name
+            if Thread.isMainThread {
+                self.sourceDeviceID = MainActor.assumeIsolated { UIDevice.current.identifierForVendor?.uuidString ?? "unknown" }
+                self.sourceDeviceName = MainActor.assumeIsolated { UIDevice.current.name }
+            } else {
+                self.sourceDeviceID = "unknown"
+                self.sourceDeviceName = "Device"
+            }
         #else
             self.sourceDeviceID = "unknown"
             self.sourceDeviceName = "Device"
@@ -478,8 +483,13 @@ public struct CloudReadingSession: Identifiable, Sendable {
             self.sourceDeviceID = Host.current().localizedName ?? "unknown"
             self.sourceDeviceName = Host.current().localizedName ?? "Mac"
         #elseif canImport(UIKit)
-            self.sourceDeviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown"
-            self.sourceDeviceName = UIDevice.current.name
+            if Thread.isMainThread {
+                self.sourceDeviceID = MainActor.assumeIsolated { UIDevice.current.identifierForVendor?.uuidString ?? "unknown" }
+                self.sourceDeviceName = MainActor.assumeIsolated { UIDevice.current.name }
+            } else {
+                self.sourceDeviceID = "unknown"
+                self.sourceDeviceName = "Device"
+            }
         #else
             self.sourceDeviceID = "unknown"
             self.sourceDeviceName = "Device"

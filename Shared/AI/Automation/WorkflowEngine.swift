@@ -412,13 +412,13 @@ final class WorkflowEngine {
         let modelName = node.configuration.parameters["model"] ?? "default"
         let systemPrompt = node.configuration.parameters["systemPrompt"]
         let temperatureStr = node.configuration.parameters["temperature"]
-        let temperature = temperatureStr.flatMap { Double($0) }
+        _ = temperatureStr.flatMap { Double($0) }
 
         // Interpolate context variables
         let interpolatedPrompt = interpolate(prompt, with: context)
 
         // Get provider from registry
-        guard let provider = await ProviderRegistry.shared.getDefaultProvider() else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             throw AutomationWorkflowError.executionFailed("No AI provider available")
         }
 

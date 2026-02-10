@@ -278,7 +278,9 @@ final class ResponseNotificationHandler: ObservableObject {
                 }
                 .map(\.request.identifier)
 
-            self.center.removeDeliveredNotifications(withIdentifiers: idsToRemove)
+            Task { @MainActor in
+                self.center.removeDeliveredNotifications(withIdentifiers: idsToRemove)
+            }
         }
     }
 

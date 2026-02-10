@@ -1,5 +1,5 @@
 import Foundation
-import SystemConfiguration
+import Network
 #if os(iOS) || os(watchOS)
 import UIKit
 import CoreMotion
@@ -451,28 +451,22 @@ final class UnifiedDeviceAwareness {
     }
 
     private func checkNetworkConnectivity() -> Bool {
-        // Simple synchronous check using a socket-based approach
-        var zeroAddress = sockaddr_in()
-        zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
-        zeroAddress.sin_family = sa_family_t(AF_INET)
+        // Synchronous connectivity check using NWPathMonitor snapshot
+        let monitor = NWPathMonitor()
+        let semaphore = DispatchSemaphore(value: 0)
+        var isConnected = false
 
-        guard let defaultRouteReachability = withUnsafePointer(to: &zeroAddress, {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { zeroSockAddress in
-                SCNetworkReachabilityCreateWithAddress(nil, zeroSockAddress)
-            }
-        }) else {
-            return false
+        monitor.pathUpdateHandler = { path in
+            isConnected = path.status == .satisfied
+            semaphore.signal()
         }
 
-        var flags: SCNetworkReachabilityFlags = []
-        if !SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags) {
-            return false
-        }
+        let queue = DispatchQueue(label: "ai.thea.network.check")
+        monitor.start(queue: queue)
+        _ = semaphore.wait(timeout: .now() + 1.0)
+        monitor.cancel()
 
-        let isReachable = flags.contains(.reachable)
-        let needsConnection = flags.contains(.connectionRequired)
-
-        return isReachable && !needsConnection
+        return isConnected
     }
 
     private func detectConnectionType() -> String {

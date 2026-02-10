@@ -161,7 +161,7 @@ public actor LifeMonitorWebSocketServer {
             guard let self = self else { return }
 
             if let error {
-                Task { await self.logger.error("Receive error: \(error.localizedDescription)") }
+                Task { self.logger.error("Receive error: \(error.localizedDescription)") }
                 return
             }
 
@@ -285,7 +285,7 @@ public actor LifeMonitorWebSocketServer {
             isComplete: true,
             completion: .contentProcessed { [weak self] error in
                 if let error {
-                    Task { await self?.logger.error("Send error: \(error.localizedDescription)") }
+                    Task { self?.logger.error("Send error: \(error.localizedDescription)") }
                 }
             }
         )

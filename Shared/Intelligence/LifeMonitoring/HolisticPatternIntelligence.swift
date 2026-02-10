@@ -491,7 +491,7 @@ public final class HolisticPatternIntelligence: ObservableObject {
         guard let index = detectedPatterns.firstIndex(where: { $0.id == patternId }) else { return }
 
         let observations = patternObservations[patternId] ?? []
-        var pattern = detectedPatterns[index]
+        let pattern = detectedPatterns[index]
 
         // Update frequency based on observations
         let newFrequency = calculateFrequency(from: observations)
@@ -864,7 +864,7 @@ public final class HolisticPatternIntelligence: ObservableObject {
     private func addCorrelation(from patternAId: UUID, to patternBId: UUID, correlation: PatternCorrelation) {
         // Update pattern A
         if let indexA = detectedPatterns.firstIndex(where: { $0.id == patternAId }) {
-            var pattern = detectedPatterns[indexA]
+            let pattern = detectedPatterns[indexA]
             var correlations = pattern.correlations
             correlations.append(PatternCorrelation(
                 relatedPatternId: patternBId,

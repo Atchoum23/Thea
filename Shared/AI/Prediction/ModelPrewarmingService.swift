@@ -205,22 +205,18 @@ public actor ModelPrewarmingService {
         stats.preloadAttempts += 1
 
         #if os(macOS)
-        do {
-            // Use MLXInferenceEngine to load the model
-            _ = try await MainActor.run {
-                Task {
-                    _ = try await MLXInferenceEngine.shared.loadModel(id: modelID)
-                }
+        // Use MLXInferenceEngine to load the model
+        _ = await MainActor.run {
+            Task {
+                _ = try await MLXInferenceEngine.shared.loadModel(id: modelID)
             }
-
-            warmModelIDs.insert(modelID)
-            stats.successfulPreloads += 1
-            persistState()
-
-            logger.info("Successfully pre-warmed model: \(modelID)")
-        } catch {
-            logger.error("Failed to pre-warm model \(modelID): \(error.localizedDescription)")
         }
+
+        warmModelIDs.insert(modelID)
+        stats.successfulPreloads += 1
+        persistState()
+
+        logger.info("Successfully pre-warmed model: \(modelID)")
         #else
         // MLX only available on macOS
         logger.debug("Model pre-warming skipped (not macOS)")

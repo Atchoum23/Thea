@@ -489,7 +489,7 @@ public actor RelationshipIntelligence {
     public func recordUrgencyFeedback(contactId: String, wasActuallyUrgent: Bool) async {
         // Find the most recent urgent event from this contact
         if let index = communicationLog.lastIndex(where: { $0.contactId == contactId && $0.wasUrgent }) {
-            var event = communicationLog[index]
+            let event = communicationLog[index]
             // Note: CommunicationEvent is a struct, we'd need to make it mutable or recreate
             communicationLog[index] = CommunicationEvent(
                 id: event.id,

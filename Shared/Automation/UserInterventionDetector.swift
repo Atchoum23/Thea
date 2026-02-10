@@ -93,59 +93,63 @@
 
             // Monitor mouse clicks
             if let monitor = NSEvent.addGlobalMonitorForEvents(
-                matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
-            ) { [weak self] event in
-                Task { @MainActor in
-                    self?.handleUserEvent(.mouseClick(NSEvent.mouseLocation), event: event)
+                matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown],
+                handler: { [weak self] event in
+                    Task { @MainActor in
+                        self?.handleUserEvent(.mouseClick(NSEvent.mouseLocation), event: event)
+                    }
                 }
-            } {
+            ) {
                 eventMonitors.append(monitor)
             }
 
             // Monitor keyboard
             if let monitor = NSEvent.addGlobalMonitorForEvents(
-                matching: [.keyDown]
-            ) { [weak self] _ in
-                Task { @MainActor in
-                    self?.handleUserEvent(.keyPress, event: nil)
+                matching: [.keyDown],
+                handler: { [weak self] _ in
+                    Task { @MainActor in
+                        self?.handleUserEvent(.keyPress, event: nil)
+                    }
                 }
-            } {
+            ) {
                 eventMonitors.append(monitor)
             }
 
             // Monitor scrolling
             if let monitor = NSEvent.addGlobalMonitorForEvents(
-                matching: [.scrollWheel]
-            ) { [weak self] _ in
-                Task { @MainActor in
-                    self?.handleUserEvent(.scroll, event: nil)
+                matching: [.scrollWheel],
+                handler: { [weak self] _ in
+                    Task { @MainActor in
+                        self?.handleUserEvent(.scroll, event: nil)
+                    }
                 }
-            } {
+            ) {
                 eventMonitors.append(monitor)
             }
 
             // Monitor significant mouse movement
             if let monitor = NSEvent.addGlobalMonitorForEvents(
-                matching: [.mouseMoved]
-            ) { [weak self] _ in
-                Task { @MainActor in
-                    let currentPos = NSEvent.mouseLocation
-                    guard let self else { return }
+                matching: [.mouseMoved],
+                handler: { [weak self] _ in
+                    Task { @MainActor in
+                        let currentPos = NSEvent.mouseLocation
+                        guard let self else { return }
 
-                    if let lastPos = self.lastMousePosition {
-                        let dx = currentPos.x - lastPos.x
-                        let dy = currentPos.y - lastPos.y
-                        let distance = sqrt(dx * dx + dy * dy)
+                        if let lastPos = self.lastMousePosition {
+                            let dx = currentPos.x - lastPos.x
+                            let dy = currentPos.y - lastPos.y
+                            let distance = sqrt(dx * dx + dy * dy)
 
-                        if distance > self.mouseMovementThreshold {
-                            self.handleUserEvent(.mouseMove(currentPos), event: nil)
+                            if distance > self.mouseMovementThreshold {
+                                self.handleUserEvent(.mouseMove(currentPos), event: nil)
+                                self.lastMousePosition = currentPos
+                            }
+                        } else {
                             self.lastMousePosition = currentPos
                         }
-                    } else {
-                        self.lastMousePosition = currentPos
                     }
                 }
-            } {
+            ) {
                 eventMonitors.append(monitor)
             }
 

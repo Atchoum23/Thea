@@ -893,10 +893,12 @@ public actor THEAMCPServer {
 
         let folder = args["folder"]?.stringValue
 
-        try await NotesIntegration.shared.createNote(title: title, body: body, folderName: folder)
+        _ = try await NotesIntegration.shared.createNote(title: title, body: body, folderName: folder)
         return [.text("Created note: \(title)")]
     }
 
+    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
     private func searchLocation(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let query = args["query"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("query")
@@ -915,6 +917,8 @@ public actor THEAMCPServer {
         return [.text(result)]
     }
 
+    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
     private func getDirections(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let from = args["from"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("from")

@@ -684,7 +684,7 @@ public actor HealthIntelligence {
     }
 
     private func fetchTodayHealthData() async -> [String: Double] {
-        var data: [String: Double] = [:]
+        let data: [String: Double] = [:]
 
         #if canImport(HealthKit)
         // Would fetch from HealthKit

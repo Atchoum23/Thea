@@ -1193,9 +1193,8 @@ public actor FocusModeIntelligence {
         let center = INFocusStatusCenter.default
 
         // Request authorization
-        center.requestAuthorization { status in
-            print("[FocusMode] iOS authorization status: \(status)")
-        }
+        let status = await center.requestAuthorization()
+        print("[FocusMode] iOS authorization status: \(status)")
 
         // Note: iOS doesn't tell us WHICH Focus is active, only that Focus IS active
         // We work around this by using Shortcuts automations
@@ -1585,7 +1584,7 @@ public actor FocusModeIntelligence {
 
         // Send immediate response with emergency services info
         guard let phoneNumber = communication.phoneNumber else { return }
-        let language = communication.languageDetected ?? "en"
+        _ = communication.languageDetected ?? "en"
 
         let emergencyMessage = """
         ⚠️ I received your message and see this may be an emergency.
@@ -1596,7 +1595,7 @@ public actor FocusModeIntelligence {
         I'm notifying you that I'm calling you back immediately.
         """
 
-        await sendMessage(to: phoneNumber, message: emergencyMessage, platform: communication.platform)
+        _ = await sendMessage(to: phoneNumber, message: emergencyMessage, platform: communication.platform)
 
         // Auto-callback if enabled
         if globalSettings.autoCallbackEnabled {
@@ -1732,7 +1731,7 @@ public actor FocusModeIntelligence {
         previousWhatsAppStatus = await getCurrentWhatsAppStatus()
 
         // Update status
-        let script = """
+        _ = """
         tell application "WhatsApp" to activate
         delay 0.5
         tell application "System Events"
@@ -2801,15 +2800,14 @@ public actor FocusModeIntelligence {
     }
 
     private func showVoIPInterceptionNotification(platform: CommunicationPlatform, callInfo: String) async {
-        // Show macOS notification
-        let notification = NSUserNotification()
-        notification.title = "📞 \(platform.displayName) Call During Focus"
-        notification.informativeText = "Incoming call: \(callInfo)\nYour Focus Mode is active."
-        notification.hasActionButton = true
-        notification.actionButtonTitle = "Answer"
-        notification.otherButtonTitle = "Decline & Reply"
-
-        NSUserNotificationCenter.default.deliver(notification)
+        // Show notification via UNUserNotificationCenter
+        let content = UNMutableNotificationContent()
+        content.title = "\u{1F4DE} \(platform.displayName) Call During Focus"
+        content.body = "Incoming call: \(callInfo)\nYour Focus Mode is active."
+        content.sound = .default
+        content.categoryIdentifier = "VOIP_INTERCEPTION"
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        try? await UNUserNotificationCenter.current().add(request)
     }
 
     private func runAppleScriptReturning(_ script: String) async -> String? {
@@ -2897,7 +2895,7 @@ public actor FocusModeIntelligence {
         ]
 
         let message = escalationInquiry[language] ?? escalationInquiry["en"]!
-        await sendMessage(to: contactKey, message: message, platform: .sms)
+        _ = await sendMessage(to: contactKey, message: message, platform: .sms)
 
         print("[Escalation] Sent inquiry to \(contactKey) - waiting for confirmation before notifying user")
     }
@@ -2924,7 +2922,7 @@ public actor FocusModeIntelligence {
 
             // Send confirmation and call instructions
             let template = messageTemplates.autoReply[language] ?? messageTemplates.autoReply["en"]!
-            await sendMessage(to: contactKey, message: template.urgentConfirmed, platform: .sms)
+            _ = await sendMessage(to: contactKey, message: template.urgentConfirmed, platform: .sms)
 
             print("[Escalation] Contact \(contactKey) confirmed urgency - user notified")
         } else if isNegativeResponse(messageContent, language: language) {
@@ -2939,7 +2937,7 @@ public actor FocusModeIntelligence {
             ]
 
             let message = notUrgentReply[language] ?? notUrgentReply["en"]!
-            await sendMessage(to: contactKey, message: message, platform: .sms)
+            _ = await sendMessage(to: contactKey, message: message, platform: .sms)
 
             print("[Escalation] Contact \(contactKey) confirmed NOT urgent - no user notification")
         }

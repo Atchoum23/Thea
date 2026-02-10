@@ -352,7 +352,7 @@ public final class TestGenerator {
                 }
 
                 // Detect functions
-                if let funcMatch = trimmed.range(of: #"(public |private |internal |fileprivate )?(func |init)"#, options: .regularExpression) {
+                if trimmed.range(of: #"(public |private |internal |fileprivate )?(func |init)"#, options: .regularExpression) != nil {
                     let funcName = extractFunctionName(from: trimmed, language: language)
                     let isAsync = trimmed.contains("async")
                     let canThrowError = trimmed.contains("throws")
