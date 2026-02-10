@@ -489,7 +489,7 @@ class LifeTrackingDashboardViewModel: ObservableObject {
 
     private let coordinator = LifeMonitoringCoordinator.shared
 
-    func loadData(for timeRange: LifeTrackingTimeRange = .today) async {
+    func loadData(for _timeRange: LifeTrackingTimeRange = .today) async {
         let stats = coordinator.getStatistics()
 
         totalEvents = stats.todayEventCount

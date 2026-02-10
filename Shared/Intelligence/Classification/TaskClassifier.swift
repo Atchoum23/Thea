@@ -576,7 +576,7 @@ public final class TaskClassifier: ObservableObject {
         return responseText
     }
 
-    private func parseClassificationResponse(_ response: String, for query: String) throws -> ClassificationResult {
+    private func parseClassificationResponse(_ response: String, for _query: String) throws -> ClassificationResult {
         // Extract JSON from response
         let jsonString = extractJSON(from: response)
 

@@ -205,7 +205,7 @@ public final class AnticipatoryIntelligenceCore {
         }
     }
 
-    private func handleContextChange(_ context: AmbientContext) {
+    private func handleContextChange(_ _context: AmbientContext) {
         // Update predictions based on new context
         Task {
             await updatePredictions()

@@ -598,7 +598,7 @@ public final class PreferenceSyncEngine: ObservableObject {
 
     // MARK: - Quota Handling
 
-    private func handleQuotaViolation(changedKeys: [String]) {
+    private func handleQuotaViolation(changedKeys _changedKeys: [String]) {
         // Remove timestamp meta-keys first (they're expendable)
         let cloudDict = cloud.dictionaryRepresentation
         let tsKeys = cloudDict.keys.filter { $0.hasSuffix(".__ts") }

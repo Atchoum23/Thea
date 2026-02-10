@@ -443,7 +443,7 @@ public final class KnowledgeSourceManager: ObservableObject {
     }
 
     /// Extract tutorial features
-    private func extractTutorialFeatures(_ content: String) -> [ExtractedFeature] {
+    private func extractTutorialFeatures(_ _content: String) -> [ExtractedFeature] {
         // Tutorials often contain step-by-step instructions
         [ExtractedFeature(
             name: "Tutorial Content",
@@ -454,7 +454,7 @@ public final class KnowledgeSourceManager: ObservableObject {
     }
 
     /// Extract reference features
-    private func extractReferenceFeatures(_ content: String) -> [ExtractedFeature] {
+    private func extractReferenceFeatures(_ _content: String) -> [ExtractedFeature] {
         [ExtractedFeature(
             name: "Reference Material",
             description: "Technical reference documentation",
@@ -464,7 +464,7 @@ public final class KnowledgeSourceManager: ObservableObject {
     }
 
     /// Extract generic features
-    private func extractGenericFeatures(_ content: String) -> [ExtractedFeature] {
+    private func extractGenericFeatures(_ _content: String) -> [ExtractedFeature] {
         [ExtractedFeature(
             name: "General Content",
             description: "General information and patterns",

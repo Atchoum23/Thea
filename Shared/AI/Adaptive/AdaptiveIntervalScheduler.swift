@@ -568,7 +568,7 @@ public actor AdaptiveIntervalScheduler {
         activity: AdaptiveActivityLevel,
         stability: StabilityState,
         resources: ResourceAvailability,
-        predictedActivity: AdaptiveActivityLevel
+        predictedActivity _predictedActivity: AdaptiveActivityLevel
     ) -> String {
         var parts: [String] = []
 

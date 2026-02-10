@@ -501,7 +501,7 @@ final class CalendarAssistant {
         AssistantCalendarSummary(eventCount: 3, nextEvent: "Team Standup at 10:00 AM", freeTime: 4)
     }
 
-    func getUpcomingEvents(hours: Int) async -> [AssistantCalendarEvent] {
+    func getUpcomingEvents(hours _hours: Int) async -> [AssistantCalendarEvent] {
         // Integrate with EventKit
         []
     }

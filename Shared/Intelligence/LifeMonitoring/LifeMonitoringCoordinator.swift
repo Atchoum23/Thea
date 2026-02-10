@@ -648,9 +648,9 @@ public final class LifeMonitoringCoordinator: ObservableObject {
 
 extension LifeMonitoringCoordinator: LifeMonitorWebSocketServerDelegate {
     nonisolated public func webSocketServer(
-        _ server: LifeMonitorWebSocketServer,
+        _ _server: LifeMonitorWebSocketServer,
         didReceiveData data: Data,
-        from clientId: String
+        from _clientId: String
     ) {
         Task { @MainActor in
             do {
@@ -664,7 +664,7 @@ extension LifeMonitoringCoordinator: LifeMonitorWebSocketServerDelegate {
     }
 
     nonisolated public func webSocketServer(
-        _ server: LifeMonitorWebSocketServer,
+        _ _server: LifeMonitorWebSocketServer,
         clientConnected clientId: String
     ) {
         Task { @MainActor in
@@ -674,7 +674,7 @@ extension LifeMonitoringCoordinator: LifeMonitorWebSocketServerDelegate {
     }
 
     nonisolated public func webSocketServer(
-        _ server: LifeMonitorWebSocketServer,
+        _ _server: LifeMonitorWebSocketServer,
         clientDisconnected clientId: String
     ) {
         Task { @MainActor in
@@ -687,7 +687,7 @@ extension LifeMonitoringCoordinator: LifeMonitorWebSocketServerDelegate {
 
 #if os(macOS)
 extension LifeMonitoringCoordinator: ClipboardMonitorDelegate {
-    nonisolated public func clipboardMonitor(_ monitor: ClipboardMonitor, didCapture content: MonitoredClipboardContent) {
+    nonisolated public func clipboardMonitor(_ _monitor: ClipboardMonitor, didCapture content: MonitoredClipboardContent) {
         Task { @MainActor in
             let event = LifeEvent(
                 type: .clipboardCopy,
@@ -702,7 +702,7 @@ extension LifeMonitoringCoordinator: ClipboardMonitorDelegate {
 }
 
 extension LifeMonitoringCoordinator: MessagesMonitorDelegate {
-    nonisolated public func messagesMonitor(_ monitor: MessagesMonitor, didReceive message: MonitoredMessageEvent) {
+    nonisolated public func messagesMonitor(_ _monitor: MessagesMonitor, didReceive message: MonitoredMessageEvent) {
         Task { @MainActor in
             let event = LifeEvent(
                 type: message.isFromMe ? .messageSent : .messageReceived,
@@ -722,7 +722,7 @@ extension LifeMonitoringCoordinator: MessagesMonitorDelegate {
 }
 
 extension LifeMonitoringCoordinator: MailMonitorDelegate {
-    nonisolated public func mailMonitor(_ monitor: MailMonitor, didReceive email: MailEvent) {
+    nonisolated public func mailMonitor(_ _monitor: MailMonitor, didReceive email: MailEvent) {
         Task { @MainActor in
             let event = LifeEvent(
                 type: .emailReceived,
@@ -741,7 +741,7 @@ extension LifeMonitoringCoordinator: MailMonitorDelegate {
 }
 
 extension LifeMonitoringCoordinator: FileSystemMonitorDelegate {
-    nonisolated public func fileSystemMonitor(_ monitor: FileSystemMonitor, didDetect change: FileSystemChange) {
+    nonisolated public func fileSystemMonitor(_ _monitor: FileSystemMonitor, didDetect change: FileSystemChange) {
         Task { @MainActor in
             let event = LifeEvent(
                 type: .fileActivity,

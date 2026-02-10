@@ -476,12 +476,12 @@ private enum VoiceSound: String {
 
 extension VoiceInteractionEngine {
     /// Set speech rate
-    func setSpeechRate(_ rate: Float) {
+    func setSpeechRate(_ _rate: Float) {
         // Would configure internal synthesizer rate
     }
 
     /// Set preferred voice
-    func setPreferredVoice(identifier: String) {
+    func setPreferredVoice(identifier _identifier: String) {
         // Would configure voice selection
     }
 }

@@ -724,7 +724,7 @@ struct BackupSettingsView: View {
         }
     }
 
-    private func restoreFromBackup(_ backup: BackupSettingsEntry) {
+    private func restoreFromBackup(_ _backup: BackupSettingsEntry) {
         isRestoringBackup = true
         restoreProgress = 0
 

@@ -56,7 +56,7 @@ public class SessionRecordingService: ObservableObject {
     // MARK: - Start Recording
 
     /// Start recording a session
-    public func startRecording(sessionId: String, width: Int, height: Int) throws -> String {
+    public func startRecording(sessionId _sessionId: String, width: Int, height: Int) throws -> String {
         guard !isRecording else {
             throw RecordingError.alreadyRecording
         }

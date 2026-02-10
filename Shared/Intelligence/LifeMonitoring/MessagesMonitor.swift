@@ -16,7 +16,7 @@ import SQLite3
 // MARK: - Messages Monitor Protocol
 
 public protocol MessagesMonitorDelegate: AnyObject, Sendable {
-    nonisolated func messagesMonitor(_ monitor: MessagesMonitor, didReceive message: MonitoredMessageEvent)
+    nonisolated func messagesMonitor(_ _monitor: MessagesMonitor, didReceive message: MonitoredMessageEvent)
 }
 
 // MARK: - Messages Monitor
@@ -278,7 +278,7 @@ public actor MessagesMonitor {
         return appleEpoch.addingTimeInterval(seconds)
     }
 
-    private func lookupContactName(_ handleId: String) -> String? {
+    private func lookupContactName(_ _handleId: String) -> String? {
         // In a full implementation, this would query the Contacts database
         // For now, return nil (use handleId as fallback)
         nil

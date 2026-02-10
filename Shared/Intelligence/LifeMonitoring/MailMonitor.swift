@@ -13,7 +13,7 @@ import os.log
 // MARK: - Mail Monitor Protocol
 
 public protocol MailMonitorDelegate: AnyObject, Sendable {
-    nonisolated func mailMonitor(_ monitor: MailMonitor, didReceive email: MailEvent)
+    nonisolated func mailMonitor(_ _monitor: MailMonitor, didReceive email: MailEvent)
 }
 
 // MARK: - Mail Monitor
@@ -267,7 +267,7 @@ public actor MailMonitor {
         return nil
     }
 
-    private func determineImportance(sender: String, subject: String) -> Bool {
+    private func determineImportance(sender _sender: String, subject: String) -> Bool {
         let lowercasedSubject = subject.lowercased()
 
         // Keywords that indicate importance

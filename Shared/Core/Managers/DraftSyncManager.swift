@@ -312,7 +312,7 @@ public final class DraftSyncManager: ObservableObject {
         cloudKeyValueStore.synchronize()
     }
 
-    @objc private func cloudStoreDidChange(_ notification: Notification) {
+    @objc private func cloudStoreDidChange(_ _notification: Notification) {
         guard crossDeviceSyncEnabled else { return }
 
         Task { @MainActor in

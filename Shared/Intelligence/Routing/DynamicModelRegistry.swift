@@ -165,7 +165,7 @@ final class DynamicModelRegistry: ObservableObject {
         return "openrouter"
     }
 
-    private func detectCapabilities(from modelID: String, data: [String: Any]) -> [ModelCapability] {
+    private func detectCapabilities(from modelID: String, data _data: [String: Any]) -> [ModelCapability] {
         var caps: [ModelCapability] = [.chat]
         let id = modelID.lowercased()
 

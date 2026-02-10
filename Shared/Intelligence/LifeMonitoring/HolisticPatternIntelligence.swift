@@ -574,7 +574,7 @@ public final class HolisticPatternIntelligence: ObservableObject {
         }
     }
 
-    private func predictNextOccurrence(from observations: [Date], pattern: DetectedLifePattern) -> Date? {
+    private func predictNextOccurrence(from observations: [Date], pattern _pattern: DetectedLifePattern) -> Date? {
         guard observations.count >= 3 else { return nil }
 
         let sorted = observations.sorted()

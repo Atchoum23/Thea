@@ -280,7 +280,7 @@ public final class ModelRouter: ObservableObject {
 
     private func fallbackDecision(
         for classification: ClassificationResult,
-        context: RoutingContext
+        context _context: RoutingContext
     ) -> RoutingDecision {
         // Use default model from config
         let defaultModel = TheaConfig.shared.ai.defaultModel

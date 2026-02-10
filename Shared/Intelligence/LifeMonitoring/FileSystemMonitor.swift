@@ -13,7 +13,7 @@ import os.log
 // MARK: - File System Monitor Protocol
 
 public protocol FileSystemMonitorDelegate: AnyObject, Sendable {
-    nonisolated func fileSystemMonitor(_ monitor: FileSystemMonitor, didDetect change: FileSystemChange)
+    nonisolated func fileSystemMonitor(_ _monitor: FileSystemMonitor, didDetect change: FileSystemChange)
 }
 
 // MARK: - File System Monitor

@@ -618,7 +618,7 @@ public final class UnifiedIntelligenceHub {
 
     // MARK: - Private Event Handlers
 
-    private func handleQueryReceived(query: String, conversationId: UUID) async {
+    private func handleQueryReceived(query: String, conversationId _conversationId: UUID) async {
         hubLogger.debug("📝 Query received: \(query.prefix(50))...")
 
         // Check for repeated queries (potential blocker)

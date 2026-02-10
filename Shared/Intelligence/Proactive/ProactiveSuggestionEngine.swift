@@ -533,7 +533,7 @@ public final class SmartSuggestionEngine: ObservableObject {
         activeSuggestions.removeAll { $0.isExpired }
     }
 
-    private func findMatchingPattern(type: String, context: [String: String]) -> Int? {
+    private func findMatchingPattern(type: String, context _context: [String: String]) -> Int? {
         patterns.firstIndex { pattern in
             pattern.description.lowercased().contains(type.lowercased()) ||
             type.lowercased().contains(pattern.description.lowercased())

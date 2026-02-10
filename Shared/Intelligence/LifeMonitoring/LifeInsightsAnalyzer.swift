@@ -302,7 +302,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
     // MARK: - Insight Generation
 
     private func generateInsights(
-        from events: [LifeEvent],
+        from _events: [LifeEvent],
         patterns: [InsightDetectedLifePattern]
     ) async -> [AnalyzedLifeInsight] {
         var insights: [AnalyzedLifeInsight] = []
@@ -448,7 +448,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
     // MARK: - Proactive Opportunities
 
     private func checkProactiveOpportunities(
-        from events: [LifeEvent],
+        from _events: [LifeEvent],
         insights: [AnalyzedLifeInsight]
     ) async {
         for insight in insights where insight.isActionable {
@@ -468,7 +468,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
 
     // MARK: - Daily Summary
 
-    private func updateDailySummary(with events: [LifeEvent]) async {
+    private func updateDailySummary(with _events: [LifeEvent]) async {
         let aggregation = eventAggregator.getAggregation()
 
         dailySummary = DailySummary(

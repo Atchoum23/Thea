@@ -541,7 +541,7 @@ final class AIModelGovernor {
     }
 
     private func buildCleanupReasoning(
-        model: LocalModel,
+        model _model: LocalModel,
         value: ModelValueAssessment,
         pressure: Double
     ) -> String {

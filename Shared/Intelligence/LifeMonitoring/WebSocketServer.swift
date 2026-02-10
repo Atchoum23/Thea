@@ -13,16 +13,16 @@ import os.log
 @MainActor
 public protocol LifeMonitorWebSocketServerDelegate: AnyObject, Sendable {
     nonisolated func webSocketServer(
-        _ server: LifeMonitorWebSocketServer,
+        _ _server: LifeMonitorWebSocketServer,
         didReceiveData data: Data,
-        from clientId: String
+        from _clientId: String
     )
     nonisolated func webSocketServer(
-        _ server: LifeMonitorWebSocketServer,
+        _ _server: LifeMonitorWebSocketServer,
         clientConnected clientId: String
     )
     nonisolated func webSocketServer(
-        _ server: LifeMonitorWebSocketServer,
+        _ _server: LifeMonitorWebSocketServer,
         clientDisconnected clientId: String
     )
 }
@@ -218,7 +218,7 @@ public actor LifeMonitorWebSocketServer {
         }
     }
 
-    private func handleSyncRequest(_ json: [String: Any], clientId: String) {
+    private func handleSyncRequest(_ _json: [String: Any], clientId: String) {
         // Send back acknowledgment with current state
         let response: [String: Any] = [
             "success": true,

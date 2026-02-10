@@ -13,7 +13,7 @@ import os.log
 // MARK: - Clipboard Monitor Protocol
 
 public protocol ClipboardMonitorDelegate: AnyObject, Sendable {
-    nonisolated func clipboardMonitor(_ monitor: ClipboardMonitor, didCapture content: MonitoredClipboardContent)
+    nonisolated func clipboardMonitor(_ _monitor: ClipboardMonitor, didCapture content: MonitoredClipboardContent)
 }
 
 // MARK: - Clipboard Monitor

@@ -178,7 +178,7 @@ public class MediaMonitor: ObservableObject {
             }
         }
 
-        private func checkNativeAppPlayback(app: NSRunningApplication, service: MediaService) async {
+        private func checkNativeAppPlayback(app _app: NSRunningApplication, service: MediaService) async {
             // Use AppleScript to check playback state
             let appName: String
             switch service {
