@@ -322,16 +322,41 @@ final class AutonomousTaskExecutor {
     }
 
     private func checkNetworkConnected(type: NetworkType) async -> Bool {
-        let networkInfo = UnifiedDeviceAwareness.shared.networkInfo
-        guard networkInfo.isConnected else { return false }
+        // Check basic reachability via SCNetworkReachability
+        var zeroAddress = sockaddr_in()
+        zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
+        zeroAddress.sin_family = sa_family_t(AF_INET)
+
+        guard let reachability = withUnsafePointer(to: &zeroAddress, {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                SCNetworkReachabilityCreateWithAddress(nil, $0)
+            }
+        }) else { return false }
+
+        var flags: SCNetworkReachabilityFlags = []
+        guard SCNetworkReachabilityGetFlags(reachability, &flags) else { return false }
+
+        let isReachable = flags.contains(.reachable)
+        let needsConnection = flags.contains(.connectionRequired)
+        guard isReachable && !needsConnection else { return false }
 
         switch type {
         case .any:
             return true
         case .wifi:
-            return networkInfo.wifiSSID != nil
+            // On macOS, non-cellular reachable means WiFi/Ethernet
+            // On iOS, check that WWAN flag is NOT set
+            #if os(iOS)
+            return !flags.contains(.isWWAN)
+            #else
+            return true
+            #endif
         case .cellular:
-            return networkInfo.connectionType == "cellular"
+            #if os(iOS)
+            return flags.contains(.isWWAN)
+            #else
+            return false // macOS has no cellular
+            #endif
         }
     }
 

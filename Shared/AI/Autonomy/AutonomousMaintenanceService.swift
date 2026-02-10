@@ -224,9 +224,6 @@ public actor AutonomousMaintenanceService {
 
     private func maintenanceLoop() async {
         while !Task.isCancelled && isRunning {
-            // Check what needs to run
-            let now = Date()
-
             // MCP cleanup
             if shouldRunTask(lastRun: lastMCPCleanup, interval: configuration.mcpCleanupInterval) {
                 await cleanUnusedMCPServers()
