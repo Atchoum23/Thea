@@ -212,16 +212,24 @@ struct ContentView: View {
         }
     }
 
-    /// Sidebar toggle button — shown in detail column toolbar so it's always accessible
+    /// Sidebar toggle button — shown in detail column toolbar so it's always accessible.
+    /// Cycles: .all → .doubleColumn (hide nav sidebar) → .detailOnly (hide conversations too) → .all
     private var sidebarToggleButton: some View {
         Button {
-            withAnimation {
-                columnVisibility = columnVisibility == .detailOnly ? .all : .detailOnly
+            withAnimation(.easeInOut(duration: 0.25)) {
+                switch columnVisibility {
+                case .all:
+                    columnVisibility = .doubleColumn
+                case .doubleColumn:
+                    columnVisibility = .detailOnly
+                default:
+                    columnVisibility = .all
+                }
             }
         } label: {
-            Image(systemName: columnVisibility == .detailOnly ? "sidebar.left" : "sidebar.right")
+            Image(systemName: columnVisibility == .all ? "sidebar.left" : "sidebar.right")
         }
-        .help(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar")
+        .help(columnVisibility == .detailOnly ? "Show All Panels" : (columnVisibility == .doubleColumn ? "Hide Conversations" : "Hide Sidebar"))
     }
 
     // MARK: - Chat List
