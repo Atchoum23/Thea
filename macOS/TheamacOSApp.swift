@@ -248,10 +248,19 @@ struct TheamacOSApp: App {
         // TODO: Restore window management after implementation
         // WindowManager.shared.setModelContext(context)
 
-        // TODO: Restore life tracking managers (macOS) after implementation
-        // ScreenTimeTracker.shared.setModelContext(context)
-        // InputTrackingManager.shared.setModelContext(context)
-        // BrowserHistoryTracker.shared.setModelContext(context)
+        // Life Monitoring — deferred startup to avoid blocking app launch
+        Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            await LifeMonitoringCoordinator.shared.startMonitoring()
+            logger.info("LifeMonitoringCoordinator started")
+        }
+
+        // Voice / Wake Word — deferred init (guarded by user preference)
+        Task {
+            try? await Task.sleep(for: .seconds(1))
+            _ = VoiceFirstModeManager.shared // Initializes wake word listening if enabled
+            logger.info("VoiceFirstModeManager initialized")
+        }
     }
 
     private func configureWindow() {

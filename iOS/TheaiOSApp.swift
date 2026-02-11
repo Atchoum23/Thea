@@ -50,5 +50,17 @@ struct TheaiOSApp: App {
         FinancialManager.shared.setModelContext(context)
         MigrationManager.shared.setModelContext(context)
         MigrationEngine.shared.setModelContext(context)
+
+        // Life Monitoring — deferred startup to avoid blocking app launch
+        Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            await LifeMonitoringCoordinator.shared.startMonitoring()
+        }
+
+        // Voice / Wake Word — deferred init (guarded by user preference)
+        Task {
+            try? await Task.sleep(for: .seconds(1))
+            _ = VoiceFirstModeManager.shared
+        }
     }
 }
