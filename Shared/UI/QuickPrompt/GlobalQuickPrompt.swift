@@ -455,4 +455,3 @@ public final class GlobalQuickPromptManager: ObservableObject {
         response = nil
     }
 }
-
