@@ -68,7 +68,7 @@ public final class RemoteMacBridge {
     /// Tailscale fallback endpoints when Bonjour discovery fails (off-LAN)
     private let tailscaleEndpoints: [(name: String, host: String, port: UInt16)] = [
         ("Mac Studio (Tailscale)", "100.121.35.50", 8765),
-        ("MacBook Air (Tailscale)", "100.74.240.60", 8765),
+        ("MacBook Air (Tailscale)", "100.74.240.60", 8765)
     ]
 
     private init() {}
