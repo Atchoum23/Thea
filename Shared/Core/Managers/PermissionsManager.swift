@@ -724,7 +724,7 @@ final class PermissionsManager {
 
     // MARK: - Helper Methods
 
-    private func convertSpeechStatus(_ status: SFSpeechRecognizerAuthorizationStatus) -> PermissionStatus {
+    func convertSpeechStatus(_ status: SFSpeechRecognizerAuthorizationStatus) -> PermissionStatus {
         switch status {
         case .authorized:
             return .authorized
@@ -739,7 +739,7 @@ final class PermissionsManager {
         }
     }
 
-    private func convertPhotoStatus(_ status: PHAuthorizationStatus) -> PermissionStatus {
+    func convertPhotoStatus(_ status: PHAuthorizationStatus) -> PermissionStatus {
         switch status {
         case .authorized, .limited:
             return .authorized
