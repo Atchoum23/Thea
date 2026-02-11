@@ -86,6 +86,12 @@ final class RemoteInferenceClient: ObservableObject {
     private var reconnectAttempts = 0
     private let maxReconnectAttempts = 5
 
+    /// Tailscale fallback endpoints when Bonjour discovery fails (off-LAN)
+    private let tailscaleEndpoints: [(name: String, host: String, port: UInt16)] = [
+        ("Mac Studio (Tailscale)", "100.121.35.50", 8765),
+        ("MacBook Air (Tailscale)", "100.74.240.60", 8765)
+    ]
+
     // MARK: - Bonjour Discovery
 
     func startDiscovery() {
@@ -257,6 +263,47 @@ final class RemoteInferenceClient: ObservableObject {
             newConnection.start(queue: queue)
             connection = newConnection
         }
+    }
+
+    // MARK: - Auto-Connect with Tailscale Fallback
+
+    /// Automatically discover and connect to the best available server.
+    /// Tries Bonjour first (5s), then falls back to Tailscale endpoints.
+    func autoConnect() async {
+        startDiscovery()
+
+        // Wait for Bonjour discovery
+        try? await Task.sleep(for: .seconds(5))
+
+        // If Bonjour found servers, connect to the first one
+        if let server = discoveredServers.first {
+            connect(to: server)
+            return
+        }
+
+        // Bonjour timeout — fall back to Tailscale endpoints
+        addTailscaleEndpoints()
+
+        if let server = discoveredServers.first {
+            connect(to: server)
+        }
+    }
+
+    /// Adds Tailscale-based endpoints as fallback when Bonjour discovery times out
+    private func addTailscaleEndpoints() {
+        let tailscaleServers = tailscaleEndpoints.map { endpoint in
+            DiscoveredInferenceServer(
+                id: "tailscale-\(endpoint.host)",
+                name: endpoint.name,
+                endpoint: NWEndpoint.hostPort(
+                    host: NWEndpoint.Host(endpoint.host),
+                    port: NWEndpoint.Port(integerLiteral: endpoint.port)
+                ),
+                platform: "macOS"
+            )
+        }
+        discoveredServers.append(contentsOf: tailscaleServers)
+        logger.info("Added \(tailscaleServers.count) Tailscale fallback endpoint(s)")
     }
 
     // MARK: - Send / Receive
