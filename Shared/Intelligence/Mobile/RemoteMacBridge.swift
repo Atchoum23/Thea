@@ -65,6 +65,12 @@ public final class RemoteMacBridge {
     private let serviceType = "_thea._tcp"
     private let browseQueue = DispatchQueue(label: "ai.thea.mac-discovery")
 
+    /// Tailscale fallback endpoints when Bonjour discovery fails (off-LAN)
+    private let tailscaleEndpoints: [(name: String, host: String, port: UInt16)] = [
+        ("Mac Studio (Tailscale)", "100.121.35.50", 8765),
+        ("MacBook Air (Tailscale)", "100.74.240.60", 8765),
+    ]
+
     private init() {}
 
     // MARK: - Discovery
@@ -286,17 +292,46 @@ public final class RemoteMacBridge {
 
     // MARK: - Auto-Connect
 
-    /// Automatically connect to the best available Mac
+    /// Automatically connect to the best available Mac.
+    /// Tries Bonjour first (5s), then falls back to Tailscale endpoints.
     public func autoConnect() async {
         startDiscovery()
 
-        // Wait for discovery
-        try? await Task.sleep(for: .seconds(3))
+        // Wait for Bonjour discovery
+        try? await Task.sleep(for: .seconds(5))
 
-        // Connect to first available Mac
+        // If Bonjour found Macs, connect to the first one
+        if let mac = discoveredMacs.first {
+            try? await connect(to: mac)
+            return
+        }
+
+        // Bonjour timeout — fall back to Tailscale endpoints
+        addTailscaleEndpoints()
+
         if let mac = discoveredMacs.first {
             try? await connect(to: mac)
         }
+    }
+
+    /// Adds Tailscale-based endpoints as fallback when Bonjour discovery times out
+    private func addTailscaleEndpoints() {
+        let tailscaleMacs = tailscaleEndpoints.map { endpoint in
+            RemoteMacInfo(
+                id: "tailscale-\(endpoint.host)",
+                name: endpoint.name,
+                host: endpoint.host,
+                port: Int(endpoint.port),
+                capabilities: .init(
+                    maxModelSize: "Unknown",
+                    hasGPU: true,
+                    ramGB: 0,
+                    availableModels: []
+                )
+            )
+        }
+        discoveredMacs.append(contentsOf: tailscaleMacs)
+        MobileIntelligenceOrchestrator.shared.setRemoteMacAvailable(!discoveredMacs.isEmpty)
     }
 }
 
