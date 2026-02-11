@@ -55,7 +55,7 @@ struct RateLimitMiddleware: AsyncMiddleware {
     }
 
     private func checkRateLimit(clientId: String, request _: Request) async throws -> Bool {
-        return await InMemoryRateLimiter.shared.checkLimit(
+        await InMemoryRateLimiter.shared.checkLimit(
             clientId: clientId,
             limit: requestsPerMinute,
             windowSeconds: windowSeconds
