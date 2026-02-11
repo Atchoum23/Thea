@@ -65,21 +65,21 @@ final class PermissionsManager {
     private(set) var lastRefreshDate: Date?
 
     // Legacy permission states (for backward compatibility)
-    private(set) var speechRecognitionStatus: PermissionStatus = .notDetermined
-    private(set) var microphoneStatus: PermissionStatus = .notDetermined
-    private(set) var notificationsStatus: PermissionStatus = .notDetermined
-    private(set) var contactsStatus: PermissionStatus = .notDetermined
-    private(set) var calendarStatus: PermissionStatus = .notDetermined
-    private(set) var photosStatus: PermissionStatus = .notDetermined
-    private(set) var locationStatus: PermissionStatus = .notDetermined
-    private(set) var fullDiskAccessStatus: PermissionStatus = .notDetermined
-    private(set) var cameraStatus: PermissionStatus = .notDetermined
-    private(set) var bluetoothStatus: PermissionStatus = .notDetermined
-    private(set) var siriStatus: PermissionStatus = .notDetermined
-    private(set) var healthStatus: PermissionStatus = .notDetermined
-    private(set) var homeKitStatus: PermissionStatus = .notDetermined
-    private(set) var accessibilityStatus: PermissionStatus = .notDetermined
-    private(set) var screenRecordingStatus: PermissionStatus = .notDetermined
+    var speechRecognitionStatus: PermissionStatus = .notDetermined
+    var microphoneStatus: PermissionStatus = .notDetermined
+    var notificationsStatus: PermissionStatus = .notDetermined
+    var contactsStatus: PermissionStatus = .notDetermined
+    var calendarStatus: PermissionStatus = .notDetermined
+    var photosStatus: PermissionStatus = .notDetermined
+    var locationStatus: PermissionStatus = .notDetermined
+    var fullDiskAccessStatus: PermissionStatus = .notDetermined
+    var cameraStatus: PermissionStatus = .notDetermined
+    var bluetoothStatus: PermissionStatus = .notDetermined
+    var siriStatus: PermissionStatus = .notDetermined
+    var healthStatus: PermissionStatus = .notDetermined
+    var homeKitStatus: PermissionStatus = .notDetermined
+    var accessibilityStatus: PermissionStatus = .notDetermined
+    var screenRecordingStatus: PermissionStatus = .notDetermined
 
     private init() {
         checkAllPermissions()
