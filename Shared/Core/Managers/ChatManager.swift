@@ -3,6 +3,12 @@ import Foundation
 import os.log
 @preconcurrency import SwiftData
 
+#if canImport(AppKit)
+    import AppKit
+#elseif canImport(UIKit)
+    import UIKit
+#endif
+
 private let chatLogger = Logger(subsystem: "ai.thea.app", category: "ChatManager")
 
 private func debugLog(_ message: String) {
@@ -272,25 +278,39 @@ final class ChatManager: ObservableObject {
             model: model
         ))
 
-        // Add conversation messages with per-message device annotations
-        apiMessages += conversation.messages.map { msg in
+        // Add conversation messages with per-message device annotations and OCR
+        for msg in conversation.messages {
             var content = msg.content
+
+            // For user messages with image attachments, extract OCR text as context
+            #if os(macOS) || os(iOS)
+            if msg.messageRole == .user, case let .multimodal(parts) = msg.content {
+                let ocrTexts = await extractOCRFromImageParts(parts)
+                if !ocrTexts.isEmpty {
+                    let ocrContext = "[Image text (OCR):\n\(ocrTexts.joined(separator: "\n---\n"))]"
+                    let originalText = msg.content.textValue
+                    content = .text("\(originalText)\n\n\(ocrContext)")
+                }
+            }
+            #endif
+
             // Annotate user messages with their origin device if different from current
             if msg.messageRole == .user, let msgDeviceName = msg.deviceName,
                msgDeviceName != currentDevice.name
             {
                 let annotation = "[Sent from \(msgDeviceName)]"
-                let originalText = msg.content.textValue
+                let originalText = content.textValue
                 content = .text("\(annotation) \(originalText)")
             }
-            return AIMessage(
+
+            apiMessages.append(AIMessage(
                 id: msg.id,
                 conversationID: msg.conversationID,
                 role: msg.messageRole,
                 content: content,
                 timestamp: msg.timestamp,
                 model: msg.model ?? model
-            )
+            ))
         }
 
         // Stream response - use defer to ALWAYS reset streaming state
@@ -561,6 +581,45 @@ final class ChatManager: ObservableObject {
         let model = AppConfiguration.shared.providerConfig.defaultModel
         return (provider, model)
     }
+
+    // MARK: - Vision OCR for Image Attachments
+
+    #if os(macOS) || os(iOS)
+    /// Extracts text from image parts in a multimodal message using VisionOCR.
+    private func extractOCRFromImageParts(_ parts: [ContentPart]) async -> [String] {
+        var ocrTexts: [String] = []
+        for part in parts {
+            if case let .image(imageData) = part.type {
+                guard let cgImage = Self.cgImageFromData(imageData) else { continue }
+                do {
+                    let text = try await VisionOCR.shared.extractAllText(from: cgImage)
+                    if !text.isEmpty {
+                        ocrTexts.append(text)
+                    }
+                } catch {
+                    debugLog("⚠️ VisionOCR failed for image attachment: \(error.localizedDescription)")
+                }
+            }
+        }
+        return ocrTexts
+    }
+
+    private static func cgImageFromData(_ data: Data) -> CGImage? {
+        #if canImport(AppKit)
+        guard let nsImage = NSImage(data: data), let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            return nil
+        }
+        return cgImage
+        #elseif canImport(UIKit)
+        guard let uiImage = UIImage(data: data), let cgImage = uiImage.cgImage else {
+            return nil
+        }
+        return cgImage
+        #else
+        return nil
+        #endif
+    }
+    #endif
 
     // MARK: - Device Context for AI
 
