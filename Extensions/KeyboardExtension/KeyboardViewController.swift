@@ -340,34 +340,44 @@ class KeyboardViewController: UIInputViewController {
     }
 
     private func completeWithAI(context: String, action: String) {
-        // Save request to shared storage for main app to process
-        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
-            return
+        // Show loading state on suggestion bar
+        setSuggestionsLoading(true)
+
+        Task {
+            let result = await KeyboardAIService.shared.performAction(context: context, action: action)
+
+            await MainActor.run {
+                self.setSuggestionsLoading(false)
+
+                if let text = result {
+                    if action == "complete" {
+                        // For completion, append the result
+                        self.textDocumentProxy.insertText(text)
+                    } else {
+                        // For rewrites (grammar, professional, casual, translate):
+                        // Delete the original context then insert replacement
+                        let contextLength = context.count
+                        for _ in 0 ..< contextLength {
+                            self.textDocumentProxy.deleteBackward()
+                        }
+                        self.textDocumentProxy.insertText(text)
+                    }
+                }
+            }
         }
+    }
 
-        let request: [String: Any] = [
-            "context": context,
-            "action": action,
-            "timestamp": Date().timeIntervalSince1970
-        ]
-
-        let requestPath = containerURL.appendingPathComponent("keyboard_request.json")
-        if let data = try? JSONSerialization.data(withJSONObject: request) {
-            try? data.write(to: requestPath)
+    private func setSuggestionsLoading(_ loading: Bool) {
+        for view in suggestionBar.arrangedSubviews {
+            if let button = view as? UIButton {
+                if loading {
+                    button.setTitle("···", for: .normal)
+                    button.isEnabled = false
+                } else {
+                    button.isEnabled = true
+                }
+            }
         }
-
-        // Notify main app
-        let notificationName = CFNotificationName("app.thea.KeyboardRequest" as CFString)
-        CFNotificationCenterPostNotification(
-            CFNotificationCenterGetDarwinNotifyCenter(),
-            notificationName,
-            nil,
-            nil,
-            true
-        )
-
-        // Show loading indicator
-        // In production, would wait for response from main app
     }
 
     private func loadUserPreferences() {

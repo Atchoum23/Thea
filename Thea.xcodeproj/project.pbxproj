@@ -555,6 +555,7 @@
 		57FC737122BAE94597B7BE77 /* OrchestrationIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95BB275BABEA672FCC727F7 /* OrchestrationIntegrationTests.swift */; };
 		5803B333EDBC63757019F62A /* PrivacyModeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE531DCD5B8951FE256555E /* PrivacyModeService.swift */; };
 		581EBB5DBB01C9F20957C1F5 /* OllamaAgentLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB5C8EEF65B9FE928E53EDA /* OllamaAgentLoop.swift */; };
+		58D3CDEDD269E1C31555ADFC /* KeyboardAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC886AE87E5DF7E3F2CB2125 /* KeyboardAIService.swift */; };
 		591614B431A7C20216FA9B54 /* OrchestratorSettingsViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25663A06DB0B6830B3824E4E /* OrchestratorSettingsViewSections.swift */; };
 		59309C6D80B0038987379A7E /* FinancialDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5915F5D74F8946C40FA0A6DF /* FinancialDashboardView.swift */; };
 		59732CF91A5DDE9FB7DF2D3F /* AccessibilityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227EFCDDE7E3D6F6855CFBB9 /* AccessibilityBridge.swift */; };
@@ -2446,6 +2447,7 @@
 		EC3A413E9AB463D1B73AA95E /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		EC40F97CF53141914AEAC0ED /* LocalModelProviderTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModelProviderTypes.swift; sourceTree = "<group>"; };
 		EC7671DAA4A40F6CE6E80A3F /* UserPreferenceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferenceModel.swift; sourceTree = "<group>"; };
+		EC886AE87E5DF7E3F2CB2125 /* KeyboardAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardAIService.swift; sourceTree = "<group>"; };
 		EC91D3F97C723D9F52B0F5BD /* AutonomyPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomyPolicy.swift; sourceTree = "<group>"; };
 		EC9E575E743A3367C2D7BB93 /* UnifiedContextEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedContextEngine.swift; sourceTree = "<group>"; };
 		ECD96E9941D80136C12E5C84 /* ModelGovernanceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelGovernanceEngine.swift; sourceTree = "<group>"; };
@@ -4690,6 +4692,7 @@
 			isa = PBXGroup;
 			children = (
 				E5FFBB71223095FF9C63940D /* Info.plist */,
+				EC886AE87E5DF7E3F2CB2125 /* KeyboardAIService.swift */,
 				9DAD9BF51CB2C2E1E41635F3 /* KeyboardExtension.entitlements */,
 				4EEA82EEE7E1488643C87233 /* KeyboardViewController.swift */,
 			);
@@ -7048,6 +7051,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				58D3CDEDD269E1C31555ADFC /* KeyboardAIService.swift in Sources */,
 				A7DA5E52AE503CC3EA6D9542 /* KeyboardViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
