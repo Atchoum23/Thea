@@ -21,6 +21,9 @@ public protocol HealthDataProvider: Actor {
 
     /// Detect cardiac anomalies in heart rate data
     func detectCardiacAnomalies(in records: [HeartRateRecord]) async throws -> [CardiacAnomaly]
+
+    /// Fetch VO2 Max data for a date range
+    func fetchVO2MaxData(for dateRange: DateInterval) async throws -> [VO2MaxRecord]
 }
 
 // MARK: - Health Observer Protocol

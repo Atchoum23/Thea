@@ -41,7 +41,8 @@ import Foundation
                 HKObjectType.quantityType(forIdentifier: .flightsClimbed)!,
                 HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!,
                 HKObjectType.quantityType(forIdentifier: .bloodPressureSystolic)!,
-                HKObjectType.quantityType(forIdentifier: .bloodPressureDiastolic)!
+                HKObjectType.quantityType(forIdentifier: .bloodPressureDiastolic)!,
+                HKObjectType.quantityType(forIdentifier: .vo2Max)!
             ]
 
             do {
@@ -449,6 +450,57 @@ import Foundation
 
             return anomalies
         }
+
+        // MARK: - VO2 Max Data
+
+        public func fetchVO2MaxData(for dateRange: DateInterval) async throws -> [VO2MaxRecord] {
+            guard isAuthorized else {
+                throw HealthError.authorizationDenied
+            }
+
+            guard dateRange.duration > 0 else {
+                throw HealthError.invalidDateRange
+            }
+
+            let vo2MaxType = HKObjectType.quantityType(forIdentifier: .vo2Max)!
+            let predicate = HKQuery.predicateForSamples(
+                withStart: dateRange.start,
+                end: dateRange.end,
+                options: .strictStartDate
+            )
+
+            return try await withCheckedThrowingContinuation { continuation in
+                let query = HKSampleQuery(
+                    sampleType: vo2MaxType,
+                    predicate: predicate,
+                    limit: HKObjectQueryNoLimit,
+                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]
+                ) { _, samples, error in
+                    if let error {
+                        continuation.resume(throwing: HealthError.fetchFailed(error.localizedDescription))
+                        return
+                    }
+
+                    guard let samples = samples as? [HKQuantitySample] else {
+                        continuation.resume(returning: [])
+                        return
+                    }
+
+                    let unit = HKUnit(from: "mL/kg*min")
+                    let records = samples.map { sample -> VO2MaxRecord in
+                        VO2MaxRecord(
+                            timestamp: sample.startDate,
+                            value: sample.quantity.doubleValue(for: unit),
+                            source: .healthKit
+                        )
+                    }
+
+                    continuation.resume(returning: records)
+                }
+
+                healthStore.execute(query)
+            }
+        }
     }
 
 #else
@@ -478,6 +530,10 @@ import Foundation
         }
 
         public func detectCardiacAnomalies(in _: [HeartRateRecord]) async throws -> [CardiacAnomaly] {
+            throw HealthError.healthKitUnavailable
+        }
+
+        public func fetchVO2MaxData(for _: DateInterval) async throws -> [VO2MaxRecord] {
             throw HealthError.healthKitUnavailable
         }
     }

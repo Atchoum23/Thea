@@ -439,6 +439,116 @@ public struct BloodPressureReading: Sendable, Codable, Identifiable {
     }
 }
 
+// MARK: - VO2 Max Models
+
+/// VO2 Max fitness level classification
+public enum VO2MaxFitnessLevel: String, Sendable, Codable {
+    case poor
+    case belowAverage
+    case average
+    case aboveAverage
+    case good
+    case excellent
+    case superior
+
+    public var displayName: String {
+        switch self {
+        case .poor: "Poor"
+        case .belowAverage: "Below Average"
+        case .average: "Average"
+        case .aboveAverage: "Above Average"
+        case .good: "Good"
+        case .excellent: "Excellent"
+        case .superior: "Superior"
+        }
+    }
+
+    /// Classify VO2 Max value based on age and sex
+    public static func classify(vo2Max: Double, age: Int, isMale: Bool) -> VO2MaxFitnessLevel {
+        // Simplified classification based on ACSM guidelines
+        if isMale {
+            switch age {
+            case ..<30:
+                if vo2Max >= 55 { return .superior }
+                else if vo2Max >= 49 { return .excellent }
+                else if vo2Max >= 43 { return .good }
+                else if vo2Max >= 37 { return .aboveAverage }
+                else if vo2Max >= 33 { return .average }
+                else if vo2Max >= 29 { return .belowAverage }
+                else { return .poor }
+            case 30 ..< 40:
+                if vo2Max >= 52 { return .superior }
+                else if vo2Max >= 45 { return .excellent }
+                else if vo2Max >= 40 { return .good }
+                else if vo2Max >= 35 { return .aboveAverage }
+                else if vo2Max >= 31 { return .average }
+                else if vo2Max >= 27 { return .belowAverage }
+                else { return .poor }
+            default:
+                if vo2Max >= 46 { return .superior }
+                else if vo2Max >= 40 { return .excellent }
+                else if vo2Max >= 36 { return .good }
+                else if vo2Max >= 31 { return .aboveAverage }
+                else if vo2Max >= 27 { return .average }
+                else if vo2Max >= 23 { return .belowAverage }
+                else { return .poor }
+            }
+        } else {
+            switch age {
+            case ..<30:
+                if vo2Max >= 49 { return .superior }
+                else if vo2Max >= 43 { return .excellent }
+                else if vo2Max >= 37 { return .good }
+                else if vo2Max >= 32 { return .aboveAverage }
+                else if vo2Max >= 28 { return .average }
+                else if vo2Max >= 24 { return .belowAverage }
+                else { return .poor }
+            case 30 ..< 40:
+                if vo2Max >= 45 { return .superior }
+                else if vo2Max >= 39 { return .excellent }
+                else if vo2Max >= 34 { return .good }
+                else if vo2Max >= 29 { return .aboveAverage }
+                else if vo2Max >= 25 { return .average }
+                else if vo2Max >= 21 { return .belowAverage }
+                else { return .poor }
+            default:
+                if vo2Max >= 40 { return .superior }
+                else if vo2Max >= 35 { return .excellent }
+                else if vo2Max >= 31 { return .good }
+                else if vo2Max >= 26 { return .aboveAverage }
+                else if vo2Max >= 22 { return .average }
+                else if vo2Max >= 19 { return .belowAverage }
+                else { return .poor }
+            }
+        }
+    }
+}
+
+/// VO2 Max measurement record
+public struct VO2MaxRecord: Sendable, Codable, Identifiable {
+    public let id: UUID
+    public let timestamp: Date
+    public let value: Double // mL/kg/min
+    public let source: DataSource
+
+    public init(
+        id: UUID = UUID(),
+        timestamp: Date,
+        value: Double,
+        source: DataSource = .healthKit
+    ) {
+        self.id = id
+        self.timestamp = timestamp
+        self.value = value
+        self.source = source
+    }
+
+    /// Formatted display value
+    public var displayValue: String {
+        String(format: "%.1f mL/kg/min", value)
+    }
+}
+
 // MARK: - Health Error
 
 /// Health-specific errors

@@ -12,6 +12,7 @@ public final class HealthDashboardViewModel {
     public var activitySummaries: [ActivitySummary] = []
     public var bloodPressureReadings: [BloodPressureReading] = []
     public var cardiacAnomalies: [CardiacAnomaly] = []
+    public var vo2MaxRecords: [VO2MaxRecord] = []
 
     public var isLoading = false
     public var errorMessage: String?
@@ -51,6 +52,10 @@ public final class HealthDashboardViewModel {
 
     public var hasCardiacAnomalies: Bool {
         !cardiacAnomalies.isEmpty
+    }
+
+    public var latestVO2Max: VO2MaxRecord? {
+        vo2MaxRecords.first
     }
 
     // MARK: - Private Properties
@@ -93,6 +98,7 @@ public final class HealthDashboardViewModel {
             try await loadHeartRateData()
             try await loadActivityData()
             try await loadBloodPressureData()
+            try await loadVO2MaxData()
             await detectAnomalies()
         } catch {
             errorMessage = error.localizedDescription
@@ -137,6 +143,13 @@ public final class HealthDashboardViewModel {
     public func loadBloodPressureData() async throws {
         let dateRange = DateInterval.lastDays(30)
         bloodPressureReadings = try await healthService.fetchBloodPressureData(for: dateRange)
+            .sorted { $0.timestamp > $1.timestamp }
+    }
+
+    /// Load VO2 Max data for the last 90 days
+    public func loadVO2MaxData() async throws {
+        let dateRange = DateInterval.lastDays(90)
+        vo2MaxRecords = try await healthService.fetchVO2MaxData(for: dateRange)
             .sorted { $0.timestamp > $1.timestamp }
     }
 
