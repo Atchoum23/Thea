@@ -131,7 +131,7 @@ public actor UnifiedContextSync {
             previousServerChangeToken: serverChangeToken
         )
 
-        // Use a class wrapper to safely capture mutable state across callback boundaries
+        // MARK: - Sendable justification: mutable state captured in CKFetchRecordZoneChangesOperation callbacks
         final class FetchState: @unchecked Sendable {
             var fetchedChanges: [ContextChange] = []
             var newToken: CKServerChangeToken?

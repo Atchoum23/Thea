@@ -285,7 +285,7 @@ public struct SuggestionAction: Identifiable, Sendable {
     }
 }
 
-/// Type-erased Sendable wrapper
+// MARK: - Sendable justification: intentional type-erased wrapper for heterogeneous storage
 public struct AnySendable: @unchecked Sendable {
     public let value: Any
 

@@ -722,6 +722,7 @@ public struct MCPConnection: Sendable, Identifiable {
     }
 }
 
+// MARK: - Sendable justification: [String: Any] params for MCP protocol flexibility
 public struct MCPRequest: @unchecked Sendable {
     public let id: String
     public let method: String
@@ -734,6 +735,7 @@ public struct MCPRequest: @unchecked Sendable {
     }
 }
 
+// MARK: - Sendable justification: [String: Any] result for MCP protocol flexibility
 public struct MCPResponse: @unchecked Sendable {
     public let id: String
     public let result: [String: Any]?

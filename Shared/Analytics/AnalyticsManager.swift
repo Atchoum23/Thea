@@ -419,6 +419,7 @@ public final class AnalyticsManager: ObservableObject {
 
 // MARK: - Timing Helper
 
+// MARK: - Sendable justification: [String: Any] properties are not Sendable
 public final class AnalyticsTimer: @unchecked Sendable {
     private let startTime: Date
     private let category: String
@@ -450,6 +451,7 @@ public final class AnalyticsTimer: @unchecked Sendable {
 
 // MARK: - Types
 
+// MARK: - Sendable justification: AnyCodable wraps type-erased values
 public struct AnalyticsEvent: Identifiable, Codable, @unchecked Sendable {
     public var id = UUID()
     public let name: String
