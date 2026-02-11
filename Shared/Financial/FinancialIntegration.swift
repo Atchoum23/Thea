@@ -25,6 +25,7 @@ final class FinancialIntegration {
 
     private func registerProviders() {
         providers = [
+            AppleFinanceKitProvider(),
             RevolutProvider(),
             BinanceProvider(),
             CoinbaseProvider(),
