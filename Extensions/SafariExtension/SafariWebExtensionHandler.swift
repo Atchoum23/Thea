@@ -89,6 +89,57 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             let formFields = message["fields"] as? [[String: Any]] ?? []
             handleSuggestAutofill(formFields, completion: completion)
 
+        case "askAI":
+            // Ask Thea AI a question
+            let question = message["question"] as? String ?? ""
+            let context = message["context"] as? [String: Any] ?? [:]
+            handleAskAI(question: question, context: context, completion: completion)
+
+        case "deepResearch":
+            // Deep research on a query
+            let query = message["query"] as? String ?? ""
+            let sources = message["sources"] as? [String] ?? []
+            handleDeepResearch(query: query, sources: sources, completion: completion)
+
+        case "getCredentials":
+            // Get stored credentials for a domain
+            let domain = message["domain"] as? String ?? ""
+            handleGetCredentials(domain: domain, completion: completion)
+
+        case "saveCredential":
+            // Save a credential
+            handleSaveCredential(message, completion: completion)
+
+        case "generatePassword":
+            // Generate a secure password
+            handleGeneratePassword(completion: completion)
+
+        case "getTOTPSecret":
+            // Get TOTP code for a domain
+            let domain = message["domain"] as? String ?? ""
+            handleGetTOTP(domain: domain, completion: completion)
+
+        case "rewriteText":
+            // Rewrite text with AI
+            let text = message["text"] as? String ?? ""
+            let style = message["style"] as? String ?? "default"
+            let tone = message["tone"] as? String ?? "neutral"
+            handleRewriteText(text: text, style: style, tone: tone, completion: completion)
+
+        case "analyzeWritingStyle":
+            // Analyze writing style
+            let text = message["text"] as? String ?? ""
+            handleAnalyzeWritingStyle(text: text, completion: completion)
+
+        case "searchMemory":
+            // Semantic memory search
+            let query = message["query"] as? String ?? ""
+            handleSearchMemory(query: query, completion: completion)
+
+        case "ping":
+            // Connection health check
+            completion(["success": true, "status": "connected", "version": "1.0"])
+
         default:
             completion(["error": "Unknown action: \(action)"])
         }
@@ -252,6 +303,121 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
 
         completion(["success": true, "suggestions": suggestions])
+    }
+
+    // MARK: - AI Handlers
+
+    private func handleAskAI(question: String, context: [String: Any], completion: @escaping ([String: Any]) -> Void) {
+        saveRequest([
+            "type": "askAI",
+            "question": question,
+            "context": context,
+            "timestamp": Date().timeIntervalSince1970
+        ])
+        notifyMainApp("AskAI")
+        completion(["success": true, "message": "Question sent to Thea. Open the app for the full response."])
+    }
+
+    private func handleDeepResearch(query: String, sources: [String], completion: @escaping ([String: Any]) -> Void) {
+        saveRequest([
+            "type": "deepResearch",
+            "query": query,
+            "sources": sources,
+            "timestamp": Date().timeIntervalSince1970
+        ])
+        notifyMainApp("DeepResearch")
+        completion(["success": true, "message": "Research queued. Open Thea for results."])
+    }
+
+    private func handleRewriteText(text: String, style: String, tone: String, completion: @escaping ([String: Any]) -> Void) {
+        saveRequest([
+            "type": "rewriteText",
+            "text": String(text.prefix(10000)),
+            "style": style,
+            "tone": tone,
+            "timestamp": Date().timeIntervalSince1970
+        ])
+        notifyMainApp("RewriteText")
+        completion(["success": true, "message": "Rewrite queued. Open Thea for results."])
+    }
+
+    private func handleAnalyzeWritingStyle(text: String, completion: @escaping ([String: Any]) -> Void) {
+        saveRequest([
+            "type": "analyzeWritingStyle",
+            "text": String(text.prefix(10000)),
+            "timestamp": Date().timeIntervalSince1970
+        ])
+        notifyMainApp("AnalyzeWritingStyle")
+        completion(["success": true, "message": "Analysis queued. Open Thea for results."])
+    }
+
+    private func handleSearchMemory(query: String, completion: @escaping ([String: Any]) -> Void) {
+        saveRequest([
+            "type": "searchMemory",
+            "query": query,
+            "timestamp": Date().timeIntervalSince1970
+        ])
+        notifyMainApp("SearchMemory")
+        completion(["success": true, "message": "Memory search queued. Open Thea for results."])
+    }
+
+    // MARK: - Credential Handlers
+
+    private func handleGetCredentials(domain: String, completion: @escaping ([String: Any]) -> Void) {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+            completion(["success": false, "error": "No app group access"])
+            return
+        }
+
+        let credPath = containerURL.appendingPathComponent("credentials.json")
+        if let data = try? Data(contentsOf: credPath),
+           let creds = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
+        {
+            let matching = creds.filter { ($0["domain"] as? String)?.contains(domain) == true }
+            completion(["success": true, "credentials": matching])
+        } else {
+            completion(["success": true, "credentials": []])
+        }
+    }
+
+    private func handleSaveCredential(_ message: [String: Any], completion: @escaping ([String: Any]) -> Void) {
+        saveRequest([
+            "type": "saveCredential",
+            "domain": message["domain"] as? String ?? "",
+            "username": message["username"] as? String ?? "",
+            "url": message["url"] as? String ?? "",
+            "timestamp": Date().timeIntervalSince1970
+        ])
+        notifyMainApp("SaveCredential")
+        completion(["success": true, "message": "Credential saved"])
+    }
+
+    private func handleGeneratePassword(completion: @escaping ([String: Any]) -> Void) {
+        // Generate a secure random password
+        let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+        var password = ""
+        for _ in 0 ..< 20 {
+            let index = Int.random(in: 0 ..< chars.count)
+            password.append(chars[chars.index(chars.startIndex, offsetBy: index)])
+        }
+        completion(["success": true, "password": password])
+    }
+
+    private func handleGetTOTP(domain: String, completion: @escaping ([String: Any]) -> Void) {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+            completion(["success": false, "error": "No app group access"])
+            return
+        }
+
+        let totpPath = containerURL.appendingPathComponent("totp_secrets.json")
+        if let data = try? Data(contentsOf: totpPath),
+           let secrets = try? JSONSerialization.jsonObject(with: data) as? [String: String],
+           let secret = secrets[domain]
+        {
+            completion(["success": true, "secret": secret])
+        } else {
+            completion(["success": false, "error": "No TOTP secret found for \(domain)"])
+        }
     }
 
     // MARK: - Helpers
