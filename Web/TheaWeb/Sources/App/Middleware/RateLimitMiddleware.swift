@@ -54,49 +54,12 @@ struct RateLimitMiddleware: AsyncMiddleware {
         return "ip:\(request.remoteAddress?.ipAddress ?? "unknown")"
     }
 
-    private func checkRateLimit(clientId: String, request: Request) async throws -> Bool {
-        // Try Redis first (production)
-        if let redis = request.redis {
-            return try await checkRedisRateLimit(clientId: clientId, redis: redis)
-        }
-
-        // Fall back to in-memory (development)
+    private func checkRateLimit(clientId: String, request _: Request) async throws -> Bool {
         return await InMemoryRateLimiter.shared.checkLimit(
             clientId: clientId,
             limit: requestsPerMinute,
             windowSeconds: windowSeconds
         )
-    }
-
-    private func checkRedisRateLimit(clientId: String, redis: Request.Redis) async throws -> Bool {
-        let key = "ratelimit:\(clientId)"
-        let now = Int(Date().timeIntervalSince1970)
-
-        // Sliding window using Redis sorted set
-        // Remove old entries outside window
-        _ = try? await redis.zremrangebyscore(
-            from: RedisKey(key),
-            withMinimumScoreOf: .inclusive(.init(integerLiteral: 0)),
-            andMaximumScoreOf: .inclusive(.init(integerLiteral: now - windowSeconds))
-        ).get()
-
-        // Count current entries
-        let count = try await redis.zcard(of: RedisKey(key)).get()
-
-        if count >= requestsPerMinute {
-            return false
-        }
-
-        // Add current request
-        _ = try? await redis.zadd(
-            [(element: RESPValue(from: UUID().uuidString), score: Double(now))],
-            to: RedisKey(key)
-        ).get()
-
-        // Set expiry on the key
-        _ = try? await redis.expire(RedisKey(key), after: .seconds(Int64(windowSeconds * 2))).get()
-
-        return true
     }
 }
 
