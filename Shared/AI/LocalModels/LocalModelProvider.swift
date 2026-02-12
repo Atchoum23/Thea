@@ -181,6 +181,7 @@ final class LocalModelManager {
                 for line in output.split(separator: "\n").dropFirst() {
                     let parts = line.split(separator: "\t").map(String.init)
                     if let modelName = parts.first {
+                        let caps = Self.detectModelCapabilities(name: modelName)
                         let model = LocalModel(
                             id: UUID(),
                             name: modelName,
@@ -190,8 +191,8 @@ final class LocalModelManager {
                             sizeInBytes: nil,
                             runtime: .ollama,
                             size: 0,
-                            parameters: config.defaultParameters,
-                            quantization: config.defaultQuantization
+                            parameters: caps.parameters ?? config.defaultParameters,
+                            quantization: caps.quantization ?? config.defaultQuantization
                         )
 
                         availableModels.append(model)
@@ -373,6 +374,41 @@ final class LocalModelManager {
             return "fp32"
         }
         return config.defaultQuantization
+    }
+
+    // MARK: - Model Capability Detection
+
+    /// Detect capabilities from model name for richer metadata
+    static func detectModelCapabilities(name: String) -> (
+        supportsVision: Bool, supportsFunctionCalling: Bool, contextWindow: Int,
+        parameters: String?, quantization: String?
+    ) {
+        let lower = name.lowercased()
+
+        // GPT-OSS: OpenAI open-weight models with tool use and 128K context
+        if lower.contains("gpt-oss") || lower.contains("gpt_oss") {
+            let params = lower.contains("120b") ? "120B" : lower.contains("20b") ? "20B" : nil
+            return (false, true, 128_000, params, "MXFP4")
+        }
+
+        // Qwen VL: Vision-language models
+        if lower.contains("qwen") && (lower.contains("-vl") || lower.contains("_vl")) {
+            return (true, false, 32_768, nil, nil)
+        }
+
+        // Gemma: Google open models with function calling
+        if lower.contains("gemma") {
+            let hasVision = lower.contains("pali") || lower.contains("vl")
+            return (hasVision, true, 128_000, nil, nil)
+        }
+
+        // Llama: Meta models
+        if lower.contains("llama") {
+            return (false, true, 128_000, nil, nil)
+        }
+
+        // Default: basic text model
+        return (false, false, 4096, nil, nil)
     }
 
     /// Calculate total size of a directory

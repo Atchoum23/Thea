@@ -549,6 +549,32 @@ public extension AIModel {
         outputCostPer1K: Decimal(string: "0.00039")
     )
 
+    // MARK: - Local Open-Weight Models
+
+    static let gptOSS20B = AIModel(
+        id: "gpt-oss-20b",
+        name: "GPT-OSS 20B",
+        provider: "local",
+        description: "OpenAI's open-weight 20B reasoning model (Apache 2.0). Runs in 16GB RAM.",
+        contextWindow: 128_000,
+        maxOutputTokens: 16_384,
+        capabilities: [.chat, .codeGeneration, .reasoning, .functionCalling],
+        isLocal: true,
+        supportsFunctionCalling: true
+    )
+
+    static let gptOSS120B = AIModel(
+        id: "gpt-oss-120b",
+        name: "GPT-OSS 120B",
+        provider: "local",
+        description: "OpenAI's open-weight 120B reasoning model (Apache 2.0). Requires 80GB+ RAM.",
+        contextWindow: 128_000,
+        maxOutputTokens: 16_384,
+        capabilities: [.chat, .codeGeneration, .reasoning, .functionCalling, .analysis],
+        isLocal: true,
+        supportsFunctionCalling: true
+    )
+
     // MARK: - Common Model Lists
 
     static var anthropicModels: [AIModel] {
@@ -579,8 +605,12 @@ public extension AIModel {
         [orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
     }
 
+    static var localModels: [AIModel] {
+        [gptOSS20B, gptOSS120B]
+    }
+
     static var allKnownModels: [AIModel] {
-        anthropicModels + openaiModels + googleModels + deepseekModels + groqModels + perplexityModels + openRouterModels
+        anthropicModels + openaiModels + googleModels + deepseekModels + groqModels + perplexityModels + openRouterModels + localModels
     }
 }
 

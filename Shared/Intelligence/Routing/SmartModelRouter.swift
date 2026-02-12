@@ -926,7 +926,7 @@ public final class SmartModelRouter: ObservableObject {
             qualityScore: 0.78
         ))
 
-        // MARK: Local models placeholder
+        // MARK: Local models
         registerModel(RouterModelCapability(
             modelId: "local-llama",
             provider: "local",
@@ -937,6 +937,33 @@ public final class SmartModelRouter: ObservableObject {
             costPerOutputToken: 0,
             averageLatency: 2.0,
             qualityScore: 0.60,
+            isLocalModel: true
+        ))
+
+        // MARK: GPT-OSS (OpenAI open-weight, Apache 2.0)
+        registerModel(RouterModelCapability(
+            modelId: "gpt-oss-20b",
+            provider: "local",
+            contextWindow: 128_000,
+            maxOutputTokens: 16_384,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .functionCalling, .streaming, .analysis],
+            costPerInputToken: 0,
+            costPerOutputToken: 0,
+            averageLatency: 1.5,
+            qualityScore: 0.78,
+            isLocalModel: true
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "gpt-oss-120b",
+            provider: "local",
+            contextWindow: 128_000,
+            maxOutputTokens: 16_384,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .functionCalling, .streaming, .analysis, .highQuality],
+            costPerInputToken: 0,
+            costPerOutputToken: 0,
+            averageLatency: 4.0,
+            qualityScore: 0.88,
             isLocalModel: true
         ))
     }
