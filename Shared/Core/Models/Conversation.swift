@@ -71,6 +71,10 @@ struct ConversationMetadata: Codable, Sendable {
     var systemPrompt: String?
     var lastExportedAt: Date?
 
+    /// BCP-47 language code for the conversation (nil = default/English)
+    /// Can be toggled on/off mid-conversation.
+    var preferredLanguage: String?
+
     init(
         totalTokens: Int = 0,
         totalCost: Decimal = 0,
@@ -78,7 +82,8 @@ struct ConversationMetadata: Codable, Sendable {
         tags: [String] = [],
         isMuted: Bool = false,
         systemPrompt: String? = nil,
-        lastExportedAt: Date? = nil
+        lastExportedAt: Date? = nil,
+        preferredLanguage: String? = nil
     ) {
         self.totalTokens = totalTokens
         self.totalCost = totalCost
@@ -87,6 +92,7 @@ struct ConversationMetadata: Codable, Sendable {
         self.isMuted = isMuted
         self.systemPrompt = systemPrompt
         self.lastExportedAt = lastExportedAt
+        self.preferredLanguage = preferredLanguage
     }
 }
 

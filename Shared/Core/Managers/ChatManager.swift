@@ -265,6 +265,19 @@ final class ChatManager: ObservableObject {
         if let customPrompt = conversation.metadata.systemPrompt, !customPrompt.isEmpty {
             systemPromptParts.append(customPrompt)
         }
+
+        // Multilingual: inject language instruction when a preferred language is set
+        if let preferredLanguage = conversation.metadata.preferredLanguage,
+           !preferredLanguage.isEmpty
+        {
+            let languageName = Locale.current.localizedString(forLanguageCode: preferredLanguage) ?? preferredLanguage
+            systemPromptParts.append(
+                "LANGUAGE: Respond entirely in \(languageName) (\(preferredLanguage)). " +
+                    "Maintain technical accuracy and use language-appropriate formatting. " +
+                    "If the user writes in a different language, still respond in \(languageName) unless asked otherwise."
+            )
+        }
+
         systemPromptParts.append(deviceContext)
         let fullSystemPrompt = systemPromptParts.joined(separator: "\n\n")
 
