@@ -20,6 +20,14 @@ final class OpenClawBridge {
     /// Contact allowlist — only process messages from these sender IDs (empty = allow all)
     var allowedSenders: Set<String> = []
 
+    // MARK: - Rate Limiting & Loop Detection
+
+    /// Max responses per channel per minute
+    private let maxResponsesPerMinute = 5
+
+    /// Tracks recent responses per channel for loop detection
+    private var recentResponses: [String: [Date]] = [:]
+
     private init() {}
 
     // MARK: - Setup
@@ -49,6 +57,17 @@ final class OpenClawBridge {
             return
         }
 
+        // Rate limit: prevent bot loops and flooding
+        let now = Date()
+        let channelID = message.channelID
+        recentResponses[channelID] = (recentResponses[channelID] ?? []).filter {
+            now.timeIntervalSince($0) < 60
+        }
+        if (recentResponses[channelID]?.count ?? 0) >= maxResponsesPerMinute {
+            logger.warning("Rate limit reached for channel \(channelID) — skipping response")
+            return
+        }
+
         // Route to AI
         do {
             let response = try await generateAIResponse(for: message)
@@ -61,6 +80,7 @@ final class OpenClawBridge {
             }
 
             try await OpenClawIntegration.shared.sendMessage(to: message.channelID, text: sanitizedResponse)
+            recentResponses[channelID, default: []].append(Date())
             logger.info("Sent AI response to \(message.platform.rawValue)/\(message.channelID)")
         } catch {
             logger.error("Failed to respond: \(error.localizedDescription)")

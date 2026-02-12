@@ -76,13 +76,32 @@ actor OpenClawSecurityGuard {
         let lower = content.lowercased()
 
         let patterns: [(String, String)] = [
-            ("system:", "system role injection"),
-            ("\\[system\\]", "bracketed system injection"),
-            ("```system", "code block system injection"),
-            ("human:", "role confusion"),
-            ("assistant:", "role confusion"),
+            // Role injection
+            ("\\bsystem\\s*:", "system role injection"),
+            ("\\[\\s*system\\s*\\]", "bracketed system injection"),
+            ("```\\s*system", "code block system injection"),
+            ("\\bhuman\\s*:", "role confusion"),
+            ("\\bassistant\\s*:", "role confusion"),
+            ("\\buser\\s*:", "role confusion"),
+            // Chat template injection
             ("<\\|im_start\\|>", "chat template injection"),
+            ("<\\|im_end\\|>", "chat template injection"),
+            ("<\\|system\\|>", "chat template injection"),
+            ("<\\|assistant\\|>", "chat template injection"),
+            // Template injection
             ("\\{\\{.*system.*\\}\\}", "template injection"),
+            ("\\{%.*system.*%\\}", "Jinja template injection"),
+            // Instruction override
+            ("\\bsystem\\s+prompt", "system prompt reference"),
+            ("\\bsystem\\s+instructions", "system instructions reference"),
+            ("\\bsystem\\s+message", "system message reference"),
+            // XML injection
+            ("<system>", "XML system tag injection"),
+            ("</system>", "XML system tag injection"),
+            ("<instructions>", "XML instructions tag injection"),
+            // Separator injection
+            ("---+\\s*system", "separator-based injection"),
+            ("={3,}", "separator-based injection")
         ]
 
         for (pattern, description) in patterns {

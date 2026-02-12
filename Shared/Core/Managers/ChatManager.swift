@@ -268,11 +268,15 @@ final class ChatManager: ObservableObject {
 
         // Multilingual: inject language instruction when a preferred language is set
         if let preferredLanguage = conversation.metadata.preferredLanguage,
-           !preferredLanguage.isEmpty
+           !preferredLanguage.isEmpty,
+           // Validate: must be a recognized BCP-47 code (prevents injection via metadata)
+           Locale.current.localizedString(forLanguageCode: preferredLanguage) != nil,
+           preferredLanguage.count <= 10, // BCP-47 codes are short (e.g., "zh-Hans")
+           preferredLanguage.allSatisfy({ $0.isLetter || $0 == "-" })
         {
             let languageName = Locale.current.localizedString(forLanguageCode: preferredLanguage) ?? preferredLanguage
             systemPromptParts.append(
-                "LANGUAGE: Respond entirely in \(languageName) (\(preferredLanguage)). " +
+                "LANGUAGE: Respond entirely in \(languageName). " +
                     "Maintain technical accuracy and use language-appropriate formatting. " +
                     "If the user writes in a different language, still respond in \(languageName) unless asked otherwise."
             )

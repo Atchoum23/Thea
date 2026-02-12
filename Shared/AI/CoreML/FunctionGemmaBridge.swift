@@ -206,12 +206,44 @@ final class FunctionGemmaBridge {
 
     // MARK: - Terminal Actions
 
+    /// Dangerous commands/patterns that must never be executed via NL parsing
+    private static let blockedCommandPatterns: [String] = [
+        "rm -rf", "rm -r /", "rm -fr",
+        "mkfs", "dd if=", "> /dev/",
+        "chmod -R 777", "chmod 777 /",
+        "curl.*|.*sh", "wget.*|.*sh",
+        "sudo", "su -",
+        ":(){:|:&};:", // Fork bomb
+        "shutdown", "reboot", "halt",
+        "launchctl unload",
+        "killall", "kill -9",
+        "diskutil erase", "diskutil unmount"
+    ]
+
     private func executeTerminalAction(_ call: FunctionCall) async throws -> String {
         let integration = TerminalIntegration.shared
         let command = call.arguments["command"] ?? ""
 
         guard !command.isEmpty else {
             throw FunctionGemmaBridgeError.invalidArgument("command")
+        }
+
+        // Validate command against blocklist
+        let lower = command.lowercased()
+        for pattern in Self.blockedCommandPatterns {
+            if lower.contains(pattern) {
+                throw FunctionGemmaBridgeError.invalidArgument(
+                    "Command blocked for safety: contains '\(pattern)'"
+                )
+            }
+        }
+
+        // Reject shell metacharacters that enable injection
+        let dangerousChars: Set<Character> = [";", "|", "&", "`", "$", "(", ")"]
+        if command.contains(where: { dangerousChars.contains($0) }) {
+            throw FunctionGemmaBridgeError.invalidArgument(
+                "Command contains shell metacharacters — rejected for safety"
+            )
         }
 
         try await integration.executeCommand(command)
