@@ -267,12 +267,12 @@ final class ChatManager: ObservableObject {
         }
 
         // Multilingual: inject language instruction when a preferred language is set
+        // Security: validate language code to prevent injection (BCP-47, max 10 chars, letters+hyphens)
         if let preferredLanguage = conversation.metadata.preferredLanguage,
            !preferredLanguage.isEmpty,
-           // Validate: must be a recognized BCP-47 code (prevents injection via metadata)
-           Locale.current.localizedString(forLanguageCode: preferredLanguage) != nil,
-           preferredLanguage.count <= 10, // BCP-47 codes are short (e.g., "zh-Hans")
-           preferredLanguage.allSatisfy({ $0.isLetter || $0 == "-" })
+           preferredLanguage.count <= 10,
+           preferredLanguage.allSatisfy({ $0.isLetter || $0 == "-" }),
+           Locale.current.localizedString(forLanguageCode: preferredLanguage) != nil
         {
             let languageName = Locale.current.localizedString(forLanguageCode: preferredLanguage) ?? preferredLanguage
             systemPromptParts.append(

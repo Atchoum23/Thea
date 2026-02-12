@@ -39,23 +39,23 @@ final class FunctionGemmaEngine {
 
         logger.info("Loading FunctionGemma model...")
 
-        // Attempt to load via CoreMLInferenceEngine
         let engine = CoreMLInferenceEngine.shared
-        let models = await engine.discoverModels()
+        let models = engine.discoverLLMModels()
 
         // Look for a FunctionGemma or function-calling model
         let functionModel = models.first { model in
-            model.name.lowercased().contains("functiongemma") ||
-                model.name.lowercased().contains("function-gemma") ||
-                model.name.lowercased().contains("function_call")
+            let name = model.name.lowercased()
+            return name.contains("functiongemma") ||
+                name.contains("function-gemma") ||
+                name.contains("function_call")
         }
 
         if let model = functionModel {
-            try await engine.loadModel(from: model.url)
+            try await engine.loadModel(at: model.path, id: model.id)
             isModelLoaded = true
             logger.info("FunctionGemma model loaded: \(model.name)")
         } else {
-            // Fall back to regex-based parsing if no CoreML model available
+            // Fall back to rule-based parsing if no CoreML model available
             logger.info("No FunctionGemma CoreML model found — using rule-based parser")
             isModelLoaded = true
         }
@@ -99,7 +99,7 @@ final class FunctionGemmaEngine {
 
     private func parseWithCoreML(_ instruction: String) async throws -> FunctionCall? {
         let engine = CoreMLInferenceEngine.shared
-        guard engine.loadedModel != nil else { return nil }
+        guard engine.loadedModelID != nil else { return nil }
 
         // Build prompt with function catalog
         let prompt = buildFunctionCallingPrompt(instruction: instruction)

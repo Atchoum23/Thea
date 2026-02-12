@@ -239,16 +239,17 @@ actor OutboundPrivacyGuard {
             ("(?<![a-zA-Z0-9/+])[A-Za-z0-9+/]{40,}={0,2}(?![a-zA-Z0-9/+=])", "Base64 secret"),
             // AWS keys
             ("AKIA[0-9A-Z]{16}", "AWS access key"),
-            // SSH/PEM private keys
-            ("-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----", "SSH/PEM private key"),
-            ("-----BEGIN CERTIFICATE-----", "TLS certificate"),
-            // Firebase / service account
-            ("\"private_key\"\\s*:", "Service account private key"),
-            ("\"private_key_id\"\\s*:", "Service account key ID"),
+            // SSH keys
+            ("ssh-rsa\\s+[A-Za-z0-9+/=]{100,}", "SSH public key"),
+            ("ssh-ed25519\\s+[A-Za-z0-9+/=]{40,}", "SSH ED25519 key"),
+            // PEM private keys
+            ("-----BEGIN[A-Z ]*PRIVATE KEY-----", "PEM private key"),
             // JWT tokens
             ("eyJ[a-zA-Z0-9_-]{10,}\\.eyJ[a-zA-Z0-9_-]{10,}\\.[a-zA-Z0-9_-]+", "JWT token"),
+            // Firebase keys
+            ("AIzaSy[a-zA-Z0-9_-]{33}", "Firebase API key"),
             // Generic secret patterns
-            ("(?i)(?:secret|password|passwd|pwd|api_key|apikey)\\s*[:=]\\s*[\"']?[^\\s\"']{8,}", "Secret value")
+            ("(?i)(?:secret|password|passwd|pwd)\\s*[:=]\\s*[\"']?[^\\s\"']{8,}", "Secret value")
         ]
 
         for (pattern, description) in patterns {

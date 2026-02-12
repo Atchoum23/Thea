@@ -178,7 +178,7 @@ final class FunctionGemmaBridge {
                   let url = URL(string: urlString) else {
                 throw FunctionGemmaBridgeError.invalidArgument("url")
             }
-            try await integration.navigateTo(url: url)
+            try await integration.navigateTo(url)
             return "Navigated to: \(urlString)"
 
         default:
@@ -206,18 +206,13 @@ final class FunctionGemmaBridge {
 
     // MARK: - Terminal Actions
 
-    /// Dangerous commands/patterns that must never be executed via NL parsing
+    /// Dangerous commands that must never be executed via voice/NL input
     private static let blockedCommandPatterns: [String] = [
-        "rm -rf", "rm -r /", "rm -fr",
-        "mkfs", "dd if=", "> /dev/",
-        "chmod -R 777", "chmod 777 /",
-        "curl.*|.*sh", "wget.*|.*sh",
-        "sudo", "su -",
-        ":(){:|:&};:", // Fork bomb
-        "shutdown", "reboot", "halt",
-        "launchctl unload",
-        "killall", "kill -9",
-        "diskutil erase", "diskutil unmount"
+        "rm -rf", "rm -r /", "rm -fr", "mkfs", "dd if=", "> /dev/",
+        "chmod -R 777", "chmod 777 /", "curl.*|.*sh", "wget.*|.*sh",
+        "sudo", "su -", ":(){:|:&};:", "shutdown", "reboot", "halt",
+        "launchctl unload", "killall", "kill -9", "diskutil erase",
+        "diskutil unmount"
     ]
 
     private func executeTerminalAction(_ call: FunctionCall) async throws -> String {
@@ -228,22 +223,20 @@ final class FunctionGemmaBridge {
             throw FunctionGemmaBridgeError.invalidArgument("command")
         }
 
-        // Validate command against blocklist
-        let lower = command.lowercased()
+        // Security: reject dangerous commands
+        let lowerCommand = command.lowercased()
         for pattern in Self.blockedCommandPatterns {
-            if lower.contains(pattern) {
-                throw FunctionGemmaBridgeError.invalidArgument(
-                    "Command blocked for safety: contains '\(pattern)'"
-                )
+            if lowerCommand.contains(pattern) {
+                logger.warning("Blocked dangerous terminal command: \(command)")
+                throw FunctionGemmaBridgeError.invalidArgument("command (blocked for safety: \(pattern))")
             }
         }
 
-        // Reject shell metacharacters that enable injection
+        // Security: reject shell metacharacters that could enable injection
         let dangerousChars: Set<Character> = [";", "|", "&", "`", "$", "(", ")"]
         if command.contains(where: { dangerousChars.contains($0) }) {
-            throw FunctionGemmaBridgeError.invalidArgument(
-                "Command contains shell metacharacters — rejected for safety"
-            )
+            logger.warning("Blocked command with shell metacharacters: \(command)")
+            throw FunctionGemmaBridgeError.invalidArgument("command (contains shell metacharacters)")
         }
 
         try await integration.executeCommand(command)
@@ -316,7 +309,7 @@ final class FunctionGemmaBridge {
             throw FunctionGemmaBridgeError.invalidArgument("name")
         }
 
-        try await integration.runShortcut(name: name)
+        _ = try await integration.runShortcut(name)
         return "Ran shortcut: \(name)"
     }
 }

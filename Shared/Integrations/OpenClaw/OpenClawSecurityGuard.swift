@@ -77,31 +77,33 @@ actor OpenClawSecurityGuard {
 
         let patterns: [(String, String)] = [
             // Role injection
-            ("\\bsystem\\s*:", "system role injection"),
-            ("\\[\\s*system\\s*\\]", "bracketed system injection"),
-            ("```\\s*system", "code block system injection"),
-            ("\\bhuman\\s*:", "role confusion"),
-            ("\\bassistant\\s*:", "role confusion"),
-            ("\\buser\\s*:", "role confusion"),
+            ("system:", "system role injection"),
+            ("\\[system\\]", "bracketed system injection"),
+            ("```system", "code block system injection"),
+            ("human:", "role confusion"),
+            ("assistant:", "role confusion"),
+            ("user:", "role confusion"),
             // Chat template injection
             ("<\\|im_start\\|>", "chat template injection"),
             ("<\\|im_end\\|>", "chat template injection"),
             ("<\\|system\\|>", "chat template injection"),
             ("<\\|assistant\\|>", "chat template injection"),
-            // Template injection
+            // Template/format injection
             ("\\{\\{.*system.*\\}\\}", "template injection"),
-            ("\\{%.*system.*%\\}", "Jinja template injection"),
-            // Instruction override
-            ("\\bsystem\\s+prompt", "system prompt reference"),
-            ("\\bsystem\\s+instructions", "system instructions reference"),
-            ("\\bsystem\\s+message", "system message reference"),
-            // XML injection
-            ("<system>", "XML system tag injection"),
-            ("</system>", "XML system tag injection"),
-            ("<instructions>", "XML instructions tag injection"),
+            ("\\{%.*%\\}", "jinja template injection"),
+            // System prompt references
+            ("system prompt", "system prompt reference"),
+            ("system message", "system prompt reference"),
+            ("your instructions", "instruction reference"),
+            ("your rules", "instruction reference"),
+            ("above instructions", "instruction reference"),
+            // XML tag injection
+            ("<system>", "xml system tag injection"),
+            ("</system>", "xml system tag injection"),
+            ("<instructions>", "xml instruction tag injection"),
             // Separator injection
-            ("---+\\s*system", "separator-based injection"),
-            ("={3,}", "separator-based injection")
+            ("---+\\s*system", "separator injection"),
+            ("===+\\s*system", "separator injection")
         ]
 
         for (pattern, description) in patterns {
