@@ -575,6 +575,18 @@ public extension AIModel {
         supportsFunctionCalling: true
     )
 
+    static let qwen3VL8B = AIModel(
+        id: "qwen3-vl-8b",
+        name: "Qwen3-VL 8B",
+        provider: "local",
+        description: "Alibaba's 8B vision-language model for local image understanding.",
+        contextWindow: 32_768,
+        maxOutputTokens: 8192,
+        capabilities: [.chat, .vision, .multimodal, .reasoning],
+        isLocal: true,
+        supportsVision: true
+    )
+
     // MARK: - Common Model Lists
 
     static var anthropicModels: [AIModel] {
@@ -606,7 +618,7 @@ public extension AIModel {
     }
 
     static var localModels: [AIModel] {
-        [gptOSS20B, gptOSS120B]
+        [gptOSS20B, gptOSS120B, qwen3VL8B]
     }
 
     static var allKnownModels: [AIModel] {

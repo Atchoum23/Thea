@@ -390,6 +390,29 @@ public final class VisionIntelligence: ObservableObject {
         )
     }
 
+    // MARK: - VLM Analysis (macOS only)
+
+    /// Analyze an image using a local vision-language model for deep understanding
+    public func analyzeWithVLM(imageData: Data, prompt: String? = nil) async throws -> String {
+        #if os(macOS)
+        let engine = MLXVisionEngine.shared
+        if engine.loadedModelID == nil {
+            try await engine.loadModel(id: "mlx-community/Qwen3-VL-8B-4bit")
+        }
+        let stream = try await engine.analyzeImage(
+            imageData: imageData,
+            prompt: prompt ?? "Describe this image in detail."
+        )
+        var result = ""
+        for try await chunk in stream {
+            result += chunk
+        }
+        return result
+        #else
+        throw VisionError.featureNotSupported(.vlmAnalysis)
+        #endif
+    }
+
     // MARK: - Helpers
 
     private func createCGImage(from data: Data) -> CGImage? {
@@ -412,6 +435,7 @@ public enum VisionFeature: String, CaseIterable, Sendable {
     case barcodeDetection = "barcode_detection"
     case documentDetection = "document_detection"
     case subjectLifting = "subject_lifting"
+    case vlmAnalysis = "vlm_analysis"
 }
 
 // MARK: - Vision Error

@@ -503,6 +503,7 @@ targets:
       - package: mlx-swift-lm
         products:
           - MLXLLM
+          - MLXVLM
           - MLXLMCommon
       - target: TheaFinderSyncExtension
         embed: true
