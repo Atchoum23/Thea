@@ -149,6 +149,13 @@ done
 ### Moltbook Agent (ACTIVE all platforms)
 - **MoltbookAgent** (`Agents/MoltbookAgent.swift`): Privacy-preserving dev discussion agent with kill switch + preview mode
 
+### Intelligence Integration Layers (ACTIVE all platforms)
+- **PersonalKnowledgeGraph** (`Memory/PersonalKnowledgeGraph.swift`): Entity-relationship graph with BFS pathfinding, JSON persistence
+- **TaskPlanDAG** (`Intelligence/Planning/TaskPlanDAG.swift`): DAG-based task decomposition with parallel execution via TaskGroup
+- **BehavioralFingerprint** (`Intelligence/UserModel/BehavioralFingerprint.swift`): 7x24 temporal behavioral model for user patterns
+- **SmartNotificationScheduler** (`Intelligence/Scheduling/SmartNotificationScheduler.swift`): Optimal notification timing via BehavioralFingerprint
+- **HealthCoachingPipeline** (`Intelligence/Health/HealthCoachingPipeline.swift`): HealthKit → rule-based analysis → coaching insights
+
 ## Excluded From Builds — DO NOT IMPLEMENT
 
 **CRITICAL RULE: Unless the user EXPLICITLY instructs you to work in an excluded folder/file, you MUST NOT create, modify, or implement code in any path listed below. These files are excluded from ALL build targets in `project.yml` and are dead code. Working in them is wasted effort.**
