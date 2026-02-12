@@ -116,6 +116,39 @@ done
 - **SyncSettingsView** (`Shared/UI/Views/Settings/SyncSettingsView.swift`): Comprehensive sync UI (macOS "Sync" tab)
 - **CloudSyncManager was REMOVED** — it was dead code, never called
 
+## AI Capabilities (Feb 2026 Upgrade)
+
+### Local Models (ACTIVE in macOS build)
+- **GPT-OSS 20B/120B** (`Core/Models/AIModel.swift`): OpenAI's Apache 2.0 open-weight models in model catalog
+- **Qwen3-VL 8B** (`AI/LocalModels/MLXVisionEngine.swift`): Local vision-language model via MLXVLM (macOS only)
+- **Gemma 3 1B/4B** (`AI/CoreML/CoreMLInferenceEngine.swift`): CoreML on-device inference for iOS
+- **FunctionGemma** (`AI/CoreML/FunctionGemmaEngine.swift`, `FunctionGemmaBridge.swift`): NL → function calls for offline agentic actions (macOS only)
+
+### MLX Audio (ACTIVE in macOS build)
+- **MLXAudioEngine** (`AI/Audio/MLXAudioEngine.swift`): TTS via Soprano-80M, STT via GLM-ASR-Nano
+- **MLXVoiceBackend** (`Voice/MLXVoiceBackend.swift`): Wraps MLXAudioEngine for voice pipeline
+- **VoiceBackendProtocol** (`Voice/VoiceBackendProtocol.swift`): Shared protocol for voice backends
+
+### Claude API Advanced (ACTIVE all platforms)
+- **AnthropicToolCatalog** (`AI/Providers/AnthropicToolCatalog.swift`): 50+ tool definitions for tool_search
+- **AnthropicProvider** enhanced: tool_search, compaction, 1M context, interleaved thinking + tool use
+
+### OpenClaw Integration (ACTIVE all platforms)
+- **OpenClawClient** (`Integrations/OpenClaw/OpenClawClient.swift`): WebSocket client to Gateway at `ws://127.0.0.1:18789`
+- **OpenClawIntegration** (`Integrations/OpenClaw/OpenClawIntegration.swift`): Lifecycle management
+- **OpenClawBridge** (`Integrations/OpenClaw/OpenClawBridge.swift`): AI message routing
+- **OpenClawSecurityGuard** (`Integrations/OpenClaw/OpenClawSecurityGuard.swift`): Prompt injection detection
+
+### Privacy System (ACTIVE all platforms)
+- **OutboundPrivacyGuard** (`Privacy/OutboundPrivacyGuard.swift`): System-wide outbound data sanitization
+- **PrivacyPolicy** (`Privacy/PrivacyPolicy.swift`): Policy protocol + strictness levels
+- **PrivacyPolicies** (`Privacy/PrivacyPolicies.swift`): 6 built-in policies (CloudAPI, Messaging, MCP, WebAPI, Moltbook, Permissive)
+- **PIISanitizer** (`Privacy/PIISanitizer.swift`): PII detection and masking (pre-existing)
+- **PrivacyPreservingAIRouter** (`Intelligence/Privacy/`): Sensitivity-based routing (pre-existing)
+
+### Moltbook Agent (ACTIVE all platforms)
+- **MoltbookAgent** (`Agents/MoltbookAgent.swift`): Privacy-preserving dev discussion agent with kill switch + preview mode
+
 ## Excluded From Builds — DO NOT IMPLEMENT
 
 **CRITICAL RULE: Unless the user EXPLICITLY instructs you to work in an excluded folder/file, you MUST NOT create, modify, or implement code in any path listed below. These files are excluded from ALL build targets in `project.yml` and are dead code. Working in them is wasted effort.**
