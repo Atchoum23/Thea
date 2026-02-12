@@ -262,10 +262,11 @@ struct ContextTrigger: Sendable {
 
 // MARK: - Server Tools (P2)
 
-/// Anthropic server-side tools (web search, web fetch, etc.)
+/// Anthropic server-side tools (web search, web fetch, tool search, etc.)
 enum ServerTool: Sendable {
     case webSearch(WebSearchConfig)
     case webFetch(WebFetchConfig)
+    case toolSearch(ToolSearchConfig)
 
     var toolDefinition: [String: Any] {
         switch self {
@@ -309,7 +310,83 @@ enum ServerTool: Sendable {
                 tool["citations"] = ["enabled": true]
             }
             return tool
+
+        case let .toolSearch(config):
+            var tool: [String: Any] = [
+                "type": "tool_search",
+                "name": "tool_search"
+            ]
+            if let maxResults = config.maxResults {
+                tool["max_results"] = maxResults
+            }
+            // Include tool definitions for Claude to search through
+            tool["tools"] = config.tools.map { toolDef -> [String: Any] in
+                var def: [String: Any] = [
+                    "name": toolDef.name,
+                    "description": toolDef.description
+                ]
+                if !toolDef.parameters.isEmpty {
+                    def["input_schema"] = toolDef.parameters
+                }
+                return def
+            }
+            return tool
         }
+    }
+}
+
+/// Tool search configuration — lets Claude search thousands of tools without consuming context
+struct ToolSearchConfig: Sendable {
+    let tools: [ToolDefinition]
+    let maxResults: Int?
+
+    init(tools: [ToolDefinition], maxResults: Int? = 20) {
+        self.tools = tools
+        self.maxResults = maxResults
+    }
+}
+
+/// Tool choice — controls how Claude selects tools
+struct AnthropicToolChoice: Sendable {
+    enum ChoiceType: String, Sendable {
+        case auto        // Claude decides
+        case any         // Must use a tool
+        case tool        // Must use specific tool
+        case none        // No tool use
+    }
+
+    let type: ChoiceType
+    let toolName: String?
+    let disableParallelToolUse: Bool?
+
+    init(type: ChoiceType, toolName: String? = nil, disableParallelToolUse: Bool? = nil) {
+        self.type = type
+        self.toolName = toolName
+        self.disableParallelToolUse = disableParallelToolUse
+    }
+
+    var toDictionary: [String: Any] {
+        var dict: [String: Any] = ["type": type.rawValue]
+        if let name = toolName, type == .tool {
+            dict["name"] = name
+        }
+        if let disable = disableParallelToolUse {
+            dict["disable_parallel_tool_use"] = disable
+        }
+        return dict
+    }
+}
+
+/// Context compaction — Claude summarizes its own context for long sessions
+struct CompactionConfig: Sendable {
+    let enabled: Bool
+    let triggerThreshold: Int
+    let targetSize: Int
+
+    init(enabled: Bool = true, triggerThreshold: Int = 150_000, targetSize: Int = 80_000) {
+        self.enabled = enabled
+        self.triggerThreshold = triggerThreshold
+        self.targetSize = targetSize
     }
 }
 

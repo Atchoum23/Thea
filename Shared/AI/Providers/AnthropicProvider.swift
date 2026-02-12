@@ -367,13 +367,18 @@ final class AnthropicProvider: AIProvider, Sendable {
             requestBody["context_management"] = ["edits": edits]
         }
 
-        // Add server tools (web search, web fetch)
+        // Add server tools (web search, web fetch, tool search)
         if let serverTools = options.serverTools {
             var tools: [[String: Any]] = []
             for tool in serverTools {
                 tools.append(tool.toolDefinition)
             }
             requestBody["tools"] = tools
+        }
+
+        // Add tool choice
+        if let toolChoice = options.toolChoice {
+            requestBody["tool_choice"] = toolChoice.toDictionary
         }
 
         guard let url = URL(string: "\(baseURL)/messages") else {
@@ -401,6 +406,10 @@ final class AnthropicProvider: AIProvider, Sendable {
         if options.serverTools?.contains(where: { if case .webFetch = $0 { return true }; return false }) == true {
             betaHeaders.append("web-fetch-2025-09-10")
         }
+        // 1M token context beta
+        if let limit = options.extendedContextLimit, limit > 200_000 {
+            betaHeaders.append("max-tokens-1m-2025-01-01")
+        }
         if !betaHeaders.isEmpty {
             request.setValue(betaHeaders.joined(separator: ","), forHTTPHeaderField: "anthropic-beta")
         }
@@ -414,7 +423,7 @@ final class AnthropicProvider: AIProvider, Sendable {
 
 // MARK: - Anthropic Chat Options
 
-/// Advanced chat options for Claude API (2026 audit features)
+/// Advanced chat options for Claude API (2026 features)
 struct AnthropicChatOptions: Sendable {
     let maxTokens: Int?
     let stream: Bool
@@ -424,6 +433,9 @@ struct AnthropicChatOptions: Sendable {
     let thinking: ThinkingConfig?
     let contextManagement: ContextManagement?
     let serverTools: [ServerTool]?
+    let toolChoice: AnthropicToolChoice?  // Controls tool selection behavior
+    let compaction: CompactionConfig?     // Context compaction for long sessions
+    let extendedContextLimit: Int?        // For 1M token beta (nil = default 200K)
 
     init(
         maxTokens: Int? = nil,
@@ -433,7 +445,10 @@ struct AnthropicChatOptions: Sendable {
         effort: EffortLevel? = nil,
         thinking: ThinkingConfig? = nil,
         contextManagement: ContextManagement? = nil,
-        serverTools: [ServerTool]? = nil
+        serverTools: [ServerTool]? = nil,
+        toolChoice: AnthropicToolChoice? = nil,
+        compaction: CompactionConfig? = nil,
+        extendedContextLimit: Int? = nil
     ) {
         self.maxTokens = maxTokens
         self.stream = stream
@@ -443,6 +458,9 @@ struct AnthropicChatOptions: Sendable {
         self.thinking = thinking
         self.contextManagement = contextManagement
         self.serverTools = serverTools
+        self.toolChoice = toolChoice
+        self.compaction = compaction
+        self.extendedContextLimit = extendedContextLimit
     }
 
     static let `default` = AnthropicChatOptions()
