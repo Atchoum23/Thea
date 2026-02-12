@@ -58,14 +58,28 @@ final class VoiceInteractionEngine {
         enum VoiceBackend: String, Codable, Sendable, CaseIterable {
             case appleNative = "Apple Native (On-Device)"
             case whisperKit = "WhisperKit (Local AI)"
+            case mlxAudio = "MLX Audio (Local AI)"
             case vapi = "Vapi (Cloud)"
             case hybrid = "Hybrid (Auto-Select)"
 
             var isOnDevice: Bool {
                 switch self {
-                case .appleNative, .whisperKit: true
+                case .appleNative, .whisperKit, .mlxAudio: true
                 case .vapi: false
                 case .hybrid: true // Prefers on-device when possible
+                }
+            }
+
+            var isAvailableOnCurrentPlatform: Bool {
+                switch self {
+                case .mlxAudio:
+                    #if os(macOS)
+                    return true
+                    #else
+                    return false
+                    #endif
+                default:
+                    return true
                 }
             }
         }

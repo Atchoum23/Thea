@@ -266,6 +266,11 @@ packages:
   mlx-swift-lm:
     url: https://github.com/ml-explore/mlx-swift-lm
     branch: main
+  # MLX Audio for on-device TTS (Soprano) and STT (GLM-ASR-Nano)
+  # Provides: MLXAudioTTS, MLXAudioSTT, MLXAudioCore
+  mlx-audio-swift:
+    url: https://github.com/Blaizzy/mlx-audio-swift
+    branch: main
 
 # ============================================
 # Targets
@@ -505,6 +510,12 @@ targets:
           - MLXLLM
           - MLXVLM
           - MLXLMCommon
+      # MLX Audio for on-device TTS/STT (macOS only)
+      - package: mlx-audio-swift
+        products:
+          - MLXAudioTTS
+          - MLXAudioSTT
+          - MLXAudioCore
       - target: TheaFinderSyncExtension
         embed: true
         codeSign: true
