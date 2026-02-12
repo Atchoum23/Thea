@@ -146,8 +146,22 @@ public actor THEAMCPServer {
 
         do {
             let content = try await executeTool(name: toolName, arguments: params.arguments ?? [:])
+
+            // Sanitize tool responses through OutboundPrivacyGuard
+            var sanitizedContent: [THEAMCPContent] = []
+            for item in content {
+                if let text = item.text {
+                    let outcome = await OutboundPrivacyGuard.shared.sanitize(text, channel: "mcp")
+                    if let sanitizedText = outcome.content {
+                        sanitizedContent.append(.text(sanitizedText))
+                    }
+                } else {
+                    sanitizedContent.append(item)
+                }
+            }
+
             var result = THEAMCPResult()
-            result.content = content
+            result.content = sanitizedContent
             return THEAMCPResponse(id: request.id, result: result)
         } catch {
             var result = THEAMCPResult()

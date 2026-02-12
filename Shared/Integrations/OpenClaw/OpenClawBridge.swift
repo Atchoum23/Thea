@@ -52,7 +52,15 @@ final class OpenClawBridge {
         // Route to AI
         do {
             let response = try await generateAIResponse(for: message)
-            try await OpenClawIntegration.shared.sendMessage(to: message.channelID, text: response)
+
+            // Sanitize outbound response through privacy guard
+            let outcome = await OutboundPrivacyGuard.shared.sanitize(response, channel: "messaging")
+            guard let sanitizedResponse = outcome.content else {
+                logger.warning("Outbound response blocked by privacy guard for channel \(message.channelID)")
+                return
+            }
+
+            try await OpenClawIntegration.shared.sendMessage(to: message.channelID, text: sanitizedResponse)
             logger.info("Sent AI response to \(message.platform.rawValue)/\(message.channelID)")
         } catch {
             logger.error("Failed to respond: \(error.localizedDescription)")
