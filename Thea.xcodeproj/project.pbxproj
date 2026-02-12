@@ -67,6 +67,7 @@
 		0AA0287CE6C3623474FB94A5 /* TodoistIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8D699C51A337162D4453E6 /* TodoistIntegration.swift */; };
 		0AC7B28266564B61DFD3DB59 /* SettingsPrivacyAboutViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F08D2E595173F31EA2BE00 /* SettingsPrivacyAboutViews.swift */; };
 		0AFE676DAD0066791B639161 /* PlanState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CC001EDD4E7CE67C947E6 /* PlanState.swift */; };
+		0B04C5588103B79EC628E11D /* CoreMLInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FEAE1F35A07990D5E09CC0F /* CoreMLInferenceEngine.swift */; };
 		0B123AD56A0D09578E8AFDA2 /* TheaShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7303CE663767ABE390515D5C /* TheaShareExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0B38947FFB175728E7B139F7 /* Scriptserror-summary.sh in Resources */ = {isa = PBXBuildFile; fileRef = BF4145F0BDEF139330DA0734 /* Scriptserror-summary.sh */; };
 		0B7D24082ACFF1DDACB3467A /* HomeKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4716380D345E63618BB0BAC9 /* HomeKitService.swift */; };
@@ -493,6 +494,7 @@
 		4EDAB512EFB0C45B25B8B41E /* TheaSharePlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D263A49EDCC79B973E539D /* TheaSharePlay.swift */; };
 		4EF05F89B87750C2EF03D43C /* TheaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F6973CAA1DBD2E9BC0F53E /* TheaConfig.swift */; };
 		4EF34FD085656D93B23B66B4 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89ADBB04DD5856B19A5115C3 /* HelpButton.swift */; };
+		4EF99C7A278DEFE1E0DB38FB /* CoreMLInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FEAE1F35A07990D5E09CC0F /* CoreMLInferenceEngine.swift */; };
 		4F06066B1DB33C201D8114CE /* GUIVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD07330219E6C53C3EE6C740 /* GUIVerifier.swift */; };
 		4F1A7F8CE3E5DC41D08B385F /* TerminalSecurityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AF8D55E3155166878E7240 /* TerminalSecurityPolicy.swift */; };
 		4F3CF44128232025C49F983D /* TerminalSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C485B7F1A5C11C81BC974B7 /* TerminalSettingsView.swift */; };
@@ -1757,6 +1759,7 @@
 		1F1B1D35D8020EDAF67F0020 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1F25101759D9FF0F8AE57B57 /* CallMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallMonitor.swift; sourceTree = "<group>"; };
 		1F3EDD38D4D04B72138D09FA /* AIProviderConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviderConfig.swift; sourceTree = "<group>"; };
+		1FEAE1F35A07990D5E09CC0F /* CoreMLInferenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLInferenceEngine.swift; sourceTree = "<group>"; };
 		20139D179BC17752B359CC7C /* CoworkProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkProgressView.swift; sourceTree = "<group>"; };
 		20FFEC451BD40BDCEF955614 /* HealthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthModels.swift; sourceTree = "<group>"; };
 		213DB857F500AF121B9B8CB2 /* HomeKitMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeKitMonitor.swift; sourceTree = "<group>"; };
@@ -3536,6 +3539,7 @@
 				2B1D0FE324873C74067E95BC /* Context */,
 				F0FDC16850F384EF9163FEB4 /* Context7 */,
 				64B6DC2FADBFAB265AA1C16B /* ConversationIntelligence */,
+				A543E55C05B6E213ABBAA3ED /* CoreML */,
 				E98F91C93B907061FA432799 /* Discovery */,
 				D61A7BFA090679439FD7521B /* Documents */,
 				E564EA5CB1C47DDA6475E25E /* Learning */,
@@ -4604,6 +4608,14 @@
 				98E15E0D71D6C0EF7C9806F3 /* MeetingIntelligence.swift */,
 			);
 			path = Meetings;
+			sourceTree = "<group>";
+		};
+		A543E55C05B6E213ABBAA3ED /* CoreML */ = {
+			isa = PBXGroup;
+			children = (
+				1FEAE1F35A07990D5E09CC0F /* CoreMLInferenceEngine.swift */,
+			);
+			path = CoreML;
 			sourceTree = "<group>";
 		};
 		A5EB3B5DE0154E217F3705E0 /* Income */ = {
@@ -6487,6 +6499,7 @@
 				630A827A4798C8FE654D36B9 /* ConversationListViewModel.swift in Sources */,
 				92527659F654E1F62F887A2D /* ConversationMemory.swift in Sources */,
 				09509E4933C75E07B2C17735 /* ConversationSettingsView.swift in Sources */,
+				0B04C5588103B79EC628E11D /* CoreMLInferenceEngine.swift in Sources */,
 				1AD241A814C36BE206B1D78D /* CoreMLService.swift in Sources */,
 				63D5B3A0DACC3D05B9425541 /* CoworkArtifact.swift in Sources */,
 				A20EB83B1E7A5F01E56A4F1B /* CoworkArtifactsView.swift in Sources */,
@@ -7288,6 +7301,7 @@
 				BAC2C674EEC36C7511FB6690 /* ConversationListViewModel.swift in Sources */,
 				4276A5153158128CD0A1899F /* ConversationMemory.swift in Sources */,
 				A399135BE14985213B94AC34 /* ConversationSettingsView.swift in Sources */,
+				4EF99C7A278DEFE1E0DB38FB /* CoreMLInferenceEngine.swift in Sources */,
 				CAB5FDD4F8A23EA81A0772F0 /* CoreMLService.swift in Sources */,
 				A7512F96E8ACEA2CDEBE4426 /* CoworkArtifact.swift in Sources */,
 				2E4BA466115CB98AD6BF1E2D /* CoworkArtifactsView.swift in Sources */,

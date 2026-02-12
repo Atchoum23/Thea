@@ -433,6 +433,7 @@ struct AutonomousSettingsView: View {
         case .mlx: return "apple.logo"
         case .ollama: return "server.rack"
         case .gguf: return "doc.zipper"
+        case .coreML: return "cpu"
         }
     }
 

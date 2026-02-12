@@ -100,8 +100,13 @@ final class ProviderRegistry {
         Task {
             await refreshLocalProviders()
         }
+        #elseif os(iOS)
+        // iOS: Discover CoreML models for on-device inference
+        Task {
+            await refreshCoreMLProviders()
+        }
         #else
-        // Local models not supported on iOS/watchOS/tvOS
+        // Local models not supported on watchOS/tvOS
         debugLog("📱 Local models not available on this platform")
         #endif
     }
@@ -135,9 +140,40 @@ final class ProviderRegistry {
         debugLog("📊 Total local models registered: \(localProviders.count)")
         print("📊 Total local models registered: \(localProviders.count)")
         #else
-        // Local models not available on iOS/watchOS/tvOS
+        // Local models not available on watchOS/tvOS
         debugLog("📱 Skipping local model refresh - not available on this platform")
         #endif
+    }
+
+    /// Discover and register CoreML models for iOS on-device inference
+    func refreshCoreMLProviders() async {
+        localProviders.removeAll()
+
+        let engine = CoreMLInferenceEngine.shared
+        let models = engine.discoverLLMModels()
+
+        debugLog("📱 Found \(models.count) CoreML models")
+
+        for info in models {
+            let localModel = LocalModel(
+                id: UUID(),
+                name: info.name,
+                path: info.path,
+                type: .coreML,
+                format: info.path.pathExtension,
+                sizeInBytes: Int(info.sizeBytes),
+                runtime: .coreML,
+                size: info.sizeBytes,
+                parameters: "",
+                quantization: ""
+            )
+            let instance = CoreMLModelInstance(model: localModel)
+            let provider = LocalModelProvider(modelName: info.name, instance: instance)
+            localProviders["local:\(info.name)"] = provider
+            debugLog("✅ Registered CoreML model: \(info.name)")
+        }
+
+        debugLog("📊 Total CoreML models registered: \(localProviders.count)")
     }
 
     /// Write debug log using os_log (viewable in Console.app)

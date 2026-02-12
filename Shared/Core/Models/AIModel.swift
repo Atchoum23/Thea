@@ -617,8 +617,31 @@ public extension AIModel {
         [orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
     }
 
+    static let gemma3_1B = AIModel(
+        id: "gemma-3-1b-it",
+        name: "Gemma 3 1B",
+        provider: "local",
+        description: "Google's lightweight 1B model for iOS on-device inference via CoreML.",
+        contextWindow: 32_768,
+        maxOutputTokens: 4096,
+        capabilities: [.chat, .reasoning],
+        isLocal: true
+    )
+
+    static let gemma3_4B = AIModel(
+        id: "gemma-3-4b-it",
+        name: "Gemma 3 4B",
+        provider: "local",
+        description: "Google's 4B multimodal model for on-device inference via CoreML.",
+        contextWindow: 128_000,
+        maxOutputTokens: 8192,
+        capabilities: [.chat, .reasoning, .vision, .multimodal],
+        isLocal: true,
+        supportsVision: true
+    )
+
     static var localModels: [AIModel] {
-        [gptOSS20B, gptOSS120B, qwen3VL8B]
+        [gptOSS20B, gptOSS120B, qwen3VL8B, gemma3_1B, gemma3_4B]
     }
 
     static var allKnownModels: [AIModel] {

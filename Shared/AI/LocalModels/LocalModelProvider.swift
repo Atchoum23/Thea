@@ -486,6 +486,8 @@ final class LocalModelManager {
             try await loadMLXModel(model)
         case .gguf:
             try await loadGGUFModel(model)
+        case .coreML:
+            CoreMLModelInstance(model: model)
         }
 
         runningModels[model.name] = instance

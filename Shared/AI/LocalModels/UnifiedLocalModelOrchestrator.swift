@@ -261,6 +261,7 @@ final class UnifiedLocalModelOrchestrator {
         case .mlx: return .mlx
         case .ollama: return .ollama
         case .gguf: return .gguf
+        case .coreML: return .coreML
         }
     }
 
@@ -270,6 +271,7 @@ final class UnifiedLocalModelOrchestrator {
         case (.ollama, .ollama): return true
         case (.ollama, .gguf): return true  // Ollama can run GGUF models
         case (.gguf, .gguf): return true
+        case (.coreML, .coreML): return true
         default: return false
         }
     }
@@ -520,6 +522,7 @@ enum LocalRuntime: String, Codable, Sendable, CaseIterable {
     case mlx = "MLX"
     case ollama = "Ollama"
     case gguf = "GGUF"
+    case coreML = "Core ML"
 
     var displayName: String { rawValue }
 
@@ -529,6 +532,7 @@ enum LocalRuntime: String, Codable, Sendable, CaseIterable {
         case .mlx: return 230  // MLX is optimized for Apple Silicon
         case .ollama: return 80
         case .gguf: return 60
+        case .coreML: return 150  // CoreML uses CPU+GPU+ANE
         }
     }
 }

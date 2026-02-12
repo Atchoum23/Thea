@@ -166,6 +166,30 @@ struct GGUFModelInstance: LocalModelInstance {
     }
 }
 
+struct CoreMLModelInstance: LocalModelInstance {
+    let model: LocalModel
+
+    func generate(prompt: String, maxTokens: Int) async throws -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            Task {
+                do {
+                    let engine = await CoreMLInferenceEngine.shared
+                    if await engine.loadedModelID != model.name {
+                        try await engine.loadModel(at: model.path, id: model.name)
+                    }
+                    let stream = try await engine.generate(prompt: prompt, maxTokens: maxTokens)
+                    for try await chunk in stream {
+                        continuation.yield(chunk)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Models
 
 struct LocalModel: Identifiable, Codable, Hashable {
@@ -201,6 +225,7 @@ enum ModelRuntime: String, Codable {
     case ollama = "Ollama"
     case mlx = "MLX"
     case gguf = "GGUF"
+    case coreML = "Core ML"
 }
 
 // MARK: - Errors
