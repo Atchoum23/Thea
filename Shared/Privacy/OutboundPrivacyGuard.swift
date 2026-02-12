@@ -240,7 +240,7 @@ actor OutboundPrivacyGuard {
             // AWS keys
             ("AKIA[0-9A-Z]{16}", "AWS access key"),
             // Generic secret patterns
-            ("(?i)(?:secret|password|passwd|pwd)\\s*[:=]\\s*[\"']?[^\\s\"']{8,}", "Secret value"),
+            ("(?i)(?:secret|password|passwd|pwd)\\s*[:=]\\s*[\"']?[^\\s\"']{8,}", "Secret value")
         ]
 
         for (pattern, description) in patterns {
@@ -301,7 +301,7 @@ actor OutboundPrivacyGuard {
             // Common macOS paths
             "/Applications/[^\\s\"'\\])}]+",
             "/Library/[^\\s\"'\\])}]+",
-            "/private/[^\\s\"'\\])}]+",
+            "/private/[^\\s\"'\\])}]+"
         ]
 
         for pattern in patterns {
