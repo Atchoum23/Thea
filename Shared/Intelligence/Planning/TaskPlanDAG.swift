@@ -135,7 +135,7 @@ final class TaskPlanDAG {
 
     // MARK: - Node Execution
 
-    private nonisolated func executeNode(_ node: TaskPlanNode) async -> TaskNodeResult {
+    nonisolated private func executeNode(_ node: TaskPlanNode) async -> TaskNodeResult {
         do {
             // Route to the appropriate executor based on node type
             switch node.actionType {
@@ -158,7 +158,7 @@ final class TaskPlanDAG {
         }
     }
 
-    private nonisolated func executeAIQuery(_ node: TaskPlanNode) async throws -> String {
+    nonisolated private func executeAIQuery(_ node: TaskPlanNode) async throws -> String {
         guard let provider = await ProviderRegistry.shared.getDefaultProvider() else {
             return "No AI provider available"
         }
@@ -190,7 +190,7 @@ final class TaskPlanDAG {
         return result
     }
 
-    private nonisolated func executeIntegration(_ node: TaskPlanNode) async throws -> String {
+    nonisolated private func executeIntegration(_ node: TaskPlanNode) async throws -> String {
         #if os(macOS)
         let bridge = await FunctionGemmaBridge.shared
         let result = try await bridge.processInstruction(node.action)

@@ -219,7 +219,7 @@ actor PersonalKnowledgeGraph {
     var edgeCount: Int { edges.count }
 
     func statistics() -> KGStatistics {
-        let typeDistribution = Dictionary(grouping: entities.values, by: { $0.type })
+        let typeDistribution = Dictionary(grouping: entities.values) { $0.type }
             .mapValues { $0.count }
 
         return KGStatistics(
