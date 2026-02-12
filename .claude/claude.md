@@ -154,7 +154,7 @@ done
 - **TaskPlanDAG** (`Intelligence/Planning/TaskPlanDAG.swift`): DAG-based task decomposition with parallel execution via TaskGroup
 - **BehavioralFingerprint** (`Intelligence/UserModel/BehavioralFingerprint.swift`): 7x24 temporal behavioral model for user patterns
 - **SmartNotificationScheduler** (`Intelligence/Scheduling/SmartNotificationScheduler.swift`): Optimal notification timing via BehavioralFingerprint
-- **HealthCoachingPipeline** (`Intelligence/Health/HealthCoachingPipeline.swift`): HealthKit → rule-based analysis → coaching insights
+- **HealthCoachingPipeline** (`Intelligence/Health/HealthCoachingPipeline.swift`): HealthKit data analysis to coaching insights
 
 ## Excluded From Builds — DO NOT IMPLEMENT
 
