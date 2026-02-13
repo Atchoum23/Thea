@@ -24,23 +24,15 @@ enum SlashCommand: String, CaseIterable, Identifiable {
     case translate
     case web
     case memory
+    case clear
+    case branch
+    case export
     case help
 
     var id: String { rawValue }
 
     /// Display name shown in the overlay
-    var name: String {
-        switch self {
-        case .search: return "search"
-        case .code: return "code"
-        case .summarize: return "summarize"
-        case .explain: return "explain"
-        case .translate: return "translate"
-        case .web: return "web"
-        case .memory: return "memory"
-        case .help: return "help"
-        }
-    }
+    var name: String { rawValue }
 
     /// Brief description of what the command does
     var commandDescription: String {
@@ -52,6 +44,9 @@ enum SlashCommand: String, CaseIterable, Identifiable {
         case .translate: return "Translate text to another language"
         case .web: return "Search the web for current information"
         case .memory: return "Recall or store information in memory"
+        case .clear: return "Clear the current conversation"
+        case .branch: return "Branch from the last message"
+        case .export: return "Export this conversation"
         case .help: return "Show available commands and tips"
         }
     }
@@ -66,6 +61,9 @@ enum SlashCommand: String, CaseIterable, Identifiable {
         case .translate: return "globe"
         case .web: return "network"
         case .memory: return "brain.head.profile"
+        case .clear: return "trash"
+        case .branch: return "arrow.triangle.branch"
+        case .export: return "square.and.arrow.up"
         case .help: return "questionmark.circle"
         }
     }

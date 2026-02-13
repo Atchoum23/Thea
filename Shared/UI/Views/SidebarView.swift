@@ -135,8 +135,16 @@ struct SidebarView: View {
         if searchText.isEmpty {
             return active
         }
-        return active.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText)
+        let query = searchText
+        return active.filter { conversation in
+            // Search title
+            if conversation.title.localizedCaseInsensitiveContains(query) {
+                return true
+            }
+            // Full-text search across message content
+            return conversation.messages.contains { message in
+                message.content.textValue.localizedCaseInsensitiveContains(query)
+            }
         }
     }
 

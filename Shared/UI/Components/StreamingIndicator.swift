@@ -61,11 +61,13 @@ public enum StreamingStatus: Equatable, Sendable {
 
 // MARK: - Streaming Indicator View
 
-/// Shows the current streaming status with animated indicator
+/// Shows the current streaming status with animated indicator and elapsed timer
 struct StreamingIndicatorView: View {
     let status: StreamingStatus
 
     @State private var shimmerOffset: CGFloat = -200
+    @State private var startTime = Date()
+    @State private var elapsedSeconds: Int = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -90,14 +92,44 @@ struct StreamingIndicatorView: View {
                         Text(status.displayText)
                             .font(.theaCaption1)
                     }
+
+                // Elapsed time for active states
+                if isActive {
+                    Text(formattedElapsed)
+                        .font(.theaCaption1)
+                        .foregroundStyle(.tertiary)
+                        .monospacedDigit()
+                }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(.ultraThinMaterial)
             .clipShape(Capsule())
             .transition(.scale.combined(with: .opacity))
-            .accessibilityLabel(status.displayText)
+            .accessibilityLabel(timerAccessibilityLabel)
+            .onAppear {
+                startTime = Date()
+                elapsedSeconds = 0
+            }
+            .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+                guard isActive else { return }
+                elapsedSeconds = Int(Date().timeIntervalSince(startTime))
+            }
         }
+    }
+
+    private var formattedElapsed: String {
+        if elapsedSeconds < 60 {
+            return "\(elapsedSeconds)s"
+        } else {
+            let minutes = elapsedSeconds / 60
+            let seconds = elapsedSeconds % 60
+            return "\(minutes)m \(seconds)s"
+        }
+    }
+
+    private var timerAccessibilityLabel: String {
+        "\(status.displayText), \(formattedElapsed) elapsed"
     }
 
     private var isActive: Bool {

@@ -23,6 +23,7 @@ struct MacChatDetailView: View {
     @State private var searchMatchIndex = 0
     @State private var showingSystemPrompt = false
     @State private var systemPromptText = ""
+    @State private var isUserScrolledUp = false
     @FocusState private var isInputFocused: Bool
     @FocusState private var isSearchFocused: Bool
 
@@ -253,12 +254,37 @@ struct MacChatDetailView: View {
                             )
                             .id("streaming")
                         }
+
+                        // Invisible anchor at the bottom for scroll detection
+                        Color.clear
+                            .frame(height: 1)
+                            .id("bottom-anchor")
+                            .onAppear { isUserScrolledUp = false }
+                            .onDisappear { isUserScrolledUp = true }
                     }
                     .padding(.horizontal, TheaSpacing.xxl)
                     .padding(.vertical, messagePadding)
                 }
             }
             .scrollContentBackground(.hidden)
+            .overlay(alignment: .bottomTrailing) {
+                if isUserScrolledUp && !messages.isEmpty {
+                    Button {
+                        isUserScrolledUp = false
+                        scrollToBottom(proxy: proxy)
+                    } label: {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.primary)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(TheaSpacing.md)
+                    .transition(.scale.combined(with: .opacity))
+                    .accessibilityLabel("Scroll to bottom")
+                }
+            }
+            .animation(TheaAnimation.smooth, value: isUserScrolledUp)
             .onChange(of: searchMatchIndex) { _, newIndex in
                 if !searchMatches.isEmpty, newIndex < searchMatches.count {
                     withAnimation(TheaAnimation.smooth) {
@@ -267,10 +293,14 @@ struct MacChatDetailView: View {
                 }
             }
             .onChange(of: messages.count) { _, _ in
-                scrollToBottom(proxy: proxy)
+                if !isUserScrolledUp {
+                    scrollToBottom(proxy: proxy)
+                }
             }
             .onChange(of: chatManager.streamingText) { _, _ in
-                scrollToBottom(proxy: proxy)
+                if !isUserScrolledUp {
+                    scrollToBottom(proxy: proxy)
+                }
             }
         }
     }
