@@ -5,6 +5,55 @@ All notable changes to THEA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-02-13
+
+### Quality — Deep Pass V4: Quality, Resilience & Polish
+
+Comprehensive 11-phase quality pass across the entire codebase. All 4 platforms (macOS, iOS, watchOS, tvOS) build with 0 errors/0 warnings. 240 SPM tests passing.
+
+#### Test Coverage (Phase 1)
+- Expanded from 157 to 240 SPM tests (+83 new tests)
+- Added PlanState, QueuedMessage, OfflineQueue, Snapshots, ModelPerformance, AIModel tests
+- 16 additional ChatManager tests (Xcode-only)
+
+#### Error Handling (Phase 2)
+- Created `ErrorLogger.swift` utility with `tryOrNil()` helpers
+- Audited 29 error enums across codebase
+- Converted 14 silent `try?` to logged error handling
+
+#### File Splitting (Phase 4)
+- SmartModelRouter: 1001 → 713 lines
+- TaskClassifier: 1000 → 233+405+388 lines (3 files)
+
+#### ChatManager Decomposition (Phase 5)
+- ChatManager: 931 → 213+426+305 lines (Core, +Messaging, +Intelligence extensions)
+
+#### Accessibility (Phase 6)
+- Added 53 accessibility labels across 6 core view files
+- ContentView, ChatView, SidebarView, iOSHomeView, MacChatDetailView, watchOSHomeView
+
+#### Localization Foundation (Phase 7)
+- Created `Localizable.xcstrings` String Catalog with 49 key UI strings
+- Registered in all 4 platform targets
+
+#### Startup Performance (Phase 8)
+- Removed 2-second blocking sleep from AppDelegate
+- Moved model discovery waits to `Task.detached(priority: .utility)`
+- App window now interactive immediately on launch
+
+#### Export + Error UX (Phase 10)
+- Replaced 4 silent `try?` in ChatView with user-facing error alerts
+- Fixed SidebarView export to show errors on file write failure
+- Wired real `GDPRDataExporter` in PrivacySettingsView (replaced simulated progress)
+- GDPR delete now calls actual `deleteAllData()` implementation
+
+### CI/CD Verified (Phase 11)
+- 6 GitHub Actions workflows verified active (CI, security, release, e2e, audit x2)
+- Makefile with 20+ targets including sanitizer tests and security scanning
+- All 240 SPM tests passing with 0 failures
+
+---
+
 ## [1.5.0] - 2026-01-24
 
 ### Security - Production Release Quality Audit
