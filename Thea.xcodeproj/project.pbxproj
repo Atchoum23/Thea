@@ -772,6 +772,7 @@
 		7BCED260C47AE1029C241DBF /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D916B95EC2BD7D0E40A1E1CC /* DeepLinkRouter.swift */; };
 		7BEC7D20188D3D0F9404C52A /* BloodPressureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF14D014A8C53ADF0933911 /* BloodPressureView.swift */; };
 		7C08878A7E79D4FB14E7B1B1 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 637130673210A50F403CA48F /* SafariWebExtensionHandler.swift */; };
+		7C0FF2F299F7E2889C9911C7 /* ErrorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B73D4B47836A3252300979 /* ErrorLogger.swift */; };
 		7C2D203E151C2A1576447CCB /* HealthInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE9A221A8692389679B0A9B /* HealthInsightsView.swift */; };
 		7C89EAAAD01EF7C678AF0594 /* PlatformFeaturesHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F920B459B19605A0B81579E /* PlatformFeaturesHub.swift */; };
 		7C8E29B62068328C89C7C49E /* AgentSecAuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E8C9279803BFF26AF774C4 /* AgentSecAuditLog.swift */; };
@@ -1206,6 +1207,7 @@
 		C6390C960796FA7E682A3084 /* TransferableService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0F2B235FB63C4FFAD580D5 /* TransferableService.swift */; };
 		C6AE822F0C618320E3763C31 /* MLXInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9430FC9CE288D2FADA7C0A /* MLXInferenceEngine.swift */; };
 		C6E24F4BB099FD0F80953D43 /* LifeMonitoringCoordinatorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C03DBA2B06A60B57429EEA /* LifeMonitoringCoordinatorTypes.swift */; };
+		C6EEF1E7C9F9BA72F3AD3D82 /* ErrorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B73D4B47836A3252300979 /* ErrorLogger.swift */; };
 		C70F84E232F773BC08538991 /* LifeTrackingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA5D76D7B512D9ED906A93 /* LifeTrackingView.swift */; };
 		C7685956709CDE7445DF0235 /* UnifiedLocalModelOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 739221B0831806D76541DF8B /* UnifiedLocalModelOrchestrator.swift */; };
 		C76B195799024E3189B6FF9D /* iOSFinancialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE7B8A478508233697E1E58 /* iOSFinancialView.swift */; };
@@ -1853,6 +1855,7 @@
 		3706645721ACA3166BB1451F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		372B4F0049D6FB7C93950371 /* IntentAnticipator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentAnticipator.swift; sourceTree = "<group>"; };
 		376303DA04EC95F86A836EAF /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
+		37B73D4B47836A3252300979 /* ErrorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorLogger.swift; sourceTree = "<group>"; };
 		38385F32DD8062479DDD388C /* InferenceRelayProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceRelayProtocol.swift; sourceTree = "<group>"; };
 		39037BEDEE29D1CE9E77BE5B /* OnDeviceAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceAIService.swift; sourceTree = "<group>"; };
 		39456DAC2FE8CA973598CB90 /* StreamingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingTextView.swift; sourceTree = "<group>"; };
@@ -2865,6 +2868,7 @@
 				5A82501A49FAFDA404126BD8 /* ArtifactManager.swift */,
 				010A46FB9A7C5C68902D3A47 /* DeviceCapabilityRouter.swift */,
 				C2AE425B0B8FE0D50096C3F4 /* DistributedTaskExecutor.swift */,
+				37B73D4B47836A3252300979 /* ErrorLogger.swift */,
 				66C8ECE96F68E07389334095 /* MemoryService.swift */,
 				1929BDC645D1ABE08396E35E /* SendableValue.swift */,
 				55A74D3D8CF3D0113B136682 /* UniversalNotificationService.swift */,
@@ -6447,6 +6451,7 @@
 				7F1938E30E0AB4C1A766B4C9 /* EnhancedMessageBubble.swift in Sources */,
 				FAFF0DE1CA99D45A66D9F16F /* EnhancedSubagentSystem.swift in Sources */,
 				6E3C2FD07745D66DB0016D25 /* EnvironmentContextProvider.swift in Sources */,
+				C6EEF1E7C9F9BA72F3AD3D82 /* ErrorLogger.swift in Sources */,
 				9AD454803621B870533E2C88 /* EventBus.swift in Sources */,
 				2551643BB57B2C6C813D8EC2 /* EventStore.swift in Sources */,
 				78798723E32B981CEBE22EDC /* ExecutableCodeBlock.swift in Sources */,
@@ -7242,6 +7247,7 @@
 				3C3118D065A66F9E5C5701CE /* EnhancedMessageBubble.swift in Sources */,
 				64272B12785AB47DD43CB7A1 /* EnhancedSubagentSystem.swift in Sources */,
 				C8538DFFF0F3BC600C5F4ABF /* EnvironmentContextProvider.swift in Sources */,
+				7C0FF2F299F7E2889C9911C7 /* ErrorLogger.swift in Sources */,
 				126C1E07879323BD2581EF18 /* EventBus.swift in Sources */,
 				E17EBDEA07D15A43ED31B0CC /* EventStore.swift in Sources */,
 				DFE3B8BF1B2C6FEA4AFEC4D7 /* ExecutableCodeBlock.swift in Sources */,

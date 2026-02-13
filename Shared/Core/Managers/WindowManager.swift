@@ -153,7 +153,7 @@ final class WindowManager {
             context.insert(windowState)
         }
 
-        try? context.save()
+        ErrorLogger.tryOrNil(context: "WindowManager.save") { try context.save() }
     }
 
     /// Deletes window state from SwiftData
@@ -166,7 +166,7 @@ final class WindowManager {
 
         if let state = allStates.first(where: { $0.id == windowID }) {
             context.delete(state)
-            try? context.save()
+            ErrorLogger.tryOrNil(context: "WindowManager.save") { try context.save() }
         }
     }
 

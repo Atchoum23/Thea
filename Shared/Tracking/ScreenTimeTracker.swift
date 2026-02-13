@@ -166,7 +166,7 @@ import Observation
             )
 
             context.insert(record)
-            try? context.save()
+            ErrorLogger.tryOrNil(context: "ScreenTimeTracker.save") { try context.save() }
         }
 
         // MARK: - Analytics

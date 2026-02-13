@@ -92,7 +92,9 @@ final class ChatManager: ObservableObject {
         for conversation in conversations {
             context.delete(conversation)
         }
-        try? context.save()
+        ErrorLogger.tryOrNil(context: "ChatManager.clearAllData save") {
+            try context.save()
+        }
 
         conversations.removeAll()
         activeConversation = nil

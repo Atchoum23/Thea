@@ -239,6 +239,20 @@ final class SettingsManager: ObservableObject {
         didSet { persist(doNotDisturb, forKey: "doNotDisturb") }
     }
 
+    // MARK: - Moltbook Agent Settings
+
+    @Published var moltbookAgentEnabled: Bool {
+        didSet { persist(moltbookAgentEnabled, forKey: "moltbookAgentEnabled") }
+    }
+
+    @Published var moltbookPreviewMode: Bool {
+        didSet { persist(moltbookPreviewMode, forKey: "moltbookPreviewMode") }
+    }
+
+    @Published var moltbookMaxDailyPosts: Int {
+        didSet { persist(moltbookMaxDailyPosts, forKey: "moltbookMaxDailyPosts") }
+    }
+
     // MARK: - Focus & Search Settings
 
     @Published var activeFocusMode: String {
@@ -321,6 +335,11 @@ final class SettingsManager: ObservableObject {
         playNotificationSound = UserDefaults.standard.object(forKey: "playNotificationSound") as? Bool ?? true
         showDockBadge = UserDefaults.standard.object(forKey: "showDockBadge") as? Bool ?? true
         doNotDisturb = UserDefaults.standard.bool(forKey: "doNotDisturb")
+        moltbookAgentEnabled = UserDefaults.standard.bool(forKey: "moltbookAgentEnabled")
+        moltbookPreviewMode = UserDefaults.standard.object(forKey: "moltbookPreviewMode") as? Bool ?? true
+        moltbookMaxDailyPosts = UserDefaults.standard.integer(forKey: "moltbookMaxDailyPosts") != 0
+            ? UserDefaults.standard.integer(forKey: "moltbookMaxDailyPosts") : 10
+
         activeFocusMode = UserDefaults.standard.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = UserDefaults.standard.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = UserDefaults.standard.string(forKey: "defaultExportFormat") ?? "markdown"

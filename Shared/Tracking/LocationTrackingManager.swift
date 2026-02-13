@@ -145,7 +145,7 @@ import Observation
             )
 
             context.insert(record)
-            try? context.save()
+            ErrorLogger.tryOrNil(context: "LocationTrackingManager.save") { try context.save() }
         }
 
         // MARK: - Historical Data

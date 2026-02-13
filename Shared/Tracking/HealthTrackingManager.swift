@@ -212,7 +212,9 @@ import Observation
                 context.insert(snapshot)
             }
 
-            try? context.save()
+            ErrorLogger.tryOrNil(context: "HealthTrackingManager.save") {
+                try context.save()
+            }
         }
 
         // MARK: - Data Retrieval

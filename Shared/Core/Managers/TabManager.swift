@@ -41,7 +41,7 @@ final class TabManager {
                 createdAt: Date()
             )
             context.insert(newConversation)
-            try? context.save()
+            ErrorLogger.tryOrNil(context: "TabManager.save") { try context.save() }
 
             tab = ConversationTab(
                 conversation: newConversation,
@@ -198,7 +198,7 @@ final class TabManager {
             createdAt: Date()
         )
         context.insert(newConversation)
-        try? context.save()
+        ErrorLogger.tryOrNil(context: "TabManager.save") { try context.save() }
 
         let newTab = ConversationTab(
             conversation: newConversation,

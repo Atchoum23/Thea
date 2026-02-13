@@ -286,7 +286,9 @@ public final class SecurityManager: ObservableObject {
         let expiredIds = activeCredentials.filter(\.isExpired).map(\.id)
 
         for credential in activeCredentials.filter(\.isExpired) {
-            try? keychain.delete(key: credential.id, service: credential.service)
+            ErrorLogger.tryOrNil(context: "SecurityHardening.cleanupExpiredCredentials") {
+                try keychain.delete(key: credential.id, service: credential.service)
+            }
         }
 
         activeCredentials.removeAll { $0.isExpired }

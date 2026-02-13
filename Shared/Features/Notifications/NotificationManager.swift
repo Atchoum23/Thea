@@ -242,7 +242,9 @@ public final class NotificationManager: ObservableObject {
             content: content,
             trigger: trigger
         )
-        try? await UNUserNotificationCenter.current().add(request)
+        await ErrorLogger.tryOrNil(context: "NotificationManager.snooze") {
+            try await UNUserNotificationCenter.current().add(request)
+        }
     }
 
     /// Send an agent notification

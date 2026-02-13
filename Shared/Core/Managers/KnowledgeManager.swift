@@ -62,7 +62,9 @@ final class KnowledgeManager {
         for file in indexedFiles {
             context.delete(file)
         }
-        try? context.save()
+        ErrorLogger.tryOrNil(context: "KnowledgeManager.clearAllData save") {
+            try context.save()
+        }
 
         indexedFiles.removeAll()
         isIndexing = false
