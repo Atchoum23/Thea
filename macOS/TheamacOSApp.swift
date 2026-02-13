@@ -316,21 +316,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        Task { @MainActor in
+        // Model discovery runs in background — no blocking waits on main thread
+        Task.detached(priority: .utility) {
             await LocalModelManager.shared.waitForDiscovery()
-            let localCount = LocalModelManager.shared.availableModels.count
+            let localCount = await LocalModelManager.shared.availableModels.count
             logger.info("LocalModelManager: \(localCount) models discovered")
 
             await MLXModelManager.shared.waitForScan()
-            let mlxCount = MLXModelManager.shared.scannedModels.count
+            let mlxCount = await MLXModelManager.shared.scannedModels.count
             logger.info("MLXModelManager: \(mlxCount) models scanned")
 
-            _ = ProviderRegistry.shared
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-
-            let registeredCount = ProviderRegistry.shared.getAvailableLocalModels().count
-            logger.info("ProviderRegistry: \(registeredCount) local models registered")
-            logger.info("Startup complete")
+            _ = await ProviderRegistry.shared.getAvailableLocalModels().count
+            logger.info("Startup model discovery complete")
         }
 
         if VoiceActivationManager.shared.isEnabled {
