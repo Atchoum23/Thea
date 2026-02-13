@@ -125,7 +125,6 @@ struct ChatView: View {
                             Label("Plan", systemImage: "list.bullet.clipboard")
                         }
                         .help("Toggle plan panel")
-                        .accessibilityLabel("Toggle plan panel")
                     }
                 }
 
@@ -142,14 +141,12 @@ struct ChatView: View {
                     }
                     .keyboardShortcut("f", modifiers: .command)
                     .help("Search in conversation (⌘F)")
-                    .accessibilityLabel("Search in conversation")
                 }
                 #endif
 
                 ToolbarItem {
                     ConversationLanguagePickerView(conversation: conversation)
                         .help("Set conversation language")
-                        .accessibilityLabel("Set conversation language")
                 }
 
                 ToolbarItem {
@@ -171,7 +168,6 @@ struct ChatView: View {
                     } label: {
                         Label("More", systemImage: "ellipsis.circle")
                     }
-                    .accessibilityLabel("More actions")
                 }
             }
             .alert("Rename Conversation", isPresented: $showingRenameDialog) {
@@ -206,9 +202,13 @@ struct ChatView: View {
                     onSave: { newText in
                         editingMessage = nil
                         Task {
-                            try? await chatManager.editMessageAndBranch(
-                                message, newContent: newText, in: conversation
-                            )
+                            do {
+                                try await chatManager.editMessageAndBranch(
+                                    message, newContent: newText, in: conversation
+                                )
+                            } catch {
+                                showingError = error
+                            }
                         }
                     },
                     onCancel: {
@@ -266,10 +266,14 @@ struct ChatView: View {
                                 },
                                 onRegenerate: { msg in
                                     Task {
-                                        try? await chatManager.editMessageAndBranch(
-                                            msg, newContent: msg.content.textValue,
-                                            in: conversation
-                                        )
+                                        do {
+                                            try await chatManager.editMessageAndBranch(
+                                                msg, newContent: msg.content.textValue,
+                                                in: conversation
+                                            )
+                                        } catch {
+                                            showingError = error
+                                        }
                                     }
                                 },
                                 onAction: { action, msg in
@@ -343,7 +347,6 @@ struct ChatView: View {
                     .textFieldStyle(.plain)
                     .lineLimit(1 ... 6)
                     .disabled(chatManager.isStreaming)
-                    .accessibilityLabel("Message input")
                     .onSubmit {
                         if !inputText.isEmpty {
                             sendMessage()
@@ -386,7 +389,6 @@ struct ChatView: View {
 
             TextField("Search messages…", text: $searchText)
                 .textFieldStyle(.plain)
-                .accessibilityLabel("Search messages")
                 .onSubmit {
                     navigateSearch(forward: true)
                 }
@@ -396,21 +398,18 @@ struct ChatView: View {
                     .font(.theaCaption1)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
-                    .accessibilityLabel("Match \(searchMatches.isEmpty ? 0 : searchMatchIndex + 1) of \(searchMatches.count)")
 
                 Button { navigateSearch(forward: false) } label: {
                     Image(systemName: "chevron.up")
                 }
                 .buttonStyle(.plain)
                 .disabled(searchMatches.isEmpty)
-                .accessibilityLabel("Previous match")
 
                 Button { navigateSearch(forward: true) } label: {
                     Image(systemName: "chevron.down")
                 }
                 .buttonStyle(.plain)
                 .disabled(searchMatches.isEmpty)
-                .accessibilityLabel("Next match")
             }
 
             Button {
@@ -422,7 +421,6 @@ struct ChatView: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Close search")
         }
         .padding(.horizontal, TheaSpacing.lg)
         .padding(.vertical, TheaSpacing.sm)
@@ -485,9 +483,13 @@ struct ChatView: View {
 
         case .regenerate:
             Task {
-                try? await chatManager.editMessageAndBranch(
-                    message, newContent: message.content.textValue, in: conversation
-                )
+                do {
+                    try await chatManager.editMessageAndBranch(
+                        message, newContent: message.content.textValue, in: conversation
+                    )
+                } catch {
+                    showingError = error
+                }
             }
 
         case .deleteMessage:
@@ -495,7 +497,11 @@ struct ChatView: View {
 
         case .continueFromHere:
             Task {
-                try? await chatManager.sendMessage("Continue", in: conversation)
+                do {
+                    try await chatManager.sendMessage("Continue", in: conversation)
+                } catch {
+                    showingError = error
+                }
             }
 
         default:

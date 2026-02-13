@@ -7,6 +7,7 @@ import LocalAuthentication
 #endif
 
 struct PrivacySettingsView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var settingsManager = SettingsManager.shared
     @State var privacyConfig = PrivacySettingsConfiguration.load()
     @State private var sanitizer = PIISanitizer.shared
@@ -18,6 +19,7 @@ struct PrivacySettingsView: View {
     @State private var showingClearMemoryConfirmation = false
     @State var isExporting = false
     @State var exportProgress: Double = 0
+    @State private var exportError: Error?
     @State private var biometricsAvailable = false
     @State private var biometricType: PrivacyBiometricType = .none
 
@@ -108,6 +110,11 @@ struct PrivacySettingsView: View {
             }
         } message: {
             Text("This will permanently delete all your conversations, settings, and data. This action cannot be undone.")
+        }
+        .alert("Export Failed", isPresented: .constant(exportError != nil), presenting: exportError) { _ in
+            Button("OK") { exportError = nil }
+        } message: { error in
+            Text(error.localizedDescription)
         }
     }
 
@@ -724,29 +731,51 @@ struct PrivacySettingsView: View {
         isExporting = true
         exportProgress = 0
 
-        // Simulate export progress
         Task {
-            for i in 1...10 {
-                try? await Task.sleep(nanoseconds: 300_000_000)
-                await MainActor.run {
-                    exportProgress = Double(i) / 10.0
-                }
-            }
+            do {
+                exportProgress = 0.1
+                let fileURL = try await GDPRDataExporter.shared.exportAllData(modelContext: modelContext)
+                exportProgress = 0.8
 
-            await MainActor.run {
+                #if os(macOS)
+                // Present save panel so user can choose where to save
+                let panel = NSSavePanel()
+                panel.nameFieldStringValue = fileURL.lastPathComponent
+                panel.allowedContentTypes = [.json]
+                panel.canCreateDirectories = true
+                if panel.runModal() == .OK, let destination = panel.url {
+                    try FileManager.default.copyItem(at: fileURL, to: destination)
+                }
+                #endif
+
+                exportProgress = 1.0
+                try? await Task.sleep(nanoseconds: 300_000_000)
+
                 isExporting = false
                 privacyConfig.auditLogEntries.append(
                     PrivacyAuditLogEntry(id: UUID(), type: .dataExport, description: "Data export completed", timestamp: Date(), details: "Format: \(privacyConfig.exportFormat.rawValue)")
                 )
+
+                // Clean up temp file
+                try? FileManager.default.removeItem(at: fileURL)
+            } catch {
+                isExporting = false
+                exportError = error
             }
         }
     }
 
     private func deleteAllData() {
-        // Implement data deletion
-        privacyConfig.auditLogEntries.append(
-            PrivacyAuditLogEntry(id: UUID(), type: .dataDelete, description: "All data deleted", timestamp: Date(), details: nil)
-        )
+        Task {
+            do {
+                try await GDPRDataExporter.shared.deleteAllData(modelContext: modelContext)
+                privacyConfig.auditLogEntries.append(
+                    PrivacyAuditLogEntry(id: UUID(), type: .dataDelete, description: "All data deleted", timestamp: Date(), details: nil)
+                )
+            } catch {
+                exportError = error
+            }
+        }
     }
 
     private func resetPrivacySettings() {

@@ -16,7 +16,6 @@ struct SidebarView: View {
                 TextField("Search conversations", text: $searchText)
                     .textFieldStyle(.plain)
                     .font(.theaCaption1)
-                    .accessibilityLabel("Search conversations")
                 if !searchText.isEmpty {
                     Button {
                         searchText = ""
@@ -26,7 +25,6 @@ struct SidebarView: View {
                             .font(.theaCaption2)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Clear search")
                 }
             }
             .padding(.horizontal, TheaSpacing.md)
@@ -160,6 +158,7 @@ struct ConversationRow: View {
     @StateObject private var projectManager = ProjectManager.shared
     @State private var isRenaming = false
     @State private var renameText = ""
+    @State private var exportError: Error?
 
     var body: some View {
         HStack(spacing: TheaSpacing.sm) {
@@ -317,6 +316,7 @@ struct ConversationRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(conversationAccessibilityLabel)
         .accessibilityHint("Double-tap to open conversation")
+        .alert(error: $exportError)
     }
 
     /// Vertical padding scales with dynamic type to prevent clipping
@@ -432,7 +432,11 @@ struct ConversationRow: View {
             content = lines.joined(separator: "\n")
         }
 
-        try? content.write(to: url, atomically: true, encoding: .utf8)
+        do {
+            try content.write(to: url, atomically: true, encoding: .utf8)
+        } catch {
+            exportError = error
+        }
     }
     #endif
 }
