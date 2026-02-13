@@ -24,8 +24,6 @@
     <dict>
         <key>NSExtensionPointIdentifier</key>
         <string>com.apple.appintents-extension</string>
-        <key>NSExtensionPrincipalClass</key>
-        <string>$(PRODUCT_MODULE_NAME).TheaFocusFilter</string>
     </dict>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2024 Thea. All rights reserved.</string>
