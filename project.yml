@@ -1110,6 +1110,7 @@ targets:
         excludes:
           - "**/SecurityRemediationTests.swift"
           - "CoreTests/**"
+          - "UITests/**"
           - "**/OrchestrationIntegrationTests.swift"
           - "**/OrchestratorRoutingTests.swift"
     settings:
