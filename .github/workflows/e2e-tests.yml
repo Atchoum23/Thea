@@ -84,12 +84,13 @@ jobs:
 
       - name: Build for Simulator
         run: |
-          # Build for arm64 simulator explicitly (GitHub macos-26 runners are arm64)
-          # This avoids "Failed to get FD to bundle executable" errors
+          # Find first available iPhone simulator (macOS 26 has iPhone 17 Pro, not 16 Pro)
+          SIM_NAME=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed 's/^[[:space:]]*//' | sed 's/ (.*//')
+          echo "Building for simulator: $SIM_NAME"
           xcodebuild build \
             -project Thea.xcodeproj \
             -scheme Thea-iOS \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination "platform=iOS Simulator,name=$SIM_NAME" \
             -configuration Debug \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \
@@ -208,12 +209,8 @@ jobs:
       - name: Boot Simulator
         id: simulator
         run: |
-          # Get available iPhone 16 Pro simulator - extract UUID from format: "iPhone 16 Pro (UUID) (State)"
-          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16 Pro" | head -1 | grep -oE '[A-F0-9-]{36}')
-          if [ -z "$DEVICE_ID" ]; then
-            # Fallback to any available iPhone
-            DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
-          fi
+          # Get first available iPhone simulator (macOS 26 runners have iPhone 17 Pro, not 16 Pro)
+          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
 
           if [ -z "$DEVICE_ID" ]; then
             echo "::error::No iPhone simulator found"
