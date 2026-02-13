@@ -117,6 +117,17 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
+    /// Whether this task type represents an actionable operation (code, system, planning)
+    public var isActionable: Bool {
+        switch self {
+        case .codeGeneration, .appDevelopment, .codeRefactoring, .debugging, .codeDebugging,
+             .system, .workflowAutomation, .planning:
+            return true
+        default:
+            return false
+        }
+    }
+
     /// Whether this task type typically needs web search
     public var needsWebSearch: Bool {
         switch self {

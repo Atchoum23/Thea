@@ -52,7 +52,7 @@ public final class TaskClassifier: ObservableObject {
     let maxEmbeddingCacheSize = 500
 
     /// Prototype embeddings for each task type (learned from examples)
-    @Published public private(set) var taskTypePrototypes: [TaskType: [Float]] = [:]
+    @Published public internal(set) var taskTypePrototypes: [TaskType: [Float]] = [:]
 
     /// Enable semantic embedding-based similarity matching
     public var useSemanticEmbeddings: Bool = true
@@ -63,16 +63,16 @@ public final class TaskClassifier: ObservableObject {
     // MARK: - Learning
 
     /// Historical classifications for learning
-    @Published public private(set) var classificationHistory: [ClassificationRecord] = []
+    @Published public internal(set) var classificationHistory: [ClassificationRecord] = []
 
     /// Enable AI-powered semantic classification (vs keyword matching fallback)
     public var useSemanticClassification: Bool = true
 
     /// Learned task patterns from MemoryManager
-    @Published public private(set) var learnedPatterns: [LearnedTaskPattern] = []
+    @Published public internal(set) var learnedPatterns: [LearnedTaskPattern] = []
 
     /// Task type performance scores (learned over time)
-    @Published public private(set) var taskTypeScores: [TaskType: Double] = [:]
+    @Published public internal(set) var taskTypeScores: [TaskType: Double] = [:]
 
     /// Confidence calibration data (for calibrating confidence to accuracy)
     var calibrationData: [CalibrationBucket] = []

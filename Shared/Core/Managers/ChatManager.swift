@@ -25,6 +25,9 @@ final class ChatManager: ObservableObject {
     @Published private(set) var conversations: [Conversation] = []
     @Published private(set) var messageQueue: [(text: String, conversation: Conversation)] = []
 
+    /// Agent execution state for the current conversation
+    @Published var agentState = AgentExecutionState()
+
     private var modelContext: ModelContext?
 
     private init() {}
@@ -217,6 +220,21 @@ final class ChatManager: ObservableObject {
         let (provider, model, taskType) = try await selectProviderAndModel(for: text)
         debugLog("✅ Selected provider '\(provider.metadata.name)' with model '\(model)'")
 
+        // Set agent mode based on task classification
+        if let taskType {
+            let recommendedMode = AgentMode.recommended(for: taskType)
+            agentState.mode = recommendedMode
+            agentState.currentTask = AgentModeTask(
+                title: String(text.prefix(80)),
+                userQuery: text,
+                taskType: taskType,
+                mode: recommendedMode,
+                status: .running
+            )
+            agentState.transition(to: .gatherContext)
+            debugLog("🤖 Agent mode: \(recommendedMode.rawValue) for \(taskType.rawValue)")
+        }
+
         // Calculate next order index for proper message ordering
         let existingIndices = conversation.messages.map(\.orderIndex)
         let nextUserIndex = (existingIndices.max() ?? -1) + 1
@@ -362,6 +380,7 @@ final class ChatManager: ObservableObject {
                 messagesToSend = await OutboundPrivacyGuard.shared.sanitizeMessages(apiMessages, channel: "cloud_api")
             }
 
+            agentState.transition(to: .takeAction)
             debugLog("🔄 Starting chat stream...")
             let responseStream = try await provider.chat(
                 messages: messagesToSend,
@@ -421,6 +440,38 @@ final class ChatManager: ObservableObject {
                 }
             }
             #endif
+
+            // Update agent state: transition to verification phase
+            agentState.transition(to: .verifyResults)
+
+            // Autonomy evaluation: check if response contains actionable tasks
+            if AutonomyController.shared.autonomyLevel != .disabled,
+               let taskType, taskType.isActionable
+            {
+                let action = AutonomousAction(
+                    category: .analysis,
+                    title: "Execute suggested action from \(taskType.rawValue) response",
+                    description: "AI response for \(taskType.description) may contain actionable steps",
+                    riskLevel: .low,
+                    execute: {
+                        // Action execution is task-specific — handled by AgentMode pipeline
+                        AutonomousAction.ActionResult(success: true, message: "Evaluated")
+                    }
+                )
+                let decision = await AutonomyController.shared.requestAction(action)
+                switch decision {
+                case .autoExecute:
+                    debugLog("🤖 Autonomy: auto-execute approved for \(taskType.rawValue)")
+                case let .requiresApproval(reason):
+                    AutonomyController.shared.queueForApproval(action, reason: reason)
+                    debugLog("🤖 Autonomy: queued for approval — \(reason)")
+                }
+            }
+
+            // Mark agent task complete
+            agentState.transition(to: .done)
+            agentState.currentTask?.status = .completed
+            agentState.updateProgress(1.0, message: "Response complete")
 
             // Plan Mode: auto-create plan from planning-classified responses
             if taskType == .planning, PlanManager.shared.activePlan == nil {
