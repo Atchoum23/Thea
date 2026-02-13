@@ -557,9 +557,8 @@ struct ConnectAccountSheet: View {
 
                 print("✅ Successfully connected account: \(account.name)")
 
-                // Store credentials securely (in production, use Keychain)
-                // For now, just logging success
-                UserDefaults.standard.set(apiKey, forKey: "FinancialAPI_\(account.id.uuidString)_key")
+                // Store credentials in Keychain via SecureStorage
+                try? SecureStorage.shared.saveAPIKey(apiKey, for: "financial_\(account.id.uuidString)")
 
                 isConnecting = false
                 dismiss()

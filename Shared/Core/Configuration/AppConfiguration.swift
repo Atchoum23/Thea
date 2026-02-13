@@ -415,4 +415,3 @@ final class AppConfiguration {
         qaToolsConfig = QAToolsConfiguration()
     }
 }
-

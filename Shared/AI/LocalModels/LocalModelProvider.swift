@@ -748,4 +748,3 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
     }
 
 }
-
