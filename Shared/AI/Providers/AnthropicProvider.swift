@@ -416,8 +416,97 @@ final class AnthropicProvider: AIProvider, Sendable {
 
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
 
-        // Use the same streaming logic as the base chat method
-        return try await chat(messages: messages, model: model, stream: options.stream)
+        // Stream the advanced request directly (not through basic chat())
+        if options.stream {
+            let requestCopy = request
+            return AsyncThrowingStream { continuation in
+                Task { @Sendable [model, messages] in
+                    do {
+                        let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
+                        guard let httpResponse = response as? HTTPURLResponse,
+                              httpResponse.statusCode == 200
+                        else {
+                            if let httpResponse = response as? HTTPURLResponse {
+                                throw AnthropicError.serverError(
+                                    status: httpResponse.statusCode,
+                                    message: "Advanced chat request failed"
+                                )
+                            }
+                            throw AnthropicError.invalidResponse
+                        }
+
+                        var accumulatedText = ""
+                        for try await line in asyncBytes.lines {
+                            guard line.hasPrefix("data: ") else { continue }
+                            let jsonString = String(line.dropFirst(6))
+                            guard let data = jsonString.data(using: .utf8),
+                                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                                  let type = json["type"] as? String
+                            else { continue }
+
+                            switch type {
+                            case "content_block_delta":
+                                if let delta = json["delta"] as? [String: Any],
+                                   let text = delta["text"] as? String {
+                                    accumulatedText += text
+                                    continuation.yield(.delta(text))
+                                }
+                            case "message_stop":
+                                let finalMessage = AIMessage(
+                                    id: UUID(),
+                                    conversationID: messages.first?.conversationID ?? UUID(),
+                                    role: .assistant,
+                                    content: .text(accumulatedText),
+                                    timestamp: Date(),
+                                    model: model
+                                )
+                                continuation.yield(.complete(finalMessage))
+                            default:
+                                break
+                            }
+                        }
+                        continuation.finish()
+                    } catch {
+                        continuation.yield(.error(error))
+                        continuation.finish(throwing: error)
+                    }
+                }
+            }
+        } else {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200
+            else {
+                if let httpResponse = response as? HTTPURLResponse {
+                    throw AnthropicError.serverError(
+                        status: httpResponse.statusCode,
+                        message: "Advanced chat request failed"
+                    )
+                }
+                throw AnthropicError.invalidResponse
+            }
+
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let content = json["content"] as? [[String: Any]],
+                  let firstContent = content.first,
+                  let text = firstContent["text"] as? String
+            else {
+                throw AnthropicError.noResponse
+            }
+
+            let finalMessage = AIMessage(
+                id: UUID(),
+                conversationID: messages.first?.conversationID ?? UUID(),
+                role: .assistant,
+                content: .text(text),
+                timestamp: Date(),
+                model: model
+            )
+            return AsyncThrowingStream { continuation in
+                continuation.yield(.complete(finalMessage))
+                continuation.finish()
+            }
+        }
     }
 }
 
