@@ -672,7 +672,7 @@ targets:
           # LifeAssistant — ACTIVATED
           - "**/Views/LifeTracking/**"
           # TerminalSettingsView — ACTIVATED
-          - "**/Execution/Testing/TestGenerator.swift"
+          - "**/Execution/Testing/TestGenerator*.swift"
           # Automation/WorkflowEngine — ACTIVATED
           # WorkflowSettingsView — ACTIVATED
           - "**/Integrations/XcodeIntegration.swift"
