@@ -128,7 +128,7 @@ final class SmartNotificationScheduler {
         case .now:
             logger.info("Delivering immediately: \(title)")
             do {
-                try await service.scheduleReminder(
+                _ = try await service.scheduleReminder(
                     title: title,
                     body: body,
                     at: Date()
@@ -140,7 +140,7 @@ final class SmartNotificationScheduler {
         case let .deferred(until, reason):
             logger.info("Deferring until \(until): \(title) — \(reason)")
             do {
-                try await service.scheduleReminder(
+                _ = try await service.scheduleReminder(
                     title: title,
                     body: body,
                     at: until

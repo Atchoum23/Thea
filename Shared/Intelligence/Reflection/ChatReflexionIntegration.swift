@@ -126,7 +126,7 @@ final class ChatReflexionIntegration {
 
         case let .correction(correctedText):
             // Learn from the correction via failure analysis
-            _ = await engine.analyzeFailure(
+            _ = engine.analyzeFailure(
                 task: "User corrected response \(messageID)",
                 error: "User provided correction",
                 context: "Corrected to: \(correctedText)"
