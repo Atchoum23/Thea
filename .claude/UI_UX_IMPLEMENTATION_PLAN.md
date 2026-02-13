@@ -82,7 +82,7 @@ This plan outlines UI/UX improvements for Thea based on research of leading AI a
 | Message branching | None | Edit user message → creates branch, navigate between branches | High |
 | Extended thinking | Basic indicator | Expandable "Thinking" section showing thought process | High |
 | Message actions | Copy only | Copy, Edit, Regenerate, Fork as hover actions | Medium |
-| Scroll behavior | Jump to bottom | Smart scroll: auto-follow during streaming, pause on user scroll | Medium |
+| Scroll behavior | Jump to bottom | ✅ Smart scroll: auto-follow during streaming, pause on user scroll | Medium |
 | Read aloud | None | TTS button on assistant messages | Low |
 
 **Implementation Notes:**
@@ -426,8 +426,8 @@ struct TheaWatchView: View {
 - [ ] File drag-drop improvements
 - [x] Command palette (Cmd+K) - CommandPalette.swift
 - [x] Quick Entry (Option+Option) - QuickEntryWindow.swift
-- [ ] Full-text conversation search
-- [ ] Keyboard shortcuts guide
+- [x] Full-text conversation search (SidebarView searches message content)
+- [x] Keyboard shortcuts guide (KeyboardShortcutsHelpView.swift)
 
 ### Phase 3: Artifacts Panel (Week 3-4)
 - [x] 4th column layout for artifacts (ArtifactPanel.swift)
@@ -561,5 +561,5 @@ enum Spacing {
 
 ---
 
-*Last Updated: January 30, 2026*
-*Version: 2.1 - Phase 1-3 components implemented*
+*Last Updated: February 13, 2026*
+*Version: 2.2 - Phase 1-3 implemented, Phase 2 nearly complete (smart scroll, full-text search, thinking timer, slash commands added)*
