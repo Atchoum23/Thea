@@ -261,6 +261,23 @@ struct TheamacOSApp: App {
             _ = VoiceFirstModeManager.shared // Initializes wake word listening if enabled
             logger.info("VoiceFirstModeManager initialized")
         }
+
+        // Moltbook Agent — deferred init (guarded by user preference)
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            let settings = SettingsManager.shared
+            if settings.moltbookAgentEnabled {
+                let agent = MoltbookAgent.shared
+                await agent.configure(
+                    previewMode: settings.moltbookPreviewMode,
+                    maxDailyPosts: settings.moltbookMaxDailyPosts
+                )
+                await agent.enable()
+                logger.info("MoltbookAgent enabled (preview: \(settings.moltbookPreviewMode))")
+            }
+            // Wire OpenClaw message routing
+            OpenClawBridge.shared.setup()
+        }
     }
 
     private func configureWindow() {

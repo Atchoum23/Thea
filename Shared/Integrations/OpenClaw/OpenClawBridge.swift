@@ -41,6 +41,11 @@ final class OpenClawBridge {
         // Skip bot messages to avoid loops
         guard !message.isFromBot else { return }
 
+        // Route Moltbook-channel messages to MoltbookAgent for insight aggregation
+        if message.channelID.hasPrefix("moltbook") || message.platform.rawValue == "moltbook" {
+            await MoltbookAgent.shared.processInboundMessage(message)
+        }
+
         // Check sender allowlist
         if !allowedSenders.isEmpty, !allowedSenders.contains(message.senderID) {
             logger.debug("Ignoring message from non-allowed sender: \(message.senderID)")

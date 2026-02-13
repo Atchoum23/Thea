@@ -399,6 +399,29 @@ final class ChatManager: ObservableObject {
             try context.save()
             debugLog("✅ Message saved successfully")
 
+            // Post-response verification: run ConfidenceSystem asynchronously
+            // Doesn't block response delivery — updates message metadata when done
+            #if os(macOS) || os(iOS)
+            do {
+                let verificationQuery = text
+                let verificationResponse = streamingText
+                let verificationTaskType = taskType ?? .general
+                let messageToVerify = assistantMessage
+                Task { @MainActor in
+                    let result = await ConfidenceSystem.shared.validateResponse(
+                        verificationResponse,
+                        query: verificationQuery,
+                        taskType: verificationTaskType
+                    )
+                    var meta = messageToVerify.metadata ?? MessageMetadata()
+                    meta.confidence = result.overallConfidence
+                    messageToVerify.metadataData = try? JSONEncoder().encode(meta)
+                    try? messageToVerify.modelContext?.save()
+                    debugLog("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100)) (\(result.level.rawValue))")
+                }
+            }
+            #endif
+
             // Plan Mode: auto-create plan from planning-classified responses
             if taskType == .planning, PlanManager.shared.activePlan == nil {
                 let responseText = streamingText

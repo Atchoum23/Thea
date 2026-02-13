@@ -55,6 +55,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case providers = "Providers"
     case memory = "Memory"
     case agent = "Agent"
+    case moltbook = "Moltbook"
     case knowledge = "Knowledge"
 
     // Group 2: Input / Output
@@ -82,6 +83,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .providers: "server.rack"
         case .memory: "memorychip"
         case .agent: "person.2.circle"
+        case .moltbook: "bubble.left.and.text.bubble.right"
         case .knowledge: "books.vertical"
         case .voiceInput: "mic.fill"
         case .codeIntelligence: "chevron.left.forwardslash.chevron.right"
@@ -97,7 +99,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .knowledge: 1
+        case .providers, .memory, .agent, .moltbook, .knowledge: 1
         case .voiceInput, .codeIntelligence: 2
         case .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
@@ -208,6 +210,8 @@ struct MacSettingsView: View {
             MemoryConfigurationView()
         case .agent:
             AgentConfigurationView()
+        case .moltbook:
+            MoltbookSettingsView()
         case .knowledge:
             KnowledgeScannerConfigurationView()
         case .voiceInput:

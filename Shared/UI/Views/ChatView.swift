@@ -145,6 +145,11 @@ struct ChatView: View {
                 #endif
 
                 ToolbarItem {
+                    ConversationLanguagePickerView(conversation: conversation)
+                        .help("Set conversation language")
+                }
+
+                ToolbarItem {
                     Menu {
                         Button("Rename") {
                             newTitle = conversation.title
