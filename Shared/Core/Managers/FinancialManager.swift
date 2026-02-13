@@ -81,9 +81,7 @@ final class FinancialManager {
         for account in accounts {
             context.delete(account)
         }
-        ErrorLogger.tryOrNil(context: "FinancialManager.clearAllData save") {
-            try context.save()
-        }
+        try? context.save()
 
         transactions.removeAll()
         accounts.removeAll()

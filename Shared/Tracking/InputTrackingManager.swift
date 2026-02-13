@@ -222,7 +222,7 @@ import Observation
                 context.insert(record)
             }
 
-            ErrorLogger.tryOrNil(context: "InputTrackingManager.save") { try context.save() }
+            try? context.save()
         }
 
         // MARK: - Historical Data

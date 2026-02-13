@@ -48,6 +48,12 @@ actor MoltbookAgent {
 
     private init() {}
 
+    /// Configure the agent settings from SettingsManager values
+    func configure(previewMode: Bool, maxDailyPosts: Int) {
+        self.previewMode = previewMode
+        self.maxDailyPosts = maxDailyPosts
+    }
+
     // MARK: - Lifecycle
 
     /// Enable the Moltbook agent
@@ -56,6 +62,16 @@ actor MoltbookAgent {
         isEnabled = true
         logger.info("Moltbook agent enabled (preview mode: \(self.previewMode))")
         startHeartbeat()
+    }
+
+    /// Update preview mode setting
+    func setPreviewMode(_ enabled: Bool) {
+        previewMode = enabled
+    }
+
+    /// Update max daily posts setting
+    func setMaxDailyPosts(_ count: Int) {
+        maxDailyPosts = count
     }
 
     /// Disable the agent immediately (kill switch)

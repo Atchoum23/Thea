@@ -339,7 +339,6 @@ final class SettingsManager: ObservableObject {
         moltbookPreviewMode = UserDefaults.standard.object(forKey: "moltbookPreviewMode") as? Bool ?? true
         moltbookMaxDailyPosts = UserDefaults.standard.integer(forKey: "moltbookMaxDailyPosts") != 0
             ? UserDefaults.standard.integer(forKey: "moltbookMaxDailyPosts") : 10
-
         activeFocusMode = UserDefaults.standard.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = UserDefaults.standard.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = UserDefaults.standard.string(forKey: "defaultExportFormat") ?? "markdown"
@@ -412,6 +411,10 @@ final class SettingsManager: ObservableObject {
         playNotificationSound = d.object(forKey: "playNotificationSound") as? Bool ?? true
         showDockBadge = d.object(forKey: "showDockBadge") as? Bool ?? true
         doNotDisturb = d.bool(forKey: "doNotDisturb")
+        moltbookAgentEnabled = d.bool(forKey: "moltbookAgentEnabled")
+        moltbookPreviewMode = d.object(forKey: "moltbookPreviewMode") as? Bool ?? true
+        moltbookMaxDailyPosts = d.integer(forKey: "moltbookMaxDailyPosts") != 0
+            ? d.integer(forKey: "moltbookMaxDailyPosts") : 10
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"

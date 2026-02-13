@@ -132,7 +132,7 @@ final class BrowserHistoryTracker {
         )
 
         context.insert(record)
-        ErrorLogger.tryOrNil(context: "BrowserHistoryTracker.save") { try context.save() }
+        try? context.save()
     }
 
     // SECURITY FIX (FINDING-009): Remove sensitive query parameters from URLs

@@ -66,9 +66,7 @@ final class ProjectManager: ObservableObject {
         for project in projects {
             context.delete(project)
         }
-        ErrorLogger.tryOrNil(context: "ProjectManager.clearAllData save") {
-            try context.save()
-        }
+        try? context.save()
 
         projects.removeAll()
         activeProject = nil
