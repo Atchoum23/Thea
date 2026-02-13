@@ -80,6 +80,22 @@ excluded:
   - Shared/UI/Views/LocalModels
   - Shared/UI/Views/LifeTracking
   - Tools
+  # Additional build-excluded files (excluded from project.yml but were missing here)
+  - Shared/Configuration/ConfigurationManager.swift
+  - Shared/Core/Services/ChatService.swift
+  - Shared/Core/Services/ProjectService.swift
+  - Shared/Core/TheaIntegrationHub.swift
+  - Shared/V1Parity
+  - Shared/AI/Automation
+  - Shared/AI/Autonomy
+  - Shared/AI/ResourceManagement
+  - Shared/UI/Components/MentionAutocompleteView.swift
+  - Shared/UI/Components/TheaTextInputField.swift
+  - Shared/UI/Views/PhaseProgressView.swift
+  - Shared/UI/Views/SelfExecutionView.swift
+  - Shared/Core/Managers/ErrorKnowledgeBaseManager.swift
+  - Shared/UI/Theme/DesignTokens.swift
+  - Shared/UI/Design/DesignSystemStubs.swift
 
 # ============================================
 # DISABLED RULES
