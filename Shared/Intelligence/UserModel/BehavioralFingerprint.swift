@@ -92,6 +92,19 @@ final class BehavioralFingerprint {
         overallResponsiveness = sent > 0 ? Double(responded) / Double(sent) : 0.5
     }
 
+    // MARK: - Convenience Aliases
+
+    /// Alias for saveToDisk() — used by orchestrator
+    func save() { saveToDisk() }
+
+    /// Alias for loadFromDisk() — used by orchestrator
+    func load() { loadFromDisk() }
+
+    /// Total number of time slots with recorded data
+    var totalRecordedSlots: Int {
+        timeSlots.flatMap { $0 }.filter { !$0.activityCounts.isEmpty }.count
+    }
+
     // MARK: - Querying
 
     /// Get the dominant activity for a specific time
@@ -197,7 +210,7 @@ final class BehavioralFingerprint {
         }
     }
 
-    private func loadFromDisk() {
+    func loadFromDisk() {
         guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
 
         do {

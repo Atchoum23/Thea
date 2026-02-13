@@ -250,6 +250,11 @@ actor PersonalKnowledgeGraph {
         }
     }
 
+    /// Load persisted graph from disk (called by orchestrator on startup)
+    func load() {
+        loadFromDisk()
+    }
+
     private func loadFromDisk() {
         guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
 
