@@ -117,10 +117,22 @@ public final class AppUpdateService: ObservableObject {
 
         loadUpdateHistory()
 
+        // Skip CloudKit setup in test environment — CKContainer.default() throws
+        // an uncatchable ObjC exception when entitlements are missing (unsigned builds)
+        guard !Self.isRunningTests else {
+            logger.debug("Running in test environment — skipping CloudKit setup")
+            return
+        }
+
         Task {
             await setupSubscription()
             await checkForUpdates()
         }
+    }
+
+    private static var isRunningTests: Bool {
+        ProcessInfo.processInfo.environment["XCTestBundlePath"] != nil
+            || ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 
     // MARK: - CloudKit Subscription
