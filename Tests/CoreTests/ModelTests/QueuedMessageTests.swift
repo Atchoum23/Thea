@@ -60,7 +60,7 @@ final class QueuedMessageTests: XCTestCase {
     // MARK: - QueuedAttachment
 
     func testQueuedAttachmentCreation() {
-        let data = "test data".data(using: .utf8)!
+        let data = Data("test data".utf8)
         let attachment = QueuedAttachment(name: "file.txt", data: data, mimeType: "text/plain")
         XCTAssertEqual(attachment.name, "file.txt")
         XCTAssertEqual(attachment.mimeType, "text/plain")

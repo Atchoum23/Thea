@@ -125,7 +125,7 @@ final class OfflineQueueTypesTests: XCTestCase {
             id: UUID(),
             type: .chat,
             priority: .high,
-            payload: "test".data(using: .utf8),
+            payload: Data("test".utf8),
             createdAt: Date(),
             retryCount: 2
         )
