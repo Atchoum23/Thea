@@ -204,7 +204,7 @@ final class ResilientAIFallbackChain {
 
     private func executeCoreMLTier(messages: [AIMessage]) async throws -> String {
         let engine = CoreMLInferenceEngine.shared
-        guard engine.loadedModelID != nil else {
+        if engine.loadedModelID == nil {
             // Try to load a model
             let models = engine.discoverLLMModels()
             guard let model = models.first else {
