@@ -8,7 +8,7 @@
     <array/>
     <key>NSPrivacyCollectedDataTypes</key>
     <array>
-        <!-- Chat messages and knowledge entries sent to AI providers (Anthropic, OpenAI, etc.) -->
+        <!-- Chat messages and knowledge entries sent to AI providers -->
         <dict>
             <key>NSPrivacyCollectedDataType</key>
             <string>NSPrivacyCollectedDataTypeOtherUserContent</string>
@@ -21,7 +21,7 @@
                 <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
             </array>
         </dict>
-        <!-- Device identifier (identifierForVendor) used for CloudKit sync -->
+        <!-- Device identifier used for CloudKit sync -->
         <dict>
             <key>NSPrivacyCollectedDataType</key>
             <string>NSPrivacyCollectedDataTypeDeviceID</string>
@@ -32,34 +32,6 @@
             <key>NSPrivacyCollectedDataTypePurposes</key>
             <array>
                 <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
-            </array>
-        </dict>
-        <!-- Health data may appear in AI coaching context -->
-        <dict>
-            <key>NSPrivacyCollectedDataType</key>
-            <string>NSPrivacyCollectedDataTypeHealth</string>
-            <key>NSPrivacyCollectedDataTypeLinked</key>
-            <false/>
-            <key>NSPrivacyCollectedDataTypeTracking</key>
-            <false/>
-            <key>NSPrivacyCollectedDataTypePurposes</key>
-            <array>
-                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
-                <string>NSPrivacyCollectedDataTypePurposeProductPersonalization</string>
-            </array>
-        </dict>
-        <!-- Fitness/activity data may appear in AI coaching context -->
-        <dict>
-            <key>NSPrivacyCollectedDataType</key>
-            <string>NSPrivacyCollectedDataTypeFitness</string>
-            <key>NSPrivacyCollectedDataTypeLinked</key>
-            <false/>
-            <key>NSPrivacyCollectedDataTypeTracking</key>
-            <false/>
-            <key>NSPrivacyCollectedDataTypePurposes</key>
-            <array>
-                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
-                <string>NSPrivacyCollectedDataTypePurposeProductPersonalization</string>
             </array>
         </dict>
         <!-- Location context may appear in AI conversations -->
@@ -79,7 +51,7 @@
     </array>
     <key>NSPrivacyAccessedAPITypes</key>
     <array>
-        <!-- User Defaults: app settings + app group shared data (widgets, extensions) -->
+        <!-- User Defaults: app settings + app group shared data -->
         <dict>
             <key>NSPrivacyAccessedAPIType</key>
             <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
@@ -89,7 +61,7 @@
                 <string>1C8F.1</string>
             </array>
         </dict>
-        <!-- File Timestamp APIs: backup management, file sync, model discovery, document intelligence -->
+        <!-- File Timestamp APIs: backup, sync, model discovery, code indexing -->
         <dict>
             <key>NSPrivacyAccessedAPIType</key>
             <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
@@ -109,7 +81,7 @@
                 <string>35F9.1</string>
             </array>
         </dict>
-        <!-- Disk Space APIs: model download space check, storage info display -->
+        <!-- Disk Space APIs: model download space check, storage display -->
         <dict>
             <key>NSPrivacyAccessedAPIType</key>
             <string>NSPrivacyAccessedAPICategoryDiskSpace</string>
