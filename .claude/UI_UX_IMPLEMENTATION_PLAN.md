@@ -421,16 +421,13 @@ struct TheaWatchView: View {
 - [x] Message branching (BranchNavigator.swift, Message model updated)
 - [x] Extended thinking UI (ExtendedThinkingView.swift)
 - [x] @ mentions system (MentionAutocomplete.swift)
-- [x] Thinking timer on StreamingIndicator (Feb 13, 2026)
-- [x] Smart scroll — auto-follow during streaming, pause on user scroll (Feb 13, 2026)
 
 ### Phase 2: Input & Navigation (Week 2-3)
-- [ ] File drag-drop improvements (PDF, DOCX, CSV — basic drag-drop exists)
+- [ ] File drag-drop improvements
 - [x] Command palette (Cmd+K) - CommandPalette.swift
 - [x] Quick Entry (Option+Option) - QuickEntryWindow.swift
-- [x] Full-text conversation search (Feb 13, 2026 — searches message content + titles)
-- [x] Keyboard shortcuts guide (KeyboardShortcutsHelpView.swift, Cmd+/)
-- [x] Slash commands — /clear /branch /export + 8 existing (Feb 13, 2026)
+- [ ] Full-text conversation search
+- [ ] Keyboard shortcuts guide
 
 ### Phase 3: Artifacts Panel (Week 3-4)
 - [x] 4th column layout for artifacts (ArtifactPanel.swift)
@@ -439,9 +436,9 @@ struct TheaWatchView: View {
 - [x] Export/save artifacts
 
 ### Phase 4: Advanced Features (Week 4-5)
-- [ ] Response styles (CustomAgentBuilder exists for full agents, need quick tone presets)
+- [ ] Response styles
 - [ ] MCP Extensions gallery
-- [ ] Personalization system ("About me" context)
+- [ ] Personalization system
 - [ ] Plan preview in Cowork
 
 ### Phase 5: Cross-Platform Polish (Week 5-6)
