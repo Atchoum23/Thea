@@ -236,6 +236,7 @@
 		2493B2009CA514EF17FAE191 /* CustomAgentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A3C60C41C83DB8CAC65274 /* CustomAgentBuilder.swift */; };
 		24C6B245F1036AF69C10FF26 /* iOSAboutSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F45D01249EC56E823ECF652 /* iOSAboutSection.swift */; };
 		24D6E86E015683B21E6BEFE0 /* PromptTemplateLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8774579D4CAD78F8DFDA5888 /* PromptTemplateLibrary.swift */; };
+		24D7D5E665E313AEFEF0D43F /* TheaAssistantSchemas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE69A60F2269AD914531B4A /* TheaAssistantSchemas.swift */; };
 		25021E4D3311E89F45484B52 /* IntegratedTestRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E411EF1662378EF17FDC7F /* IntegratedTestRunner.swift */; };
 		250373D85D182015BA566A76 /* GitSavepoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DF88A0D9B3677236656455 /* GitSavepoint.swift */; };
 		2551643BB57B2C6C813D8EC2 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65047875E449994016D285AA /* EventStore.swift */; };
@@ -1063,6 +1064,7 @@
 		A8883309D2D61286F9FC9067 /* ContextualMultiArmedBandit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFDB048804A6C8CC1D372B /* ContextualMultiArmedBandit.swift */; };
 		A8DBD04BAF577EA23A8BFFBC /* DeviceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE3F4288C165F9736A02094 /* DeviceDiscovery.swift */; };
 		A8DE689CF74C5DF871B75F61 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89C8E729F7046437DDE9E5C /* Colors.swift */; };
+		A93E47DABEA388FB43D49DD0 /* TheaAssistantSchemas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE69A60F2269AD914531B4A /* TheaAssistantSchemas.swift */; };
 		A989ACD65A552BF5A00B65E7 /* AdaptivePromptEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5848F48A94E9F588E4F2D9F /* AdaptivePromptEngine.swift */; };
 		A9A4803A4F584CE3DB2190B5 /* CareerProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A0F98E0BDE6616C5220E4B /* CareerProtocols.swift */; };
 		A9ACAF3E5FEC8E45451169CB /* AgentSecEnforcer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27F12B2A1D617DA383C60E5F /* AgentSecEnforcer.swift */; };
@@ -2226,6 +2228,7 @@
 		89ADBB04DD5856B19A5115C3 /* HelpButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButton.swift; sourceTree = "<group>"; };
 		8A929EC8E304E78BBAF968AD /* XcodeBuildRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeBuildRunner.swift; sourceTree = "<group>"; };
 		8ABF6311D4DDD50457C5616F /* SessionRecordingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecordingService.swift; sourceTree = "<group>"; };
+		8AE69A60F2269AD914531B4A /* TheaAssistantSchemas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaAssistantSchemas.swift; sourceTree = "<group>"; };
 		8B9AF80F34979202E399E64F /* HealthCoachingPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthCoachingPipeline.swift; sourceTree = "<group>"; };
 		8BA957B75D5617FCA5E0BE4F /* AutoCorrectSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCorrectSettingsView.swift; sourceTree = "<group>"; };
 		8BE23DB7917163F2DED64B99 /* password-enhancer.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = "password-enhancer.css"; sourceTree = "<group>"; };
@@ -5656,6 +5659,7 @@
 			isa = PBXGroup;
 			children = (
 				7A1E5812E31F47BF9AC08874 /* TheaAppIntents.swift */,
+				8AE69A60F2269AD914531B4A /* TheaAssistantSchemas.swift */,
 				149B9875C9ADDA752ACB41B4 /* TheaControls.swift */,
 			);
 			path = AppIntents;
@@ -7062,6 +7066,7 @@
 				291C8F99CF27CA8BAE8B5DE7 /* TheaAnimations.swift in Sources */,
 				0CFBBCA2E55EDB84C53580CD /* TheaApp.swift in Sources */,
 				B45ACC988DF358341015F3FD /* TheaAppIntents.swift in Sources */,
+				24D7D5E665E313AEFEF0D43F /* TheaAssistantSchemas.swift in Sources */,
 				C3D83275131B8EDD5A4ED074 /* TheaConfig.swift in Sources */,
 				616F5000163FBADA6F9988FA /* TheaControls.swift in Sources */,
 				9BD515D0A5D67AB72CE507B7 /* TheaDesignSystem.swift in Sources */,
@@ -7934,6 +7939,7 @@
 				9F0F5E154A0B88F48C68B8BB /* TheaAnimations.swift in Sources */,
 				36E37E807499AF9FFF5706C6 /* TheaApp.swift in Sources */,
 				29606B23A2216E9B54F20D42 /* TheaAppIntents.swift in Sources */,
+				A93E47DABEA388FB43D49DD0 /* TheaAssistantSchemas.swift in Sources */,
 				4EF05F89B87750C2EF03D43C /* TheaConfig.swift in Sources */,
 				C94925D9673BDD6F4DCFA67A /* TheaControls.swift in Sources */,
 				625770CFFC930D2AE55B0DA3 /* TheaDesignSystem.swift in Sources */,

@@ -7,6 +7,7 @@
 //
 
 import AppIntents
+import CoreLocation
 import Foundation
 
 // MARK: - System Search Intent
@@ -14,9 +15,9 @@ import Foundation
 /// Search across Thea's conversations and knowledge base via Siri / Apple Intelligence
 @available(iOS 18.0, macOS 15.0, tvOS 18.0, *)
 @available(watchOS, unavailable)
-@AssistantIntent(schema: .system.search)
+@AppIntent(schema: .system.search)
 public struct TheaSearchIntent: ShowInAppSearchResultsIntent {
-    public static var searchScopes: [StringSearchScope] = [.general]
+    nonisolated(unsafe) public static var searchScopes: [StringSearchScope] = [.general]
 
     public var criteria: StringSearchCriteria
 
@@ -26,8 +27,7 @@ public struct TheaSearchIntent: ShowInAppSearchResultsIntent {
 
     @MainActor
     public func perform() async throws -> some IntentResult {
-        // Opens the app to show search results for the criteria term
-        return .result()
+        .result()
     }
 }
 
@@ -35,27 +35,26 @@ public struct TheaSearchIntent: ShowInAppSearchResultsIntent {
 
 /// Represents a knowledge base entry for Apple Intelligence
 @available(iOS 18.0, macOS 15.0, watchOS 11.0, tvOS 18.0, *)
-@AssistantEntity(schema: .journal.entry)
+@AppEntity(schema: .journal.entry)
 public struct TheaKnowledgeEntryEntity: Identifiable {
     public struct TheaKnowledgeEntryQuery: EntityStringQuery {
+        public init() {}
+
         @MainActor
         public func entities(for identifiers: [TheaKnowledgeEntryEntity.ID]) async throws -> [TheaKnowledgeEntryEntity] {
-            // Look up entries by ID from KnowledgeManager
-            return []
+            []
         }
 
         public func entities(matching string: String) async throws -> [TheaKnowledgeEntryEntity] {
-            // Search knowledge base for matching entries
-            return []
+            []
         }
 
         public func suggestedEntities() async throws -> [TheaKnowledgeEntryEntity] {
-            // Return recent knowledge entries
-            return []
+            []
         }
     }
 
-    public static var defaultQuery = TheaKnowledgeEntryQuery()
+    nonisolated(unsafe) public static var defaultQuery = TheaKnowledgeEntryQuery()
 
     public var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(stringLiteral: title ?? "Untitled Entry")
@@ -64,14 +63,16 @@ public struct TheaKnowledgeEntryEntity: Identifiable {
     public let id: UUID
     public var title: String?
     public var message: String?
-    public var createdDate: Date?
-    public var mediaItems: [IntentFile]?
+    public var entryDate: Date?
+    public var location: CLPlacemark?
+    public var mediaItems: [IntentFile]
 
-    public init(id: UUID, title: String?, message: String?, createdDate: Date?) {
+    public init(id: UUID, title: String?, message: String?, entryDate: Date?) {
         self.id = id
         self.title = title
         self.message = message
-        self.createdDate = createdDate
+        self.entryDate = entryDate
+        self.mediaItems = []
     }
 }
 
@@ -79,16 +80,20 @@ public struct TheaKnowledgeEntryEntity: Identifiable {
 
 /// Create a knowledge base entry via Siri / Apple Intelligence
 @available(iOS 18.0, macOS 15.0, watchOS 11.0, tvOS 18.0, *)
-@AssistantIntent(schema: .journal.createEntry)
+@AppIntent(schema: .journal.createEntry)
 public struct TheaCreateEntryIntent: AppIntent {
     public var title: String?
-    public var message: String?
-    public var createdDate: Date?
-    public var mediaItems: [IntentFile]?
+    public var message: String
+    public var entryDate: Date?
+    public var location: CLPlacemark?
+    public var mediaItems: [IntentFile]
 
     nonisolated(unsafe) public static var title: LocalizedStringResource = "Create Knowledge Entry"
 
-    public init() {}
+    public init() {
+        self.message = ""
+        self.mediaItems = []
+    }
 
     @MainActor
     public func perform() async throws -> some IntentResult & ReturnsValue<TheaKnowledgeEntryEntity> {
@@ -96,7 +101,7 @@ public struct TheaCreateEntryIntent: AppIntent {
             id: UUID(),
             title: title,
             message: message,
-            createdDate: createdDate ?? Date()
+            entryDate: entryDate ?? Date()
         )
         return .result(value: entry)
     }
@@ -106,7 +111,7 @@ public struct TheaCreateEntryIntent: AppIntent {
 
 /// Search knowledge base entries via Siri / Apple Intelligence
 @available(iOS 18.0, macOS 15.0, watchOS 11.0, tvOS 18.0, *)
-@AssistantIntent(schema: .journal.search)
+@AppIntent(schema: .journal.search)
 public struct TheaSearchEntriesIntent: AppIntent {
     public var criteria: StringSearchCriteria
 
@@ -118,7 +123,6 @@ public struct TheaSearchEntriesIntent: AppIntent {
 
     @MainActor
     public func perform() async throws -> some IntentResult & ReturnsValue<[TheaKnowledgeEntryEntity]> {
-        // Search knowledge base using criteria.term
-        return .result(value: [])
+        .result(value: [])
     }
 }
