@@ -101,9 +101,9 @@ done
 - **SemanticSearchService** (`Intelligence/Search/`): Embedding-based semantic search (macOS only)
 - **ChatManager.selectProviderAndModel()**: Wired with `#if os(macOS)` to use TaskClassifier + ModelRouter; falls back to default provider on iOS/watchOS/tvOS
 
-## Verification Pipeline (ACTIVE in macOS + iOS builds)
+## Verification Pipeline (ACTIVE + WIRED in macOS + iOS builds)
 
-- **ConfidenceSystem** (`Intelligence/Verification/`): Orchestrates all 5 sub-verifiers for response confidence scoring
+- **ConfidenceSystem** (`Intelligence/Verification/`): Orchestrates all 5 sub-verifiers for response confidence scoring. **WIRED** into ChatManager — runs async after every AI response, stores confidence score in `MessageMetadata.confidence`
 - **MultiModelConsensus** (`Intelligence/Verification/`): Cross-validates responses across multiple AI models
 - **WebSearchVerifier** (`Intelligence/Verification/`): Fact-checks responses against web sources via Perplexity/OpenRouter
 - **StaticAnalysisVerifier** (`Intelligence/Verification/`): Code analysis via patterns, SwiftLint, compiler checks, and AI
@@ -136,8 +136,8 @@ done
 ### OpenClaw Integration (ACTIVE all platforms)
 - **OpenClawClient** (`Integrations/OpenClaw/OpenClawClient.swift`): WebSocket client to Gateway at `ws://127.0.0.1:18789`
 - **OpenClawIntegration** (`Integrations/OpenClaw/OpenClawIntegration.swift`): Lifecycle management
-- **OpenClawBridge** (`Integrations/OpenClaw/OpenClawBridge.swift`): AI message routing
-- **OpenClawSecurityGuard** (`Integrations/OpenClaw/OpenClawSecurityGuard.swift`): Prompt injection detection
+- **OpenClawBridge** (`Integrations/OpenClaw/OpenClawBridge.swift`): AI message routing with prompt injection mitigation (user input sanitization, zero-width Unicode stripping, explicit message delimiters). Routes Moltbook messages to MoltbookAgent
+- **OpenClawSecurityGuard** (`Integrations/OpenClaw/OpenClawSecurityGuard.swift`): Prompt injection detection with Unicode NFD normalization and invisible character stripping
 
 ### Privacy System (ACTIVE all platforms)
 - **OutboundPrivacyGuard** (`Privacy/OutboundPrivacyGuard.swift`): System-wide outbound data sanitization
@@ -146,8 +146,19 @@ done
 - **PIISanitizer** (`Privacy/PIISanitizer.swift`): PII detection and masking (pre-existing)
 - **PrivacyPreservingAIRouter** (`Intelligence/Privacy/`): Sensitivity-based routing (pre-existing)
 
-### Moltbook Agent (ACTIVE all platforms)
-- **MoltbookAgent** (`Agents/MoltbookAgent.swift`): Privacy-preserving dev discussion agent with kill switch + preview mode
+### Moltbook Agent (ACTIVE + WIRED all platforms)
+- **MoltbookAgent** (`Agents/MoltbookAgent.swift`): Privacy-preserving dev discussion agent with kill switch + preview mode. **WIRED** into TheamacOSApp lifecycle (deferred 2s init, guarded by `SettingsManager.moltbookAgentEnabled`), OpenClawBridge routes Moltbook messages to it
+- **MoltbookSettingsView** (`UI/Views/Settings/MoltbookSettingsView.swift`): Settings UI (enable/disable, preview mode, daily post limit) in MacSettingsView sidebar
+
+### AgentMode + Autonomy (ACTIVE + WIRED all platforms)
+- **AgentMode** (`Intelligence/AgentMode/`): Task execution modes (planning/fast/auto) with phase tracking (gatherContext → takeAction → verifyResults → done). **WIRED** into ChatManager — mode selected after task classification, phase transitions tracked
+- **AutonomyController** (`Intelligence/Autonomy/`): 5-level risk-based autonomy with action approval/rejection. **WIRED** into ChatManager — evaluates actionable task types post-response, queues for approval when needed
+- **AgentExecutionState**: Published on ChatManager as `agentState` for UI observation
+
+### Multilingual Conversations (ACTIVE all platforms)
+- **ConversationLanguageService** (`Localization/ConversationLanguageService.swift`): Per-conversation language management (27 languages, BCP-47)
+- **ConversationLanguagePickerView** (`UI/Views/Components/ConversationLanguagePickerView.swift`): Toolbar globe menu. **WIRED** into ChatView toolbar
+- **ChatManager**: Injects language instruction into system prompt (validated against injection)
 
 ### Intelligence Integration Layers (ACTIVE all platforms)
 - **PersonalKnowledgeGraph** (`Memory/PersonalKnowledgeGraph.swift`): Entity-relationship graph with BFS pathfinding, JSON persistence
@@ -175,7 +186,7 @@ If a task seems to require changes in an excluded area, **STOP and ask the user*
 | **Duplicate Terminal** | `**/Execution/Terminal/**` | `Shared/System/Terminal/` |
 | **Duplicate Memory** | `**/AI/Memory/**` | `Shared/Memory/` |
 | **AI Subsystems** | `**/AI/Context/**`, `**/AI/Adaptive/**`, `**/AI/MultiModal/**`, `**/AI/Proactive/**` | None active |
-| **Autonomy / Automation** | `**/Autonomy/**`, `**/Automation/**`, `**/Autonomous/**`, `**/AgentMode/**`, `**/SelfEvolution/**` | None active |
+| **Automation / SelfEvolution** | `**/Automation/**`, `**/SelfEvolution/**` | Autonomy + AgentMode now ACTIVE (see above) |
 | **Learning / Monitoring** | `**/PatternLearning/**`, `**/LifeMonitoring/**`, `**/LifeAssistant/**` | None active |
 | **LocalModels** | Selective: `ProactiveModelManager`, `LocalModelRecommendation*`, `AIModelGovernor`, `ModelGovernanceEngine`, `UnifiedLocalModelOrchestrator`, `SupraModelSelector`, `OllamaAgentLoop`, `ModelQualityBenchmark`, `PredictivePreloader` | Core LocalModel files now active |
 | **Integrations** | `**/Integrations/{Mail,Finder,Safari,Xcode,Shortcuts,Terminal,Music,Calendar,Messages,Notes,Reminders,MCP,System,IntegrationModule}*` | None active |

@@ -73,7 +73,16 @@ actor OpenClawSecurityGuard {
     // MARK: - Prompt Injection Detection
 
     private func checkPromptInjection(_ content: String) -> InjectionCheckResult {
-        let lower = content.lowercased()
+        // Normalize Unicode (NFD) to defeat homoglyph attacks,
+        // then strip zero-width/invisible characters before pattern matching
+        let invisibleChars = CharacterSet(
+            charactersIn: "\u{200B}\u{200C}\u{200D}\u{FEFF}\u{00AD}\u{2060}\u{180E}"
+        )
+        let normalized = content.decomposedStringWithCanonicalMapping
+        let stripped = normalized.unicodeScalars
+            .filter { !invisibleChars.contains($0) }
+            .map(String.init).joined()
+        let lower = stripped.lowercased()
 
         let patterns: [(String, String)] = [
             // Role injection
