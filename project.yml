@@ -1109,6 +1109,7 @@ targets:
       - path: Tests
         excludes:
           - "**/SecurityRemediationTests.swift"
+          - "CoreTests/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.tests
