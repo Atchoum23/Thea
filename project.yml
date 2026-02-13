@@ -435,6 +435,7 @@ targets:
           - "**/Design/DesignSystemStubs.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
+      - path: Shared/Resources/Localizable.xcstrings
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos
@@ -689,6 +690,7 @@ targets:
           - "**/Design/DesignSystemStubs.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
+      - path: Shared/Resources/Localizable.xcstrings
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios
@@ -755,6 +757,7 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: watchOS
+      - path: Shared/Resources/Localizable.xcstrings
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.watchos
@@ -798,6 +801,7 @@ targets:
         excludes:
           - "**/TVFeatures/**"
       - path: Shared/Resources/Assets.xcassets
+      - path: Shared/Resources/Localizable.xcstrings
       - path: Shared/InferenceRelay
     settings:
       base:
