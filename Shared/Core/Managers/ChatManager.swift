@@ -356,9 +356,15 @@ final class ChatManager: ObservableObject {
         context.insert(assistantMessage)
 
         do {
+            // Optional cloud API privacy guard: sanitize messages before sending to provider
+            var messagesToSend = apiMessages
+            if SettingsManager.shared.cloudAPIPrivacyGuardEnabled {
+                messagesToSend = await OutboundPrivacyGuard.shared.sanitizeMessages(apiMessages, channel: "cloud_api")
+            }
+
             debugLog("🔄 Starting chat stream...")
             let responseStream = try await provider.chat(
-                messages: apiMessages,
+                messages: messagesToSend,
                 model: model,
                 stream: true
             )

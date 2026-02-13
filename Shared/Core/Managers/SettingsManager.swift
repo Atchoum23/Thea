@@ -56,6 +56,11 @@ final class SettingsManager: ObservableObject {
         didSet { persist(handoffEnabled, forKey: "handoffEnabled") }
     }
 
+    /// When enabled, outbound messages to cloud AI providers pass through OutboundPrivacyGuard
+    @Published var cloudAPIPrivacyGuardEnabled: Bool {
+        didSet { persist(cloudAPIPrivacyGuardEnabled, forKey: "cloudAPIPrivacyGuardEnabled") }
+    }
+
     // MARK: - Behavior Settings
 
     @Published var launchAtLogin: Bool {
@@ -269,6 +274,7 @@ final class SettingsManager: ObservableObject {
         iCloudSyncEnabled = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
         analyticsEnabled = UserDefaults.standard.bool(forKey: "analyticsEnabled")
         handoffEnabled = UserDefaults.standard.object(forKey: "handoffEnabled") as? Bool ?? true
+        cloudAPIPrivacyGuardEnabled = UserDefaults.standard.bool(forKey: "cloudAPIPrivacyGuardEnabled")
 
         launchAtLogin = UserDefaults.standard.bool(forKey: "launchAtLogin")
         showInMenuBar = UserDefaults.standard.object(forKey: "showInMenuBar") as? Bool ?? true
@@ -348,6 +354,7 @@ final class SettingsManager: ObservableObject {
         iCloudSyncEnabled = d.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
         analyticsEnabled = d.bool(forKey: "analyticsEnabled")
         handoffEnabled = d.object(forKey: "handoffEnabled") as? Bool ?? true
+        cloudAPIPrivacyGuardEnabled = d.bool(forKey: "cloudAPIPrivacyGuardEnabled")
         launchAtLogin = d.bool(forKey: "launchAtLogin")
         showInMenuBar = d.object(forKey: "showInMenuBar") as? Bool ?? true
         notificationsEnabled = d.object(forKey: "notificationsEnabled") as? Bool ?? true
@@ -457,6 +464,7 @@ final class SettingsManager: ObservableObject {
         iCloudSyncEnabled = false
         analyticsEnabled = false
         handoffEnabled = true
+        cloudAPIPrivacyGuardEnabled = false
 
         launchAtLogin = false
         showInMenuBar = true
