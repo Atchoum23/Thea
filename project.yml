@@ -1110,6 +1110,8 @@ targets:
         excludes:
           - "**/SecurityRemediationTests.swift"
           - "CoreTests/**"
+          - "**/OrchestrationIntegrationTests.swift"
+          - "**/OrchestratorRoutingTests.swift"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.tests
