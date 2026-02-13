@@ -252,17 +252,7 @@ public final class SelfEvolutionEngine: ObservableObject {
             ))
         }
 
-        // Step 2: Update integration points
-        steps.append(ImplementationStep(
-            order: steps.count + 1,
-            title: "Update integration hub",
-            description: "Register new components in TheaIntegrationHub",
-            type: .modifyFile,
-            filePath: "Shared/Core/TheaIntegrationHub.swift",
-            estimatedDuration: 60
-        ))
-
-        // Step 3: Write tests
+        // Step 2: Write tests
         steps.append(ImplementationStep(
             order: steps.count + 1,
             title: "Write unit tests",

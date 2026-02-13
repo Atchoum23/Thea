@@ -337,7 +337,7 @@ targets:
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
           - "**/Views/Code/**"  # CodeProjectView extracted sub-view, duplicates types in parent
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
-          # SelfExecutionView — excluded below with explanation
+          # SelfExecutionView — REMOVED from codebase on 2026-02-13
           # MultiModal — ACTIVATED (VisionIntelligence, SpeechIntelligence, DocumentIntelligence all active)
           # DeviceCapabilityRouter — ACTIVATED
           # DeviceSwitcherView — ACTIVATED
@@ -371,7 +371,7 @@ targets:
           # AI/Proactive — ACTIVATED (MemoryManager is active)
           # ResourceManagement — ACTIVATED
           - "**/Widgets/**"
-          - "**/Views/Code/**"  # CodeProjectView extracted sub-view (duplicate at UI/Views/Code/)
+          # **/Views/Code/** already excluded above (line ~338)
           - "**/Views/LocalModels/**"  # LocalModelsView extracted sub-view (duplicate at UI/Views/LocalModels/)
           # Views/LifeTracking — ACTIVATED (LifeTrackingDashboardView, LifeMonitoring active)
           - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView inline types
@@ -384,20 +384,8 @@ targets:
           # Files outside the blanket-excluded directories that still
           # need to be excluded due to missing types or dependencies.
           # ============================================================
-          - "**/Configuration/ConfigurationManager.swift"  # Duplicate types: AIConfiguration, PrivacyConfiguration conflict with TheaConfig.swift
-          # EnhancedMessageBubble — ACTIVATED (uses ExecutableCodeBlock + MarkdownUI)
-          # ExecutableCodeBlock — ACTIVATED (uses CodeExecutionManager)
-          # MentionAutocomplete + TheaTextInputField — excluded above (see line ~342)
-          # THEAThinkingView — ACTIVATED
-          # QuerySuggestionOverlay — ACTIVATED (self-contained, stub methods)
-          # MemoryContextView — ACTIVATED
-          # StreamingTextView — ACTIVATED (StreamingStatus from StreamingIndicator)
-          - "**/Views/PhaseProgressView.swift"  # Depends on MetaAI (archived to .v1-archive)
-          - "**/Views/SelfExecutionView.swift"  # Depends on MetaAI (archived to .v1-archive)
-          # DeviceSwitcherView — ACTIVATED
-          # KeyboardShortcutsView — ACTIVATED
-          # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
-          - "**/Managers/ErrorKnowledgeBaseManager.swift"  # Depends on MetaAI (archived to .v1-archive)
+          # ConfigurationManager, PhaseProgressView, SelfExecutionView, ErrorKnowledgeBaseManager
+          # REMOVED from codebase on 2026-02-13 (dead code, all references were self-referential)
           # IntegrationsManager — ACTIVATED (all service deps in Integrations/ are active)
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
           # IntegrationModule — ACTIVATED (protocol + registry for all integrations)
@@ -417,12 +405,11 @@ targets:
           # CodeIntelligence — ACTIVATED (see above)
           # MultiModal — ACTIVATED (see above, both copies removed)
           # DeviceCapabilityRouter — ACTIVATED (see above)
-          - "**/Core/TheaIntegrationHub.swift"  # References ConfigurationManager (excluded) + many cross-deps
+          # TheaIntegrationHub, MessageRegeneration, TheaIntegrationHub+NewFeatures
+          # REMOVED from codebase on 2026-02-13 (dead code, all excluded and unreferenced)
           # TestGenerator — ACTIVATED (AI-powered test generation, AIProviderHelpers replaced with direct streaming)
-          - "**/V1Parity/MessageRegeneration.swift"  # Uses ChatMessage/ChatOptions/DynamicConfig from excluded Providers layer
           # RemoteCommandService — ACTIVATED (CloudKit-based remote commands)
           # QuickLauncher — ACTIVATED (Raycast-style command palette)
-          - "**/Integration/TheaIntegrationHub+NewFeatures.swift"  # Extension on excluded TheaIntegrationHub
           # Intelligence/Subagents — ACTIVATED
           # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
           # MemorySettingsView — ACTIVATED
@@ -600,7 +587,7 @@ targets:
           - "**/Views/Code/**"
           - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
-          - "**/Views/SelfExecutionView.swift"
+          # SelfExecutionView REMOVED from codebase on 2026-02-13
           - "**/AI/MultiModal/MultiModalCoordinator.swift"
           - "**/AI/MultiModal/MultiModalAnalyzer.swift"
           # LiquidGlassStyle and DesignTokens kept for iOS/iPadHomeView
@@ -612,10 +599,9 @@ targets:
           # LifeMonitoring — ACTIVATED (35 files, self-contained)
           # PatternLearning — ACTIVATED (single file, self-contained)
           # AI/Context — ACTIVATED
-          - "**/Configuration/ConfigurationManager.swift"  # Duplicate types conflict with TheaConfig.swift
+          # ConfigurationManager, PhaseProgressView, ErrorKnowledgeBaseManager
+          # REMOVED from codebase on 2026-02-13 (dead code)
           - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView.swift
-          - "**/Views/PhaseProgressView.swift"
-          - "**/Managers/ErrorKnowledgeBaseManager.swift"
           # AgentMode — FULLY ACTIVATED
           # IntegrationModule — ACTIVATED (protocol + registry, has #if os(macOS) guards)
           - "**/Integrations/MCPConnectionManager.swift"
@@ -658,7 +644,7 @@ targets:
           # ShortcutsOrchestrator — ACTIVATED (proper #if canImport guards)
           # SettingsPrivacyAboutViews — ACTIVATED
           # SettingsViewModel — ACTIVATED
-          # MessageRegeneration — ACTIVATED (uses AIMessage, active types)
+          # MessageRegeneration — REMOVED from codebase on 2026-02-13 (dead code)
           - "**/Integrations/MessagesIntegration.swift"
           # PromptOptimizer — ACTIVATED (SubAgentOrchestrator.AgentType→String)
           # RemoteCommandService — ACTIVATED (CloudKit works on iOS)
@@ -681,10 +667,9 @@ targets:
           - "**/Settings/AutonomousTasks/**"
           # SquadOrchestrator — ACTIVATED
           # SupraModelSelector — ACTIVATED (governance files active)
-          - "**/Core/TheaIntegrationHub.swift"
+          # TheaIntegrationHub + NewFeatures extension REMOVED from codebase on 2026-02-13
           - "**/Launcher/QuickLauncher.swift"
           # MemoryAugmentedChat — ACTIVATED
-          - "**/Integration/TheaIntegrationHub+NewFeatures.swift"
           # Anticipatory — ACTIVATED (all files)
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
           # LocalModels — ACTIVATED (governance files enabled for iOS, MLX files remain excluded)

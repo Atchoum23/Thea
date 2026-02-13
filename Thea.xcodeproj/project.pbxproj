@@ -102,7 +102,6 @@
 		0EBE87F361A9EE121D8FDAD1 /* AgentSecKillSwitchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE928CB73B90AC0E7CE1654 /* AgentSecKillSwitchTests.swift */; };
 		0EC995DB88EE0AA9506AB953 /* AgentMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5807C5003A441D28BB9689F8 /* AgentMode.swift */; };
 		0F03E62482080C257BE4BB3F /* ProjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF9B29745B3455B7EB0D745 /* ProjectManager.swift */; };
-		0F1092C8123D8BD8A5F5562E /* MessageRegeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78B278CF94AE39A10D05321 /* MessageRegeneration.swift */; };
 		0F5191421DEDD840D27BC4CA /* SystemAudioMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF7F4F780CD58452A7E38BC /* SystemAudioMonitor.swift */; };
 		0FA55C147D022F74032766F4 /* TaskType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C6C536A8603496BADCD3A /* TaskType.swift */; };
 		0FD0DB6758079D1738FE7E4D /* IntegrationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1942158A31A4A96EC101D1 /* IntegrationTypes.swift */; };
@@ -2587,7 +2586,6 @@
 		F6499FE68779A3AFD04CE2BE /* password-enhancer-ui.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "password-enhancer-ui.js"; sourceTree = "<group>"; };
 		F6CBA75876D112D3CDB04CD5 /* print-friendly.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = "print-friendly.css"; sourceTree = "<group>"; };
 		F74F450B2F44A98E1CE88C84 /* GoogleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleProvider.swift; sourceTree = "<group>"; };
-		F78B278CF94AE39A10D05321 /* MessageRegeneration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageRegeneration.swift; sourceTree = "<group>"; };
 		F7D263A49EDCC79B973E539D /* TheaSharePlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaSharePlay.swift; sourceTree = "<group>"; };
 		F804EEDA7F3B3DFEA138BABD /* COPY-PASTE-COMMANDS.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "COPY-PASTE-COMMANDS.sh"; sourceTree = "<group>"; };
 		F818AA92AC0A6993C7B7F954 /* FocusModeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModeSettings.swift; sourceTree = "<group>"; };
@@ -3202,6 +3200,13 @@
 				5E91EEB1BBF14E9ECDD7995B /* WelcomeView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		26A293B368F5A8BA877FFF75 /* Integration */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Integration;
 			sourceTree = "<group>";
 		};
 		27009FA254DBE3E19BB4932D /* Context */ = {
@@ -5182,7 +5187,6 @@
 		CD50DCD71A5D3F3B7F9895AA /* V1Parity */ = {
 			isa = PBXGroup;
 			children = (
-				F78B278CF94AE39A10D05321 /* MessageRegeneration.swift */,
 				FFEA230891CE01E61E472FC9 /* ModelDownloadManager.swift */,
 				7853DB6959DC8D9D05D49042 /* SiriIntegration.swift */,
 			);
@@ -5465,6 +5469,7 @@
 				425D5B511C0CA45EEF7F9CF2 /* Backup */,
 				3EAA4BA862217F50E3BD25D6 /* Code */,
 				57674347317CD257E462B91D /* Collaboration */,
+				E8DE8F0D6ECDB2E5513D6FD8 /* Configuration */,
 				D0E0D37DCD12DCFB345A05E4 /* Context */,
 				15C7D9A18AEC3A6EB53BFC7C /* Core */,
 				692C4057C2D246F5FACFCF54 /* Cowork */,
@@ -5476,6 +5481,7 @@
 				D48E82FDF052FFEA9132E591 /* Files */,
 				5C6991F6CB610F3A4D5BAF17 /* Financial */,
 				F96B7B02E25F284595E1114C /* InferenceRelay */,
+				26A293B368F5A8BA877FFF75 /* Integration */,
 				4B52D48252E41559D90BA583 /* Integrations */,
 				1841D4A5350EFA8AB7CD4FC7 /* Intelligence */,
 				CC61422FEE785ADFE33554B6 /* Keyboard */,
@@ -5616,6 +5622,13 @@
 				DCDFC2E314AF65AA1419EA43 /* OrchestrationTypes.swift */,
 			);
 			path = Orchestration;
+			sourceTree = "<group>";
+		};
+		E8DE8F0D6ECDB2E5513D6FD8 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Configuration;
 			sourceTree = "<group>";
 		};
 		E8FDBCB41D0AB232C9117CC0 /* AppIntegration */ = {
@@ -6850,7 +6863,6 @@
 				48C183CBC8262AB2B2935E71 /* MentionAutocompleteView.swift in Sources */,
 				E0F4E830AAB74510D016AF2D /* Message.swift in Sources */,
 				8F7E87989230403D8B0C7D8B /* MessageBubble.swift in Sources */,
-				0F1092C8123D8BD8A5F5562E /* MessageRegeneration.swift in Sources */,
 				E1B12A556E01BE0B727525B5 /* MessagesMonitor.swift in Sources */,
 				03BB60900A1136E3C8020A99 /* MetaLearningController.swift in Sources */,
 				A48D3A3E4877A6DB0640B1DA /* MigrationEngine.swift in Sources */,
