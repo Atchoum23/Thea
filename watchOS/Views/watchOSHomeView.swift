@@ -49,6 +49,7 @@ struct watchOSHomeView: View {
                     } label: {
                         Image(systemName: "gearshape")
                     }
+                    .accessibilityLabel("Settings")
                 }
             }
         }
@@ -82,6 +83,8 @@ struct watchOSHomeView: View {
         .buttonStyle(.plain)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: WatchCornerRadius.lg))
+        .accessibilityLabel(isListening ? "Stop listening" : "Tap to speak to Thea")
+        .accessibilityHint(isListening ? "Stops voice input" : "Activates voice input")
     }
 
     // MARK: - Recent Conversations
@@ -199,6 +202,7 @@ private struct WatchQuickReply: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Quick reply: \(text)")
     }
 }
 
@@ -232,6 +236,8 @@ private struct WatchActionRow: View {
         .buttonStyle(.plain)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: WatchCornerRadius.md))
+        .accessibilityLabel(label)
+        .accessibilityHint("Double tap to activate")
     }
 }
 
@@ -311,6 +317,7 @@ struct watchOSVoiceSettingsView: View {
                 Toggle("Voice Activation", isOn: $config.voiceEnabled)
                     .font(.body)
                     .onChange(of: config.voiceEnabled) { _, _ in config.save() }
+                    .accessibilityValue(config.voiceEnabled ? "On" : "Off")
             } footer: {
                 Text("Use wake word to activate")
             }
@@ -330,6 +337,7 @@ struct watchOSVoiceSettingsView: View {
                     Toggle("Conversation Mode", isOn: $config.conversationMode)
                         .font(.body)
                         .onChange(of: config.conversationMode) { _, _ in config.save() }
+                        .accessibilityValue(config.conversationMode ? "On" : "Off")
                 }
             }
         }
@@ -348,6 +356,7 @@ struct watchOSSyncSettingsView: View {
                 Toggle("iCloud Sync", isOn: $config.iCloudSyncEnabled)
                     .font(.body)
                     .onChange(of: config.iCloudSyncEnabled) { _, _ in config.save() }
+                    .accessibilityValue(config.iCloudSyncEnabled ? "On" : "Off")
             } footer: {
                 Text("Sync with iPhone and Mac")
             }
@@ -386,12 +395,14 @@ struct watchOSPrivacySettingsView: View {
                 Toggle("Analytics", isOn: $config.analyticsEnabled)
                     .font(.body)
                     .onChange(of: config.analyticsEnabled) { _, _ in config.save() }
+                    .accessibilityValue(config.analyticsEnabled ? "On" : "Off")
             }
 
             Section("Security") {
                 Toggle("Passcode Lock", isOn: $config.requirePasscode)
                     .font(.body)
                     .onChange(of: config.requirePasscode) { _, _ in config.save() }
+                    .accessibilityValue(config.requirePasscode ? "On" : "Off")
             }
 
             Section {
@@ -399,6 +410,7 @@ struct watchOSPrivacySettingsView: View {
                     // Clear data
                 }
                 .font(.body)
+                .accessibilityHint("Permanently removes all local data")
             }
         }
         .navigationTitle("Privacy")

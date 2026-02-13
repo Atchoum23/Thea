@@ -88,12 +88,14 @@ struct iOSHomeView: View {
             } label: {
                 Image(systemName: "square.and.pencil")
             }
+            .accessibilityLabel("New conversation")
         case .projects:
             Button {
                 _ = projectManager.createProject(title: "New Project")
             } label: {
                 Image(systemName: "plus")
             }
+            .accessibilityLabel("New project")
         case .knowledge:
             Button {
                 showingVoiceSettings = true
@@ -101,6 +103,7 @@ struct iOSHomeView: View {
                 Image(systemName: voiceManager.isEnabled ? "mic.fill" : "mic.slash.fill")
                     .foregroundStyle(voiceManager.isEnabled ? .theaPrimary : .secondary)
             }
+            .accessibilityLabel(voiceManager.isEnabled ? "Voice enabled, tap to configure" : "Voice disabled, tap to configure")
         case .financial, .settings:
             EmptyView()
         }
@@ -248,6 +251,20 @@ private struct IOSConversationRow: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(.vertical, TheaSpacing.xxs)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(iosConversationAccessibilityLabel)
+    }
+
+    private var iosConversationAccessibilityLabel: String {
+        var label = conversation.title
+        if conversation.isPinned { label += ", pinned" }
+        let time = conversation.updatedAt.formatted(.relative(presentation: .named))
+        label += ", \(time)"
+        if let lastMessage = conversation.messages.last {
+            let preview = lastMessage.content.textValue
+            label += ". \(preview.count > 80 ? String(preview.prefix(80)) + "…" : preview)"
+        }
+        return label
     }
 }
 
@@ -302,6 +319,7 @@ struct iOSChatView: View {
                         .foregroundStyle(isListeningForVoice ? .red : .theaPrimary)
                         .symbolEffect(.bounce, value: isListeningForVoice)
                 }
+                .accessibilityLabel(isListeningForVoice ? "Stop voice input" : "Start voice input")
             }
         }
         .onAppear {
@@ -372,6 +390,7 @@ struct iOSChatView: View {
                 .lineLimit(1 ... 6)
                 .focused($isInputFocused)
                 .disabled(chatManager.isStreaming)
+                .accessibilityLabel("Message input")
                 .onSubmit {
                     if !messageText.isEmpty {
                         sendMessage()

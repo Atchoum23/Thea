@@ -16,6 +16,7 @@ struct SidebarView: View {
                 TextField("Search conversations", text: $searchText)
                     .textFieldStyle(.plain)
                     .font(.theaCaption1)
+                    .accessibilityLabel("Search conversations")
                 if !searchText.isEmpty {
                     Button {
                         searchText = ""
@@ -25,6 +26,7 @@ struct SidebarView: View {
                             .font(.theaCaption2)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Clear search")
                 }
             }
             .padding(.horizontal, TheaSpacing.md)

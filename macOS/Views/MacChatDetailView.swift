@@ -87,6 +87,7 @@ struct MacChatDetailView: View {
                     Image(systemName: "text.bubble")
                 }
                 .help("Edit system prompt")
+                .accessibilityLabel("Edit system prompt")
                 .popover(isPresented: $showingSystemPrompt, arrowEdge: .bottom) {
                     VStack(alignment: .leading, spacing: TheaSpacing.sm) {
                         Text("System Prompt")
@@ -100,6 +101,7 @@ struct MacChatDetailView: View {
                         TextEditor(text: $systemPromptText)
                             .font(.theaBody)
                             .frame(minHeight: 100, maxHeight: 200)
+                            .accessibilityLabel("System prompt text")
                             .scrollContentBackground(.hidden)
                             .padding(TheaSpacing.xs)
                             .background(Color.theaSurface)
@@ -114,6 +116,7 @@ struct MacChatDetailView: View {
                                 try? modelContext.save()
                             }
                             .foregroundStyle(.secondary)
+                            .accessibilityLabel("Clear system prompt")
 
                             Spacer()
 
@@ -125,6 +128,7 @@ struct MacChatDetailView: View {
                                 showingSystemPrompt = false
                             }
                             .buttonStyle(.borderedProminent)
+                            .accessibilityLabel("Save system prompt")
                         }
                     }
                     .padding(TheaSpacing.md)
@@ -146,6 +150,7 @@ struct MacChatDetailView: View {
                 }
                 .keyboardShortcut("f", modifiers: .command)
                 .help("Search in conversation (⌘F)")
+                .accessibilityLabel("Search in conversation")
             }
         }
     }

@@ -238,6 +238,7 @@ struct ContentView: View {
             Image(systemName: columnVisibility == .all ? "sidebar.left" : "sidebar.right")
         }
         .help(columnVisibility == .detailOnly ? "Show All Panels" : (columnVisibility == .doubleColumn ? "Hide Conversations" : "Hide Sidebar"))
+        .accessibilityLabel(columnVisibility == .detailOnly ? "Show all panels" : (columnVisibility == .doubleColumn ? "Hide conversations" : "Hide sidebar"))
     }
 
     // MARK: - Chat List
@@ -254,6 +255,7 @@ struct ContentView: View {
                         Image(systemName: "plus")
                     }
                     .help("New Conversation (⇧⌘N)")
+                    .accessibilityLabel("New conversation")
                 }
             }
     }
@@ -304,6 +306,7 @@ struct ContentView: View {
                     Image(systemName: "plus")
                 }
                 .help("New Project (⇧⌘P)")
+                .accessibilityLabel("New project")
             }
         }
         .frame(minWidth: 250)
@@ -462,5 +465,7 @@ struct ContentProjectRow: View {
             }
         }
         .padding(.vertical, TheaSpacing.xxs)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(project.title), \(project.conversations.count) conversations, \(project.files.count) files")
     }
 }
