@@ -36,7 +36,7 @@ enum SARIFWriter {
                         )
                     )
                 ],
-                fixes: [SARIFFix(description: SARIFMessage(text: finding.recommendation))]
+                fixes: nil  // Omit fixes — recommendations are in rule help; SARIF 2.1.0 requires artifactChanges on fix objects
             )
         }
 
