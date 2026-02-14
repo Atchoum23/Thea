@@ -1,476 +1,473 @@
 import Foundation
 import XCTest
 
-/// Standalone tests for TheaConfig configuration section types.
-/// Tests defaults, Codable round-trips, and getValue/setValue behaviors
-/// mirroring the types in TheaConfig.swift.
+/// Standalone tests for configuration enums and their logic.
+/// Creates local test doubles mirroring the real types in Shared/Core/Configuration/.
+/// Pattern: same as TaskClassifierTypesTests.swift — no app module imports.
+///
+/// Part 1 of 2: Enum types (ExecutionMode, ContextStrategy, MetaAIPriority,
+/// TokenCountingMethod, LocalModelPreference, ExecutionStrategy, QueryComplexity,
+/// QATool, QAIssueSeverity, AITaskCategory).
+/// Part 2: ConfigurationStructTests.swift (PerformanceMetrics, QAToolResult,
+/// QAIssue, ConversationConfig, OrchestratorConfig, SystemPromptConfig,
+/// VerificationConfig, SecurityConfig).
 final class ConfigurationTypesTests: XCTestCase {
 
-    // MARK: - AIConfiguration Mirror
+    // =========================================================================
+    // MARK: - 1. ExecutionMode (mirror AppConfigurationTypes.swift)
+    // =========================================================================
 
-    struct TestAIConfig: Codable, Equatable {
-        var defaultProvider: String = "openrouter"
-        var defaultModel: String = "anthropic/claude-sonnet-4"
-        var temperature: Double = 0.7
-        var maxTokens: Int = 8192
-        var streamingEnabled: Bool = true
-        var enableTaskClassification: Bool = true
-        var enableModelRouting: Bool = true
-        var learningRate: Double = 0.1
-        var feedbackDecayFactor: Double = 0.95
+    enum ExecutionMode: String, Codable, Sendable, CaseIterable {
+        case safe
+        case normal
+        case aggressive
 
-        func getValue(_ key: String) -> Any? {
-            switch key {
-            case "defaultProvider": return defaultProvider
-            case "defaultModel": return defaultModel
-            case "temperature": return temperature
-            case "maxTokens": return maxTokens
-            case "streamingEnabled": return streamingEnabled
-            case "enableTaskClassification": return enableTaskClassification
-            case "enableModelRouting": return enableModelRouting
-            case "learningRate": return learningRate
-            case "feedbackDecayFactor": return feedbackDecayFactor
-            default: return nil
+        var displayName: String {
+            switch self {
+            case .safe: "Safe Mode (Manual Approval)"
+            case .normal: "Normal Mode (Smart Approval)"
+            case .aggressive: "Aggressive Mode (Autonomous)"
             }
         }
 
-        mutating func setValue(_ value: Any, forKey key: String) -> Bool {
-            switch key {
-            case "defaultProvider":
-                if let val = value as? String { defaultProvider = val; return true }
-            case "defaultModel":
-                if let val = value as? String { defaultModel = val; return true }
-            case "temperature":
-                if let val = value as? Double { temperature = val; return true }
-            case "maxTokens":
-                if let val = value as? Int { maxTokens = val; return true }
-            case "streamingEnabled":
-                if let val = value as? Bool { streamingEnabled = val; return true }
-            case "learningRate":
-                if let val = value as? Double { learningRate = val; return true }
-            default:
-                break
+        var description: String {
+            switch self {
+            case .safe:
+                "Every operation requires manual approval. Best for learning or sensitive work."
+            case .normal:
+                "Approve plans upfront, allow safe operations automatically. Recommended for most users."
+            case .aggressive:
+                "Pre-approve all operations. AI continues until mission complete. Use with caution."
             }
-            return false
         }
     }
 
-    func testAIConfigDefaults() {
-        let config = TestAIConfig()
-        XCTAssertEqual(config.defaultProvider, "openrouter")
-        XCTAssertEqual(config.defaultModel, "anthropic/claude-sonnet-4")
-        XCTAssertEqual(config.temperature, 0.7, accuracy: 0.001)
-        XCTAssertEqual(config.maxTokens, 8192)
-        XCTAssertTrue(config.streamingEnabled)
-        XCTAssertTrue(config.enableTaskClassification)
-        XCTAssertTrue(config.enableModelRouting)
-        XCTAssertEqual(config.learningRate, 0.1, accuracy: 0.001)
-        XCTAssertEqual(config.feedbackDecayFactor, 0.95, accuracy: 0.001)
+    func testExecutionModeRawValues() {
+        XCTAssertEqual(ExecutionMode.safe.rawValue, "safe")
+        XCTAssertEqual(ExecutionMode.normal.rawValue, "normal")
+        XCTAssertEqual(ExecutionMode.aggressive.rawValue, "aggressive")
     }
 
-    func testAIConfigCodable() throws {
-        var config = TestAIConfig()
-        config.defaultProvider = "anthropic"
-        config.temperature = 0.9
-        config.maxTokens = 4096
-
-        let data = try JSONEncoder().encode(config)
-        let decoded = try JSONDecoder().decode(TestAIConfig.self, from: data)
-        XCTAssertEqual(decoded, config)
+    func testExecutionModeCaseIterable() {
+        XCTAssertEqual(ExecutionMode.allCases.count, 3)
+        XCTAssertEqual(ExecutionMode.allCases, [.safe, .normal, .aggressive])
     }
 
-    func testAIConfigGetValue() {
-        let config = TestAIConfig()
-        XCTAssertEqual(config.getValue("defaultProvider") as? String, "openrouter")
-        XCTAssertEqual(config.getValue("temperature") as? Double, 0.7)
-        XCTAssertEqual(config.getValue("maxTokens") as? Int, 8192)
-        XCTAssertNil(config.getValue("nonexistentKey"))
-    }
-
-    func testAIConfigSetValue() {
-        var config = TestAIConfig()
-        XCTAssertTrue(config.setValue("anthropic", forKey: "defaultProvider"))
-        XCTAssertEqual(config.defaultProvider, "anthropic")
-
-        XCTAssertTrue(config.setValue(0.9, forKey: "temperature"))
-        XCTAssertEqual(config.temperature, 0.9, accuracy: 0.001)
-
-        XCTAssertTrue(config.setValue(16384, forKey: "maxTokens"))
-        XCTAssertEqual(config.maxTokens, 16384)
-    }
-
-    func testAIConfigSetValueTypeMismatch() {
-        var config = TestAIConfig()
-        XCTAssertFalse(config.setValue("not a number", forKey: "temperature"))
-        XCTAssertEqual(config.temperature, 0.7, accuracy: 0.001, "Should not change on type mismatch")
-
-        XCTAssertFalse(config.setValue(42, forKey: "defaultProvider"))
-        XCTAssertEqual(config.defaultProvider, "openrouter", "Should not change on type mismatch")
-    }
-
-    func testAIConfigSetValueInvalidKey() {
-        var config = TestAIConfig()
-        XCTAssertFalse(config.setValue("test", forKey: "nonexistentKey"))
-    }
-
-    // MARK: - MemoryConfiguration Mirror
-
-    struct TestMemoryConfig: Codable, Equatable {
-        var workingCapacity: Int = 100
-        var episodicCapacity: Int = 10000
-        var semanticCapacity: Int = 50000
-        var proceduralCapacity: Int = 1000
-        var consolidationInterval: TimeInterval = 3600
-        var decayRate: Double = 0.99
-        var enableActiveRetrieval: Bool = true
-        var enableContextInjection: Bool = true
-        var retrievalLimit: Int = 10
-        var similarityThreshold: Double = 0.3
-    }
-
-    func testMemoryConfigDefaults() {
-        let config = TestMemoryConfig()
-        XCTAssertEqual(config.workingCapacity, 100)
-        XCTAssertEqual(config.episodicCapacity, 10000)
-        XCTAssertEqual(config.semanticCapacity, 50000)
-        XCTAssertEqual(config.proceduralCapacity, 1000)
-        XCTAssertEqual(config.consolidationInterval, 3600, accuracy: 0.1)
-        XCTAssertEqual(config.decayRate, 0.99, accuracy: 0.001)
-        XCTAssertTrue(config.enableActiveRetrieval)
-        XCTAssertTrue(config.enableContextInjection)
-        XCTAssertEqual(config.retrievalLimit, 10)
-        XCTAssertEqual(config.similarityThreshold, 0.3, accuracy: 0.001)
-    }
-
-    func testMemoryConfigCodable() throws {
-        var config = TestMemoryConfig()
-        config.workingCapacity = 200
-        config.decayRate = 0.95
-        config.retrievalLimit = 20
-
-        let data = try JSONEncoder().encode(config)
-        let decoded = try JSONDecoder().decode(TestMemoryConfig.self, from: data)
-        XCTAssertEqual(decoded, config)
-    }
-
-    // MARK: - VerificationConfiguration Mirror
-
-    struct TestVerificationConfig: Codable, Equatable {
-        var enableMultiModel: Bool = true
-        var enableWebSearch: Bool = true
-        var enableCodeExecution: Bool = true
-        var enableStaticAnalysis: Bool = true
-        var enableFeedbackLearning: Bool = true
-        var highConfidenceThreshold: Double = 0.85
-        var mediumConfidenceThreshold: Double = 0.60
-        var lowConfidenceThreshold: Double = 0.30
-        var consensusWeight: Double = 0.30
-        var webSearchWeight: Double = 0.25
-        var codeExecutionWeight: Double = 0.25
-        var staticAnalysisWeight: Double = 0.10
-        var feedbackWeight: Double = 0.10
-    }
-
-    func testVerificationConfigDefaults() {
-        let config = TestVerificationConfig()
-        XCTAssertTrue(config.enableMultiModel)
-        XCTAssertTrue(config.enableWebSearch)
-        XCTAssertEqual(config.highConfidenceThreshold, 0.85, accuracy: 0.001)
-        XCTAssertEqual(config.mediumConfidenceThreshold, 0.60, accuracy: 0.001)
-        XCTAssertEqual(config.lowConfidenceThreshold, 0.30, accuracy: 0.001)
-    }
-
-    func testVerificationWeightsSum() {
-        let config = TestVerificationConfig()
-        let totalWeight = config.consensusWeight + config.webSearchWeight +
-            config.codeExecutionWeight + config.staticAnalysisWeight + config.feedbackWeight
-        XCTAssertEqual(totalWeight, 1.0, accuracy: 0.001, "Verification weights should sum to 1.0")
-    }
-
-    func testVerificationThresholdOrdering() {
-        let config = TestVerificationConfig()
-        XCTAssertGreaterThan(config.highConfidenceThreshold, config.mediumConfidenceThreshold)
-        XCTAssertGreaterThan(config.mediumConfidenceThreshold, config.lowConfidenceThreshold)
-        XCTAssertGreaterThan(config.lowConfidenceThreshold, 0)
-    }
-
-    func testVerificationConfigCodable() throws {
-        var config = TestVerificationConfig()
-        config.enableMultiModel = false
-        config.highConfidenceThreshold = 0.90
-
-        let data = try JSONEncoder().encode(config)
-        let decoded = try JSONDecoder().decode(TestVerificationConfig.self, from: data)
-        XCTAssertEqual(decoded, config)
-    }
-
-    // MARK: - ProvidersConfiguration Mirror
-
-    struct TestProvidersConfig: Codable, Equatable {
-        var anthropicBaseURL: String = "https://api.anthropic.com/v1"
-        var openaiBaseURL: String = "https://api.openai.com/v1"
-        var openrouterBaseURL: String = "https://openrouter.ai/api/v1"
-        var ollamaBaseURL: String = "http://localhost:11434"
-        var timeout: TimeInterval = 60.0
-        var maxRetries: Int = 3
-        var retryDelay: TimeInterval = 1.0
-    }
-
-    func testProvidersConfigDefaults() {
-        let config = TestProvidersConfig()
-        XCTAssertTrue(config.anthropicBaseURL.hasPrefix("https://"))
-        XCTAssertTrue(config.openaiBaseURL.hasPrefix("https://"))
-        XCTAssertTrue(config.openrouterBaseURL.hasPrefix("https://"))
-        XCTAssertTrue(config.ollamaBaseURL.hasPrefix("http://localhost"))
-        XCTAssertEqual(config.timeout, 60.0, accuracy: 0.1)
-        XCTAssertEqual(config.maxRetries, 3)
-        XCTAssertEqual(config.retryDelay, 1.0, accuracy: 0.1)
-    }
-
-    func testProvidersConfigCodable() throws {
-        var config = TestProvidersConfig()
-        config.timeout = 120.0
-        config.maxRetries = 5
-
-        let data = try JSONEncoder().encode(config)
-        let decoded = try JSONDecoder().decode(TestProvidersConfig.self, from: data)
-        XCTAssertEqual(decoded, config)
-    }
-
-    func testProvidersBaseURLsAreValid() {
-        let config = TestProvidersConfig()
-        let urls = [
-            config.anthropicBaseURL, config.openaiBaseURL,
-            config.openrouterBaseURL, config.ollamaBaseURL
-        ]
-        for urlString in urls {
-            XCTAssertNotNil(URL(string: urlString), "\(urlString) should be valid URL")
+    func testExecutionModeCodableRoundTrip() throws {
+        for mode in ExecutionMode.allCases {
+            let data = try JSONEncoder().encode(mode)
+            let decoded = try JSONDecoder().decode(ExecutionMode.self, from: data)
+            XCTAssertEqual(decoded, mode)
         }
     }
 
-    // MARK: - SecurityConfiguration Mirror
-
-    struct TestSecurityConfig: Codable, Equatable {
-        var requireApprovalForFiles: Bool = true
-        var requireApprovalForTerminal: Bool = true
-        var requireApprovalForNetwork: Bool = false
-        var blockedCommands: [String] = ["rm -rf /", "sudo rm", "mkfs", "dd if="]
-        var allowedDomains: [String] = []
-        var maxFileSize: Int = 100_000_000
-        var enableSandbox: Bool = true
-        var logSensitiveOperations: Bool = true
+    func testExecutionModeDisplayNames() {
+        XCTAssertTrue(ExecutionMode.safe.displayName.contains("Safe"))
+        XCTAssertTrue(ExecutionMode.normal.displayName.contains("Normal"))
+        XCTAssertTrue(ExecutionMode.aggressive.displayName.contains("Autonomous"))
     }
 
-    func testSecurityConfigDefaults() {
-        let config = TestSecurityConfig()
-        XCTAssertTrue(config.requireApprovalForFiles)
-        XCTAssertTrue(config.requireApprovalForTerminal)
-        XCTAssertFalse(config.requireApprovalForNetwork)
-        XCTAssertTrue(config.enableSandbox)
-        XCTAssertTrue(config.logSensitiveOperations)
-        XCTAssertEqual(config.maxFileSize, 100_000_000)
+    // =========================================================================
+    // MARK: - 2. ContextStrategy (mirror ConversationConfiguration.swift)
+    // =========================================================================
+
+    enum ContextStrategy: String, Codable, CaseIterable, Sendable {
+        case unlimited = "Unlimited"
+        case sliding = "Sliding Window"
+        case summarize = "Smart Summarization"
+        case hybrid = "Hybrid (Summarize + Recent)"
+
+        var description: String {
+            switch self {
+            case .unlimited:
+                "Keep all messages, use provider's full context window"
+            case .sliding:
+                "Keep most recent messages, drop oldest when limit reached"
+            case .summarize:
+                "Summarize old messages to preserve context efficiently"
+            case .hybrid:
+                "Keep recent messages verbatim + summary of older context"
+            }
+        }
     }
 
-    func testSecurityBlockedCommandsContainDangerous() {
-        let config = TestSecurityConfig()
-        XCTAssertTrue(config.blockedCommands.contains("rm -rf /"))
-        XCTAssertTrue(config.blockedCommands.contains("sudo rm"))
-        XCTAssertTrue(config.blockedCommands.contains("mkfs"))
-        XCTAssertTrue(config.blockedCommands.contains("dd if="))
-        XCTAssertGreaterThanOrEqual(config.blockedCommands.count, 4)
+    func testContextStrategyAllCases() {
+        XCTAssertEqual(ContextStrategy.allCases.count, 4)
+        XCTAssertEqual(ContextStrategy.allCases,
+                       [.unlimited, .sliding, .summarize, .hybrid])
     }
 
-    func testSecurityConfigCodable() throws {
-        var config = TestSecurityConfig()
-        config.blockedCommands.append("format")
-        config.allowedDomains = ["api.example.com"]
-
-        let data = try JSONEncoder().encode(config)
-        let decoded = try JSONDecoder().decode(TestSecurityConfig.self, from: data)
-        XCTAssertEqual(decoded, config)
+    func testContextStrategyCodableRoundTrip() throws {
+        for strategy in ContextStrategy.allCases {
+            let data = try JSONEncoder().encode(strategy)
+            let decoded = try JSONDecoder().decode(ContextStrategy.self, from: data)
+            XCTAssertEqual(decoded, strategy)
+        }
     }
 
-    func testSecurityAllowedDomainsDefaultEmpty() {
-        let config = TestSecurityConfig()
-        XCTAssertTrue(config.allowedDomains.isEmpty, "Should default to empty for restrictive security")
+    func testContextStrategyDescriptionsNonEmpty() {
+        for strategy in ContextStrategy.allCases {
+            XCTAssertFalse(strategy.description.isEmpty, "\(strategy) description should not be empty")
+        }
     }
 
-    // MARK: - TrackingConfiguration Mirror
+    // =========================================================================
+    // MARK: - 3. MetaAIPriority (mirror ConversationConfiguration.swift)
+    // =========================================================================
 
-    struct TestTrackingConfig: Codable, Equatable {
-        var enableLocation: Bool = false
-        var enableHealth: Bool = false
-        var enableUsage: Bool = false
-        var enableBrowser: Bool = false
-        var enableInput: Bool = false
-        var localOnly: Bool = true
-        var enableCloudSync: Bool = false
-        var retentionDays: Int = 365
+    enum MetaAIPriority: String, Codable, CaseIterable, Sendable {
+        case normal = "Normal"
+        case high = "High"
+        case maximum = "Maximum"
+
+        var allocationPercentage: Double {
+            switch self {
+            case .normal: 0.5
+            case .high: 0.7
+            case .maximum: 0.9
+            }
+        }
     }
 
-    func testTrackingConfigPrivacyDefaults() {
-        let config = TestTrackingConfig()
-        XCTAssertFalse(config.enableLocation, "Location should default off for privacy")
-        XCTAssertFalse(config.enableHealth, "Health should default off for privacy")
-        XCTAssertFalse(config.enableUsage, "Usage should default off for privacy")
-        XCTAssertFalse(config.enableBrowser, "Browser should default off for privacy")
-        XCTAssertFalse(config.enableInput, "Input should default off for privacy")
-        XCTAssertTrue(config.localOnly, "Should default to local-only for privacy")
-        XCTAssertFalse(config.enableCloudSync, "Cloud sync should default off for privacy")
+    func testMetaAIPriorityAllCases() {
+        XCTAssertEqual(MetaAIPriority.allCases.count, 3)
+        XCTAssertEqual(MetaAIPriority.allCases, [.normal, .high, .maximum])
     }
 
-    func testTrackingRetentionDays() {
-        let config = TestTrackingConfig()
-        XCTAssertEqual(config.retentionDays, 365)
-        XCTAssertGreaterThan(config.retentionDays, 0)
+    func testMetaAIPriorityAllocationPercentages() {
+        XCTAssertEqual(MetaAIPriority.normal.allocationPercentage, 0.5, accuracy: 0.001)
+        XCTAssertEqual(MetaAIPriority.high.allocationPercentage, 0.7, accuracy: 0.001)
+        XCTAssertEqual(MetaAIPriority.maximum.allocationPercentage, 0.9, accuracy: 0.001)
     }
 
-    func testTrackingConfigCodable() throws {
-        var config = TestTrackingConfig()
-        config.enableHealth = true
-        config.retentionDays = 90
-
-        let data = try JSONEncoder().encode(config)
-        let decoded = try JSONDecoder().decode(TestTrackingConfig.self, from: data)
-        XCTAssertEqual(decoded, config)
+    func testMetaAIPriorityAllocationOrdering() {
+        XCTAssertLessThan(MetaAIPriority.normal.allocationPercentage,
+                          MetaAIPriority.high.allocationPercentage)
+        XCTAssertLessThan(MetaAIPriority.high.allocationPercentage,
+                          MetaAIPriority.maximum.allocationPercentage)
     }
 
-    // MARK: - UIConfiguration Mirror
+    // =========================================================================
+    // MARK: - 4. TokenCountingMethod (mirror ConversationConfiguration.swift)
+    // =========================================================================
 
-    struct TestUIConfig: Codable, Equatable {
-        var theme: String = "system"
-        var accentColor: String = "blue"
-        var fontSize: Double = 14.0
-        var showConfidenceIndicators: Bool = true
-        var showMemoryContext: Bool = true
-        var enableAnimations: Bool = true
-        var compactMode: Bool = false
-        var sidebarWidth: Double = 250.0
-        var messageSpacing: Double = 12.0
+    enum TokenCountingMethod: String, Codable, Sendable {
+        case estimate = "Estimate (Fast)"
+        case accurate = "Accurate (Slower)"
+
+        static let tokensPerChar: Double = 0.25
     }
 
-    func testUIConfigDefaults() {
-        let config = TestUIConfig()
-        XCTAssertEqual(config.theme, "system")
-        XCTAssertEqual(config.accentColor, "blue")
-        XCTAssertEqual(config.fontSize, 14.0, accuracy: 0.1)
-        XCTAssertTrue(config.showConfidenceIndicators)
-        XCTAssertTrue(config.enableAnimations)
-        XCTAssertFalse(config.compactMode)
+    func testTokenCountingMethodBothCases() {
+        XCTAssertEqual(TokenCountingMethod.estimate.rawValue, "Estimate (Fast)")
+        XCTAssertEqual(TokenCountingMethod.accurate.rawValue, "Accurate (Slower)")
     }
 
-    func testUIConfigCodable() throws {
-        var config = TestUIConfig()
-        config.theme = "dark"
-        config.fontSize = 16.0
-        config.compactMode = true
-
-        let data = try JSONEncoder().encode(config)
-        let decoded = try JSONDecoder().decode(TestUIConfig.self, from: data)
-        XCTAssertEqual(decoded, config)
+    func testTokenCountingMethodCodableRoundTrip() throws {
+        for method in [TokenCountingMethod.estimate, .accurate] {
+            let data = try JSONEncoder().encode(method)
+            let decoded = try JSONDecoder().decode(TokenCountingMethod.self, from: data)
+            XCTAssertEqual(decoded, method)
+        }
     }
 
-    func testUIConfigFontSizeReasonable() {
-        let config = TestUIConfig()
-        XCTAssertGreaterThanOrEqual(config.fontSize, 8.0, "Font too small")
-        XCTAssertLessThanOrEqual(config.fontSize, 72.0, "Font too large")
+    func testTokenCountingMethodTokensPerChar() {
+        XCTAssertEqual(TokenCountingMethod.tokensPerChar, 0.25, accuracy: 0.001)
+        let chars = 100
+        let estimated = Double(chars) * TokenCountingMethod.tokensPerChar
+        XCTAssertEqual(estimated, 25.0, accuracy: 0.001)
     }
 
-    func testUIConfigSidebarWidthReasonable() {
-        let config = TestUIConfig()
-        XCTAssertGreaterThanOrEqual(config.sidebarWidth, 100.0, "Sidebar too narrow")
-        XCTAssertLessThanOrEqual(config.sidebarWidth, 600.0, "Sidebar too wide")
+    // =========================================================================
+    // MARK: - 5. LocalModelPreference (mirror OrchestratorConfiguration.swift)
+    // =========================================================================
+
+    enum LocalModelPreference: String, Codable, CaseIterable, Sendable {
+        case always = "Always"
+        case prefer = "Prefer"
+        case balanced = "Balanced"
+        case cloudFirst = "Cloud-First"
+
+        var description: String {
+            switch self {
+            case .always:
+                "Only use local models (fail if unavailable)"
+            case .prefer:
+                "Try local first, fallback to cloud"
+            case .balanced:
+                "Use local for simple tasks, cloud for complex"
+            case .cloudFirst:
+                "Prefer cloud models, use local only offline"
+            }
+        }
     }
 
-    // MARK: - ConfigSnapshot Mirror
-
-    struct TestConfigSnapshot: Codable, Equatable {
-        let ai: TestAIConfig
-        let memory: TestMemoryConfig
-        let verification: TestVerificationConfig
-        let providers: TestProvidersConfig
-        let ui: TestUIConfig
-        let tracking: TestTrackingConfig
-        let security: TestSecurityConfig
+    func testLocalModelPreferenceAllCases() {
+        XCTAssertEqual(LocalModelPreference.allCases.count, 4)
+        XCTAssertEqual(LocalModelPreference.allCases,
+                       [.always, .prefer, .balanced, .cloudFirst])
     }
 
-    func testFullSnapshotCodable() throws {
-        let snapshot = TestConfigSnapshot(
-            ai: TestAIConfig(),
-            memory: TestMemoryConfig(),
-            verification: TestVerificationConfig(),
-            providers: TestProvidersConfig(),
-            ui: TestUIConfig(),
-            tracking: TestTrackingConfig(),
-            security: TestSecurityConfig()
-        )
-
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        let data = try encoder.encode(snapshot)
-        let decoded = try JSONDecoder().decode(TestConfigSnapshot.self, from: data)
-        XCTAssertEqual(decoded, snapshot)
+    func testLocalModelPreferenceOrdering() {
+        let cases = LocalModelPreference.allCases
+        XCTAssertEqual(cases.first, .always)
+        XCTAssertEqual(cases.last, .cloudFirst)
     }
 
-    func testSnapshotJSONIsReadable() throws {
-        let snapshot = TestConfigSnapshot(
-            ai: TestAIConfig(),
-            memory: TestMemoryConfig(),
-            verification: TestVerificationConfig(),
-            providers: TestProvidersConfig(),
-            ui: TestUIConfig(),
-            tracking: TestTrackingConfig(),
-            security: TestSecurityConfig()
-        )
-
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let data = try encoder.encode(snapshot)
-        let json = String(data: data, encoding: .utf8)
-        XCTAssertNotNil(json)
-        XCTAssertTrue(json?.contains("defaultProvider") ?? false)
-        XCTAssertTrue(json?.contains("openrouter") ?? false)
+    func testLocalModelPreferenceDescriptions() {
+        XCTAssertTrue(LocalModelPreference.always.description.lowercased().contains("local"))
+        XCTAssertTrue(LocalModelPreference.prefer.description.lowercased().contains("local"))
+        XCTAssertTrue(LocalModelPreference.balanced.description.lowercased().contains("local"))
+        XCTAssertTrue(LocalModelPreference.cloudFirst.description.lowercased().contains("cloud"))
     }
 
-    func testSnapshotWithModifiedValues() throws {
-        var ai = TestAIConfig()
-        ai.temperature = 0.0
-        ai.maxTokens = 100
+    // =========================================================================
+    // MARK: - 6. ExecutionStrategy (mirror OrchestratorConfiguration.swift)
+    // =========================================================================
 
-        var security = TestSecurityConfig()
-        security.blockedCommands = []
-
-        let snapshot = TestConfigSnapshot(
-            ai: ai,
-            memory: TestMemoryConfig(),
-            verification: TestVerificationConfig(),
-            providers: TestProvidersConfig(),
-            ui: TestUIConfig(),
-            tracking: TestTrackingConfig(),
-            security: security
-        )
-
-        let data = try JSONEncoder().encode(snapshot)
-        let decoded = try JSONDecoder().decode(TestConfigSnapshot.self, from: data)
-        XCTAssertEqual(decoded.ai.temperature, 0.0, accuracy: 0.001)
-        XCTAssertEqual(decoded.ai.maxTokens, 100)
-        XCTAssertTrue(decoded.security.blockedCommands.isEmpty)
+    enum ExecutionStrategy: String, Codable, Sendable {
+        case direct
+        case decompose
+        case deepAgent
     }
 
-    // MARK: - Cross-Section Validation
+    func testExecutionStrategyAllCases() {
+        XCTAssertEqual(ExecutionStrategy.direct.rawValue, "direct")
+        XCTAssertEqual(ExecutionStrategy.decompose.rawValue, "decompose")
+        XCTAssertEqual(ExecutionStrategy.deepAgent.rawValue, "deepAgent")
+    }
 
-    func testSecurityDefaultsAreRestrictive() {
-        let security = TestSecurityConfig()
-        let tracking = TestTrackingConfig()
+    func testExecutionStrategyCodableRoundTrip() throws {
+        for strategy in [ExecutionStrategy.direct, .decompose, .deepAgent] {
+            let data = try JSONEncoder().encode(strategy)
+            let decoded = try JSONDecoder().decode(ExecutionStrategy.self, from: data)
+            XCTAssertEqual(decoded, strategy)
+        }
+    }
 
-        // Security should require approvals by default
-        XCTAssertTrue(security.requireApprovalForFiles)
-        XCTAssertTrue(security.requireApprovalForTerminal)
-        XCTAssertTrue(security.enableSandbox)
+    // =========================================================================
+    // MARK: - 7. QueryComplexity (mirror OrchestrationTypes.swift)
+    // =========================================================================
 
-        // Tracking should be off by default
-        XCTAssertFalse(tracking.enableLocation)
-        XCTAssertFalse(tracking.enableHealth)
-        XCTAssertTrue(tracking.localOnly)
+    enum QueryComplexity: String, Codable, Sendable, Comparable {
+        case simple
+        case moderate
+        case complex
+
+        var description: String {
+            switch self {
+            case .simple: "Single-task, straightforward query"
+            case .moderate: "Multi-step or requires decomposition"
+            case .complex: "Complex reasoning, verification needed"
+            }
+        }
+
+        private var sortOrder: Int {
+            switch self {
+            case .simple: 0
+            case .moderate: 1
+            case .complex: 2
+            }
+        }
+
+        static func < (lhs: QueryComplexity, rhs: QueryComplexity) -> Bool {
+            lhs.sortOrder < rhs.sortOrder
+        }
+    }
+
+    func testQueryComplexityAllCases() {
+        XCTAssertEqual(QueryComplexity.simple.rawValue, "simple")
+        XCTAssertEqual(QueryComplexity.moderate.rawValue, "moderate")
+        XCTAssertEqual(QueryComplexity.complex.rawValue, "complex")
+    }
+
+    func testQueryComplexityComparable() {
+        XCTAssertLessThan(QueryComplexity.simple, .moderate)
+        XCTAssertLessThan(QueryComplexity.moderate, .complex)
+        XCTAssertLessThan(QueryComplexity.simple, .complex)
+        XCTAssertFalse(QueryComplexity.complex < .simple)
+    }
+
+    func testQueryComplexityCodableRoundTrip() throws {
+        for complexity in [QueryComplexity.simple, .moderate, .complex] {
+            let data = try JSONEncoder().encode(complexity)
+            let decoded = try JSONDecoder().decode(QueryComplexity.self, from: data)
+            XCTAssertEqual(decoded, complexity)
+        }
+    }
+
+    // =========================================================================
+    // MARK: - 8. QATool (mirror AppConfigurationTypes.swift)
+    // =========================================================================
+
+    enum QATool: String, Codable, Sendable, CaseIterable {
+        case swiftLint = "SwiftLint"
+        case codeCov = "CodeCov"
+        case sonarCloud = "SonarCloud"
+        case deepSource = "DeepSource"
+
+        var displayName: String { rawValue }
+
+        var icon: String {
+            switch self {
+            case .swiftLint: "swift"
+            case .codeCov: "chart.pie"
+            case .sonarCloud: "cloud"
+            case .deepSource: "magnifyingglass.circle"
+            }
+        }
+
+        var description: String {
+            switch self {
+            case .swiftLint:
+                "Static code analysis for Swift style and conventions"
+            case .codeCov:
+                "Code coverage reporting and tracking"
+            case .sonarCloud:
+                "Continuous code quality and security analysis"
+            case .deepSource:
+                "Automated code review and issue detection"
+            }
+        }
+    }
+
+    func testQAToolAllCases() {
+        XCTAssertEqual(QATool.allCases.count, 4)
+        XCTAssertEqual(QATool.allCases, [.swiftLint, .codeCov, .sonarCloud, .deepSource])
+    }
+
+    func testQAToolCodableRoundTrip() throws {
+        for tool in QATool.allCases {
+            let data = try JSONEncoder().encode(tool)
+            let decoded = try JSONDecoder().decode(QATool.self, from: data)
+            XCTAssertEqual(decoded, tool)
+        }
+    }
+
+    func testQAToolDisplayNameMatchesRawValue() {
+        for tool in QATool.allCases {
+            XCTAssertEqual(tool.displayName, tool.rawValue)
+        }
+    }
+
+    func testQAToolIconsNonEmpty() {
+        for tool in QATool.allCases {
+            XCTAssertFalse(tool.icon.isEmpty, "\(tool) icon should not be empty")
+        }
+    }
+
+    // =========================================================================
+    // MARK: - 9. QAIssueSeverity (mirror AppConfigurationTypes.swift)
+    // =========================================================================
+
+    enum QAIssueSeverity: String, Codable, Sendable {
+        case error
+        case warning
+        case info
+        case hint
+
+        var color: String {
+            switch self {
+            case .error: "red"
+            case .warning: "orange"
+            case .info: "blue"
+            case .hint: "gray"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .error: "xmark.circle.fill"
+            case .warning: "exclamationmark.triangle.fill"
+            case .info: "info.circle.fill"
+            case .hint: "lightbulb.fill"
+            }
+        }
+
+        var severityOrder: Int {
+            switch self {
+            case .error: 3
+            case .warning: 2
+            case .info: 1
+            case .hint: 0
+            }
+        }
+    }
+
+    func testQAIssueSeverityAllCases() {
+        let allSeverities: [QAIssueSeverity] = [.error, .warning, .info, .hint]
+        for severity in allSeverities {
+            XCTAssertNotNil(QAIssueSeverity(rawValue: severity.rawValue))
+        }
+    }
+
+    func testQAIssueSeverityOrdering() {
+        XCTAssertGreaterThan(QAIssueSeverity.error.severityOrder,
+                             QAIssueSeverity.warning.severityOrder)
+        XCTAssertGreaterThan(QAIssueSeverity.warning.severityOrder,
+                             QAIssueSeverity.info.severityOrder)
+        XCTAssertGreaterThan(QAIssueSeverity.info.severityOrder,
+                             QAIssueSeverity.hint.severityOrder)
+    }
+
+    func testQAIssueSeverityColors() {
+        XCTAssertEqual(QAIssueSeverity.error.color, "red")
+        XCTAssertEqual(QAIssueSeverity.warning.color, "orange")
+        XCTAssertEqual(QAIssueSeverity.info.color, "blue")
+        XCTAssertEqual(QAIssueSeverity.hint.color, "gray")
+    }
+
+    func testQAIssueSeverityCodableRoundTrip() throws {
+        for severity in [QAIssueSeverity.error, .warning, .info, .hint] {
+            let data = try JSONEncoder().encode(severity)
+            let decoded = try JSONDecoder().decode(QAIssueSeverity.self, from: data)
+            XCTAssertEqual(decoded, severity)
+        }
+    }
+
+    // =========================================================================
+    // MARK: - 10. AITaskCategory (mirror DynamicConfig.swift)
+    // =========================================================================
+
+    enum AITaskCategory: String, Codable, Sendable, CaseIterable {
+        case codeGeneration
+        case codeReview
+        case bugFix
+        case conversation
+        case assistance
+        case creative
+        case brainstorming
+        case analysis
+        case classification
+        case translation
+        case correction
+    }
+
+    func testAITaskCategoryAllCases() {
+        XCTAssertEqual(AITaskCategory.allCases.count, 11)
+    }
+
+    func testAITaskCategoryCodableRoundTrip() throws {
+        for category in AITaskCategory.allCases {
+            let data = try JSONEncoder().encode(category)
+            let decoded = try JSONDecoder().decode(AITaskCategory.self, from: data)
+            XCTAssertEqual(decoded, category)
+        }
+    }
+
+    func testAITaskCategoryRawValuesAreCamelCase() {
+        for category in AITaskCategory.allCases {
+            let first = category.rawValue.first!
+            XCTAssertTrue(first.isLowercase,
+                          "\(category.rawValue) should start with lowercase")
+        }
+    }
+
+    func testAITaskCategoryCodeRelatedSubset() {
+        let codeRelated: Set<AITaskCategory> = [.codeGeneration, .codeReview, .bugFix]
+        XCTAssertEqual(codeRelated.count, 3)
+        for cat in codeRelated {
+            XCTAssertNotNil(AITaskCategory(rawValue: cat.rawValue))
+        }
     }
 }
