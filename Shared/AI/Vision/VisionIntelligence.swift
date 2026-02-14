@@ -397,7 +397,7 @@ public final class VisionIntelligence: ObservableObject {
         #if os(macOS)
         let engine = MLXVisionEngine.shared
         if engine.loadedModelID == nil {
-            try await engine.loadModel(id: "mlx-community/Qwen3-VL-8B-4bit")
+            _ = try await engine.loadModel(id: "mlx-community/Qwen3-VL-8B-4bit")
         }
         let stream = try await engine.analyzeImage(
             imageData: imageData,

@@ -92,6 +92,7 @@ public struct PrivacyControlsView: View {
                 } label: {
                     Label("Clean Up Old Data", systemImage: "trash")
                 }
+                .accessibilityHint("Removes activity data older than the retention period")
 
                 Button(role: .destructive) {
                     showDeleteConfirmation = true
@@ -99,6 +100,7 @@ public struct PrivacyControlsView: View {
                     Label("Delete All Activity Data", systemImage: "trash.fill")
                         .foregroundStyle(.red)
                 }
+                .accessibilityHint("Permanently deletes all activity logs. This cannot be undone.")
             } header: {
                 Text("Data Management")
             }
@@ -177,6 +179,9 @@ private struct PermissionRow: View {
             statusBadge
         }
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(permission.displayName), \(status.displayName)")
+        .accessibilityHint(status != .granted ? "Tap to open system privacy settings" : "Permission granted")
         .onTapGesture {
             if status != .granted {
                 Task { @MainActor in
@@ -223,7 +228,8 @@ public struct ActivityStatsView: View {
                 displayedComponents: .date
             )
             .datePickerStyle(.compact)
-            .labelsHidden()
+            .accessibilityLabel("Activity date")
+            .accessibilityHint("Select a date to view activity statistics")
 
             if let stats {
                 // Stats Cards
@@ -313,6 +319,7 @@ private struct PrivacyStatCard: View {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundStyle(.blue)
+                .accessibilityHidden(true)
 
             Text(value)
                 .font(.title2)
@@ -326,6 +333,8 @@ private struct PrivacyStatCard: View {
         .padding()
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 }
 
