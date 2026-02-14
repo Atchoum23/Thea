@@ -142,13 +142,13 @@ struct ContentView: View {
         case .projects:
             projectsListView
         case .knowledge:
-            macOSKnowledgeView()
+            KnowledgeManagementView()
         case .financial:
-            macOSFinancialView()
+            FinancialDashboardView()
         case .code:
-            macOSCodeView()
+            CodeProjectView()
         case .migration:
-            macOSMigrationView()
+            MigrationView()
         case .none:
             ContentUnavailableView(
                 "Select a Section",
@@ -416,47 +416,6 @@ extension ContentView {
     }
 }
 
-// MARK: - Placeholder Views (to be implemented)
-
-struct macOSKnowledgeView: View {
-    var body: some View {
-        ContentUnavailableView(
-            "Knowledge Base",
-            systemImage: "brain.head.profile",
-            description: Text("Coming soon in a future update.")
-        )
-    }
-}
-
-struct macOSFinancialView: View {
-    var body: some View {
-        ContentUnavailableView(
-            "Financial Tracking",
-            systemImage: "dollarsign.circle.fill",
-            description: Text("Coming soon in a future update.")
-        )
-    }
-}
-
-struct macOSCodeView: View {
-    var body: some View {
-        ContentUnavailableView(
-            "Code Intelligence",
-            systemImage: "chevron.left.forwardslash.chevron.right",
-            description: Text("Coming soon in a future update.")
-        )
-    }
-}
-
-struct macOSMigrationView: View {
-    var body: some View {
-        ContentUnavailableView(
-            "Migration",
-            systemImage: "arrow.down.doc.fill",
-            description: Text("Coming soon in a future update.")
-        )
-    }
-}
 
 // MARK: - Project Row
 
