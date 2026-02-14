@@ -187,10 +187,9 @@ struct TheamacOSApp: App {
         }
 
         // LIFE TRACKING DASHBOARD WINDOW
-        // TODO: Restore LifeTrackingView once implemented
         WindowGroup("Life Tracking", id: "life-tracking") {
             if let container = modelContainer {
-                Text("Life Tracking (Coming Soon)")
+                LifeTrackingView()
                     .modelContainer(container)
                     .frame(minWidth: 1000, minHeight: 700)
             }
