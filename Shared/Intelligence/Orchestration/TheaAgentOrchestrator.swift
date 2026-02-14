@@ -35,10 +35,38 @@ public struct TheaAgentActivity: Identifiable, Sendable {
     }
 }
 
+// MARK: - Delegation Decision
+
+/// Result of a delegation request through the request-approve gate
+public enum DelegationDecision: Sendable {
+    case approve(UUID)                // New worker spawned, returns session ID
+    case reuseExisting(UUID)          // Point to in-progress worker doing same task
+    case returnCached(String)         // Result already available from cache
+    case deny(reason: String)         // Too many workers, budget exhausted, etc.
+}
+
+// MARK: - Cached Task Result
+
+/// Cached result from a completed worker, with TTL for freshness
+public struct CachedTaskResult: Sendable {
+    public let result: String
+    public let completedAt: Date
+    public let agentType: SpecializedAgentType
+    public let tokensUsed: Int
+
+    public init(result: String, completedAt: Date = Date(), agentType: SpecializedAgentType, tokensUsed: Int) {
+        self.result = result
+        self.completedAt = completedAt
+        self.agentType = agentType
+        self.tokensUsed = tokensUsed
+    }
+}
+
 // MARK: - TheaAgentOrchestrator
 
 /// Main supervisor for the sub-agent delegation system.
 /// Manages session lifecycle, delegates tasks, monitors context, synthesizes results.
+/// Supports 2-layer delegation (sub-agents can spawn workers, workers cannot delegate).
 @MainActor
 @Observable
 public final class TheaAgentOrchestrator {
@@ -61,6 +89,18 @@ public final class TheaAgentOrchestrator {
     private var freeTokens: Int {
         totalTokenPool - allocatedTokens
     }
+
+    // MARK: - Task Registry & Cache
+
+    /// Registry of delegated tasks, keyed by content hash for deduplication
+    private var taskRegistry: [String: UUID] = []  // taskHash -> sessionID
+
+    /// Subscribers waiting for a shared task result
+    private var taskSubscribers: [String: [UUID]] = [:]  // taskHash -> [sessionIDs wanting result]
+
+    /// Cached results from completed workers with TTL
+    private var resultCache: [String: CachedTaskResult] = [:]
+    private let cacheTTL: TimeInterval = 300  // 5 minutes
 
     // MARK: - Runner
 
@@ -91,10 +131,11 @@ public final class TheaAgentOrchestrator {
             name: "\(selectedType.rawValue.capitalized) Agent #\(sessions.count + 1)",
             taskDescription: description,
             parentConversationID: conversationID,
-            tokenBudget: defaultBudget(for: selectedType)
+            tokenBudget: defaultBudget(for: selectedType, depth: 1)
         )
 
         sessions.append(session)
+        taskRegistry[computeTaskHash(description)] = session.id
         logActivity(sessionID: session.id, event: "delegated", detail: "Type: \(selectedType.rawValue), task: \(description.prefix(80))")
 
         // Spawn execution
@@ -120,10 +161,11 @@ public final class TheaAgentOrchestrator {
                 name: "\(selectedType.rawValue.capitalized) Agent #\(sessions.count + 1)",
                 taskDescription: desc,
                 parentConversationID: conversationID,
-                tokenBudget: defaultBudget(for: selectedType)
+                tokenBudget: defaultBudget(for: selectedType, depth: 1)
             )
             sessions.append(session)
             createdSessions.append(session)
+            taskRegistry[computeTaskHash(desc)] = session.id
             logActivity(sessionID: session.id, event: "delegated-parallel", detail: desc.prefix(80).description)
         }
 
@@ -229,6 +271,152 @@ public final class TheaAgentOrchestrator {
         }
     }
 
+    // MARK: - Multi-Layer Delegation (B-MLT2)
+
+    /// Request-approve gate: sub-agents must request delegation through the orchestrator.
+    /// Prevents duplicate work, enforces depth limits, manages resource budgets.
+    public func requestDelegation(
+        from parent: TheaAgentSession,
+        task: String,
+        agentType: SpecializedAgentType
+    ) async -> DelegationDecision {
+        // 1. Check depth cap (max 2 layers below Meta-AI)
+        guard parent.canDelegate else {
+            logActivity(sessionID: parent.id, event: "delegation-denied", detail: "Max depth reached (depth=\(parent.delegationDepth))")
+            return .deny(reason: "Maximum delegation depth reached")
+        }
+
+        // 2. Check task registry for dedup
+        let taskHash = computeTaskHash(task)
+        if let cached = getCachedResult(taskHash: taskHash) {
+            logActivity(sessionID: parent.id, event: "delegation-cached", detail: task.prefix(60).description)
+            return .returnCached(cached.result)
+        }
+
+        if let existingSessionID = taskRegistry[taskHash],
+           let existingSession = sessions.first(where: { $0.id == existingSessionID }) {
+            if existingSession.state.isActive {
+                subscribeToTask(taskHash: taskHash, subscriberID: parent.id)
+                logActivity(sessionID: parent.id, event: "delegation-reuse", detail: "Reusing \(existingSessionID.uuidString.prefix(8))")
+                return .reuseExisting(existingSessionID)
+            } else if existingSession.state == .completed {
+                let result = existingSession.messages.filter { $0.role == .agent }.map(\.content).joined(separator: "\n")
+                cacheResult(taskHash: taskHash, result: CachedTaskResult(result: result, agentType: agentType, tokensUsed: existingSession.tokensUsed))
+                return .returnCached(result)
+            }
+        }
+
+        // 3. Check resource budget
+        let workerCount = sessions.filter { $0.parentSessionID == parent.id && $0.state.isActive }.count
+        let maxWorkers = maxConcurrentWorkers(for: parent)
+        guard workerCount < maxWorkers else {
+            logActivity(sessionID: parent.id, event: "delegation-denied", detail: "Worker limit reached (\(workerCount)/\(maxWorkers))")
+            return .deny(reason: "Maximum concurrent workers reached (\(maxWorkers))")
+        }
+
+        // 4. Approve — spawn worker
+        let workerBudget = defaultBudget(for: agentType, depth: parent.delegationDepth + 1)
+        let worker = TheaAgentSession(
+            agentType: agentType,
+            name: "\(agentType.rawValue.capitalized) Worker #\(sessions.count + 1)",
+            taskDescription: task,
+            parentConversationID: parent.parentConversationID,
+            tokenBudget: workerBudget,
+            delegationDepth: parent.delegationDepth + 1,
+            parentSessionID: parent.id
+        )
+
+        taskRegistry[taskHash] = worker.id
+        sessions.append(worker)
+        logActivity(sessionID: worker.id, event: "worker-spawned", detail: "Parent: \(parent.id.uuidString.prefix(8)), depth: \(worker.delegationDepth)")
+
+        Task {
+            await executeSession(worker)
+            publishTaskResult(taskHash: taskHash, session: worker)
+        }
+
+        return .approve(worker.id)
+    }
+
+    // MARK: - Task Deduplication (B-MLT3)
+
+    /// Subscribe to be notified when a shared task completes
+    private func subscribeToTask(taskHash: String, subscriberID: UUID) {
+        taskSubscribers[taskHash, default: []].append(subscriberID)
+    }
+
+    /// Deliver completed task result to all subscribers via AgentCommunicationBus
+    private func publishTaskResult(taskHash: String, session: TheaAgentSession) {
+        guard let subscribers = taskSubscribers[taskHash], !subscribers.isEmpty else {
+            // Still cache even without subscribers
+            let agentOutput = session.messages.filter { $0.role == .agent }.map(\.content).joined(separator: "\n")
+            if !agentOutput.isEmpty {
+                cacheResult(taskHash: taskHash, result: CachedTaskResult(
+                    result: agentOutput, agentType: session.agentType, tokensUsed: session.tokensUsed
+                ))
+            }
+            return
+        }
+
+        let result = session.messages.filter { $0.role == .agent }.map(\.content).joined(separator: "\n")
+        for subscriberID in subscribers {
+            Task {
+                await AgentCommunicationBus.shared.broadcastResult(
+                    from: session.id, taskId: session.id,
+                    output: String(result.prefix(500)), success: session.state == .completed,
+                    metadata: ["taskHash": taskHash, "tokensUsed": "\(session.tokensUsed)"]
+                )
+                // Also send a direct message to each subscriber
+                await AgentCommunicationBus.shared.send(BusAgentMessage(
+                    id: UUID(), timestamp: Date(), senderAgentId: session.id,
+                    recipientAgentId: subscriberID, messageType: .completionSignal,
+                    payload: .text(result),
+                    priority: .normal, correlationId: session.parentConversationID
+                ))
+            }
+        }
+        taskSubscribers.removeValue(forKey: taskHash)
+
+        // Cache the result for future dedup
+        cacheResult(taskHash: taskHash, result: CachedTaskResult(
+            result: result, agentType: session.agentType, tokensUsed: session.tokensUsed
+        ))
+    }
+
+    // MARK: - Result Cache (B-MLT4)
+
+    /// Cache a task result with TTL for future dedup
+    private func cacheResult(taskHash: String, result: CachedTaskResult) {
+        resultCache[taskHash] = result
+    }
+
+    /// Look up a cached result, returning nil if expired
+    private func getCachedResult(taskHash: String) -> CachedTaskResult? {
+        guard let cached = resultCache[taskHash] else { return nil }
+        guard Date().timeIntervalSince(cached.completedAt) < cacheTTL else {
+            resultCache.removeValue(forKey: taskHash)
+            return nil
+        }
+        return cached
+    }
+
+    /// Purge expired cache entries
+    public func purgeExpiredCache() {
+        let now = Date()
+        resultCache = resultCache.filter { now.timeIntervalSince($0.value.completedAt) < cacheTTL }
+    }
+
+    // MARK: - Resource Budgets Per Layer (B-MLT5)
+
+    /// Maximum concurrent workers a session can spawn, based on its delegation depth
+    public func maxConcurrentWorkers(for session: TheaAgentSession) -> Int {
+        switch session.delegationDepth {
+        case 0: return 5   // Meta-AI can run 5 sub-agents
+        case 1: return 3   // Sub-agent can run 3 workers
+        default: return 0  // Workers cannot delegate
+        }
+    }
+
     // MARK: - Convenience Queries
 
     public var activeSessions: [TheaAgentSession] {
@@ -237,6 +425,11 @@ public final class TheaAgentOrchestrator {
 
     public var completedSessions: [TheaAgentSession] {
         sessions.filter { $0.state == .completed }
+    }
+
+    /// Find all children of a given session
+    public func childSessions(of parentID: UUID) -> [TheaAgentSession] {
+        sessions.filter { $0.parentSessionID == parentID }
     }
 
     // MARK: - Private Helpers
@@ -276,13 +469,25 @@ public final class TheaAgentOrchestrator {
         }
     }
 
-    private func defaultBudget(for agentType: SpecializedAgentType) -> Int {
+    /// Token budget based on agent type, adjusted for delegation depth.
+    /// Deeper agents get smaller budgets to prevent worker sprawl.
+    private func defaultBudget(for agentType: SpecializedAgentType, depth: Int = 1) -> Int {
+        let baseBudget: Int
         switch agentType {
-        case .research, .documentation: 16384
-        case .plan, .review: 12288
-        case .explore, .debug: 8192
-        default: 8192
+        case .research, .documentation: baseBudget = 16384
+        case .plan, .review: baseBudget = 12288
+        case .explore, .debug: baseBudget = 8192
+        default: baseBudget = 8192
         }
+        // Layer 2 workers get half the base budget
+        return depth >= 2 ? baseBudget / 2 : baseBudget
+    }
+
+    /// Compute a content hash for task deduplication
+    nonisolated private func computeTaskHash(_ task: String) -> String {
+        let normalized = task.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        // Simple hash using hashValue — sufficient for in-memory dedup
+        return String(normalized.hashValue, radix: 16)
     }
 
     private func logActivity(sessionID: UUID?, event: String, detail: String) {
