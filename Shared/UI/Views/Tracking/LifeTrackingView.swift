@@ -133,14 +133,14 @@ struct LifeTrackingView: View {
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 if let snapshot = healthSnapshot {
-                    StatCard(
+                    LifeStatCard(
                         title: "Steps",
                         value: "\(snapshot.steps)",
                         icon: "figure.walk",
                         color: .green
                     )
 
-                    StatCard(
+                    LifeStatCard(
                         title: "Calories",
                         value: String(format: "%.0f", snapshot.activeCalories),
                         icon: "flame.fill",
@@ -148,7 +148,7 @@ struct LifeTrackingView: View {
                     )
 
                     if let hr = snapshot.heartRateAverage {
-                        StatCard(
+                        LifeStatCard(
                             title: "Avg Heart Rate",
                             value: String(format: "%.0f bpm", hr),
                             icon: "heart.fill",
@@ -158,7 +158,7 @@ struct LifeTrackingView: View {
 
                     if snapshot.sleepDuration > 0 {
                         let hours = snapshot.sleepDuration / 3600
-                        StatCard(
+                        LifeStatCard(
                             title: "Sleep",
                             value: String(format: "%.1fh", hours),
                             icon: "moon.fill",
@@ -167,7 +167,7 @@ struct LifeTrackingView: View {
                     }
 
                     if snapshot.workoutMinutes > 0 {
-                        StatCard(
+                        LifeStatCard(
                             title: "Workout",
                             value: "\(snapshot.workoutMinutes) min",
                             icon: "dumbbell.fill",
@@ -189,14 +189,14 @@ struct LifeTrackingView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 if let screen = screenTimeRecord {
                     let hours = screen.totalScreenTime / 3600
-                    StatCard(
+                    LifeStatCard(
                         title: "Screen Time",
                         value: String(format: "%.1fh", hours),
                         icon: "desktopcomputer",
                         color: .blue
                     )
 
-                    StatCard(
+                    LifeStatCard(
                         title: "Focus Time",
                         value: "\(screen.focusTimeMinutes) min",
                         icon: "brain.head.profile",
@@ -204,7 +204,7 @@ struct LifeTrackingView: View {
                     )
 
                     if screen.productivityScore > 0 {
-                        StatCard(
+                        LifeStatCard(
                             title: "Productivity",
                             value: String(format: "%.0f%%", screen.productivityScore * 100),
                             icon: "chart.bar.fill",
@@ -214,14 +214,14 @@ struct LifeTrackingView: View {
                 }
 
                 if let input = inputStats {
-                    StatCard(
+                    LifeStatCard(
                         title: "Keystrokes",
                         value: formatNumber(input.keystrokes),
                         icon: "keyboard",
                         color: .teal
                     )
 
-                    StatCard(
+                    LifeStatCard(
                         title: "Active Time",
                         value: "\(input.activeMinutes) min",
                         icon: "clock.fill",
@@ -309,7 +309,7 @@ struct TrackingStatusRow: View {
     }
 }
 
-private struct StatCard: View {
+private struct LifeStatCard: View {
     let title: String
     let value: String
     let icon: String
