@@ -312,8 +312,8 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
             name: match.description,
             brand: match.brandName,
             servingSize: match.servingSize ?? 100,
-            barcode: match.gtinUpc,
             nutrients: profile,
+            barcode: match.gtinUpc,
             source: .usda
         )
     }
