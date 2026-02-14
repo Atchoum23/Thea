@@ -70,3 +70,9 @@ build*.log
 test_*.log
 *.profraw
 swiftlint_report.json
+# Secrets and credentials
+**/secrets.ts
+**/secrets.js
+**/*.secrets.*
+.env
+.env.*
