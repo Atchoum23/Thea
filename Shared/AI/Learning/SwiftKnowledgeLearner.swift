@@ -4,6 +4,9 @@ import SwiftData
 // MARK: - Swift Knowledge Learner
 // Continuously learns from coding sessions, extracts patterns, and builds a knowledge base
 // for optimal Swift code generation
+//
+// Supporting types (UserFeedback, SwiftLearnedPattern, CodeSnippet, DTOs, etc.)
+// are in SwiftKnowledgeLearnerTypes.swift
 
 @MainActor
 @Observable
