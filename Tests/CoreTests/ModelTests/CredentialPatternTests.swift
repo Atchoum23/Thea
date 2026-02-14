@@ -106,7 +106,7 @@ final class CredentialPatternTests: XCTestCase {
     }
 
     func testDetectsFirebaseKey() {
-        let text = "FIREBASE_KEY=AIzaSyA1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q"
+        let text = "FIREBASE_KEY=AIzaSyFAKE_TEST_KEY_NOT_REAL_000000000"
         let matched = anyPatternMatches(text)
         XCTAssertTrue(matched.contains("Firebase API key"), "Should detect Firebase key")
     }
