@@ -66,9 +66,12 @@ public class TheaRemoteClient: ObservableObject {
         connectionState = .connecting
 
         // Create connection
+        guard let nwPort = NWEndpoint.Port(rawValue: port) else {
+            throw ClientError.invalidAddress
+        }
         let endpoint = NWEndpoint.hostPort(
             host: NWEndpoint.Host(host),
-            port: NWEndpoint.Port(rawValue: port)!
+            port: nwPort
         )
 
         // Configure TLS

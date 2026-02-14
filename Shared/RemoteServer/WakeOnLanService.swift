@@ -124,9 +124,12 @@ public class WakeOnLanService: ObservableObject {
     // MARK: - UDP Broadcast
 
     private func sendUDPBroadcast(data: Data, port: UInt16) async throws {
+        guard let nwPort = NWEndpoint.Port(rawValue: port) else {
+            throw RemoteServerError.networkError("Invalid port: \(port)")
+        }
         let connection = NWConnection(
             host: .ipv4(.broadcast),
-            port: NWEndpoint.Port(rawValue: port)!,
+            port: nwPort,
             using: .udp
         )
 

@@ -214,8 +214,8 @@ public class ConnectionQualityMonitor: ObservableObject {
         let now = Date()
         let recentFrames = frameTimestamps.filter { now.timeIntervalSince($0) < 2.0 }
 
-        if recentFrames.count >= 2 {
-            let timeSpan = recentFrames.last!.timeIntervalSince(recentFrames.first!)
+        if let first = recentFrames.first, let last = recentFrames.last, recentFrames.count >= 2 {
+            let timeSpan = last.timeIntervalSince(first)
             fps = timeSpan > 0 ? Double(recentFrames.count - 1) / timeSpan : 0
         } else {
             fps = 0

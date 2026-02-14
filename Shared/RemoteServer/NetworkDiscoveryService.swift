@@ -210,7 +210,8 @@ public class NetworkDiscoveryService: ObservableObject {
         var openServices: [NetworkDevice.NetworkService] = []
 
         for port in ports {
-            let endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host(ip), port: NWEndpoint.Port(rawValue: UInt16(port))!)
+            guard let nwPort = NWEndpoint.Port(rawValue: UInt16(port)) else { continue }
+            let endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host(ip), port: nwPort)
             let connection = NWConnection(to: endpoint, using: .tcp)
 
             let isOpen = await withCheckedContinuation { continuation in
@@ -291,7 +292,7 @@ public class NetworkDiscoveryService: ObservableObject {
             let addrFamily = interface.ifa_addr.pointee.sa_family
 
             if addrFamily == UInt8(AF_INET) {
-                let namePtr = interface.ifa_name!
+                guard let namePtr = interface.ifa_name else { continue }
                 let nameLength = Int(strlen(namePtr))
                 let nameData = Data(bytes: namePtr, count: nameLength)
                 let name = String(decoding: nameData, as: UTF8.self)

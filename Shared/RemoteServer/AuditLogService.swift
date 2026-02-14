@@ -32,6 +32,7 @@ public class AuditLogService: ObservableObject {
     // MARK: - Initialization
 
     public init() {
+        // Safe: applicationSupportDirectory always returns at least one URL on Apple platforms
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         storageDirectory = appSupport.appendingPathComponent("Thea/AuditLogs", isDirectory: true)
         entriesFileURL = storageDirectory.appendingPathComponent("audit_log.json")

@@ -139,7 +139,10 @@ final class DeviceDiscoveryService {
         let parameters = NWParameters(tls: nil, tcp: NWProtocolTCP.Options())
         parameters.includePeerToPeer = true
 
-        listener = try NWListener(using: parameters, on: NWEndpoint.Port(rawValue: port)!)
+        guard let nwPort = NWEndpoint.Port(rawValue: port) else {
+            throw RemoteServerError.networkError("Invalid port: \(port)")
+        }
+        listener = try NWListener(using: parameters, on: nwPort)
 
         // Create TXT record with device info
         let txtRecord = createTXTRecord(name: name, capabilities: capabilities)
