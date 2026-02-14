@@ -79,7 +79,12 @@ public final class TheaAgentOrchestrator {
         from conversationID: UUID,
         agentType: SpecializedAgentType? = nil
     ) async -> TheaAgentSession {
-        let selectedType = agentType ?? EnhancedSubagentSystem.shared.selectAgentType(for: description)
+        let selectedType: SpecializedAgentType
+        if let explicit = agentType {
+            selectedType = explicit
+        } else {
+            selectedType = await EnhancedSubagentSystem.shared.selectAgentType(for: description)
+        }
 
         let session = TheaAgentSession(
             agentType: selectedType,
@@ -109,7 +114,7 @@ public final class TheaAgentOrchestrator {
         var createdSessions: [TheaAgentSession] = []
 
         for desc in descriptions {
-            let selectedType = EnhancedSubagentSystem.shared.selectAgentType(for: desc)
+            let selectedType = await EnhancedSubagentSystem.shared.selectAgentType(for: desc)
             let session = TheaAgentSession(
                 agentType: selectedType,
                 name: "\(selectedType.rawValue.capitalized) Agent #\(sessions.count + 1)",
