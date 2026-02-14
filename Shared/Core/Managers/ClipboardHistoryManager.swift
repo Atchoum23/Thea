@@ -294,12 +294,14 @@ final class ClipboardHistoryManager: ObservableObject {
         )
         modelContext?.insert(junction)
         saveContext()
+        Task { await TheaClipSyncService.shared.pushPinboard(pinboard) }
     }
 
     func removeFromPinboard(_ entry: TheaClipEntry, pinboard: TheaClipPinboard) {
         guard let junction = entry.pinboardEntries.first(where: { $0.pinboard?.id == pinboard.id }) else { return }
         modelContext?.delete(junction)
         saveContext()
+        Task { await TheaClipSyncService.shared.pushPinboard(pinboard) }
     }
 
     // MARK: - Search
