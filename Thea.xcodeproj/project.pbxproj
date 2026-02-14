@@ -64,6 +64,7 @@
 		073CB99C08B7111CCB2C7873 /* AssessmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D9A711AEC2BF35FC6A06EC /* AssessmentViewModel.swift */; };
 		075F88D01AC7818F14E789AF /* PlanState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CC001EDD4E7CE67C947E6 /* PlanState.swift */; };
 		07779B9D902D51995166BBCD /* FocusModeIntelligence+CallHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC9570D9D51D09A2B3515196 /* FocusModeIntelligence+CallHandling.swift */; };
+		077DFC490A2736B46550CAF0 /* ProjectMemoryTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A25CE7667073FBEB5A6B4 /* ProjectMemoryTypes.swift */; };
 		078C13BBA11B9F5EB53F2586 /* MultiModelConsensus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D417926C4545172DC9448E9D /* MultiModelConsensus.swift */; };
 		07ADE670DCF2760829A6EB00 /* AutonomyPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC91D3F97C723D9F52B0F5BD /* AutonomyPolicy.swift */; };
 		07C1016F24943EFFC50A3F62 /* CognitiveDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F660581A82BF65ADCBA483 /* CognitiveDashboardViewModel.swift */; };
@@ -515,6 +516,7 @@
 		469992CB18608EF25AFE9C5C /* TheaLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA05A04C9029841AE749334A /* TheaLiveActivity.swift */; };
 		46C546CF4FDBB2D98F1EAED1 /* ModelSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED750FD427E77BFE04F76D0 /* ModelSettingsView.swift */; };
 		46D77E7A28F4EE86F0382D4E /* InteractionTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BB0BE43AD93A41E1B9924F /* InteractionTracker.swift */; };
+		46F0AB9629F31A34A3E62AA6 /* AIModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0DCEF05E74BDB708A36F18 /* AIModelCatalog.swift */; };
 		470A24FE95C664E4AFC57554 /* AnnotationOverlayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319A195F298A8425CEB3FC43 /* AnnotationOverlayService.swift */; };
 		47117A52DF8734B08C310C89 /* CallMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F25101759D9FF0F8AE57B57 /* CallMonitor.swift */; };
 		4720430AE8897474840A8285 /* EfficiencySuggestionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3CEBDD99A456EBA6D9E2DA7 /* EfficiencySuggestionEngine.swift */; };
@@ -562,6 +564,7 @@
 		4D3AEB8ABCE7393A94C9EC1B /* AccessibilityObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E744DA1369765DAD7FF4EC9 /* AccessibilityObserver.swift */; };
 		4D3E398A56E642B86CFACF9E /* CoworkQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96C18373CAC4FC5346195DA /* CoworkQueueView.swift */; };
 		4D9F637FFC69B1526B332984 /* UserModelBuilder+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321BFF008EA701CB170DB38F /* UserModelBuilder+Core.swift */; };
+		4DCAF633AA844ADB1AE9E596 /* AIModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0DCEF05E74BDB708A36F18 /* AIModelCatalog.swift */; };
 		4E2A2C2A53C59D27EB7768AE /* SemanticCodeIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8985233553549C094658B5C7 /* SemanticCodeIndexer.swift */; };
 		4E2D9DC1A6B705492AF1D16B /* CareerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83034A1686EC312EF8EE3D1 /* CareerModels.swift */; };
 		4E507D1D6841E1E16F012E48 /* PredictivePreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C78730D32ADCBCBD4C2C99A /* PredictivePreloader.swift */; };
@@ -928,6 +931,7 @@
 		8209F64F14678E715AEFA991 /* SemanticCodeIndexer+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759E2BD5AD4C86C3A35FBC1C /* SemanticCodeIndexer+Core.swift */; };
 		8252CF80DBDFD4DF9837B22B /* CareerDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7210F0D8AF8B398D945828C2 /* CareerDashboardViewModel.swift */; };
 		82756321F71B0B5FF76F9BD9 /* OpenClawBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5576ADFDD39D4DA9B03E286 /* OpenClawBridge.swift */; };
+		828A4054FCDCC17A19618576 /* ProjectMemoryTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A25CE7667073FBEB5A6B4 /* ProjectMemoryTypes.swift */; };
 		829BAE99DC113008D31F3CD7 /* AIModelGovernor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA2C2984F91DCA78C56338 /* AIModelGovernor.swift */; };
 		82D66EB9406BE1A064A202F0 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44CA10441E6DFEB6D0F795C3 /* LocalizationManager.swift */; };
 		82D8A07E5C2D8409B15A8210 /* RelationshipIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A27D66B7F2B5A459B21F2FE /* RelationshipIntelligence.swift */; };
@@ -1388,6 +1392,7 @@
 		C9D0870BF5839E846511F6F5 /* KeyboardShortcutsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 707BAFE3BBA310F92F2817BD /* KeyboardShortcutsView.swift */; };
 		C9FB39F073059F2675493749 /* TheaSafariExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A1D5DA4E452EC166813574C /* TheaSafariExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CA0F62AEB727E7F7655D5E7D /* AmbientIntelligenceSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0866884D25FF067DF83D91CC /* AmbientIntelligenceSystem.swift */; };
+		CA2500409F812BF8242C100C /* ProjectMemoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB21BF74E833548B4A70CE7E /* ProjectMemoryViews.swift */; };
 		CA6036098FD2B7074E57232A /* VoiceInteractionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C8EB5896F5D12809013DAF /* VoiceInteractionEngine.swift */; };
 		CA7107277D899C1D062007EC /* ShareExtensionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D46B387F2A77E098EAD2011 /* ShareExtensionManager.swift */; };
 		CAB5FDD4F8A23EA81A0772F0 /* CoreMLService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE45E617D2796AF751FFE80A /* CoreMLService.swift */; };
@@ -1640,6 +1645,7 @@
 		EEE7FC9F5762C5ECC366C963 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 053FD2F023803F93207745DE /* KeychainAccess */; };
 		EEF91E7CD98C987EDD7D38BD /* IncomeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB01955DB6324DA02F8702C /* IncomeService.swift */; };
 		EF1E53F1519A320A8BF6EB2A /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8911016AC9D2BEFB29B5B6B8 /* MarkdownUI */; };
+		EF1EF4F7B5521D3B98F85746 /* ProjectMemoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB21BF74E833548B4A70CE7E /* ProjectMemoryViews.swift */; };
 		EF245E26801AC829725D221C /* MoltbookSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C07C09167DC399966C84B2C9 /* MoltbookSettingsView.swift */; };
 		EFA7BD74BCEF5E0A2C968C01 /* IntegrationModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58FB08F521CDE9F944C7836C /* IntegrationModule.swift */; };
 		EFAA3E68053407AEE35EDEF4 /* AutomatableSuggestionEngineTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC38B5C832E9F81EEFFC371B /* AutomatableSuggestionEngineTypes.swift */; };
@@ -2384,6 +2390,7 @@
 		7E58FF99D17021B04ECB5DD6 /* MultiModalCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiModalCoordinator.swift; sourceTree = "<group>"; };
 		7E84DFD47051BC4063B6D3CC /* TheaAgentRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaAgentRunner.swift; sourceTree = "<group>"; };
 		7EE31955DBC99AB204F007FF /* UIElementInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElementInspector.swift; sourceTree = "<group>"; };
+		7F0DCEF05E74BDB708A36F18 /* AIModelCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIModelCatalog.swift; sourceTree = "<group>"; };
 		7F399C32A6447AD87229D5BD /* TerminalCommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCommandExecutor.swift; sourceTree = "<group>"; };
 		7F5C4EB3265FAC72AB769004 /* ShortcutsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsService.swift; sourceTree = "<group>"; };
 		7FB81CB84E6077D3E27356DB /* TheamacOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheamacOSApp.swift; sourceTree = "<group>"; };
@@ -2397,6 +2404,7 @@
 		82355C7B74E1F61F7E0542E0 /* AutonomyController+Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutonomyController+Views.swift"; sourceTree = "<group>"; };
 		826846983CA6501514B912D8 /* MentionAutocompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionAutocompleteView.swift; sourceTree = "<group>"; };
 		826AC9D7AE3F12A7C81ECD23 /* AgentResourcePool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentResourcePool.swift; sourceTree = "<group>"; };
+		829A25CE7667073FBEB5A6B4 /* ProjectMemoryTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectMemoryTypes.swift; sourceTree = "<group>"; };
 		830A8824378DAFA673E5A02A /* RemoteInferenceClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteInferenceClient.swift; sourceTree = "<group>"; };
 		83701F2E56268076A9E7B89D /* MemoryManagerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryManagerTypes.swift; sourceTree = "<group>"; };
 		837CB8A90B228894E2BED118 /* OpenClawTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawTypes.swift; sourceTree = "<group>"; };
@@ -2548,6 +2556,7 @@
 		AAD68D6416E308F43865C790 /* UnifiedContextSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedContextSync.swift; sourceTree = "<group>"; };
 		AAD76F0C50307B9122381B9B /* RemoteMacBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteMacBridge.swift; sourceTree = "<group>"; };
 		AAE80BDB0049B656DE29CEE3 /* VoiceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSettingsView.swift; sourceTree = "<group>"; };
+		AB21BF74E833548B4A70CE7E /* ProjectMemoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectMemoryViews.swift; sourceTree = "<group>"; };
 		AB71964345B536041E4DCB29 /* setup.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = setup.sh; sourceTree = "<group>"; };
 		AC0A36040953AA93C6956598 /* MultiLanguageUtteranceBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiLanguageUtteranceBuilder.swift; sourceTree = "<group>"; };
 		AC223AA9A0FBA027A9C92DAC /* dark-mode-engine.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "dark-mode-engine.js"; sourceTree = "<group>"; };
@@ -3359,6 +3368,7 @@
 			isa = PBXGroup;
 			children = (
 				6F1D529663D235ED1CE630B7 /* AIModel.swift */,
+				7F0DCEF05E74BDB708A36F18 /* AIModelCatalog.swift */,
 				1F3EDD38D4D04B72138D09FA /* AIProviderConfig.swift */,
 				AA65CF6F48987A1BFB88CF3A /* Conversation.swift */,
 				4318671F8DE98472EC663FBF /* FinancialModels.swift */,
@@ -4272,6 +4282,8 @@
 				5900B3D94C20F38A746A675B /* MemorySystem.swift */,
 				17D779B8BB68E7BE9F25201F /* PersonalKnowledgeGraph.swift */,
 				D481F245A51B8370C481C0E4 /* ProjectMemoryManager.swift */,
+				829A25CE7667073FBEB5A6B4 /* ProjectMemoryTypes.swift */,
+				AB21BF74E833548B4A70CE7E /* ProjectMemoryViews.swift */,
 			);
 			path = Memory;
 			sourceTree = "<group>";
@@ -6693,6 +6705,7 @@
 				4964DA9656DA3BCA4408DAD3 /* AAnticipatoryCommonTypes.swift in Sources */,
 				18DD17A93AF006D20FF3C7DA /* AIFeaturesSettingsView.swift in Sources */,
 				D9942005F212A8758ED7CD59 /* AIModel.swift in Sources */,
+				4DCAF633AA844ADB1AE9E596 /* AIModelCatalog.swift in Sources */,
 				829BAE99DC113008D31F3CD7 /* AIModelGovernor.swift in Sources */,
 				85BB197C019074016531B2C3 /* AIProviderConfig.swift in Sources */,
 				0EA7A3E8E673D0B0E401ED3C /* AIProviderProtocol.swift in Sources */,
@@ -7191,6 +7204,8 @@
 				568147FF7569FE9699205F13 /* ProjectKnowledge.swift in Sources */,
 				0F03E62482080C257BE4BB3F /* ProjectManager.swift in Sources */,
 				ABFBAA9606280C526B197B94 /* ProjectMemoryManager.swift in Sources */,
+				077DFC490A2736B46550CAF0 /* ProjectMemoryTypes.swift in Sources */,
+				CA2500409F812BF8242C100C /* ProjectMemoryViews.swift in Sources */,
 				F8AD718F5FB8AE5ED7DE6B88 /* ProjectPathManager.swift in Sources */,
 				C1C5652AA805E500323F1AC7 /* PromptEngineeringModels.swift in Sources */,
 				E8F12EB30A86183D1F01A6C3 /* PromptEngineeringSettingsView.swift in Sources */,
@@ -7574,6 +7589,7 @@
 				972C1A73511048BE461BEBF1 /* AAnticipatoryCommonTypes.swift in Sources */,
 				FDC8877697BB93E39DB21A7F /* AIFeaturesSettingsView.swift in Sources */,
 				57EE3038E853F16583554A0E /* AIModel.swift in Sources */,
+				46F0AB9629F31A34A3E62AA6 /* AIModelCatalog.swift in Sources */,
 				B0AD7E96994D4302B423916C /* AIModelGovernor.swift in Sources */,
 				FCEED9CAFA04FE178DDC8564 /* AIProviderConfig.swift in Sources */,
 				4118DB461D20CFB7256B98E5 /* AIProviderProtocol.swift in Sources */,
@@ -8106,6 +8122,8 @@
 				C483DBB904D4AFC18BA588B9 /* ProjectKnowledge.swift in Sources */,
 				E4C7042A8C46982DF9ACE52E /* ProjectManager.swift in Sources */,
 				B3DF232218C6A3BE57C192DD /* ProjectMemoryManager.swift in Sources */,
+				828A4054FCDCC17A19618576 /* ProjectMemoryTypes.swift in Sources */,
+				EF1EF4F7B5521D3B98F85746 /* ProjectMemoryViews.swift in Sources */,
 				3AE6C80CDEFDF8B1AAA78644 /* ProjectPathManager.swift in Sources */,
 				06B89B7187CADFC3B8C82F40 /* PromptEngineeringModels.swift in Sources */,
 				2DA86B306094E43D76223FD2 /* PromptEngineeringSettingsView.swift in Sources */,
