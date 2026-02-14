@@ -243,6 +243,7 @@ public struct SettingsSectionHeader: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Help")
                 .popover(isPresented: $showingHelp) {
                     if let helpText = helpText {
                         Text(helpText)
@@ -298,6 +299,7 @@ public struct SettingsInfoRow: View {
                 Image(systemName: icon)
                     .foregroundStyle(.secondary)
                     .frame(width: 20)
+                    .accessibilityHidden(true)
             }
             Text(label)
             Spacer()
