@@ -194,10 +194,74 @@ extension ReflexionEngine {
         critique: SelfCritique,
         context: String
     ) async -> String? {
-        // In production, this would use an LLM to improve
-        // For now, return nil to indicate no improvement possible
-        logger.debug("Would improve based on: \(critique.suggestions.joined(separator: ", "))")
-        return nil
+        guard let provider = ProviderRegistry.shared.getProvider(id: "openrouter")
+                          ?? ProviderRegistry.shared.getProvider(id: "anthropic")
+                          ?? ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
+            logger.info("No provider available for output improvement")
+            return nil
+        }
+
+        let weaknessText = critique.weaknesses.isEmpty
+            ? "None identified"
+            : critique.weaknesses.joined(separator: "\n- ")
+        let suggestionText = critique.suggestions.isEmpty
+            ? "None"
+            : critique.suggestions.joined(separator: "\n- ")
+
+        let prompt = """
+        You are improving an AI response based on self-critique. \
+        Produce ONLY the improved version — no meta-commentary.
+
+        ORIGINAL TASK: \(task)
+
+        ORIGINAL OUTPUT:
+        \(output.prefix(2000))
+
+        SELF-CRITIQUE:
+        Quality: \(critique.overallQuality)
+        Weaknesses:
+        - \(weaknessText)
+        Suggestions:
+        - \(suggestionText)
+        \(context.isEmpty ? "" : "\nADDITIONAL CONTEXT: \(context.prefix(500))")
+
+        Write an improved version that addresses ALL weaknesses and suggestions. \
+        Maintain the same format and style but improve quality.
+        """
+
+        let modelId = "openai/gpt-4o-mini"
+        do {
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: modelId
+            )
+
+            var responseText = ""
+            let stream = try await provider.chat(
+                messages: [message],
+                model: modelId,
+                stream: false
+            )
+
+            for try await chunk in stream {
+                if case .delta(let text) = chunk.type {
+                    responseText += text
+                } else if case .complete(let msg) = chunk.type {
+                    responseText = msg.content.textValue
+                }
+            }
+
+            guard !responseText.isEmpty else { return nil }
+            logger.info("Output improved via LLM (\(responseText.count) chars)")
+            return responseText
+        } catch {
+            logger.warning("LLM improvement failed: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     private func generateDefaultCritique() -> SelfCritique {
