@@ -234,7 +234,7 @@ extension IntegratedTestRunner {
         environment: [String: String],
         timeout: TimeInterval
     ) async throws -> (output: String, errorOutput: String, exitCode: Int32) {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             let process = Process()
             let outputPipe = Pipe()
             let errorPipe = Pipe()
