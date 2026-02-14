@@ -6,9 +6,11 @@
 //  Copyright © 2026. All rights reserved.
 //
 
+import CloudKit
 import Combine
 import CryptoKit
 import Foundation
+import LocalAuthentication
 import Network
 import Security
 
@@ -364,24 +366,79 @@ public class SecureConnectionManager: ObservableObject {
 
     // MARK: - iCloud Identity Authentication
 
-    private func verifyiCloudIdentity(response _: AuthResponse) async -> Bool {
-        // In a real implementation, this would verify the client's iCloud identity
-        // matches one of the devices on the same iCloud account
-        logEvent(.authenticationFailed, "iCloud identity verification not implemented")
-        return false
+    private func verifyiCloudIdentity(response: AuthResponse) async -> Bool {
+        // Verify the client's iCloud user record ID matches the server's iCloud account
+        guard let clientiCloudToken = response.sharedSecret else {
+            logEvent(.authenticationFailed, "No iCloud identity token provided by client")
+            return false
+        }
+
+        do {
+            let container = CKContainer(identifier: "iCloud.app.theathe")
+            let serverRecordID = try await container.userRecordID()
+            let serverIdentity = serverRecordID.recordName
+
+            // Compare client-provided identity with server's iCloud identity
+            // Client sends HMAC(iCloudRecordName, sharedPairingKey) for verification
+            if let pairingKeyData = loadKeyFromKeychain(identifier: "thea.remote.pairingkey") {
+                let key = SymmetricKey(data: pairingKeyData)
+                let expectedHMAC = HMAC<SHA256>.authenticationCode(
+                    for: Data(serverIdentity.utf8),
+                    using: key
+                )
+                let expectedToken = Data(expectedHMAC).base64EncodedString()
+
+                if clientiCloudToken == expectedToken {
+                    logEvent(.clientConnected, "iCloud identity verified — same account")
+                    return true
+                }
+            }
+
+            // Fallback: direct record name comparison (less secure, for initial pairing)
+            if clientiCloudToken == serverIdentity {
+                logEvent(.clientConnected, "iCloud identity matched via direct comparison")
+                return true
+            }
+
+            logEvent(.authenticationFailed, "iCloud identity mismatch")
+            return false
+        } catch {
+            logEvent(.authenticationFailed, "iCloud identity check failed: \(error.localizedDescription)")
+            return false
+        }
     }
 
     // MARK: - Biometric Authentication
 
     private func verifyBiometric() async -> Bool {
-        #if os(macOS)
-            // This would show a local biometric prompt on the server
-            // and only allow connection if approved
-            logEvent(.authenticationFailed, "Biometric verification not implemented")
+        let context = LAContext()
+        context.localizedReason = "Authorize remote connection to Thea"
+
+        var error: NSError?
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+            if let error {
+                logEvent(.authenticationFailed, "Biometric not available: \(error.localizedDescription)")
+            } else {
+                logEvent(.authenticationFailed, "Biometric authentication not available on this device")
+            }
             return false
-        #else
+        }
+
+        do {
+            let success = try await context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: "Approve incoming remote connection to Thea"
+            )
+            if success {
+                logEvent(.clientConnected, "Biometric authentication approved")
+            } else {
+                logEvent(.authenticationFailed, "Biometric authentication denied by user")
+            }
+            return success
+        } catch {
+            logEvent(.authenticationFailed, "Biometric authentication failed: \(error.localizedDescription)")
             return false
-        #endif
+        }
     }
 
     // MARK: - Unattended Password Authentication
