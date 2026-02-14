@@ -419,13 +419,15 @@ final class DynamicResourceAllocator {
         return baseRate
     }
 
-    // MARK: - Monitoring
+}
 
+// MARK: - Monitoring
+
+extension DynamicResourceAllocator {
     func startMonitoring() {
         guard !isMonitoring else { return }
         isMonitoring = true
 
-        // Start periodic metrics collection
         monitoringTask = Task {
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(configuration.updateIntervalSeconds))
@@ -433,10 +435,8 @@ final class DynamicResourceAllocator {
             }
         }
 
-        // Setup memory pressure notifications
         setupMemoryPressureMonitoring()
 
-        // Setup thermal state notifications
         NotificationCenter.default.addObserver(
             forName: ProcessInfo.thermalStateDidChangeNotification,
             object: nil,
@@ -456,7 +456,7 @@ final class DynamicResourceAllocator {
         memoryPressureSource = nil
     }
 
-    private func setupMemoryPressureMonitoring() {
+    func setupMemoryPressureMonitoring() {
         memoryPressureSource = DispatchSource.makeMemoryPressureSource(
             eventMask: [.warning, .critical],
             queue: .main
@@ -471,12 +471,11 @@ final class DynamicResourceAllocator {
         memoryPressureSource?.resume()
     }
 
-    private func collectMetricsAndAdjust() async {
+    func collectMetricsAndAdjust() async {
         updateAllSystemMetrics()
 
         let newAllocation = calculateOptimalAllocation()
 
-        // Check if significant adjustment needed
         if shouldAdjustAllocation(from: currentAllocation, to: newAllocation) {
             let adjustment = ResourceAdjustment(
                 reason: generateAdjustmentReason(),
@@ -493,7 +492,6 @@ final class DynamicResourceAllocator {
             currentAllocation = newAllocation
             lastAdjustmentReason = adjustment.reason
 
-            // Notify observers
             NotificationCenter.default.post(
                 name: .resourceAllocationDidChange,
                 object: nil,
@@ -501,26 +499,19 @@ final class DynamicResourceAllocator {
             )
         }
 
-        // Generate recommendations
         recommendations = generateRecommendations()
     }
 
-    private func shouldAdjustAllocation(from old: ResourceAllocation, to new: ResourceAllocation) -> Bool {
-        // Significant memory change (>10%)
+    func shouldAdjustAllocation(from old: ResourceAllocation, to new: ResourceAllocation) -> Bool {
         let memoryChange = abs(Double(new.maxModelMemoryBytes) - Double(old.maxModelMemoryBytes))
         let memoryChangePercent = memoryChange / Double(old.maxModelMemoryBytes)
         if memoryChangePercent > 0.1 { return true }
-
-        // Throttle level change
         if new.throttleLevel != old.throttleLevel { return true }
-
-        // Quantization change
         if new.quantizationLevel != old.quantizationLevel { return true }
-
         return false
     }
 
-    private func generateAdjustmentReason() -> String {
+    func generateAdjustmentReason() -> String {
         var reasons: [String] = []
 
         if systemMetrics.thermalState != .nominal {
@@ -533,23 +524,17 @@ final class DynamicResourceAllocator {
             reasons.append("battery: \(Int(systemMetrics.batteryLevel * 100))%")
         }
 
-        if reasons.isEmpty {
-            return "Routine optimization"
-        }
-
-        return "Adjusted for: " + reasons.joined(separator: ", ")
+        return reasons.isEmpty ? "Routine optimization" : "Adjusted for: " + reasons.joined(separator: ", ")
     }
 
-    private func handleThermalStateChange() async {
+    func handleThermalStateChange() async {
         await collectMetricsAndAdjust()
     }
 
-    private func handleMemoryPressure() async {
-        // Immediate response to memory pressure
+    func handleMemoryPressure() async {
         systemMetrics.memoryPressure = getMemoryPressure()
 
         if systemMetrics.memoryPressure == .critical {
-            // Emergency memory reduction
             var emergencyAllocation = currentAllocation
             emergencyAllocation.maxModelMemoryBytes /= 2
             emergencyAllocation.kvCacheSizeBytes /= 2
@@ -573,11 +558,14 @@ final class DynamicResourceAllocator {
             )
         }
     }
+}
 
-    private func generateRecommendations() -> [ResourceRecommendation] {
+// MARK: - Recommendations & Public API
+
+extension DynamicResourceAllocator {
+    func generateRecommendations() -> [ResourceRecommendation] {
         var recs: [ResourceRecommendation] = []
 
-        // Thermal recommendations
         if systemMetrics.thermalState == .serious || systemMetrics.thermalState == .critical {
             recs.append(ResourceRecommendation(
                 title: "High Temperature Detected",
@@ -587,7 +575,6 @@ final class DynamicResourceAllocator {
             ))
         }
 
-        // Memory pressure recommendations
         if systemMetrics.memoryPressure == .warning {
             recs.append(ResourceRecommendation(
                 title: "Memory Pressure",
@@ -597,7 +584,6 @@ final class DynamicResourceAllocator {
             ))
         }
 
-        // Context length optimization
         if currentAllocation.recommendedContextLength < 4096 && systemMetrics.memoryPressure == .nominal {
             recs.append(ResourceRecommendation(
                 title: "Context Length Limited",
@@ -607,7 +593,6 @@ final class DynamicResourceAllocator {
             ))
         }
 
-        // Battery recommendations
         if !systemMetrics.isCharging && systemMetrics.batteryLevel < 0.2 {
             recs.append(ResourceRecommendation(
                 title: "Low Battery",
@@ -620,11 +605,9 @@ final class DynamicResourceAllocator {
         return recs
     }
 
-    // MARK: - Public API
-
     /// Get optimal model size that can be loaded given current system state
     func getMaxRecommendedModelSizeGB() -> Double {
-        currentAllocation.maxModelMemoryGB * 0.8  // 80% to leave headroom
+        currentAllocation.maxModelMemoryGB * 0.8
     }
 
     /// Check if a model of given size can be loaded
@@ -651,9 +634,11 @@ final class DynamicResourceAllocator {
     func recalculateAllocation() async {
         await collectMetricsAndAdjust()
     }
+}
 
-    // MARK: - Configuration
+// MARK: - Configuration
 
+extension DynamicResourceAllocator {
     func updateConfiguration(_ config: Configuration) {
         configuration = config
         saveConfiguration()
@@ -664,18 +649,17 @@ final class DynamicResourceAllocator {
             stopMonitoring()
         }
 
-        // Recalculate with new configuration
         currentAllocation = calculateOptimalAllocation()
     }
 
-    private func loadConfiguration() {
+    func loadConfiguration() {
         if let data = UserDefaults.standard.data(forKey: "DynamicResourceAllocator.config"),
            let config = try? JSONDecoder().decode(Configuration.self, from: data) {
             configuration = config
         }
     }
 
-    private func saveConfiguration() {
+    func saveConfiguration() {
         if let data = try? JSONEncoder().encode(configuration) {
             UserDefaults.standard.set(data, forKey: "DynamicResourceAllocator.config")
         }
