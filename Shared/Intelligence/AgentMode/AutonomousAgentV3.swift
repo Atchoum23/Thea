@@ -346,27 +346,137 @@ extension AutonomousAgentV3 {
         return try await streamToString(provider: provider, prompt: prompt)
     }
 
-    private func modifyFile(path: String, changes _changes: String) async throws {
-        logger.info("Would modify file: \(path)")
+    private func modifyFile(path: String, changes: String) async throws {
+        #if os(macOS)
+        logger.info("Modifying file: \(path)")
+        let fileURL = URL(fileURLWithPath: path)
+        guard FileManager.default.fileExists(atPath: path) else {
+            throw AutonomousAgentError.executionFailed("File not found: \(path)")
+        }
+        var content = try String(contentsOf: fileURL, encoding: .utf8)
+        content += "\n" + changes
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+        logger.info("File modified: \(path)")
+        #else
+        logger.info("File modification not available on this platform: \(path)")
+        _ = changes
+        #endif
     }
 
-    private func createFile(path: String, content _content: String) async throws {
-        logger.info("Would create file: \(path)")
+    private func createFile(path: String, content: String) async throws {
+        #if os(macOS)
+        logger.info("Creating file: \(path)")
+        let fileURL = URL(fileURLWithPath: path)
+        let directory = fileURL.deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+        logger.info("File created: \(path)")
+        #else
+        logger.info("File creation not available on this platform: \(path)")
+        _ = content
+        #endif
     }
 
     private func runCommand(_ command: String) async throws -> String {
-        logger.info("Would run command: \(command)")
-        return "Command output placeholder"
+        #if os(macOS)
+        logger.info("Running command: \(command)")
+        return try await Task.detached { [logger] in
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+            process.arguments = ["-c", command]
+            let outputPipe = Pipe()
+            let errorPipe = Pipe()
+            process.standardOutput = outputPipe
+            process.standardError = errorPipe
+            try process.run()
+            process.waitUntilExit()
+            let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: outputData, encoding: .utf8) ?? ""
+            let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
+            if process.terminationStatus != 0 {
+                logger.warning("Command exited with status \(process.terminationStatus): \(errorOutput)")
+            }
+            return output + (errorOutput.isEmpty ? "" : "\n" + errorOutput)
+        }.value
+        #else
+        logger.info("Command execution not available on this platform")
+        _ = command
+        return "Command execution not available on this platform"
+        #endif
     }
 
     private func runTests(testSuite: String?) async throws -> TestResult {
-        logger.info("Would run tests: \(testSuite ?? "all")")
+        #if os(macOS)
+        let testTarget = testSuite ?? "all"
+        logger.info("Running tests: \(testTarget)")
+        let command = testSuite != nil
+            ? "cd \"/Users/alexis/Documents/IT & Tech/MyApps/Thea\" && swift test --filter \(testSuite!)"
+            : "cd \"/Users/alexis/Documents/IT & Tech/MyApps/Thea\" && swift test"
+        let output = try await runCommand(command)
+        // Parse test results from swift test output
+        let lines = output.components(separatedBy: "\n")
+        var totalTests = 0
+        var passedTests = 0
+        var failures: [TestFailure] = []
+        for line in lines {
+            if line.contains("Test Suite") && line.contains("passed") {
+                // e.g. "Test Suite 'All tests' passed at ..."
+                if let match = line.range(of: #"(\d+) test"#, options: .regularExpression) {
+                    let numStr = line[match].components(separatedBy: " ").first ?? "0"
+                    totalTests = Int(numStr) ?? totalTests
+                }
+            }
+            if line.contains("Executed") {
+                // e.g. "Executed 47 tests, with 0 failures"
+                let parts = line.components(separatedBy: " ")
+                for (i, part) in parts.enumerated() {
+                    if part == "Executed", i + 1 < parts.count {
+                        totalTests = Int(parts[i + 1]) ?? totalTests
+                    }
+                    if part == "with", i + 1 < parts.count {
+                        let failCount = Int(parts[i + 1]) ?? 0
+                        passedTests = totalTests - failCount
+                    }
+                }
+            }
+            if line.contains("✗") || line.contains("FAIL:") {
+                failures.append(TestFailure(
+                    testName: line.trimmingCharacters(in: .whitespaces),
+                    message: line,
+                    filePath: nil,
+                    lineNumber: nil
+                ))
+            }
+        }
+        if passedTests == 0 && failures.isEmpty { passedTests = totalTests }
+        let passed = failures.isEmpty
+        return TestResult(
+            id: UUID(), timestamp: Date(), passed: passed,
+            totalTests: totalTests, passedTests: passedTests, failures: failures
+        )
+        #else
+        logger.info("Test execution not available on this platform")
+        _ = testSuite
         return TestResult(id: UUID(), timestamp: Date(), passed: true, totalTests: 0, passedTests: 0, failures: [])
+        #endif
     }
 
     private func verifyOutput(pattern: String) async throws -> Bool {
-        logger.info("Would verify output matches: \(pattern)")
+        #if os(macOS)
+        logger.info("Verifying output matches pattern: \(pattern)")
+        let output = try await runCommand("cd \"/Users/alexis/Documents/IT & Tech/MyApps/Thea\" && swift build 2>&1")
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let range = NSRange(output.startIndex..., in: output)
+        let matches = regex?.numberOfMatches(in: output, range: range) ?? 0
+        let result = matches > 0 || output.contains(pattern)
+        logger.info("Verification result: \(result)")
+        return result
+        #else
+        logger.info("Output verification not available on this platform")
+        _ = pattern
         return true
+        #endif
     }
 
     private func executeAIQuery(prompt: String) async throws -> String {
@@ -401,15 +511,23 @@ extension AutonomousAgentV3 {
     ) async throws -> Bool {
         switch verification {
         case .compileCheck:
+            #if os(macOS)
+            let output = try await runCommand("cd \"/Users/alexis/Documents/IT & Tech/MyApps/Thea\" && swift build 2>&1")
+            let compileSuccess = output.contains("Build complete") || !output.contains("error:")
+            logger.info("Compile check result: \(compileSuccess)")
+            return compileSuccess
+            #else
             return true
+            #endif
         case let .testRun(testName):
             let result = try await runTests(testSuite: testName)
             return result.passed
         case let .outputMatch(pattern):
             return try await verifyOutput(pattern: pattern)
         case let .fileExists(path):
-            logger.info("Checking file exists: \(path)")
-            return true
+            let exists = FileManager.default.fileExists(atPath: path)
+            logger.info("File exists check '\(path)': \(exists)")
+            return exists
         case .aiReview:
             return true
         case .manual:
