@@ -45,7 +45,7 @@ struct TheaAgentSettingsView: View {
                 .disabled(!settings.agentDelegationEnabled)
             }
 
-            Section("Default Autonomy") {
+            Section {
                 Picker("Autonomy level", selection: $settings.agentDefaultAutonomy) {
                     Text("Disabled").tag("disabled")
                     Text("Ask Always").tag("askAlways")
@@ -55,6 +55,8 @@ struct TheaAgentSettingsView: View {
                 }
                 .disabled(!settings.agentDelegationEnabled)
                 .accessibilityLabel("Default autonomy level for agents")
+            } header: {
+                Text("Default Autonomy")
             } footer: {
                 Text("Controls how much freedom agents have to take actions. 'Balanced' asks for approval on risky operations.")
             }
