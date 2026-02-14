@@ -615,10 +615,5 @@ extension OrchestratorSettingsView {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    OrchestratorSettingsView()
-        .frame(width: 700, height: 900)
-}
+// Preview is in OrchestratorSettingsViewSections.swift
 #endif // end os(macOS)

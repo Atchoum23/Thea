@@ -52,31 +52,74 @@ extension PermissionsManager {
         let status: PermissionStatus
 
         switch type {
+        case .camera, .microphone, .photoLibrary, .photoLibraryAddOnly:
+            status = await requestMediaPermission(for: type)
+        case .contacts, .calendars, .reminders:
+            status = await requestDataPermission(for: type)
+        case .locationWhenInUse, .locationAlways:
+            status = requestLocationPermission(for: type)
+        case .notifications, .criticalAlerts:
+            status = await requestNotificationPermission(for: type)
+        case .speechRecognition:
+            status = await requestSpeechRecognitionPermission()
+        case .siri:
+            status = await requestSiriPermission()
+        case .mediaLibrary:
+            status = await requestMediaLibraryPermission()
+        case .accessibility, .screenRecording:
+            status = requestSecurityPermission(for: type)
+        case .fullDiskAccess, .inputMonitoring, .automation, .bluetooth,
+             .localNetwork, .homeKit, .appManagement, .developerTools,
+             .focusStatus, .motionFitness, .remoteDesktop, .passkeys,
+             .notes:
+            openSettings(for: type)
+            status = .unknown
+        default:
+            status = .notAvailable
+        }
+
+        await refreshAllPermissions()
+        return status
+    }
+
+    // MARK: - Media Permissions
+
+    private func requestMediaPermission(for type: PermissionType) async -> PermissionStatus {
+        switch type {
         case .camera:
             let granted = await AVCaptureDevice.requestAccess(for: .video)
-            status = granted ? .authorized : .denied
+            let status: PermissionStatus = granted ? .authorized : .denied
             cameraStatus = status
-
+            return status
         case .microphone:
             #if os(macOS)
                 let granted = await AVCaptureDevice.requestAccess(for: .audio)
-                status = granted ? .authorized : .denied
+                let status: PermissionStatus = granted ? .authorized : .denied
             #else
                 let granted = await AVAudioApplication.requestRecordPermission()
-                status = granted ? .authorized : .denied
+                let status: PermissionStatus = granted ? .authorized : .denied
             #endif
             microphoneStatus = status
-
+            return status
         case .photoLibrary:
             let phStatus = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-            status = convertPhotoStatus(phStatus)
+            let status = convertPhotoStatus(phStatus)
             photosStatus = status
-
+            return status
         case .photoLibraryAddOnly:
             let phStatus = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
-            status = convertPhotoStatus(phStatus)
+            return convertPhotoStatus(phStatus)
+        default:
+            return .notAvailable
+        }
+    }
 
+    // MARK: - Data Permissions
+
+    private func requestDataPermission(for type: PermissionType) async -> PermissionStatus {
+        switch type {
         case .contacts:
+            let status: PermissionStatus
             do {
                 let granted = try await CNContactStore().requestAccess(for: .contacts)
                 status = granted ? .authorized : .denied
@@ -84,8 +127,9 @@ extension PermissionsManager {
                 status = .denied
             }
             contactsStatus = status
-
+            return status
         case .calendars:
+            let status: PermissionStatus
             do {
                 let granted = try await EKEventStore().requestFullAccessToEvents()
                 status = granted ? .authorized : .denied
@@ -93,127 +137,129 @@ extension PermissionsManager {
                 status = .denied
             }
             calendarStatus = status
-
+            return status
         case .reminders:
             do {
                 let granted = try await EKEventStore().requestFullAccessToReminders()
-                status = granted ? .authorized : .denied
+                return granted ? .authorized : .denied
             } catch {
-                status = .denied
+                return .denied
             }
+        default:
+            return .notAvailable
+        }
+    }
 
+    // MARK: - Location Permissions
+
+    private func requestLocationPermission(for type: PermissionType) -> PermissionStatus {
+        switch type {
         case .locationWhenInUse:
             CLLocationManager().requestWhenInUseAuthorization()
-            status = .notDetermined
-
         case .locationAlways:
             CLLocationManager().requestAlwaysAuthorization()
-            status = .notDetermined
+        default:
+            break
+        }
+        return .notDetermined
+    }
 
-        case .notifications:
-            do {
-                let granted = try await UNUserNotificationCenter.current()
-                    .requestAuthorization(options: [.alert, .sound, .badge])
-                status = granted ? .authorized : .denied
-            } catch {
-                status = .denied
+    // MARK: - Notification Permissions
+
+    private func requestNotificationPermission(for type: PermissionType) async -> PermissionStatus {
+        let options: UNAuthorizationOptions = type == .criticalAlerts
+            ? [.criticalAlert]
+            : [.alert, .sound, .badge]
+
+        do {
+            let granted = try await UNUserNotificationCenter.current()
+                .requestAuthorization(options: options)
+            let status: PermissionStatus = granted ? .authorized : .denied
+            if type == .notifications { notificationsStatus = status }
+            return status
+        } catch {
+            if type == .notifications { notificationsStatus = .denied }
+            return .denied
+        }
+    }
+
+    // MARK: - Speech Recognition Permission
+
+    private func requestSpeechRecognitionPermission() async -> PermissionStatus {
+        let status = await withCheckedContinuation { continuation in
+            SFSpeechRecognizer.requestAuthorization { authStatus in
+                continuation.resume(returning: self.convertSpeechStatus(authStatus))
             }
-            notificationsStatus = status
+        }
+        speechRecognitionStatus = status
+        return status
+    }
 
-        case .criticalAlerts:
-            do {
-                let granted = try await UNUserNotificationCenter.current()
-                    .requestAuthorization(options: [.criticalAlert])
-                status = granted ? .authorized : .denied
-            } catch {
-                status = .denied
-            }
+    // MARK: - Siri Permission
 
-        case .speechRecognition:
-            status = await withCheckedContinuation { continuation in
-                SFSpeechRecognizer.requestAuthorization { authStatus in
+    private func requestSiriPermission() async -> PermissionStatus {
+        #if os(iOS) || os(watchOS)
+            let status = await withCheckedContinuation { continuation in
+                INPreferences.requestSiriAuthorization { authStatus in
                     switch authStatus {
-                    case .authorized: continuation.resume(returning: .authorized)
-                    case .denied: continuation.resume(returning: .denied)
-                    case .restricted: continuation.resume(returning: .restricted)
-                    case .notDetermined: continuation.resume(returning: .notDetermined)
-                    @unknown default: continuation.resume(returning: .notDetermined)
+                    case .authorized: continuation.resume(returning: PermissionStatus.authorized)
+                    case .denied: continuation.resume(returning: PermissionStatus.denied)
+                    case .restricted: continuation.resume(returning: PermissionStatus.restricted)
+                    case .notDetermined: continuation.resume(returning: PermissionStatus.notDetermined)
+                    @unknown default: continuation.resume(returning: PermissionStatus.notDetermined)
                     }
                 }
             }
-            speechRecognitionStatus = status
+            siriStatus = status
+            return status
+        #else
+            return .notAvailable
+        #endif
+    }
 
-        case .siri:
-            #if os(iOS) || os(watchOS)
-                status = await withCheckedContinuation { continuation in
-                    INPreferences.requestSiriAuthorization { authStatus in
-                        switch authStatus {
-                        case .authorized: continuation.resume(returning: .authorized)
-                        case .denied: continuation.resume(returning: .denied)
-                        case .restricted: continuation.resume(returning: .restricted)
-                        case .notDetermined: continuation.resume(returning: .notDetermined)
-                        @unknown default: continuation.resume(returning: .notDetermined)
-                        }
+    // MARK: - Media Library Permission
+
+    private func requestMediaLibraryPermission() async -> PermissionStatus {
+        #if os(iOS)
+            return await withCheckedContinuation { continuation in
+                MPMediaLibrary.requestAuthorization { authStatus in
+                    switch authStatus {
+                    case .authorized: continuation.resume(returning: PermissionStatus.authorized)
+                    case .denied: continuation.resume(returning: PermissionStatus.denied)
+                    case .restricted: continuation.resume(returning: PermissionStatus.restricted)
+                    case .notDetermined: continuation.resume(returning: PermissionStatus.notDetermined)
+                    @unknown default: continuation.resume(returning: PermissionStatus.notDetermined)
                     }
                 }
-                siriStatus = status
-            #else
-                status = .notAvailable
-            #endif
+            }
+        #else
+            openSettings(for: .mediaLibrary)
+            return .unknown
+        #endif
+    }
 
-        case .mediaLibrary:
-            #if os(iOS)
-                status = await withCheckedContinuation { continuation in
-                    MPMediaLibrary.requestAuthorization { authStatus in
-                        switch authStatus {
-                        case .authorized: continuation.resume(returning: .authorized)
-                        case .denied: continuation.resume(returning: .denied)
-                        case .restricted: continuation.resume(returning: .restricted)
-                        case .notDetermined: continuation.resume(returning: .notDetermined)
-                        @unknown default: continuation.resume(returning: .notDetermined)
-                        }
-                    }
-                }
-            #else
-                // On macOS, open System Settings instead
-                openSettings(for: .mediaLibrary)
-                status = .unknown
-            #endif
+    // MARK: - Security Permissions (macOS)
 
-        case .accessibility:
-            #if os(macOS)
+    private func requestSecurityPermission(for type: PermissionType) -> PermissionStatus {
+        #if os(macOS)
+            switch type {
+            case .accessibility:
                 let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
                 let trusted = AXIsProcessTrustedWithOptions(options)
-                status = trusted ? .authorized : .notDetermined
+                let status: PermissionStatus = trusted ? .authorized : .notDetermined
                 accessibilityStatus = status
-            #else
-                status = .notAvailable
-            #endif
-
-        case .screenRecording:
-            #if os(macOS)
+                return status
+            case .screenRecording:
                 CGRequestScreenCaptureAccess()
-                status = CGPreflightScreenCaptureAccess() ? .authorized : .denied
+                let status: PermissionStatus = CGPreflightScreenCaptureAccess() ? .authorized : .denied
                 screenRecordingStatus = status
-            #else
-                status = .notAvailable
-            #endif
-
-        // Permissions that can only be granted via System Settings
-        case .fullDiskAccess, .inputMonitoring, .automation, .bluetooth,
-             .localNetwork, .homeKit, .appManagement, .developerTools,
-             .focusStatus, .motionFitness, .remoteDesktop, .passkeys,
-             .notes:
-            openSettings(for: type)
-            status = .unknown
-
-        default:
-            status = .notAvailable
-        }
-
-        // Refresh all permissions after request
-        await refreshAllPermissions()
-        return status
+                return status
+            default:
+                return .notAvailable
+            }
+        #else
+            return .notAvailable
+        #endif
     }
 
     // MARK: - Open Settings

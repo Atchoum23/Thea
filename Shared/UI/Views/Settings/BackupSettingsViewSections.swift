@@ -161,90 +161,10 @@ extension BackupSettingsView {
     func backupDetailSheet(_ backup: BackupSettingsEntry) -> some View {
         NavigationStack {
             Form {
-                Section("Backup Information") {
-                    LabeledContent("Name", value: backup.name)
-                    LabeledContent("Date", value: backup.date, format: .dateTime)
-                    LabeledContent("Size", value: backup.size)
-                    LabeledContent("Type", value: backup.type.displayName)
-                    LabeledContent("Location", value: backup.location.displayName)
-
-                    if backup.isEncrypted {
-                        HStack {
-                            Text("Encrypted")
-                            Spacer()
-                            Image(systemName: "lock.fill")
-                                .foregroundStyle(.green)
-                        }
-                    }
-                }
-
-                Section("Contents") {
-                    ForEach(backup.contents, id: \.name) { item in
-                        HStack {
-                            Image(systemName: item.icon)
-                                .foregroundStyle(.blue)
-                                .frame(width: 24)
-                                .accessibilityHidden(true)
-
-                            Text(item.name)
-
-                            Spacer()
-
-                            Text("\(item.count) items")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(item.name): \(item.count) items")
-                    }
-                }
-
-                Section("Verification") {
-                    HStack {
-                        Text("Integrity Check")
-                        Spacer()
-                        if backup.isVerified {
-                            Label("Passed", systemImage: "checkmark.circle.fill")
-                                .font(.caption)
-                                .foregroundStyle(.green)
-                        } else {
-                            Label("Not Verified", systemImage: "questionmark.circle.fill")
-                                .font(.caption)
-                                .foregroundStyle(.orange)
-                        }
-                    }
-
-                    if let checksum = backup.checksum {
-                        LabeledContent("Checksum", value: String(checksum.prefix(16)) + "...")
-                    }
-                }
-
-                Section {
-                    Button {
-                        showingBackupDetail = nil
-                        selectedBackup = backup
-                        showingRestoreConfirmation = true
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Label("Restore This Backup", systemImage: "arrow.counterclockwise")
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    Button(role: .destructive) {
-                        showingBackupDetail = nil
-                        selectedBackup = backup
-                        showingDeleteConfirmation = true
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Label("Delete Backup", systemImage: "trash")
-                            Spacer()
-                        }
-                    }
-                }
+                backupInfoSection(backup)
+                backupContentsSection(backup)
+                backupVerificationSection(backup)
+                backupActionsSection(backup)
             }
             .navigationTitle("Backup Details")
             #if os(iOS)
@@ -261,6 +181,103 @@ extension BackupSettingsView {
         #if os(macOS)
         .frame(width: 500, height: 600)
         #endif
+    }
+
+    @ViewBuilder
+    private func backupInfoSection(_ backup: BackupSettingsEntry) -> some View {
+        Section("Backup Information") {
+            LabeledContent("Name", value: backup.name)
+            LabeledContent("Date", value: backup.date, format: .dateTime)
+            LabeledContent("Size", value: backup.size)
+            LabeledContent("Type", value: backup.type.displayName)
+            LabeledContent("Location", value: backup.location.displayName)
+
+            if backup.isEncrypted {
+                HStack {
+                    Text("Encrypted")
+                    Spacer()
+                    Image(systemName: "lock.fill")
+                        .foregroundStyle(.green)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func backupContentsSection(_ backup: BackupSettingsEntry) -> some View {
+        Section("Contents") {
+            ForEach(backup.contents, id: \.name) { item in
+                HStack {
+                    Image(systemName: item.icon)
+                        .foregroundStyle(.blue)
+                        .frame(width: 24)
+                        .accessibilityHidden(true)
+
+                    Text(item.name)
+
+                    Spacer()
+
+                    Text("\(item.count) items")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("\(item.name): \(item.count) items")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func backupVerificationSection(_ backup: BackupSettingsEntry) -> some View {
+        Section("Verification") {
+            HStack {
+                Text("Integrity Check")
+                Spacer()
+                if backup.isVerified {
+                    Label("Passed", systemImage: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.green)
+                } else {
+                    Label("Not Verified", systemImage: "questionmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            }
+
+            if let checksum = backup.checksum {
+                LabeledContent("Checksum", value: String(checksum.prefix(16)) + "...")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func backupActionsSection(_ backup: BackupSettingsEntry) -> some View {
+        Section {
+            Button {
+                showingBackupDetail = nil
+                selectedBackup = backup
+                showingRestoreConfirmation = true
+            } label: {
+                HStack {
+                    Spacer()
+                    Label("Restore This Backup", systemImage: "arrow.counterclockwise")
+                    Spacer()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+
+            Button(role: .destructive) {
+                showingBackupDetail = nil
+                selectedBackup = backup
+                showingDeleteConfirmation = true
+            } label: {
+                HStack {
+                    Spacer()
+                    Label("Delete Backup", systemImage: "trash")
+                    Spacer()
+                }
+            }
+        }
     }
 
     // MARK: - Actions

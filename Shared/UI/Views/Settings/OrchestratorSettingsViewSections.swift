@@ -537,4 +537,11 @@ struct ExecutionRecord: Identifiable {
     let errorMessage: String
 }
 
+// MARK: - Preview
+
+#Preview {
+    OrchestratorSettingsView()
+        .frame(width: 700, height: 900)
+}
+
 #endif // end os(macOS)

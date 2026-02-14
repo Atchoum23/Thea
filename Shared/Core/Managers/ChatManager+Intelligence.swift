@@ -200,64 +200,116 @@ extension ChatManager {
     static func buildTaskSpecificPrompt(for taskType: TaskType) -> String {
         switch taskType {
         case .codeGeneration, .appDevelopment:
+            return codingPrompt(.generation)
+        case .codeAnalysis:
+            return codingPrompt(.analysis)
+        case .codeDebugging, .debugging:
+            return codingPrompt(.debugging)
+        case .codeExplanation:
+            return codingPrompt(.explanation)
+        case .codeRefactoring:
+            return codingPrompt(.refactoring)
+        case .factual, .simpleQA:
+            return knowledgePrompt(.factual)
+        case .creative, .creativeWriting, .contentCreation, .creation:
+            return knowledgePrompt(.creative)
+        case .analysis, .complexReasoning:
+            return knowledgePrompt(.analysis)
+        case .research, .informationRetrieval:
+            return knowledgePrompt(.research)
+        case .conversation, .general:
+            return ""
+        case .system, .workflowAutomation:
+            return knowledgePrompt(.system)
+        case .math, .mathLogic:
+            return knowledgePrompt(.math)
+        case .translation:
+            return knowledgePrompt(.translation)
+        case .summarization:
+            return knowledgePrompt(.summarization)
+        case .planning:
+            return knowledgePrompt(.planning)
+        case .unknown:
+            return ""
+        }
+    }
+
+    // MARK: - Coding Prompt Helpers
+
+    private enum CodingCategory {
+        case generation, analysis, debugging, explanation, refactoring
+    }
+
+    private static func codingPrompt(_ category: CodingCategory) -> String {
+        switch category {
+        case .generation:
             return """
             You are a senior software engineer. Write clean, production-ready code. \
             Follow best practices for the language. Include error handling. \
             Explain your design decisions briefly.
             """
-        case .codeAnalysis:
+        case .analysis:
             return """
             Analyze the code thoroughly. Identify potential bugs, performance issues, \
             security vulnerabilities, and style improvements. Be specific with line references.
             """
-        case .codeDebugging, .debugging:
+        case .debugging:
             return """
             Debug systematically. Identify the root cause, not just symptoms. \
             Explain why the bug occurs and provide a targeted fix. \
             Verify the fix doesn't introduce regressions.
             """
-        case .codeExplanation:
+        case .explanation:
             return """
             Explain the code clearly at the appropriate level of detail. \
             Walk through the logic step by step. Highlight key patterns and design decisions.
             """
-        case .codeRefactoring:
+        case .refactoring:
             return """
             Refactor for clarity, maintainability, and performance. \
             Preserve existing behavior. Explain each change and its benefit. \
             Follow SOLID principles where applicable.
             """
-        case .factual, .simpleQA:
+        }
+    }
+
+    // MARK: - Knowledge Prompt Helpers
+
+    private enum KnowledgeCategory {
+        case factual, creative, analysis, research, system, math, translation, summarization, planning
+    }
+
+    private static func knowledgePrompt(_ category: KnowledgeCategory) -> String {
+        switch category {
+        case .factual:
             return """
             Provide accurate, well-sourced factual information. \
             Distinguish between established facts and your reasoning. \
             If uncertain, say so.
             """
-        case .creative, .creativeWriting, .contentCreation, .creation:
+        case .creative:
             return """
             Be creative and engaging. Match the requested tone and style. \
             Offer multiple options or approaches when appropriate.
             """
-        case .analysis, .complexReasoning:
+        case .analysis:
             return """
             Analyze thoroughly with structured reasoning. Consider multiple perspectives. \
             Support conclusions with evidence. Identify assumptions and limitations.
             """
-        case .research, .informationRetrieval:
+        case .research:
             return """
             Research comprehensively. Organize findings clearly. \
             Cite sources when possible. Distinguish between primary and secondary information. \
             Note gaps in available information.
             """
-        case .conversation, .general:
-            return ""
-        case .system, .workflowAutomation:
+        case .system:
             return """
             Provide precise system commands and configurations. \
             Warn about potentially destructive operations. \
             Include verification steps.
             """
-        case .math, .mathLogic:
+        case .math:
             return """
             Show your work step by step. Use precise mathematical notation. \
             Verify your answer with a sanity check. Explain the approach before calculating.
@@ -280,8 +332,6 @@ extension ChatManager {
             Identify risks and mitigation strategies. \
             Include time estimates where possible. Consider resource constraints.
             """
-        case .unknown:
-            return ""
         }
     }
 

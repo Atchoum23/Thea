@@ -398,7 +398,13 @@ struct ModelSettingsView: View {
         }
     }
 
-    private func categoryChip(_ category: ModelSelectionConfiguration.ModelCategory?, label: String) -> some View {
+}
+
+// MARK: - Model List Helpers
+
+extension ModelSettingsView {
+
+    func categoryChip(_ category: ModelSelectionConfiguration.ModelCategory?, label: String) -> some View {
         Button {
             selectedCategory = category
         } label: {
@@ -413,9 +419,8 @@ struct ModelSettingsView: View {
         .buttonStyle(.plain)
     }
 
-    private func modelRow(_ model: OpenRouterModel) -> some View {
+    func modelRow(_ model: OpenRouterModel) -> some View {
         HStack(spacing: 12) {
-            // Selection for comparison
             Button {
                 toggleComparison(model.id)
             } label: {
@@ -462,7 +467,6 @@ struct ModelSettingsView: View {
                     .foregroundStyle(.tertiary)
             }
 
-            // Favorite button
             Button {
                 toggleFavorite(model.id)
             } label: {
@@ -472,7 +476,6 @@ struct ModelSettingsView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(settingsManager.favoriteModels.contains(model.id) ? "Remove from favorites" : "Add to favorites")
 
-            // Info button
             Button {
                 showingModelDetail = model
             } label: {
@@ -485,10 +488,9 @@ struct ModelSettingsView: View {
         .padding(.vertical, 4)
     }
 
-    private var filteredModels: [OpenRouterModel] {
+    var filteredModels: [OpenRouterModel] {
         var models = catalogManager.models
 
-        // Filter by search
         if !searchText.isEmpty {
             models = models.filter {
                 $0.name.localizedCaseInsensitiveContains(searchText) ||
@@ -497,7 +499,6 @@ struct ModelSettingsView: View {
             }
         }
 
-        // Filter by category
         if let category = selectedCategory {
             let categoryModelIds = config.models(for: category)
             models = models.filter { categoryModelIds.contains($0.id) }
@@ -505,5 +506,4 @@ struct ModelSettingsView: View {
 
         return models
     }
-
 }

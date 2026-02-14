@@ -379,11 +379,16 @@ struct AdvancedSettingsView: View {
         }
     }
 
+}
+
+// MARK: - Performance, Cache, Experimental, Diagnostics, Actions & Helpers
+
+extension AdvancedSettingsView {
+
     // MARK: - Performance Section
 
-    private var performanceSection: some View {
+    var performanceSection: some View {
         Group {
-            // Memory limit
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Memory Limit")
@@ -404,7 +409,6 @@ struct AdvancedSettingsView: View {
 
             Divider()
 
-            // Background tasks
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Max Background Tasks")
@@ -443,7 +447,7 @@ struct AdvancedSettingsView: View {
 
     // MARK: - Cache Section
 
-    private var cacheSection: some View {
+    var cacheSection: some View {
         Group {
             HStack {
                 Text("Cache Size")
@@ -470,14 +474,11 @@ struct AdvancedSettingsView: View {
             Divider()
 
             Toggle("Cache API Responses", isOn: $advancedConfig.cacheAPIResponses)
-
             Toggle("Cache Model Outputs", isOn: $advancedConfig.cacheModelOutputs)
-
             Toggle("Cache Images", isOn: $advancedConfig.cacheImages)
 
             Divider()
 
-            // Cache breakdown
             VStack(alignment: .leading, spacing: 8) {
                 Text("Cache Breakdown")
                     .font(.subheadline)
@@ -499,7 +500,7 @@ struct AdvancedSettingsView: View {
         }
     }
 
-    private func cacheBreakdownRow(title: String, size: String) -> some View {
+    func cacheBreakdownRow(title: String, size: String) -> some View {
         HStack {
             Text(title)
                 .font(.caption)
@@ -516,7 +517,7 @@ struct AdvancedSettingsView: View {
 
     // MARK: - Experimental Section
 
-    private var experimentalSection: some View {
+    var experimentalSection: some View {
         Group {
             Toggle("Enable Beta Features", isOn: $settingsManager.betaFeaturesEnabled)
 
@@ -552,11 +553,6 @@ struct AdvancedSettingsView: View {
             }
         }
     }
-}
-
-// MARK: - Diagnostics, Actions, and Helpers
-
-extension AdvancedSettingsView {
 
     var diagnosticsSection: some View {
         Group {
