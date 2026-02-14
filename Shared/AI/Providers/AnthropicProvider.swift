@@ -132,6 +132,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                             if line.hasPrefix("data: ") {
                                 let jsonString = String(line.dropFirst(6))
                                 guard let data = jsonString.data(using: .utf8),
+                                      // try? OK: SSE line may be malformed; skip and continue
                                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                                 else {
                                     continue
@@ -435,6 +436,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                         guard line.hasPrefix("data: ") else { continue }
                         let jsonString = String(line.dropFirst(6))
                         guard let data = jsonString.data(using: .utf8),
+                              // try? OK: SSE line may be malformed; skip and continue
                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                               let type = json["type"] as? String
                         else { continue }

@@ -100,6 +100,7 @@ final class GoogleProvider: AIProvider, Sendable {
 
                         for try await line in asyncBytes.lines {
                             guard let data = line.data(using: .utf8),
+                                  // try? OK: SSE line may be malformed; skip and continue
                                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                   let candidates = json["candidates"] as? [[String: Any]],
                                   let content = candidates.first?["content"] as? [String: Any],

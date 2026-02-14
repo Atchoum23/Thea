@@ -83,6 +83,7 @@ struct AnthropicTokenCounter: Sendable {
         }
 
         if httpResponse.statusCode != 200 {
+            // try? OK: error response may not be valid JSON
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = json["error"] as? [String: Any],
                let message = error["message"] as? String {

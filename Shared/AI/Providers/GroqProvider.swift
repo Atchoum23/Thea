@@ -130,6 +130,7 @@ final class GroqProvider: AIProvider, Sendable {
                                 }
 
                                 guard let data = jsonString.data(using: .utf8),
+                                      // try? OK: SSE line may be malformed; skip and continue
                                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                       let choices = json["choices"] as? [[String: Any]],
                                       let delta = choices.first?["delta"] as? [String: Any],
