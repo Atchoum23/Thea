@@ -96,6 +96,26 @@ public enum SpecializedAgentType: String, Codable, Sendable, CaseIterable {
         }
     }
 
+    public var sfSymbol: String {
+        switch self {
+        case .explore: return "magnifyingglass"
+        case .plan: return "list.bullet.clipboard"
+        case .generalPurpose: return "cpu"
+        case .bash: return "terminal"
+        case .research: return "globe"
+        case .database: return "cylinder"
+        case .security: return "lock.shield"
+        case .performance: return "gauge.with.dots.needle.67percent"
+        case .api: return "arrow.left.arrow.right"
+        case .testing: return "checkmark.diamond"
+        case .documentation: return "doc.text"
+        case .refactoring: return "arrow.triangle.2.circlepath"
+        case .review: return "eye"
+        case .debug: return "ant"
+        case .deployment: return "shippingbox"
+        }
+    }
+
     public var systemPrompt: String {
         switch self {
         case .explore:

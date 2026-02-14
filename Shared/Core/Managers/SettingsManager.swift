@@ -299,6 +299,24 @@ final class SettingsManager: ObservableObject {
         didSet { persist(clipboardExcludedApps, forKey: "clipboardExcludedApps") }
     }
 
+    // MARK: - Agent Delegation Settings
+
+    @Published var agentDelegationEnabled: Bool {
+        didSet { persist(agentDelegationEnabled, forKey: "agentDelegationEnabled") }
+    }
+
+    @Published var agentAutoDelegateComplexTasks: Bool {
+        didSet { persist(agentAutoDelegateComplexTasks, forKey: "agentAutoDelegateComplexTasks") }
+    }
+
+    @Published var agentMaxConcurrent: Int {
+        didSet { persist(agentMaxConcurrent, forKey: "agentMaxConcurrent") }
+    }
+
+    @Published var agentDefaultAutonomy: String {
+        didSet { persist(agentDefaultAutonomy, forKey: "agentDefaultAutonomy") }
+    }
+
     // MARK: - Focus & Search Settings
 
     @Published var activeFocusMode: String {
@@ -399,6 +417,11 @@ final class SettingsManager: ObservableObject {
         clipboardAutoCategorize = UserDefaults.standard.bool(forKey: "clipboardAutoCategorize")
         clipboardSyncPinboards = UserDefaults.standard.bool(forKey: "clipboardSyncPinboards")
         clipboardExcludedApps = UserDefaults.standard.stringArray(forKey: "clipboardExcludedApps") ?? []
+        agentDelegationEnabled = UserDefaults.standard.object(forKey: "agentDelegationEnabled") as? Bool ?? true
+        agentAutoDelegateComplexTasks = UserDefaults.standard.bool(forKey: "agentAutoDelegateComplexTasks")
+        agentMaxConcurrent = UserDefaults.standard.integer(forKey: "agentMaxConcurrent") != 0
+            ? UserDefaults.standard.integer(forKey: "agentMaxConcurrent") : 4
+        agentDefaultAutonomy = UserDefaults.standard.string(forKey: "agentDefaultAutonomy") ?? "balanced"
         activeFocusMode = UserDefaults.standard.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = UserDefaults.standard.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = UserDefaults.standard.string(forKey: "defaultExportFormat") ?? "markdown"
@@ -487,6 +510,11 @@ final class SettingsManager: ObservableObject {
         clipboardAutoSummarize = d.bool(forKey: "clipboardAutoSummarize")
         clipboardSyncEnabled = d.bool(forKey: "clipboardSyncEnabled")
         clipboardExcludedApps = d.stringArray(forKey: "clipboardExcludedApps") ?? []
+        agentDelegationEnabled = d.object(forKey: "agentDelegationEnabled") as? Bool ?? true
+        agentAutoDelegateComplexTasks = d.bool(forKey: "agentAutoDelegateComplexTasks")
+        agentMaxConcurrent = d.integer(forKey: "agentMaxConcurrent") != 0
+            ? d.integer(forKey: "agentMaxConcurrent") : 4
+        agentDefaultAutonomy = d.string(forKey: "agentDefaultAutonomy") ?? "balanced"
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
@@ -603,6 +631,10 @@ final class SettingsManager: ObservableObject {
         playNotificationSound = true
         showDockBadge = true
         doNotDisturb = false
+        agentDelegationEnabled = true
+        agentAutoDelegateComplexTasks = false
+        agentMaxConcurrent = 4
+        agentDefaultAutonomy = "balanced"
         activeFocusMode = "general"
         enableSemanticSearch = true
         defaultExportFormat = "markdown"
