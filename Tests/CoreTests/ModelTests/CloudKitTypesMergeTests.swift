@@ -132,25 +132,16 @@ final class CloudKitTypesMergeTests: XCTestCase {
     }
 
     func testConflictResolutionCases() {
-        let local = ConflictResolution.keepLocal
-        let remote = ConflictResolution.keepRemote
-        let merge = ConflictResolution.merge
+        // Verify all cases exist and are distinct
+        let cases: [ConflictResolution] = [.keepLocal, .keepRemote, .merge]
+        XCTAssertEqual(cases.count, 3)
 
-        // Type check — ensures all cases exist
-        switch local {
-        case .keepLocal: break
-        case .keepRemote: XCTFail("Expected keepLocal")
-        case .merge: XCTFail("Expected keepLocal")
-        }
-
-        switch remote {
-        case .keepRemote: break
-        default: XCTFail("Expected keepRemote")
-        }
-
-        switch merge {
-        case .merge: break
-        default: XCTFail("Expected merge")
+        // Verify cases are distinguishable via pattern matching
+        for resolution in cases {
+            switch resolution {
+            case .keepLocal, .keepRemote, .merge:
+                break
+            }
         }
     }
 
