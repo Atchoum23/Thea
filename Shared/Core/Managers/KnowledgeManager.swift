@@ -1,6 +1,9 @@
 import Foundation
 import Observation
+import os.log
 @preconcurrency import SwiftData
+
+private let knowledgeLogger = Logger(subsystem: "ai.thea.app", category: "KnowledgeManager")
 
 @MainActor
 @Observable
@@ -46,13 +49,13 @@ final class KnowledgeManager {
         )
 
         modelContext?.insert(file)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { knowledgeLogger.error("Failed to save indexed file: \(error.localizedDescription)") }
         indexedFiles.append(file)
     }
 
     func removeFile(_ file: IndexedFile) {
         modelContext?.delete(file)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { knowledgeLogger.error("Failed to save after removing file: \(error.localizedDescription)") }
         indexedFiles.removeAll { $0.id == file.id }
     }
 
@@ -62,7 +65,7 @@ final class KnowledgeManager {
         for file in indexedFiles {
             context.delete(file)
         }
-        try? context.save()
+        do { try context.save() } catch { knowledgeLogger.error("Failed to save after clearing all data: \(error.localizedDescription)") }
 
         indexedFiles.removeAll()
         isIndexing = false
@@ -77,6 +80,11 @@ final class KnowledgeManager {
         guard let context = modelContext else { return }
         var descriptor = FetchDescriptor<IndexedFile>()
         descriptor.sortBy = [SortDescriptor(\.indexedAt, order: .reverse)]
-        indexedFiles = (try? context.fetch(descriptor)) ?? []
+        do {
+            indexedFiles = try context.fetch(descriptor)
+        } catch {
+            knowledgeLogger.error("Failed to fetch indexed files: \(error.localizedDescription)")
+            indexedFiles = []
+        }
     }
 }

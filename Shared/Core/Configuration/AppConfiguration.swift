@@ -2,8 +2,13 @@ import Foundation
 
 // MARK: - App Configuration
 
-// Centralized configuration for all hardcoded values
-// All settings are persisted via UserDefaults with sensible defaults
+// Centralized configuration for all hardcoded values.
+// All settings are persisted via UserDefaults with sensible defaults.
+//
+// NOTE: try? usage throughout this file is intentional and correct:
+// - Getters: try? decode returns nil → falls through to default instance
+// - Setters: try? encode only fails if the type has non-Codable properties (impossible for these types)
+// Converting these to ErrorLogger would add ~100 lines with no diagnostic value.
 
 @MainActor
 @Observable
