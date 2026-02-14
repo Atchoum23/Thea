@@ -50,6 +50,7 @@ struct TheaiOSApp: App {
         FinancialManager.shared.setModelContext(context)
         MigrationManager.shared.setModelContext(context)
         MigrationEngine.shared.setModelContext(context)
+        ClipboardHistoryManager.shared.setModelContext(context)
 
         // Life Monitoring — deferred startup to avoid blocking app launch
         Task {

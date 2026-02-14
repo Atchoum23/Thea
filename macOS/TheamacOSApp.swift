@@ -159,6 +159,13 @@ struct TheamacOSApp: App {
                 .keyboardShortcut("l", modifiers: [.command, .option])
             }
 
+            CommandGroup(after: .pasteboard) {
+                Button("Clipboard History") {
+                    TheaClipWindowController.shared.togglePanel()
+                }
+                .keyboardShortcut("v", modifiers: [.command, .shift])
+            }
+
             CommandGroup(after: .sidebar) {
                 Button("Toggle Sidebar") {
                     NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
@@ -243,6 +250,7 @@ struct TheamacOSApp: App {
         MigrationManager.shared.setModelContext(context)
         MigrationEngine.shared.setModelContext(context)
         CodeIntelligenceManager.shared.setModelContext(context)
+        ClipboardHistoryManager.shared.setModelContext(context)
 
         // TODO: Restore prompt engineering managers after Phase 5+
         // PromptOptimizer.shared.setModelContext(context)
