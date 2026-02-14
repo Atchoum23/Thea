@@ -5,6 +5,7 @@
 
 import Foundation
 import os.log
+import SwiftData
 
 private let msgLogger = Logger(subsystem: "ai.thea.app", category: "ChatManager+Messaging")
 
@@ -15,81 +16,104 @@ extension ChatManager {
     func sendMessage(_ text: String, in conversation: Conversation) async throws {
         msgLogger.debug("📤 sendMessage: Starting with text '\(text.prefix(50))...'")
 
-        // Check if this message should modify an active plan
-        if let activePlan = PlanManager.shared.activePlan, activePlan.isActive {
-            let isPlanModifying = detectPlanModificationIntent(text)
-            if isPlanModifying {
-                msgLogger.debug("📋 Detected plan modification intent, updating plan")
-                let newStep = PlanStep(
-                    title: String(text.prefix(80)),
-                    activeDescription: "Working on \(text.prefix(60).lowercased())...",
-                    taskType: "general"
-                )
-                let modification = PlanModification(
-                    type: .insertSteps([newStep], afterStepId: nil),
-                    reason: "User added new instruction mid-execution"
-                )
-                PlanManager.shared.applyModification(modification)
-            }
-        }
+        handlePlanModificationIfNeeded(text)
 
         guard let context = modelContext else {
             msgLogger.error("❌ No model context!")
             throw ChatError.noModelContext
         }
 
-        // Check if offline — queue the message for later if no network
+        // Offline — queue for later
         if !OfflineQueueService.shared.isOnline {
-            msgLogger.debug("📴 Offline — queuing message for later")
-            let nextIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
-            let currentDevice = DeviceRegistry.shared.currentDevice
-            let userMessage = Message(
-                conversationID: conversation.id,
-                role: .user,
-                content: .text(text),
-                orderIndex: nextIndex,
-                deviceID: currentDevice.id,
-                deviceName: currentDevice.name,
-                deviceType: currentDevice.type.rawValue
-            )
-            conversation.messages.append(userMessage)
-            context.insert(userMessage)
-            try context.save()
-            messageQueue.append((text: text, conversation: conversation))
+            try queueOfflineMessage(text, in: conversation, context: context)
             return
         }
 
-        // Use the orchestrator system: classify task → route to optimal model
-        msgLogger.debug("🔄 Selecting provider and model...")
+        // Classify task → route to optimal provider/model
         let (provider, model, taskType) = try await selectProviderAndModel(for: text)
         msgLogger.debug("✅ Selected provider '\(provider.metadata.name)' with model '\(model)'")
 
-        // Set agent mode based on task classification
-        if let taskType {
-            let recommendedMode = AgentMode.recommended(for: taskType)
-            agentState.mode = recommendedMode
-            agentState.currentTask = AgentModeTask(
-                title: String(text.prefix(80)),
-                userQuery: text,
-                taskType: taskType,
-                mode: recommendedMode,
-                status: .running
-            )
-            agentState.transition(to: .gatherContext)
-            msgLogger.debug("🤖 Agent mode: \(recommendedMode.rawValue) for \(taskType.rawValue)")
+        configureAgentMode(for: taskType, text: text)
+
+        // Create and persist user message
+        let currentDevice = DeviceRegistry.shared.currentDevice
+        let userMessage = createUserMessage(text, in: conversation, device: currentDevice)
+        conversation.messages.append(userMessage)
+        context.insert(userMessage)
+        try context.save()
+
+        // Build API messages (system prompt + conversation history)
+        let apiMessages = await buildAPIMessages(
+            for: conversation, model: model, taskType: taskType, device: currentDevice
+        )
+
+        // Stream AI response
+        isStreaming = true
+        streamingText = ""
+        defer {
+            isStreaming = false
+            streamingText = ""
         }
 
-        // Calculate next order index for proper message ordering
-        let existingIndices = conversation.messages.map(\.orderIndex)
-        let nextUserIndex = (existingIndices.max() ?? -1) + 1
+        let assistantMessage = createAssistantMessage(in: conversation, model: model, device: currentDevice)
+        conversation.messages.append(assistantMessage)
+        context.insert(assistantMessage)
 
-        // Create user message with orderIndex and device origin
+        do {
+            try await streamResponse(
+                provider: provider, model: model,
+                apiMessages: apiMessages, assistantMessage: assistantMessage
+            )
+
+            conversation.updatedAt = Date()
+            autoGenerateTitle(for: conversation)
+            try context.save()
+
+            await runPostResponseActions(
+                text: text, taskType: taskType,
+                assistantMessage: assistantMessage, conversation: conversation
+            )
+
+            processQueue()
+        } catch {
+            msgLogger.debug("❌ Error during chat: \(error)")
+            context.delete(assistantMessage)
+            conversation.messages.removeLast()
+            processQueue()
+            throw error
+        }
+    }
+
+    // MARK: - Send Message Helpers
+
+    private func handlePlanModificationIfNeeded(_ text: String) {
+        guard let activePlan = PlanManager.shared.activePlan, activePlan.isActive else { return }
+        guard detectPlanModificationIntent(text) else { return }
+
+        msgLogger.debug("📋 Detected plan modification intent, updating plan")
+        let newStep = PlanStep(
+            title: String(text.prefix(80)),
+            activeDescription: "Working on \(text.prefix(60).lowercased())...",
+            taskType: "general"
+        )
+        let modification = PlanModification(
+            type: .insertSteps([newStep], afterStepId: nil),
+            reason: "User added new instruction mid-execution"
+        )
+        PlanManager.shared.applyModification(modification)
+    }
+
+    private func queueOfflineMessage(
+        _ text: String, in conversation: Conversation, context: ModelContext
+    ) throws {
+        msgLogger.debug("📴 Offline — queuing message for later")
+        let nextIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
         let currentDevice = DeviceRegistry.shared.currentDevice
         let userMessage = Message(
             conversationID: conversation.id,
             role: .user,
             content: .text(text),
-            orderIndex: nextUserIndex,
+            orderIndex: nextIndex,
             deviceID: currentDevice.id,
             deviceName: currentDevice.name,
             deviceType: currentDevice.type.rawValue
@@ -97,89 +121,91 @@ extension ChatManager {
         conversation.messages.append(userMessage)
         context.insert(userMessage)
         try context.save()
+        messageQueue.append((text: text, conversation: conversation))
+    }
 
-        // Prepare messages for API with device context
-        let deviceContext = buildDeviceContextPrompt()
+    private func configureAgentMode(for taskType: TaskType?, text: String) {
+        guard let taskType else { return }
+        let recommendedMode = AgentMode.recommended(for: taskType)
+        agentState.mode = recommendedMode
+        agentState.currentTask = AgentModeTask(
+            title: String(text.prefix(80)),
+            userQuery: text,
+            taskType: taskType,
+            mode: recommendedMode,
+            status: .running
+        )
+        agentState.transition(to: .gatherContext)
+        msgLogger.debug("🤖 Agent mode: \(recommendedMode.rawValue) for \(taskType.rawValue)")
+    }
+
+    private func createUserMessage(
+        _ text: String, in conversation: Conversation, device: DeviceInfo
+    ) -> Message {
+        let nextIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
+        return Message(
+            conversationID: conversation.id,
+            role: .user,
+            content: .text(text),
+            orderIndex: nextIndex,
+            deviceID: device.id,
+            deviceName: device.name,
+            deviceType: device.type.rawValue
+        )
+    }
+
+    private func createAssistantMessage(
+        in conversation: Conversation, model: String, device: DeviceInfo
+    ) -> Message {
+        let orderIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
+        let message = Message(
+            conversationID: conversation.id,
+            role: .assistant,
+            content: .text(""),
+            orderIndex: orderIndex,
+            deviceID: device.id,
+            deviceName: device.name,
+            deviceType: device.type.rawValue
+        )
+        message.model = model
+        return message
+    }
+
+    private func buildAPIMessages(
+        for conversation: Conversation,
+        model: String,
+        taskType: TaskType?,
+        device: DeviceInfo
+    ) async -> [AIMessage] {
         var apiMessages: [AIMessage] = []
+        let systemPrompt = buildFullSystemPrompt(for: conversation, taskType: taskType)
 
-        // Build system prompt: task-specific instructions + user's custom prompt + device context
-        var systemPromptParts: [String] = []
-
-        // Automatic prompt engineering: add task-specific instructions based on classification
-        if let taskType {
-            let taskPrompt = Self.buildTaskSpecificPrompt(for: taskType)
-            if !taskPrompt.isEmpty {
-                systemPromptParts.append(taskPrompt)
-            }
-
-            // Plan Mode: ask AI to structure response with numbered steps
-            if taskType == .planning {
-                systemPromptParts.append(
-                    """
-                    IMPORTANT: Structure your response as a numbered plan with clear steps.
-                    Start each step on its own line with a number and period (e.g., "1. Step description").
-                    Keep each step concise and actionable.
-                    """
-                )
-            }
-        }
-
-        if let customPrompt = conversation.metadata.systemPrompt, !customPrompt.isEmpty {
-            systemPromptParts.append(customPrompt)
-        }
-
-        // Multilingual: inject language instruction when a preferred language is set
-        // Security: validate language code to prevent injection (BCP-47, max 10 chars, letters+hyphens)
-        if let preferredLanguage = conversation.metadata.preferredLanguage,
-           !preferredLanguage.isEmpty,
-           preferredLanguage.count <= 10,
-           preferredLanguage.allSatisfy({ $0.isLetter || $0 == "-" }),
-           Locale.current.localizedString(forLanguageCode: preferredLanguage) != nil
-        {
-            let languageName = Locale.current.localizedString(forLanguageCode: preferredLanguage) ?? preferredLanguage
-            systemPromptParts.append(
-                "LANGUAGE: Respond entirely in \(languageName). " +
-                    "Maintain technical accuracy and use language-appropriate formatting. " +
-                    "If the user writes in a different language, still respond in \(languageName) unless asked otherwise."
-            )
-        }
-
-        systemPromptParts.append(deviceContext)
-        let fullSystemPrompt = systemPromptParts.joined(separator: "\n\n")
-
-        // Inject combined system message at the start
         apiMessages.append(AIMessage(
             id: UUID(),
             conversationID: conversation.id,
             role: .system,
-            content: .text(fullSystemPrompt),
+            content: .text(systemPrompt),
             timestamp: Date.distantPast,
             model: model
         ))
 
-        // Add conversation messages with per-message device annotations and OCR
         for msg in conversation.messages {
             var content = msg.content
 
-            // For user messages with image attachments, extract OCR text as context
             #if os(macOS) || os(iOS)
             if msg.messageRole == .user, case let .multimodal(parts) = msg.content {
                 let ocrTexts = await extractOCRFromImageParts(parts)
                 if !ocrTexts.isEmpty {
                     let ocrContext = "[Image text (OCR):\n\(ocrTexts.joined(separator: "\n---\n"))]"
-                    let originalText = msg.content.textValue
-                    content = .text("\(originalText)\n\n\(ocrContext)")
+                    content = .text("\(msg.content.textValue)\n\n\(ocrContext)")
                 }
             }
             #endif
 
-            // Annotate user messages with their origin device if different from current
             if msg.messageRole == .user, let msgDeviceName = msg.deviceName,
-               msgDeviceName != currentDevice.name
+               msgDeviceName != device.name
             {
-                let annotation = "[Sent from \(msgDeviceName)]"
-                let originalText = content.textValue
-                content = .text("\(annotation) \(originalText)")
+                content = .text("[Sent from \(msgDeviceName)] \(content.textValue)")
             }
 
             apiMessages.append(AIMessage(
@@ -191,174 +217,175 @@ extension ChatManager {
                 model: msg.model ?? model
             ))
         }
+        return apiMessages
+    }
 
-        // Stream response - use defer to ALWAYS reset streaming state
-        isStreaming = true
-        streamingText = ""
+    private func buildFullSystemPrompt(for conversation: Conversation, taskType: TaskType?) -> String {
+        var parts: [String] = []
 
-        defer {
-            isStreaming = false
-            streamingText = ""
+        if let taskType {
+            let taskPrompt = Self.buildTaskSpecificPrompt(for: taskType)
+            if !taskPrompt.isEmpty { parts.append(taskPrompt) }
+
+            if taskType == .planning {
+                parts.append(
+                    """
+                    IMPORTANT: Structure your response as a numbered plan with clear steps.
+                    Start each step on its own line with a number and period (e.g., "1. Step description").
+                    Keep each step concise and actionable.
+                    """
+                )
+            }
         }
 
-        // Calculate order index for assistant message (after user message was added)
-        let assistantOrderIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
+        if let customPrompt = conversation.metadata.systemPrompt, !customPrompt.isEmpty {
+            parts.append(customPrompt)
+        }
 
-        let assistantMessage = Message(
-            conversationID: conversation.id,
-            role: .assistant,
-            content: .text(""),
-            orderIndex: assistantOrderIndex,
-            deviceID: currentDevice.id,
-            deviceName: currentDevice.name,
-            deviceType: currentDevice.type.rawValue
-        )
-        assistantMessage.model = model
-        conversation.messages.append(assistantMessage)
-        context.insert(assistantMessage)
-
-        do {
-            // Optional cloud API privacy guard: sanitize messages before sending to provider
-            var messagesToSend = apiMessages
-            if SettingsManager.shared.cloudAPIPrivacyGuardEnabled {
-                messagesToSend = await OutboundPrivacyGuard.shared.sanitizeMessages(apiMessages, channel: "cloud_api")
-            }
-
-            agentState.transition(to: .takeAction)
-            msgLogger.debug("🔄 Starting chat stream...")
-            let responseStream = try await provider.chat(
-                messages: messagesToSend,
-                model: model,
-                stream: true
+        if let preferredLanguage = conversation.metadata.preferredLanguage,
+           !preferredLanguage.isEmpty,
+           preferredLanguage.count <= 10,
+           preferredLanguage.allSatisfy({ $0.isLetter || $0 == "-" }),
+           let languageName = Locale.current.localizedString(forLanguageCode: preferredLanguage)
+        {
+            parts.append(
+                "LANGUAGE: Respond entirely in \(languageName). " +
+                    "Maintain technical accuracy and use language-appropriate formatting. " +
+                    "If the user writes in a different language, still respond in \(languageName) unless asked otherwise."
             )
-            msgLogger.debug("✅ Got response stream, iterating...")
-
-            for try await chunk in responseStream {
-                switch chunk.type {
-                case let .delta(text):
-                    streamingText += text
-                    assistantMessage.contentData = try JSONEncoder().encode(MessageContent.text(streamingText))
-                    msgLogger.debug("📝 Received delta: '\(text.prefix(20))...'")
-
-                case let .complete(finalMessage):
-                    assistantMessage.contentData = try JSONEncoder().encode(finalMessage.content)
-                    assistantMessage.tokenCount = finalMessage.tokenCount
-                    if let metadata = finalMessage.metadata {
-                        assistantMessage.metadataData = try? JSONEncoder().encode(metadata)
-                    }
-                    msgLogger.debug("✅ Received complete message")
-
-                case let .error(error):
-                    msgLogger.debug("❌ Received error in stream: \(error)")
-                    throw error
-                }
-            }
-
-            conversation.updatedAt = Date()
-
-            // Auto-generate title from first user message if still default
-            autoGenerateTitle(for: conversation)
-
-            try context.save()
-            msgLogger.debug("✅ Message saved successfully")
-
-            // Post-response verification: run ConfidenceSystem asynchronously
-            #if os(macOS) || os(iOS)
-            do {
-                let verificationQuery = text
-                let verificationResponse = streamingText
-                let verificationTaskType = taskType ?? .general
-                let messageToVerify = assistantMessage
-                Task { @MainActor in
-                    let result = await ConfidenceSystem.shared.validateResponse(
-                        verificationResponse,
-                        query: verificationQuery,
-                        taskType: verificationTaskType
-                    )
-                    var meta = messageToVerify.metadata ?? MessageMetadata()
-                    meta.confidence = result.overallConfidence
-                    messageToVerify.metadataData = try? JSONEncoder().encode(meta)
-                    try? messageToVerify.modelContext?.save()
-                    msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100)) (\(result.level.rawValue))")
-                }
-            }
-            #endif
-
-            // Update agent state: transition to verification phase
-            agentState.transition(to: .verifyResults)
-
-            // Autonomy evaluation: check if response contains actionable tasks
-            if AutonomyController.shared.autonomyLevel != .disabled,
-               let taskType, taskType.isActionable
-            {
-                let action = AutonomousAction(
-                    category: .analysis,
-                    title: "Execute suggested action from \(taskType.rawValue) response",
-                    description: "AI response for \(taskType.description) may contain actionable steps",
-                    riskLevel: .low
-                ) {
-                    AutonomousAction.ActionResult(success: true, message: "Evaluated")
-                }
-                let decision = await AutonomyController.shared.requestAction(action)
-                switch decision {
-                case .autoExecute:
-                    msgLogger.debug("🤖 Autonomy: auto-execute approved for \(taskType.rawValue)")
-                case let .requiresApproval(reason):
-                    AutonomyController.shared.queueForApproval(action, reason: reason)
-                    msgLogger.debug("🤖 Autonomy: queued for approval — \(reason)")
-                }
-            }
-
-            // Mark agent task complete
-            agentState.transition(to: .done)
-            agentState.currentTask?.status = .completed
-            agentState.updateProgress(1.0, message: "Response complete")
-
-            // Plan Mode: auto-create plan from planning-classified responses
-            if taskType == .planning, PlanManager.shared.activePlan == nil {
-                let responseText = streamingText
-                let planSteps = Self.extractPlanSteps(from: responseText)
-                if planSteps.count >= 2 {
-                    let planTitle = String(text.prefix(60))
-                    _ = PlanManager.shared.createSimplePlan(
-                        title: planTitle,
-                        steps: planSteps,
-                        conversationId: conversation.id
-                    )
-                    PlanManager.shared.startExecution()
-                    PlanManager.shared.showPanel()
-                    msgLogger.debug("📋 Auto-created plan with \(planSteps.count) steps")
-                }
-            }
-
-            // Route response through voice if BT audio device is active
-            if AudioOutputRouter.shared.isVoiceOutputActive {
-                AudioOutputRouter.shared.routeResponse(streamingText)
-            }
-
-            // Notify when response is complete (local + cross-device)
-            let responsePreview = streamingText
-            Task {
-                await ResponseNotificationHandler.shared.notifyResponseComplete(
-                    conversationId: conversation.id,
-                    conversationTitle: conversation.title,
-                    previewText: responsePreview
-                )
-                try? await CrossDeviceNotificationService.shared.notifyAIResponseReady(
-                    conversationId: conversation.id.uuidString,
-                    preview: responsePreview
-                )
-            }
-
-            // Process next queued message if any
-            processQueue()
-        } catch {
-            msgLogger.debug("❌ Error during chat: \(error)")
-            context.delete(assistantMessage)
-            conversation.messages.removeLast()
-            processQueue()
-            throw error
         }
+
+        parts.append(buildDeviceContextPrompt())
+        return parts.joined(separator: "\n\n")
+    }
+
+    private func streamResponse(
+        provider: any AIProvider,
+        model: String,
+        apiMessages: [AIMessage],
+        assistantMessage: Message
+    ) async throws {
+        var messagesToSend = apiMessages
+        if SettingsManager.shared.cloudAPIPrivacyGuardEnabled {
+            messagesToSend = await OutboundPrivacyGuard.shared.sanitizeMessages(apiMessages, channel: "cloud_api")
+        }
+
+        agentState.transition(to: .takeAction)
+        let responseStream = try await provider.chat(
+            messages: messagesToSend,
+            model: model,
+            stream: true
+        )
+
+        for try await chunk in responseStream {
+            switch chunk.type {
+            case let .delta(text):
+                streamingText += text
+                assistantMessage.contentData = try JSONEncoder().encode(MessageContent.text(streamingText))
+
+            case let .complete(finalMessage):
+                assistantMessage.contentData = try JSONEncoder().encode(finalMessage.content)
+                assistantMessage.tokenCount = finalMessage.tokenCount
+                if let metadata = finalMessage.metadata {
+                    assistantMessage.metadataData = try? JSONEncoder().encode(metadata)
+                }
+
+            case let .error(error):
+                throw error
+            }
+        }
+    }
+
+    private func runPostResponseActions(
+        text: String, taskType: TaskType?,
+        assistantMessage: Message, conversation: Conversation
+    ) async {
+        // Confidence verification
+        #if os(macOS) || os(iOS)
+        do {
+            let responseText = streamingText
+            let verificationTaskType = taskType ?? .general
+            Task { @MainActor in
+                let result = await ConfidenceSystem.shared.validateResponse(
+                    responseText, query: text, taskType: verificationTaskType
+                )
+                var meta = assistantMessage.metadata ?? MessageMetadata()
+                meta.confidence = result.overallConfidence
+                assistantMessage.metadataData = try? JSONEncoder().encode(meta)
+                try? assistantMessage.modelContext?.save()
+                msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100))")
+            }
+        }
+        #endif
+
+        agentState.transition(to: .verifyResults)
+
+        // Autonomy evaluation
+        await evaluateAutonomy(for: taskType)
+
+        agentState.transition(to: .done)
+        agentState.currentTask?.status = .completed
+        agentState.updateProgress(1.0, message: "Response complete")
+
+        // Auto-create plan from planning responses
+        autoCreatePlanIfNeeded(text: text, taskType: taskType, conversation: conversation)
+
+        // Voice output routing
+        if AudioOutputRouter.shared.isVoiceOutputActive {
+            AudioOutputRouter.shared.routeResponse(streamingText)
+        }
+
+        // Response notifications
+        let preview = streamingText
+        Task {
+            await ResponseNotificationHandler.shared.notifyResponseComplete(
+                conversationId: conversation.id,
+                conversationTitle: conversation.title,
+                previewText: preview
+            )
+            try? await CrossDeviceNotificationService.shared.notifyAIResponseReady(
+                conversationId: conversation.id.uuidString,
+                preview: preview
+            )
+        }
+    }
+
+    private func evaluateAutonomy(for taskType: TaskType?) async {
+        guard AutonomyController.shared.autonomyLevel != .disabled,
+              let taskType, taskType.isActionable
+        else { return }
+
+        let action = AutonomousAction(
+            category: .analysis,
+            title: "Execute suggested action from \(taskType.rawValue) response",
+            description: "AI response for \(taskType.description) may contain actionable steps",
+            riskLevel: .low
+        ) {
+            AutonomousAction.ActionResult(success: true, message: "Evaluated")
+        }
+        let decision = await AutonomyController.shared.requestAction(action)
+        switch decision {
+        case .autoExecute:
+            msgLogger.debug("🤖 Autonomy: auto-execute approved for \(taskType.rawValue)")
+        case let .requiresApproval(reason):
+            AutonomyController.shared.queueForApproval(action, reason: reason)
+        }
+    }
+
+    private func autoCreatePlanIfNeeded(text: String, taskType: TaskType?, conversation: Conversation) {
+        guard taskType == .planning, PlanManager.shared.activePlan == nil else { return }
+        let planSteps = Self.extractPlanSteps(from: streamingText)
+        guard planSteps.count >= 2 else { return }
+
+        let planTitle = String(text.prefix(60))
+        _ = PlanManager.shared.createSimplePlan(
+            title: planTitle,
+            steps: planSteps,
+            conversationId: conversation.id
+        )
+        PlanManager.shared.startExecution()
+        PlanManager.shared.showPanel()
+        msgLogger.debug("📋 Auto-created plan with \(planSteps.count) steps")
     }
 
     // MARK: - Message Queue
