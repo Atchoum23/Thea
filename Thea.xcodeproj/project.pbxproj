@@ -360,7 +360,9 @@
 		2E2962F3E018A8026A9A3414 /* MacSystemObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339927C307D1E770E3A63F42 /* MacSystemObserver.swift */; };
 		2E473A3ED47B3E18A1184A29 /* ArtifactManagerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B16117438AF4B92C53E5F76 /* ArtifactManagerTypes.swift */; };
 		2E4BA466115CB98AD6BF1E2D /* CoworkArtifactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E94F6648B259AA8B80F84D /* CoworkArtifactsView.swift */; };
+		2E7EC0AA1297D8A690436F8F /* TheaAgentOrchestratorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA51688A7ABBF6ACF4608324 /* TheaAgentOrchestratorTypes.swift */; };
 		2E8D8251D4785A18A9054FF7 /* LocalModelRecommendationEngine+Hardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A0773033CC1984860B48AE /* LocalModelRecommendationEngine+Hardware.swift */; };
+		2E8F39F6ABCFCBD71E52622F /* TheaAgentOrchestratorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA51688A7ABBF6ACF4608324 /* TheaAgentOrchestratorTypes.swift */; };
 		2F0E5442D52B77E9A0F6E5DD /* NotificationPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BCB7B11E6C5C3D1E18B7A29 /* NotificationPayload.swift */; };
 		2F6BFA64A8C967345DDBC5E6 /* IntegrationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5427843F93176F4C55BF2A2B /* IntegrationsManager.swift */; };
 		2F7F8A9A838A28F11CE0FA2B /* NutritionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7130C85DA968036A0DA5FF11 /* NutritionServiceTests.swift */; };
@@ -2886,6 +2888,7 @@
 		DA1A95AD763A8BE07399BC04 /* dark-mode-themes.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "dark-mode-themes.js"; sourceTree = "<group>"; };
 		DA442AE1630095516AB91743 /* AdaptiveOCREngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveOCREngine.swift; sourceTree = "<group>"; };
 		DA51376D068195F9D9ABAC78 /* TestGenerator+CoverageAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TestGenerator+CoverageAnalysis.swift"; sourceTree = "<group>"; };
+		DA51688A7ABBF6ACF4608324 /* TheaAgentOrchestratorTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaAgentOrchestratorTypes.swift; sourceTree = "<group>"; };
 		DA59F7DE23369BDDE886752E /* CoworkContextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkContextView.swift; sourceTree = "<group>"; };
 		DA5A73448A770BC37E987A7F /* TerminalIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalIntegration.swift; sourceTree = "<group>"; };
 		DAAA553464FE2769C111150E /* Thea.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Thea.entitlements; sourceTree = "<group>"; };
@@ -5621,6 +5624,7 @@
 			children = (
 				F96EF19C9806E7825C16053B /* IntelligenceOrchestrator.swift */,
 				C2F19EFD19171EF12F4B28A9 /* TheaAgentOrchestrator.swift */,
+				DA51688A7ABBF6ACF4608324 /* TheaAgentOrchestratorTypes.swift */,
 				7E84DFD47051BC4063B6D3CC /* TheaAgentRunner.swift */,
 				03D3F49FEE86A434FDA477C8 /* TheaAgentSession.swift */,
 				1EC32135A936EA800810AEFA /* TheaContextMonitor.swift */,
@@ -7617,6 +7621,7 @@
 				0DBFCC1D77DA9D6718583B84 /* TerminalSettingsViewSections.swift in Sources */,
 				46228D2CB0E145B08CB7EA4D /* TheaAgentListView.swift in Sources */,
 				AED22364394A8BD60BE5DBE0 /* TheaAgentOrchestrator.swift in Sources */,
+				2E8F39F6ABCFCBD71E52622F /* TheaAgentOrchestratorTypes.swift in Sources */,
 				5A2FA6481AD13DE64DE89955 /* TheaAgentRunner.swift in Sources */,
 				D2B42614759F0D06BD33B104 /* TheaAgentSession.swift in Sources */,
 				243BDC18DF65F4B39DF56CA5 /* TheaAgentSettingsView.swift in Sources */,
@@ -8617,6 +8622,7 @@
 				85E88CD8FA4245533D462FEA /* TestGeneratorTypes.swift in Sources */,
 				B5B130BA08C6B191D9405A09 /* TheaAgentDetailView.swift in Sources */,
 				1ADE3D0721F258B7DAACF155 /* TheaAgentOrchestrator.swift in Sources */,
+				2E7EC0AA1297D8A690436F8F /* TheaAgentOrchestratorTypes.swift in Sources */,
 				F2B1AEEB876FA22930D7B139 /* TheaAgentRowView.swift in Sources */,
 				7A38C618D9AD110A3BF89DFF /* TheaAgentRunner.swift in Sources */,
 				12D25F1DB76D132BDA364023 /* TheaAgentSession.swift in Sources */,
