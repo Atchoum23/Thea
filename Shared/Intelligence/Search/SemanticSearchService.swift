@@ -285,3 +285,25 @@ struct EmbeddingPersistenceData: Codable {
     let conversationIndex: [UUID: [UUID]]
 }
 
+// MARK: - Errors
+
+public enum SemanticSearchError: Error, LocalizedError, Sendable {
+    case embeddingGenerationFailed
+    case apiKeyNotFound
+    case networkError(String)
+    case indexCorrupted
+
+    public var errorDescription: String? {
+        switch self {
+        case .embeddingGenerationFailed:
+            "Failed to generate embedding for search query"
+        case .apiKeyNotFound:
+            "OpenAI API key not found"
+        case .networkError(let message):
+            "Network error: \(message)"
+        case .indexCorrupted:
+            "Search index is corrupted and needs to be rebuilt"
+        }
+    }
+}
+

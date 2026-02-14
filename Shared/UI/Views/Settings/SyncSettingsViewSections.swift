@@ -4,7 +4,379 @@
 import OSLog
 import SwiftUI
 
-// MARK: - Device Updates, Handoff, Advanced & Actions
+// MARK: - Preference Sync, Data Sync, Devices & Updates
+
+extension SyncSettingsContentView {
+
+    // MARK: - Preference Sync Scope Section
+
+    var preferenceSyncScopeSection: some View {
+        ForEach(SyncCategory.allCases, id: \.self) { category in
+            categoryScopeRow(for: category)
+        }
+    }
+
+    func categoryScopeRow(for category: SyncCategory) -> some View {
+        let currentScope = syncEngine.effectiveScope(for: category)
+        let isDefault = syncEngine.scopeOverrides[category] == nil
+        let descriptors = PreferenceRegistry.descriptors(for: category)
+
+        return HStack(spacing: 12) {
+            Image(systemName: category.icon)
+                .font(.title3)
+                .foregroundStyle(scopeColor(for: currentScope))
+                .frame(width: 28)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(category.displayName)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+
+                    if isDefault {
+                        Text("Default")
+                            .font(.caption2)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Color.secondary.opacity(0.15))
+                            .foregroundStyle(.secondary)
+                            .cornerRadius(3)
+                    }
+                }
+
+                Text(descriptors.map(\.displayName).joined(separator: ", "))
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Picker("", selection: Binding(
+                get: { currentScope },
+                set: { newScope in
+                    if newScope == category.defaultScope {
+                        syncEngine.scopeOverrides.removeValue(forKey: category)
+                    } else {
+                        syncEngine.scopeOverrides[category] = newScope
+                    }
+                }
+            )) {
+                ForEach(SyncScope.allCases, id: \.self) { scope in
+                    Label(scope.displayName, systemImage: scope.icon)
+                        .tag(scope)
+                }
+            }
+            .pickerStyle(.menu)
+            #if os(macOS)
+            .frame(width: 180)
+            #endif
+        }
+        .padding(.vertical, 2)
+    }
+
+    func scopeColor(for scope: SyncScope) -> Color {
+        switch scope {
+        case .universal: .blue
+        case .deviceClass: .orange
+        case .deviceLocal: .secondary
+        }
+    }
+
+    // MARK: - Data Sync Section (CloudKit)
+
+    var dataSyncSection: some View {
+        Group {
+            Toggle("Conversations", isOn: $syncConversations)
+            Toggle("Knowledge Base", isOn: $syncKnowledge)
+            Toggle("Projects", isOn: $syncProjects)
+            Toggle("Favorite Models", isOn: $syncFavorites)
+
+            Text("These control which data types sync via CloudKit. Preferences sync separately using the rules above.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: - Connected Devices Section
+
+    var connectedDevicesSection: some View {
+        Group {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Your Devices")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+
+                    Text("\(syncEngine.registeredDevices.count) device\(syncEngine.registeredDevices.count == 1 ? "" : "s") registered")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Button {
+                    showingDeviceList = true
+                } label: {
+                    Label("Manage", systemImage: "laptopcomputer.and.iphone")
+                        .font(.caption)
+                }
+                .buttonStyle(.bordered)
+            }
+
+            ForEach(syncEngine.registeredDevices.prefix(3)) { device in
+                deviceRow(device)
+            }
+
+            if syncEngine.registeredDevices.count > 3 {
+                Text("+ \(syncEngine.registeredDevices.count - 3) more device\(syncEngine.registeredDevices.count - 3 == 1 ? "" : "s")")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            if syncEngine.registeredDevices.isEmpty {
+                HStack {
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
+                    Text("No devices registered yet. Open Thea on another device to see it here.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    func deviceRow(_ device: DeviceProfile) -> some View {
+        let isCurrentDevice = device.id == cachedDeviceProfile.id
+
+        return HStack(spacing: 12) {
+            Image(systemName: device.deviceClass.systemImage)
+                .font(.title3)
+                .foregroundStyle(.blue)
+                .frame(width: 30)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(device.name)
+                        .font(.caption)
+                        .fontWeight(.medium)
+
+                    if isCurrentDevice {
+                        Text("This device")
+                            .font(.caption2)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.green.opacity(0.2))
+                            .foregroundStyle(.green)
+                            .cornerRadius(4)
+                    }
+                }
+
+                Text("\(device.model) · \(device.deviceClass.displayName)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(device.lastActive, style: .relative)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+
+                Text("ago")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    // MARK: - Device Updates Section
+
+    #if os(macOS)
+    @ViewBuilder
+    var deviceUpdatesSection: some View {
+        // Update availability banner
+        if let update = updateService.availableUpdate {
+            HStack(spacing: 12) {
+                Image(systemName: "arrow.down.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.blue)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Update Available")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                    Text("v\(update.version) (build \(update.build)) from \(update.sourceDevice)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(update.publishedAt, style: .relative)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+
+                Spacer()
+
+                Button {
+                    Task {
+                        isUpdating = true
+                        let success = await updateService.performUpdate()
+                        updateResult = success ? .success : .failure
+                        isUpdating = false
+                    }
+                } label: {
+                    if isUpdating {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Label("Update Now", systemImage: "arrow.down.to.line")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isUpdating)
+            }
+            .padding(.vertical, 4)
+        }
+
+        // Update result feedback
+        if let result = updateResult {
+            HStack {
+                Image(systemName: result == .success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundStyle(result == .success ? .green : .red)
+                    .accessibilityHidden(true)
+                Text(result == .success
+                    ? "Update installed. Restart Thea to use the new version."
+                    : "Update failed. Check ~/Library/Logs/thea-sync-stderr.log for details.")
+                    .font(.caption)
+            }
+        }
+
+        // Auto-update toggle
+        Toggle("Auto-update when available", isOn: $updateService.autoUpdateEnabled)
+
+        // Check for updates
+        HStack {
+            Button {
+                Task {
+                    await updateService.checkForUpdates()
+                }
+            } label: {
+                Label("Check for Updates", systemImage: "arrow.triangle.2.circlepath")
+            }
+            .disabled(updateService.isCheckingForUpdate)
+
+            Spacer()
+
+            if updateService.isCheckingForUpdate {
+                ProgressView()
+                    .controlSize(.small)
+            } else if let lastChecked = updateService.lastChecked {
+                Text("Last checked \(lastChecked, style: .relative) ago")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+
+        // Push update to other devices
+        if updateService.availableUpdate == nil {
+            Button {
+                Task {
+                    await publishCurrentBuild()
+                }
+            } label: {
+                Label("Push This Build to Other Devices", systemImage: "square.and.arrow.up")
+            }
+            .help("Notify other Macs that this build is available for installation")
+        }
+
+        // Update history
+        if !updateService.updateHistory.isEmpty {
+            DisclosureGroup("Update History") {
+                ForEach(updateService.updateHistory.prefix(5)) { update in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("v\(update.version) (build \(update.build))")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                            Text("From \(update.sourceDevice)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        VStack(alignment: .trailing, spacing: 2) {
+                            if let installed = update.installedAt {
+                                Text("Installed")
+                                    .font(.caption2)
+                                    .foregroundStyle(.green)
+                                Text(installed, style: .relative)
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            } else {
+                                Text(update.publishedAt, style: .relative)
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    func publishCurrentBuild() async {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
+        let deviceName = cachedDeviceProfile.name
+
+        // Get current git commit hash (runs on background thread)
+        let commitHash = await currentCommitHash()
+
+        do {
+            try await updateService.publishUpdate(
+                version: version,
+                build: build,
+                commitHash: commitHash,
+                sourceDevice: deviceName
+            )
+        } catch {
+            // Silently log — the user will see the error via the update banner next time
+            Logger(subsystem: "app.thea", category: "AppUpdate")
+                .error("Failed to publish update: \(error.localizedDescription)")
+        }
+    }
+
+    func currentCommitHash() async -> String {
+        let bundleURL = Bundle.main.bundleURL
+        return await Task.detached {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+            process.arguments = ["rev-parse", "--short", "HEAD"]
+            process.currentDirectoryURL = bundleURL
+
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            process.standardError = FileHandle.nullDevice
+
+            do {
+                try process.run()
+                process.waitUntilExit()
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "unknown"
+            } catch {
+                return "unknown"
+            }
+        }.value
+    }
+    #endif
+}
+
+// MARK: - Handoff, Advanced & Actions
 
 extension SyncSettingsContentView {
 
