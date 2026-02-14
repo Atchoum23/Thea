@@ -271,8 +271,65 @@ extension ChatManager {
         }
 
         agentState.transition(to: .takeAction)
+
+        // Retry with exponential backoff, then fallback to alternative provider
+        let maxRetries = 2
+        var lastError: Error?
+
+        for attempt in 0...maxRetries {
+            if attempt > 0 {
+                let delay = Self.retryDelay(attempt: attempt)
+                msgLogger.info("⏳ Retrying stream (attempt \(attempt + 1)/\(maxRetries + 1)) after \(String(format: "%.1f", delay))s delay")
+                try await Task.sleep(for: .seconds(delay))
+                streamingText = "" // Reset accumulated text for retry
+            }
+
+            do {
+                try await executeStream(
+                    provider: provider, model: model,
+                    messages: messagesToSend, assistantMessage: assistantMessage
+                )
+                return // Success — exit retry loop
+            } catch {
+                lastError = error
+                if Self.isRetryableError(error) {
+                    msgLogger.warning("⚠️ Stream failed with retryable error (attempt \(attempt + 1)): \(error.localizedDescription)")
+                    continue
+                } else {
+                    msgLogger.error("❌ Stream failed with non-retryable error: \(error.localizedDescription)")
+                    throw error
+                }
+            }
+        }
+
+        // All retries exhausted on primary provider — try fallback chain
+        msgLogger.warning("⚠️ Primary provider exhausted, trying fallback chain")
+        do {
+            streamingText = ""
+            let fallbackResult = try await ResilientAIFallbackChain.shared.chat(
+                messages: messagesToSend, preferredModel: model, stream: false
+            )
+            let responseText = fallbackResult.response
+            streamingText = responseText
+            assistantMessage.contentData = try JSONEncoder().encode(MessageContent.text(responseText))
+            msgLogger.info("✅ Fallback chain succeeded via \(fallbackResult.tier.rawValue)")
+            return
+        } catch {
+            msgLogger.error("❌ Fallback chain also failed: \(error.localizedDescription)")
+        }
+
+        // Everything failed — throw the original error
+        throw lastError ?? ChatError.providerNotAvailable
+    }
+
+    private func executeStream(
+        provider: any AIProvider,
+        model: String,
+        messages: [AIMessage],
+        assistantMessage: Message
+    ) async throws {
         let responseStream = try await provider.chat(
-            messages: messagesToSend,
+            messages: messages,
             model: model,
             stream: true
         )
@@ -298,6 +355,35 @@ extension ChatManager {
                 throw error
             }
         }
+    }
+
+    /// Exponential backoff with jitter: 1s, 2s, 4s (capped at 10s)
+    static func retryDelay(attempt: Int) -> TimeInterval {
+        let base = min(pow(2.0, Double(attempt)), 10.0)
+        let jitter = Double.random(in: 0...0.5)
+        return base + jitter
+    }
+
+    /// Determines if an error is retryable (timeouts, server errors, rate limits).
+    static func isRetryableError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        // URLSession timeout
+        if nsError.domain == NSURLErrorDomain,
+           [NSURLErrorTimedOut, NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost]
+            .contains(nsError.code)
+        {
+            return true
+        }
+        // AnthropicError or similar provider errors with HTTP status
+        let description = error.localizedDescription.lowercased()
+        if description.contains("429") || description.contains("rate limit") { return true }
+        if description.contains("500") || description.contains("502") ||
+            description.contains("503") || description.contains("504")
+        {
+            return true
+        }
+        if description.contains("timeout") || description.contains("timed out") { return true }
+        return false
     }
 
     private func runPostResponseActions(
