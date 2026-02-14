@@ -427,9 +427,13 @@ struct IntegrationsSettingsView: View {
         }
     }
 
-    // MARK: - Module Detail Sheet
+}
 
-    private func moduleDetailSheet(_ module: IntegrationModuleType) -> some View {
+// MARK: - Detail Sheet, Status & Helpers
+
+extension IntegrationsSettingsView {
+
+    func moduleDetailSheet(_ module: IntegrationModuleType) -> some View {
         NavigationStack {
             Form {
                 Section("About") {
@@ -482,7 +486,7 @@ struct IntegrationsSettingsView: View {
     }
 
     @ViewBuilder
-    private func moduleFeatures(for module: IntegrationModuleType) -> some View {
+    func moduleFeatures(for module: IntegrationModuleType) -> some View {
         switch module {
         case .health:
             Text("Sleep tracking and analysis")
@@ -547,7 +551,7 @@ struct IntegrationsSettingsView: View {
     }
 
     @ViewBuilder
-    private func moduleStatus(for module: IntegrationModuleType) -> some View {
+    func moduleStatus(for module: IntegrationModuleType) -> some View {
         HStack {
             Text("Enabled")
             Spacer()
@@ -570,7 +574,7 @@ struct IntegrationsSettingsView: View {
         }
     }
 
-    private func isModuleEnabled(_ module: IntegrationModuleType) -> Bool {
+    func isModuleEnabled(_ module: IntegrationModuleType) -> Bool {
         switch module {
         case .health: featureFlags.healthEnabled
         case .wellness: featureFlags.wellnessEnabled
@@ -585,7 +589,7 @@ struct IntegrationsSettingsView: View {
         }
     }
 
-    private func platformSupport(for module: IntegrationModuleType) -> String {
+    func platformSupport(for module: IntegrationModuleType) -> String {
         switch module {
         case .display, .automation:
             "macOS only"
