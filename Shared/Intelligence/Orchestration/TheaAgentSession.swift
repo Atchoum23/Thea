@@ -197,6 +197,15 @@ public final class TheaAgentSession: Identifiable {
     public var summarizationCount: Int = 0
     public var lastSummarizedAt: Date?
 
+    // MARK: - Delegation Hierarchy
+
+    /// Depth in the delegation tree: 0 = Meta-AI, 1 = sub-agent, 2 = worker
+    public let delegationDepth: Int
+    /// ID of the parent session that spawned this agent (nil for top-level)
+    public let parentSessionID: UUID?
+    /// Whether this session can delegate sub-tasks (depth < 2)
+    public var canDelegate: Bool { delegationDepth < 2 }
+
     // MARK: - Autonomy
 
     public var autonomyLevel: THEAAutonomyLevel = .balanced
@@ -222,7 +231,9 @@ public final class TheaAgentSession: Identifiable {
         taskDescription: String,
         parentConversationID: UUID,
         tokenBudget: Int = 8192,
-        autonomyLevel: THEAAutonomyLevel = .balanced
+        autonomyLevel: THEAAutonomyLevel = .balanced,
+        delegationDepth: Int = 1,
+        parentSessionID: UUID? = nil
     ) {
         self.id = id
         self.agentType = agentType
@@ -231,6 +242,8 @@ public final class TheaAgentSession: Identifiable {
         self.parentConversationID = parentConversationID
         self.tokenBudget = tokenBudget
         self.autonomyLevel = autonomyLevel
+        self.delegationDepth = delegationDepth
+        self.parentSessionID = parentSessionID
         self.startedAt = Date()
     }
 
