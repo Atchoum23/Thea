@@ -187,6 +187,7 @@ private struct SyncSettingsContentView: View {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundStyle(color)
+                .accessibilityHidden(true)
 
             Text(value)
                 .font(.headline)
@@ -200,6 +201,8 @@ private struct SyncSettingsContentView: View {
         .padding(.vertical, 12)
         .background(color.opacity(0.1))
         .cornerRadius(8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 
     private func statusIcon(for status: CloudSyncStatus) -> String {
@@ -286,6 +289,7 @@ private struct SyncSettingsContentView: View {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
+                        .accessibilityHidden(true)
 
                     Text(error)
                         .font(.caption)
@@ -317,6 +321,7 @@ private struct SyncSettingsContentView: View {
                 .font(.title3)
                 .foregroundStyle(scopeColor(for: currentScope))
                 .frame(width: 28)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
@@ -429,6 +434,7 @@ private struct SyncSettingsContentView: View {
                 HStack {
                     Image(systemName: "info.circle")
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
                     Text("No devices registered yet. Open Thea on another device to see it here.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -445,6 +451,7 @@ private struct SyncSettingsContentView: View {
                 .font(.title3)
                 .foregroundStyle(.blue)
                 .frame(width: 30)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
@@ -493,6 +500,7 @@ private struct SyncSettingsContentView: View {
                 Image(systemName: "arrow.down.circle.fill")
                     .font(.title2)
                     .foregroundStyle(.blue)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Update Available")
@@ -534,6 +542,7 @@ private struct SyncSettingsContentView: View {
             HStack {
                 Image(systemName: result == .success ? "checkmark.circle.fill" : "xmark.circle.fill")
                     .foregroundStyle(result == .success ? .green : .red)
+                    .accessibilityHidden(true)
                 Text(result == .success
                     ? "Update installed. Restart Thea to use the new version."
                     : "Update failed. Check ~/Library/Logs/thea-sync-stderr.log for details.")
@@ -685,6 +694,7 @@ private struct SyncSettingsContentView: View {
                 HStack {
                     Image(systemName: "arrow.left.arrow.right")
                         .foregroundStyle(.blue)
+                        .accessibilityHidden(true)
                     Text("Activity ready for handoff")
                         .font(.caption)
                         .foregroundStyle(.blue)
@@ -728,6 +738,7 @@ private struct SyncSettingsContentView: View {
             Image(systemName: icon)
                 .foregroundStyle(.secondary)
                 .frame(width: 20)
+                .accessibilityHidden(true)
 
             Text(title)
                 .font(.caption)
@@ -736,7 +747,10 @@ private struct SyncSettingsContentView: View {
 
             Image(systemName: status ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .foregroundStyle(status ? .green : .red)
+                .accessibilityHidden(true)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(status ? "met" : "not met")")
     }
 
     // MARK: - Advanced Section
@@ -798,6 +812,7 @@ private struct SyncSettingsContentView: View {
                                 .font(.title2)
                                 .foregroundStyle(.blue)
                                 .frame(width: 40)
+                                .accessibilityHidden(true)
 
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
@@ -864,24 +879,28 @@ private struct SyncSettingsContentView: View {
 
             HStack(spacing: 4) {
                 Image(systemName: "desktopcomputer")
+                    .accessibilityHidden(true)
                 Text("Mac ↔ Mac")
                     .font(.caption)
             }
 
             HStack(spacing: 4) {
                 Image(systemName: "iphone")
+                    .accessibilityHidden(true)
                 Text("iPhone ↔ iPad")
                     .font(.caption)
             }
 
             HStack(spacing: 4) {
                 Image(systemName: "appletv")
+                    .accessibilityHidden(true)
                 Text("Apple TV (standalone)")
                     .font(.caption)
             }
 
             HStack(spacing: 4) {
                 Image(systemName: "applewatch")
+                    .accessibilityHidden(true)
                 Text("Apple Watch (standalone)")
                     .font(.caption)
             }
