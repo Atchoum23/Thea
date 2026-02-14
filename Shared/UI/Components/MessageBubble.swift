@@ -279,11 +279,13 @@ struct MessageBubble: View {
         }
     #endif
 
-    // MARK: - Context Menu
+}
 
+// MARK: - MessageBubble + Context Menu
+
+extension MessageBubble {
     @ViewBuilder
-    private var messageContextMenu: some View {
-        // --- Clipboard ---
+    var messageContextMenu: some View {
         Button { copyToClipboard() } label: {
             Label("Copy text", systemImage: "doc.on.doc")
         }
@@ -296,7 +298,6 @@ struct MessageBubble: View {
 
         Divider()
 
-        // --- Edit / Regenerate ---
         if message.messageRole == .user {
             Button {
                 if let onEdit { onEdit(message) } else { onAction?(.edit, message) }
@@ -312,7 +313,6 @@ struct MessageBubble: View {
                 Label("Regenerate", systemImage: "arrow.clockwise")
             }
 
-            // Rewrite submenu
             Menu("Rewrite") {
                 Button { onAction?(.rewrite(.shorter), message) } label: {
                     Label("Shorter", systemImage: "arrow.down.right.and.arrow.up.left")
@@ -334,7 +334,6 @@ struct MessageBubble: View {
                 }
             }
 
-            // Change model submenu
             Menu("Retry with model") {
                 Button { onAction?(.retryWithModel("gpt-4o"), message) } label: { Text("GPT-4o") }
                 Button { onAction?(.retryWithModel("claude-4-sonnet"), message) } label: { Text("Claude 4 Sonnet") }
@@ -345,7 +344,6 @@ struct MessageBubble: View {
 
         Divider()
 
-        // --- Navigation / Flow ---
         Button { onAction?(.continueFromHere, message) } label: {
             Label("Continue from here", systemImage: "arrow.right.to.line")
         }
@@ -356,7 +354,6 @@ struct MessageBubble: View {
 
         Divider()
 
-        // --- Utility ---
         Button { onAction?(.readAloud, message) } label: {
             Label("Read aloud", systemImage: "speaker.wave.2")
         }
@@ -375,15 +372,12 @@ struct MessageBubble: View {
 
         Divider()
 
-        // --- Destructive ---
         Button(role: .destructive) { onAction?(.deleteMessage, message) } label: {
             Label("Delete message", systemImage: "trash")
         }
     }
 
-    // MARK: - Actions
-
-    private func copyToClipboard() {
+    func copyToClipboard() {
         #if os(macOS)
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(message.content.textValue, forType: .string)
@@ -402,7 +396,7 @@ struct MessageBubble: View {
         }
     }
 
-    private func copyAsMarkdown() {
+    func copyAsMarkdown() {
         #if os(macOS)
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(message.content.textValue, forType: .string)
@@ -411,37 +405,35 @@ struct MessageBubble: View {
         #endif
     }
 
-    // MARK: - Accessibility
-
-    private var messageAccessibilityLabel: String {
+    var messageAccessibilityLabel: String {
         let role = message.messageRole == .user ? "You" : "Thea"
         let time = message.timestamp.formatted(.dateTime.hour().minute())
         let content = message.content.textValue
         let truncated = content.count > 200 ? String(content.prefix(200)) + "..." : content
         return "\(role), \(time): \(truncated)"
     }
+}
 
-    // MARK: - Density Padding
+// MARK: - MessageBubble + Styling
 
-    private var densityHorizontalPadding: CGFloat {
+extension MessageBubble {
+    var densityHorizontalPadding: CGFloat {
         switch settingsManager.messageDensity {
         case "compact": TheaSpacing.md
         case "spacious": TheaSpacing.xl
-        default: TheaSpacing.lg  // "comfortable"
+        default: TheaSpacing.lg
         }
     }
 
-    private var densityVerticalPadding: CGFloat {
+    var densityVerticalPadding: CGFloat {
         switch settingsManager.messageDensity {
         case "compact": TheaSpacing.sm
         case "spacious": TheaSpacing.lg
-        default: TheaSpacing.md  // "comfortable"
+        default: TheaSpacing.md
         }
     }
 
-    // MARK: - Styling
-
-    private var backgroundColor: Color {
+    var backgroundColor: Color {
         switch message.messageRole {
         case .user:
             return .theaUserBubble
@@ -452,7 +444,7 @@ struct MessageBubble: View {
         }
     }
 
-    private var foregroundColor: Color {
+    var foregroundColor: Color {
         switch message.messageRole {
         case .user:
             .white
@@ -461,9 +453,7 @@ struct MessageBubble: View {
         }
     }
 
-    // MARK: - Markdown Theme
-
-    private var theaMarkdownTheme: MarkdownUI.Theme {
+    var theaMarkdownTheme: MarkdownUI.Theme {
         let config = AppConfiguration.shared.themeConfig
         return MarkdownUI.Theme()
             .text {
@@ -521,183 +511,3 @@ struct MessageBubble: View {
     }
 }
 
-// MARK: - Message Action Enum
-
-/// All possible actions on a message/turn
-enum MessageAction {
-    case copy
-    case copyAsMarkdown
-    case edit
-    case regenerate
-    case rewrite(RewriteStyle)
-    case retryWithModel(String)
-    case continueFromHere
-    case splitConversation
-    case readAloud
-    case shareMessage
-    case pinMessage
-    case selectText
-    case deleteMessage
-
-    /// Rewrite styles for assistant responses
-    enum RewriteStyle: String, CaseIterable {
-        case shorter
-        case longer
-        case simpler
-        case moreDetailed
-        case moreFormal
-        case moreCasual
-
-        var label: String {
-            switch self {
-            case .shorter: "Shorter"
-            case .longer: "Longer"
-            case .simpler: "Simpler"
-            case .moreDetailed: "More detailed"
-            case .moreFormal: "More formal"
-            case .moreCasual: "More casual"
-            }
-        }
-    }
-}
-
-// MARK: - Code Block View with Syntax Highlighting
-
-struct CodeBlockView: View {
-    let configuration: CodeBlockConfiguration
-
-    @State private var showCopied = false
-    @Environment(\.colorScheme) private var colorScheme
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header with language and copy button
-            HStack {
-                if let language = configuration.language {
-                    Text(language)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                }
-
-                Spacer()
-
-                Button {
-                    copyCode()
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: showCopied ? "checkmark" : "doc.on.doc")
-                        Text(showCopied ? "Copied" : "Copy")
-                    }
-                    .font(.caption)
-                    .foregroundStyle(showCopied ? .green : .secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Copy code snippet")
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(headerBackground)
-
-            // Code content with syntax highlighting
-            ScrollView(.horizontal, showsIndicators: false) {
-                highlightedCode
-                    .padding(12)
-            }
-            .background(codeBackground)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(borderColor, lineWidth: 1)
-        )
-    }
-
-    @ViewBuilder
-    private var highlightedCode: some View {
-        let code = configuration.content
-
-        #if canImport(Highlightr) && os(macOS)
-            if let attributedCode = highlightCodeWithHighlightr(code) {
-                Text(attributedCode)
-                    .font(.system(.body, design: .monospaced))
-                    .textSelection(.enabled)
-            } else {
-                plainCodeText(code)
-            }
-        #else
-            plainCodeText(code)
-        #endif
-    }
-
-    #if canImport(Highlightr) && os(macOS)
-        /// Highlights code using Highlightr library
-        private func highlightCodeWithHighlightr(_ code: String) -> AttributedString? {
-            guard let highlighter = Highlightr(),
-                  let language = configuration.language else {
-                return nil
-            }
-
-            let themeName = colorScheme == .dark ? "monokai-sublime" : "github"
-            highlighter.setTheme(to: themeName)
-
-            guard let highlighted = highlighter.highlight(code, as: language) else {
-                return nil
-            }
-
-            return AttributedString(highlighted)
-        }
-    #endif
-
-    private func plainCodeText(_ code: String) -> some View {
-        Text(code)
-            .font(.system(.body, design: .monospaced))
-            .foregroundStyle(.primary)
-            .textSelection(.enabled)
-    }
-
-    private func copyCode() {
-        let code = configuration.content
-        #if os(macOS)
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(code, forType: .string)
-        #else
-            UIPasteboard.general.string = code
-        #endif
-
-        withAnimation {
-            showCopied = true
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation {
-                showCopied = false
-            }
-        }
-    }
-
-    private var headerBackground: Color {
-        Color.theaSurface.opacity(0.8)
-    }
-
-    private var codeBackground: Color {
-        Color.theaSurface.opacity(0.5)
-    }
-
-    private var borderColor: Color {
-        Color.secondary.opacity(0.2)
-    }
-}
-
-// MARK: - Code Syntax Highlighter for MarkdownUI
-
-struct TheaCodeHighlighter: CodeSyntaxHighlighter {
-    func highlightCode(_ code: String, language: String?) -> Text {
-        Text(code)
-            .font(.system(.body, design: .monospaced))
-    }
-}

@@ -350,116 +350,79 @@ class CommandPaletteManager: ObservableObject {
     }
 
     private func registerDefaultCommands() {
-        commands = [
-            // Conversation commands
+        commands = conversationCommands + navigationCommands + modelCommands + settingsCommands + generalCommands
+    }
+
+    private var conversationCommands: [PaletteCommand] {
+        [
             PaletteCommand(
-                id: "new-conversation",
-                title: "New Conversation",
-                subtitle: "Start a fresh chat",
-                icon: "plus.bubble",
-                shortcut: "⌘N",
+                id: "new-conversation", title: "New Conversation",
+                subtitle: "Start a fresh chat", icon: "plus.bubble",
+                shortcut: "⌘N", category: .conversation
+            ) { NotificationCenter.default.post(name: .newConversation, object: nil) },
+            PaletteCommand(
+                id: "clear-conversation", title: "Clear Conversation",
+                subtitle: "Clear the current chat history", icon: "trash",
                 category: .conversation
-            ) {
-                NotificationCenter.default.post(name: .newConversation, object: nil)
-            },
+            ) { NotificationCenter.default.post(name: .clearConversation, object: nil) },
             PaletteCommand(
-                id: "clear-conversation",
-                title: "Clear Conversation",
-                subtitle: "Clear the current chat history",
-                icon: "trash",
+                id: "export-conversation", title: "Export Conversation",
+                subtitle: "Save chat as Markdown or JSON", icon: "square.and.arrow.up",
                 category: .conversation
-            ) {
-                NotificationCenter.default.post(name: .clearConversation, object: nil)
-            },
-            PaletteCommand(
-                id: "export-conversation",
-                title: "Export Conversation",
-                subtitle: "Save chat as Markdown or JSON",
-                icon: "square.and.arrow.up",
-                category: .conversation
-            ) {
-                NotificationCenter.default.post(name: .exportConversation, object: nil)
-            },
+            ) { NotificationCenter.default.post(name: .exportConversation, object: nil) }
+        ]
+    }
 
-            // Navigation commands
+    private var navigationCommands: [PaletteCommand] {
+        [
             PaletteCommand(
-                id: "go-to-chat",
-                title: "Go to Chat",
-                icon: "bubble.left.and.bubble.right",
-                shortcut: "⌘1",
-                category: .navigation
-            ) {
-                NotificationCenter.default.post(name: .navigateToSection, object: "chat")
-            },
+                id: "go-to-chat", title: "Go to Chat",
+                icon: "bubble.left.and.bubble.right", shortcut: "⌘1", category: .navigation
+            ) { NotificationCenter.default.post(name: .navigateToSection, object: "chat") },
             PaletteCommand(
-                id: "go-to-projects",
-                title: "Go to Projects",
-                icon: "folder",
-                shortcut: "⌘2",
-                category: .navigation
-            ) {
-                NotificationCenter.default.post(name: .navigateToSection, object: "projects")
-            },
+                id: "go-to-projects", title: "Go to Projects",
+                icon: "folder", shortcut: "⌘2", category: .navigation
+            ) { NotificationCenter.default.post(name: .navigateToSection, object: "projects") },
             PaletteCommand(
-                id: "go-to-settings",
-                title: "Go to Settings",
-                icon: "gear",
-                shortcut: "⌘,",
-                category: .navigation
-            ) {
-                NotificationCenter.default.post(name: .navigateToSection, object: "settings")
-            },
+                id: "go-to-settings", title: "Go to Settings",
+                icon: "gear", shortcut: "⌘,", category: .navigation
+            ) { NotificationCenter.default.post(name: .navigateToSection, object: "settings") }
+        ]
+    }
 
-            // Model commands
+    private var modelCommands: [PaletteCommand] {
+        [
             PaletteCommand(
-                id: "switch-model-gpt4",
-                title: "Switch to GPT-4",
-                subtitle: "OpenAI's most capable model",
-                icon: "cpu",
-                category: .model
-            ) {
-                NotificationCenter.default.post(name: .switchModel, object: "gpt-4")
-            },
+                id: "switch-model-gpt4", title: "Switch to GPT-4",
+                subtitle: "OpenAI's most capable model", icon: "cpu", category: .model
+            ) { NotificationCenter.default.post(name: .switchModel, object: "gpt-4") },
             PaletteCommand(
-                id: "switch-model-claude",
-                title: "Switch to Claude",
-                subtitle: "Anthropic's Claude model",
-                icon: "cpu",
-                category: .model
-            ) {
-                NotificationCenter.default.post(name: .switchModel, object: "claude")
-            },
+                id: "switch-model-claude", title: "Switch to Claude",
+                subtitle: "Anthropic's Claude model", icon: "cpu", category: .model
+            ) { NotificationCenter.default.post(name: .switchModel, object: "claude") },
             PaletteCommand(
-                id: "switch-model-local",
-                title: "Switch to Local Model",
-                subtitle: "On-device MLX model",
-                icon: "desktopcomputer",
-                category: .model
-            ) {
-                NotificationCenter.default.post(name: .switchModel, object: "local")
-            },
+                id: "switch-model-local", title: "Switch to Local Model",
+                subtitle: "On-device MLX model", icon: "desktopcomputer", category: .model
+            ) { NotificationCenter.default.post(name: .switchModel, object: "local") }
+        ]
+    }
 
-            // Settings commands
+    private var settingsCommands: [PaletteCommand] {
+        [
             PaletteCommand(
-                id: "toggle-dark-mode",
-                title: "Toggle Dark Mode",
-                icon: "moon",
-                category: .settings
-            ) {
-                NotificationCenter.default.post(name: .toggleDarkMode, object: nil)
-            },
+                id: "toggle-dark-mode", title: "Toggle Dark Mode",
+                icon: "moon", category: .settings
+            ) { NotificationCenter.default.post(name: .toggleDarkMode, object: nil) }
+        ]
+    }
 
-            // General commands
+    private var generalCommands: [PaletteCommand] {
+        [
             PaletteCommand(
-                id: "show-keyboard-shortcuts",
-                title: "Show Keyboard Shortcuts",
-                subtitle: "View all available shortcuts",
-                icon: "keyboard",
-                shortcut: "⌘/",
-                category: .general
-            ) {
-                NotificationCenter.default.post(name: .showKeyboardShortcuts, object: nil)
-            }
+                id: "show-keyboard-shortcuts", title: "Show Keyboard Shortcuts",
+                subtitle: "View all available shortcuts", icon: "keyboard",
+                shortcut: "⌘/", category: .general
+            ) { NotificationCenter.default.post(name: .showKeyboardShortcuts, object: nil) }
         ]
     }
 }

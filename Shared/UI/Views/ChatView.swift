@@ -417,10 +417,13 @@ struct ChatView: View {
         #endif
     }
 
-    // MARK: - Search
+}
 
+// MARK: - ChatView + Search
+
+extension ChatView {
     #if os(macOS)
-    private var chatSearchBar: some View {
+    var chatSearchBar: some View {
         HStack(spacing: TheaSpacing.sm) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
@@ -469,7 +472,7 @@ struct ChatView: View {
         .background(.bar)
     }
 
-    private func navigateSearch(forward: Bool) {
+    func navigateSearch(forward: Bool) {
         guard !searchMatches.isEmpty else { return }
         if forward {
             searchMatchIndex = (searchMatchIndex + 1) % searchMatches.count
@@ -478,23 +481,25 @@ struct ChatView: View {
         }
     }
 
-    private func isCurrentSearchMatch(_ message: Message) -> Bool {
+    func isCurrentSearchMatch(_ message: Message) -> Bool {
         !searchMatches.isEmpty
             && searchMatchIndex < searchMatches.count
             && searchMatches[searchMatchIndex].id == message.id
     }
 
-    private func searchDimOpacity(for message: Message) -> Double {
+    func searchDimOpacity(for message: Message) -> Double {
         guard isSearching, !searchText.isEmpty else { return 1.0 }
         let isMatch = message.content.textValue.localizedCaseInsensitiveContains(searchText)
         return isMatch ? 1.0 : 0.4
     }
     #endif
+}
 
-    // MARK: - Branching
+// MARK: - ChatView + Actions
 
+extension ChatView {
     /// Compute branch info for a message (nil if no branches exist)
-    private func branchInfo(for message: Message) -> MessageBubble.BranchInfo? {
+    func branchInfo(for message: Message) -> MessageBubble.BranchInfo? {
         let branches = chatManager.getBranches(for: message, in: conversation)
         guard branches.count > 1 else { return nil }
 
@@ -510,7 +515,7 @@ struct ChatView: View {
     }
 
     /// Handle message actions from the MessageBubble context menu / hover bar
-    private func handleMessageAction(_ action: MessageAction, message: Message) {
+    func handleMessageAction(_ action: MessageAction, message: Message) {
         switch action {
         case .copy:
             #if os(macOS)
@@ -551,9 +556,7 @@ struct ChatView: View {
         }
     }
 
-    // MARK: - Actions
-
-    private func scrollToBottom(proxy: ScrollViewProxy) {
+    func scrollToBottom(proxy: ScrollViewProxy) {
         withAnimation(TheaAnimation.smooth) {
             if chatManager.isStreaming {
                 proxy.scrollTo("streaming", anchor: .bottom)
@@ -563,7 +566,7 @@ struct ChatView: View {
         }
     }
 
-    private func setupProvider() async {
+    func setupProvider() async {
         let hasLocalModels = !ProviderRegistry.shared.getAvailableLocalModels().isEmpty
 
         if let apiKey = try? SecureStorage.shared.loadAPIKey(for: "openai") {
@@ -575,7 +578,7 @@ struct ChatView: View {
         }
     }
 
-    private func sendMessage() {
+    func sendMessage() {
         guard !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -600,116 +603,6 @@ struct ChatView: View {
             } catch {
                 showingError = error
                 inputText = text
-            }
-        }
-    }
-}
-
-// MARK: - Conversation Document
-
-struct ConversationDocument: FileDocument, @unchecked Sendable {
-    static var readableContentTypes: [UTType] { [.json] }
-
-    let conversation: Conversation
-
-    init(conversation: Conversation) {
-        self.conversation = conversation
-    }
-
-    init(configuration _: ReadConfiguration) throws {
-        throw CocoaError(.fileReadUnsupportedScheme, userInfo: [
-            NSLocalizedDescriptionKey: "Reading conversation files is not supported. This document type is for export only."
-        ])
-    }
-
-    func fileWrapper(configuration _: WriteConfiguration) throws -> FileWrapper {
-        let exportData = ExportedConversation(
-            title: conversation.title,
-            messages: conversation.messages.sorted { $0.orderIndex < $1.orderIndex }.map { message in
-                ExportedMessage(
-                    role: message.role,
-                    content: message.content.textValue,
-                    timestamp: message.timestamp
-                )
-            },
-            createdAt: conversation.createdAt
-        )
-
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        encoder.dateEncodingStrategy = .iso8601
-
-        let data = try encoder.encode(exportData)
-        return FileWrapper(regularFileWithContents: data)
-    }
-}
-
-struct ExportedConversation: Codable {
-    let title: String
-    let messages: [ExportedMessage]
-    let createdAt: Date
-}
-
-struct ExportedMessage: Codable {
-    let role: String
-    let content: String
-    let timestamp: Date
-}
-
-// MARK: - API Key Setup View
-
-struct APIKeySetupView: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var apiKey = ""
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    Text("To use THEA's chat features, you need to add an OpenAI API key.")
-                        .font(.theaCaption1)
-                        .foregroundStyle(.secondary)
-                }
-
-                Section("API Key") {
-                    SecureField("Enter your OpenAI API key", text: $apiKey)
-
-                    if let url = URL(string: "https://platform.openai.com/api-keys") {
-                        Link("Get API Key →", destination: url)
-                            .font(.theaCaption1)
-                    }
-                }
-
-                Section {
-                    Button("Save API Key") {
-                        saveAPIKey()
-                    }
-                    .disabled(apiKey.isEmpty)
-                    .frame(maxWidth: .infinity)
-                }
-            }
-            .formStyle(.grouped)
-            .navigationTitle("Setup API Key")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-        #if os(macOS)
-        .frame(width: 450, height: 300)
-        #endif
-    }
-
-    private func saveAPIKey() {
-        Task {
-            do {
-                try SecureStorage.shared.saveAPIKey(apiKey, for: "openai")
-                dismiss()
-            } catch {
-                print("Failed to save API key: \(error)")
             }
         }
     }

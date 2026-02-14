@@ -81,167 +81,163 @@
 
         private func stepCard(_ step: CoworkStep) -> some View {
             VStack(alignment: .leading, spacing: 0) {
-                // Step header
-                Button {
-                    withAnimation {
-                        if expandedSteps.contains(step.id) {
-                            expandedSteps.remove(step.id)
-                        } else {
-                            expandedSteps.insert(step.id)
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 12) {
-                        // Status icon
-                        ZStack {
-                            Circle()
-                                .fill(colorForStepStatus(step.status).opacity(0.2))
-                                .frame(width: 32, height: 32)
+                stepHeader(step)
 
-                            if step.status == .inProgress {
-                                ProgressView()
-                                    .scaleEffect(0.6)
-                            } else {
-                                Image(systemName: step.status.icon)
-                                    .foregroundStyle(colorForStepStatus(step.status))
-                            }
-                        }
-                        .accessibilityHidden(true)
-
-                        // Step info
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack {
-                                Text("Step \(step.stepNumber)")
-                                    .font(.headline)
-                                Text(step.status.rawValue)
-                                    .font(.caption)
-                                    .foregroundStyle(colorForStepStatus(step.status))
-                            }
-
-                            Text(step.description)
-                                .font(.body)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(expandedSteps.contains(step.id) ? nil : 1)
-                        }
-
-                        Spacer()
-
-                        // Duration
-                        if let duration = step.duration {
-                            Text(formatDuration(duration))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        // Expand indicator
-                        Image(systemName: expandedSteps.contains(step.id) ? "chevron.up" : "chevron.down")
-                            .foregroundStyle(.secondary)
-                            .accessibilityHidden(true)
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Step \(step.stepNumber), \(step.status.rawValue): \(step.description)")
-                    .padding()
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-
-                // Expanded content
                 if expandedSteps.contains(step.id) {
                     Divider()
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        // Tools used
-                        if !step.toolsUsed.isEmpty {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Tools Used")
-                                    .font(.caption.bold())
-                                FlowLayout(spacing: 4) {
-                                    ForEach(step.toolsUsed, id: \.self) { tool in
-                                        Text(tool)
-                                            .font(.caption)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(Color.blue.opacity(0.1))
-                                            .cornerRadius(4)
-                                    }
-                                }
-                            }
-                        }
-
-                        // Input files
-                        if !step.inputFiles.isEmpty {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Input Files (\(step.inputFiles.count))")
-                                    .font(.caption.bold())
-                                ForEach(step.inputFiles.prefix(5), id: \.self) { file in
-                                    HStack {
-                                        Image(systemName: "doc")
-                                        Text(file.lastPathComponent)
-                                            .lineLimit(1)
-                                    }
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                }
-                                if step.inputFiles.count > 5 {
-                                    Text("... and \(step.inputFiles.count - 5) more")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-
-                        // Output files
-                        if !step.outputFiles.isEmpty {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Output Files (\(step.outputFiles.count))")
-                                    .font(.caption.bold())
-                                ForEach(step.outputFiles.prefix(5), id: \.self) { file in
-                                    HStack {
-                                        Image(systemName: "doc.fill")
-                                        Text(file.lastPathComponent)
-                                            .lineLimit(1)
-                                    }
-                                    .font(.caption)
-                                    .foregroundStyle(.green)
-                                }
-                            }
-                        }
-
-                        // Error
-                        if let error = step.error {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Error")
-                                    .font(.caption.bold())
-                                    .foregroundStyle(.red)
-                                Text(error)
-                                    .font(.caption)
-                                    .foregroundStyle(.red)
-                            }
-                        }
-
-                        // Logs
-                        if !step.logs.isEmpty {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Logs")
-                                    .font(.caption.bold())
-                                ForEach(step.logs.suffix(5)) { log in
-                                    HStack(spacing: 4) {
-                                        Image(systemName: log.level.icon)
-                                            .foregroundStyle(colorForLogLevel(log.level))
-                                        Text(log.message)
-                                            .lineLimit(1)
-                                    }
-                                    .font(.caption)
-                                }
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(Color(nsColor: .windowBackgroundColor))
+                    stepExpandedContent(step)
                 }
             }
             .background(Color(nsColor: .controlBackgroundColor))
             .cornerRadius(8)
+        }
+
+        private func stepHeader(_ step: CoworkStep) -> some View {
+            Button {
+                withAnimation {
+                    if expandedSteps.contains(step.id) {
+                        expandedSteps.remove(step.id)
+                    } else {
+                        expandedSteps.insert(step.id)
+                    }
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(colorForStepStatus(step.status).opacity(0.2))
+                            .frame(width: 32, height: 32)
+
+                        if step.status == .inProgress {
+                            ProgressView()
+                                .scaleEffect(0.6)
+                        } else {
+                            Image(systemName: step.status.icon)
+                                .foregroundStyle(colorForStepStatus(step.status))
+                        }
+                    }
+                    .accessibilityHidden(true)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text("Step \(step.stepNumber)")
+                                .font(.headline)
+                            Text(step.status.rawValue)
+                                .font(.caption)
+                                .foregroundStyle(colorForStepStatus(step.status))
+                        }
+
+                        Text(step.description)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(expandedSteps.contains(step.id) ? nil : 1)
+                    }
+
+                    Spacer()
+
+                    if let duration = step.duration {
+                        Text(formatDuration(duration))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Image(systemName: expandedSteps.contains(step.id) ? "chevron.up" : "chevron.down")
+                        .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Step \(step.stepNumber), \(step.status.rawValue): \(step.description)")
+                .padding()
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+
+        private func stepExpandedContent(_ step: CoworkStep) -> some View {
+            VStack(alignment: .leading, spacing: 12) {
+                if !step.toolsUsed.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Tools Used")
+                            .font(.caption.bold())
+                        FlowLayout(spacing: 4) {
+                            ForEach(step.toolsUsed, id: \.self) { tool in
+                                Text(tool)
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.blue.opacity(0.1))
+                                    .cornerRadius(4)
+                            }
+                        }
+                    }
+                }
+
+                if !step.inputFiles.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Input Files (\(step.inputFiles.count))")
+                            .font(.caption.bold())
+                        ForEach(step.inputFiles.prefix(5), id: \.self) { file in
+                            HStack {
+                                Image(systemName: "doc")
+                                Text(file.lastPathComponent)
+                                    .lineLimit(1)
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                        if step.inputFiles.count > 5 {
+                            Text("... and \(step.inputFiles.count - 5) more")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                if !step.outputFiles.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Output Files (\(step.outputFiles.count))")
+                            .font(.caption.bold())
+                        ForEach(step.outputFiles.prefix(5), id: \.self) { file in
+                            HStack {
+                                Image(systemName: "doc.fill")
+                                Text(file.lastPathComponent)
+                                    .lineLimit(1)
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                        }
+                    }
+                }
+
+                if let error = step.error {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Error")
+                            .font(.caption.bold())
+                            .foregroundStyle(.red)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                if !step.logs.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Logs")
+                            .font(.caption.bold())
+                        ForEach(step.logs.suffix(5)) { log in
+                            HStack(spacing: 4) {
+                                Image(systemName: log.level.icon)
+                                    .foregroundStyle(colorForLogLevel(log.level))
+                                Text(log.message)
+                                    .lineLimit(1)
+                            }
+                            .font(.caption)
+                        }
+                    }
+                }
+            }
+            .padding()
+            .background(Color(nsColor: .windowBackgroundColor))
         }
 
         // MARK: - Summary Card
