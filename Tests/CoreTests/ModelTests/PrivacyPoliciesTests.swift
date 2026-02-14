@@ -4,6 +4,8 @@
 import Foundation
 import XCTest
 
+// swiftlint:disable private_over_fileprivate
+
 // MARK: - Mirrored Types
 
 fileprivate enum StrictnessLevel: String, Codable, Comparable {
