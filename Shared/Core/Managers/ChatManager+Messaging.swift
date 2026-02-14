@@ -33,6 +33,31 @@ extension ChatManager {
         let (provider, model, taskType) = try await selectProviderAndModel(for: text)
         msgLogger.debug("✅ Selected provider '\(provider.metadata.name)' with model '\(model)'")
 
+        // Auto-delegate complex tasks to sub-agents if enabled
+        if shouldAutoDelegate(taskType: taskType, text: text) {
+            if let session = await delegateToAgent(
+                text: text, conversationID: conversation.id, taskType: taskType
+            ) {
+                // Create a user message to record the delegation in the conversation
+                let currentDevice = DeviceRegistry.shared.currentDevice
+                let userMessage = createUserMessage(text, in: conversation, device: currentDevice)
+                conversation.messages.append(userMessage)
+                context.insert(userMessage)
+
+                // Create an assistant message indicating delegation
+                let delegationMsg = createAssistantMessage(in: conversation, model: model, device: currentDevice)
+                delegationMsg.content = .text(
+                    "I've delegated this task to a specialized **\(session.agentType.displayName)** agent. "
+                    + "You can monitor its progress in the Agents panel. "
+                    + "I'll continue to be available for other requests while the agent works."
+                )
+                conversation.messages.append(delegationMsg)
+                context.insert(delegationMsg)
+                try context.save()
+                return
+            }
+        }
+
         configureAgentMode(for: taskType, text: text)
 
         // Create and persist user message

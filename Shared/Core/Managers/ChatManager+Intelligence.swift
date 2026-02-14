@@ -120,6 +120,43 @@ extension ChatManager {
         return (provider, model)
     }
 
+    // MARK: - Auto-Delegation
+
+    /// Determine if a task should be auto-delegated to a sub-agent
+    func shouldAutoDelegate(taskType: TaskType?, text: String) -> Bool {
+        guard SettingsManager.shared.agentDelegationEnabled,
+              SettingsManager.shared.agentAutoDelegateComplexTasks,
+              let taskType else {
+            return false
+        }
+
+        // Tasks that are both complex (benefit from reasoning) and actionable are delegation candidates
+        let isComplex = taskType.benefitsFromReasoning && taskType.isActionable
+        // Multi-step requests (containing "and then", "also", "after that") suggest delegation
+        let lower = text.lowercased()
+        let isMultiStep = lower.contains(" and then ") || lower.contains(" after that ")
+            || lower.contains(" also ") || lower.contains(" in parallel ")
+            || lower.contains(", then ")
+
+        return isComplex || isMultiStep
+    }
+
+    /// Delegate a task to the sub-agent orchestrator. Returns the session for UI tracking.
+    func delegateToAgent(
+        text: String,
+        conversationID: UUID,
+        taskType: TaskType?
+    ) async -> TheaAgentSession? {
+        let orchestrator = TheaAgentOrchestrator.shared
+        let session = await orchestrator.delegateTask(
+            description: text,
+            from: conversationID,
+            explicitAgentType: nil
+        )
+        intLogger.info("Auto-delegated task to agent: \(session.name) [\(session.agentType.rawValue)]")
+        return session
+    }
+
     // MARK: - Vision OCR for Image Attachments
 
     #if os(macOS) || os(iOS)
