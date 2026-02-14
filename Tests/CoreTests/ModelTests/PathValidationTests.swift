@@ -438,7 +438,7 @@ final class PathValidationTests: XCTestCase {
             ("a%00b", "%00"),
             ("a%2e%2eb", "%2e%2e"),
             ("a%2fb", "%2f"),
-            ("a%5cb", "%5c"),
+            ("a%5cb", "%5c")
         ]
         for (input, expectedPattern) in testCases {
             XCTAssertThrowsError(
@@ -494,7 +494,7 @@ final class PathValidationTests: XCTestCase {
         let attacks = [
             "../../../etc/passwd",
             "../../../var/log/system.log",
-            "../../../../private/etc/hosts",
+            "../../../../private/etc/hosts"
         ]
         for attack in attacks {
             XCTAssertThrowsError(
