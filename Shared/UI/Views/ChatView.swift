@@ -388,6 +388,7 @@ struct ChatView: View {
         HStack(spacing: TheaSpacing.sm) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
 
             TextField("Search messages…", text: $searchText)
                 .textFieldStyle(.plain)
