@@ -13,9 +13,12 @@ struct SidebarView: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
                     .font(.theaCaption1)
+                    .accessibilityHidden(true)
                 TextField("Search conversations", text: $searchText)
                     .textFieldStyle(.plain)
                     .font(.theaCaption1)
+                    .accessibilityLabel("Search conversations")
+                    .accessibilityHint("Filter conversations by title or message content")
                 if !searchText.isEmpty {
                     Button {
                         searchText = ""
@@ -25,6 +28,7 @@ struct SidebarView: View {
                             .font(.theaCaption2)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Clear search")
                 }
             }
             .padding(.horizontal, TheaSpacing.md)
@@ -189,12 +193,14 @@ struct ConversationRow: View {
                         Image(systemName: "pin.fill")
                             .font(.theaCaption2)
                             .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
                     }
 
                     if !conversation.isRead {
                         Circle()
                             .fill(Color.theaPrimaryDefault)
                             .frame(width: 8, height: 8)
+                            .accessibilityHidden(true)
                     }
                 }
 
