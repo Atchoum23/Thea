@@ -21,141 +21,127 @@ actor TheaAgentRunner {
 
     /// Run a session against the given provider and model.
     func execute(session: TheaAgentSession, provider: AIProvider, model: String) async {
+        let messages = await prepareMessages(session: session, model: model)
+
+        await notifyStarted(session: session)
+
+        do {
+            let (fullResponse, totalTokens) = try await streamResponse(
+                session: session, provider: provider, model: model, messages: messages
+            )
+            await finalizeSuccess(
+                session: session, provider: provider, model: model,
+                response: fullResponse, tokens: totalTokens
+            )
+        } catch {
+            await finalizeFailure(session: session, error: error)
+        }
+    }
+
+    // MARK: - Execution Steps
+
+    private func prepareMessages(session: TheaAgentSession, model: String) async -> [AIMessage] {
         await MainActor.run { session.transition(to: .planning) }
 
-        // Build system prompt from agent type
         let systemPrompt = session.agentType.systemPrompt
-
-        let systemMessage = AIMessage(
-            id: UUID(),
-            conversationID: session.parentConversationID,
-            role: .system,
-            content: .text(systemPrompt),
-            timestamp: Date(),
-            model: model
-        )
-
-        let userMessage = AIMessage(
-            id: UUID(),
-            conversationID: session.parentConversationID,
-            role: .user,
-            content: .text(session.taskDescription),
-            timestamp: Date(),
-            model: model
-        )
+        let taskDesc = await MainActor.run { session.taskDescription }
+        let convID = session.parentConversationID
 
         await MainActor.run {
             session.appendMessage(TheaAgentMessage(role: .system, content: systemPrompt))
-            session.appendMessage(TheaAgentMessage(role: .user, content: session.taskDescription))
+            session.appendMessage(TheaAgentMessage(role: .user, content: taskDesc))
             session.transition(to: .working)
             session.statusMessage = "Generating response..."
         }
 
-        // Send status via AgentCommunicationBus
+        return [
+            AIMessage(id: UUID(), conversationID: convID, role: .system, content: .text(systemPrompt), timestamp: Date(), model: model),
+            AIMessage(id: UUID(), conversationID: convID, role: .user, content: .text(taskDesc), timestamp: Date(), model: model)
+        ]
+    }
+
+    private func notifyStarted(session: TheaAgentSession) async {
+        let desc = await MainActor.run { session.taskDescription }
         await AgentCommunicationBus.shared.send(BusAgentMessage(
-            id: UUID(),
-            timestamp: Date(),
-            senderAgentId: session.id,
-            recipientAgentId: nil,
-            messageType: .statusUpdate,
-            payload: .text("Started working on: \(session.taskDescription.prefix(100))"),
-            priority: .normal,
+            id: UUID(), timestamp: Date(), senderAgentId: session.id,
+            recipientAgentId: nil, messageType: .statusUpdate,
+            payload: .text("Started working on: \(desc.prefix(100))"),
+            priority: .normal, correlationId: session.parentConversationID
+        ))
+    }
+
+    private func streamResponse(
+        session: TheaAgentSession, provider: AIProvider, model: String, messages: [AIMessage]
+    ) async throws -> (String, Int) {
+        let stream = try await provider.chat(messages: messages, model: model, stream: true)
+        var fullResponse = ""
+        var totalTokens = 0
+
+        for try await chunk in stream {
+            let currentState = await MainActor.run { session.state }
+            guard currentState == .working else { break }
+
+            switch chunk.type {
+            case let .delta(text):
+                fullResponse += text
+            case let .complete(msg):
+                if case let .text(completeText) = msg.content { fullResponse = completeText }
+                if let usage = msg.tokenCount { totalTokens = usage }
+            case .error:
+                break
+            }
+        }
+        return (fullResponse, totalTokens)
+    }
+
+    private func finalizeSuccess(
+        session: TheaAgentSession, provider: AIProvider, model: String,
+        response: String, tokens: Int
+    ) async {
+        await MainActor.run {
+            session.appendMessage(TheaAgentMessage(role: .agent, content: response))
+            session.tokensUsed += tokens > 0 ? tokens : estimateTokens(response)
+            session.updateContextPressure()
+            session.confidence = estimateConfidence(response)
+            session.statusMessage = "Completed"
+            session.transition(to: .completed)
+        }
+
+        let artifacts = extractArtifacts(from: response)
+        if !artifacts.isEmpty {
+            await MainActor.run { for a in artifacts { session.addArtifact(a) } }
+        }
+
+        await AgentCommunicationBus.shared.broadcastResult(
+            from: session.id, taskId: session.id,
+            output: String(response.prefix(500)), success: true,
+            metadata: ["tokensUsed": "\(await MainActor.run { session.tokensUsed })"],
             correlationId: session.parentConversationID
+        )
+
+        let pressure = await MainActor.run { session.contextPressure }
+        if pressure >= .elevated {
+            await summarizeContext(session: session, provider: provider, model: model)
+        }
+
+        logger.info("Agent \(session.id.uuidString.prefix(8)) completed: \(response.count) chars")
+    }
+
+    private func finalizeFailure(session: TheaAgentSession, error: Error) async {
+        await MainActor.run {
+            session.error = error.localizedDescription
+            session.statusMessage = "Failed: \(error.localizedDescription)"
+            session.transition(to: .failed)
+        }
+
+        await AgentCommunicationBus.shared.send(BusAgentMessage(
+            id: UUID(), timestamp: Date(), senderAgentId: session.id,
+            recipientAgentId: nil, messageType: .errorNotification,
+            payload: .text(error.localizedDescription),
+            priority: .high, correlationId: session.parentConversationID
         ))
 
-        do {
-            let stream = try await provider.chat(
-                messages: [systemMessage, userMessage],
-                model: model,
-                stream: true
-            )
-
-            var fullResponse = ""
-            var totalTokens = 0
-
-            for try await chunk in stream {
-                // Check if cancelled
-                let currentState = await MainActor.run { session.state }
-                guard currentState == .working else { break }
-
-                switch chunk.type {
-                case let .delta(text):
-                    fullResponse += text
-                    await MainActor.run {
-                        session.statusMessage = "Generating response..."
-                    }
-
-                case let .complete(msg):
-                    if case let .text(completeText) = msg.content {
-                        fullResponse = completeText
-                    }
-                    if let usage = msg.tokenCount {
-                        totalTokens = usage
-                    }
-
-                case .error:
-                    break
-                }
-            }
-
-            // Update session with results
-            await MainActor.run {
-                session.appendMessage(TheaAgentMessage(role: .agent, content: fullResponse))
-                session.tokensUsed += totalTokens > 0 ? totalTokens : estimateTokens(fullResponse)
-                session.updateContextPressure()
-                session.confidence = estimateConfidence(fullResponse)
-                session.statusMessage = "Completed"
-                session.transition(to: .completed)
-            }
-
-            // Extract artifacts if response contains code blocks
-            let artifacts = extractArtifacts(from: fullResponse)
-            if !artifacts.isEmpty {
-                await MainActor.run {
-                    for artifact in artifacts {
-                        session.addArtifact(artifact)
-                    }
-                }
-            }
-
-            // Broadcast completion
-            await AgentCommunicationBus.shared.broadcastResult(
-                from: session.id,
-                taskId: session.id,
-                output: String(fullResponse.prefix(500)),
-                success: true,
-                metadata: ["tokensUsed": "\(session.tokensUsed)"],
-                correlationId: session.parentConversationID
-            )
-
-            // Check if context pressure warrants summarization
-            let pressure = await MainActor.run { session.contextPressure }
-            if pressure >= .elevated {
-                await summarizeContext(session: session, provider: provider, model: model)
-            }
-
-            logger.info("Agent \(session.id.uuidString.prefix(8)) completed: \(fullResponse.count) chars, \(totalTokens) tokens")
-
-        } catch {
-            await MainActor.run {
-                session.error = error.localizedDescription
-                session.statusMessage = "Failed: \(error.localizedDescription)"
-                session.transition(to: .failed)
-            }
-
-            await AgentCommunicationBus.shared.send(BusAgentMessage(
-                id: UUID(),
-                timestamp: Date(),
-                senderAgentId: session.id,
-                recipientAgentId: nil,
-                messageType: .errorNotification,
-                payload: .text(error.localizedDescription),
-                priority: .high,
-                correlationId: session.parentConversationID
-            ))
-
-            logger.error("Agent \(session.id.uuidString.prefix(8)) failed: \(error.localizedDescription)")
-        }
+        logger.error("Agent \(session.id.uuidString.prefix(8)) failed: \(error.localizedDescription)")
     }
 
     // MARK: - Context Summarization
