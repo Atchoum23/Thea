@@ -35,6 +35,7 @@ public struct UnifiedDashboardView: View {
                 } label: {
                     Label("Settings", systemImage: "gear")
                 }
+                .accessibilityHint("Opens module configuration settings")
             }
         } detail: {
             // Main content area
@@ -64,6 +65,8 @@ public struct UnifiedDashboardView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.gray.opacity(0.05))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Integration Dashboard, \(coordinator.getActiveModuleCount()) of \(coordinator.getAllModules().count) modules active")
     }
 
     @ViewBuilder
@@ -104,6 +107,7 @@ private struct ModuleRow: View {
             Image(systemName: module.icon)
                 .foregroundStyle(module.color)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(module.rawValue)
@@ -119,7 +123,10 @@ private struct ModuleRow: View {
             Circle()
                 .fill(status.color)
                 .frame(width: 8, height: 8)
+                .accessibilityHidden(true)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(module.rawValue), \(status.displayName)")
     }
 }
 

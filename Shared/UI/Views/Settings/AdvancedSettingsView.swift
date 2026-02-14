@@ -59,6 +59,7 @@ struct AdvancedSettingsView: View {
                 Button("Reset Advanced Settings", role: .destructive) {
                     resetAdvancedSettings()
                 }
+                .accessibilityHint("Restores all advanced settings to their default values")
             }
         }
         .formStyle(.grouped)
@@ -184,6 +185,7 @@ struct AdvancedSettingsView: View {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundStyle(color)
+                .accessibilityHidden(true)
 
             Text(value)
                 .font(.headline)
@@ -198,6 +200,8 @@ struct AdvancedSettingsView: View {
         .padding(.vertical, 12)
         .background(color.opacity(0.1))
         .cornerRadius(8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 
     // MARK: - Development Section
@@ -264,6 +268,8 @@ struct AdvancedSettingsView: View {
                 }
 
                 Slider(value: $advancedConfig.requestTimeout, in: 10 ... 300, step: 10)
+                    .accessibilityValue("\(Int(advancedConfig.requestTimeout)) seconds")
+                    .accessibilityLabel("Request timeout")
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -276,6 +282,8 @@ struct AdvancedSettingsView: View {
                 }
 
                 Slider(value: $advancedConfig.connectionTimeout, in: 5 ... 60, step: 5)
+                    .accessibilityValue("\(Int(advancedConfig.connectionTimeout)) seconds")
+                    .accessibilityLabel("Connection timeout")
             }
 
             Divider()
@@ -386,6 +394,8 @@ struct AdvancedSettingsView: View {
                 }
 
                 Slider(value: $advancedConfig.memoryLimit, in: 256 ... 2048, step: 128)
+                    .accessibilityValue("\(Int(advancedConfig.memoryLimit)) megabytes")
+                    .accessibilityLabel("Memory limit")
 
                 Text("Maximum memory usage before automatic cleanup")
                     .font(.caption2)
@@ -453,6 +463,8 @@ struct AdvancedSettingsView: View {
                 }
 
                 Slider(value: $advancedConfig.maxCacheSize, in: 50 ... 1000, step: 50)
+                    .accessibilityValue("\(Int(advancedConfig.maxCacheSize)) megabytes")
+                    .accessibilityLabel("Maximum cache size")
             }
 
             Divider()
@@ -498,6 +510,8 @@ struct AdvancedSettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(size)")
     }
 
     // MARK: - Experimental Section
@@ -615,6 +629,8 @@ struct AdvancedSettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 
     // MARK: - Actions

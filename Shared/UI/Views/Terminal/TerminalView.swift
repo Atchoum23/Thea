@@ -103,9 +103,12 @@
                     Circle()
                         .fill(manager.isConnected ? Color.green : Color.red)
                         .frame(width: 8, height: 8)
+                        .accessibilityHidden(true)
                     Text(manager.isConnected ? "Connected" : "Disconnected")
                         .font(.headline)
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Terminal \(manager.isConnected ? "connected" : "disconnected")")
 
                 if manager.isConnected {
                     Text("\(manager.terminalWindows.count) window(s)")
@@ -120,6 +123,7 @@
                         Text("Monitoring...")
                             .font(.caption)
                     }
+                    .accessibilityLabel("Monitoring terminal activity")
                 }
             }
         }
@@ -290,9 +294,11 @@
                     if command.wasSuccessful {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.green)
+                            .accessibilityLabel("Succeeded")
                     } else {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundStyle(.red)
+                            .accessibilityLabel("Failed")
                     }
                 }
 
@@ -433,6 +439,8 @@
                         executeCommand()
                     }
                     .disabled(isExecuting || !manager.isEnabled)
+                    .accessibilityLabel("Command input")
+                    .accessibilityHint("Type a terminal command and press Return to execute")
 
                 if isExecuting {
                     ProgressView()
@@ -446,6 +454,7 @@
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(commandInput.isEmpty || isExecuting || !manager.isEnabled)
+                .accessibilityLabel("Execute command")
 
                 Menu {
                     ForEach(TerminalIntegrationManager.ExecutionMode.allCases, id: \.self) { mode in
@@ -464,6 +473,8 @@
                 } label: {
                     Image(systemName: "gearshape")
                 }
+                .accessibilityLabel("Execution mode")
+                .accessibilityHint("Select how commands are executed")
             }
             .padding()
             .background(Color(nsColor: .controlBackgroundColor))

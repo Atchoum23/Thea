@@ -67,50 +67,62 @@ struct ProvidersSettingsView: View {
 
             Section("OpenAI (ChatGPT)") {
                 SecureField("API Key", text: $openAIKey)
+                    .accessibilityLabel("OpenAI API key")
                 Button("Save") {
                     saveAPIKey(openAIKey, for: "openai")
                 }
                 .disabled(openAIKey.isEmpty)
+                .accessibilityHint("Saves the OpenAI API key to the keychain")
             }
 
             Section("Anthropic (Claude)") {
                 SecureField("API Key", text: $anthropicKey)
+                    .accessibilityLabel("Anthropic API key")
                 Button("Save") {
                     saveAPIKey(anthropicKey, for: "anthropic")
                 }
                 .disabled(anthropicKey.isEmpty)
+                .accessibilityHint("Saves the Anthropic API key to the keychain")
             }
 
             Section("Google (Gemini)") {
                 SecureField("API Key", text: $googleKey)
+                    .accessibilityLabel("Google API key")
                 Button("Save") {
                     saveAPIKey(googleKey, for: "google")
                 }
                 .disabled(googleKey.isEmpty)
+                .accessibilityHint("Saves the Google API key to the keychain")
             }
 
             Section("Perplexity") {
                 SecureField("API Key", text: $perplexityKey)
+                    .accessibilityLabel("Perplexity API key")
                 Button("Save") {
                     saveAPIKey(perplexityKey, for: "perplexity")
                 }
                 .disabled(perplexityKey.isEmpty)
+                .accessibilityHint("Saves the Perplexity API key to the keychain")
             }
 
             Section("OpenRouter") {
                 SecureField("API Key", text: $openRouterKey)
+                    .accessibilityLabel("OpenRouter API key")
                 Button("Save") {
                     saveAPIKey(openRouterKey, for: "openrouter")
                 }
                 .disabled(openRouterKey.isEmpty)
+                .accessibilityHint("Saves the OpenRouter API key to the keychain")
             }
 
             Section("Groq") {
                 SecureField("API Key", text: $groqKey)
+                    .accessibilityLabel("Groq API key")
                 Button("Save") {
                     saveAPIKey(groqKey, for: "groq")
                 }
                 .disabled(groqKey.isEmpty)
+                .accessibilityHint("Saves the Groq API key to the keychain")
             }
         }
         .formStyle(.grouped)
