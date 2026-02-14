@@ -113,7 +113,7 @@ private enum TestOperationCategory: String, Sendable {
     }
 }
 
-private struct TestThrottlingConfiguration: Sendable {
+struct TestThrottlingConfiguration: Sendable {
     var enabled: Bool = true
     var throttleOnBattery: Bool = true
     var respectLowPowerMode: Bool = true
@@ -265,7 +265,7 @@ struct ThrottleLevelPropertyTests {
 // MARK: - Tests: OperationCategory
 
 @Suite("OperationCategory — Properties")
-struct OperationCategoryTests {
+struct ThrottlingOperationCategoryTests {
     @Test("AI requests have high priority")
     func aiPriority() {
         #expect(TestOperationCategory.aiRequest.priority == .high)

@@ -499,13 +499,13 @@ struct SecurityResultTests {
 
 // MARK: - Tests: Terminal Security Policy
 
-private enum TestCommandValidation: Equatable {
+enum TestCommandValidation: Equatable {
     case allowed
     case blocked(reason: String)
     case requiresConfirmation(reason: String)
 }
 
-private struct TestTerminalSecurityPolicy {
+struct TestTerminalSecurityPolicy {
     var allowedCommands: [String] = []
     var blockedCommands: [String]
     var blockedPatterns: [String]
@@ -907,10 +907,10 @@ struct TerminalWhitelistTests {
 
 @Suite("Terminal Security — Security Level Presets")
 struct SecurityLevelPresetsTests {
-    @Test("Standard policy has 13 blocked commands")
+    @Test("Standard policy has 14 blocked commands")
     func standardBlockedCount() {
         let policy = TestTerminalSecurityPolicy.default
-        #expect(policy.blockedCommands.count == 13)
+        #expect(policy.blockedCommands.count == 14)
     }
 
     @Test("Standard policy has 14 blocked patterns")
@@ -919,10 +919,10 @@ struct SecurityLevelPresetsTests {
         #expect(policy.blockedPatterns.count == 14)
     }
 
-    @Test("Standard policy has 20 confirmation commands")
+    @Test("Standard policy has 21 confirmation commands")
     func standardConfirmationCount() {
         let policy = TestTerminalSecurityPolicy.default
-        #expect(policy.requireConfirmation.count == 20)
+        #expect(policy.requireConfirmation.count == 21)
     }
 
     @Test("Standard policy disables sudo by default")

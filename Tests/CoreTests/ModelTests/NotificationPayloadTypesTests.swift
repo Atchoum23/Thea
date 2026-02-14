@@ -341,8 +341,8 @@ struct NotificationHapticTests {
 
 // MARK: - Tests: Device Type
 
-@Suite("Device Type")
-struct DeviceTypeTests {
+@Suite("Notification Device Type")
+struct NotificationDeviceTypeTests {
     @Test("6 device types")
     func count() {
         #expect(TestDeviceType.allCases.count == 6)

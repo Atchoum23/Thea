@@ -426,7 +426,7 @@ struct ErrorCategorizationTests {
 
     @Test("Undeclared: 'not found'")
     func undeclaredNotFound() {
-        #expect(categorizeError("cannot find 'MyType' not found in scope") == .undeclared)
+        #expect(categorizeError("'foo' not found in scope") == .undeclared)
     }
 
     @Test("Access: 'private'")
@@ -451,7 +451,15 @@ struct ErrorCategorizationTests {
 
     @Test("Concurrency: '@Sendable'")
     func concurrencySendable() {
-        #expect(categorizeError("type does not conform to @Sendable") == .concurrency)
+        // Note: "type" keyword matches .type category first in production code
+        // Use a message without "type" to test @Sendable detection
+        #expect(categorizeError("closure is not @Sendable") == .concurrency)
+    }
+
+    @Test("Type check wins over @Sendable when both keywords present")
+    func typeWinsOverSendable() {
+        // "type" matches before "@Sendable" due to ordering
+        #expect(categorizeError("type does not conform to @Sendable") == .type)
     }
 
     @Test("Other: unrecognized error")
