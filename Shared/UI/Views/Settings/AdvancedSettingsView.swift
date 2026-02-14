@@ -607,8 +607,68 @@ extension AdvancedSettingsView {
         .accessibilityLabel("\(title): \(value)")
     }
 
-    // Real implementations in AdvancedSheetsActions.swift
+    func calculateCacheSize() {
+        Task {
+            let totalBytes = await computeRealCacheSize()
+            await MainActor.run {
+                cacheSize = formatBytes(totalBytes)
+            }
+        }
+    }
 
+    func calculateMemoryUsage() {
+        Task {
+            let info = ProcessInfo.processInfo
+            let physicalMemory = info.physicalMemory
+            let footprint = currentMemoryFootprint()
+            await MainActor.run {
+                if footprint > 0 {
+                    memoryUsage = "\(formatBytes(UInt64(footprint))) / \(formatBytes(physicalMemory))"
+                } else {
+                    memoryUsage = formatBytes(physicalMemory)
+                }
+            }
+        }
+    }
+
+    private func currentMemoryFootprint() -> UInt64 {
+        var info = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size / MemoryLayout<natural_t>.size)
+        let result = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+            }
+        }
+        return result == KERN_SUCCESS ? info.resident_size : 0
+    }
+
+    private func computeRealCacheSize() async -> UInt64 {
+        let fm = FileManager.default
+        var totalBytes: UInt64 = 0
+        let cacheDirs: [URL?] = [
+            fm.urls(for: .cachesDirectory, in: .userDomainMask).first?
+                .appendingPathComponent(Bundle.main.bundleIdentifier ?? "app.thea"),
+            fm.temporaryDirectory
+        ]
+        for dirOpt in cacheDirs {
+            guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
+            if let enumerator = fm.enumerator(at: dir, includingPropertiesForKeys: [.fileSizeKey]) {
+                for case let fileURL as URL in enumerator {
+                    if let values = try? fileURL.resourceValues(forKeys: [.fileSizeKey]),
+                       let size = values.fileSize {
+                        totalBytes += UInt64(size)
+                    }
+                }
+            }
+        }
+        return totalBytes
+    }
+
+    private func formatBytes(_ bytes: UInt64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: Int64(bytes))
+    }
 }
 
 // Actions (clearCache, clearLogs, etc.) and Preview

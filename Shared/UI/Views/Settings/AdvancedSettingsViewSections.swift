@@ -343,11 +343,25 @@ struct AdvancedLogViewerSheet: View {
 extension AdvancedSettingsView {
 
     func clearCache() {
-        cacheSize = "0 MB"
-        advancedConfig.apiCacheSize = "0 MB"
-        advancedConfig.modelCacheSize = "0 MB"
-        advancedConfig.imageCacheSize = "0 MB"
-        advancedConfig.tempCacheSize = "0 MB"
+        let fm = FileManager.default
+        let cacheDirs: [URL?] = [
+            fm.urls(for: .cachesDirectory, in: .userDomainMask).first?
+                .appendingPathComponent(Bundle.main.bundleIdentifier ?? "app.thea"),
+            fm.temporaryDirectory
+        ]
+        for dirOpt in cacheDirs {
+            guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
+            if let contents = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
+                for item in contents {
+                    try? fm.removeItem(at: item)
+                }
+            }
+        }
+        cacheSize = "0 bytes"
+        advancedConfig.apiCacheSize = "0 bytes"
+        advancedConfig.modelCacheSize = "0 bytes"
+        advancedConfig.imageCacheSize = "0 bytes"
+        advancedConfig.tempCacheSize = "0 bytes"
     }
 
     func clearLogs() {
@@ -357,13 +371,8 @@ extension AdvancedSettingsView {
 
     func generateDiagnosticReport() {
         isGeneratingReport = true
-        Task {
-            try? await Task.sleep(nanoseconds: 1_500_000_000)
-            await MainActor.run {
-                isGeneratingReport = false
-                showingDiagnosticReport = true
-            }
-        }
+        showingDiagnosticReport = true
+        isGeneratingReport = false
     }
 
     func generateReportText() -> String {
