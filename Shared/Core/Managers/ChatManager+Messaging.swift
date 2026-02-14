@@ -287,7 +287,11 @@ extension ChatManager {
                 assistantMessage.contentData = try JSONEncoder().encode(finalMessage.content)
                 assistantMessage.tokenCount = finalMessage.tokenCount
                 if let metadata = finalMessage.metadata {
-                    assistantMessage.metadataData = try? JSONEncoder().encode(metadata)
+                    do {
+                        assistantMessage.metadataData = try JSONEncoder().encode(metadata)
+                    } catch {
+                        msgLogger.error("❌ Failed to encode message metadata: \(error.localizedDescription)")
+                    }
                 }
 
             case let .error(error):
@@ -311,8 +315,12 @@ extension ChatManager {
                 )
                 var meta = assistantMessage.metadata ?? MessageMetadata()
                 meta.confidence = result.overallConfidence
-                assistantMessage.metadataData = try? JSONEncoder().encode(meta)
-                try? assistantMessage.modelContext?.save()
+                do {
+                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
+                    try assistantMessage.modelContext?.save()
+                } catch {
+                    msgLogger.error("❌ Failed to save confidence: \(error.localizedDescription)")
+                }
                 msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100))")
             }
         }
@@ -343,10 +351,14 @@ extension ChatManager {
                 conversationTitle: conversation.title,
                 previewText: preview
             )
-            try? await CrossDeviceNotificationService.shared.notifyAIResponseReady(
-                conversationId: conversation.id.uuidString,
-                preview: preview
-            )
+            do {
+                try await CrossDeviceNotificationService.shared.notifyAIResponseReady(
+                    conversationId: conversation.id.uuidString,
+                    preview: preview
+                )
+            } catch {
+                msgLogger.debug("Cross-device notification skipped: \(error.localizedDescription)")
+            }
         }
     }
 

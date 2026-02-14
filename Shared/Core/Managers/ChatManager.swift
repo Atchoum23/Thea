@@ -90,7 +90,11 @@ final class ChatManager: ObservableObject {
         for conversation in conversations {
             context.delete(conversation)
         }
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            chatLogger.error("❌ clearAllData save failed: \(error.localizedDescription)")
+        }
 
         conversations.removeAll()
         activeConversation = nil
