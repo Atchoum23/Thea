@@ -527,11 +527,8 @@ struct AdvancedSettingsView: View {
             Divider()
 
             Toggle("Experimental UI", isOn: $advancedConfig.experimentalUI)
-
             Toggle("Advanced Code Editor", isOn: $advancedConfig.advancedCodeEditor)
-
             Toggle("Multi-Model Conversations", isOn: $advancedConfig.multiModelConversations)
-
             Toggle("Parallel Processing", isOn: $advancedConfig.parallelProcessing)
 
             Text("Process multiple requests simultaneously")
@@ -540,15 +537,11 @@ struct AdvancedSettingsView: View {
 
             Divider()
 
-            // Feature flags
             DisclosureGroup("Feature Flags") {
                 ForEach(advancedConfig.featureFlags.sorted { $0.key < $1.key }, id: \.key) { key, value in
                     HStack {
-                        Text(key)
-                            .font(.caption)
-
+                        Text(key).font(.caption)
                         Spacer()
-
                         Toggle("", isOn: Binding(
                             get: { value },
                             set: { advancedConfig.featureFlags[key] = $0 }
@@ -559,29 +552,26 @@ struct AdvancedSettingsView: View {
             }
         }
     }
+}
 
-    // MARK: - Diagnostics Section
+// MARK: - Diagnostics, Actions, and Helpers
 
-    private var diagnosticsSection: some View {
+extension AdvancedSettingsView {
+
+    var diagnosticsSection: some View {
         Group {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Diagnostic Report")
-                        .font(.subheadline)
-
+                    Text("Diagnostic Report").font(.subheadline)
                     Text("Generate a detailed report for troubleshooting")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(.secondary)
                 }
-
                 Spacer()
-
                 Button {
                     generateDiagnosticReport()
                 } label: {
                     if isGeneratingReport {
-                        ProgressView()
-                            .scaleEffect(0.8)
+                        ProgressView().scaleEffect(0.8)
                     } else {
                         Label("Generate", systemImage: "doc.badge.gearshape")
                     }
@@ -592,12 +582,8 @@ struct AdvancedSettingsView: View {
 
             Divider()
 
-            // System info
             VStack(alignment: .leading, spacing: 8) {
-                Text("System Information")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-
+                Text("System Information").font(.subheadline).fontWeight(.medium)
                 systemInfoRow(title: "Device", value: advancedConfig.deviceModel)
                 systemInfoRow(title: "OS Version", value: advancedConfig.osVersion)
                 systemInfoRow(title: "App Version", value: advancedConfig.appVersion)
@@ -608,54 +594,38 @@ struct AdvancedSettingsView: View {
 
             Divider()
 
-            // Copy system info
-            Button {
-                copySystemInfo()
-            } label: {
+            Button { copySystemInfo() } label: {
                 Label("Copy System Info", systemImage: "doc.on.clipboard")
             }
             .buttonStyle(.bordered)
         }
     }
 
-    private func systemInfoRow(title: String, value: String) -> some View {
+    func systemInfoRow(title: String, value: String) -> some View {
         HStack {
-            Text(title)
-                .font(.caption)
-
+            Text(title).font(.caption)
             Spacer()
-
-            Text(value)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(value).font(.caption).foregroundStyle(.secondary)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value)")
     }
 
-    // MARK: - Actions
-
-    private func calculateCacheSize() {
-        // Simulate cache calculation
+    func calculateCacheSize() {
         Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
-            await MainActor.run {
-                cacheSize = "~\(Int.random(in: 20...150)) MB"
-            }
+            await MainActor.run { cacheSize = "~\(Int.random(in: 20...150)) MB" }
         }
     }
 
-    private func calculateMemoryUsage() {
-        // Simulate memory calculation
+    func calculateMemoryUsage() {
         Task {
             try? await Task.sleep(nanoseconds: 300_000_000)
-            await MainActor.run {
-                memoryUsage = "\(Int.random(in: 80...300)) MB"
-            }
+            await MainActor.run { memoryUsage = "\(Int.random(in: 80...300)) MB" }
         }
     }
 
-    private func clearCache() {
+    func clearCache() {
         cacheSize = "0 MB"
         advancedConfig.apiCacheSize = "0 MB"
         advancedConfig.modelCacheSize = "0 MB"
@@ -663,14 +633,13 @@ struct AdvancedSettingsView: View {
         advancedConfig.tempCacheSize = "0 MB"
     }
 
-    private func clearLogs() {
+    func clearLogs() {
         advancedConfig.logEntries = []
         advancedConfig.logEntryCount = 0
     }
 
-    private func generateDiagnosticReport() {
+    func generateDiagnosticReport() {
         isGeneratingReport = true
-
         Task {
             try? await Task.sleep(nanoseconds: 1_500_000_000)
             await MainActor.run {
@@ -680,7 +649,7 @@ struct AdvancedSettingsView: View {
         }
     }
 
-    private func generateReportText() -> String {
+    func generateReportText() -> String {
         """
         THEA DIAGNOSTIC REPORT
         Generated: \(Date())
@@ -700,7 +669,7 @@ struct AdvancedSettingsView: View {
         """
     }
 
-    private func copySystemInfo() {
+    func copySystemInfo() {
         let info = generateReportText()
         #if os(macOS)
         NSPasteboard.general.clearContents()
@@ -710,7 +679,7 @@ struct AdvancedSettingsView: View {
         #endif
     }
 
-    private func resetAdvancedSettings() {
+    func resetAdvancedSettings() {
         advancedConfig = AdvancedSettingsConfiguration()
         advancedConfig.save()
     }

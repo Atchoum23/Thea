@@ -100,9 +100,29 @@ public final class TheaConfig {
 
     /// Returns the complete configuration schema for AI consumption
     public func describeSchema() -> String {
+        [
+            schemaHeader,
+            aiSchemaSection,
+            memorySchemaSection,
+            verificationSchemaSection,
+            providersSchemaSection,
+            uiSchemaSection,
+            trackingSchemaSection,
+            securitySchemaSection
+        ].joined(separator: "\n")
+    }
+
+    // MARK: - Schema Sections
+
+    private var schemaHeader: String {
         """
         THEA CONFIGURATION SCHEMA
         =========================
+        """
+    }
+
+    private var aiSchemaSection: String {
+        """
 
         1. AI Configuration (ai.*)
            - defaultProvider: String (openrouter, anthropic, openai, etc.)
@@ -116,6 +136,11 @@ public final class TheaConfig {
            - enableMultiAgentOrchestration: Bool
            - learningRate: Double (0.0-1.0)
            - feedbackDecayFactor: Double (0.0-1.0)
+        """
+    }
+
+    private var memorySchemaSection: String {
+        """
 
         2. Memory Configuration (memory.*)
            - workingCapacity: Int (max items in working memory)
@@ -128,6 +153,11 @@ public final class TheaConfig {
            - enableContextInjection: Bool
            - retrievalLimit: Int
            - similarityThreshold: Double (0.0-1.0)
+        """
+    }
+
+    private var verificationSchemaSection: String {
+        """
 
         3. Verification Configuration (verification.*)
            - enableMultiModel: Bool
@@ -143,6 +173,11 @@ public final class TheaConfig {
            - codeExecutionWeight: Double (0.0-1.0)
            - staticAnalysisWeight: Double (0.0-1.0)
            - feedbackWeight: Double (0.0-1.0)
+        """
+    }
+
+    private var providersSchemaSection: String {
+        """
 
         4. Providers Configuration (providers.*)
            - anthropicBaseURL: String
@@ -154,6 +189,11 @@ public final class TheaConfig {
            - timeout: TimeInterval
            - maxRetries: Int
            - retryDelay: TimeInterval
+        """
+    }
+
+    private var uiSchemaSection: String {
+        """
 
         5. UI Configuration (ui.*)
            - theme: String (system, light, dark)
@@ -163,6 +203,11 @@ public final class TheaConfig {
            - showMemoryContext: Bool
            - enableAnimations: Bool
            - compactMode: Bool
+        """
+    }
+
+    private var trackingSchemaSection: String {
+        """
 
         6. Tracking Configuration (tracking.*)
            - enableLocation: Bool
@@ -173,6 +218,11 @@ public final class TheaConfig {
            - localOnly: Bool
            - enableCloudSync: Bool
            - retentionDays: Int
+        """
+    }
+
+    private var securitySchemaSection: String {
+        """
 
         7. Security Configuration (security.*)
            - requireApprovalForFiles: Bool

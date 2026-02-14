@@ -165,151 +165,166 @@ struct AdvancedPromptSettingsView: View {
     private func promptEditorView(_ prompt: CustomPrompt) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Header
-                HStack {
-                    Image(systemName: prompt.category.icon)
-                        .font(.title)
-                        .foregroundStyle(prompt.category.color)
-
-                    VStack(alignment: .leading) {
-                        TextField("Prompt Name", text: Binding(
-                            get: { prompt.name },
-                            set: { newValue in
-                                promptLibrary.update(prompt) { $0.name = newValue }
-                                promptLibrary.save()
-                            }
-                        ))
-                        .font(.title2)
-                        .textFieldStyle(.plain)
-
-                        Text("Category: \(prompt.category.rawValue)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Toggle("Active", isOn: Binding(
-                        get: { prompt.isActive },
-                        set: { newValue in
-                            promptLibrary.setActive(prompt, active: newValue)
-                            promptLibrary.save()
-                        }
-                    ))
-                    .toggleStyle(.switch)
-                }
-
+                promptEditorHeader(prompt)
                 Divider()
-
-                // Category picker
-                Picker("Category", selection: Binding(
-                    get: { prompt.category },
-                    set: { newValue in
-                        promptLibrary.update(prompt) { $0.category = newValue }
-                        promptLibrary.save()
-                    }
-                )) {
-                    ForEach(PromptCategory.allCases, id: \.self) { cat in
-                        Label(cat.rawValue, systemImage: cat.icon).tag(cat)
-                    }
-                }
-                .pickerStyle(.menu)
-
-                // Scope
-                Picker("Applies To", selection: Binding(
-                    get: { prompt.scope },
-                    set: { newValue in
-                        promptLibrary.update(prompt) { $0.scope = newValue }
-                        promptLibrary.save()
-                    }
-                )) {
-                    ForEach(PromptScope.allCases, id: \.self) { scope in
-                        Text(scope.rawValue).tag(scope)
-                    }
-                }
-                .pickerStyle(.segmented)
-
-                // Prompt content
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Prompt Content")
-                        .font(.headline)
-
-                    TextEditor(text: Binding(
-                        get: { prompt.content },
-                        set: { newValue in
-                            promptLibrary.update(prompt) { $0.content = newValue }
-                            promptLibrary.save()
-                        }
-                    ))
-                    .font(.system(.body, design: .monospaced))
-                    .frame(minHeight: 200)
-                    .border(Color.secondary.opacity(0.3))
-
-                    Text("\(prompt.content.count) characters")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                // Priority
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Priority")
-                            .font(.headline)
-                        Spacer()
-                        Text("\(prompt.priority)")
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Slider(value: Binding(
-                        get: { Double(prompt.priority) },
-                        set: { newValue in
-                            promptLibrary.update(prompt) { $0.priority = Int(newValue) }
-                            promptLibrary.save()
-                        }
-                    ), in: 1...10, step: 1)
-
-                    Text("Higher priority prompts are applied first")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                // Conditions
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Conditions (Optional)")
-                        .font(.headline)
-
-                    TextField("e.g., when message contains 'code'", text: Binding(
-                        get: { prompt.conditions ?? "" },
-                        set: { newValue in
-                            promptLibrary.update(prompt) { $0.conditions = newValue.isEmpty ? nil : newValue }
-                            promptLibrary.save()
-                        }
-                    ))
-                    .textFieldStyle(.roundedBorder)
-
-                    Text("Prompt is only applied when conditions are met")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
+                promptEditorCategoryScope(prompt)
+                promptEditorContent(prompt)
+                promptEditorPriority(prompt)
+                promptEditorConditions(prompt)
                 Spacer()
-
-                // Actions
-                HStack {
-                    Button("Delete", role: .destructive) {
-                        showingDeleteConfirmation = true
-                    }
-                    .buttonStyle(.bordered)
-
-                    Spacer()
-
-                    Button("Test Prompt") {
-                        // Could open a test dialog
-                    }
-                    .buttonStyle(.bordered)
-                }
+                promptEditorActions
             }
             .padding()
+        }
+    }
+
+    @ViewBuilder
+    private func promptEditorHeader(_ prompt: CustomPrompt) -> some View {
+        HStack {
+            Image(systemName: prompt.category.icon)
+                .font(.title)
+                .foregroundStyle(prompt.category.color)
+
+            VStack(alignment: .leading) {
+                TextField("Prompt Name", text: Binding(
+                    get: { prompt.name },
+                    set: { newValue in
+                        promptLibrary.update(prompt) { $0.name = newValue }
+                        promptLibrary.save()
+                    }
+                ))
+                .font(.title2)
+                .textFieldStyle(.plain)
+
+                Text("Category: \(prompt.category.rawValue)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Toggle("Active", isOn: Binding(
+                get: { prompt.isActive },
+                set: { newValue in
+                    promptLibrary.setActive(prompt, active: newValue)
+                    promptLibrary.save()
+                }
+            ))
+            .toggleStyle(.switch)
+        }
+    }
+
+    @ViewBuilder
+    private func promptEditorCategoryScope(_ prompt: CustomPrompt) -> some View {
+        Picker("Category", selection: Binding(
+            get: { prompt.category },
+            set: { newValue in
+                promptLibrary.update(prompt) { $0.category = newValue }
+                promptLibrary.save()
+            }
+        )) {
+            ForEach(PromptCategory.allCases, id: \.self) { cat in
+                Label(cat.rawValue, systemImage: cat.icon).tag(cat)
+            }
+        }
+        .pickerStyle(.menu)
+
+        Picker("Applies To", selection: Binding(
+            get: { prompt.scope },
+            set: { newValue in
+                promptLibrary.update(prompt) { $0.scope = newValue }
+                promptLibrary.save()
+            }
+        )) {
+            ForEach(PromptScope.allCases, id: \.self) { scope in
+                Text(scope.rawValue).tag(scope)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    @ViewBuilder
+    private func promptEditorContent(_ prompt: CustomPrompt) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Prompt Content")
+                .font(.headline)
+
+            TextEditor(text: Binding(
+                get: { prompt.content },
+                set: { newValue in
+                    promptLibrary.update(prompt) { $0.content = newValue }
+                    promptLibrary.save()
+                }
+            ))
+            .font(.system(.body, design: .monospaced))
+            .frame(minHeight: 200)
+            .border(Color.secondary.opacity(0.3))
+
+            Text("\(prompt.content.count) characters")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func promptEditorPriority(_ prompt: CustomPrompt) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Priority")
+                    .font(.headline)
+                Spacer()
+                Text("\(prompt.priority)")
+                    .foregroundStyle(.secondary)
+            }
+
+            Slider(value: Binding(
+                get: { Double(prompt.priority) },
+                set: { newValue in
+                    promptLibrary.update(prompt) { $0.priority = Int(newValue) }
+                    promptLibrary.save()
+                }
+            ), in: 1...10, step: 1)
+
+            Text("Higher priority prompts are applied first")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func promptEditorConditions(_ prompt: CustomPrompt) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Conditions (Optional)")
+                .font(.headline)
+
+            TextField("e.g., when message contains 'code'", text: Binding(
+                get: { prompt.conditions ?? "" },
+                set: { newValue in
+                    promptLibrary.update(prompt) { $0.conditions = newValue.isEmpty ? nil : newValue }
+                    promptLibrary.save()
+                }
+            ))
+            .textFieldStyle(.roundedBorder)
+
+            Text("Prompt is only applied when conditions are met")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var promptEditorActions: some View {
+        HStack {
+            Button("Delete", role: .destructive) {
+                showingDeleteConfirmation = true
+            }
+            .buttonStyle(.bordered)
+
+            Spacer()
+
+            Button("Test Prompt") {
+                // Could open a test dialog
+            }
+            .buttonStyle(.bordered)
         }
     }
 
