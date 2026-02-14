@@ -31,6 +31,7 @@ private enum TestExportFormat: String, CaseIterable, Sendable {
 }
 
 /// Mirrors export message structure
+// swiftlint:disable:next private_over_fileprivate
 fileprivate struct TestExportMessage: Sendable {
     let role: String // "user" or "assistant"
     let content: String
