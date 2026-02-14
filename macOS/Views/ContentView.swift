@@ -21,6 +21,8 @@ struct ContentView: View {
     @State private var welcomeInputText = ""
     @State private var isListeningForVoice = false
     @State private var showingNewProjectDialog = false
+    @State private var showingRenameProjectDialog = false
+    @State private var renamingProject: Project?
     @State private var showingKeyboardShortcuts = false
     @State private var showingCommandPalette = false
     @State private var newProjectTitle = ""
@@ -270,7 +272,8 @@ struct ContentView: View {
             .contextMenu {
                 Button("Rename") {
                     newProjectTitle = project.title
-                    // TODO: implement rename sheet
+                    renamingProject = project
+                    showingRenameProjectDialog = true
                 }
                 Divider()
                 Button("Delete", role: .destructive) {
@@ -320,6 +323,18 @@ struct ContentView: View {
         } message: {
             Text("Enter a name for your new project workspace.")
         }
+        .alert("Rename Project", isPresented: $showingRenameProjectDialog) {
+            TextField("Project Name", text: $newProjectTitle)
+            Button("Cancel", role: .cancel) {
+                renamingProject = nil
+            }
+            Button("Rename") {
+                renameProject()
+            }
+            .disabled(newProjectTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        } message: {
+            Text("Enter a new name for this project.")
+        }
     }
 
     // MARK: - Actions
@@ -328,6 +343,15 @@ struct ContentView: View {
         let title = newProjectTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         let project = projectManager.createProject(title: title.isEmpty ? "New Project" : title)
         selectedProject = project
+    }
+
+    private func renameProject() {
+        guard let project = renamingProject else { return }
+        let title = newProjectTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
+        project.title = title
+        project.updatedAt = Date()
+        renamingProject = nil
     }
 
     private func handleVoiceInput() {
