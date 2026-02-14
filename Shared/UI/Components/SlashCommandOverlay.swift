@@ -129,6 +129,7 @@ struct SlashCommandOverlay: View {
             Image(systemName: "command")
                 .font(.caption)
                 .foregroundStyle(TheaBrandColors.gold)
+                .accessibilityHidden(true)
 
             Text("Commands")
                 .font(.caption.weight(.semibold))
@@ -166,6 +167,7 @@ struct SlashCommandOverlay: View {
                 RoundedRectangle(cornerRadius: TheaCornerRadius.sm)
                     .fill(Color.primary.opacity(0.06))
             )
+            .accessibilityHidden(true)
     }
 
     // MARK: - Command List
@@ -234,6 +236,7 @@ private struct SlashCommandRow: View {
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(isSelected ? TheaBrandColors.gold : .secondary)
                 .frame(width: TheaSize.iconLarge, height: TheaSize.iconLarge)
+                .accessibilityHidden(true)
 
             // Command name and description
             VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
@@ -259,6 +262,7 @@ private struct SlashCommandRow: View {
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(TheaBrandColors.gold.opacity(0.7))
                     .transition(.opacity)
+                    .accessibilityHidden(true)
             }
         }
         .padding(.horizontal, TheaSpacing.md)

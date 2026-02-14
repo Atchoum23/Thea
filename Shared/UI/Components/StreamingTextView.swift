@@ -178,6 +178,7 @@ public struct StreamingTextView: View {
             Image(systemName: contentType.icon)
                 .font(.system(size: 11))
                 .symbolEffect(.pulse, options: .repeating, isActive: isActive)
+                .accessibilityHidden(true)
 
             Text(contentType.label)
                 .font(.caption2)

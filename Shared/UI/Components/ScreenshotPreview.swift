@@ -28,6 +28,7 @@ import SwiftUI
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Cancel screenshot")
                 }
 
                 // Image preview

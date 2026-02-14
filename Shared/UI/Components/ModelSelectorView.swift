@@ -141,6 +141,7 @@ struct CompactModelSelectorView: View {
             HStack(spacing: 4) {
                 Image(systemName: "cpu")
                     .font(.caption)
+                    .accessibilityHidden(true)
                 if let model = catalogManager.getModel(byID: selectedModel) {
                     Text(model.displayName)
                         .font(.caption)
@@ -151,6 +152,7 @@ struct CompactModelSelectorView: View {
                 }
                 Image(systemName: "chevron.down")
                     .font(.caption2)
+                    .accessibilityHidden(true)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)

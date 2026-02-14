@@ -77,6 +77,7 @@ struct MessageEditSheet: View {
             HStack(spacing: 8) {
                 Image(systemName: "arrow.triangle.branch")
                     .foregroundStyle(.blue)
+                    .accessibilityHidden(true)
                 Text("Editing creates a new branch. The original message is preserved.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

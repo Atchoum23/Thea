@@ -359,6 +359,7 @@ public struct InlineCodeEditorView: View {
                 Image(systemName: "arrow.uturn.backward")
             }
             .disabled(!(controller.activeBlock?.canUndo ?? false))
+            .accessibilityLabel("Undo")
 
             // Revert
             Button {
@@ -367,6 +368,7 @@ public struct InlineCodeEditorView: View {
                 Image(systemName: "arrow.counterclockwise")
             }
             .disabled(!(controller.activeBlock?.hasChanges ?? false))
+            .accessibilityLabel("Revert changes")
 
             // Close
             Button {
@@ -374,6 +376,7 @@ public struct InlineCodeEditorView: View {
             } label: {
                 Image(systemName: "xmark")
             }
+            .accessibilityLabel("Close editor")
         }
         .padding(12)
     }
@@ -412,6 +415,7 @@ public struct InlineCodeEditorView: View {
                     Image(systemName: "paperplane.fill")
                 }
                 .disabled(controller.customPrompt.isEmpty || controller.isProcessing)
+                .accessibilityLabel("Apply custom edit")
             }
             .padding(.horizontal)
 

@@ -69,6 +69,7 @@ public struct MemorySourcesView: View {
                     Image(systemName: "brain.head.profile")
                         .font(.title2)
                         .foregroundStyle(.purple)
+                        .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Memory Context")
@@ -88,6 +89,7 @@ public struct MemorySourcesView: View {
                             .font(.title3)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Close memory sources")
                 }
 
                 Divider()

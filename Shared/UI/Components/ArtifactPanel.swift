@@ -65,6 +65,7 @@ struct ArtifactPanel: View {
                 }
                 .buttonStyle(.plain)
                 .help("Back to list")
+                .accessibilityLabel("Back to list")
             }
 
             Text(selectedArtifact?.title ?? "Artifacts")
@@ -81,6 +82,7 @@ struct ArtifactPanel: View {
                 }
                 .buttonStyle(.plain)
                 .help("Version history")
+                .accessibilityLabel("Version history")
             }
 
             Button(action: onClose) {
@@ -89,6 +91,7 @@ struct ArtifactPanel: View {
             }
             .buttonStyle(.plain)
             .help("Close panel")
+            .accessibilityLabel("Close panel")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -103,6 +106,7 @@ struct ArtifactPanel: View {
             Image(systemName: "doc.badge.plus")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
 
             Text("No Artifacts Yet")
                 .font(.headline)

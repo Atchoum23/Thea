@@ -86,6 +86,7 @@ struct ConversationDeviceBar: View {
                 Image(systemName: "arrow.triangle.swap")
                     .font(.system(size: 9))
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
 
                 ForEach(Array(uniqueDevices.enumerated()), id: \.offset) { _, device in
                     DeviceOriginBadge(

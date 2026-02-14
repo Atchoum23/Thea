@@ -73,6 +73,7 @@ public struct THEAThinkingView: View {
             Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

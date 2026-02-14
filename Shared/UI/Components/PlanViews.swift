@@ -18,6 +18,7 @@ struct CompactPlanBar: View {
             HStack(spacing: TheaSpacing.sm) {
                 Image(systemName: "list.bullet.clipboard")
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(plan.title)
@@ -45,6 +46,7 @@ struct CompactPlanBar: View {
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Expand plan")
             }
             .padding(TheaSpacing.md)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
@@ -112,6 +114,7 @@ struct PlanPanel: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Close plan")
         }
         .padding(TheaSpacing.md)
     }
@@ -193,21 +196,27 @@ private struct StepRow: View {
         case .pending:
             Image(systemName: "circle")
                 .foregroundStyle(.secondary)
+                .accessibilityLabel("Pending")
         case .inProgress:
             ProgressView()
                 .scaleEffect(0.7)
+                .accessibilityLabel("In progress")
         case .completed:
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(.green)
+                .accessibilityLabel("Completed")
         case .failed:
             Image(systemName: "xmark.circle.fill")
                 .foregroundStyle(.red)
+                .accessibilityLabel("Failed")
         case .skipped:
             Image(systemName: "arrow.turn.up.right")
                 .foregroundStyle(.orange)
+                .accessibilityLabel("Skipped")
         case .modified:
             Image(systemName: "pencil.circle.fill")
                 .foregroundStyle(.blue)
+                .accessibilityLabel("Modified")
         }
     }
 }
