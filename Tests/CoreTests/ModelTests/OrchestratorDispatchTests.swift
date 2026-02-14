@@ -278,7 +278,7 @@ final class AgentTypeSelectionTests: XCTestCase {
     }
 
     func testSecurityTask() {
-        XCTAssertEqual(selectAgentType(for: "Check for security vulnerabilities"), .security)
+        XCTAssertEqual(selectAgentType(for: "Audit security vulnerabilities"), .security)
     }
 
     func testPerformanceTask() {
@@ -300,7 +300,7 @@ final class AgentTypeSelectionTests: XCTestCase {
 
 // MARK: - Synthesis Tests
 
-final class SynthesisTests: XCTestCase {
+final class DispatchSynthesisTests: XCTestCase {
     func testEmptySessions() {
         let result = synthesizeResults(from: [])
         XCTAssertEqual(result, "No completed agent results to synthesize.")
@@ -308,7 +308,7 @@ final class SynthesisTests: XCTestCase {
 
     func testOnlyWorkingSessions() {
         let sessions = [
-            AgentSession(agentType: .research, state: .working, output: "In progress..."),
+            AgentSession(agentType: .research, state: .working, output: "In progress...")
         ]
         let result = synthesizeResults(from: sessions)
         XCTAssertEqual(result, "No completed agent results to synthesize.")
@@ -316,7 +316,7 @@ final class SynthesisTests: XCTestCase {
 
     func testSingleCompletedSession() {
         let sessions = [
-            AgentSession(agentType: .research, state: .completed, output: "Found 5 relevant papers"),
+            AgentSession(agentType: .research, state: .completed, output: "Found 5 relevant papers")
         ]
         let result = synthesizeResults(from: sessions)
         XCTAssertTrue(result.contains("Research"))
@@ -327,7 +327,7 @@ final class SynthesisTests: XCTestCase {
         let sessions = [
             AgentSession(agentType: .research, state: .completed, output: "Research findings"),
             AgentSession(agentType: .codeGeneration, state: .completed, output: "Generated code"),
-            AgentSession(agentType: .testing, state: .working, output: "Still testing..."),
+            AgentSession(agentType: .testing, state: .working, output: "Still testing...")
         ]
         let result = synthesizeResults(from: sessions)
         XCTAssertTrue(result.contains("Research"))
@@ -340,7 +340,7 @@ final class SynthesisTests: XCTestCase {
             AgentSession(
                 agentType: .codeGeneration, state: .completed,
                 output: "Generated module", artifacts: ["auth.swift", "login.swift"]
-            ),
+            )
         ]
         let result = synthesizeResults(from: sessions)
         XCTAssertTrue(result.contains("Artifacts"))
@@ -351,7 +351,7 @@ final class SynthesisTests: XCTestCase {
     func testOutputTruncation() {
         let longOutput = String(repeating: "x", count: 1000)
         let sessions = [
-            AgentSession(agentType: .research, state: .completed, output: longOutput),
+            AgentSession(agentType: .research, state: .completed, output: longOutput)
         ]
         let result = synthesizeResults(from: sessions)
         // Output should be truncated to 500 chars
@@ -363,7 +363,7 @@ final class SynthesisTests: XCTestCase {
             AgentSession(agentType: .research, state: .completed, output: "Done"),
             AgentSession(agentType: .debugging, state: .failed, output: "Error"),
             AgentSession(agentType: .testing, state: .cancelled, output: "Stopped"),
-            AgentSession(agentType: .planning, state: .working, output: "Working"),
+            AgentSession(agentType: .planning, state: .working, output: "Working")
         ]
         let result = synthesizeResults(from: sessions)
         XCTAssertTrue(result.contains("Research"))
@@ -375,11 +375,11 @@ final class SynthesisTests: XCTestCase {
 
 // MARK: - Budget Reallocation Tests
 
-final class BudgetReallocationTests: XCTestCase {
+final class DispatchBudgetReallocationTests: XCTestCase {
     func testNoReallocationWhenAllActive() {
         var sessions = [
             AgentSession(agentType: .research, state: .working, tokenBudget: 16384, tokensUsed: 5000),
-            AgentSession(agentType: .codeGeneration, state: .working, tokenBudget: 8192, tokensUsed: 3000),
+            AgentSession(agentType: .codeGeneration, state: .working, tokenBudget: 8192, tokensUsed: 3000)
         ]
         let originalBudgets = sessions.map(\.tokenBudget)
         reallocateContextBudget(sessions: &sessions)
@@ -391,7 +391,7 @@ final class BudgetReallocationTests: XCTestCase {
     func testReclaimFromCompletedSessions() {
         var sessions = [
             AgentSession(agentType: .research, state: .completed, tokenBudget: 16384, tokensUsed: 8000),
-            AgentSession(agentType: .codeGeneration, state: .working, tokenBudget: 8192, tokensUsed: 6000),
+            AgentSession(agentType: .codeGeneration, state: .working, tokenBudget: 8192, tokensUsed: 6000)
         ]
         reallocateContextBudget(sessions: &sessions)
         // Completed session should have budget shrunk to actual usage
@@ -403,7 +403,7 @@ final class BudgetReallocationTests: XCTestCase {
     func testNoReallocationWhenActiveNotUnderPressure() {
         var sessions = [
             AgentSession(agentType: .research, state: .completed, tokenBudget: 16384, tokensUsed: 8000),
-            AgentSession(agentType: .codeGeneration, state: .working, tokenBudget: 8192, tokensUsed: 1000),
+            AgentSession(agentType: .codeGeneration, state: .working, tokenBudget: 8192, tokensUsed: 1000)
         ]
         reallocateContextBudget(sessions: &sessions)
         // Active session at 12% usage — not under pressure
@@ -415,7 +415,7 @@ final class BudgetReallocationTests: XCTestCase {
         var sessions = [
             AgentSession(agentType: .research, state: .completed, tokenBudget: 100_000, tokensUsed: 10_000),
             AgentSession(agentType: .codeGeneration, state: .working, tokenBudget: 8192, tokensUsed: 6000),
-            AgentSession(agentType: .testing, state: .working, tokenBudget: 8192, tokensUsed: 7000),
+            AgentSession(agentType: .testing, state: .working, tokenBudget: 8192, tokensUsed: 7000)
         ]
         reallocateContextBudget(sessions: &sessions)
         // Both active sessions should get approximately equal extra budget
@@ -428,7 +428,7 @@ final class BudgetReallocationTests: XCTestCase {
 
 // MARK: - Session Pruning Tests
 
-final class SessionPruningTests: XCTestCase {
+final class DispatchSessionPruningTests: XCTestCase {
     func testPruneOldCompletedSessions() {
         var sessions = [
             AgentSession(
@@ -436,7 +436,7 @@ final class SessionPruningTests: XCTestCase {
                 startedAt: Date().addingTimeInterval(-7200),
                 completedAt: Date().addingTimeInterval(-7200)
             ),
-            AgentSession(agentType: .codeGeneration, state: .working),
+            AgentSession(agentType: .codeGeneration, state: .working)
         ]
         pruneOldSessions(sessions: &sessions, olderThan: 3600)
         XCTAssertEqual(sessions.count, 1)
@@ -448,7 +448,7 @@ final class SessionPruningTests: XCTestCase {
             AgentSession(
                 agentType: .research, state: .completed,
                 completedAt: Date()
-            ),
+            )
         ]
         pruneOldSessions(sessions: &sessions, olderThan: 3600)
         XCTAssertEqual(sessions.count, 1)
@@ -459,7 +459,7 @@ final class SessionPruningTests: XCTestCase {
             AgentSession(
                 agentType: .research, state: .working,
                 startedAt: Date().addingTimeInterval(-7200)
-            ),
+            )
         ]
         pruneOldSessions(sessions: &sessions, olderThan: 3600)
         XCTAssertEqual(sessions.count, 1) // Active, not pruned
@@ -477,7 +477,7 @@ final class SessionPruningTests: XCTestCase {
                 agentType: .debugging, state: .failed,
                 startedAt: Date().addingTimeInterval(-7200),
                 completedAt: Date().addingTimeInterval(-7200)
-            ),
+            )
         ]
         pruneOldSessions(sessions: &sessions, olderThan: 3600)
         XCTAssertTrue(sessions.isEmpty)
@@ -489,7 +489,7 @@ final class SessionPruningTests: XCTestCase {
                 agentType: .testing, state: .cancelled,
                 startedAt: Date().addingTimeInterval(-7200),
                 completedAt: Date().addingTimeInterval(-7200)
-            ),
+            )
         ]
         pruneOldSessions(sessions: &sessions, olderThan: 3600)
         XCTAssertTrue(sessions.isEmpty)
@@ -498,7 +498,7 @@ final class SessionPruningTests: XCTestCase {
 
 // MARK: - Activity Logging Tests
 
-final class ActivityLoggingTests: XCTestCase {
+final class DispatchActivityLoggingTests: XCTestCase {
     func testActivityCreation() {
         let sessionID = UUID()
         let activity = Activity(
@@ -538,7 +538,7 @@ final class ActivityLoggingTests: XCTestCase {
 
 // MARK: - Default Budget Tests
 
-final class DefaultBudgetTests: XCTestCase {
+final class DispatchDefaultBudgetTests: XCTestCase {
     func testResearchBudget() {
         XCTAssertEqual(AgentType.research.defaultBudget, 16384)
     }
@@ -575,7 +575,7 @@ final class DefaultBudgetTests: XCTestCase {
 
 // MARK: - Token Usage Tests
 
-final class TokenUsageRatioTests: XCTestCase {
+final class DispatchTokenUsageTests: XCTestCase {
     func testZeroUsage() {
         let session = AgentSession(agentType: .research, tokensUsed: 0)
         XCTAssertEqual(session.tokenUsageRatio, 0.0, accuracy: 0.001)
