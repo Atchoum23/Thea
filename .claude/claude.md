@@ -49,6 +49,51 @@ find ~/Library/Developer/Xcode/DerivedData -maxdepth 1 -name "Thea-*" -type d -e
 
 ---
 
+## UNIVERSAL IMPLEMENTATION STANDARD — Non-Negotiable
+
+**This standard applies to ALL work: past, present, and future. Every feature, capability, phase, and deliverable must meet this bar.**
+
+### What "Done" Means
+
+"Done" means a **real user can USE the feature** — not compile it, not test its types, USE it. Every deliverable must have:
+
+1. **Working UI** wired into app navigation (MacSettingsView sidebar, iOS tabs, toolbar items, etc.)
+2. **Real data models** persisted via SwiftData, UserDefaults, or CloudKit — not in-memory throwaway
+3. **Actual business logic** that processes, transforms, and presents data — not pass-throughs
+4. **Error handling** with user-facing alerts/feedback — not silent failures
+5. **Tests** covering actual behavior and logic — not just type conformance or Codable roundtrips
+
+### What Is FORBIDDEN as a Deliverable
+
+The following are NEVER acceptable as "completed" work:
+
+- Protocol/interface definitions without concrete implementations
+- Manager/Service classes with empty, stub, or TODO method bodies
+- Views displaying placeholder text, "Coming soon", or static mock data
+- "Infrastructure" or "foundation" commits without corresponding working features
+- Types, enums, or models that nothing in the app actually uses at runtime
+- Code that compiles and passes tests but does nothing when the user taps/clicks
+- Boilerplate scaffolding intended for "future sessions" to fill in
+- Shims, adapters, or compatibility layers that just forward calls without adding value
+- Feature flags guarding empty code paths
+- Draft APIs or unstable interfaces without implementations behind them
+
+### If External API Keys or Entitlements Are Unavailable
+
+- Implement EVERYTHING up to the API boundary with real code
+- Use a clear protocol abstraction at the boundary (1 protocol, 1 live impl, 1 demo impl)
+- The demo implementation must exercise the FULL pipeline with realistic synthetic data
+- The user must only need to swap 1 line of config or provide 1 API key to go live
+- Document what the owner needs to provide in a comment at the top of the file
+
+### Conversation History — No Compaction
+
+Thea must NEVER compact, summarize, or truncate conversation history. Users must be able to scroll through the ENTIRE history of ALL conversations, from the very first message to the latest. This differs from Claude Code in Terminal which compacts. Thea stores full history in SwiftData — no automatic cleanup, no summarization, no "load more" pagination that drops old messages.
+
+### Sensitive Data Handling
+
+When asked to remove secrets from session/log files, **surgically redact** the secret values (replace with `[REDACTED]`) while preserving all surrounding content. NEVER delete entire files unless explicitly asked to do so.
+
 ## AI Behavior Guidelines
 
 **IMPORTANT: For every task or instruction:**
