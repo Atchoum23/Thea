@@ -130,6 +130,7 @@
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: iconForTab(tab))
+                                .accessibilityHidden(true)
                             Text(tab.rawValue)
                         }
                         .padding(.horizontal, 12)
@@ -138,6 +139,7 @@
                         .cornerRadius(6)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
                 }
                 Spacer()
             }
@@ -320,6 +322,7 @@
         var body: some View {
             HStack(spacing: 4) {
                 Image(systemName: status.icon)
+                    .accessibilityHidden(true)
                 Text(status.rawValue)
             }
             .font(.caption)
@@ -328,6 +331,8 @@
             .background(colorForStatus.opacity(0.2))
             .foregroundStyle(colorForStatus)
             .cornerRadius(4)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Status: \(status.rawValue)")
         }
 
         private var colorForStatus: Color {
