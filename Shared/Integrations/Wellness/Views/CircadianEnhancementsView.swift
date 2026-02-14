@@ -175,7 +175,7 @@ public struct CircadianEnhancementsView: View {
 
             VStack(spacing: 12) {
                 ForEach(currentPhase.recommendations, id: \.self) { recommendation in
-                    RecommendationCard(
+                    CircadianRecommendationCard(
                         icon: recommendation.icon,
                         title: recommendation.title,
                         description: recommendation.description,
@@ -317,7 +317,7 @@ private struct PhaseTimelineRow: View {
 
 // MARK: - Recommendation Card
 
-private struct RecommendationCard: View {
+private struct CircadianRecommendationCard: View {
     let icon: String
     let title: String
     let description: String
