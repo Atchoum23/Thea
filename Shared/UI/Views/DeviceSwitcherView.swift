@@ -130,6 +130,7 @@ private struct DeviceSwitcherRow: View {
                 .font(.title2)
                 .foregroundStyle(device.isOnline ? .blue : .secondary)
                 .frame(width: 40)
+                .accessibilityHidden(true)
 
             // Device Info
             VStack(alignment: .leading, spacing: 2) {

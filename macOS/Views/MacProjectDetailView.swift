@@ -122,6 +122,7 @@ struct MacProjectDetailView: View {
                     HStack(spacing: TheaSpacing.md) {
                         Image(systemName: "doc.fill")
                             .foregroundStyle(Color.theaPrimaryDefault)
+                            .accessibilityHidden(true)
 
                         VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
                             Text(file.name)

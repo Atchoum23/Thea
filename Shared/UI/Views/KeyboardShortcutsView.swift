@@ -85,6 +85,7 @@ struct KeyboardShortcutsSimpleView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(TheaBrandColors.gold)
                     .frame(width: 24)
+                    .accessibilityHidden(true)
 
                 Text(title)
                     .font(.headline)
