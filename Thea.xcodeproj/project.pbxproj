@@ -769,6 +769,7 @@
 		65E7C9AFE788F11B38280704 /* ConnectionQualityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1504C8298B2DD6FC344E3519 /* ConnectionQualityMonitor.swift */; };
 		66091D34CE50F7F286E18254 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BEC0A96C2F4BAE27B5C351 /* IntentHandler.swift */; };
 		662672F6EFEB478AF6814113 /* SettingsManagerReset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F03FBC03CD600211095F412 /* SettingsManagerReset.swift */; };
+		66828BC3233D05A23CC1AAB7 /* SmartTransportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D3526CCC665056029CBF8C /* SmartTransportManager.swift */; };
 		668CB8401A11C87910A75387 /* MacProjectDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAF6605C0F73BF08FF699B2C /* MacProjectDetailView.swift */; };
 		66A6EC14B0B34E879EDA07A3 /* FocusModeIntelligence+CallHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC9570D9D51D09A2B3515196 /* FocusModeIntelligence+CallHandling.swift */; };
 		66C0361CEE0ACDA9DAFD9AD3 /* AutomatableSuggestionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFB0A33F20F68B86E4DF43C /* AutomatableSuggestionEngine.swift */; };
@@ -1605,6 +1606,7 @@
 		DC1C1250A50231C3C59F7320 /* ActivityTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5450739121E31EE2C598325F /* ActivityTracker.swift */; };
 		DC274DC7263D6B1801EF2616 /* PredictiveEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F33EC2C30CECD2A8D1B4672E /* PredictiveEngine.swift */; };
 		DC37F7A213CB08AE40EF244E /* iOSSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D843CD7F24B89C084064F2 /* iOSSettingsView.swift */; };
+		DC970AC47C727C8F2D252843 /* SmartTransportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D3526CCC665056029CBF8C /* SmartTransportManager.swift */; };
 		DCB5C3F6E03FC8845EB00708 /* CommunicationAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5168B495A348213F83F395E /* CommunicationAssistant.swift */; };
 		DCEEF6F4757A62EE547DCEB9 /* DeviceOriginBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C574D14D40228EC8A8FE5311 /* DeviceOriginBadge.swift */; };
 		DD43E32C50919D432714D9A5 /* ConversationLanguageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01999AAFC4A66E784736E459 /* ConversationLanguageService.swift */; };
@@ -2119,6 +2121,7 @@
 		20FFEC451BD40BDCEF955614 /* HealthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthModels.swift; sourceTree = "<group>"; };
 		213DB857F500AF121B9B8CB2 /* HomeKitMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeKitMonitor.swift; sourceTree = "<group>"; };
 		2199809338B4E610A89B591F /* Thea-watchOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Thea-watchOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		21D3526CCC665056029CBF8C /* SmartTransportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartTransportManager.swift; sourceTree = "<group>"; };
 		21E411EF1662378EF17FDC7F /* IntegratedTestRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegratedTestRunner.swift; sourceTree = "<group>"; };
 		225996E03B5ADBC52A52D9EA /* ScreenAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenAnalyzer.swift; sourceTree = "<group>"; };
 		227EFCDDE7E3D6F6855CFBB9 /* AccessibilityBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityBridge.swift; sourceTree = "<group>"; };
@@ -3207,6 +3210,7 @@
 				1AE015CDA0C3F95CE3FBB4F3 /* DeviceRegistry.swift */,
 				7279FAB1D028DD8804694B21 /* HandoffService.swift */,
 				7B22A03578915E3A117AB6AA /* PreferenceSyncEngine.swift */,
+				21D3526CCC665056029CBF8C /* SmartTransportManager.swift */,
 				C48B618D8E77233F77D02CD0 /* TheaClipSyncService.swift */,
 				AAD68D6416E308F43865C790 /* UnifiedContextSync.swift */,
 			);
@@ -7572,6 +7576,7 @@
 				00023931B261CCABF845E2F0 /* SmartModelRouter+ModelCatalog.swift in Sources */,
 				1878B5418C19F464B77B1E80 /* SmartModelRouter.swift in Sources */,
 				21FE11DB889EB2D529BA0E26 /* SmartNotificationScheduler.swift in Sources */,
+				66828BC3233D05A23CC1AAB7 /* SmartTransportManager.swift in Sources */,
 				33F8ACD836FC9DCB5BC33B90 /* SmartTriggerEngine.swift in Sources */,
 				E7EE5137F7FA31343133176E /* SocialMediaMonitor.swift in Sources */,
 				9BDD16930AB0A61ADE7E19C3 /* SpeechIntelligence.swift in Sources */,
@@ -8556,6 +8561,7 @@
 				4F6625E40763222423478FD4 /* SmartModelRouter+ModelCatalog.swift in Sources */,
 				B3B04BB1ED566FDD916FE3B6 /* SmartModelRouter.swift in Sources */,
 				41E11F965FBEC74684B0AC1E /* SmartNotificationScheduler.swift in Sources */,
+				DC970AC47C727C8F2D252843 /* SmartTransportManager.swift in Sources */,
 				568D884225509AF1A8421C0B /* SmartTriggerEngine.swift in Sources */,
 				0509A201D476C50C0033A7D1 /* SocialMediaMonitor.swift in Sources */,
 				026ADE6C5F995C7836FAB500 /* SpeechIntelligence.swift in Sources */,
