@@ -433,9 +433,11 @@ final class TheaContextPressureTests: XCTestCase {
     }
 
     func testEqualityIsReflexive() {
-        for pressure in [TheaContextPressure.nominal, .elevated, .critical, .exceeded] {
-            XCTAssertFalse(pressure < pressure, "\(pressure.rawValue) should not be less than itself")
-            XCTAssertEqual(pressure, pressure)
+        let allLevels: [TheaContextPressure] = [.nominal, .elevated, .critical, .exceeded]
+        for pressure in allLevels {
+            let copy = pressure
+            XCTAssertFalse(copy < pressure, "\(pressure.rawValue) should not be less than itself")
+            XCTAssertEqual(copy, pressure)
         }
     }
 }
