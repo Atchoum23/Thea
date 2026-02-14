@@ -200,6 +200,7 @@ struct AIProvidersSettingsView: View {
                 ForEach(ProviderDisplayInfo.all) { provider in
                     HStack {
                         Image(systemName: provider.icon)
+                            .accessibilityHidden(true)
                         Text(provider.displayName)
                     }
                     .tag(provider.id)
@@ -276,6 +277,7 @@ struct AIProvidersSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Test \(provider.displayName) connection")
             }
 
             Button {
@@ -285,6 +287,7 @@ struct AIProvidersSettingsView: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Details for \(provider.displayName)")
         }
         .padding(.vertical, 4)
     }
@@ -360,9 +363,11 @@ struct AIProvidersSettingsView: View {
             if settingsManager.hasAPIKey(for: provider) {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
+                    .accessibilityHidden(true)
             } else if !key.wrappedValue.isEmpty {
                 Image(systemName: "circle.dotted")
                     .foregroundStyle(.orange)
+                    .accessibilityHidden(true)
             }
         }
     }
@@ -434,6 +439,7 @@ struct AIProvidersSettingsView: View {
         VStack(spacing: 4) {
             Image(systemName: icon)
                 .foregroundStyle(color)
+                .accessibilityHidden(true)
 
             Text(value)
                 .font(.caption)
@@ -447,6 +453,8 @@ struct AIProvidersSettingsView: View {
         .padding(.vertical, 8)
         .background(color.opacity(0.1))
         .cornerRadius(8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 
     // MARK: - Fallback Configuration Section
@@ -475,6 +483,7 @@ struct AIProvidersSettingsView: View {
                             if let provider = ProviderDisplayInfo.all.first(where: { $0.id == providerId }) {
                                 Image(systemName: provider.icon)
                                     .foregroundStyle(.secondary)
+                                    .accessibilityHidden(true)
                                 Text(provider.displayName)
                             }
 
@@ -489,6 +498,7 @@ struct AIProvidersSettingsView: View {
                                         .font(.caption)
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityLabel("Move up")
                             }
 
                             if index < fallbackOrder.count - 1 {
@@ -499,6 +509,7 @@ struct AIProvidersSettingsView: View {
                                         .font(.caption)
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityLabel("Move down")
                             }
                         }
                         .padding(.vertical, 2)
