@@ -20,7 +20,7 @@ struct iOSSettingsView: View {
             // MARK: - AI & Models Section
             Section {
                 NavigationLink {
-                    iOSAIProvidersSettingsView()
+                    IOSAIProvidersSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "cloud.fill",
@@ -31,7 +31,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSModelsSettingsView()
+                    IOSModelsSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "cpu",
@@ -43,7 +43,7 @@ struct iOSSettingsView: View {
 
                 // Local Models - not available on iOS (MLX is macOS only)
                 NavigationLink {
-                    iOSLocalModelsUnavailableView()
+                    IOSLocalModelsUnavailableView()
                 } label: {
                     SettingsRow(
                         icon: "desktopcomputer",
@@ -54,7 +54,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSOrchestratorSettingsView()
+                    IOSOrchestratorSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "gearshape.2.fill",
@@ -81,7 +81,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSMemorySettingsView()
+                    IOSMemorySettingsView()
                 } label: {
                     SettingsRow(
                         icon: "brain",
@@ -92,7 +92,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSAutomationSettingsView()
+                    IOSAutomationSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "bolt.fill",
@@ -108,7 +108,7 @@ struct iOSSettingsView: View {
             // MARK: - Integrations Section
             Section {
                 NavigationLink {
-                    iOSIntegrationsSettingsView()
+                    IOSIntegrationsSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "square.grid.2x2.fill",
@@ -143,7 +143,7 @@ struct iOSSettingsView: View {
             // MARK: - Data & Sync Section
             Section {
                 NavigationLink {
-                    iOSSyncSettingsView()
+                    IOSSyncSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "icloud.fill",
@@ -154,7 +154,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSBackupSettingsView()
+                    IOSBackupSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "arrow.clockwise.icloud.fill",
@@ -182,7 +182,7 @@ struct iOSSettingsView: View {
             // MARK: - Privacy & Security Section
             Section {
                 NavigationLink {
-                    iOSPrivacySettingsView()
+                    IOSPrivacySettingsView()
                 } label: {
                     SettingsRow(
                         icon: "hand.raised.fill",
@@ -210,7 +210,7 @@ struct iOSSettingsView: View {
             // MARK: - Advanced Section
             Section {
                 NavigationLink {
-                    iOSAdvancedSettingsView()
+                    IOSAdvancedSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "wrench.and.screwdriver.fill",
@@ -263,7 +263,7 @@ struct iOSSettingsView: View {
             iOSAPIKeysView()
         }
         .sheet(isPresented: $showingPermissions) {
-            iOSPermissionsView()
+            IOSPermissionsView()
         }
         .confirmationDialog(
             "Clear All Data",
@@ -320,12 +320,12 @@ private struct SettingsRow: View {
 
 // MARK: - iOS AI Providers Settings View
 
-struct iOSAIProvidersSettingsView: View {
+struct IOSAIProvidersSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
     @State private var showingAPIKeys = false
 
     // Provider health simulation
-    @State private var providerHealth: [String: iOSProviderHealthStatus] = [
+    @State private var providerHealth: [String: IOSProviderHealthStatus] = [
         "OpenAI": .healthy,
         "Anthropic": .healthy,
         "Google": .healthy,
@@ -398,7 +398,7 @@ struct iOSAIProvidersSettingsView: View {
         }
     }
 
-    private func statusColor(for status: iOSProviderHealthStatus) -> Color {
+    private func statusColor(for status: IOSProviderHealthStatus) -> Color {
         switch status {
         case .healthy: return .green
         case .degraded: return .yellow
@@ -414,7 +414,7 @@ struct iOSAIProvidersSettingsView: View {
     }
 }
 
-private enum iOSProviderHealthStatus: String {
+private enum IOSProviderHealthStatus: String {
     case healthy = "Healthy"
     case degraded = "Degraded"
     case down = "Down"
@@ -423,7 +423,7 @@ private enum iOSProviderHealthStatus: String {
 
 // MARK: - iOS Models Settings View
 
-struct iOSModelsSettingsView: View {
+struct IOSModelsSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
     @State private var selectedModel = "gpt-4o"
     @State private var favoriteModels: Set<String> = ["gpt-4o", "claude-3-5-sonnet"]
@@ -500,7 +500,7 @@ struct iOSModelsSettingsView: View {
 
 // MARK: - iOS Local Models Unavailable View
 
-struct iOSLocalModelsUnavailableView: View {
+struct IOSLocalModelsUnavailableView: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -556,8 +556,8 @@ struct iOSLocalModelsUnavailableView: View {
 
 // MARK: - iOS Orchestrator Settings View
 
-struct iOSOrchestratorSettingsView: View {
-    @State private var config = iOSOrchestratorConfig.load()
+struct IOSOrchestratorSettingsView: View {
+    @State private var config = IOSOrchestratorConfig.load()
 
     var body: some View {
         Form {
@@ -629,7 +629,7 @@ struct iOSOrchestratorSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSOrchestratorConfig()
+                    config = IOSOrchestratorConfig()
                 }
             }
         }
@@ -641,7 +641,7 @@ struct iOSOrchestratorSettingsView: View {
     }
 }
 
-private struct iOSOrchestratorConfig: Equatable, Codable {
+private struct IOSOrchestratorConfig: Equatable, Codable {
     var isEnabled: Bool = true
     var maxConcurrentTasks: Int = 4
     var agentTimeout: Int = 60
@@ -651,12 +651,12 @@ private struct iOSOrchestratorConfig: Equatable, Codable {
 
     private static let storageKey = "iOSOrchestratorConfig"
 
-    static func load() -> iOSOrchestratorConfig {
+    static func load() -> IOSOrchestratorConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSOrchestratorConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSOrchestratorConfig.self, from: data) {
             return config
         }
-        return iOSOrchestratorConfig()
+        return IOSOrchestratorConfig()
     }
 
     func save() {
@@ -731,8 +731,8 @@ struct iOSVoiceSettingsView: View {
 
 // MARK: - iOS Memory Settings View
 
-struct iOSMemorySettingsView: View {
-    @State private var config = iOSMemoryConfig.load()
+struct IOSMemorySettingsView: View {
+    @State private var config = IOSMemoryConfig.load()
 
     var body: some View {
         Form {
@@ -804,7 +804,7 @@ struct iOSMemorySettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSMemoryConfig()
+                    config = IOSMemoryConfig()
                 }
             }
         }
@@ -816,7 +816,7 @@ struct iOSMemorySettingsView: View {
     }
 }
 
-private struct iOSMemoryConfig: Equatable, Codable {
+private struct IOSMemoryConfig: Equatable, Codable {
     var isEnabled: Bool = true
     var shortTermCapacity: Int = 50
     var longTermCapacity: Int = 10000
@@ -826,12 +826,12 @@ private struct iOSMemoryConfig: Equatable, Codable {
 
     private static let storageKey = "iOSMemoryConfig"
 
-    static func load() -> iOSMemoryConfig {
+    static func load() -> IOSMemoryConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSMemoryConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSMemoryConfig.self, from: data) {
             return config
         }
-        return iOSMemoryConfig()
+        return IOSMemoryConfig()
     }
 
     func save() {
@@ -843,8 +843,8 @@ private struct iOSMemoryConfig: Equatable, Codable {
 
 // MARK: - iOS Automation Settings View
 
-struct iOSAutomationSettingsView: View {
-    @State private var config = iOSAutomationConfig.load()
+struct IOSAutomationSettingsView: View {
+    @State private var config = IOSAutomationConfig.load()
 
     var body: some View {
         Form {
@@ -903,7 +903,7 @@ struct iOSAutomationSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSAutomationConfig()
+                    config = IOSAutomationConfig()
                 }
             }
         }
@@ -915,7 +915,7 @@ struct iOSAutomationSettingsView: View {
     }
 }
 
-private struct iOSAutomationConfig: Equatable, Codable {
+private struct IOSAutomationConfig: Equatable, Codable {
     var isEnabled: Bool = true
     var executionMode: String = "normal"
     var requireApproval: Bool = true
@@ -923,12 +923,12 @@ private struct iOSAutomationConfig: Equatable, Codable {
 
     private static let storageKey = "iOSAutomationConfig"
 
-    static func load() -> iOSAutomationConfig {
+    static func load() -> IOSAutomationConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSAutomationConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSAutomationConfig.self, from: data) {
             return config
         }
-        return iOSAutomationConfig()
+        return IOSAutomationConfig()
     }
 
     func save() {
@@ -940,8 +940,8 @@ private struct iOSAutomationConfig: Equatable, Codable {
 
 // MARK: - iOS Integrations Settings View
 
-struct iOSIntegrationsSettingsView: View {
-    @State private var config = iOSIntegrationsConfig.load()
+struct IOSIntegrationsSettingsView: View {
+    @State private var config = IOSIntegrationsConfig.load()
 
     var body: some View {
         Form {
@@ -979,7 +979,7 @@ struct iOSIntegrationsSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSIntegrationsConfig()
+                    config = IOSIntegrationsConfig()
                 }
             }
         }
@@ -991,7 +991,7 @@ struct iOSIntegrationsSettingsView: View {
     }
 }
 
-private struct iOSIntegrationsConfig: Equatable, Codable {
+private struct IOSIntegrationsConfig: Equatable, Codable {
     var healthEnabled: Bool = false
     var fitnessEnabled: Bool = false
     var calendarEnabled: Bool = true
@@ -1002,12 +1002,12 @@ private struct iOSIntegrationsConfig: Equatable, Codable {
 
     private static let storageKey = "iOSIntegrationsConfig"
 
-    static func load() -> iOSIntegrationsConfig {
+    static func load() -> IOSIntegrationsConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSIntegrationsConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSIntegrationsConfig.self, from: data) {
             return config
         }
-        return iOSIntegrationsConfig()
+        return IOSIntegrationsConfig()
     }
 
     func save() {
@@ -1019,9 +1019,9 @@ private struct iOSIntegrationsConfig: Equatable, Codable {
 
 // MARK: - iOS Sync Settings View
 
-struct iOSSyncSettingsView: View {
+struct IOSSyncSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
-    @State private var config = iOSSyncConfig.load()
+    @State private var config = IOSSyncConfig.load()
 
     var body: some View {
         Form {
@@ -1093,7 +1093,7 @@ struct iOSSyncSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSSyncConfig()
+                    config = IOSSyncConfig()
                 }
             }
         }
@@ -1105,7 +1105,7 @@ struct iOSSyncSettingsView: View {
     }
 }
 
-private struct iOSSyncConfig: Equatable, Codable {
+private struct IOSSyncConfig: Equatable, Codable {
     var syncConversations: Bool = true
     var syncSettings: Bool = true
     var syncKnowledge: Bool = true
@@ -1113,12 +1113,12 @@ private struct iOSSyncConfig: Equatable, Codable {
 
     private static let storageKey = "iOSSyncConfig"
 
-    static func load() -> iOSSyncConfig {
+    static func load() -> IOSSyncConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSSyncConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSSyncConfig.self, from: data) {
             return config
         }
-        return iOSSyncConfig()
+        return IOSSyncConfig()
     }
 
     func save() {
@@ -1130,8 +1130,8 @@ private struct iOSSyncConfig: Equatable, Codable {
 
 // MARK: - iOS Backup Settings View
 
-struct iOSBackupSettingsView: View {
-    @State private var config = iOSBackupConfig.load()
+struct IOSBackupSettingsView: View {
+    @State private var config = IOSBackupConfig.load()
     @State private var showingCreateBackup = false
 
     var body: some View {
@@ -1214,7 +1214,7 @@ struct iOSBackupSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSBackupConfig()
+                    config = IOSBackupConfig()
                 }
             }
         }
@@ -1234,7 +1234,7 @@ struct iOSBackupSettingsView: View {
     }
 }
 
-private struct iOSBackupConfig: Equatable, Codable {
+private struct IOSBackupConfig: Equatable, Codable {
     var autoBackupEnabled: Bool = true
     var backupFrequency: String = "weekly"
     var backupConversations: Bool = true
@@ -1244,12 +1244,12 @@ private struct iOSBackupConfig: Equatable, Codable {
 
     private static let storageKey = "iOSBackupConfig"
 
-    static func load() -> iOSBackupConfig {
+    static func load() -> IOSBackupConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSBackupConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSBackupConfig.self, from: data) {
             return config
         }
-        return iOSBackupConfig()
+        return IOSBackupConfig()
     }
 
     func save() {
@@ -1261,9 +1261,9 @@ private struct iOSBackupConfig: Equatable, Codable {
 
 // MARK: - iOS Privacy Settings View
 
-struct iOSPrivacySettingsView: View {
+struct IOSPrivacySettingsView: View {
     @State private var settingsManager = SettingsManager.shared
-    @State private var config = iOSPrivacyConfig.load()
+    @State private var config = IOSPrivacyConfig.load()
     @State private var showingExportOptions = false
 
     var body: some View {
@@ -1345,7 +1345,7 @@ struct iOSPrivacySettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSPrivacyConfig()
+                    config = IOSPrivacyConfig()
                 }
             }
         }
@@ -1355,7 +1355,7 @@ struct iOSPrivacySettingsView: View {
             config.save()
         }
         .sheet(isPresented: $showingExportOptions) {
-            iOSExportOptionsView()
+            IOSExportOptionsView()
         }
     }
 
@@ -1375,7 +1375,7 @@ struct iOSPrivacySettingsView: View {
     }
 }
 
-private struct iOSPrivacyConfig: Equatable, Codable {
+private struct IOSPrivacyConfig: Equatable, Codable {
     var crashReportsEnabled: Bool = true
     var dataRetention: String = "30"
     var requireBiometric: Bool = false
@@ -1383,12 +1383,12 @@ private struct iOSPrivacyConfig: Equatable, Codable {
 
     private static let storageKey = "iOSPrivacyConfig"
 
-    static func load() -> iOSPrivacyConfig {
+    static func load() -> IOSPrivacyConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSPrivacyConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSPrivacyConfig.self, from: data) {
             return config
         }
-        return iOSPrivacyConfig()
+        return IOSPrivacyConfig()
     }
 
     func save() {
@@ -1398,7 +1398,7 @@ private struct iOSPrivacyConfig: Equatable, Codable {
     }
 }
 
-struct iOSExportOptionsView: View {
+struct IOSExportOptionsView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -1437,8 +1437,8 @@ struct iOSExportOptionsView: View {
 
 // MARK: - iOS Advanced Settings View
 
-struct iOSAdvancedSettingsView: View {
-    @State private var config = iOSAdvancedConfig.load()
+struct IOSAdvancedSettingsView: View {
+    @State private var config = IOSAdvancedConfig.load()
 
     var body: some View {
         Form {
@@ -1493,7 +1493,7 @@ struct iOSAdvancedSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSAdvancedConfig()
+                    config = IOSAdvancedConfig()
                 }
             }
         }
@@ -1505,7 +1505,7 @@ struct iOSAdvancedSettingsView: View {
     }
 }
 
-private struct iOSAdvancedConfig: Equatable, Codable {
+private struct IOSAdvancedConfig: Equatable, Codable {
     var debugMode: Bool = false
     var verboseLogging: Bool = false
     var useCellularData: Bool = true
@@ -1515,12 +1515,12 @@ private struct iOSAdvancedConfig: Equatable, Codable {
 
     private static let storageKey = "iOSAdvancedConfig"
 
-    static func load() -> iOSAdvancedConfig {
+    static func load() -> IOSAdvancedConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSAdvancedConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSAdvancedConfig.self, from: data) {
             return config
         }
-        return iOSAdvancedConfig()
+        return IOSAdvancedConfig()
     }
 
     func save() {
@@ -1653,14 +1653,14 @@ struct iOSMigrationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var migrationManager = MigrationManager.shared
 
-    @State private var selectedSource: iOSMigrationSourceType?
+    @State private var selectedSource: IOSMigrationSourceType?
     @State private var showingFilePicker = false
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    ForEach(iOSMigrationSourceType.allCases, id: \.self) { source in
+                    ForEach(IOSMigrationSourceType.allCases, id: \.self) { source in
                         Button {
                             selectedSource = source
                             showingFilePicker = true
@@ -1732,7 +1732,7 @@ struct iOSMigrationView: View {
 }
 
 // Migration source enumeration
-enum iOSMigrationSourceType: String, CaseIterable {
+enum IOSMigrationSourceType: String, CaseIterable {
     case chatGPT
     case claude
     case cursor
@@ -1764,7 +1764,7 @@ enum iOSMigrationSourceType: String, CaseIterable {
 
 struct iOSMigrationImportView: View {
     @Environment(\.dismiss) private var dismiss
-    let source: iOSMigrationSourceType
+    let source: IOSMigrationSourceType
 
     @State private var migrationManager = MigrationManager.shared
     @State private var selectedURL: URL?
@@ -2021,7 +2021,7 @@ struct FeatureRow: View {
 
 // MARK: - iOS Permissions View
 
-struct iOSPermissionsView: View {
+struct IOSPermissionsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var permissionsManager = PermissionsManager.shared
     @State private var expandedCategories: Set<PermissionCategory> = Set(PermissionCategory.allCases)
@@ -2035,7 +2035,7 @@ struct iOSPermissionsView: View {
                 ForEach(permissionsManager.availableCategories) { category in
                     Section {
                         ForEach(permissionsManager.permissions(for: category), id: \.id) { permission in
-                            iOSPermissionRow(
+                            IOSPermissionRow(
                                 permission: permission,
                                 onRequest: {
                                     Task {
@@ -2118,7 +2118,7 @@ struct iOSPermissionsView: View {
     }
 }
 
-private struct iOSPermissionRow: View {
+private struct IOSPermissionRow: View {
     let permission: PermissionInfo
     let onRequest: () -> Void
     let onOpenSettings: () -> Void

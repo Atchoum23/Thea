@@ -18,7 +18,7 @@ struct iOSSettingsView: View {
             // MARK: - AI & Models Section
             Section {
                 NavigationLink {
-                    iOSAIProvidersSettingsView()
+                    IOSAIProvidersSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "cloud.fill",
@@ -29,7 +29,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSModelsSettingsView()
+                    IOSModelsSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "cpu",
@@ -41,7 +41,7 @@ struct iOSSettingsView: View {
 
                 // Local Models - not available on iOS (MLX is macOS only)
                 NavigationLink {
-                    iOSLocalModelsUnavailableView()
+                    IOSLocalModelsUnavailableView()
                 } label: {
                     SettingsRow(
                         icon: "desktopcomputer",
@@ -52,7 +52,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSOrchestratorSettingsView()
+                    IOSOrchestratorSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "gearshape.2.fill",
@@ -79,7 +79,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSMemorySettingsView()
+                    IOSMemorySettingsView()
                 } label: {
                     SettingsRow(
                         icon: "brain",
@@ -90,7 +90,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSAutomationSettingsView()
+                    IOSAutomationSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "bolt.fill",
@@ -106,7 +106,7 @@ struct iOSSettingsView: View {
             // MARK: - Integrations Section
             Section {
                 NavigationLink {
-                    iOSIntegrationsSettingsView()
+                    IOSIntegrationsSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "square.grid.2x2.fill",
@@ -141,7 +141,7 @@ struct iOSSettingsView: View {
             // MARK: - Data & Sync Section
             Section {
                 NavigationLink {
-                    iOSSyncSettingsView()
+                    IOSSyncSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "icloud.fill",
@@ -152,7 +152,7 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
-                    iOSBackupSettingsView()
+                    IOSBackupSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "arrow.clockwise.icloud.fill",
@@ -180,7 +180,7 @@ struct iOSSettingsView: View {
             // MARK: - Privacy & Security Section
             Section {
                 NavigationLink {
-                    iOSPrivacySettingsView()
+                    IOSPrivacySettingsView()
                 } label: {
                     SettingsRow(
                         icon: "hand.raised.fill",
@@ -208,7 +208,7 @@ struct iOSSettingsView: View {
             // MARK: - Advanced Section
             Section {
                 NavigationLink {
-                    iOSAdvancedSettingsView()
+                    IOSAdvancedSettingsView()
                 } label: {
                     SettingsRow(
                         icon: "wrench.and.screwdriver.fill",
@@ -261,7 +261,7 @@ struct iOSSettingsView: View {
             iOSAPIKeysView()
         }
         .sheet(isPresented: $showingPermissions) {
-            iOSPermissionsView()
+            IOSPermissionsView()
         }
         .confirmationDialog(
             "Clear All Data",

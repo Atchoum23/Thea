@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct iOSMemorySettingsView: View {
-    @State private var config = iOSMemoryConfig.load()
+struct IOSMemorySettingsView: View {
+    @State private var config = IOSMemoryConfig.load()
 
     var body: some View {
         Form {
@@ -73,7 +73,7 @@ struct iOSMemorySettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSMemoryConfig()
+                    config = IOSMemoryConfig()
                 }
             }
         }
@@ -85,7 +85,7 @@ struct iOSMemorySettingsView: View {
     }
 }
 
-struct iOSMemoryConfig: Equatable, Codable {
+struct IOSMemoryConfig: Equatable, Codable {
     var isEnabled: Bool = true
     var shortTermCapacity: Int = 50
     var longTermCapacity: Int = 10000
@@ -95,12 +95,12 @@ struct iOSMemoryConfig: Equatable, Codable {
 
     private static let storageKey = "iOSMemoryConfig"
 
-    static func load() -> iOSMemoryConfig {
+    static func load() -> IOSMemoryConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSMemoryConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSMemoryConfig.self, from: data) {
             return config
         }
-        return iOSMemoryConfig()
+        return IOSMemoryConfig()
     }
 
     func save() {

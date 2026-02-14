@@ -1,8 +1,8 @@
 import SwiftUI
 
-struct iOSSyncSettingsView: View {
+struct IOSSyncSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
-    @State private var config = iOSSyncConfig.load()
+    @State private var config = IOSSyncConfig.load()
 
     var body: some View {
         Form {
@@ -74,7 +74,7 @@ struct iOSSyncSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSSyncConfig()
+                    config = IOSSyncConfig()
                 }
             }
         }
@@ -86,7 +86,7 @@ struct iOSSyncSettingsView: View {
     }
 }
 
-struct iOSSyncConfig: Equatable, Codable {
+struct IOSSyncConfig: Equatable, Codable {
     var syncConversations: Bool = true
     var syncSettings: Bool = true
     var syncKnowledge: Bool = true
@@ -94,12 +94,12 @@ struct iOSSyncConfig: Equatable, Codable {
 
     private static let storageKey = "iOSSyncConfig"
 
-    static func load() -> iOSSyncConfig {
+    static func load() -> IOSSyncConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSSyncConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSSyncConfig.self, from: data) {
             return config
         }
-        return iOSSyncConfig()
+        return IOSSyncConfig()
     }
 
     func save() {
@@ -109,8 +109,8 @@ struct iOSSyncConfig: Equatable, Codable {
     }
 }
 
-struct iOSBackupSettingsView: View {
-    @State private var config = iOSBackupConfig.load()
+struct IOSBackupSettingsView: View {
+    @State private var config = IOSBackupConfig.load()
     @State private var showingCreateBackup = false
 
     var body: some View {
@@ -193,7 +193,7 @@ struct iOSBackupSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSBackupConfig()
+                    config = IOSBackupConfig()
                 }
             }
         }
@@ -213,7 +213,7 @@ struct iOSBackupSettingsView: View {
     }
 }
 
-struct iOSBackupConfig: Equatable, Codable {
+struct IOSBackupConfig: Equatable, Codable {
     var autoBackupEnabled: Bool = true
     var backupFrequency: String = "weekly"
     var backupConversations: Bool = true
@@ -223,12 +223,12 @@ struct iOSBackupConfig: Equatable, Codable {
 
     private static let storageKey = "iOSBackupConfig"
 
-    static func load() -> iOSBackupConfig {
+    static func load() -> IOSBackupConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSBackupConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSBackupConfig.self, from: data) {
             return config
         }
-        return iOSBackupConfig()
+        return IOSBackupConfig()
     }
 
     func save() {

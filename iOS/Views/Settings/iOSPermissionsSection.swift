@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct iOSPermissionsView: View {
+struct IOSPermissionsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var permissionsManager = PermissionsManager.shared
     @State private var expandedCategories: Set<PermissionCategory> = Set(PermissionCategory.allCases)
@@ -14,7 +14,7 @@ struct iOSPermissionsView: View {
                 ForEach(permissionsManager.availableCategories) { category in
                     Section {
                         ForEach(permissionsManager.permissions(for: category), id: \.id) { permission in
-                            iOSPermissionRow(
+                            IOSPermissionRow(
                                 permission: permission,
                                 onRequest: {
                                     Task {
@@ -97,7 +97,7 @@ struct iOSPermissionsView: View {
     }
 }
 
-struct iOSPermissionRow: View {
+struct IOSPermissionRow: View {
     let permission: PermissionInfo
     let onRequest: () -> Void
     let onOpenSettings: () -> Void

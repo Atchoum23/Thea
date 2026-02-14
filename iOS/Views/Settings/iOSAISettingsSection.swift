@@ -1,11 +1,11 @@
 import SwiftUI
 
-struct iOSAIProvidersSettingsView: View {
+struct IOSAIProvidersSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
     @State private var showingAPIKeys = false
 
     // Provider health simulation
-    @State private var providerHealth: [String: iOSProviderHealthStatus] = [
+    @State private var providerHealth: [String: IOSProviderHealthStatus] = [
         "OpenAI": .healthy,
         "Anthropic": .healthy,
         "Google": .healthy,
@@ -78,7 +78,7 @@ struct iOSAIProvidersSettingsView: View {
         }
     }
 
-    private func statusColor(for status: iOSProviderHealthStatus) -> Color {
+    private func statusColor(for status: IOSProviderHealthStatus) -> Color {
         switch status {
         case .healthy: return .green
         case .degraded: return .yellow
@@ -94,14 +94,14 @@ struct iOSAIProvidersSettingsView: View {
     }
 }
 
-enum iOSProviderHealthStatus: String {
+enum IOSProviderHealthStatus: String {
     case healthy = "Healthy"
     case degraded = "Degraded"
     case down = "Down"
     case unknown = "Unknown"
 }
 
-struct iOSModelsSettingsView: View {
+struct IOSModelsSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
     @State private var selectedModel = "gpt-4o"
     @State private var favoriteModels: Set<String> = ["gpt-4o", "claude-3-5-sonnet"]
@@ -176,7 +176,7 @@ struct iOSModelsSettingsView: View {
     }
 }
 
-struct iOSLocalModelsUnavailableView: View {
+struct IOSLocalModelsUnavailableView: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -230,8 +230,8 @@ struct iOSLocalModelsUnavailableView: View {
     }
 }
 
-struct iOSOrchestratorSettingsView: View {
-    @State private var config = iOSOrchestratorConfig.load()
+struct IOSOrchestratorSettingsView: View {
+    @State private var config = IOSOrchestratorConfig.load()
 
     var body: some View {
         Form {
@@ -303,7 +303,7 @@ struct iOSOrchestratorSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSOrchestratorConfig()
+                    config = IOSOrchestratorConfig()
                 }
             }
         }
@@ -315,7 +315,7 @@ struct iOSOrchestratorSettingsView: View {
     }
 }
 
-struct iOSOrchestratorConfig: Equatable, Codable {
+struct IOSOrchestratorConfig: Equatable, Codable {
     var isEnabled: Bool = true
     var maxConcurrentTasks: Int = 4
     var agentTimeout: Int = 60
@@ -325,12 +325,12 @@ struct iOSOrchestratorConfig: Equatable, Codable {
 
     private static let storageKey = "iOSOrchestratorConfig"
 
-    static func load() -> iOSOrchestratorConfig {
+    static func load() -> IOSOrchestratorConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSOrchestratorConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSOrchestratorConfig.self, from: data) {
             return config
         }
-        return iOSOrchestratorConfig()
+        return IOSOrchestratorConfig()
     }
 
     func save() {

@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct iOSAdvancedSettingsView: View {
-    @State private var config = iOSAdvancedConfig.load()
+struct IOSAdvancedSettingsView: View {
+    @State private var config = IOSAdvancedConfig.load()
 
     var body: some View {
         Form {
@@ -56,7 +56,7 @@ struct iOSAdvancedSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSAdvancedConfig()
+                    config = IOSAdvancedConfig()
                 }
             }
         }
@@ -68,7 +68,7 @@ struct iOSAdvancedSettingsView: View {
     }
 }
 
-struct iOSAdvancedConfig: Equatable, Codable {
+struct IOSAdvancedConfig: Equatable, Codable {
     var debugMode: Bool = false
     var verboseLogging: Bool = false
     var useCellularData: Bool = true
@@ -78,12 +78,12 @@ struct iOSAdvancedConfig: Equatable, Codable {
 
     private static let storageKey = "iOSAdvancedConfig"
 
-    static func load() -> iOSAdvancedConfig {
+    static func load() -> IOSAdvancedConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSAdvancedConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSAdvancedConfig.self, from: data) {
             return config
         }
-        return iOSAdvancedConfig()
+        return IOSAdvancedConfig()
     }
 
     func save() {

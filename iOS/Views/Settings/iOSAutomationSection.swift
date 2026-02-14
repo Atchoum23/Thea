@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct iOSAutomationSettingsView: View {
-    @State private var config = iOSAutomationConfig.load()
+struct IOSAutomationSettingsView: View {
+    @State private var config = IOSAutomationConfig.load()
 
     var body: some View {
         Form {
@@ -60,7 +60,7 @@ struct iOSAutomationSettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSAutomationConfig()
+                    config = IOSAutomationConfig()
                 }
             }
         }
@@ -72,7 +72,7 @@ struct iOSAutomationSettingsView: View {
     }
 }
 
-struct iOSAutomationConfig: Equatable, Codable {
+struct IOSAutomationConfig: Equatable, Codable {
     var isEnabled: Bool = true
     var executionMode: String = "normal"
     var requireApproval: Bool = true
@@ -80,12 +80,12 @@ struct iOSAutomationConfig: Equatable, Codable {
 
     private static let storageKey = "iOSAutomationConfig"
 
-    static func load() -> iOSAutomationConfig {
+    static func load() -> IOSAutomationConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSAutomationConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSAutomationConfig.self, from: data) {
             return config
         }
-        return iOSAutomationConfig()
+        return IOSAutomationConfig()
     }
 
     func save() {

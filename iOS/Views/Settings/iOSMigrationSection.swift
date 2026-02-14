@@ -4,14 +4,14 @@ struct iOSMigrationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var migrationManager = MigrationManager.shared
 
-    @State private var selectedSource: iOSMigrationSourceType?
+    @State private var selectedSource: IOSMigrationSourceType?
     @State private var showingFilePicker = false
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    ForEach(iOSMigrationSourceType.allCases, id: \.self) { source in
+                    ForEach(IOSMigrationSourceType.allCases, id: \.self) { source in
                         Button {
                             selectedSource = source
                             showingFilePicker = true
@@ -82,7 +82,7 @@ struct iOSMigrationView: View {
     }
 }
 
-enum iOSMigrationSourceType: String, CaseIterable {
+enum IOSMigrationSourceType: String, CaseIterable {
     case chatGPT
     case claude
     case cursor
@@ -114,7 +114,7 @@ enum iOSMigrationSourceType: String, CaseIterable {
 
 struct iOSMigrationImportView: View {
     @Environment(\.dismiss) private var dismiss
-    let source: iOSMigrationSourceType
+    let source: IOSMigrationSourceType
 
     @State private var migrationManager = MigrationManager.shared
     @State private var selectedURL: URL?

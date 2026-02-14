@@ -1,8 +1,8 @@
 import SwiftUI
 
-struct iOSPrivacySettingsView: View {
+struct IOSPrivacySettingsView: View {
     @State private var settingsManager = SettingsManager.shared
-    @State private var config = iOSPrivacyConfig.load()
+    @State private var config = IOSPrivacyConfig.load()
     @State private var showingExportOptions = false
 
     var body: some View {
@@ -84,7 +84,7 @@ struct iOSPrivacySettingsView: View {
             // Reset
             Section {
                 Button("Reset to Defaults", role: .destructive) {
-                    config = iOSPrivacyConfig()
+                    config = IOSPrivacyConfig()
                 }
             }
         }
@@ -94,7 +94,7 @@ struct iOSPrivacySettingsView: View {
             config.save()
         }
         .sheet(isPresented: $showingExportOptions) {
-            iOSExportOptionsView()
+            IOSExportOptionsView()
         }
     }
 
@@ -114,7 +114,7 @@ struct iOSPrivacySettingsView: View {
     }
 }
 
-struct iOSPrivacyConfig: Equatable, Codable {
+struct IOSPrivacyConfig: Equatable, Codable {
     var crashReportsEnabled: Bool = true
     var dataRetention: String = "30"
     var requireBiometric: Bool = false
@@ -122,12 +122,12 @@ struct iOSPrivacyConfig: Equatable, Codable {
 
     private static let storageKey = "iOSPrivacyConfig"
 
-    static func load() -> iOSPrivacyConfig {
+    static func load() -> IOSPrivacyConfig {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(iOSPrivacyConfig.self, from: data) {
+           let config = try? JSONDecoder().decode(IOSPrivacyConfig.self, from: data) {
             return config
         }
-        return iOSPrivacyConfig()
+        return IOSPrivacyConfig()
     }
 
     func save() {
@@ -137,7 +137,7 @@ struct iOSPrivacyConfig: Equatable, Codable {
     }
 }
 
-struct iOSExportOptionsView: View {
+struct IOSExportOptionsView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
