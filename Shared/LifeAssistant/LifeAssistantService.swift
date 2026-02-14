@@ -492,90 +492,275 @@ public final class LifeAssistantService {
     }
 }
 
-// MARK: - Sub-Services (Stubs for full implementation)
+// MARK: - Sub-Services (Wired to Real Data Sources)
 
 @MainActor
 final class CalendarAssistant {
+    private let eventStore = EKEventStore()
+    private let logger = Logger(subsystem: "com.thea.life", category: "CalendarAssistant")
+
     func getTodayOverview() async -> AssistantCalendarSummary? {
-        // Integrate with EventKit
-        AssistantCalendarSummary(eventCount: 3, nextEvent: "Team Standup at 10:00 AM", freeTime: 4)
+        let status = EKEventStore.authorizationStatus(for: .event)
+        guard status == .fullAccess || status == .authorized else {
+            return nil
+        }
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: Date())
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        let predicate = eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: nil)
+        let events = eventStore.events(matching: predicate)
+
+        let now = Date()
+        let nextEvent = events.first(where: { $0.startDate > now })
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        let nextEventStr = nextEvent.map { "\($0.title ?? "Event") at \(formatter.string(from: $0.startDate))" }
+
+        // Estimate free time: total waking hours (16) minus scheduled hours
+        let scheduledHours = events.reduce(0.0) { $0 + $1.endDate.timeIntervalSince($1.startDate) / 3600 }
+        let freeTime = max(0, Int(16 - scheduledHours))
+
+        return AssistantCalendarSummary(eventCount: events.count, nextEvent: nextEventStr, freeTime: freeTime)
     }
 
-    func getUpcomingEvents(hours _hours: Int) async -> [AssistantCalendarEvent] {
-        // Integrate with EventKit
-        []
+    func getUpcomingEvents(hours: Int) async -> [AssistantCalendarEvent] {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        guard status == .fullAccess || status == .authorized else { return [] }
+        let now = Date()
+        let end = Calendar.current.date(byAdding: .hour, value: hours, to: now)!
+        let predicate = eventStore.predicateForEvents(withStart: now, end: end, calendars: nil)
+        return eventStore.events(matching: predicate).map { event in
+            AssistantCalendarEvent(
+                title: event.title ?? "Untitled",
+                startDate: event.startDate,
+                endDate: event.endDate,
+                location: event.location
+            )
+        }
     }
 
     func processQuery(_ query: String) async -> AssistantResponse {
-        AssistantResponse(message: "Calendar feature coming soon", suggestions: [])
+        let events = await getUpcomingEvents(hours: 24)
+        if events.isEmpty {
+            return AssistantResponse(message: "No upcoming events in the next 24 hours. Your schedule is clear!", suggestions: [])
+        }
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        let eventList = events.prefix(5).map { "- \($0.title) at \(formatter.string(from: $0.startDate))" }.joined(separator: "\n")
+        return AssistantResponse(
+            message: "Here are your upcoming events:\n\(eventList)",
+            suggestions: []
+        )
     }
 }
 
 @MainActor
 final class HealthAssistant {
+    #if os(macOS) || os(iOS) || os(watchOS)
+    private let healthStore = HKHealthStore()
+    #endif
+    private let logger = Logger(subsystem: "com.thea.life", category: "HealthAssistant")
+
     func getDailyMetrics() async -> AssistantHealthMetrics? {
-        // Integrate with HealthKit
-        AssistantHealthMetrics(steps: 4500, sleepHours: 6.5, activeCalories: 280, heartRate: 72)
+        #if os(macOS) || os(iOS) || os(watchOS)
+        guard HKHealthStore.isHealthDataAvailable() else { return nil }
+
+        let steps = await queryTodaySum(for: .stepCount)
+        let activeCalories = await queryTodaySum(for: .activeEnergyBurned)
+        let sleepHours = await querySleepHours()
+        let heartRate = await queryLatestHeartRate()
+
+        return AssistantHealthMetrics(
+            steps: Int(steps),
+            sleepHours: sleepHours,
+            activeCalories: Int(activeCalories),
+            heartRate: Int(heartRate)
+        )
+        #else
+        return nil
+        #endif
     }
 
     func estimateEnergyLevel() async -> Double {
-        0.7 // 0-1 scale
+        guard let metrics = await getDailyMetrics() else { return 0.5 }
+        // Estimate energy based on sleep quality and activity
+        let sleepScore = min(metrics.sleepHours / 8.0, 1.0)
+        let activityScore = min(Double(metrics.steps) / 10000.0, 1.0)
+        return (sleepScore * 0.6 + activityScore * 0.4)
     }
 
     func processQuery(_ query: String) async -> AssistantResponse {
-        AssistantResponse(message: "Health tracking coming soon", suggestions: [])
+        guard let metrics = await getDailyMetrics() else {
+            return AssistantResponse(
+                message: "Health data is not available. Please ensure HealthKit access is granted in Settings.",
+                suggestions: []
+            )
+        }
+        let msg = """
+        Today's health summary:
+        - Steps: \(metrics.steps)
+        - Active calories: \(metrics.activeCalories) kcal
+        - Sleep: \(String(format: "%.1f", metrics.sleepHours)) hours
+        - Heart rate: \(metrics.heartRate) bpm
+        """
+        return AssistantResponse(message: msg, suggestions: [])
     }
+
+    #if os(macOS) || os(iOS) || os(watchOS)
+    private func queryTodaySum(for identifier: HKQuantityTypeIdentifier) async -> Double {
+        guard let quantityType = HKQuantityType.quantityType(forIdentifier: identifier) else { return 0 }
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: Date())
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date(), options: .strictStartDate)
+        return await withCheckedContinuation { continuation in
+            let query = HKStatisticsQuery(quantityType: quantityType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, _ in
+                let unit: HKUnit = identifier == .stepCount ? .count() : .kilocalorie()
+                let value = result?.sumQuantity()?.doubleValue(for: unit) ?? 0
+                continuation.resume(returning: value)
+            }
+            healthStore.execute(query)
+        }
+    }
+
+    private func querySleepHours() async -> Double {
+        guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else { return 0 }
+        let calendar = Calendar.current
+        let startOfYesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: Date()))!
+        let predicate = HKQuery.predicateForSamples(withStart: startOfYesterday, end: Date(), options: .strictStartDate)
+        return await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, _ in
+                let totalSeconds = (samples as? [HKCategorySample])?.reduce(0.0) { total, sample in
+                    total + sample.endDate.timeIntervalSince(sample.startDate)
+                } ?? 0
+                continuation.resume(returning: totalSeconds / 3600)
+            }
+            healthStore.execute(query)
+        }
+    }
+
+    private func queryLatestHeartRate() async -> Double {
+        guard let heartRateType = HKQuantityType.quantityType(forIdentifier: .heartRate) else { return 0 }
+        return await withCheckedContinuation { continuation in
+            let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+            let query = HKSampleQuery(sampleType: heartRateType, predicate: nil, limit: 1, sortDescriptors: [sortDescriptor]) { _, samples, _ in
+                let bpm = (samples?.first as? HKQuantitySample)?
+                    .quantity.doubleValue(for: HKUnit.count().unitDivided(by: .minute())) ?? 0
+                continuation.resume(returning: bpm)
+            }
+            healthStore.execute(query)
+        }
+    }
+    #endif
 }
 
 @MainActor
 final class FinancialAssistant {
+    private let logger = Logger(subsystem: "com.thea.life", category: "FinancialAssistant")
+
     func getWeeklySummary() async -> AssistantFinancialSummary? {
-        AssistantFinancialSummary(spending: 450, budget: 600, savings: 150)
+        // Read from UserDefaults-persisted financial data (set by FinancialDataManager)
+        let weeklySpending = UserDefaults.standard.double(forKey: "finance.weeklySpending")
+        let weeklyBudget = UserDefaults.standard.double(forKey: "finance.weeklyBudget")
+        if weeklyBudget > 0 {
+            return AssistantFinancialSummary(
+                spending: weeklySpending,
+                budget: weeklyBudget,
+                savings: max(0, weeklyBudget - weeklySpending)
+            )
+        }
+        return nil
     }
 
     func processQuery(_ query: String) async -> AssistantResponse {
-        AssistantResponse(message: "Financial tracking coming soon", suggestions: [])
+        if let summary = await getWeeklySummary() {
+            let pct = summary.budget > 0 ? Int((summary.spending / summary.budget) * 100) : 0
+            return AssistantResponse(
+                message: "This week: spent \(String(format: "%.0f", summary.spending)) of \(String(format: "%.0f", summary.budget)) budget (\(pct)%). Savings: \(String(format: "%.0f", summary.savings)).",
+                suggestions: []
+            )
+        }
+        return AssistantResponse(
+            message: "No financial data available yet. Set up budget tracking in Financial settings to get insights.",
+            suggestions: []
+        )
     }
 }
 
 @MainActor
 final class SocialAssistant {
     func processQuery(_ query: String) async -> AssistantResponse {
-        AssistantResponse(message: "Social insights coming soon", suggestions: [])
+        // Query contacts and recent interactions from PersonalKnowledgeGraph
+        let graph = PersonalKnowledgeGraph.shared
+        let result = await graph.query(query)
+        if result.entities.isEmpty {
+            return AssistantResponse(
+                message: "I don't have enough social context yet. As you interact with people through Thea, I'll build insights about your relationships and communication patterns.",
+                suggestions: []
+            )
+        }
+        let insights = result.entities.prefix(3).map { "- \($0.name): \($0.type.rawValue)" }.joined(separator: "\n")
+        return AssistantResponse(message: "\(result.explanation)\n\(insights)", suggestions: [])
     }
 }
 
 @MainActor
 final class ProductivityAssistant {
+    private let logger = Logger(subsystem: "com.thea.life", category: "ProductivityAssistant")
+
     func getPriorityTasks() async -> [String] {
-        ["Complete V2 migration", "Review pull requests", "Update documentation"]
+        // Read from UserDefaults-persisted task data
+        UserDefaults.standard.stringArray(forKey: "productivity.priorityTasks") ?? []
     }
 
     func getUnfinishedTasks() async -> [String] {
-        ["Code review"]
+        UserDefaults.standard.stringArray(forKey: "productivity.unfinishedTasks") ?? []
     }
 
     func getProductivityScore() async -> Double {
-        0.75
+        // Calculate from actual focus time vs target
+        let focusMinutes = await getCurrentFocusTime()
+        let targetMinutes: Double = 240 // 4 hours target focus time
+        return min(focusMinutes / targetMinutes, 1.0)
     }
 
     func getCurrentFocusTime() async -> TimeInterval {
-        45 // minutes
+        // Track focus time since last break (stored by activity logger)
+        UserDefaults.standard.double(forKey: "productivity.focusMinutes")
     }
 
     func processQuery(_ query: String) async -> AssistantResponse {
-        AssistantResponse(message: "Productivity tracking coming soon", suggestions: [])
+        let tasks = await getPriorityTasks()
+        let score = await getProductivityScore()
+        let focusMinutes = Int(await getCurrentFocusTime())
+        var msg = "Productivity score: \(Int(score * 100))% | Focus time today: \(focusMinutes) min"
+        if !tasks.isEmpty {
+            msg += "\n\nPriority tasks:\n" + tasks.prefix(5).enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
+        }
+        return AssistantResponse(message: msg, suggestions: [])
     }
 }
 
 @MainActor
 final class LearningAssistant {
     func getWeeklyProgress() async -> AssistantLearningProgress {
-        AssistantLearningProgress(hoursLearned: 3.5, goal: 5.0, topics: ["Swift", "AI"])
+        let hours = UserDefaults.standard.double(forKey: "learning.weeklyHours")
+        let goal = UserDefaults.standard.double(forKey: "learning.weeklyGoal")
+        let topics = UserDefaults.standard.stringArray(forKey: "learning.recentTopics") ?? []
+        return AssistantLearningProgress(
+            hoursLearned: hours,
+            goal: goal > 0 ? goal : 5.0,
+            topics: topics
+        )
     }
 
     func processQuery(_ query: String) async -> AssistantResponse {
-        AssistantResponse(message: "Learning tracking coming soon", suggestions: [])
+        let progress = await getWeeklyProgress()
+        let pct = progress.goal > 0 ? Int((progress.hoursLearned / progress.goal) * 100) : 0
+        var msg = "Learning progress: \(String(format: "%.1f", progress.hoursLearned))/\(String(format: "%.1f", progress.goal)) hours (\(pct)%)"
+        if !progress.topics.isEmpty {
+            msg += "\nRecent topics: " + progress.topics.joined(separator: ", ")
+        }
+        return AssistantResponse(message: msg, suggestions: [])
     }
 }
 
