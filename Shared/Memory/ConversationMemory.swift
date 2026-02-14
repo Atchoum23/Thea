@@ -328,14 +328,21 @@ final class ConversationMemory {
         isProcessing = true
         defer { isProcessing = false }
 
-        // In a full implementation, this would call an LLM to summarize
-        // For now, create a placeholder summary
+        // Build context from recent learned facts for summarization
+        let recentFacts = learnedFacts.suffix(20).map { $0.fact }
+        let factsContext = recentFacts.isEmpty
+            ? "No specific facts extracted."
+            : recentFacts.joined(separator: "\n- ")
+
+        // Attempt AI-powered summarization via available provider
+        let aiSummary = await generateAISummary(factsContext: factsContext)
+
         let summary = ConversationSummary(
             projectId: projectId,
-            summary: "Conversation covering recent topics",
-            keyTopics: Array(learnedFacts.prefix(5).map { $0.fact }),
+            summary: aiSummary.text,
+            keyTopics: aiSummary.keyTopics,
             messageCount: configuration.summarizationThreshold,
-            importanceScore: 0.6
+            importanceScore: aiSummary.importance
         )
 
         conversationSummaries.append(summary)
@@ -348,6 +355,106 @@ final class ConversationMemory {
         }
 
         saveMemory()
+    }
+
+    private struct AISummaryResult {
+        let text: String
+        let keyTopics: [String]
+        let importance: Double
+    }
+
+    private func generateAISummary(factsContext: String) async -> AISummaryResult {
+        // Try to get an AI provider for summarization (prefer cheap, fast models)
+        guard let provider = ProviderRegistry.shared.getProvider(id: "openrouter")
+                          ?? ProviderRegistry.shared.getProvider(id: "anthropic")
+                          ?? ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
+            logger.info("No provider available for summarization, using fact-based fallback")
+            return fallbackSummary(factsContext: factsContext)
+        }
+
+        let modelId = "openai/gpt-4o-mini"
+        let prompt = """
+        Summarize the following conversation context into a concise summary. \
+        Extract key topics as a JSON array and rate importance from 0.0 to 1.0.
+
+        Context and learned facts:
+        - \(factsContext)
+
+        Respond in this exact JSON format (no other text):
+        {"summary": "...", "keyTopics": ["topic1", "topic2"], "importance": 0.7}
+        """
+
+        do {
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: modelId
+            )
+
+            var responseText = ""
+            let stream = try await provider.chat(
+                messages: [message],
+                model: modelId,
+                stream: false
+            )
+
+            for try await chunk in stream {
+                if case .delta(let text) = chunk.type {
+                    responseText += text
+                } else if case .complete(let msg) = chunk.type {
+                    responseText = msg.content.textValue
+                }
+            }
+
+            // Parse JSON response
+            if let jsonStart = responseText.firstIndex(of: "{"),
+               let jsonEnd = responseText.lastIndex(of: "}") {
+                let jsonStr = String(responseText[jsonStart...jsonEnd])
+                if let data = jsonStr.data(using: .utf8) {
+                    struct SummaryJSON: Decodable {
+                        let summary: String
+                        let keyTopics: [String]
+                        let importance: Double
+                    }
+                    let parsed = try JSONDecoder().decode(SummaryJSON.self, from: data)
+                    return AISummaryResult(
+                        text: parsed.summary,
+                        keyTopics: parsed.keyTopics,
+                        importance: min(max(parsed.importance, 0.0), 1.0)
+                    )
+                }
+            }
+
+            // If JSON parsing failed but we have text, use it as-is
+            if !responseText.isEmpty {
+                return AISummaryResult(
+                    text: responseText.prefix(500).description,
+                    keyTopics: Array(learnedFacts.prefix(5).map { $0.fact }),
+                    importance: 0.5
+                )
+            }
+        } catch {
+            logger.warning("AI summarization failed: \(error.localizedDescription)")
+        }
+
+        return fallbackSummary(factsContext: factsContext)
+    }
+
+    private func fallbackSummary(factsContext: String) -> AISummaryResult {
+        // Deterministic fallback when no AI provider is available
+        let topics = Array(learnedFacts.suffix(5).map { $0.fact })
+        let topicSummary = topics.isEmpty
+            ? "General conversation"
+            : "Topics discussed: \(topics.joined(separator: ", "))"
+        let importance = min(Double(learnedFacts.count) / 20.0, 0.8)
+        return AISummaryResult(
+            text: topicSummary,
+            keyTopics: topics,
+            importance: max(importance, 0.3)
+        )
     }
 
     // MARK: - User Preferences
