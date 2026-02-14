@@ -1,14 +1,26 @@
 // TheaClipRelayView.swift
 // Thea — Read-only clipboard relay for tvOS
+// Uses lightweight local types since tvOS target doesn't include Shared/
 
 import SwiftUI
 
+/// Lightweight clip representation for tvOS (populated via sync in future)
+struct TVClipItem: Identifiable, Codable {
+    let id: UUID
+    let preview: String
+    let contentType: String
+    let sourceApp: String?
+    let timestamp: Date
+
+    static let placeholder: [TVClipItem] = []
+}
+
 struct TheaClipRelayView: View {
-    @StateObject private var clipManager = ClipboardHistoryManager.shared
+    @State private var clips: [TVClipItem] = TVClipItem.placeholder
 
     var body: some View {
         NavigationStack {
-            if clipManager.recentEntries.isEmpty {
+            if clips.isEmpty {
                 ContentUnavailableView(
                     "No Clips",
                     systemImage: "doc.on.clipboard",
@@ -16,21 +28,23 @@ struct TheaClipRelayView: View {
                 )
             } else {
                 List {
-                    ForEach(clipManager.recentEntries.prefix(50), id: \.id) { entry in
+                    ForEach(clips) { clip in
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
-                                typeLabel(for: entry.contentType)
+                                Label(clip.contentType.capitalized, systemImage: iconForType(clip.contentType))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                                 Spacer()
-                                Text(entry.createdAt, style: .relative)
+                                Text(clip.timestamp, style: .relative)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
 
-                            Text(entry.previewText)
+                            Text(clip.preview)
                                 .font(.body)
                                 .lineLimit(4)
 
-                            if let appName = entry.sourceAppName {
+                            if let appName = clip.sourceApp {
                                 Text("from \(appName)")
                                     .font(.caption2)
                                     .foregroundStyle(.tertiary)
@@ -44,24 +58,14 @@ struct TheaClipRelayView: View {
         }
     }
 
-    private func typeLabel(for type: TheaClipContentType) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: iconForType(type))
-            Text(type.rawValue.capitalized)
-        }
-        .font(.caption)
-        .foregroundStyle(.secondary)
-    }
-
-    private func iconForType(_ type: TheaClipContentType) -> String {
+    private func iconForType(_ type: String) -> String {
         switch type {
-        case .text: "text.alignleft"
-        case .richText: "text.badge.star"
-        case .html: "chevron.left.forwardslash.chevron.right"
-        case .url: "link"
-        case .image: "photo"
-        case .file: "doc"
-        case .color: "paintpalette"
+        case "text", "richText": "text.alignleft"
+        case "html": "chevron.left.forwardslash.chevron.right"
+        case "url": "link"
+        case "image": "photo"
+        case "file": "doc"
+        default: "doc.on.clipboard"
         }
     }
 }

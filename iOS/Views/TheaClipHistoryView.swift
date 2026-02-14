@@ -54,7 +54,7 @@ struct TheaClipHistoryView: View {
 
     private func pinboardDetail(_ pinboard: TheaClipPinboard) -> some View {
         List {
-            ForEach(pinboard.entries.sorted(by: { $0.sortOrder < $1.sortOrder })) { junction in
+            ForEach(pinboard.entries.sorted { $0.sortOrder < $1.sortOrder }) { junction in
                 if let entry = junction.clipEntry {
                     TheaClipRowView(entry: entry)
                         .swipeActions(edge: .trailing) {

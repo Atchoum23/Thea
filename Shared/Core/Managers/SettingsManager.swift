@@ -287,6 +287,14 @@ final class SettingsManager: ObservableObject {
         didSet { persist(clipboardSyncEnabled, forKey: "clipboardSyncEnabled") }
     }
 
+    @Published var clipboardAutoCategorize: Bool {
+        didSet { persist(clipboardAutoCategorize, forKey: "clipboardAutoCategorize") }
+    }
+
+    @Published var clipboardSyncPinboards: Bool {
+        didSet { persist(clipboardSyncPinboards, forKey: "clipboardSyncPinboards") }
+    }
+
     @Published var clipboardExcludedApps: [String] {
         didSet { persist(clipboardExcludedApps, forKey: "clipboardExcludedApps") }
     }
@@ -388,6 +396,8 @@ final class SettingsManager: ObservableObject {
             ? UserDefaults.standard.integer(forKey: "clipboardSensitiveExpiryHours") : 24
         clipboardAutoSummarize = UserDefaults.standard.bool(forKey: "clipboardAutoSummarize")
         clipboardSyncEnabled = UserDefaults.standard.bool(forKey: "clipboardSyncEnabled")
+        clipboardAutoCategorize = UserDefaults.standard.bool(forKey: "clipboardAutoCategorize")
+        clipboardSyncPinboards = UserDefaults.standard.bool(forKey: "clipboardSyncPinboards")
         clipboardExcludedApps = UserDefaults.standard.stringArray(forKey: "clipboardExcludedApps") ?? []
         activeFocusMode = UserDefaults.standard.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = UserDefaults.standard.object(forKey: "enableSemanticSearch") as? Bool ?? true
@@ -465,6 +475,18 @@ final class SettingsManager: ObservableObject {
         moltbookPreviewMode = d.object(forKey: "moltbookPreviewMode") as? Bool ?? true
         moltbookMaxDailyPosts = d.integer(forKey: "moltbookMaxDailyPosts") != 0
             ? d.integer(forKey: "moltbookMaxDailyPosts") : 10
+        clipboardHistoryEnabled = d.object(forKey: "clipboardHistoryEnabled") as? Bool ?? true
+        clipboardRecordImages = d.object(forKey: "clipboardRecordImages") as? Bool ?? true
+        clipboardMaxHistory = d.integer(forKey: "clipboardMaxHistory") != 0
+            ? d.integer(forKey: "clipboardMaxHistory") : 500
+        clipboardRetentionDays = d.integer(forKey: "clipboardRetentionDays") != 0
+            ? d.integer(forKey: "clipboardRetentionDays") : 30
+        clipboardAutoDetectSensitive = d.object(forKey: "clipboardAutoDetectSensitive") as? Bool ?? true
+        clipboardSensitiveExpiryHours = d.integer(forKey: "clipboardSensitiveExpiryHours") != 0
+            ? d.integer(forKey: "clipboardSensitiveExpiryHours") : 24
+        clipboardAutoSummarize = d.bool(forKey: "clipboardAutoSummarize")
+        clipboardSyncEnabled = d.bool(forKey: "clipboardSyncEnabled")
+        clipboardExcludedApps = d.stringArray(forKey: "clipboardExcludedApps") ?? []
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
