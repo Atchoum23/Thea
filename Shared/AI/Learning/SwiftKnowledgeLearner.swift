@@ -239,57 +239,43 @@ final class SwiftKnowledgeLearner {
         }
     }
 
-    // MARK: - Pattern Extraction Helpers
+}
 
-    private struct ExtractedPattern {
+// MARK: - Pattern Extraction Helpers
+
+extension SwiftKnowledgeLearner {
+    struct ExtractedPattern {
         let category: String
         let signature: String
     }
 
-    private func extractPatterns(from code: String) -> [ExtractedPattern] {
+    func extractPatterns(from code: String) -> [ExtractedPattern] {
         var patterns: [ExtractedPattern] = []
 
-        // Actor pattern
         if code.contains("actor ") {
             patterns.append(ExtractedPattern(category: "concurrency", signature: "actor_definition"))
         }
-
-        // Async/await pattern
         if code.contains("async ") && code.contains("await ") {
             patterns.append(ExtractedPattern(category: "concurrency", signature: "async_await"))
         }
-
-        // Task pattern
         if code.contains("Task {") || code.contains("Task.detached") {
             patterns.append(ExtractedPattern(category: "concurrency", signature: "task_creation"))
         }
-
-        // MVVM pattern
         if code.contains("@Observable") || code.contains("@StateObject") {
             patterns.append(ExtractedPattern(category: "architecture", signature: "mvvm_observable"))
         }
-
-        // SwiftUI view pattern
         if code.contains("struct") && code.contains(": View") {
             patterns.append(ExtractedPattern(category: "swiftui", signature: "view_definition"))
         }
-
-        // Error handling
         if code.contains("do {") && code.contains("catch") {
             patterns.append(ExtractedPattern(category: "error_handling", signature: "try_catch"))
         }
-
-        // Result type
         if code.contains("Result<") {
             patterns.append(ExtractedPattern(category: "error_handling", signature: "result_type"))
         }
-
-        // Protocol-oriented
         if code.contains("protocol ") && code.contains("extension ") {
             patterns.append(ExtractedPattern(category: "architecture", signature: "protocol_oriented"))
         }
-
-        // Dependency injection
         if code.contains("init(") && code.range(of: ":\\s*\\w+Protocol", options: .regularExpression) != nil {
             patterns.append(ExtractedPattern(category: "architecture", signature: "dependency_injection"))
         }
@@ -297,62 +283,30 @@ final class SwiftKnowledgeLearner {
         return patterns
     }
 
-    private func isHighQualityCode(_ code: String) -> Bool {
-        // Quality indicators
+    func isHighQualityCode(_ code: String) -> Bool {
         var score = 0
-
-        // Has documentation
-        if code.contains("///") || code.contains("/**") {
-            score += 2
-        }
-
-        // Uses modern Swift features
-        if code.contains("async") || code.contains("await") || code.contains("actor") {
-            score += 1
-        }
-
-        // Has proper error handling
-        if code.contains("throws") || code.contains("do {") {
-            score += 1
-        }
-
-        // Uses access control
-        if code.contains("private ") || code.contains("public ") || code.contains("internal ") {
-            score += 1
-        }
-
-        // Uses type annotations
-        if code.range(of: ":\\s*[A-Z]\\w+", options: .regularExpression) != nil {
-            score += 1
-        }
-
+        if code.contains("///") || code.contains("/**") { score += 2 }
+        if code.contains("async") || code.contains("await") || code.contains("actor") { score += 1 }
+        if code.contains("throws") || code.contains("do {") { score += 1 }
+        if code.contains("private ") || code.contains("public ") || code.contains("internal ") { score += 1 }
+        if code.range(of: ":\\s*[A-Z]\\w+", options: .regularExpression) != nil { score += 1 }
         return score >= 3
     }
 
-    private func calculateQualityScore(_ code: String) -> Double {
+    func calculateQualityScore(_ code: String) -> Double {
         var score = 0.5
-
-        // Positive factors
         if code.contains("///") { score += 0.1 }
         if code.contains("async") { score += 0.05 }
         if code.contains("private ") { score += 0.05 }
         if code.contains("guard ") { score += 0.05 }
         if code.contains("throws") { score += 0.05 }
-
-        // Negative factors
-        if code.contains("force unwrap") || code.contains("!") && code.count(of: "!") > 3 {
-            score -= 0.1
-        }
-        if code.contains("// TODO") || code.contains("// FIXME") {
-            score -= 0.05
-        }
-
+        if code.contains("force unwrap") || code.contains("!") && code.count(of: "!") > 3 { score -= 0.1 }
+        if code.contains("// TODO") || code.contains("// FIXME") { score -= 0.05 }
         return min(1.0, max(0.0, score))
     }
 
-    private func inferPurpose(from context: String) -> String {
+    func inferPurpose(from context: String) -> String {
         let lowercased = context.lowercased()
-
         if lowercased.contains("network") || lowercased.contains("api") || lowercased.contains("fetch") {
             return "Networking"
         }
@@ -362,19 +316,13 @@ final class SwiftKnowledgeLearner {
         if lowercased.contains("data") || lowercased.contains("model") || lowercased.contains("persist") {
             return "Data Model"
         }
-        if lowercased.contains("test") {
-            return "Testing"
-        }
-        if lowercased.contains("error") || lowercased.contains("handle") {
-            return "Error Handling"
-        }
-
+        if lowercased.contains("test") { return "Testing" }
+        if lowercased.contains("error") || lowercased.contains("handle") { return "Error Handling" }
         return "General"
     }
 
-    private func extractTags(from code: String) -> [String] {
+    func extractTags(from code: String) -> [String] {
         var tags: [String] = []
-
         if code.contains("@MainActor") { tags.append("MainActor") }
         if code.contains("@Observable") { tags.append("Observable") }
         if code.contains("SwiftUI") { tags.append("SwiftUI") }
@@ -383,54 +331,48 @@ final class SwiftKnowledgeLearner {
         if code.contains("actor ") { tags.append("Actor") }
         if code.contains("protocol ") { tags.append("Protocol") }
         if code.contains("extension ") { tags.append("Extension") }
-
         return tags
     }
+}
 
-    private struct DetectedError {
+// MARK: - Error Detection & Best Practices
+
+extension SwiftKnowledgeLearner {
+    struct DetectedError {
         let pattern: String
         let type: String
         let resolution: String
         let preventionRule: String
     }
 
-    private func detectErrorPatterns(in original: String, correction: String) -> [DetectedError] {
+    func detectErrorPatterns(in original: String, correction: String) -> [DetectedError] {
         var errors: [DetectedError] = []
-
-        // Detect common error patterns by comparing original and correction context
         let lowerCorrection = correction.lowercased()
 
         if lowerCorrection.contains("sendable") {
             errors.append(DetectedError(
-                pattern: "non_sendable_type",
-                type: "Concurrency",
+                pattern: "non_sendable_type", type: "Concurrency",
                 resolution: "Add @Sendable or @unchecked Sendable conformance",
                 preventionRule: "Always check Sendable conformance for types used across concurrency boundaries"
             ))
         }
-
         if lowerCorrection.contains("mainactor") {
             errors.append(DetectedError(
-                pattern: "missing_mainactor",
-                type: "Concurrency",
+                pattern: "missing_mainactor", type: "Concurrency",
                 resolution: "Add @MainActor annotation to UI-related code",
                 preventionRule: "UI code should always be annotated with @MainActor"
             ))
         }
-
         if lowerCorrection.contains("deprecated") {
             errors.append(DetectedError(
-                pattern: "deprecated_api",
-                type: "API",
+                pattern: "deprecated_api", type: "API",
                 resolution: "Use the suggested modern replacement",
                 preventionRule: "Check API availability and prefer non-deprecated alternatives"
             ))
         }
-
         if lowerCorrection.contains("optional") || lowerCorrection.contains("nil") {
             errors.append(DetectedError(
-                pattern: "optional_handling",
-                type: "Safety",
+                pattern: "optional_handling", type: "Safety",
                 resolution: "Use guard let, if let, or optional chaining",
                 preventionRule: "Handle optionals safely, avoid force unwrapping"
             ))
@@ -439,7 +381,7 @@ final class SwiftKnowledgeLearner {
         return errors
     }
 
-    private struct DetectedBestPractice {
+    struct DetectedBestPractice {
         let id: String
         let category: String
         let title: String
@@ -447,36 +389,28 @@ final class SwiftKnowledgeLearner {
         let example: String
     }
 
-    private func detectBestPracticesInCode(_ code: String) -> [DetectedBestPractice] {
+    func detectBestPracticesInCode(_ code: String) -> [DetectedBestPractice] {
         var practices: [DetectedBestPractice] = []
 
-        // Actor isolation
         if code.contains("actor ") && code.contains("isolated") {
             practices.append(DetectedBestPractice(
-                id: "actor_isolation",
-                category: "Concurrency",
+                id: "actor_isolation", category: "Concurrency",
                 title: "Proper Actor Isolation",
                 description: "Using actors with proper isolation boundaries for thread safety",
                 example: code
             ))
         }
-
-        // Structured concurrency
         if code.contains("TaskGroup") || code.contains("withTaskGroup") {
             practices.append(DetectedBestPractice(
-                id: "structured_concurrency",
-                category: "Concurrency",
+                id: "structured_concurrency", category: "Concurrency",
                 title: "Structured Concurrency",
                 description: "Using TaskGroup for managing concurrent operations",
                 example: code
             ))
         }
-
-        // Guard early return
         if code.contains("guard ") && code.contains("else { return") {
             practices.append(DetectedBestPractice(
-                id: "guard_early_return",
-                category: "Code Style",
+                id: "guard_early_return", category: "Code Style",
                 title: "Guard Early Return",
                 description: "Using guard statements for early returns and cleaner code flow",
                 example: code
@@ -485,9 +419,11 @@ final class SwiftKnowledgeLearner {
 
         return practices
     }
+}
 
-    // MARK: - Knowledge Retrieval
+// MARK: - Knowledge Retrieval
 
+extension SwiftKnowledgeLearner {
     /// Get relevant patterns for a given coding task
     func getRelevantPatterns(for query: String, limit: Int = 5) -> [SwiftLearnedPattern] {
         let queryWords = Set(query.lowercased().split(separator: " ").map(String.init))
@@ -532,30 +468,27 @@ final class SwiftKnowledgeLearner {
     func getBestPractices(for category: String) -> [BestPractice] {
         bestPractices.filter { $0.category.lowercased() == category.lowercased() }
     }
+}
 
-    // MARK: - Persistence
+// MARK: - Persistence & Configuration
 
-    private func persistKnowledge() async {
-        // Enforce limits
+extension SwiftKnowledgeLearner {
+    func persistKnowledge() async {
         if learnedPatterns.count > configuration.maxPatternsPerCategory * 10 {
-            // Remove old, low-confidence patterns
             learnedPatterns = learnedPatterns
                 .sorted { $0.confidence * Double($0.occurrenceCount) > $1.confidence * Double($1.occurrenceCount) }
                 .prefix(configuration.maxPatternsPerCategory * 10)
                 .map { $0 }
         }
 
-        // Save to UserDefaults (could be SwiftData in production)
         let encoder = JSONEncoder()
 
         if let patternsData = try? encoder.encode(learnedPatterns.map(SwiftLearnedPatternDTO.init)) {
             UserDefaults.standard.set(patternsData, forKey: "SwiftKnowledgeLearner.patterns")
         }
-
         if let snippetsData = try? encoder.encode(codeSnippets.map(CodeSnippetDTO.init)) {
             UserDefaults.standard.set(snippetsData, forKey: "SwiftKnowledgeLearner.snippets")
         }
-
         if let errorsData = try? encoder.encode(errorResolutions.map(ErrorResolutionDTO.init)) {
             UserDefaults.standard.set(errorsData, forKey: "SwiftKnowledgeLearner.errors")
         }
@@ -564,7 +497,7 @@ final class SwiftKnowledgeLearner {
         UserDefaults.standard.set(totalPatternsLearned, forKey: "SwiftKnowledgeLearner.patternsCount")
     }
 
-    private func loadStoredKnowledge() async {
+    func loadStoredKnowledge() async {
         let decoder = JSONDecoder()
 
         if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.patterns"),
@@ -572,13 +505,11 @@ final class SwiftKnowledgeLearner {
         {
             learnedPatterns = dtos.map(SwiftLearnedPattern.init)
         }
-
         if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.snippets"),
            let dtos = try? decoder.decode([CodeSnippetDTO].self, from: data)
         {
             codeSnippets = dtos.map(CodeSnippet.init)
         }
-
         if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.errors"),
            let dtos = try? decoder.decode([ErrorResolutionDTO].self, from: data)
         {
@@ -589,7 +520,7 @@ final class SwiftKnowledgeLearner {
         totalPatternsLearned = UserDefaults.standard.integer(forKey: "SwiftKnowledgeLearner.patternsCount")
     }
 
-    private func loadConfiguration() {
+    func loadConfiguration() {
         if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.config"),
            let config = try? JSONDecoder().decode(Configuration.self, from: data)
         {

@@ -198,11 +198,17 @@ public actor THEAMCPServer {
         return THEAMCPResponse(id: request.id, result: result)
     }
 
-    // MARK: - Tool Definitions
+}
 
-    private func getAvailableTools() -> [THEAMCPToolDefinition] {
+// MARK: - Tool Definitions
+
+extension THEAMCPServer {
+    func getAvailableTools() -> [THEAMCPToolDefinition] {
+        systemTools() + appleIntegrationTools() + automationTools()
+    }
+
+    private func systemTools() -> [THEAMCPToolDefinition] {
         [
-            // System Tools
             THEAMCPToolDefinition(
                 name: "thea_execute_command",
                 description: "Execute a shell command on the system",
@@ -243,9 +249,12 @@ public actor THEAMCPServer {
                     ],
                     required: ["path"]
                 )
-            ),
+            )
+        ]
+    }
 
-            // Apple Integration Tools
+    private func appleIntegrationTools() -> [THEAMCPToolDefinition] {
+        [
             THEAMCPToolDefinition(
                 name: "thea_search_contacts",
                 description: "Search for contacts by name, email, or phone",
@@ -326,9 +335,12 @@ public actor THEAMCPServer {
                     ],
                     required: ["from", "to"]
                 )
-            ),
+            )
+        ]
+    }
 
-            // Automation Tools
+    private func automationTools() -> [THEAMCPToolDefinition] {
+        [
             THEAMCPToolDefinition(
                 name: "thea_run_shortcut",
                 description: "Run a Shortcuts automation",
@@ -352,10 +364,12 @@ public actor THEAMCPServer {
             )
         ]
     }
+}
 
-    // MARK: - Tool Execution
+// MARK: - Tool Execution
 
-    private func executeTool(name: String, arguments: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+extension THEAMCPServer {
+    func executeTool(name: String, arguments: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         switch name {
         case "thea_execute_command":
             return try await executeCommand(arguments)
@@ -387,10 +401,12 @@ public actor THEAMCPServer {
             throw THEAMCPToolError.unknownTool(name)
         }
     }
+}
 
-    // MARK: - Tool Implementations
+// MARK: - Tool Implementations
 
-    private func executeCommand(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+extension THEAMCPServer {
+    func executeCommand(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let command = args["command"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("command")
         }
@@ -422,7 +438,7 @@ public actor THEAMCPServer {
         return [.text(result)]
     }
 
-    private func readFile(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func readFile(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let path = args["path"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("path")
         }
@@ -432,7 +448,7 @@ public actor THEAMCPServer {
         return [.text(content)]
     }
 
-    private func writeFile(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func writeFile(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let path = args["path"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("path")
         }
@@ -445,7 +461,7 @@ public actor THEAMCPServer {
         return [.text("Successfully wrote \(content.count) characters to \(path)")]
     }
 
-    private func listDirectory(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func listDirectory(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let path = args["path"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("path")
         }
@@ -456,18 +472,17 @@ public actor THEAMCPServer {
         var listing = ""
         for item in contents.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
             let isDir = (try? item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
-            listing += "\(isDir ? "📁" : "📄") \(item.lastPathComponent)\n"
+            listing += "\(isDir ? "\u{1F4C1}" : "\u{1F4C4}") \(item.lastPathComponent)\n"
         }
 
         return [.text(listing)]
     }
 
-    private func searchContacts(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func searchContacts(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let query = args["query"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("query")
         }
 
-        // Use ContactsIntegration
         let criteria = ContactSearchCriteria(nameQuery: query)
         let contacts = try await ContactsIntegration.shared.searchContacts(criteria: criteria)
         var result = "Found \(contacts.count) contacts:\n"
@@ -481,10 +496,9 @@ public actor THEAMCPServer {
         return [.text(result)]
     }
 
-    private func getReminders(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func getReminders(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         let includeCompleted = args["completed"]?.boolValue ?? false
 
-        // Build criteria - if includeCompleted is false, filter for incomplete only
         let criteria = ReminderSearchCriteria(
             isCompleted: includeCompleted ? nil : false
         )
@@ -492,7 +506,7 @@ public actor THEAMCPServer {
 
         var result = "Found \(reminders.count) reminders:\n"
         for reminder in reminders.prefix(20) {
-            let status = reminder.isCompleted ? "✅" : "⬜️"
+            let status = reminder.isCompleted ? "\u{2705}" : "\u{2B1C}\u{FE0F}"
             result += "\(status) \(reminder.title)"
             if let dueDate = reminder.dueDate {
                 result += " (due: \(dueDate.formatted()))"
@@ -502,7 +516,7 @@ public actor THEAMCPServer {
         return [.text(result)]
     }
 
-    private func createReminder(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func createReminder(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let title = args["title"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("title")
         }
@@ -527,7 +541,7 @@ public actor THEAMCPServer {
         return [.text("Created reminder: \(title)")]
     }
 
-    private func searchNotes(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func searchNotes(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let query = args["query"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("query")
         }
@@ -544,7 +558,7 @@ public actor THEAMCPServer {
         return [.text(result)]
     }
 
-    private func createNote(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func createNote(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let title = args["title"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("title")
         }
@@ -560,7 +574,7 @@ public actor THEAMCPServer {
 
     @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
     @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    private func searchLocation(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func searchLocation(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let query = args["query"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("query")
         }
@@ -580,7 +594,7 @@ public actor THEAMCPServer {
 
     @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
     @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    private func getDirections(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func getDirections(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let from = args["from"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("from")
         }
@@ -617,14 +631,13 @@ public actor THEAMCPServer {
         return [.text(result)]
     }
 
-    private func runShortcut(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func runShortcut(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let name = args["name"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("name")
         }
 
         let input = args["input"]?.stringValue ?? ""
 
-        // Run shortcut via shell
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/shortcuts")
         process.arguments = ["run", name, "--input-path", "-"]
@@ -643,7 +656,7 @@ public actor THEAMCPServer {
         return [.text("Shortcut '\(name)' completed.\n\(output)")]
     }
 
-    private func speak(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
+    func speak(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let text = args["text"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("text")
         }
@@ -651,10 +664,12 @@ public actor THEAMCPServer {
         try await VoiceIntegration.shared.speak(text: text)
         return [.text("Speaking: \(text)")]
     }
+}
 
-    // MARK: - Resource Definitions
+// MARK: - Resource Definitions & Reading
 
-    private func getAvailableResources() -> [THEAMCPResourceDefinition] {
+extension THEAMCPServer {
+    func getAvailableResources() -> [THEAMCPResourceDefinition] {
         [
             THEAMCPResourceDefinition(
                 uri: "thea://system/info",
@@ -677,7 +692,7 @@ public actor THEAMCPServer {
         ]
     }
 
-    private func readResource(uri: String) async throws -> [THEAMCPContent] {
+    func readResource(uri: String) async throws -> [THEAMCPContent] {
         switch uri {
         case "thea://system/info":
             let info = """

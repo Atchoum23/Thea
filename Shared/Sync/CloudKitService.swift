@@ -168,8 +168,11 @@ public class CloudKitService: ObservableObject {
         }
     }
 
-    // MARK: - Sync Operations
+}
 
+// MARK: - Sync Operations
+
+extension CloudKitService {
     /// Sync all data using delta sync (only fetches changes since last sync)
     public func syncAll() async throws {
         guard syncEnabled, iCloudAvailable, privateDatabase != nil else { return }

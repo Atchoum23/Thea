@@ -594,4 +594,3 @@ extension SettingsManager {
         return getAPIKey(for: provider) != nil
     }
 }
-

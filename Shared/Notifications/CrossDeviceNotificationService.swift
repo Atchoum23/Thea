@@ -97,8 +97,11 @@ public actor CrossDeviceNotificationService {
         }
     }
 
-    // MARK: - Device Registration
+}
 
+// MARK: - Device Registration
+
+extension CrossDeviceNotificationService {
     /// Register the current device for push notifications
     public func registerDevice(deviceToken: Data) async throws -> CrossDeviceRegistration {
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
@@ -229,8 +232,11 @@ public actor CrossDeviceNotificationService {
         return allDevices.filter { $0.id != currentId }
     }
 
-    // MARK: - Send Notifications
+}
 
+// MARK: - Send Notifications
+
+extension CrossDeviceNotificationService {
     /// Send a notification to other devices
     public func sendNotification(_ payload: CrossDeviceNotificationPayload) async throws {
         // Save notification to CloudKit for relay
@@ -298,8 +304,11 @@ public actor CrossDeviceNotificationService {
         try await sendNotification(payload)
     }
 
-    // MARK: - Receive Notifications
+}
 
+// MARK: - Receive Notifications
+
+extension CrossDeviceNotificationService {
     /// Handle incoming CloudKit notification
     public func handleCloudKitNotification(_ userInfo: [AnyHashable: Any]) async {
         let notification = CKNotification(fromRemoteNotificationDictionary: userInfo)
@@ -353,7 +362,7 @@ public actor CrossDeviceNotificationService {
     }
 
     /// Display a local notification from a cross-device payload
-    private func displayLocalNotification(_ payload: CrossDeviceNotificationPayload) async {
+    func displayLocalNotification(_ payload: CrossDeviceNotificationPayload) async {
         let content = UNMutableNotificationContent()
         content.title = payload.title
         content.body = payload.body
@@ -432,7 +441,7 @@ public actor CrossDeviceNotificationService {
     }
 
     /// Trigger haptic feedback
-    private func triggerHaptic(_ haptic: CrossDeviceNotificationHaptic) async {
+    func triggerHaptic(_ haptic: CrossDeviceNotificationHaptic) async {
         guard haptic != .none else { return }
 
         #if os(iOS)
@@ -488,8 +497,11 @@ public actor CrossDeviceNotificationService {
         #endif
     }
 
-    // MARK: - Acknowledgment
+}
 
+// MARK: - Acknowledgment
+
+extension CrossDeviceNotificationService {
     /// Acknowledge receipt of a notification
     public func acknowledgeNotification(_ notificationId: UUID, action: String? = nil) async throws {
         guard let deviceId = currentDeviceRegistration?.id else {
@@ -509,7 +521,7 @@ public actor CrossDeviceNotificationService {
     }
 
     /// Save delivery confirmation
-    private func saveDeliveryConfirmation(_ notificationId: UUID) async {
+    func saveDeliveryConfirmation(_ notificationId: UUID) async {
         guard let deviceId = currentDeviceRegistration?.id else { return }
 
         // Update delivery tracking in CloudKit
@@ -527,9 +539,12 @@ public actor CrossDeviceNotificationService {
         }
     }
 
-    // MARK: - CloudKit Subscriptions
+}
 
-    private func setupCloudKitSubscriptions() async {
+// MARK: - CloudKit Subscriptions
+
+extension CrossDeviceNotificationService {
+    func setupCloudKitSubscriptions() async {
         // Subscribe to new notifications
         let predicate = NSPredicate(value: true)
         let subscription = CKQuerySubscription(
@@ -557,8 +572,11 @@ public actor CrossDeviceNotificationService {
         }
     }
 
-    // MARK: - Cleanup
+}
 
+// MARK: - Cleanup
+
+extension CrossDeviceNotificationService {
     /// Clean up expired notifications
     public func cleanupExpiredNotifications() async {
         let predicate = NSPredicate(format: "expiresAt < %@", Date() as NSDate)
@@ -604,9 +622,12 @@ public actor CrossDeviceNotificationService {
         }
     }
 
-    // MARK: - Device Info Helpers
+}
 
-    private func loadCurrentDeviceRegistration() async {
+// MARK: - Device Info Helpers
+
+extension CrossDeviceNotificationService {
+    func loadCurrentDeviceRegistration() async {
         // Try to load from UserDefaults first
         if let data = UserDefaults.standard.data(forKey: "thea.notifications.deviceRegistration"),
            let registration = try? JSONDecoder().decode(CrossDeviceRegistration.self, from: data) {
@@ -641,7 +662,7 @@ public actor CrossDeviceNotificationService {
     }
 
     @MainActor
-    private func getDeviceName() -> String {
+    func getDeviceName() -> String {
         #if os(iOS)
             return UIDevice.current.name
         #elseif os(macOS)
@@ -656,7 +677,7 @@ public actor CrossDeviceNotificationService {
     }
 
     @MainActor
-    private func getModelIdentifier() -> String {
+    func getModelIdentifier() -> String {
         var systemInfo = utsname()
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -668,7 +689,7 @@ public actor CrossDeviceNotificationService {
     }
 
     @MainActor
-    private func getOSVersion() -> String {
+    func getOSVersion() -> String {
         #if os(iOS) || os(tvOS)
             return UIDevice.current.systemVersion
         #elseif os(macOS)
@@ -681,12 +702,15 @@ public actor CrossDeviceNotificationService {
         #endif
     }
 
-    private func getAppVersion() -> String {
+    func getAppVersion() -> String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     }
 
-    // MARK: - Status
+}
 
+// MARK: - Status
+
+extension CrossDeviceNotificationService {
     /// Get current device registration
     public func getCurrentDevice() -> CrossDeviceRegistration? {
         currentDeviceRegistration

@@ -121,9 +121,12 @@ public class RemoteSystemService: ObservableObject {
         }
     }
 
-    // MARK: - System Information
+}
 
-    private func getSystemInfo() async throws -> SystemResponse {
+// MARK: - System Information
+
+extension RemoteSystemService {
+    func getSystemInfo() async throws -> SystemResponse {
         #if os(macOS)
             let processInfo = ProcessInfo.processInfo
 
@@ -192,7 +195,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    private func getArchitecture() -> String {
+    func getArchitecture() -> String {
         #if arch(arm64)
             return "arm64"
         #elseif arch(x86_64)
@@ -202,7 +205,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    private func getAvailableMemory() -> UInt64 {
+    func getAvailableMemory() -> UInt64 {
         var vmStats = vm_statistics64()
         var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
         let hostPort = mach_host_self()
@@ -226,7 +229,7 @@ public class RemoteSystemService: ObservableObject {
     }
 
     #if os(macOS)
-        private func getBatteryInfo() -> (level: Float?, isCharging: Bool?) {
+        func getBatteryInfo() -> (level: Float?, isCharging: Bool?) {
             guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
                   let sources = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef],
                   let source = sources.first,
@@ -243,9 +246,12 @@ public class RemoteSystemService: ObservableObject {
         }
     #endif
 
-    // MARK: - Process List
+}
 
-    private func getProcessList() async throws -> SystemResponse {
+// MARK: - Process List & Kill Process
+
+extension RemoteSystemService {
+    func getProcessList() async throws -> SystemResponse {
         #if os(macOS)
             let task = Process()
             task.executableURL = URL(fileURLWithPath: "/bin/ps")
@@ -291,9 +297,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    // MARK: - Kill Process
-
-    private func killProcess(pid: Int32) async throws -> SystemResponse {
+    func killProcess(pid: Int32) async throws -> SystemResponse {
         #if os(macOS)
             let result = kill(pid, SIGTERM)
             if result == 0 {
@@ -312,9 +316,12 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    // MARK: - Execute Command
+}
 
-    private func validateCommand(_ command: String) -> Bool {
+// MARK: - Execute Command
+
+extension RemoteSystemService {
+    func validateCommand(_ command: String) -> Bool {
         // Block dangerous commands
         let blockedPatterns = [
             "rm -rf /",
@@ -341,7 +348,7 @@ public class RemoteSystemService: ObservableObject {
         return true
     }
 
-    private func executeCommand(_ command: String, workingDirectory: String?, timeout: TimeInterval) async throws -> SystemResponse {
+    func executeCommand(_ command: String, workingDirectory: String?, timeout: TimeInterval) async throws -> SystemResponse {
         #if os(macOS)
             let task = Process()
             task.executableURL = URL(fileURLWithPath: "/bin/sh")
@@ -383,9 +390,12 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    // MARK: - Launch App
+}
 
-    private func launchApp(bundleId: String, arguments: [String]?) async throws -> SystemResponse {
+// MARK: - Launch App & System Control
+
+extension RemoteSystemService {
+    func launchApp(bundleId: String, arguments: [String]?) async throws -> SystemResponse {
         #if os(macOS)
             let config = NSWorkspace.OpenConfiguration()
             if let args = arguments {
@@ -409,9 +419,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    // MARK: - System Control
-
-    private func performReboot() async throws -> SystemResponse {
+    func performReboot() async throws -> SystemResponse {
         #if os(macOS)
             let script = "tell application \"System Events\" to restart"
             try await runAppleScript(script)
@@ -422,7 +430,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    private func performShutdown() async throws -> SystemResponse {
+    func performShutdown() async throws -> SystemResponse {
         #if os(macOS)
             let script = "tell application \"System Events\" to shut down"
             try await runAppleScript(script)
@@ -433,7 +441,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    private func performSleep() async throws -> SystemResponse {
+    func performSleep() async throws -> SystemResponse {
         #if os(macOS)
             let script = "tell application \"System Events\" to sleep"
             try await runAppleScript(script)
@@ -444,7 +452,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    private func performLock() async throws -> SystemResponse {
+    func performLock() async throws -> SystemResponse {
         #if os(macOS)
             let task = Process()
             task.executableURL = URL(fileURLWithPath: "/System/Library/CoreServices/Menu Extras/User.menu/Contents/Resources/CGSession")
@@ -458,7 +466,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    private func performLogout() async throws -> SystemResponse {
+    func performLogout() async throws -> SystemResponse {
         #if os(macOS)
             let script = "tell application \"System Events\" to log out"
             try await runAppleScript(script)
@@ -469,9 +477,12 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    // MARK: - Volume & Brightness
+}
 
-    private func setVolume(level: Float) async throws -> SystemResponse {
+// MARK: - Volume, Brightness, Notifications & Helpers
+
+extension RemoteSystemService {
+    func setVolume(level: Float) async throws -> SystemResponse {
         #if os(macOS)
             let clampedLevel = max(0, min(100, level))
             let script = "set volume output volume \(Int(clampedLevel))"
@@ -482,7 +493,7 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    private func setBrightness(level: Float) async throws -> SystemResponse {
+    func setBrightness(level: Float) async throws -> SystemResponse {
         #if os(macOS)
             _ = max(0, min(1, level))
             _ = """
@@ -500,21 +511,17 @@ public class RemoteSystemService: ObservableObject {
         #endif
     }
 
-    // MARK: - Notifications
-
-    private func getNotifications() async throws -> SystemResponse {
+    func getNotifications() async throws -> SystemResponse {
         // This would require notification center access
         .notifications([])
     }
 
-    private func dismissNotification(id _: String) async throws -> SystemResponse {
+    func dismissNotification(id _: String) async throws -> SystemResponse {
         .error("Notification dismissal requires system-level access")
     }
 
-    // MARK: - AppleScript
-
     #if os(macOS)
-        private func runAppleScript(_ script: String) async throws {
+        func runAppleScript(_ script: String) async throws {
             guard let appleScript = NSAppleScript(source: script) else {
                 throw SystemServiceError.scriptFailed
             }
@@ -528,9 +535,7 @@ public class RemoteSystemService: ObservableObject {
         }
     #endif
 
-    // MARK: - Confirmation
-
-    private func requestConfirmation(action: String) async -> Bool {
+    func requestConfirmation(action: String) async -> Bool {
         let confirmationId = UUID().uuidString
         let confirmation = PendingConfirmation(id: confirmationId, action: action, requestedAt: Date())
         pendingConfirmations.append(confirmation)
