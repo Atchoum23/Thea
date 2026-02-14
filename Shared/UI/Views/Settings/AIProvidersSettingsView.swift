@@ -562,6 +562,7 @@ struct AIProvidersSettingsView: View {
                             Image(systemName: provider.icon)
                                 .font(.largeTitle)
                                 .foregroundStyle(.blue)
+                                .accessibilityHidden(true)
 
                             VStack(alignment: .leading) {
                                 Text(provider.displayName)
@@ -586,6 +587,7 @@ struct AIProvidersSettingsView: View {
                         Spacer()
                         Image(systemName: (providerStatuses[provider.id] ?? .disconnected).icon)
                             .foregroundStyle((providerStatuses[provider.id] ?? .disconnected).color)
+                            .accessibilityHidden(true)
                         Text(statusText(for: provider.id))
                             .foregroundStyle(.secondary)
                     }
@@ -605,6 +607,7 @@ struct AIProvidersSettingsView: View {
                                 Text("Get API Key")
                                 Spacer()
                                 Image(systemName: "arrow.up.right.square")
+                                    .accessibilityHidden(true)
                             }
                         }
                     }
@@ -689,7 +692,10 @@ struct AIProvidersSettingsView: View {
             Spacer()
             Image(systemName: supported ? "checkmark.circle.fill" : "xmark.circle")
                 .foregroundStyle(supported ? .green : .secondary)
+                .accessibilityHidden(true)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(name), \(supported ? "supported" : "not supported")")
     }
 
     // MARK: - Helper Methods
