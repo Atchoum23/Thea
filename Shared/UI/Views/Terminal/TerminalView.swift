@@ -74,9 +74,12 @@
             }
         }
 
-        // MARK: - Sidebar
+    }
 
-        private var sidebarView: some View {
+    // MARK: - Sidebar
+
+    extension TerminalView {
+        var sidebarView: some View {
             VStack(alignment: .leading, spacing: 16) {
                 // Connection status
                 connectionStatusView

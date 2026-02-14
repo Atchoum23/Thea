@@ -466,6 +466,7 @@ public struct MemoryConfiguration: Codable, Sendable, Equatable {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     mutating func setValue(_ value: Any, forKey key: String) -> Bool {
         switch key {
         case "workingCapacity", "shortTermCapacity":

@@ -188,7 +188,7 @@ extension CloudKitService {
 
     /// Perform delta sync using CKServerChangeToken
     /// This only fetches records that have changed since the last sync
-    private func performDeltaSync() async throws {
+    func performDeltaSync() async throws {
         guard let privateDatabase else { return }
         let zoneID = CKRecordZone.ID(zoneName: "TheaZone", ownerName: CKCurrentUserDefaultName)
 
@@ -276,7 +276,7 @@ extension CloudKitService {
     }
 
     /// Ensure the custom record zone exists
-    private func ensureZoneExists(_ zoneID: CKRecordZone.ID) async throws {
+    func ensureZoneExists(_ zoneID: CKRecordZone.ID) async throws {
         guard let privateDatabase else { return }
         let zone = CKRecordZone(zoneID: zoneID)
         do {
@@ -287,7 +287,7 @@ extension CloudKitService {
     }
 
     /// Process a changed record from delta sync
-    private func processChangedRecord(_ record: CKRecord) async {
+    func processChangedRecord(_ record: CKRecord) async {
         switch record.recordType {
         case RecordType.conversation.rawValue:
             let conversation = CloudConversation(from: record)
@@ -307,7 +307,7 @@ extension CloudKitService {
     }
 
     /// Process a deleted record from delta sync
-    private func processDeletedRecord(_ recordID: CKRecord.ID) async {
+    func processDeletedRecord(_ recordID: CKRecord.ID) async {
         // Extract UUID from record name (format: "type-uuid")
         let components = recordID.recordName.split(separator: "-", maxSplits: 1)
         guard components.count == 2,
@@ -328,7 +328,7 @@ extension CloudKitService {
     }
 
     /// Delete a local conversation that was deleted remotely
-    private func deleteLocalConversation(_ id: UUID) async {
+    func deleteLocalConversation(_ id: UUID) async {
         // Notify the app to remove this conversation from local storage
         NotificationCenter.default.post(
             name: .cloudKitConversationDeleted,
@@ -338,7 +338,7 @@ extension CloudKitService {
     }
 
     /// Delete a local knowledge item that was deleted remotely
-    private func deleteLocalKnowledgeItem(_ id: UUID) async {
+    func deleteLocalKnowledgeItem(_ id: UUID) async {
         NotificationCenter.default.post(
             name: .cloudKitKnowledgeItemDeleted,
             object: nil,
@@ -347,7 +347,7 @@ extension CloudKitService {
     }
 
     /// Delete a local project that was deleted remotely
-    private func deleteLocalProject(_ id: UUID) async {
+    func deleteLocalProject(_ id: UUID) async {
         NotificationCenter.default.post(
             name: .cloudKitProjectDeleted,
             object: nil,
@@ -425,8 +425,11 @@ extension CloudKitService {
         }
     }
 
-    // MARK: - Save Operations
+}
 
+// MARK: - Save Operations
+
+extension CloudKitService {
     /// Save a conversation to CloudKit with conflict resolution
     public func saveConversation(_ conversation: CloudConversation) async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
@@ -475,8 +478,11 @@ extension CloudKitService {
         try await privateDatabase.save(record)
     }
 
-    // MARK: - Delete Operations
+}
 
+// MARK: - Delete Operations
+
+extension CloudKitService {
     /// Delete a conversation from CloudKit
     public func deleteConversation(_ id: UUID) async throws {
         guard let privateDatabase else { return }
@@ -491,9 +497,12 @@ extension CloudKitService {
         try await privateDatabase.deleteRecord(withID: recordID)
     }
 
-    // MARK: - Subscriptions
+}
 
-    private func setupSubscriptions() async {
+// MARK: - Subscriptions
+
+extension CloudKitService {
+    func setupSubscriptions() async {
         guard let privateDatabase else { return }
         do {
             // Subscribe to conversation changes
@@ -551,10 +560,13 @@ extension CloudKitService {
         }
     }
 
-    // MARK: - Merge Operations
+}
 
+// MARK: - Merge Operations
+
+extension CloudKitService {
     /// Merge a remote conversation with local data using intelligent conflict resolution
-    private func mergeConversation(_ remote: CloudConversation) async {
+    func mergeConversation(_ remote: CloudConversation) async {
         let localConversation = await getLocalConversation(remote.id)
 
         if let local = localConversation {
@@ -579,7 +591,7 @@ extension CloudKitService {
     }
 
     /// Merge a remote knowledge item with local data
-    private func mergeKnowledgeItem(_ remote: CloudKnowledgeItem) async {
+    func mergeKnowledgeItem(_ remote: CloudKnowledgeItem) async {
         let localItem = await getLocalKnowledgeItem(remote.id)
 
         if let local = localItem {
@@ -599,7 +611,7 @@ extension CloudKitService {
     }
 
     /// Merge a remote project with local data
-    private func mergeProject(_ remote: CloudProject) async {
+    func mergeProject(_ remote: CloudProject) async {
         let localProject = await getLocalProject(remote.id)
 
         if let local = localProject {
@@ -623,7 +635,7 @@ extension CloudKitService {
     }
 
     /// Apply synced settings to local storage with field-level merge
-    private func applySettings(_ remote: CloudSettings) async {
+    func applySettings(_ remote: CloudSettings) async {
         let localLastSync = lastSyncDate ?? .distantPast
 
         guard remote.modifiedAt > localLastSync else { return }
@@ -642,11 +654,14 @@ extension CloudKitService {
         lastSyncDate = Date()
     }
 
-    // MARK: - Local Storage Helpers
+}
 
+// MARK: - Local Storage Helpers
+
+extension CloudKitService {
     /// Thread-safe local conversation fetch via notification.
     /// Uses nonisolated(unsafe) flag to track whether the continuation has already resumed.
-    private func getLocalConversation(_ id: UUID) async -> CloudConversation? {
+    func getLocalConversation(_ id: UUID) async -> CloudConversation? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
             let observer = NotificationCenter.default.addObserver(
@@ -679,7 +694,7 @@ extension CloudKitService {
         }
     }
 
-    private func saveLocalConversation(_ conversation: CloudConversation) async {
+    func saveLocalConversation(_ conversation: CloudConversation) async {
         NotificationCenter.default.post(
             name: .cloudKitSaveLocalConversation,
             object: nil,
@@ -687,7 +702,7 @@ extension CloudKitService {
         )
     }
 
-    private func getLocalKnowledgeItem(_ id: UUID) async -> CloudKnowledgeItem? {
+    func getLocalKnowledgeItem(_ id: UUID) async -> CloudKnowledgeItem? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
             let observer = NotificationCenter.default.addObserver(
@@ -719,7 +734,7 @@ extension CloudKitService {
         }
     }
 
-    private func saveLocalKnowledgeItem(_ item: CloudKnowledgeItem) async {
+    func saveLocalKnowledgeItem(_ item: CloudKnowledgeItem) async {
         NotificationCenter.default.post(
             name: .cloudKitSaveLocalKnowledgeItem,
             object: nil,
@@ -727,7 +742,7 @@ extension CloudKitService {
         )
     }
 
-    private func getLocalProject(_ id: UUID) async -> CloudProject? {
+    func getLocalProject(_ id: UUID) async -> CloudProject? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
             let observer = NotificationCenter.default.addObserver(
@@ -759,7 +774,7 @@ extension CloudKitService {
         }
     }
 
-    private func saveLocalProject(_ project: CloudProject) async {
+    func saveLocalProject(_ project: CloudProject) async {
         NotificationCenter.default.post(
             name: .cloudKitSaveLocalProject,
             object: nil,
@@ -767,8 +782,11 @@ extension CloudKitService {
         )
     }
 
-    // MARK: - Conflict Resolution
+}
 
+// MARK: - Conflict Resolution & Sharing
+
+extension CloudKitService {
     public enum ConflictResolution {
         case keepLocal
         case keepRemote
@@ -797,7 +815,7 @@ extension CloudKitService {
 
     /// Merge two conversations by combining messages (deduplicated by ID),
     /// taking the newest metadata fields, and union of device/tag lists.
-    private func mergeConversations(local: CloudConversation, remote: CloudConversation) -> CloudConversation {
+    func mergeConversations(local: CloudConversation, remote: CloudConversation) -> CloudConversation {
         // Deduplicate messages by ID, preferring the newer version of each
         var messagesByID: [UUID: CloudMessage] = [:]
         for msg in local.messages {

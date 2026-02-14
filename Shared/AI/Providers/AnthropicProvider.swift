@@ -300,6 +300,23 @@ final class AnthropicProvider: AIProvider, Sendable {
         model: String,
         options: AnthropicChatOptions
     ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
+        let requestBody = buildAdvancedRequestBody(messages: messages, model: model, options: options)
+        let request = try buildAdvancedRequest(body: requestBody, model: model, options: options)
+
+        if options.stream {
+            return streamAdvancedResponse(request: request, model: model, messages: messages)
+        } else {
+            return try await nonStreamAdvancedResponse(request: request, messages: messages, model: model)
+        }
+    }
+
+    // MARK: - Advanced Chat Helpers
+
+    private func buildAdvancedRequestBody(
+        messages: [AIMessage],
+        model: String,
+        options: AnthropicChatOptions
+    ) -> [String: Any] {
         let anthropicMessages = messages.map { msg in
             [
                 "role": msg.role == .user ? "user" : "assistant",
@@ -307,45 +324,35 @@ final class AnthropicProvider: AIProvider, Sendable {
             ]
         }
 
-        var requestBody: [String: Any] = [
+        var body: [String: Any] = [
             "model": model,
             "max_tokens": options.maxTokens ?? maxTokens,
             "messages": anthropicMessages,
             "stream": options.stream
         ]
 
-        // Add system prompt with optional cache control
         if let systemPrompt = options.systemPrompt {
             if let cacheControl = options.cacheControl {
-                requestBody["system"] = [
+                body["system"] = [
                     [
                         "type": "text",
                         "text": systemPrompt,
-                        "cache_control": [
-                            "type": "ephemeral",
-                            "ttl": cacheControl.ttl
-                        ]
+                        "cache_control": ["type": "ephemeral", "ttl": cacheControl.ttl]
                     ]
                 ]
             } else {
-                requestBody["system"] = systemPrompt
+                body["system"] = systemPrompt
             }
         }
 
-        // Add effort parameter for Opus 4.5 (beta)
         if let effort = options.effort, model.contains("opus-4-5") {
-            requestBody["output_config"] = ["effort": effort.rawValue]
+            body["output_config"] = ["effort": effort.rawValue]
         }
 
-        // Add thinking config (interleaved thinking beta)
         if let thinking = options.thinking, thinking.enabled {
-            requestBody["thinking"] = [
-                "type": "enabled",
-                "budget_tokens": thinking.budgetTokens
-            ]
+            body["thinking"] = ["type": "enabled", "budget_tokens": thinking.budgetTokens]
         }
 
-        // Add context management (beta)
         if let contextMgmt = options.contextManagement {
             var edits: [[String: Any]] = []
             for edit in contextMgmt.edits {
@@ -353,34 +360,30 @@ final class AnthropicProvider: AIProvider, Sendable {
                     "type": edit.type.rawValue,
                     "trigger": ["input_tokens": edit.trigger.inputTokens]
                 ]
-                if let keep = edit.keep {
-                    editDict["keep"] = keep
-                }
-                if let clearAtLeast = edit.clearAtLeast {
-                    editDict["clear_at_least"] = clearAtLeast
-                }
-                if let excludeTools = edit.excludeTools {
-                    editDict["exclude_tools"] = excludeTools
-                }
+                if let keep = edit.keep { editDict["keep"] = keep }
+                if let clearAtLeast = edit.clearAtLeast { editDict["clear_at_least"] = clearAtLeast }
+                if let excludeTools = edit.excludeTools { editDict["exclude_tools"] = excludeTools }
                 edits.append(editDict)
             }
-            requestBody["context_management"] = ["edits": edits]
+            body["context_management"] = ["edits": edits]
         }
 
-        // Add server tools (web search, web fetch, tool search)
         if let serverTools = options.serverTools {
-            var tools: [[String: Any]] = []
-            for tool in serverTools {
-                tools.append(tool.toolDefinition)
-            }
-            requestBody["tools"] = tools
+            body["tools"] = serverTools.map { $0.toolDefinition }
         }
 
-        // Add tool choice
         if let toolChoice = options.toolChoice {
-            requestBody["tool_choice"] = toolChoice.toDictionary
+            body["tool_choice"] = toolChoice.toDictionary
         }
 
+        return body
+    }
+
+    private func buildAdvancedRequest(
+        body: [String: Any],
+        model _: String,
+        options: AnthropicChatOptions
+    ) throws -> URLRequest {
         guard let url = URL(string: "\(baseURL)/messages") else {
             throw AnthropicError.invalidResponse
         }
@@ -392,21 +395,13 @@ final class AnthropicProvider: AIProvider, Sendable {
         request.setValue("application/json", forHTTPHeaderField: "content-type")
         request.timeoutInterval = requestTimeout
 
-        // Add beta headers based on features used
         var betaHeaders: [String] = []
-        if options.effort != nil {
-            betaHeaders.append("effort-2025-11-24")
-        }
-        if options.contextManagement != nil {
-            betaHeaders.append("context-management-2025-06-27")
-        }
-        if options.thinking?.enabled == true {
-            betaHeaders.append("interleaved-thinking-2025-05-14")
-        }
+        if options.effort != nil { betaHeaders.append("effort-2025-11-24") }
+        if options.contextManagement != nil { betaHeaders.append("context-management-2025-06-27") }
+        if options.thinking?.enabled == true { betaHeaders.append("interleaved-thinking-2025-05-14") }
         if options.serverTools?.contains(where: { if case .webFetch = $0 { return true }; return false }) == true {
             betaHeaders.append("web-fetch-2025-09-10")
         }
-        // 1M token context beta
         if let limit = options.extendedContextLimit, limit > 200_000 {
             betaHeaders.append("max-tokens-1m-2025-01-01")
         }
@@ -414,98 +409,88 @@ final class AnthropicProvider: AIProvider, Sendable {
             request.setValue(betaHeaders.joined(separator: ","), forHTTPHeaderField: "anthropic-beta")
         }
 
-        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        return request
+    }
 
-        // Stream the advanced request directly (not through basic chat())
-        if options.stream {
-            let requestCopy = request
-            return AsyncThrowingStream { continuation in
-                Task { @Sendable [model, messages] in
-                    do {
-                        let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
-                        guard let httpResponse = response as? HTTPURLResponse,
-                              httpResponse.statusCode == 200
-                        else {
-                            if let httpResponse = response as? HTTPURLResponse {
-                                throw AnthropicError.serverError(
-                                    status: httpResponse.statusCode,
-                                    message: "Advanced chat request failed"
-                                )
-                            }
-                            throw AnthropicError.invalidResponse
+    private func streamAdvancedResponse(
+        request: URLRequest,
+        model: String,
+        messages: [AIMessage]
+    ) -> AsyncThrowingStream<ChatResponse, Error> {
+        let requestCopy = request
+        return AsyncThrowingStream { continuation in
+            Task { @Sendable [model, messages] in
+                do {
+                    let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
+                    guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                        if let httpResponse = response as? HTTPURLResponse {
+                            throw AnthropicError.serverError(status: httpResponse.statusCode, message: "Advanced chat request failed")
                         }
-
-                        var accumulatedText = ""
-                        for try await line in asyncBytes.lines {
-                            guard line.hasPrefix("data: ") else { continue }
-                            let jsonString = String(line.dropFirst(6))
-                            guard let data = jsonString.data(using: .utf8),
-                                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                                  let type = json["type"] as? String
-                            else { continue }
-
-                            switch type {
-                            case "content_block_delta":
-                                if let delta = json["delta"] as? [String: Any],
-                                   let text = delta["text"] as? String {
-                                    accumulatedText += text
-                                    continuation.yield(.delta(text))
-                                }
-                            case "message_stop":
-                                let finalMessage = AIMessage(
-                                    id: UUID(),
-                                    conversationID: messages.first?.conversationID ?? UUID(),
-                                    role: .assistant,
-                                    content: .text(accumulatedText),
-                                    timestamp: Date(),
-                                    model: model
-                                )
-                                continuation.yield(.complete(finalMessage))
-                            default:
-                                break
-                            }
-                        }
-                        continuation.finish()
-                    } catch {
-                        continuation.yield(.error(error))
-                        continuation.finish(throwing: error)
+                        throw AnthropicError.invalidResponse
                     }
+
+                    var accumulatedText = ""
+                    for try await line in asyncBytes.lines {
+                        guard line.hasPrefix("data: ") else { continue }
+                        let jsonString = String(line.dropFirst(6))
+                        guard let data = jsonString.data(using: .utf8),
+                              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                              let type = json["type"] as? String
+                        else { continue }
+
+                        switch type {
+                        case "content_block_delta":
+                            if let delta = json["delta"] as? [String: Any], let text = delta["text"] as? String {
+                                accumulatedText += text
+                                continuation.yield(.delta(text))
+                            }
+                        case "message_stop":
+                            let finalMessage = AIMessage(
+                                id: UUID(), conversationID: messages.first?.conversationID ?? UUID(),
+                                role: .assistant, content: .text(accumulatedText), timestamp: Date(), model: model
+                            )
+                            continuation.yield(.complete(finalMessage))
+                        default: break
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.yield(.error(error))
+                    continuation.finish(throwing: error)
                 }
             }
-        } else {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200
-            else {
-                if let httpResponse = response as? HTTPURLResponse {
-                    throw AnthropicError.serverError(
-                        status: httpResponse.statusCode,
-                        message: "Advanced chat request failed"
-                    )
-                }
-                throw AnthropicError.invalidResponse
-            }
+        }
+    }
 
-            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let content = json["content"] as? [[String: Any]],
-                  let firstContent = content.first,
-                  let text = firstContent["text"] as? String
-            else {
-                throw AnthropicError.noResponse
+    private func nonStreamAdvancedResponse(
+        request: URLRequest,
+        messages: [AIMessage],
+        model: String
+    ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            if let httpResponse = response as? HTTPURLResponse {
+                throw AnthropicError.serverError(status: httpResponse.statusCode, message: "Advanced chat request failed")
             }
+            throw AnthropicError.invalidResponse
+        }
 
-            let finalMessage = AIMessage(
-                id: UUID(),
-                conversationID: messages.first?.conversationID ?? UUID(),
-                role: .assistant,
-                content: .text(text),
-                timestamp: Date(),
-                model: model
-            )
-            return AsyncThrowingStream { continuation in
-                continuation.yield(.complete(finalMessage))
-                continuation.finish()
-            }
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let content = json["content"] as? [[String: Any]],
+              let firstContent = content.first,
+              let text = firstContent["text"] as? String
+        else {
+            throw AnthropicError.noResponse
+        }
+
+        let finalMessage = AIMessage(
+            id: UUID(), conversationID: messages.first?.conversationID ?? UUID(),
+            role: .assistant, content: .text(text), timestamp: Date(), model: model
+        )
+        return AsyncThrowingStream { continuation in
+            continuation.yield(.complete(finalMessage))
+            continuation.finish()
         }
     }
 }
