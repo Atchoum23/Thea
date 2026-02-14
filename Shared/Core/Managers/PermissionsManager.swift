@@ -340,135 +340,78 @@ final class PermissionsManager {
     // MARK: - Check Current Status (Legacy)
 
     func checkAllPermissions() {
-        checkSpeechRecognition()
-        checkMicrophone()
-        checkNotifications()
-        checkContacts()
-        checkCalendar()
-        checkPhotos()
-        checkLocation()
+        speechRecognitionStatus = convertSpeechStatus(SFSpeechRecognizer.authorizationStatus())
+
+        #if !os(macOS)
+            switch AVAudioApplication.shared.recordPermission {
+            case .granted: microphoneStatus = .authorized
+            case .denied: microphoneStatus = .denied
+            case .undetermined: microphoneStatus = .notDetermined
+            @unknown default: microphoneStatus = .notDetermined
+            }
+        #else
+            microphoneStatus = .authorized
+        #endif
+
+        Task {
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            await MainActor.run {
+                switch settings.authorizationStatus {
+                case .authorized, .provisional, .ephemeral: notificationsStatus = .authorized
+                case .denied: notificationsStatus = .denied
+                case .notDetermined: notificationsStatus = .notDetermined
+                @unknown default: notificationsStatus = .notDetermined
+                }
+            }
+        }
+
+        #if os(iOS) || os(macOS)
+            contactsStatus = convertContactStatus(CNContactStore.authorizationStatus(for: .contacts))
+            photosStatus = convertPhotoStatus(PHPhotoLibrary.authorizationStatus(for: .readWrite))
+        #endif
+
+        calendarStatus = convertCalendarStatus(EKEventStore.authorizationStatus(for: .event))
+
+        #if os(iOS)
+            locationStatus = convertLocationStatus(CLLocationManager().authorizationStatus)
+        #endif
 
         #if os(macOS)
             fullDiskAccessStatus = checkFullDiskAccess()
         #endif
     }
 
-    private func checkSpeechRecognition() {
-        let status = SFSpeechRecognizer.authorizationStatus()
-        speechRecognitionStatus = convertSpeechStatus(status)
-    }
-
-    private func checkMicrophone() {
-        #if !os(macOS)
-            switch AVAudioApplication.shared.recordPermission {
-            case .granted:
-                microphoneStatus = .authorized
-            case .denied:
-                microphoneStatus = .denied
-            case .undetermined:
-                microphoneStatus = .notDetermined
-            @unknown default:
-                microphoneStatus = .notDetermined
-            }
-        #else
-            microphoneStatus = .authorized
-        #endif
-    }
-
-    private func checkNotifications() {
-        Task {
-            let settings = await UNUserNotificationCenter.current().notificationSettings()
-            await MainActor.run {
-                switch settings.authorizationStatus {
-                case .authorized, .provisional:
-                    notificationsStatus = .authorized
-                case .denied:
-                    notificationsStatus = .denied
-                case .notDetermined:
-                    notificationsStatus = .notDetermined
-                case .ephemeral:
-                    notificationsStatus = .authorized
-                @unknown default:
-                    notificationsStatus = .notDetermined
-                }
-            }
-        }
-    }
-
-    private func checkContacts() {
-        #if os(iOS) || os(macOS)
-            switch CNContactStore.authorizationStatus(for: .contacts) {
-            case .authorized:
-                contactsStatus = .authorized
-            case .denied:
-                contactsStatus = .denied
-            case .notDetermined:
-                contactsStatus = .notDetermined
-            case .restricted:
-                contactsStatus = .restricted
-            case .limited:
-                contactsStatus = .authorized
-            @unknown default:
-                contactsStatus = .notDetermined
-            }
-        #endif
-    }
-
-    private func checkCalendar() {
-        switch EKEventStore.authorizationStatus(for: .event) {
-        case .fullAccess:
-            calendarStatus = .authorized
-        case .denied:
-            calendarStatus = .denied
-        case .notDetermined:
-            calendarStatus = .notDetermined
-        case .restricted:
-            calendarStatus = .restricted
-        case .writeOnly:
-            calendarStatus = .authorized
-        @unknown default:
-            calendarStatus = .notDetermined
-        }
-    }
-
-    private func checkPhotos() {
-        #if os(iOS) || os(macOS)
-            let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-            photosStatus = convertPhotoStatus(status)
-        #endif
-    }
-
-    private func checkLocation() {
-        #if os(iOS)
-            let manager = CLLocationManager()
-            switch manager.authorizationStatus {
-            case .authorizedAlways, .authorizedWhenInUse:
-                locationStatus = .authorized
-            case .denied:
-                locationStatus = .denied
-            case .notDetermined:
-                locationStatus = .notDetermined
-            case .restricted:
-                locationStatus = .restricted
-            @unknown default:
-                locationStatus = .notDetermined
-            }
-        #endif
-    }
-
-    private func checkFullDiskAccess() -> PermissionStatus {
-        #if os(macOS)
-            let testPath = FileManager.default.homeDirectoryForCurrentUser
-                .appendingPathComponent("Library/Mail")
-
-            let canAccess = FileManager.default.isReadableFile(atPath: testPath.path)
-            return canAccess ? .authorized : .denied
-        #else
-            return .authorized
-        #endif
-    }
-
     // MARK: - Helper Methods
+
+    private func convertContactStatus(_ status: CNAuthorizationStatus) -> PermissionStatus {
+        switch status {
+        case .authorized, .limited: return .authorized
+        case .denied: return .denied
+        case .notDetermined: return .notDetermined
+        case .restricted: return .restricted
+        @unknown default: return .notDetermined
+        }
+    }
+
+    private func convertCalendarStatus(_ status: EKAuthorizationStatus) -> PermissionStatus {
+        switch status {
+        case .fullAccess, .writeOnly: return .authorized
+        case .denied: return .denied
+        case .notDetermined: return .notDetermined
+        case .restricted: return .restricted
+        @unknown default: return .notDetermined
+        }
+    }
+
+    private func convertLocationStatus(_ status: CLAuthorizationStatus) -> PermissionStatus {
+        switch status {
+        case .authorizedAlways, .authorizedWhenInUse: return .authorized
+        case .denied: return .denied
+        case .notDetermined: return .notDetermined
+        case .restricted: return .restricted
+        @unknown default: return .notDetermined
+        }
+    }
 
     func convertSpeechStatus(_ status: SFSpeechRecognizerAuthorizationStatus) -> PermissionStatus {
         switch status {

@@ -194,46 +194,8 @@ extension PrivacySettingsView {
         .cornerRadius(8)
     }
 
-    var biometricIcon: String {
-        switch biometricType {
-        case .faceID: "faceid"
-        case .touchID: "touchid"
-        case .none: "lock.fill"
-        }
-    }
-
-    var retentionPeriodText: String {
-        switch privacyConfig.retentionPeriod {
-        case .sevenDays: "7 days"
-        case .thirtyDays: "30 days"
-        case .ninetyDays: "90 days"
-        case .oneYear: "1 year"
-        case .forever: "Forever"
-        }
-    }
-
-    var privacyScore: Double {
-        var score: Double = 0
-        if !settingsManager.analyticsEnabled { score += 25 }
-        if privacyConfig.encryptionEnabled { score += 25 }
-        if privacyConfig.biometricLockEnabled { score += 25 }
-        if privacyConfig.retentionPeriod != .forever { score += 15 }
-        if privacyConfig.clearClipboardAfterPaste { score += 5 }
-        if privacyConfig.hidePreviewsInNotifications { score += 5 }
-        return min(score, 100)
-    }
-
-    var privacyScoreColor: Color {
-        if privacyScore >= 80 { return .green }
-        if privacyScore >= 50 { return .orange }
-        return .red
-    }
-
-    var privacyScoreDescription: String {
-        if privacyScore >= 80 { return "Excellent privacy protection" }
-        if privacyScore >= 50 { return "Moderate privacy protection" }
-        return "Consider enabling more privacy features"
-    }
+    // biometricIcon, retentionPeriodText, privacyScore, privacyScoreColor,
+    // privacyScoreDescription are in PrivacySettingsView.swift (same-file extension)
 
     var dataCollectionSection: some View {
         Group {
