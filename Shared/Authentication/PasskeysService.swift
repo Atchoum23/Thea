@@ -331,8 +331,8 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                 if let anyScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                     return UIWindow(windowScene: anyScene)
                 }
-                // Truly unreachable — no scene at all
-                return UIWindow(frame: .zero)
+                // Truly unreachable — iOS always has at least one connected scene
+                fatalError("No UIWindowScene available for passkey presentation")
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -493,8 +493,8 @@ public struct SignInWithAppleButton: View {
                 if let anyScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                     return UIWindow(windowScene: anyScene)
                 }
-                // Truly unreachable — no scene at all
-                return UIWindow(frame: .zero)
+                // Truly unreachable — iOS always has at least one connected scene
+                fatalError("No UIWindowScene available for passkey presentation")
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {

@@ -509,7 +509,10 @@ public actor TodoistClient {
         }
 
         if data.isEmpty || T.self == EmptyResponse.self {
-            return EmptyResponse() as! T
+            guard let empty = EmptyResponse() as? T else {
+                throw TodoistError.apiError(statusCode: httpResponse.statusCode, message: "Unexpected response type")
+            }
+            return empty
         }
 
         let decoder = JSONDecoder()
@@ -591,7 +594,10 @@ public actor TodoistClient {
         }
 
         if data.isEmpty || T.self == EmptyResponse.self {
-            return EmptyResponse() as! T
+            guard let empty = EmptyResponse() as? T else {
+                throw TodoistError.apiError(statusCode: httpResponse.statusCode, message: "Unexpected response type")
+            }
+            return empty
         }
 
         let decoder = JSONDecoder()

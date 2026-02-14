@@ -115,7 +115,7 @@
             let callback: FSEventStreamCallback = { _, clientCallBackInfo, numEvents, eventPaths, eventFlags, eventIds in
                 let observer = Unmanaged<FileSystemObserver>.fromOpaque(clientCallBackInfo!).takeUnretainedValue()
 
-                let paths = unsafeBitCast(eventPaths, to: NSArray.self) as! [String]
+                guard let paths = unsafeBitCast(eventPaths, to: NSArray.self) as? [String] else { return }
 
                 for i in 0 ..< numEvents {
                     let path = paths[i]

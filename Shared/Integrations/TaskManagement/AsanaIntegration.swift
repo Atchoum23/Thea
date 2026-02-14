@@ -853,7 +853,10 @@ public actor AsanaClient {
         }
 
         if data.isEmpty || T.self == AsanaEmptyResponse.self {
-            return AsanaEmptyResponse() as! T
+            guard let empty = AsanaEmptyResponse() as? T else {
+                throw AsanaError.apiError(statusCode: httpResponse.statusCode, message: "Unexpected response type")
+            }
+            return empty
         }
 
         return try JSONDecoder().decode(T.self, from: data)
