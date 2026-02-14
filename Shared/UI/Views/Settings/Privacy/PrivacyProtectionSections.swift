@@ -157,42 +157,8 @@ extension PrivacySettingsView {
 
 extension PrivacySettingsView {
     var customPatternEditorSheet: some View {
-        NavigationStack {
-            Form {
-                Section("Add Custom Pattern") {
-                    Text("Define regex patterns to detect and mask custom sensitive data")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    // Placeholder - full implementation in PIISanitizer
-                    Text("Coming soon: Custom pattern editor")
-                        .foregroundStyle(.tertiary)
-                }
-
-                Section("Example Patterns") {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("• API Key: [A-Za-z0-9]{32,}")
-                        Text("• JWT Token: eyJ[A-Za-z0-9_-]+")
-                        Text("• UUID: [0-9a-f]{8}-...")
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
-            }
-            .navigationTitle("Custom Patterns")
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        showingCustomPatternSheet = false
-                    }
-                }
-            }
+        CustomPatternEditorView {
+            showingCustomPatternSheet = false
         }
-        #if os(macOS)
-        .frame(width: 400, height: 300)
-        #endif
     }
 }

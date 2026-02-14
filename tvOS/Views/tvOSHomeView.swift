@@ -8,6 +8,8 @@ import SwiftUI
 struct tvOSHomeView: View {
     @State private var selectedTab: Tab = .chat
     @State private var messages: [TVMessage] = []
+    @State private var isWaitingForResponse = false
+    @State private var inputText = ""
 
     enum Tab: String, CaseIterable {
         case chat = "Chat"
@@ -235,13 +237,67 @@ struct tvOSChatView: View {
     private func sendMessage(_ text: String) {
         let userMessage = TVMessage(content: text, isUser: true)
         messages.append(userMessage)
+        isWaitingForResponse = true
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let response = TVMessage(
-                content: "I'd be happy to help you with that! Full AI integration coming soon.",
-                isUser: false
-            )
-            messages.append(response)
+        Task { @MainActor in
+            defer { isWaitingForResponse = false }
+
+            guard let provider = ProviderRegistry.shared.getCloudProvider() else {
+                let response = TVMessage(
+                    content: "No AI provider configured. Please set up an API key in Settings on your Mac or iPhone.",
+                    isUser: false
+                )
+                messages.append(response)
+                return
+            }
+
+            let model = SettingsManager.shared.defaultModel.isEmpty
+                ? "claude-sonnet-4-5-20250929"
+                : SettingsManager.shared.defaultModel
+
+            let aiMessages: [AIMessage] = messages.map { msg in
+                AIMessage(
+                    id: UUID(),
+                    conversationID: UUID(),
+                    role: msg.isUser ? .user : .assistant,
+                    content: .text(msg.content),
+                    timestamp: Date(),
+                    model: model
+                )
+            }
+
+            do {
+                let stream = try await provider.chat(
+                    messages: aiMessages,
+                    model: model,
+                    stream: false
+                )
+
+                var responseText = ""
+                for try await chunk in stream {
+                    switch chunk.type {
+                    case .delta(let text):
+                        responseText += text
+                    case .complete(let msg):
+                        responseText = msg.content.textValue
+                    case .error:
+                        break
+                    }
+                }
+
+                if responseText.isEmpty {
+                    responseText = "I wasn't able to generate a response. Please try again."
+                }
+
+                let response = TVMessage(content: responseText, isUser: false)
+                messages.append(response)
+            } catch {
+                let response = TVMessage(
+                    content: "Something went wrong: \(error.localizedDescription). Please try again.",
+                    isUser: false
+                )
+                messages.append(response)
+            }
         }
     }
 }
