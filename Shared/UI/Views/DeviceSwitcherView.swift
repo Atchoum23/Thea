@@ -166,6 +166,7 @@ private struct DeviceSwitcherRow: View {
                 Circle()
                     .fill(device.isOnline ? Color.green : Color.gray)
                     .frame(width: 8, height: 8)
+                    .accessibilityHidden(true)
 
                 Text(device.isOnline ? "Online" : device.formattedLastSeen)
                     .font(.caption)
@@ -173,6 +174,8 @@ private struct DeviceSwitcherRow: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(device.name), \(device.type.displayName), \(device.isOnline ? "online" : "offline")\(isCurrent ? ", this device" : "")")
     }
 }
 
@@ -185,6 +188,7 @@ private struct SyncStatusRow: View {
         HStack {
             Image(systemName: statusIcon)
                 .foregroundStyle(statusColor)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(status.statusDescription)
@@ -204,6 +208,7 @@ private struct SyncStatusRow: View {
                     .foregroundStyle(.orange)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var statusIcon: String {
