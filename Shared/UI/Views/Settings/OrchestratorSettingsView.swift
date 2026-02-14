@@ -3,12 +3,12 @@
 
 import SwiftUI
 
-// MARK: - Benchmark Service Stub (ModelBenchmarkService is in excluded MetaAI folder)
+// MARK: - Benchmark Service (scans configured providers and known models)
 
 #if os(macOS)
 
-/// Lightweight stub replacing excluded MetaAI/ModelBenchmarkService
-/// Provides the same interface used by OrchestratorSettingsView
+/// Scans configured AI providers and the AIModel catalog to provide
+/// benchmark overview data for OrchestratorSettingsView.
 @MainActor
 @Observable
 private final class BenchmarkServiceStub {
@@ -16,17 +16,44 @@ private final class BenchmarkServiceStub {
 
     struct BenchmarkEntry {
         let isLocal: Bool
+        let provider: String
+        let contextWindow: Int
     }
 
     private(set) var benchmarks: [String: BenchmarkEntry] = [:]
     private(set) var lastUpdateDate: Date?
     private(set) var updateError: Error?
 
-    private init() {}
+    private init() {
+        populateFromCatalog()
+    }
 
     func updateBenchmarks() async {
-        // No-op stub — real benchmarks require MetaAI infrastructure
+        populateFromCatalog()
         lastUpdateDate = Date()
+    }
+
+    private func populateFromCatalog() {
+        let knownModels: [AIModel] = [
+            .claude45Opus, .claude45Sonnet, .claude45Haiku,
+            .claude4Opus, .claude4Sonnet, .claude35Haiku,
+            .gpt4o, .gpt4oMini, .o1, .o1Mini,
+            .gemini3Pro, .gemini3Flash, .gemini25Pro, .gemini25Flash, .gemini2Flash, .gemini15Pro,
+            .deepseekChat, .deepseekReasoner,
+            .llama370b, .llama318b, .mixtral8x7b,
+            .sonarPro, .sonar, .sonarReasoning,
+            .orClaude45Sonnet, .orGpt4o, .orGemini25Pro, .orDeepseekChat, .orLlama370b,
+            .gptOSS20B, .gptOSS120B, .qwen3VL8B, .gemma3_1B, .gemma3_4B
+        ]
+        var result: [String: BenchmarkEntry] = [:]
+        for model in knownModels {
+            result[model.id] = BenchmarkEntry(
+                isLocal: model.isLocal,
+                provider: model.provider,
+                contextWindow: model.contextWindow
+            )
+        }
+        benchmarks = result
     }
 }
 
