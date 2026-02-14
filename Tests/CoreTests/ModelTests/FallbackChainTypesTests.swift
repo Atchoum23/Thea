@@ -253,7 +253,7 @@ final class TierAvailabilityTests: XCTestCase {
             .cloud: TierHealthStatus(),
             .localMLX: TierHealthStatus(),
             .coreML: TierHealthStatus(),
-            .ruleBased: TierHealthStatus(),
+            .ruleBased: TierHealthStatus()
         ]
         let available = availableTiers(health: health)
         XCTAssertEqual(available.count, 4)
@@ -266,7 +266,7 @@ final class TierAvailabilityTests: XCTestCase {
         cloudHealth.recordFailure()
         let health: [FallbackTier: TierHealthStatus] = [
             .cloud: cloudHealth,
-            .localMLX: TierHealthStatus(),
+            .localMLX: TierHealthStatus()
         ]
         let available = availableTiers(health: health)
         XCTAssertFalse(available.contains(.cloud))
@@ -279,7 +279,7 @@ final class TierAvailabilityTests: XCTestCase {
         // Set last failure to 120 seconds ago (past 60s cooldown)
         cloudHealth.lastFailureDate = Date().addingTimeInterval(-120)
         let health: [FallbackTier: TierHealthStatus] = [
-            .cloud: cloudHealth,
+            .cloud: cloudHealth
         ]
         let available = availableTiers(health: health, cooldownSeconds: 60)
         XCTAssertTrue(available.contains(.cloud))
@@ -291,7 +291,7 @@ final class TierAvailabilityTests: XCTestCase {
         // Set last failure to 10 seconds ago (within 60s cooldown)
         cloudHealth.lastFailureDate = Date().addingTimeInterval(-10)
         let health: [FallbackTier: TierHealthStatus] = [
-            .cloud: cloudHealth,
+            .cloud: cloudHealth
         ]
         let available = availableTiers(health: health, cooldownSeconds: 60)
         XCTAssertFalse(available.contains(.cloud))
@@ -314,7 +314,7 @@ final class TierAvailabilityTests: XCTestCase {
             .cloud: cloudHealth,
             .localMLX: mlxHealth,
             .coreML: TierHealthStatus(),
-            .ruleBased: TierHealthStatus(),
+            .ruleBased: TierHealthStatus()
         ]
         let available = availableTiers(health: health)
         XCTAssertEqual(available.count, 2)
@@ -327,7 +327,7 @@ final class TierAvailabilityTests: XCTestCase {
         cloudHealth.consecutiveFailures = 5
         cloudHealth.lastFailureDate = Date()
         let health: [FallbackTier: TierHealthStatus] = [
-            .cloud: cloudHealth,
+            .cloud: cloudHealth
         ]
         // With threshold of 10, 5 failures is still OK
         let available = availableTiers(health: health, maxConsecutiveFailures: 10)

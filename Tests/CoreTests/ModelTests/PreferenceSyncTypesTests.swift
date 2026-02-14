@@ -448,7 +448,7 @@ final class ScopeResolutionTests: XCTestCase {
         PreferenceDescriptor(
             key: "apiKey", category: .privacy,
             defaultScope: .deviceLocal, description: "API key"
-        ),
+        )
     ]
 
     func testDefaultScopeUsedWhenNoOverride() {
