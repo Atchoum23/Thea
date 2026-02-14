@@ -53,6 +53,7 @@ struct tvOSHomeView: View {
 struct tvOSChatView: View {
     @Binding var messages: [TVMessage]
     @State private var isListening = false
+    @State private var isWaitingForResponse = false
 
     var body: some View {
         ScrollView {
@@ -242,54 +243,31 @@ struct tvOSChatView: View {
         Task { @MainActor in
             defer { isWaitingForResponse = false }
 
-            guard let provider = ProviderRegistry.shared.getCloudProvider() else {
+            let client = TVInferenceClient.shared
+            guard client.isConnected else {
                 let response = TVMessage(
-                    content: "No AI provider configured. Please set up an API key in Settings on your Mac or iPhone.",
+                    content: "Not connected to a Thea server. Make sure Thea is running on your Mac on the same network.",
                     isUser: false
                 )
                 messages.append(response)
                 return
             }
 
-            let model = SettingsManager.shared.defaultModel.isEmpty
-                ? "claude-sonnet-4-5-20250929"
-                : SettingsManager.shared.defaultModel
-
-            let aiMessages: [AIMessage] = messages.map { msg in
-                AIMessage(
-                    id: UUID(),
-                    conversationID: UUID(),
-                    role: msg.isUser ? .user : .assistant,
-                    content: .text(msg.content),
-                    timestamp: Date(),
-                    model: model
+            let inferenceMessages = messages.map { msg in
+                InferenceMessage(
+                    role: msg.isUser ? "user" : "assistant",
+                    content: msg.content
                 )
             }
 
             do {
-                let stream = try await provider.chat(
-                    messages: aiMessages,
-                    model: model,
-                    stream: false
+                let responseText = try await client.sendChat(messages: inferenceMessages)
+                let response = TVMessage(
+                    content: responseText.isEmpty
+                        ? "I wasn't able to generate a response. Please try again."
+                        : responseText,
+                    isUser: false
                 )
-
-                var responseText = ""
-                for try await chunk in stream {
-                    switch chunk.type {
-                    case .delta(let text):
-                        responseText += text
-                    case .complete(let msg):
-                        responseText = msg.content.textValue
-                    case .error:
-                        break
-                    }
-                }
-
-                if responseText.isEmpty {
-                    responseText = "I wasn't able to generate a response. Please try again."
-                }
-
-                let response = TVMessage(content: responseText, isUser: false)
                 messages.append(response)
             } catch {
                 let response = TVMessage(
