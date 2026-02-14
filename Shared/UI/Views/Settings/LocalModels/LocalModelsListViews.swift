@@ -294,8 +294,7 @@ extension LocalModelsSettingsView {
                 }
 
                 Section("Custom Configuration") {
-                    Text("Per-model configuration coming soon")
-                        .foregroundStyle(.tertiary)
+                    ModelConfigurationControls(modelName: model.name)
                 }
             }
             .navigationTitle("Model Configuration")
@@ -383,5 +382,86 @@ extension LocalModelsSettingsView {
             showingError = true
         }
         modelToDelete = nil
+    }
+}
+
+// MARK: - Per-Model Configuration Controls
+
+/// UserDefaults-backed per-model configuration (temperature, max tokens, system prompt)
+private struct ModelConfigurationControls: View {
+    let modelName: String
+
+    @State private var temperature: Double
+    @State private var maxTokens: Double
+    @State private var systemPrompt: String
+    @State private var useCustomConfig: Bool
+
+    private var configKey: String { "localModel.config.\(modelName)" }
+
+    init(modelName: String) {
+        self.modelName = modelName
+        let key = "localModel.config.\(modelName)"
+        let saved = UserDefaults.standard.dictionary(forKey: key) ?? [:]
+        _useCustomConfig = State(initialValue: saved["enabled"] as? Bool ?? false)
+        _temperature = State(initialValue: saved["temperature"] as? Double ?? 0.7)
+        _maxTokens = State(initialValue: saved["maxTokens"] as? Double ?? 4096)
+        _systemPrompt = State(initialValue: saved["systemPrompt"] as? String ?? "")
+    }
+
+    var body: some View {
+        Toggle("Use custom settings for this model", isOn: $useCustomConfig)
+            .onChange(of: useCustomConfig) { saveConfig() }
+
+        if useCustomConfig {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("Temperature")
+                    Spacer()
+                    Text(String(format: "%.2f", temperature))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+                Slider(value: $temperature, in: 0...2, step: 0.05)
+                    .onChange(of: temperature) { saveConfig() }
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("Max Tokens")
+                    Spacer()
+                    Text("\(Int(maxTokens))")
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+                Slider(value: $maxTokens, in: 256...32768, step: 256)
+                    .onChange(of: maxTokens) { saveConfig() }
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("System Prompt Override")
+                TextField("Optional system prompt for this model", text: $systemPrompt, axis: .vertical)
+                    .textFieldStyle(.roundedBorder)
+                    .lineLimit(3...6)
+                    .onChange(of: systemPrompt) { saveConfig() }
+            }
+
+            Button("Reset to Defaults", role: .destructive) {
+                temperature = 0.7
+                maxTokens = 4096
+                systemPrompt = ""
+                saveConfig()
+            }
+            .font(.caption)
+        }
+    }
+
+    private func saveConfig() {
+        let config: [String: Any] = [
+            "enabled": useCustomConfig,
+            "temperature": temperature,
+            "maxTokens": maxTokens,
+            "systemPrompt": systemPrompt
+        ]
+        UserDefaults.standard.set(config, forKey: configKey)
     }
 }
