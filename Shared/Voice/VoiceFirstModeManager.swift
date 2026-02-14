@@ -18,6 +18,11 @@
 
 import Foundation
 import OSLog
+#if os(macOS)
+import AppKit
+#elseif canImport(AudioToolbox)
+import AudioToolbox
+#endif
 
 // MARK: - Voice-First Mode Manager
 
@@ -371,8 +376,27 @@ public final class VoiceFirstModeManager {
     }
 
     private func playSound(_ sound: VoiceSound) {
-        // Platform-specific sound playback would go here
-        // For now, just log
+        #if os(macOS)
+        let soundName: String
+        switch sound {
+        case .wakeWordDetected: soundName = "Tink"
+        case .listeningStart: soundName = "Pop"
+        case .listeningEnd: soundName = "Bottle"
+        case .error: soundName = "Basso"
+        }
+        if let nsSound = NSSound(named: NSSound.Name(soundName)) {
+            nsSound.play()
+        }
+        #elseif canImport(AudioToolbox)
+        let soundID: SystemSoundID
+        switch sound {
+        case .wakeWordDetected: soundID = 1057
+        case .listeningStart: soundID = 1104
+        case .listeningEnd: soundID = 1105
+        case .error: soundID = 1073
+        }
+        AudioServicesPlaySystemSound(soundID)
+        #endif
         logger.debug("Playing sound: \(sound.rawValue)")
     }
 
