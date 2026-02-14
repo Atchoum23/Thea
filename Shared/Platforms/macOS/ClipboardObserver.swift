@@ -71,117 +71,56 @@
 
         private func extractClipboardItem(from pasteboard: NSPasteboard) -> ClipboardItem? {
             let types = pasteboard.types ?? []
+            let source = getSourceApp()
 
-            // Check for text
-            if types.contains(.string), let text = pasteboard.string(forType: .string) {
-                // Check if it's a URL
-                if let url = URL(string: text), url.scheme != nil {
-                    return ClipboardItem(
-                        contentType: .url,
-                        textContent: text,
-                        url: url,
-                        imageData: nil,
-                        fileURLs: nil,
-                        sourceApp: getSourceApp()
-                    )
-                }
+            return extractText(from: pasteboard, types: types, source: source)
+                ?? extractURL(from: pasteboard, types: types, source: source)
+                ?? extractImage(from: pasteboard, types: types, source: source)
+                ?? extractFiles(from: pasteboard, types: types, source: source)
+                ?? extractRichText(from: pasteboard, types: types, source: source)
+                ?? extractHTML(from: pasteboard, types: types, source: source)
+        }
 
-                return ClipboardItem(
-                    contentType: .text,
-                    textContent: text,
-                    url: nil,
-                    imageData: nil,
-                    fileURLs: nil,
-                    sourceApp: getSourceApp()
-                )
+        private func extractText(from pasteboard: NSPasteboard, types: [NSPasteboard.PasteboardType], source: String?) -> ClipboardItem? {
+            guard types.contains(.string), let text = pasteboard.string(forType: .string) else { return nil }
+            if let url = URL(string: text), url.scheme != nil {
+                return ClipboardItem(contentType: .url, textContent: text, url: url, imageData: nil, fileURLs: nil, sourceApp: source)
             }
+            return ClipboardItem(contentType: .text, textContent: text, url: nil, imageData: nil, fileURLs: nil, sourceApp: source)
+        }
 
-            // Check for URL
-            if types.contains(.URL), let urlString = pasteboard.string(forType: .URL),
-               let url = URL(string: urlString)
-            {
-                return ClipboardItem(
-                    contentType: .url,
-                    textContent: urlString,
-                    url: url,
-                    imageData: nil,
-                    fileURLs: nil,
-                    sourceApp: getSourceApp()
-                )
+        private func extractURL(from pasteboard: NSPasteboard, types: [NSPasteboard.PasteboardType], source: String?) -> ClipboardItem? {
+            guard types.contains(.URL), let urlString = pasteboard.string(forType: .URL), let url = URL(string: urlString) else { return nil }
+            return ClipboardItem(contentType: .url, textContent: urlString, url: url, imageData: nil, fileURLs: nil, sourceApp: source)
+        }
+
+        private func extractImage(from pasteboard: NSPasteboard, types: [NSPasteboard.PasteboardType], source: String?) -> ClipboardItem? {
+            if types.contains(.tiff), let data = pasteboard.data(forType: .tiff) {
+                return ClipboardItem(contentType: .image, textContent: nil, url: nil, imageData: data, fileURLs: nil, sourceApp: source)
             }
-
-            // Check for image
-            if types.contains(.tiff), let imageData = pasteboard.data(forType: .tiff) {
-                return ClipboardItem(
-                    contentType: .image,
-                    textContent: nil,
-                    url: nil,
-                    imageData: imageData,
-                    fileURLs: nil,
-                    sourceApp: getSourceApp()
-                )
+            if types.contains(.png), let data = pasteboard.data(forType: .png) {
+                return ClipboardItem(contentType: .image, textContent: nil, url: nil, imageData: data, fileURLs: nil, sourceApp: source)
             }
-
-            if types.contains(.png), let imageData = pasteboard.data(forType: .png) {
-                return ClipboardItem(
-                    contentType: .image,
-                    textContent: nil,
-                    url: nil,
-                    imageData: imageData,
-                    fileURLs: nil,
-                    sourceApp: getSourceApp()
-                )
-            }
-
-            // Check for files
-            if types.contains(.fileURL),
-               let urls = pasteboard.readObjects(forClasses: [NSURL.self]) as? [URL], !urls.isEmpty
-            {
-                return ClipboardItem(
-                    contentType: .file,
-                    textContent: urls.map(\.lastPathComponent).joined(separator: ", "),
-                    url: nil,
-                    imageData: nil,
-                    fileURLs: urls,
-                    sourceApp: getSourceApp()
-                )
-            }
-
-            // Check for RTF
-            if types.contains(.rtf), let rtfData = pasteboard.data(forType: .rtf) {
-                if let attributedString = NSAttributedString(rtf: rtfData, documentAttributes: nil) {
-                    return ClipboardItem(
-                        contentType: .richText,
-                        textContent: attributedString.string,
-                        url: nil,
-                        imageData: nil,
-                        fileURLs: nil,
-                        sourceApp: getSourceApp()
-                    )
-                }
-            }
-
-            // Check for HTML
-            if types.contains(.html), let htmlData = pasteboard.data(forType: .html) {
-                if let htmlString = String(data: htmlData, encoding: .utf8) {
-                    // Strip HTML for preview
-                    let stripped = htmlString.replacingOccurrences(
-                        of: "<[^>]+>",
-                        with: "",
-                        options: .regularExpression
-                    )
-                    return ClipboardItem(
-                        contentType: .html,
-                        textContent: stripped,
-                        url: nil,
-                        imageData: nil,
-                        fileURLs: nil,
-                        sourceApp: getSourceApp()
-                    )
-                }
-            }
-
             return nil
+        }
+
+        private func extractFiles(from pasteboard: NSPasteboard, types: [NSPasteboard.PasteboardType], source: String?) -> ClipboardItem? {
+            guard types.contains(.fileURL),
+                  let urls = pasteboard.readObjects(forClasses: [NSURL.self]) as? [URL], !urls.isEmpty else { return nil }
+            return ClipboardItem(contentType: .file, textContent: urls.map(\.lastPathComponent).joined(separator: ", "), url: nil, imageData: nil, fileURLs: urls, sourceApp: source)
+        }
+
+        private func extractRichText(from pasteboard: NSPasteboard, types: [NSPasteboard.PasteboardType], source: String?) -> ClipboardItem? {
+            guard types.contains(.rtf), let rtfData = pasteboard.data(forType: .rtf),
+                  let attributedString = NSAttributedString(rtf: rtfData, documentAttributes: nil) else { return nil }
+            return ClipboardItem(contentType: .richText, textContent: attributedString.string, url: nil, imageData: nil, fileURLs: nil, sourceApp: source)
+        }
+
+        private func extractHTML(from pasteboard: NSPasteboard, types: [NSPasteboard.PasteboardType], source: String?) -> ClipboardItem? {
+            guard types.contains(.html), let htmlData = pasteboard.data(forType: .html),
+                  let htmlString = String(data: htmlData, encoding: .utf8) else { return nil }
+            let stripped = htmlString.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+            return ClipboardItem(contentType: .html, textContent: stripped, url: nil, imageData: nil, fileURLs: nil, sourceApp: source)
         }
 
         private func getSourceApp() -> String? {

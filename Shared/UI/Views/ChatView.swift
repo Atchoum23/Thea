@@ -9,43 +9,43 @@ import SwiftUI
 struct ChatView: View {
     let conversation: Conversation
 
-    @State private var chatManager = ChatManager.shared
+    @State var chatManager = ChatManager.shared
     @State private var planManager = PlanManager.shared
-    @State private var orchestrator = TheaAgentOrchestrator.shared
-    @State private var inputText = ""
-    @State private var selectedProvider: AIProvider?
-    @State private var showingError: Error?
+    @State var orchestrator = TheaAgentOrchestrator.shared
+    @State var inputText = ""
+    @State var selectedProvider: AIProvider?
+    @State var showingError: Error?
     @State private var showingRenameDialog = false
     @State private var showingExportDialog = false
-    @State private var showingAPIKeySetup = false
+    @State var showingAPIKeySetup = false
     @State private var newTitle = ""
     @StateObject private var settingsManager = SettingsManager.shared
 
     /// Message being edited (triggers edit sheet)
-    @State private var editingMessage: Message?
+    @State var editingMessage: Message?
 
     /// Selected agent session (for inspector panel)
-    @State private var selectedAgentSession: TheaAgentSession?
+    @State var selectedAgentSession: TheaAgentSession?
 
     /// Tracks which branch index is selected for each parent message ID
-    @State private var selectedBranches: [UUID: Int] = [:]
+    @State var selectedBranches: [UUID: Int] = [:]
 
     /// Search state
-    @State private var isSearching = false
-    @State private var searchText = ""
-    @State private var searchMatchIndex = 0
+    @State var isSearching = false
+    @State var searchText = ""
+    @State var searchMatchIndex = 0
 
     @Query private var allMessages: [Message]
 
     /// All messages for this conversation, sorted by time
-    private var allConversationMessages: [Message] {
+    var allConversationMessages: [Message] {
         allMessages
             .filter { $0.conversationID == conversation.id }
             .sorted { $0.timestamp < $1.timestamp }
     }
 
     /// Messages filtered to show only the currently-selected branch for each message position
-    private var messages: [Message] {
+    var messages: [Message] {
         var result: [Message] = []
         var seenParents = Set<UUID>()
 
@@ -86,7 +86,7 @@ struct ChatView: View {
     }
 
     /// Messages matching the current search query
-    private var searchMatches: [Message] {
+    var searchMatches: [Message] {
         guard !searchText.isEmpty else { return [] }
         let query = searchText.lowercased()
         return messages.filter { $0.content.textValue.lowercased().contains(query) }
