@@ -311,9 +311,8 @@ targets:
           # MetaAI ARCHIVED to .v1-archive/ on 2026-02-11.
           # 73 source files + 10 test files (~30K LOC) moved to .v1-archive/Shared/AI/MetaAI/
           # Superseded by Shared/Intelligence/ (canonical implementation).
-          # Exclusion kept as safety net in case files are restored.
+          # No files remain in Shared/ (all archived). Exclusion removed 2026-02-14.
           # ============================================================
-          - "**/AI/MetaAI/**"
           # ACTIVATED: NotesIntegration + RemindersIntegration (macOS)
           # - "**/Integrations/NotesIntegration.swift"
           # - "**/Integrations/RemindersIntegration.swift"
@@ -323,8 +322,7 @@ targets:
           - "**/Theme/DesignTokens.swift"
           # LocalModelsSettingsView — no file at this path (subfolder version at Settings/LocalModels/ separately excluded)
           # AutonomousTaskSettingsView — no file at this path
-          # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11. Exclusion kept as safety net.
-          - "**/Views/MetaAI/**"
+          # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11 (no files remain in Shared/)
           # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
           # MemorySettingsView — ACTIVATED
           # PrivacySettingsView — ACTIVATED
@@ -397,7 +395,7 @@ targets:
           # MessagesIntegration, XcodeIntegration — all macOS-only with AppKit
           # ActiveMemoryRetrieval — ACTIVATED (MemoryManager active, ProviderRegistry active)
           # MemoryAugmentedChat — ACTIVATED (ActiveMemoryRetrieval now active)
-          - "**/MetaAI/ModelBenchmarkService.swift"  # Archived to .v1-archive on 2026-02-11
+          # MetaAI/ModelBenchmarkService.swift — Archived to .v1-archive on 2026-02-11 (no file remains)
           # PlatformFeaturesHub — ACTIVATED (Platform enum, PlatformFeature, platform detection)
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
           # THEAMCPServer — ACTIVATED (MCP server with THEA-prefixed types)
@@ -561,18 +559,14 @@ targets:
           - "**/Providers/Helpers/**"
           - "**/Providers/Protocol/**"
           - "**/Providers/Registry/**"
-          # Exclude Anthropic files that depend on excluded ProviderError/ChatContentPart types
-          - "**/AI/Providers/AnthropicFilesAPI.swift"
-          - "**/AI/Providers/AnthropicTokenCounter.swift"
-          # MetaAI ARCHIVED to .v1-archive/ on 2026-02-11. Exclusion kept as safety net.
-          - "**/AI/MetaAI/**"
+          # AnthropicFilesAPI + AnthropicTokenCounter — ACTIVATED (Foundation only, iOS-ready)
+          # MetaAI ARCHIVED to .v1-archive/ on 2026-02-11 (no files remain in Shared/)
           # NotesIntegration — ACTIVATED (no file in Shared/, cleanup only)
           # RemindersIntegration — ACTIVATED (no file in Shared/, cleanup only)
           - "**/AI/Memory/**"
           # LocalModelsSettingsView — no file at this path
           # AutonomousTaskSettingsView — no file at this path
-          # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11. Exclusion kept as safety net.
-          - "**/Views/MetaAI/**"
+          # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11 (no files remain in Shared/)
           # OrchestratorSettingsView — ACTIVATED (macOS-only via #if os(macOS), safe on iOS)
           - "**/Settings/Orchestrator/**"
           # MemorySettingsView — ACTIVATED
@@ -596,7 +590,7 @@ targets:
           # DeviceSwitcherView — ACTIVATED
           # THEAThinkingView — ACTIVATED
           # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
-          - "**/DistributedTaskExecutor.swift"
+          # DistributedTaskExecutor — ACTIVATED (CloudKit works on iOS)
           # LifeMonitoring — ACTIVATED (35 files, self-contained)
           # PatternLearning — ACTIVATED (single file, self-contained)
           # AI/Context — ACTIVATED
@@ -618,7 +612,7 @@ targets:
           # ProactiveModelManager, LocalModelRecommendationEngine (+extensions),
           # LocalModelRecommendationTypes, AIModelGovernor, ModelGovernanceEngine,
           # UnifiedLocalModelOrchestrator — all use Foundation/OSLog with platform guards
-          - "**/MetaAI/ModelBenchmarkService.swift"  # Archived to .v1-archive on 2026-02-11
+          # MetaAI/ModelBenchmarkService — Archived to .v1-archive on 2026-02-11 (no file remains in Shared/)
           # ProactivityEngine — ACTIVATED
           # AutonomousSettingsView — ACTIVATED (governance deps now active)
           - "**/Settings/LocalModels/**"
@@ -628,7 +622,7 @@ targets:
           # LiveAutoCorrect — ACTIVATED (system frameworks only)
           # AutoCorrectSettingsView — ACTIVATED
           - "**/Integrations/SafariIntegration.swift"
-          - "**/Components/ChatInputView.swift"
+          # ChatInputView — ACTIVATED (has #if os(macOS) guards, pure SwiftUI)
           - "**/Search/SemanticSearchService*.swift"
           # QuerySuggestionOverlay — ACTIVATED (pure SwiftUI)
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
@@ -669,7 +663,7 @@ targets:
           # SquadOrchestrator — ACTIVATED
           # SupraModelSelector — ACTIVATED (governance files active)
           # TheaIntegrationHub + NewFeatures extension REMOVED from codebase on 2026-02-13
-          - "**/Launcher/QuickLauncher.swift"
+          # QuickLauncher — ACTIVATED (pure SwiftUI with platform guards)
           # MemoryAugmentedChat — ACTIVATED
           # Anticipatory — ACTIVATED (all files)
           # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
@@ -677,8 +671,8 @@ targets:
           - "**/LocalModels/MLXModelManager.swift"
           - "**/LocalModels/MLXInferenceEngine.swift"
           - "**/LocalModels/MLXModelScanner.swift"
-          - "**/Focus/FocusOrchestrator.swift"
-          - "**/V1Parity/SiriIntegration.swift"
+          # FocusOrchestrator — ACTIVATED (iOS Focus mode integration)
+          # SiriIntegration — ACTIVATED (has #if os(iOS) guards + macOS stub)
           # Exclude macOS-only browser automation files
           - "**/Automation/BrowserAutomationOrchestrator.swift"
           - "**/Automation/UserInterventionDetector.swift"

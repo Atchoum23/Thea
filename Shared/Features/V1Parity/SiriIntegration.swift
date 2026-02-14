@@ -255,7 +255,7 @@ public final class SiriIntegrationService {
             )
         }
 
-        guard let provider = ProviderRegistry.shared.bestAvailableProvider else {
+        guard let provider = ProviderRegistry.shared.getDefaultProvider() else {
             return SiriResponse(
                 success: false,
                 message: "AI services are currently unavailable",
@@ -265,12 +265,26 @@ public final class SiriIntegrationService {
 
         do {
             let model = await DynamicConfig.shared.bestModel(for: .conversation)
-            let response = try await AIProviderHelpers.singleResponse(
-                provider: provider,
-                prompt: question,
-                model: model,
-                maxTokens: 200 // Keep short for voice
+            let userMessage = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(question),
+                timestamp: Date(),
+                model: model
             )
+            let stream = try await provider.chat(messages: [userMessage], model: model, stream: false)
+            var response = ""
+            for try await chunk in stream {
+                switch chunk.type {
+                case .delta(let text):
+                    response += text
+                case .complete(let message):
+                    response = message.content.textValue
+                case .error(let error):
+                    throw error
+                }
+            }
 
             return SiriResponse(
                 success: true,

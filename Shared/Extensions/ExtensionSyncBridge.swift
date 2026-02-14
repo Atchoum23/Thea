@@ -8,6 +8,8 @@ import Network
 import OSLog
 
 // Protocols and supporting types are in ExtensionSyncBridgeTypes.swift
+// Message handlers are in ExtensionSyncBridge+MessageHandlers.swift
+// State sync, App Group sync, and public API are in ExtensionSyncBridge+SyncAPI.swift
 
 // MARK: - Extension Sync Bridge
 
@@ -15,7 +17,7 @@ import OSLog
 public final class ExtensionSyncBridge: ObservableObject {
     public static let shared = ExtensionSyncBridge()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "ExtensionSync")
+    let logger = Logger(subsystem: "com.thea.app", category: "ExtensionSync")
 
     // MARK: - Published State
 
@@ -38,14 +40,17 @@ public final class ExtensionSyncBridge: ObservableObject {
     public var emailProtectionAutoRemoveTrackers: Bool = true
     public var printFriendlyAutoDetect: Bool = true
 
+    // MARK: - Internal Properties (accessed from extension files)
+
+    var activeConnections: [NWConnection] = []
+    let appGroupIdentifier = "group.app.theathe"
+
     // MARK: - Private Properties
 
     private var webSocketServer: NWListener?
-    private var activeConnections: [NWConnection] = []
     private var heartbeatTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
 
-    private let appGroupIdentifier = "group.app.theathe"
     private let webSocketPort: UInt16 = 9876
 
     // MARK: - Initialization
@@ -225,7 +230,7 @@ public final class ExtensionSyncBridge: ObservableObject {
         }
     }
 
-    private func handleMessage(_ message: SyncMessage, from connection: NWConnection) {
+    func handleMessage(_ message: SyncMessage, from connection: NWConnection) {
         Task { @MainActor in
             switch message.type {
             case .identify:
@@ -259,193 +264,9 @@ public final class ExtensionSyncBridge: ObservableObject {
         }
     }
 
-    // MARK: - Message Handlers
-
-    private func handleIdentify(_ message: SyncMessage, from connection: NWConnection) {
-        guard let extensionType = message.data["type"]?.value as? String,
-              let version = message.data["version"]?.value as? String
-        else {
-            return
-        }
-
-        let extensionConnection = ExtensionConnection(
-            connectionId: ObjectIdentifier(connection).debugDescription,
-            type: ExtensionType(rawValue: extensionType) ?? .chrome,
-            version: version,
-            connectedAt: Date(),
-            lastHeartbeat: Date()
-        )
-
-        // Remove existing connection of same type
-        connectedExtensions.removeAll { $0.type == extensionConnection.type }
-        connectedExtensions.append(extensionConnection)
-
-        logger.info("Extension identified: \(extensionType) v\(version)")
-
-        // Send acknowledgment with current state
-        sendCurrentState(to: connection)
-    }
-
-    private func handleSync(_ message: SyncMessage, from connection: NWConnection) {
-        // Merge state from extension
-        if let extensionState = message.data["state"]?.value as? [String: Any] {
-            mergeExtensionState(extensionState)
-        }
-
-        lastSyncTime = Date()
-
-        // Send updated state back
-        sendCurrentState(to: connection)
-    }
-
-    private func handleStateUpdate(_ message: SyncMessage, from _: NWConnection) {
-        if let extensionState = message.data["state"]?.value as? [String: Any] {
-            mergeExtensionState(extensionState)
-        }
-    }
-
-    private func handleFeatureToggle(_ message: SyncMessage) {
-        guard let feature = message.data["feature"]?.value as? String,
-              let enabled = message.data["enabled"]?.value as? Bool
-        else {
-            return
-        }
-
-        // Update feature state locally
-        switch feature {
-        case "adBlocker":
-            adBlockerEnabled = enabled
-        case "darkMode":
-            darkModeEnabled = enabled
-        case "privacyProtection":
-            privacyProtectionEnabled = enabled
-        case "passwordManager":
-            passwordManagerLocked = !enabled
-        case "emailProtection":
-            emailProtectionAutoRemoveTrackers = enabled
-        default:
-            break
-        }
-
-        // Broadcast to all extensions
-        let updateMessage = SyncMessage(
-            type: .featureToggle,
-            data: [
-                "feature": AnyCodable(feature),
-                "enabled": AnyCodable(enabled)
-            ]
-        )
-        broadcast(updateMessage)
-    }
-
-    private func handleCredentialRequest(_ message: SyncMessage, from connection: NWConnection) {
-        guard let domain = message.data["domain"]?.value as? String else { return }
-
-        // Credential requests are handled via notification to the app
-        // The app layer should respond with the actual credentials
-        let response = SyncMessage(
-            type: .credentialResponse,
-            data: [
-                "domain": AnyCodable(domain),
-                "hasCredentials": AnyCodable(false),
-                "count": AnyCodable(0)
-            ]
-        )
-        send(response, to: connection)
-
-        // Post notification for app to handle
-        NotificationCenter.default.post(
-            name: .extensionCredentialRequest,
-            object: nil,
-            userInfo: ["domain": domain, "connection": connection]
-        )
-    }
-
-    private func handleAliasRequest(_ message: SyncMessage, from connection: NWConnection) {
-        guard let domain = message.data["domain"]?.value as? String else { return }
-
-        // Alias generation is handled via notification to the app
-        // Post notification for app to handle
-        NotificationCenter.default.post(
-            name: .extensionAliasRequest,
-            object: nil,
-            userInfo: ["domain": domain, "connection": connection]
-        )
-    }
-
-    private func handleStatsUpdate(_ message: SyncMessage) {
-        if let statsData = message.data["stats"]?.value as? [String: Any] {
-            // Update local stats
-            if let adsBlocked = statsData["adsBlocked"] as? Int {
-                stats.adsBlocked += adsBlocked
-            }
-            if let trackersBlocked = statsData["trackersBlocked"] as? Int {
-                stats.trackersBlocked += trackersBlocked
-            }
-        }
-    }
-
-    private func updateConnectionHeartbeat(_ connection: NWConnection) {
-        let connectionId = ObjectIdentifier(connection).debugDescription
-        if let index = connectedExtensions.firstIndex(where: { $0.connectionId == connectionId }) {
-            connectedExtensions[index].lastHeartbeat = Date()
-        }
-    }
-
-    // MARK: - State Synchronization
-
-    private func sendCurrentState(to connection: NWConnection) {
-        let state = getCurrentState()
-        let message = SyncMessage(
-            type: .stateUpdate,
-            data: ["state": AnyCodable(state)]
-        )
-        send(message, to: connection)
-    }
-
-    private func getCurrentState() -> [String: Any] {
-        [
-            "adBlockerEnabled": adBlockerEnabled,
-            "darkModeEnabled": darkModeEnabled,
-            "darkModeTheme": darkModeThemeId,
-            "privacyProtectionEnabled": privacyProtectionEnabled,
-            "passwordManagerEnabled": !passwordManagerLocked,
-            "emailProtectionEnabled": emailProtectionAutoRemoveTrackers,
-            "printFriendlyEnabled": printFriendlyAutoDetect,
-            "stats": [
-                "adsBlocked": stats.adsBlocked,
-                "trackersBlocked": stats.trackersBlocked,
-                "emailsProtected": stats.emailsProtected,
-                "passwordsAutofilled": stats.passwordsAutofilled,
-                "pagesDarkened": stats.pagesDarkened
-            ]
-        ]
-    }
-
-    private func mergeExtensionState(_ extensionState: [String: Any]) {
-        // Merge stats
-        if let statsData = extensionState["stats"] as? [String: Int] {
-            if let adsBlocked = statsData["adsBlocked"] {
-                stats.adsBlocked = max(stats.adsBlocked, adsBlocked)
-            }
-            if let trackersBlocked = statsData["trackersBlocked"] {
-                stats.trackersBlocked = max(stats.trackersBlocked, trackersBlocked)
-            }
-            if let emailsProtected = statsData["emailsProtected"] {
-                stats.emailsProtected = max(stats.emailsProtected, emailsProtected)
-            }
-            if let passwordsAutofilled = statsData["passwordsAutofilled"] {
-                stats.passwordsAutofilled = max(stats.passwordsAutofilled, passwordsAutofilled)
-            }
-            if let pagesDarkened = statsData["pagesDarkened"] {
-                stats.pagesDarkened = max(stats.pagesDarkened, pagesDarkened)
-            }
-        }
-    }
-
     // MARK: - Message Sending
 
-    private func send(_ message: SyncMessage, to connection: NWConnection) {
+    func send(_ message: SyncMessage, to connection: NWConnection) {
         do {
             let data = try JSONEncoder().encode(message)
             connection.send(content: data, completion: .contentProcessed { error in
@@ -466,135 +287,5 @@ public final class ExtensionSyncBridge: ObservableObject {
 
         // Also sync via App Group for Safari extension
         syncToAppGroup(message)
-    }
-
-    // MARK: - App Group Sync (Safari)
-
-    private func setupAppGroupSync() {
-        guard let userDefaults = UserDefaults(suiteName: appGroupIdentifier) else {
-            logger.warning("Failed to access app group")
-            return
-        }
-
-        // Watch for changes from Safari extension
-        NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification,
-            object: userDefaults,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.handleAppGroupChange()
-            }
-        }
-    }
-
-    private func handleAppGroupChange() {
-        guard let userDefaults = UserDefaults(suiteName: appGroupIdentifier) else { return }
-
-        // Check for pending messages from Safari extension
-        if let messageData = userDefaults.data(forKey: "safari.pendingMessage") {
-            if let message = try? JSONDecoder().decode(SyncMessage.self, from: messageData) {
-                handleSafariExtensionMessage(message)
-            }
-            userDefaults.removeObject(forKey: "safari.pendingMessage")
-        }
-    }
-
-    private func handleSafariExtensionMessage(_ message: SyncMessage) {
-        switch message.type {
-        case .stateUpdate, .featureToggle, .statsUpdate:
-            handleMessage(message, from: activeConnections.first ?? NWConnection(host: "localhost", port: 0, using: .tcp))
-        default:
-            break
-        }
-    }
-
-    private func syncToAppGroup(_ message: SyncMessage) {
-        guard let userDefaults = UserDefaults(suiteName: appGroupIdentifier) else { return }
-
-        if let data = try? JSONEncoder().encode(message) {
-            userDefaults.set(data, forKey: "app.pendingMessage")
-        }
-
-        // Also sync current state
-        let state = getCurrentState()
-        if let stateData = try? JSONSerialization.data(withJSONObject: state) {
-            userDefaults.set(stateData, forKey: "app.currentState")
-        }
-    }
-
-    // MARK: - Public Feature Toggle Methods
-
-    /// Update ad blocker state and broadcast to extensions
-    public func setAdBlockerEnabled(_ enabled: Bool) {
-        adBlockerEnabled = enabled
-        broadcastFeatureChange("adBlocker", enabled: enabled)
-    }
-
-    /// Update dark mode state and broadcast to extensions
-    public func setDarkModeEnabled(_ enabled: Bool) {
-        darkModeEnabled = enabled
-        broadcastFeatureChange("darkMode", enabled: enabled)
-    }
-
-    /// Update dark mode theme and broadcast to extensions
-    public func setDarkModeTheme(_ themeId: String) {
-        darkModeThemeId = themeId
-        let message = SyncMessage(
-            type: .themeChange,
-            data: ["theme": AnyCodable(themeId)]
-        )
-        broadcast(message)
-    }
-
-    /// Update privacy protection state and broadcast to extensions
-    public func setPrivacyProtectionEnabled(_ enabled: Bool) {
-        privacyProtectionEnabled = enabled
-        broadcastFeatureChange("privacyProtection", enabled: enabled)
-    }
-
-    private func broadcastFeatureChange(_ feature: String, enabled: Bool) {
-        let message = SyncMessage(
-            type: .featureToggle,
-            data: [
-                "feature": AnyCodable(feature),
-                "enabled": AnyCodable(enabled)
-            ]
-        )
-        broadcast(message)
-    }
-
-    // MARK: - Public API
-
-    /// Notify extensions of credential update
-    public func notifyCredentialUpdate(domain: String) {
-        let message = SyncMessage(
-            type: .credentialUpdate,
-            data: ["domain": AnyCodable(domain)]
-        )
-        broadcast(message)
-    }
-
-    /// Notify extensions of alias creation
-    public func notifyAliasCreated(alias: EmailAlias) {
-        let message = SyncMessage(
-            type: .aliasCreated,
-            data: [
-                "id": AnyCodable(alias.id),
-                "alias": AnyCodable(alias.alias),
-                "domain": AnyCodable(alias.domain)
-            ]
-        )
-        broadcast(message)
-    }
-
-    /// Force sync with all extensions
-    public func forceSync() {
-        let message = SyncMessage(
-            type: .sync,
-            data: ["state": AnyCodable(getCurrentState())]
-        )
-        broadcast(message)
-        lastSyncTime = Date()
     }
 }

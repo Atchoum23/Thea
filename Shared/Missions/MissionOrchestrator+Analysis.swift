@@ -1,42 +1,11 @@
-// MissionOrchestrator.swift
-// Autonomous multi-phase mission execution engine
+// MissionOrchestrator+Analysis.swift
+// Goal analysis, capability assessment, and phase planning
 
-import Combine
 import Foundation
-import OSLog
 
-// MARK: - Mission Orchestrator
+// MARK: - Goal Analysis & Phase Planning
 
-/// Orchestrates complex, multi-phase autonomous missions
-@MainActor
-public final class MissionOrchestrator: ObservableObject {
-    public static let shared = MissionOrchestrator()
-
-    let logger = Logger(subsystem: "com.thea.app", category: "Mission")
-    private var cancellables = Set<AnyCancellable>()
-
-    // MARK: - Published State
-
-    @Published public private(set) var activeMission: Mission?
-    @Published public private(set) var missionHistory: [Mission] = []
-    @Published public private(set) var currentPhase: MissionPhase?
-    @Published public private(set) var currentStep: MissionStep?
-    @Published public private(set) var overallProgress: Double = 0
-    @Published public private(set) var isPaused = false
-    @Published public private(set) var logs: [MissionLog] = []
-
-    // MARK: - Execution State
-
-    private var executionTask: Task<Void, Error>?
-    var checkpointData: [String: Any] = [:]
-    var retryCount: [String: Int] = [:]
-    private let maxRetries = 3
-
-    // MARK: - Initialization
-
-    private init() {
-        loadMissionHistory()
-    }
+extension MissionOrchestrator {
 
     // MARK: - Mission Creation
 
@@ -68,13 +37,22 @@ public final class MissionOrchestrator: ObservableObject {
 
     // MARK: - Goal Analysis
 
-    private func analyzeGoal(_ goal: String) async throws -> MissionAnalysis {
+    func analyzeGoal(_ goal: String) async throws -> MissionAnalysis {
         log(.info, "Analyzing goal...")
 
+        // Break down the goal into components
         let components = extractComponents(from: goal)
+
+        // Identify required capabilities
         let capabilities = identifyCapabilities(for: components)
+
+        // Estimate complexity
         let complexity = estimateComplexity(components: components, capabilities: capabilities)
+
+        // Identify dependencies
         let dependencies = identifyDependencies(components)
+
+        // Assess feasibility
         let feasibility = assessFeasibility(capabilities: capabilities)
 
         return MissionAnalysis(
@@ -87,9 +65,11 @@ public final class MissionOrchestrator: ObservableObject {
         )
     }
 
-    private func extractComponents(from goal: String) -> [GoalComponent] {
+    func extractComponents(from goal: String) -> [GoalComponent] {
+        // Use NLP to extract key components
         var components: [GoalComponent] = []
 
+        // Action keywords
         let actionKeywords = ["create", "build", "implement", "design", "analyze", "fix", "update", "deploy", "test", "optimize"]
         let targetKeywords = ["feature", "system", "api", "ui", "database", "service", "module", "integration"]
 
@@ -114,6 +94,7 @@ public final class MissionOrchestrator: ObservableObject {
             components.append(GoalComponent(action: action, target: target, details: nil))
         }
 
+        // Default component if none found
         if components.isEmpty {
             components.append(GoalComponent(action: "execute", target: "task", details: goal))
         }
@@ -121,7 +102,7 @@ public final class MissionOrchestrator: ObservableObject {
         return components
     }
 
-    private func identifyCapabilities(for components: [GoalComponent]) -> [RequiredCapability] {
+    func identifyCapabilities(for components: [GoalComponent]) -> [RequiredCapability] {
         var capabilities: [RequiredCapability] = []
 
         for component in components {
@@ -146,7 +127,7 @@ public final class MissionOrchestrator: ObservableObject {
         return capabilities
     }
 
-    private func estimateComplexity(components: [GoalComponent], capabilities: [RequiredCapability]) -> MissionComplexity {
+    func estimateComplexity(components: [GoalComponent], capabilities: [RequiredCapability]) -> MissionComplexity {
         let componentScore = components.count * 10
         let capabilityScore = capabilities.count { $0.importance == .critical } * 15
 
@@ -163,11 +144,12 @@ public final class MissionOrchestrator: ObservableObject {
         }
     }
 
-    private func identifyDependencies(_ components: [GoalComponent]) -> [ComponentDependency] {
+    func identifyDependencies(_ components: [GoalComponent]) -> [ComponentDependency] {
         var dependencies: [ComponentDependency] = []
 
         for (index, component) in components.enumerated() {
             if index > 0 {
+                // Later components may depend on earlier ones
                 dependencies.append(ComponentDependency(
                     from: components[index - 1].id,
                     to: component.id,
@@ -179,7 +161,8 @@ public final class MissionOrchestrator: ObservableObject {
         return dependencies
     }
 
-    private func assessFeasibility(capabilities: [RequiredCapability]) -> FeasibilityAssessment {
+    func assessFeasibility(capabilities: [RequiredCapability]) -> FeasibilityAssessment {
+        // Check if all required capabilities are available
         let criticalCapabilities = capabilities.filter { $0.importance == .critical }
         let availableCapabilities = getAvailableCapabilities()
 
@@ -204,7 +187,7 @@ public final class MissionOrchestrator: ObservableObject {
         }
     }
 
-    private func getAvailableCapabilities() -> Set<String> {
+    func getAvailableCapabilities() -> Set<String> {
         [
             "code_generation",
             "file_system",
@@ -218,7 +201,7 @@ public final class MissionOrchestrator: ObservableObject {
         ]
     }
 
-    private func estimateDuration(complexity: MissionComplexity, phases: Int) -> TimeInterval {
+    func estimateDuration(complexity: MissionComplexity, phases: Int) -> TimeInterval {
         let baseTime: TimeInterval = switch complexity {
         case .simple: 60
         case .moderate: 300
@@ -231,9 +214,10 @@ public final class MissionOrchestrator: ObservableObject {
 
     // MARK: - Phase Planning
 
-    private func planPhases(for analysis: MissionAnalysis) async throws -> [MissionPhase] {
+    func planPhases(for analysis: MissionAnalysis) async throws -> [MissionPhase] {
         var phases: [MissionPhase] = []
 
+        // Phase 1: Preparation
         phases.append(MissionPhase(
             id: UUID(),
             name: "Preparation",
@@ -247,6 +231,7 @@ public final class MissionOrchestrator: ObservableObject {
             status: .pending
         ))
 
+        // Phase 2+: Execution phases based on components
         for (index, component) in analysis.components.enumerated() {
             let steps = createStepsForComponent(component)
 
@@ -260,6 +245,7 @@ public final class MissionOrchestrator: ObservableObject {
             ))
         }
 
+        // Final Phase: Verification
         phases.append(MissionPhase(
             id: UUID(),
             name: "Verification",
@@ -277,7 +263,7 @@ public final class MissionOrchestrator: ObservableObject {
         return phases
     }
 
-    private func createStepsForComponent(_ component: GoalComponent) -> [MissionStep] {
+    func createStepsForComponent(_ component: GoalComponent) -> [MissionStep] {
         var steps: [MissionStep] = []
         var order = 1
 
@@ -318,194 +304,9 @@ public final class MissionOrchestrator: ObservableObject {
             steps.append(MissionStep(id: UUID(), name: "Execute task", type: .execution, order: order))
         }
 
+        // Add checkpoint at end
         steps.append(MissionStep(id: UUID(), name: "Checkpoint", type: .checkpoint, order: steps.count + 1))
 
         return steps
     }
-
-    // MARK: - Mission Execution
-
-    /// Start executing a mission
-    public func startMission(_ mission: Mission) async throws {
-        guard activeMission == nil else {
-            throw MissionError.missionAlreadyActive
-        }
-
-        activeMission = mission
-        mission.status = .running
-        mission.startedAt = Date()
-        isPaused = false
-
-        log(.info, "Starting mission: \(mission.goal)")
-
-        executionTask = Task {
-            do {
-                try await executeMission(mission)
-            } catch {
-                await handleMissionError(mission, error: error)
-            }
-        }
-    }
-
-    private func executeMission(_ mission: Mission) async throws {
-        for (phaseIndex, phase) in mission.phases.enumerated() {
-            try Task.checkCancellation()
-            while isPaused {
-                try await Task.sleep(nanoseconds: 100_000_000)
-            }
-
-            currentPhase = phase
-            phase.status = .running
-            phase.startedAt = Date()
-
-            log(.info, "Starting phase \(phase.order): \(phase.name)")
-
-            for step in phase.steps {
-                try Task.checkCancellation()
-                while isPaused {
-                    try await Task.sleep(nanoseconds: 100_000_000)
-                }
-
-                currentStep = step
-
-                do {
-                    try await executeStep(step, in: phase, mission: mission)
-                    step.status = .completed
-                } catch {
-                    step.status = .failed
-                    step.error = error.localizedDescription
-
-                    let retryKey = "\(phase.id)-\(step.id)"
-                    let currentRetries = retryCount[retryKey, default: 0]
-
-                    if currentRetries < maxRetries, step.type != .checkpoint {
-                        retryCount[retryKey] = currentRetries + 1
-                        log(.warning, "Retrying step (attempt \(currentRetries + 1)/\(maxRetries))")
-                        try await executeStep(step, in: phase, mission: mission)
-                        step.status = .completed
-                    } else {
-                        throw error
-                    }
-                }
-
-                updateProgress(mission: mission, phaseIndex: phaseIndex)
-            }
-
-            phase.status = .completed
-            phase.completedAt = Date()
-
-            log(.success, "Completed phase \(phase.order): \(phase.name)")
-        }
-
-        mission.status = .completed
-        mission.completedAt = Date()
-        activeMission = nil
-        currentPhase = nil
-        currentStep = nil
-
-        log(.success, "Mission completed successfully!")
-
-        missionHistory.insert(mission, at: 0)
-        saveMissionHistory()
-
-        NotificationCenter.default.post(name: .missionCompleted, object: mission)
-    }
-
-    private func executeStep(_ step: MissionStep, in _: MissionPhase, mission: Mission) async throws {
-        step.status = .running
-        step.startedAt = Date()
-
-        log(.info, "Executing step: \(step.name)")
-
-        switch step.type {
-        case .validation:
-            try await performValidation(step, mission: mission)
-        case .resourceGathering:
-            try await gatherResources(step, mission: mission)
-        case .checkpoint:
-            try await saveCheckpoint(step, mission: mission)
-        case .planning:
-            try await performPlanning(step, mission: mission)
-        case .codeGeneration:
-            try await generateCode(step, mission: mission)
-        case .codeModification:
-            try await modifyCode(step, mission: mission)
-        case .fileOperation:
-            try await performFileOperation(step, mission: mission)
-        case .dataCollection:
-            try await collectData(step, mission: mission)
-        case .processing:
-            try await processData(step, mission: mission)
-        case .aiAnalysis:
-            try await performAIAnalysis(step, mission: mission)
-        case .building:
-            try await performBuild(step, mission: mission)
-        case .testing:
-            try await runTests(step, mission: mission)
-        case .deployment:
-            try await deploy(step, mission: mission)
-        case .reporting:
-            try await generateReport(step, mission: mission)
-        case .cleanup:
-            try await cleanupMission(step, mission: mission)
-        case .execution:
-            try await executeGeneric(step, mission: mission)
-        }
-
-        step.completedAt = Date()
-    }
-
-    // MARK: - Mission Control
-
-    /// Pause the current mission
-    public func pauseMission() {
-        isPaused = true
-        activeMission?.status = .paused
-        log(.warning, "Mission paused")
-    }
-
-    /// Resume a paused mission
-    public func resumeMission() {
-        isPaused = false
-        activeMission?.status = .running
-        log(.info, "Mission resumed")
-    }
-
-    /// Cancel the current mission
-    public func cancelMission() {
-        executionTask?.cancel()
-        activeMission?.status = .cancelled
-        activeMission = nil
-        currentPhase = nil
-        currentStep = nil
-        isPaused = false
-        log(.error, "Mission cancelled")
-    }
-
-    /// Restore from checkpoint
-    public func restoreFromCheckpoint(missionId: UUID) async throws -> Mission? {
-        guard let data = UserDefaults.standard.data(forKey: "mission.checkpoint.\(missionId)"),
-              let checkpoint = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else {
-            return nil
-        }
-
-        log(.info, "Restoring from checkpoint...")
-
-        guard let mission = missionHistory.first(where: { $0.id == missionId }) else {
-            return nil
-        }
-
-        if let phaseOrder = checkpoint["phase"] as? Int {
-            for phase in mission.phases where phase.order < phaseOrder {
-                phase.status = .completed
-            }
-        }
-
-        return mission
-    }
 }
-
-// Step implementations, error handling, progress, logging, and persistence
-// are in MissionOrchestrator+Execution.swift
-// Supporting types are in MissionOrchestratorTypes.swift
