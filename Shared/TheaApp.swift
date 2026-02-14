@@ -20,6 +20,11 @@ enum TheaAppConfiguration {
             FinancialTransaction.self,
             IndexedFile.self,
 
+            // Clipboard History models
+            TheaClipEntry.self,
+            TheaClipPinboard.self,
+            TheaClipPinboardEntry.self,
+
             // Prompt Engineering models
             UserPromptPreference.self,
             CodeErrorRecord.self,

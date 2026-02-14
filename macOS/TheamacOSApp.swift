@@ -19,7 +19,10 @@ struct TheamacOSApp: App {
     @State private var showingFallbackAlert = false
 
     init() {
-        let schema = Schema([Conversation.self, Message.self, Project.self])
+        let schema = Schema([
+            Conversation.self, Message.self, Project.self,
+            TheaClipEntry.self, TheaClipPinboard.self, TheaClipPinboardEntry.self,
+        ])
         let useInMemory = isUITesting || isUnitTesting
 
         // Pre-flight: delete incompatible store before SwiftData touches it
