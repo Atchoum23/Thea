@@ -126,7 +126,16 @@ final class TabManagerTests: XCTestCase {
         }
 
         func reorderTabs(from source: IndexSet, to destination: Int) {
-            openTabs.move(fromOffsets: source, toOffset: destination)
+            // Manual implementation of move(fromOffsets:toOffset:) to avoid SwiftUI dependency
+            let items = source.map { openTabs[$0] }
+            // Remove from high to low to preserve indices
+            for index in source.sorted().reversed() {
+                openTabs.remove(at: index)
+            }
+            // Adjust destination for removed items before it
+            let adjustedDest = destination - source.filter { $0 < destination }.count
+            let clampedDest = min(adjustedDest, openTabs.count)
+            openTabs.insert(contentsOf: items, at: clampedDest)
         }
 
         func updateTabTitle(_ tabID: UUID, title: String) {
