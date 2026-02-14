@@ -35,11 +35,11 @@ final class TheaClipHashTests: XCTestCase {
         XCTAssertNotEqual(hash1, hash2, "Different text should produce different hash")
     }
 
-    func testContentHashNilText() {
+    func testContentHashNilTextSameAsEmpty() {
         let hash1 = TheaClipEntry.contentHash(text: nil, imageData: nil, fileNames: [])
         let hash2 = TheaClipEntry.contentHash(text: "", imageData: nil, fileNames: [])
-        // nil text vs empty text should differ because nil doesn't add to hasher
-        XCTAssertNotEqual(hash1, hash2)
+        // nil text and empty text both contribute nothing to the hasher → same hash
+        XCTAssertEqual(hash1, hash2)
     }
 
     func testContentHashWithImageData() {

@@ -48,6 +48,7 @@
                 HStack {
                     Image(systemName: "folder.fill")
                         .foregroundStyle(.blue)
+                        .accessibilityHidden(true)
                     Text("Working Folder")
                         .font(.headline)
                 }
@@ -84,6 +85,7 @@
                 HStack {
                     Image(systemName: "list.bullet.clipboard.fill")
                         .foregroundStyle(.purple)
+                        .accessibilityHidden(true)
                     Text("Progress")
                         .font(.headline)
                     Spacer()
@@ -127,6 +129,7 @@
                 Image(systemName: step.status.icon)
                     .foregroundStyle(colorForStepStatus(step.status))
                     .frame(width: 16)
+                    .accessibilityHidden(true)
 
                 Text("Step \(step.stepNumber)")
                     .font(.caption.bold())
@@ -137,6 +140,8 @@
                     .foregroundStyle(.secondary)
             }
             .padding(.vertical, 2)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Step \(step.stepNumber), \(step.status.rawValue): \(step.description)")
         }
 
         private func colorForStepStatus(_ status: CoworkStep.StepStatus) -> Color {
@@ -156,6 +161,7 @@
                 HStack {
                     Image(systemName: "info.circle.fill")
                         .foregroundStyle(.cyan)
+                        .accessibilityHidden(true)
                     Text("Context")
                         .font(.headline)
                 }
@@ -175,12 +181,15 @@
             HStack {
                 Image(systemName: icon)
                     .frame(width: 16)
+                    .accessibilityHidden(true)
                 Text(label)
                 Spacer()
                 Text(value)
                     .foregroundStyle(.secondary)
             }
             .font(.caption)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(label): \(value)")
         }
 
         // MARK: - Queue Section
@@ -190,6 +199,7 @@
                 HStack {
                     Image(systemName: "tray.full.fill")
                         .foregroundStyle(.orange)
+                        .accessibilityHidden(true)
                     Text("Queue")
                         .font(.headline)
 
@@ -219,10 +229,13 @@
                                         Image(systemName: task.priority.icon)
                                             .foregroundStyle(colorForPriority(task.priority))
                                             .frame(width: 16)
+                                            .accessibilityHidden(true)
                                         Text(task.instruction)
                                             .font(.caption)
                                             .lineLimit(1)
                                     }
+                                    .accessibilityElement(children: .combine)
+                                    .accessibilityLabel("\(task.priority.displayName) priority: \(task.instruction)")
                                 }
                             }
                         }

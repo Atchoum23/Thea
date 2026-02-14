@@ -163,6 +163,7 @@ struct BackupSettingsView: View {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundStyle(color)
+                .accessibilityHidden(true)
 
             Text(value)
                 .font(.headline)
@@ -177,6 +178,8 @@ struct BackupSettingsView: View {
         .padding(.vertical, 12)
         .background(color.opacity(0.1))
         .cornerRadius(8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 
     private var lastBackupText: String {
@@ -307,6 +310,7 @@ struct BackupSettingsView: View {
                 .font(.title2)
                 .foregroundStyle(backupTypeColor(backup.type))
                 .frame(width: 40)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -367,6 +371,7 @@ struct BackupSettingsView: View {
                     .font(.title2)
                     .foregroundStyle(.secondary)
             }
+            .accessibilityLabel("Backup actions for \(backup.name)")
         }
         .padding(.vertical, 4)
     }
@@ -609,6 +614,7 @@ struct BackupSettingsView: View {
                             Image(systemName: item.icon)
                                 .foregroundStyle(.blue)
                                 .frame(width: 24)
+                                .accessibilityHidden(true)
 
                             Text(item.name)
 
@@ -618,6 +624,8 @@ struct BackupSettingsView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("\(item.name): \(item.count) items")
                     }
                 }
 

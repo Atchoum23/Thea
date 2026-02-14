@@ -90,9 +90,11 @@
                 } label: {
                     HStack {
                         Image(systemName: "line.3.horizontal.decrease.circle")
+                            .accessibilityHidden(true)
                         Text(filterType?.rawValue ?? "All Types")
                     }
                 }
+                .accessibilityLabel("Filter: \(filterType?.rawValue ?? "All Types")")
 
                 Toggle("Show Intermediates", isOn: $showIntermediates)
                     .toggleStyle(.checkbox)
@@ -179,6 +181,8 @@
                 .cornerRadius(8)
             }
             .buttonStyle(.plain)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(artifact.name), \(artifact.fileType.rawValue), \(artifact.formattedSize)\(artifact.isIntermediate ? ", intermediate" : "")")
             .contextMenu {
                 artifactContextMenu(artifact)
             }
@@ -203,6 +207,7 @@
                     .font(.title2)
                     .foregroundStyle(colorForType(artifact.fileType))
                     .frame(width: 32)
+                    .accessibilityHidden(true)
 
                 // Info
                 VStack(alignment: .leading, spacing: 2) {
@@ -246,6 +251,7 @@
                     Image(systemName: "eye")
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Preview \(artifact.name)")
             }
             .padding(.vertical, 4)
         }

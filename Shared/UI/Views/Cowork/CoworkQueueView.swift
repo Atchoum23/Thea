@@ -121,6 +121,7 @@
                         } label: {
                             Image(systemName: "ellipsis.circle")
                         }
+                        .accessibilityLabel("Queue actions")
                     }
                 }
             }
@@ -139,6 +140,8 @@
             .padding(.vertical, 8)
             .background(color.opacity(0.1))
             .cornerRadius(8)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(label): \(value)")
         }
 
         // MARK: - Filter Tabs
@@ -152,6 +155,7 @@
                         } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: filter.icon)
+                                    .accessibilityHidden(true)
                                 Text(filter.rawValue)
                             }
                             .padding(.horizontal, 12)
@@ -160,6 +164,8 @@
                             .cornerRadius(6)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Filter: \(filter.rawValue)")
+                        .accessibilityAddTraits(selectedFilter == filter ? .isSelected : [])
                     }
                 }
                 .padding(.horizontal)
@@ -243,9 +249,12 @@
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
+                    .accessibilityLabel("Task actions")
                 }
             }
             .padding(.vertical, 4)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(task.priority.displayName) priority, \(task.status.rawValue): \(task.instruction)")
         }
 
         @ViewBuilder
@@ -254,6 +263,7 @@
                 .fill(colorForPriority(priority))
                 .frame(width: 4, height: 40)
                 .cornerRadius(2)
+                .accessibilityHidden(true)
         }
 
         @ViewBuilder
@@ -269,6 +279,7 @@
                 }
             }
             .frame(width: 20)
+            .accessibilityHidden(true)
         }
 
         // MARK: - Add Task Area

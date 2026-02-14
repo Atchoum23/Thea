@@ -203,6 +203,7 @@ struct IntegrationsSettingsView: View {
             HStack {
                 Image(systemName: icon)
                     .foregroundStyle(color)
+                    .accessibilityHidden(true)
                 Text("\(count)")
                     .font(.title2)
                     .fontWeight(.bold)
@@ -221,6 +222,8 @@ struct IntegrationsSettingsView: View {
         .padding()
         .background(color.opacity(0.1))
         .cornerRadius(8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(count) of \(total)")
     }
 
     private var enabledModulesCount: Int {
@@ -246,6 +249,7 @@ struct IntegrationsSettingsView: View {
                 .font(.title2)
                 .foregroundStyle(binding.wrappedValue ? moduleColor(for: module) : .secondary)
                 .frame(width: 32)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(module.displayName)
@@ -280,6 +284,7 @@ struct IntegrationsSettingsView: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Details for \(module.displayName)")
         }
         .padding(.vertical, 4)
     }
@@ -353,6 +358,7 @@ struct IntegrationsSettingsView: View {
                 .font(.title3)
                 .foregroundStyle(isEnabled ? .blue : .secondary)
                 .frame(width: 28)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -367,7 +373,10 @@ struct IntegrationsSettingsView: View {
 
             Image(systemName: isEnabled ? "checkmark.circle.fill" : "circle")
                 .foregroundStyle(isEnabled ? .green : .secondary)
+                .accessibilityHidden(true)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title), \(isEnabled ? "enabled" : "disabled")")
     }
 
     // MARK: - Platform Integrations
