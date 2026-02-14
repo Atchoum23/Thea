@@ -283,10 +283,13 @@ struct IOSOrchestratorSettingsView: View {
             // Configuration
             Section {
                 Toggle("Enable Orchestration", isOn: $config.isEnabled)
+                    .accessibilityHint("Enables multi-agent task orchestration")
 
                 Stepper("Max Concurrent Tasks: \(config.maxConcurrentTasks)", value: $config.maxConcurrentTasks, in: 1...10)
+                    .accessibilityHint("Sets maximum simultaneous agent tasks from 1 to 10")
 
                 Stepper("Agent Timeout: \(config.agentTimeout)s", value: $config.agentTimeout, in: 30...300, step: 30)
+                    .accessibilityHint("Sets agent timeout in seconds from 30 to 300")
             } header: {
                 Text("Configuration")
             }

@@ -4,6 +4,7 @@ struct IOSPrivacySettingsView: View {
     @State private var settingsManager = SettingsManager.shared
     @State private var config = IOSPrivacyConfig.load()
     @State private var showingExportOptions = false
+    @State private var showingDeleteConfirmation = false
 
     var body: some View {
         Form {
@@ -81,7 +82,7 @@ struct IOSPrivacySettingsView: View {
                 }
 
                 Button("Delete All Data", role: .destructive) {
-                    // Delete action
+                    showingDeleteConfirmation = true
                 }
             } header: {
                 Text("Data Management")
@@ -101,6 +102,14 @@ struct IOSPrivacySettingsView: View {
         }
         .sheet(isPresented: $showingExportOptions) {
             IOSExportOptionsView()
+        }
+        .alert("Delete All Data?", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete Everything", role: .destructive) {
+                // Delete action
+            }
+        } message: {
+            Text("This will permanently delete all conversations, memories, and settings. This action cannot be undone.")
         }
     }
 

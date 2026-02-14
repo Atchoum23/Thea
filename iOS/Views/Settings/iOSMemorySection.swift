@@ -2,6 +2,7 @@ import SwiftUI
 
 struct IOSMemorySettingsView: View {
     @State private var config = IOSMemoryConfig.load()
+    @State private var showingClearConfirmation = false
 
     var body: some View {
         Form {
@@ -12,7 +13,7 @@ struct IOSMemorySettingsView: View {
                         Text("1,234")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(Color.accentColor)
                         Text("Memories")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -23,7 +24,7 @@ struct IOSMemorySettingsView: View {
                         Text("45")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundStyle(.green)
+                            .foregroundStyle(Color.green.opacity(0.8))
                         Text("Recent")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -38,10 +39,13 @@ struct IOSMemorySettingsView: View {
             // Configuration
             Section {
                 Toggle("Enable Memory", isOn: $config.isEnabled)
+                    .accessibilityHint("Enables Thea to remember context across conversations")
 
                 Stepper("Short-term: \(config.shortTermCapacity)", value: $config.shortTermCapacity, in: 10...100, step: 10)
+                    .accessibilityHint("Adjusts short-term memory capacity from 10 to 100 items")
 
                 Stepper("Long-term: \(config.longTermCapacity)", value: $config.longTermCapacity, in: 1000...50000, step: 1000)
+                    .accessibilityHint("Adjusts long-term memory capacity from 1000 to 50000 items")
             } header: {
                 Text("Capacity")
             }
@@ -49,10 +53,13 @@ struct IOSMemorySettingsView: View {
             // Learning
             Section {
                 Toggle("Learn from Conversations", isOn: $config.learnFromConversations)
+                    .accessibilityHint("Allows Thea to learn from your conversation patterns")
 
                 Toggle("Remember Preferences", isOn: $config.rememberPreferences)
+                    .accessibilityHint("Saves your preferences for future interactions")
 
                 Toggle("Context Awareness", isOn: $config.contextAwareness)
+                    .accessibilityHint("Enables awareness of time, location, and activity context")
             } header: {
                 Text("Learning")
             }
@@ -64,7 +71,7 @@ struct IOSMemorySettingsView: View {
                 }
 
                 Button("Clear All Memory", role: .destructive) {
-                    // Clear all action
+                    showingClearConfirmation = true
                 }
             } header: {
                 Text("Management")
@@ -81,6 +88,14 @@ struct IOSMemorySettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: config) { _, _ in
             config.save()
+        }
+        .alert("Clear All Memory?", isPresented: $showingClearConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Clear All", role: .destructive) {
+                // Clear all memory action
+            }
+        } message: {
+            Text("This will permanently delete all stored memories and learned preferences. This action cannot be undone.")
         }
     }
 }
