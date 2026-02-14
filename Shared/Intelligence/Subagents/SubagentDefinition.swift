@@ -188,8 +188,17 @@ public final class SubagentRegistry: ObservableObject {
 
     /// Register built-in subagents inspired by Claude Code
     private func registerBuiltinSubagents() {
-        let builtins = [
-            // Explore: Fast read-only agent for searching and analyzing codebases
+        let builtins = makeExplorationSubagents() + makeExecutionSubagents()
+
+        for subagent in builtins {
+            subagents[subagent.id] = subagent
+        }
+
+        logger.info("Registered \(builtins.count) built-in subagents")
+    }
+
+    private func makeExplorationSubagents() -> [SubagentDefinition] {
+        [
             SubagentDefinition(
                 id: "explore",
                 name: "Explore",
@@ -211,8 +220,6 @@ public final class SubagentRegistry: ObservableObject {
                 scope: .builtin,
                 thoroughness: .medium
             ),
-
-            // Plan: Agent for designing implementation approaches
             SubagentDefinition(
                 id: "plan",
                 name: "Plan",
@@ -233,50 +240,6 @@ public final class SubagentRegistry: ObservableObject {
                 executionMode: .foreground,
                 scope: .builtin
             ),
-
-            // General-purpose: Versatile agent for various tasks
-            SubagentDefinition(
-                id: "general-purpose",
-                name: "General Purpose",
-                description: "Versatile agent for researching and executing multi-step tasks",
-                systemPrompt: """
-                You are the General-purpose subagent, capable of handling diverse tasks.
-                You can research questions, search code, and execute multi-step tasks.
-
-                Approach tasks systematically:
-                1. Understand the goal
-                2. Gather necessary context
-                3. Execute steps methodically
-                4. Verify results
-                """,
-                model: .inherit,
-                tools: .all,
-                executionMode: .foreground,
-                scope: .builtin
-            ),
-
-            // Bash: Command execution specialist
-            SubagentDefinition(
-                id: "bash",
-                name: "Bash",
-                description: "Command execution specialist for terminal operations",
-                systemPrompt: """
-                You are the Bash subagent, specialized for command-line operations.
-                You handle git operations, build commands, and other terminal tasks.
-
-                Guidelines:
-                1. Use safe, non-destructive commands when possible
-                2. Explain what commands do before running
-                3. Check command results before proceeding
-                4. Handle errors gracefully
-                """,
-                model: .fast,
-                tools: .specific(["bash", "terminal"]),
-                executionMode: .foreground,
-                scope: .builtin
-            ),
-
-            // Research: Web and documentation research
             SubagentDefinition(
                 id: "research",
                 name: "Research",
@@ -297,12 +260,49 @@ public final class SubagentRegistry: ObservableObject {
                 scope: .builtin
             )
         ]
+    }
 
-        for subagent in builtins {
-            subagents[subagent.id] = subagent
-        }
+    private func makeExecutionSubagents() -> [SubagentDefinition] {
+        [
+            SubagentDefinition(
+                id: "general-purpose",
+                name: "General Purpose",
+                description: "Versatile agent for researching and executing multi-step tasks",
+                systemPrompt: """
+                You are the General-purpose subagent, capable of handling diverse tasks.
+                You can research questions, search code, and execute multi-step tasks.
 
-        logger.info("Registered \(builtins.count) built-in subagents")
+                Approach tasks systematically:
+                1. Understand the goal
+                2. Gather necessary context
+                3. Execute steps methodically
+                4. Verify results
+                """,
+                model: .inherit,
+                tools: .all,
+                executionMode: .foreground,
+                scope: .builtin
+            ),
+            SubagentDefinition(
+                id: "bash",
+                name: "Bash",
+                description: "Command execution specialist for terminal operations",
+                systemPrompt: """
+                You are the Bash subagent, specialized for command-line operations.
+                You handle git operations, build commands, and other terminal tasks.
+
+                Guidelines:
+                1. Use safe, non-destructive commands when possible
+                2. Explain what commands do before running
+                3. Check command results before proceeding
+                4. Handle errors gracefully
+                """,
+                model: .fast,
+                tools: .specific(["bash", "terminal"]),
+                executionMode: .foreground,
+                scope: .builtin
+            )
+        ]
     }
 
     // MARK: - Management

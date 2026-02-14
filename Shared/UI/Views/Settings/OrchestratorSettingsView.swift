@@ -499,9 +499,13 @@ struct OrchestratorSettingsView: View {
         return result.prefix(1).uppercased() + result.dropFirst()
     }
 
-    // MARK: - Cost Management Section
+}
 
-    private var costManagementSection: some View {
+// MARK: - Cost, Execution, Debug & Actions
+
+extension OrchestratorSettingsView {
+
+    var costManagementSection: some View {
         Section("Cost Optimization") {
             Toggle("Prefer Cost-Effective Models", isOn: $config.preferCheaperModels)
                 .onChange(of: config.preferCheaperModels) { _, _ in
@@ -518,7 +522,6 @@ struct OrchestratorSettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            // Cost budget
             if let budget = config.costBudgetPerQuery {
                 HStack {
                     Text("Budget per Query")
@@ -530,9 +533,7 @@ struct OrchestratorSettingsView: View {
         }
     }
 
-    // MARK: - Execution Settings Section
-
-    private var executionSettingsSection: some View {
+    var executionSettingsSection: some View {
         Section("Execution Settings") {
             HStack {
                 Text("Max Parallel Agents")
@@ -576,9 +577,7 @@ struct OrchestratorSettingsView: View {
         }
     }
 
-    // MARK: - Debug Section
-
-    private var debugSection: some View {
+    var debugSection: some View {
         Section("Debug & Monitoring") {
             Toggle("Show Decomposition Details", isOn: $config.showDecompositionDetails)
                 .onChange(of: config.showDecompositionDetails) { _, _ in
@@ -606,13 +605,11 @@ struct OrchestratorSettingsView: View {
         }
     }
 
-    // MARK: - Actions
-
     func saveConfig() {
         config.save()
     }
 
-    private func resetToDefaults() {
+    func resetToDefaults() {
         config = OrchestratorConfiguration()
         saveConfig()
     }
@@ -620,7 +617,6 @@ struct OrchestratorSettingsView: View {
 
 // MARK: - Preview
 
-// macOS Preview
 #Preview {
     OrchestratorSettingsView()
         .frame(width: 700, height: 900)

@@ -203,7 +203,7 @@ final class ContextMonitorAndRunnerTests: XCTestCase {
 
     func testConfidenceWithLength500() {
         let text = String(repeating: "word ", count: 120)  // >500 chars
-        XCTAssertEqual(estimateConfidence(text), 0.7)
+        XCTAssertEqual(estimateConfidence(text), 0.7, accuracy: 0.001)
     }
 
     func testConfidenceWithCodeBlocks() {
@@ -227,7 +227,7 @@ final class ContextMonitorAndRunnerTests: XCTestCase {
         // Long (>500) + code + headers = 0.5 + 0.1 + 0.1 + 0.1 + 0.1 = 0.9, capped at 0.9
         let text = String(repeating: "w ", count: 300) + "\n```python\nx\n```\n## Title\n**bold**"
         let conf = estimateConfidence(text)
-        XCTAssertEqual(conf, 0.9)
+        XCTAssertEqual(conf, 0.9, accuracy: 0.001)
     }
 
     // MARK: - Artifact Extraction Tests

@@ -13,15 +13,15 @@ struct PrivacySettingsView: View {
     @State private var sanitizer = PIISanitizer.shared
     @State private var conversationMemory = ConversationMemory.shared
     @State var showingExportOptions = false
-    @State private var showingDeleteConfirmation = false
+    @State var showingDeleteConfirmation = false
     @State var showingAuditLog = false
     @State var showingCustomPatternSheet = false
     @State private var showingClearMemoryConfirmation = false
     @State var isExporting = false
     @State var exportProgress: Double = 0
-    @State private var exportError: Error?
-    @State private var biometricsAvailable = false
-    @State private var biometricType: PrivacyBiometricType = .none
+    @State var exportError: Error?
+    @State var biometricsAvailable = false
+    @State var biometricType: PrivacyBiometricType = .none
 
     var body: some View {
         Form {
@@ -572,23 +572,23 @@ struct PrivacySettingsView: View {
         }
     }
 
-    // MARK: - Data Management Section
+}
 
-    private var dataManagementSection: some View {
+// MARK: - Data Management, Audit, and Actions
+
+extension PrivacySettingsView {
+
+    var dataManagementSection: some View {
         Group {
-            // Export
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Export Your Data")
                         .font(.subheadline)
-
                     Text("Download all your data in a portable format")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
                 Spacer()
-
                 Button {
                     showingExportOptions = true
                 } label: {
@@ -608,19 +608,15 @@ struct PrivacySettingsView: View {
 
             Divider()
 
-            // Delete
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Delete All Data")
                         .font(.subheadline)
-
                     Text("Permanently remove all conversations and settings")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
                 Spacer()
-
                 Button(role: .destructive) {
                     showingDeleteConfirmation = true
                 } label: {
@@ -635,22 +631,17 @@ struct PrivacySettingsView: View {
         }
     }
 
-    // MARK: - Privacy Audit Section
-
-    private var privacyAuditSection: some View {
+    var privacyAuditSection: some View {
         Group {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Privacy Audit Log")
                         .font(.subheadline)
-
                     Text("\(privacyConfig.auditLogEntries.count) events recorded")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
                 Spacer()
-
                 Button {
                     showingAuditLog = true
                 } label: {
@@ -666,10 +657,8 @@ struct PrivacySettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            // Recent activity
             if !privacyConfig.auditLogEntries.isEmpty {
                 Divider()
-
                 Text("Recent Activity")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -679,16 +668,13 @@ struct PrivacySettingsView: View {
                         Image(systemName: auditIcon(for: entry.type))
                             .foregroundStyle(auditColor(for: entry.type))
                             .frame(width: 20)
-
                         VStack(alignment: .leading, spacing: 2) {
                             Text(entry.description)
                                 .font(.caption)
-
                             Text(entry.timestamp, style: .relative)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
-
                         Spacer()
                     }
                 }
@@ -696,9 +682,7 @@ struct PrivacySettingsView: View {
         }
     }
 
-    // MARK: - Actions
-
-    private func checkBiometrics() {
+    func checkBiometrics() {
         #if canImport(LocalAuthentication)
         let context = LAContext()
         var error: NSError?
@@ -720,8 +704,7 @@ struct PrivacySettingsView: View {
         #endif
     }
 
-    private func cleanUpStorage() {
-        // Implement storage cleanup
+    func cleanUpStorage() {
         privacyConfig.auditLogEntries.append(
             PrivacyAuditLogEntry(id: UUID(), type: .dataDelete, description: "Storage cleanup performed", timestamp: Date(), details: nil)
         )
@@ -738,7 +721,6 @@ struct PrivacySettingsView: View {
                 exportProgress = 0.8
 
                 #if os(macOS)
-                // Present save panel so user can choose where to save
                 let panel = NSSavePanel()
                 panel.nameFieldStringValue = fileURL.lastPathComponent
                 panel.allowedContentTypes = [.json]
@@ -755,8 +737,6 @@ struct PrivacySettingsView: View {
                 privacyConfig.auditLogEntries.append(
                     PrivacyAuditLogEntry(id: UUID(), type: .dataExport, description: "Data export completed", timestamp: Date(), details: "Format: \(privacyConfig.exportFormat.rawValue)")
                 )
-
-                // Clean up temp file
                 try? FileManager.default.removeItem(at: fileURL)
             } catch {
                 isExporting = false
@@ -765,7 +745,7 @@ struct PrivacySettingsView: View {
         }
     }
 
-    private func deleteAllData() {
+    func deleteAllData() {
         Task {
             do {
                 try await GDPRDataExporter.shared.deleteAllData(modelContext: modelContext)
@@ -778,7 +758,7 @@ struct PrivacySettingsView: View {
         }
     }
 
-    private func resetPrivacySettings() {
+    func resetPrivacySettings() {
         privacyConfig = PrivacySettingsConfiguration()
         privacyConfig.save()
     }

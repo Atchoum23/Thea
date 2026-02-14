@@ -259,14 +259,14 @@ final class NetworkManagerTypesTests: XCTestCase {
     }
 
     func testHTTPErrorWithData() {
-        let data = "rate limited".data(using: .utf8)
+        let data = Data("rate limited".utf8)
         let error = TestNetworkError.httpError(429, data)
         XCTAssertTrue(error.errorDescription.contains("429"))
     }
 
     func testDecodingErrorDescription() {
         struct Dummy: Decodable { let x: Int }
-        let invalidData = "not json".data(using: .utf8)!
+        let invalidData = Data("not json".utf8)
         do {
             _ = try JSONDecoder().decode(Dummy.self, from: invalidData)
             XCTFail("Should have thrown")

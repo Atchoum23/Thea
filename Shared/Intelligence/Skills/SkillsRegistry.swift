@@ -259,6 +259,10 @@ public final class SkillsRegistryService: ObservableObject {
     // MARK: - Built-in Marketplace Skills
 
     private func getBuiltinMarketplaceSkills() -> [MarketplaceSkill] {
+        makeCodingSkills() + makeWorkflowSkills() + makeDocumentationSkills()
+    }
+
+    private func makeCodingSkills() -> [MarketplaceSkill] {
         [
             MarketplaceSkill(
                 id: "swift-best-practices",
@@ -322,7 +326,12 @@ public final class SkillsRegistryService: ObservableObject {
                 5. Version your API appropriately
                 6. Document with OpenAPI/Swagger
                 """
-            ),
+            )
+        ]
+    }
+
+    private func makeWorkflowSkills() -> [MarketplaceSkill] {
+        [
             MarketplaceSkill(
                 id: "git-workflow",
                 name: "Git Workflow",
@@ -364,7 +373,12 @@ public final class SkillsRegistryService: ObservableObject {
                 5. Verify input validation
                 6. Check for security misconfigurations
                 """
-            ),
+            )
+        ]
+    }
+
+    private func makeDocumentationSkills() -> [MarketplaceSkill] {
+        [
             MarketplaceSkill(
                 id: "documentation-writer",
                 name: "Documentation Writer",

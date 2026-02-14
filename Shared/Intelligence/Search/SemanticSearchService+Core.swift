@@ -300,6 +300,10 @@ public final class SemanticSearchService: ObservableObject {
         await embeddingIndex.saveToDisk()
     }
 
+    deinit {
+        indexingTask?.cancel()
+        saveTask?.cancel()
+    }
 }
 
 // MARK: - Private Search Methods
@@ -627,11 +631,6 @@ extension SemanticSearchService {
 
     private func updateStats() async {
         indexStats = await embeddingIndex.statistics()
-    }
-
-    deinit {
-        indexingTask?.cancel()
-        saveTask?.cancel()
     }
 }
 

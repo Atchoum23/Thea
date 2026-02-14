@@ -51,7 +51,18 @@ public final class DeepLinkRouter: ObservableObject {
     }
 
     private func registerDefaultRoutes() {
-        // Conversation routes
+        registerConversationRoutes()
+        registerEntityRoutes()
+        registerSettingsRoutes()
+        registerQuickActionRoutes()
+        registerShareImportRoutes()
+        registerWidgetAndSpotlightRoutes()
+        registerOAuthRoutes()
+
+        logger.info("Registered \(self.routes.count) default routes")
+    }
+
+    private func registerConversationRoutes() {
         register("conversation/:id") { link in
             if let conversationId = link.parameters["id"] {
                 NotificationCenter.default.post(
@@ -72,8 +83,9 @@ public final class DeepLinkRouter: ObservableObject {
             )
             return true
         }
+    }
 
-        // Agent routes
+    private func registerEntityRoutes() {
         register("agent/:id") { link in
             if let agentId = link.parameters["id"] {
                 NotificationCenter.default.post(
@@ -86,7 +98,6 @@ public final class DeepLinkRouter: ObservableObject {
             return false
         }
 
-        // Artifact routes
         register("artifact/:id") { link in
             if let artifactId = link.parameters["id"] {
                 NotificationCenter.default.post(
@@ -99,7 +110,6 @@ public final class DeepLinkRouter: ObservableObject {
             return false
         }
 
-        // Memory routes
         register("memory/:id") { link in
             if let memoryId = link.parameters["id"] {
                 NotificationCenter.default.post(
@@ -111,8 +121,9 @@ public final class DeepLinkRouter: ObservableObject {
             }
             return false
         }
+    }
 
-        // Settings routes
+    private func registerSettingsRoutes() {
         register("settings") { _ in
             NotificationCenter.default.post(
                 name: .deepLinkNavigate,
@@ -133,8 +144,9 @@ public final class DeepLinkRouter: ObservableObject {
             }
             return false
         }
+    }
 
-        // Quick actions
+    private func registerQuickActionRoutes() {
         register("ask") { link in
             let query = link.queryParameters["q"] ?? link.queryParameters["query"] ?? ""
             NotificationCenter.default.post(
@@ -154,7 +166,6 @@ public final class DeepLinkRouter: ObservableObject {
             return true
         }
 
-        // Search
         register("search") { link in
             let query = link.queryParameters["q"] ?? ""
             NotificationCenter.default.post(
@@ -164,8 +175,9 @@ public final class DeepLinkRouter: ObservableObject {
             )
             return true
         }
+    }
 
-        // Share/import
+    private func registerShareImportRoutes() {
         register("share") { link in
             if let text = link.queryParameters["text"] {
                 NotificationCenter.default.post(
@@ -189,8 +201,9 @@ public final class DeepLinkRouter: ObservableObject {
             }
             return false
         }
+    }
 
-        // Widget actions
+    private func registerWidgetAndSpotlightRoutes() {
         register("widget/:action") { link in
             if let action = link.parameters["action"] {
                 NotificationCenter.default.post(
@@ -203,7 +216,6 @@ public final class DeepLinkRouter: ObservableObject {
             return false
         }
 
-        // Spotlight
         register("spotlight/:type/:id") { link in
             if let type = link.parameters["type"],
                let id = link.parameters["id"]
@@ -217,8 +229,9 @@ public final class DeepLinkRouter: ObservableObject {
             }
             return false
         }
+    }
 
-        // OAuth callback
+    private func registerOAuthRoutes() {
         register("oauth/callback") { link in
             NotificationCenter.default.post(
                 name: .deepLinkOAuthCallback,
@@ -227,8 +240,6 @@ public final class DeepLinkRouter: ObservableObject {
             )
             return true
         }
-
-        logger.info("Registered \(self.routes.count) default routes")
     }
 
     // MARK: - Navigation

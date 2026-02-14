@@ -9,7 +9,19 @@ import Foundation
 extension SmartModelRouter {
 
     func setupDefaultModels() {
-        // MARK: Anthropic — Claude 4.5 (Latest)
+        registerAnthropicModels()
+        registerOpenAIModels()
+        registerGoogleModels()
+        registerDeepSeekModels()
+        registerGroqModels()
+        registerPerplexityModels()
+        registerLocalModels()
+    }
+
+    // MARK: - Anthropic
+
+    private func registerAnthropicModels() {
+        // Claude 4.5 (Latest)
         registerModel(RouterModelCapability(
             modelId: "claude-opus-4-5-20251101",
             provider: "anthropic",
@@ -46,7 +58,7 @@ extension SmartModelRouter {
             qualityScore: 0.75
         ))
 
-        // MARK: Anthropic — Claude 4 (Legacy)
+        // Claude 4 (Legacy)
         registerModel(RouterModelCapability(
             modelId: "claude-opus-4-20250514",
             provider: "anthropic",
@@ -82,8 +94,11 @@ extension SmartModelRouter {
             averageLatency: 0.4,
             qualityScore: 0.70
         ))
+    }
 
-        // MARK: OpenAI
+    // MARK: - OpenAI
+
+    private func registerOpenAIModels() {
         registerModel(RouterModelCapability(
             modelId: "gpt-4o",
             provider: "openai",
@@ -119,8 +134,11 @@ extension SmartModelRouter {
             averageLatency: 8.0,
             qualityScore: 0.93
         ))
+    }
 
-        // MARK: Google — Gemini
+    // MARK: - Google Gemini
+
+    private func registerGoogleModels() {
         registerModel(RouterModelCapability(
             modelId: "gemini-3-pro-preview",
             provider: "google",
@@ -168,8 +186,11 @@ extension SmartModelRouter {
             averageLatency: 0.3,
             qualityScore: 0.75
         ))
+    }
 
-        // MARK: DeepSeek
+    // MARK: - DeepSeek
+
+    private func registerDeepSeekModels() {
         registerModel(RouterModelCapability(
             modelId: "deepseek-chat",
             provider: "deepseek",
@@ -193,8 +214,11 @@ extension SmartModelRouter {
             averageLatency: 5.0,
             qualityScore: 0.83
         ))
+    }
 
-        // MARK: Groq (ultra-fast inference)
+    // MARK: - Groq
+
+    private func registerGroqModels() {
         registerModel(RouterModelCapability(
             modelId: "llama-3.3-70b-versatile",
             provider: "groq",
@@ -218,8 +242,11 @@ extension SmartModelRouter {
             averageLatency: 0.1,
             qualityScore: 0.60
         ))
+    }
 
-        // MARK: Perplexity (search-enhanced)
+    // MARK: - Perplexity
+
+    private func registerPerplexityModels() {
         registerModel(RouterModelCapability(
             modelId: "sonar-pro",
             provider: "perplexity",
@@ -255,8 +282,11 @@ extension SmartModelRouter {
             averageLatency: 3.0,
             qualityScore: 0.78
         ))
+    }
 
-        // MARK: Local models
+    // MARK: - Local Models
+
+    private func registerLocalModels() {
         registerModel(RouterModelCapability(
             modelId: "local-llama",
             provider: "local",
@@ -270,7 +300,7 @@ extension SmartModelRouter {
             isLocalModel: true
         ))
 
-        // MARK: GPT-OSS (OpenAI open-weight, Apache 2.0)
+        // GPT-OSS (OpenAI open-weight, Apache 2.0)
         registerModel(RouterModelCapability(
             modelId: "gpt-oss-20b",
             provider: "local",

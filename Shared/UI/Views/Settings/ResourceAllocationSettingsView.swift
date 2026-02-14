@@ -414,9 +414,13 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    // MARK: - Helpers
+}
 
-    private var memoryColor: Color {
+// MARK: - Helpers
+
+extension ResourceAllocationSettingsView {
+
+    var memoryColor: Color {
         switch allocator.systemMetrics.memoryPressure {
         case .nominal: .green
         case .warning: .orange
@@ -424,7 +428,7 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private var thermalIcon: String {
+    var thermalIcon: String {
         switch allocator.systemMetrics.thermalState {
         case .nominal: "thermometer.medium"
         case .fair: "thermometer.medium"
@@ -433,7 +437,7 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private var thermalColor: Color {
+    var thermalColor: Color {
         switch allocator.systemMetrics.thermalState {
         case .nominal: .green
         case .fair: .yellow
@@ -442,7 +446,7 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private var throttleIcon: String {
+    var throttleIcon: String {
         switch allocator.currentAllocation.throttleLevel {
         case .none: "bolt.fill"
         case .light: "bolt"
@@ -451,7 +455,7 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private var throttleColor: Color {
+    var throttleColor: Color {
         switch allocator.currentAllocation.throttleLevel {
         case .none: .green
         case .light: .yellow
@@ -460,7 +464,7 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private var batteryIcon: String {
+    var batteryIcon: String {
         if allocator.systemMetrics.isCharging {
             return "battery.100.bolt"
         }
@@ -473,7 +477,7 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private var batteryColor: Color {
+    var batteryColor: Color {
         if allocator.systemMetrics.isCharging { return .green }
         let level = allocator.systemMetrics.batteryLevel
         return switch level {
@@ -483,7 +487,7 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private func impactIcon(_ impact: DynamicResourceAllocator.ResourceRecommendation.ImpactLevel) -> String {
+    func impactIcon(_ impact: DynamicResourceAllocator.ResourceRecommendation.ImpactLevel) -> String {
         switch impact {
         case .low: "info.circle"
         case .medium: "exclamationmark.triangle"
@@ -492,7 +496,7 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private func impactColor(_ impact: DynamicResourceAllocator.ResourceRecommendation.ImpactLevel) -> Color {
+    func impactColor(_ impact: DynamicResourceAllocator.ResourceRecommendation.ImpactLevel) -> Color {
         switch impact {
         case .low: .blue
         case .medium: .yellow
@@ -501,14 +505,14 @@ struct ResourceAllocationSettingsView: View {
         }
     }
 
-    private func formatNumber(_ num: Int) -> String {
+    func formatNumber(_ num: Int) -> String {
         if num >= 1000 {
             return String(format: "%.0fK", Double(num) / 1000)
         }
         return "\(num)"
     }
 
-    private func saveConfiguration() {
+    func saveConfiguration() {
         allocator.updateConfiguration(configuration)
     }
 }

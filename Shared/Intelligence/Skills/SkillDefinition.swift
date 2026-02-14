@@ -187,7 +187,17 @@ public final class SkillRegistry: ObservableObject {
 
     /// Load built-in skills
     private func loadBuiltinSkills() async {
-        let builtinSkills = [
+        let builtinSkills = makeCodeReviewSkills() + makeGenerationSkills() + makeDocumentationSkills()
+
+        for skill in builtinSkills {
+            skills[skill.id] = skill
+        }
+
+        logger.info("Loaded \(builtinSkills.count) built-in skills")
+    }
+
+    private func makeCodeReviewSkills() -> [SkillDefinition] {
+        [
             SkillDefinition(
                 name: "Code Review",
                 description: "Reviews code for best practices, bugs, and improvements",
@@ -224,7 +234,12 @@ public final class SkillRegistry: ObservableObject {
                     SkillTrigger(type: .keyword, pattern: "explain this"),
                     SkillTrigger(type: .keyword, pattern: "how does this work")
                 ]
-            ),
+            )
+        ]
+    }
+
+    private func makeGenerationSkills() -> [SkillDefinition] {
+        [
             SkillDefinition(
                 name: "Generate Tests",
                 description: "Generates unit tests for code",
@@ -262,7 +277,12 @@ public final class SkillRegistry: ObservableObject {
                     SkillTrigger(type: .slashCommand, pattern: "refactor"),
                     SkillTrigger(type: .taskType, pattern: "codeRefactoring")
                 ]
-            ),
+            )
+        ]
+    }
+
+    private func makeDocumentationSkills() -> [SkillDefinition] {
+        [
             SkillDefinition(
                 name: "Document Code",
                 description: "Generates documentation for code",
@@ -281,12 +301,6 @@ public final class SkillRegistry: ObservableObject {
                 ]
             )
         ]
-
-        for skill in builtinSkills {
-            skills[skill.id] = skill
-        }
-
-        logger.info("Loaded \(builtinSkills.count) built-in skills")
     }
 
     /// Load global skills from ~/.thea/skills/
