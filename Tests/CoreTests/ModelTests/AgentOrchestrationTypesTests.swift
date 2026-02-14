@@ -502,4 +502,3 @@ final class RunnerHelpersTests: XCTestCase {
         XCTAssertEqual(result[0].code, codeContent + "\n")
     }
 }
-

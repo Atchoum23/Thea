@@ -306,4 +306,3 @@ public enum SemanticSearchError: Error, LocalizedError, Sendable {
         }
     }
 }
-

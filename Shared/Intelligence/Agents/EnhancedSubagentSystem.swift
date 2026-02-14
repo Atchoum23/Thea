@@ -331,4 +331,3 @@ public struct SubagentAggregatedResult: Sendable {
         case custom         // Custom aggregation logic
     }
 }
-

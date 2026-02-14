@@ -403,4 +403,3 @@ public final class SkillsRegistryService: ObservableObject {
         ]
     }
 }
-

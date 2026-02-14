@@ -627,4 +627,3 @@ public final class CodebaseSearchEngine: ObservableObject {
         }
     }
 }
-

@@ -230,4 +230,3 @@ public struct IndexerConfiguration: Sendable {
 
     public init() {}
 }
-

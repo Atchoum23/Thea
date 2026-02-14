@@ -299,4 +299,3 @@ public struct ToolPipelineResult: Sendable {
         self.errors = errors
     }
 }
-

@@ -575,4 +575,3 @@ public struct AutonomyActionHistoryEntry: Identifiable, Codable, Sendable {
     public let success: Bool
     public let timestamp: Date
 }
-

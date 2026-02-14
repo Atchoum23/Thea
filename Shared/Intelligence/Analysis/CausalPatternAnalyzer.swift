@@ -228,4 +228,3 @@ public struct CausalTimelineEntry: Identifiable, Sendable {
         self.metadata = metadata
     }
 }
-

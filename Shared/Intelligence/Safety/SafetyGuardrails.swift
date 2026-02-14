@@ -401,4 +401,3 @@ public struct SafetyRule: Identifiable, Codable, Sendable {
         case escalate
     }
 }
-

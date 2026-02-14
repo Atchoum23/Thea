@@ -418,4 +418,3 @@ public struct IntelligenceContext: Sendable {
         self.sessionDuration = sessionDuration
     }
 }
-

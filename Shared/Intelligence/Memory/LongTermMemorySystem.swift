@@ -489,4 +489,3 @@ public final class SemanticMemoryManager: ObservableObject {
         }
     }
 }
-

@@ -149,4 +149,3 @@ public struct TaskTracker: Sendable {
         Date().timeIntervalSince(lastActivityTime)
     }
 }
-

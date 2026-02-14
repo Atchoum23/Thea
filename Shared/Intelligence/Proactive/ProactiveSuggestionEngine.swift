@@ -586,4 +586,3 @@ public final class SmartSuggestionEngine: ObservableObject {
         }
     }
 }
-

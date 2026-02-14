@@ -680,4 +680,3 @@ struct SemanticSearchResult: Identifiable, Sendable {
         self.highlightRanges = highlightRanges
     }
 }
-

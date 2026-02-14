@@ -284,4 +284,3 @@ public struct ReflexionCalibrationBucket: Codable, Sendable {
         }
     }
 }
-

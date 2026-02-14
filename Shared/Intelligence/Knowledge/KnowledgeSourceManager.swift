@@ -228,4 +228,3 @@ public enum KnowledgeFeaturePriority: String, Codable, Sendable, CaseIterable {
         }
     }
 }
-

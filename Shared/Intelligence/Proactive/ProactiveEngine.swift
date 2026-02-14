@@ -215,4 +215,3 @@ public enum PatternType: String, Codable, Sendable {
     case preferredTools    // Tool preferences
     case communicationStyle // How user phrases requests
 }
-
