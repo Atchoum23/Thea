@@ -203,7 +203,6 @@ extension TheaRemoteClient {
     }
 
     /// Execute a command
-    // swiftlint:disable:next function_parameter_count
     public func executeCommand(
         _ command: String,
         workingDirectory: String? = nil,

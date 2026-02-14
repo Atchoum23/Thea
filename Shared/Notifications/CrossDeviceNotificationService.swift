@@ -10,19 +10,6 @@ import CloudKit
 import Combine
 import Foundation
 import OSLog
-@preconcurrency import UserNotifications
-
-#if canImport(UIKit)
-    import UIKit
-#endif
-
-#if canImport(AppKit)
-    import AppKit
-#endif
-
-#if os(watchOS)
-    import WatchKit
-#endif
 
 // MARK: - Cross-Device Notification Service
 
