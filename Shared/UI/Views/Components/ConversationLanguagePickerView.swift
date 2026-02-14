@@ -45,6 +45,7 @@ struct ConversationLanguagePickerView: View {
         } label: {
             Image(systemName: "globe")
         }
+        .accessibilityLabel("Conversation language")
     }
 }
 
@@ -71,6 +72,7 @@ struct ConversationLanguageBadge: View {
                         .foregroundStyle(.tertiary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Clear language override")
             }
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
