@@ -152,10 +152,82 @@ extension ActiveMemoryRetrieval {
     // MARK: - Knowledge Graph Retrieval
 
     func retrieveFromKnowledgeGraph(query: String) async -> PartialRetrievalResult {
-        // KnowledgeGraph is not yet available in the canonical build
-        // Placeholder: returns empty results until KnowledgeGraph is implemented
-        _ = query
-        return PartialRetrievalResult(sources: [], averageConfidence: 0.0)
+        var sources: [RetrievalSource] = []
+
+        let graph = PersonalKnowledgeGraph.shared
+
+        // Query the knowledge graph with the user's query
+        let result = await graph.query(query)
+
+        // Convert matched entities to retrieval sources
+        for entity in result.entities {
+            let attributeStr = entity.attributes.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
+            let content = "\(entity.name) (\(entity.type.rawValue))"
+                + (attributeStr.isEmpty ? "" : " — \(attributeStr)")
+
+            // Score based on reference count and recency
+            let recencyDays = Date().timeIntervalSince(entity.lastUpdatedAt) / 86400
+            let recencyFactor = max(0.3, 1.0 - recencyDays * 0.05)
+            let referenceFactor = min(1.0, Double(entity.referenceCount) / 10.0)
+            let relevance = (recencyFactor * 0.5 + referenceFactor * 0.5)
+
+            sources.append(RetrievalSource(
+                type: .knowledgeNode,
+                tier: .semantic,
+                content: content,
+                relevanceScore: min(relevance, 1.0),
+                timestamp: entity.lastUpdatedAt,
+                metadata: [
+                    "entityId": entity.id,
+                    "entityType": entity.type.rawValue,
+                    "referenceCount": String(entity.referenceCount)
+                ]
+            ))
+        }
+
+        // Convert relationships to retrieval sources (provide connection context)
+        for edge in result.edges {
+            let sourceEntity = await graph.getEntity(edge.sourceID)
+            let targetEntity = await graph.getEntity(edge.targetID)
+            let sourceName = sourceEntity?.name ?? edge.sourceID
+            let targetName = targetEntity?.name ?? edge.targetID
+
+            sources.append(RetrievalSource(
+                type: .knowledgeNode,
+                tier: .semantic,
+                content: "\(sourceName) \(edge.relationship) \(targetName)",
+                relevanceScore: edge.confidence * 0.8,
+                timestamp: edge.lastReferencedAt,
+                metadata: [
+                    "relationship": edge.relationship,
+                    "source": edge.sourceID,
+                    "target": edge.targetID
+                ]
+            ))
+        }
+
+        // Also add recently referenced entities for broader context
+        if sources.isEmpty {
+            let recentEntities = await graph.recentEntities(limit: 5)
+            for entity in recentEntities {
+                let queryWords = Set(query.lowercased().components(separatedBy: .whitespaces))
+                let entityWords = Set(entity.name.lowercased().components(separatedBy: .whitespaces))
+                let overlap = Double(queryWords.intersection(entityWords).count)
+                guard overlap > 0 || entity.referenceCount > 3 else { continue }
+
+                sources.append(RetrievalSource(
+                    type: .knowledgeNode,
+                    tier: .semantic,
+                    content: "\(entity.name) (\(entity.type.rawValue))",
+                    relevanceScore: max(overlap * 0.3, 0.2),
+                    timestamp: entity.lastUpdatedAt,
+                    metadata: ["entityId": entity.id, "entityType": entity.type.rawValue]
+                ))
+            }
+        }
+
+        let avgConfidence = sources.isEmpty ? 0.0 : sources.map(\.relevanceScore).reduce(0, +) / Double(sources.count)
+        return PartialRetrievalResult(sources: sources, averageConfidence: avgConfidence)
     }
 
     // MARK: - Event History Retrieval
