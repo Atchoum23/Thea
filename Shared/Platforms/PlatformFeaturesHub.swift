@@ -55,97 +55,44 @@ public final class PlatformFeaturesHub: ObservableObject {
 
     private func detectAvailableFeatures() {
         var features: Set<PlatformFeature> = [.core]
-
-        switch currentPlatform {
-        case .macOS:
-            features.formUnion([
-                .menuBar,
-                .globalHotkeys,
-                .touchBar,
-                .services,
-                .finderIntegration,
-                .appleScript,
-                .multiWindow,
-                .accessibility,
-                .spotlight,
-                .handoff,
-                .universalClipboard
-            ])
-
-        case .iOS:
-            features.formUnion([
-                .siriShortcuts,
-                .homeScreenQuickActions,
-                .widgets,
-                .liveActivities,
-                .shareExtension,
-                .spotlight,
-                .handoff,
-                .universalClipboard,
-                .haptics,
-                .faceID,
-                .healthKit,
-                .coreLocation
-            ])
-
-        case .iPadOS:
-            features.formUnion([
-                .siriShortcuts,
-                .homeScreenQuickActions,
-                .widgets,
-                .liveActivities,
-                .shareExtension,
-                .spotlight,
-                .handoff,
-                .universalClipboard,
-                .multiWindow,
-                .pencilSupport,
-                .stageManager,
-                .haptics
-            ])
-
-        case .watchOS:
-            features.formUnion([
-                .complications,
-                .glances,
-                .digitalCrown,
-                .haptics,
-                .healthKit,
-                .workoutKit
-            ])
-
-        case .visionOS:
-            features.formUnion([
-                .immersiveSpaces,
-                .volumetricWindows,
-                .handTracking,
-                .eyeTracking,
-                .spatialAudio,
-                .sharePlay
-            ])
-
-        case .tvOS:
-            features.formUnion([
-                .siriRemote,
-                .topShelf
-            ])
-
-        case .macCatalyst:
-            features.formUnion([
-                .siriShortcuts,
-                .widgets,
-                .spotlight,
-                .handoff,
-                .universalClipboard,
-                .multiWindow
-            ])
-
-        case .unknown:
-            break
-        }
-
+        features.formUnion(platformSpecificFeatures(for: currentPlatform))
         availableFeatures = features
         logger.info("Available features: \(features.count)")
+    }
+
+    private func platformSpecificFeatures(for platform: Platform) -> Set<PlatformFeature> {
+        switch platform {
+        case .macOS:
+            return [
+                .menuBar, .globalHotkeys, .touchBar, .services,
+                .finderIntegration, .appleScript, .multiWindow,
+                .accessibility, .spotlight, .handoff, .universalClipboard
+            ]
+        case .iOS:
+            return [
+                .siriShortcuts, .homeScreenQuickActions, .widgets,
+                .liveActivities, .shareExtension, .spotlight,
+                .handoff, .universalClipboard, .haptics, .faceID,
+                .healthKit, .coreLocation
+            ]
+        case .iPadOS:
+            return [
+                .siriShortcuts, .homeScreenQuickActions, .widgets,
+                .liveActivities, .shareExtension, .spotlight,
+                .handoff, .universalClipboard, .multiWindow,
+                .pencilSupport, .stageManager, .haptics
+            ]
+        case .watchOS:
+            return [.complications, .glances, .digitalCrown, .haptics, .healthKit, .workoutKit]
+        case .visionOS:
+            return [.immersiveSpaces, .volumetricWindows, .handTracking, .eyeTracking, .spatialAudio, .sharePlay]
+        case .tvOS:
+            return [.siriRemote, .topShelf]
+        case .macCatalyst:
+            return [.siriShortcuts, .widgets, .spotlight, .handoff, .universalClipboard, .multiWindow]
+        case .unknown:
+            return []
+        }
     }
 
     // MARK: - Feature Access
