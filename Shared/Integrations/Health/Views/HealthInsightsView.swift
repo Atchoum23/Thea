@@ -701,113 +701,162 @@ final class HealthInsightsViewModel {
     var heartRateTrendData: [TrendDataPoint] = []
     var correlations: [HealthCorrelation] = []
 
+    private let healthKitService = HealthKitService()
+
     func loadData(timeRange: TimeRange) async {
-        // Would integrate with HealthKit and other services
-        // Mock data for demonstration
-        await generateMockData(timeRange: timeRange)
-    }
-
-    func refreshInsights() async {
-        // Would trigger AI analysis
-        await generateInsights()
-    }
-
-    private func generateMockData(timeRange: TimeRange) async {
-        // Simulate loading
-        try? await Task.sleep(for: .milliseconds(500))
-
-        // Mock scores
-        healthScore = 75.0
-        sleepScore = 80.0
-        activityScore = 70.0
-        heartScore = 75.0
-        nutritionScore = 65.0
-
-        // Mock averages
-        averageSleepDuration = 420 // 7 hours
-        averageSteps = 8500
-        averageRestingHR = 62
-        averageActiveCalories = 450
-
-        // Mock trends
-        sleepTrend = .stable
-        activityTrend = .improving
-        heartRateTrend = .stable
-        caloriesTrend = .improving
-
-        // Mock trend data
-        sleepTrendData = generateMockTrendData(days: timeRange.days, baseValue: 7.0, variance: 1.5)
-        activityTrendData = generateMockTrendData(days: timeRange.days, baseValue: 8500, variance: 2000)
-        heartRateTrendData = generateMockTrendData(days: timeRange.days, baseValue: 62, variance: 5)
-
-        await generateInsights()
-        generateCorrelations()
-    }
-
-    private func generateMockTrendData(days: Int, baseValue: Double, variance: Double) -> [TrendDataPoint] {
-        (0 ..< days).map { day in
-            let date = Calendar.current.date(byAdding: .day, value: -days + day, to: Date()) ?? Date().addingTimeInterval(Double(-days + day) * 86400)
-            let randomVariance = Double.random(in: -variance ... variance)
-            return TrendDataPoint(date: date, value: baseValue + randomVariance)
+        do {
+            _ = try await healthKitService.requestAuthorization()
+            await loadFromHealthKit(timeRange: timeRange)
+        } catch {
+            healthScore = 0; sleepScore = 0; activityScore = 0; heartScore = 0; nutritionScore = 0
         }
     }
 
-    private func generateInsights() async {
-        insights = [
-            HealthInsightDisplay(
-                category: .sleep,
-                title: "Consistent Sleep Pattern",
-                message: "You've maintained a regular sleep schedule for the past 7 days. Keep it up!",
-                icon: "bed.double.fill",
-                severity: .positive,
-                recommendations: [
-                    "Continue going to bed at the same time",
-                    "Aim for 7-9 hours per night",
-                    "Avoid screens 1 hour before bed"
-                ]
-            ),
-            HealthInsightDisplay(
-                category: .activity,
-                title: "Increasing Activity Trend",
-                message: "Your daily step count has increased by 15% this week compared to last week.",
-                icon: "figure.walk",
-                severity: .positive,
-                recommendations: [
-                    "Try to maintain this momentum",
-                    "Consider adding strength training",
-                    "Take movement breaks every hour"
-                ]
-            ),
-            HealthInsightDisplay(
-                category: .heart,
-                title: "Resting Heart Rate Optimal",
-                message: "Your resting heart rate of 62 BPM is in the excellent range for your age.",
-                icon: "heart.fill",
-                severity: .positive,
-                recommendations: [
-                    "Continue regular cardiovascular exercise",
-                    "Monitor for any sudden changes",
-                    "Consider HRV tracking"
-                ]
-            )
-        ]
+    func refreshInsights() async {
+        generateInsightsFromData()
     }
 
-    private func generateCorrelations() {
-        correlations = [
-            HealthCorrelation(
-                metric1: "Sleep Duration",
-                metric2: "Activity Level",
-                strength: .strong,
-                description: "Better sleep correlates with higher next-day activity"
-            ),
-            HealthCorrelation(
-                metric1: "Resting HR",
-                metric2: "Sleep Quality",
-                strength: .moderate,
-                description: "Lower resting HR associates with better sleep"
-            )
-        ]
+    private func loadFromHealthKit(timeRange: TimeRange) async {
+        let calendar = Calendar.current
+        let endDate = Date()
+        let startDate = calendar.date(byAdding: .day, value: -timeRange.days, to: endDate) ?? endDate
+
+        // Fetch sleep data
+        var sleepMinutes: [Double] = []
+        let sleepRange = DateInterval(start: startDate.addingTimeInterval(-30 * 3600), end: endDate)
+        if let records = try? await healthKitService.fetchSleepData(for: sleepRange) {
+            for record in records {
+                sleepMinutes.append(record.endDate.timeIntervalSince(record.startDate) / 60)
+            }
+            averageSleepDuration = sleepMinutes.isEmpty ? 0 : Int(sleepMinutes.reduce(0, +) / Double(sleepMinutes.count))
+            sleepScore = min(100, Double(averageSleepDuration) / 480 * 100)
+            sleepTrendData = records.map { TrendDataPoint(date: $0.startDate, value: $0.endDate.timeIntervalSince($0.startDate) / 3600) }
+            sleepTrend = computeTrend(from: sleepTrendData)
+        }
+
+        // Fetch activity data per day
+        var stepValues: [Double] = []
+        var calorieValues: [Double] = []
+        var activityPoints: [TrendDataPoint] = []
+        for dayOffset in 0 ..< timeRange.days {
+            let date = calendar.date(byAdding: .day, value: -dayOffset, to: endDate) ?? endDate
+            if let summary = try? await healthKitService.fetchActivityData(for: date) {
+                stepValues.append(Double(summary.steps))
+                calorieValues.append(Double(summary.activeCalories))
+                activityPoints.append(TrendDataPoint(date: date, value: Double(summary.steps)))
+            }
+        }
+        averageSteps = stepValues.isEmpty ? 0 : Int(stepValues.reduce(0, +) / Double(stepValues.count))
+        averageActiveCalories = calorieValues.isEmpty ? 0 : Int(calorieValues.reduce(0, +) / Double(calorieValues.count))
+        activityScore = min(100, Double(averageSteps) / 10000 * 100)
+        activityTrendData = activityPoints.reversed()
+        activityTrend = computeTrend(from: activityTrendData)
+        caloriesTrend = computeTrend(from: calorieValues.reversed().enumerated().map {
+            TrendDataPoint(date: calendar.date(byAdding: .day, value: $0.offset - calorieValues.count, to: endDate) ?? endDate, value: $0.element)
+        })
+
+        // Fetch heart rate data
+        let hrRange = DateInterval(start: startDate, end: endDate)
+        if let hrRecords = try? await healthKitService.fetchHeartRateData(for: hrRange) {
+            let restingHR = hrRecords.filter { $0.context == .resting || $0.context == .sleep }
+            averageRestingHR = restingHR.isEmpty ? 0 : restingHR.map(\.beatsPerMinute).reduce(0, +) / restingHR.count
+            heartScore = averageRestingHR > 0 ? min(100, max(0, 100 - Double(averageRestingHR - 50))) : 0
+
+            var hrByDay: [Date: [Int]] = [:]
+            for record in hrRecords {
+                let day = calendar.startOfDay(for: record.timestamp)
+                hrByDay[day, default: []].append(record.beatsPerMinute)
+            }
+            heartRateTrendData = hrByDay.sorted { $0.key < $1.key }.map { day, bpms in
+                TrendDataPoint(date: day, value: Double(bpms.reduce(0, +)) / Double(bpms.count))
+            }
+            heartRateTrend = computeTrend(from: heartRateTrendData)
+        }
+
+        nutritionScore = 50
+        healthScore = (sleepScore + activityScore + heartScore + nutritionScore) / 4
+
+        generateInsightsFromData()
+        generateCorrelationsFromData()
+    }
+
+    private func computeTrend(from data: [TrendDataPoint]) -> Trend {
+        guard data.count >= 4 else { return .unknown }
+        let half = data.count / 2
+        let firstAvg = data.prefix(half).map(\.value).reduce(0, +) / Double(half)
+        let secondAvg = data.suffix(half).map(\.value).reduce(0, +) / Double(half)
+        guard firstAvg > 0 else { return .unknown }
+        let change = (secondAvg - firstAvg) / firstAvg
+        if change > 0.05 { return .improving }
+        if change < -0.05 { return .declining }
+        return .stable
+    }
+
+    private func generateInsightsFromData() {
+        var result: [HealthInsightDisplay] = []
+        if averageSleepDuration >= 420 {
+            result.append(HealthInsightDisplay(
+                category: .sleep, title: "Good Sleep Duration",
+                message: "Your average sleep of \(averageSleepDuration / 60)h \(averageSleepDuration % 60)m meets recommended levels.",
+                icon: "bed.double.fill", severity: .positive,
+                recommendations: ["Keep a consistent sleep schedule", "Avoid caffeine after 2 PM"]
+            ))
+        } else if averageSleepDuration > 0 {
+            result.append(HealthInsightDisplay(
+                category: .sleep, title: "Sleep Below Target",
+                message: "Your average sleep is \(averageSleepDuration / 60)h \(averageSleepDuration % 60)m — below the 7-hour recommendation.",
+                icon: "bed.double.fill", severity: .warning,
+                recommendations: ["Try going to bed 30 minutes earlier", "Create a wind-down routine"]
+            ))
+        }
+        if averageSteps >= 10000 {
+            result.append(HealthInsightDisplay(
+                category: .activity, title: "Excellent Activity Level",
+                message: "Averaging \(averageSteps) steps daily — you're hitting the 10,000-step target!",
+                icon: "figure.walk", severity: .positive,
+                recommendations: ["Consider adding variety with cycling or swimming"]
+            ))
+        } else if averageSteps > 0 {
+            result.append(HealthInsightDisplay(
+                category: .activity, title: "Room for More Activity",
+                message: "Averaging \(averageSteps) steps daily. Aim for 10,000.",
+                icon: "figure.walk", severity: .neutral,
+                recommendations: ["Take walking meetings", "Use stairs instead of elevator"]
+            ))
+        }
+        if averageRestingHR > 0 && averageRestingHR < 70 {
+            result.append(HealthInsightDisplay(
+                category: .heart, title: "Healthy Resting Heart Rate",
+                message: "Your resting HR of \(averageRestingHR) BPM indicates good cardiovascular fitness.",
+                icon: "heart.fill", severity: .positive,
+                recommendations: ["Continue regular exercise", "Monitor for sudden changes"]
+            ))
+        } else if averageRestingHR >= 80 {
+            result.append(HealthInsightDisplay(
+                category: .heart, title: "Elevated Resting Heart Rate",
+                message: "Your resting HR of \(averageRestingHR) BPM is above the optimal range.",
+                icon: "heart.fill", severity: .warning,
+                recommendations: ["Consult your doctor if persistently elevated", "Increase aerobic exercise gradually"]
+            ))
+        }
+        insights = result
+    }
+
+    private func generateCorrelationsFromData() {
+        var result: [HealthCorrelation] = []
+        if sleepTrend == activityTrend && sleepTrend != .unknown {
+            result.append(HealthCorrelation(
+                metric1: "Sleep Duration", metric2: "Activity Level", strength: .strong,
+                description: "Sleep and activity trends are moving together"
+            ))
+        }
+        if heartRateTrend == .improving {
+            result.append(HealthCorrelation(
+                metric1: "Resting HR", metric2: "Fitness Level", strength: .moderate,
+                description: "Resting heart rate is improving — cardiovascular fitness increasing"
+            ))
+        }
+        correlations = result
     }
 }
 

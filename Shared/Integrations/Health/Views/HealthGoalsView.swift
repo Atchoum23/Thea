@@ -537,8 +537,8 @@ private struct AddGoalView: View {
 
 // MARK: - Models
 
-public struct HealthGoal: Identifiable, Sendable {
-    public let id = UUID()
+public struct HealthGoal: Identifiable, Sendable, Codable {
+    public var id = UUID()
     public var title: String
     public var description: String
     public var category: GoalCategory
@@ -584,7 +584,7 @@ public struct HealthGoal: Identifiable, Sendable {
     }
 }
 
-public enum GoalCategory: String, CaseIterable, Sendable {
+public enum GoalCategory: String, CaseIterable, Sendable, Codable {
     case sleep
     case activity
     case nutrition
@@ -630,8 +630,8 @@ public enum GoalCategory: String, CaseIterable, Sendable {
     }
 }
 
-public struct GoalMilestone: Identifiable, Sendable {
-    public let id = UUID()
+public struct GoalMilestone: Identifiable, Sendable, Codable {
+    public var id = UUID()
     public var title: String
     public var targetValue: Int
     public var isCompleted: Bool
@@ -697,6 +697,7 @@ final class HealthGoalsViewModel {
 
     func addGoal(_ goal: HealthGoal) async {
         activeGoals.append(goal)
+        persistGoals()
     }
 
     func completeGoal(_ goal: HealthGoal) async {
@@ -706,10 +707,12 @@ final class HealthGoalsViewModel {
         completedGoal.completedDate = Date()
         completedGoal.isActive = false
         completedGoals.insert(completedGoal, at: 0)
+        persistGoals()
     }
 
     func deleteGoal(_ goal: HealthGoal) async {
         activeGoals.removeAll { $0.id == goal.id }
+        persistGoals()
     }
 
     func createGoalFromSuggestion(_ suggestion: GoalSuggestion) async {
@@ -727,92 +730,118 @@ final class HealthGoalsViewModel {
         suggestions.removeAll { $0.id == suggestion.id }
     }
 
+    private static let goalsKey = "thea.health.goals.active"
+    private static let completedGoalsKey = "thea.health.goals.completed"
+    private let healthKitService = HealthKitService()
+
     private func generateMockData() async {
-        // Mock active goals
-        activeGoals = [
-            HealthGoal(
-                title: "10,000 Daily Steps",
-                description: "Walk 10,000 steps every day for better cardiovascular health",
-                category: .activity,
-                targetValue: 10000,
-                currentValue: 7500,
-                unit: "steps",
-                deadline: Calendar.current.date(byAdding: .day, value: 14, to: Date()),
-                milestones: [
-                    GoalMilestone(title: "First 5,000 steps", targetValue: 5000, isCompleted: true, completedDate: Date().addingTimeInterval(-86400 * 3)),
-                    GoalMilestone(title: "Reach 7,500 steps", targetValue: 7500, isCompleted: true, completedDate: Date()),
-                    GoalMilestone(title: "Hit 10,000 steps", targetValue: 10000)
-                ]
-            ),
-            HealthGoal(
-                title: "8 Hours of Sleep",
-                description: "Get consistent 8 hours of quality sleep every night",
-                category: .sleep,
-                targetValue: 8,
-                currentValue: 7,
-                unit: "hours",
-                deadline: nil,
-                milestones: []
-            ),
-            HealthGoal(
-                title: "Lose 5 kg",
-                description: "Gradually lose 5 kg through healthy diet and exercise",
-                category: .weight,
-                targetValue: 5,
-                currentValue: 2,
-                unit: "kg",
-                deadline: Calendar.current.date(byAdding: .month, value: 3, to: Date()),
-                milestones: [
-                    GoalMilestone(title: "Lose 2 kg", targetValue: 2, isCompleted: true, completedDate: Date().addingTimeInterval(-86400 * 15)),
-                    GoalMilestone(title: "Lose 3.5 kg", targetValue: 3, isCompleted: false),
-                    GoalMilestone(title: "Reach target", targetValue: 5, isCompleted: false)
-                ]
-            )
-        ]
+        // Load persisted goals from UserDefaults
+        if let data = UserDefaults.standard.data(forKey: Self.goalsKey),
+           let saved = try? JSONDecoder().decode([HealthGoal].self, from: data)
+        {
+            activeGoals = saved
+        }
+        if let data = UserDefaults.standard.data(forKey: Self.completedGoalsKey),
+           let saved = try? JSONDecoder().decode([HealthGoal].self, from: data)
+        {
+            completedGoals = saved
+        }
 
-        // Mock completed goals
-        completedGoals = [
-            HealthGoal(
-                title: "30 Days of Meditation",
-                description: "Meditate for 10 minutes daily for 30 consecutive days",
-                category: .mindfulness,
-                targetValue: 30,
-                currentValue: 30,
-                unit: "days",
-                deadline: nil,
-                milestones: []
-            )
-        ]
-        completedGoals[0].completedDate = Date().addingTimeInterval(-86400 * 5)
-        completedGoals[0].isActive = false
+        // Update current values from HealthKit if available
+        do {
+            _ = try await healthKitService.requestAuthorization()
+            let today = Date()
+            let summary = try await healthKitService.fetchActivityData(for: today)
 
-        // Mock suggestions
-        suggestions = [
-            GoalSuggestion(
-                title: "Lower Resting Heart Rate",
-                description: "Improve cardiovascular fitness by lowering resting HR",
-                category: .heart,
-                icon: "heart.fill",
-                targetValue: 60,
-                unit: "BPM"
-            ),
-            GoalSuggestion(
-                title: "Increase Protein Intake",
-                description: "Consume 100g of protein daily for muscle health",
-                category: .nutrition,
-                icon: "leaf.fill",
-                targetValue: 100,
-                unit: "g"
-            ),
-            GoalSuggestion(
-                title: "Weekly Active Minutes",
-                description: "Achieve 150 minutes of moderate activity per week",
-                category: .activity,
-                icon: "timer",
-                targetValue: 150,
-                unit: "minutes"
-            )
-        ]
+            for index in activeGoals.indices {
+                switch activeGoals[index].category {
+                case .activity:
+                    if activeGoals[index].unit == "steps" {
+                        activeGoals[index].currentValue = summary.steps
+                    } else if activeGoals[index].unit == "minutes" {
+                        activeGoals[index].currentValue = summary.activeMinutes
+                    }
+                case .sleep:
+                    let sleepStart = Calendar.current.date(byAdding: .hour, value: -30, to: Calendar.current.startOfDay(for: today)) ?? today
+                    let sleepEnd = Calendar.current.date(byAdding: .hour, value: 12, to: Calendar.current.startOfDay(for: today)) ?? today
+                    let sleepRange = DateInterval(start: sleepStart, end: sleepEnd)
+                    if let records = try? await healthKitService.fetchSleepData(for: sleepRange),
+                       let lastRecord = records.last
+                    {
+                        let hours = Int(lastRecord.endDate.timeIntervalSince(lastRecord.startDate) / 3600)
+                        activeGoals[index].currentValue = hours
+                    }
+                default:
+                    break
+                }
+                // Update milestone completion
+                for mIndex in activeGoals[index].milestones.indices {
+                    if !activeGoals[index].milestones[mIndex].isCompleted &&
+                        activeGoals[index].currentValue >= activeGoals[index].milestones[mIndex].targetValue
+                    {
+                        activeGoals[index].milestones[mIndex].isCompleted = true
+                        activeGoals[index].milestones[mIndex].completedDate = Date()
+                    }
+                }
+            }
+        } catch {
+            // HealthKit unavailable — goals remain with last saved values
+        }
+
+        // Seed initial goals if none exist
+        if activeGoals.isEmpty && completedGoals.isEmpty {
+            activeGoals = [
+                HealthGoal(
+                    title: "10,000 Daily Steps",
+                    description: "Walk 10,000 steps every day for better cardiovascular health",
+                    category: .activity, targetValue: 10000, currentValue: 0, unit: "steps",
+                    deadline: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
+                    milestones: [
+                        GoalMilestone(title: "5,000 steps", targetValue: 5000),
+                        GoalMilestone(title: "10,000 steps", targetValue: 10000)
+                    ]
+                ),
+                HealthGoal(
+                    title: "7+ Hours Sleep",
+                    description: "Get at least 7 hours of quality sleep nightly",
+                    category: .sleep, targetValue: 7, currentValue: 0, unit: "hours",
+                    deadline: nil, milestones: []
+                )
+            ]
+        }
+
+        // Generate suggestions based on what goals don't exist yet
+        let existingCategories = Set((activeGoals + completedGoals).map(\.category))
+        suggestions = []
+        if !existingCategories.contains(.heart) {
+            suggestions.append(GoalSuggestion(
+                title: "Lower Resting Heart Rate", description: "Improve cardiovascular fitness",
+                category: .heart, icon: "heart.fill", targetValue: 60, unit: "BPM"
+            ))
+        }
+        if !existingCategories.contains(.nutrition) {
+            suggestions.append(GoalSuggestion(
+                title: "Daily Protein Intake", description: "Consume 100g of protein daily",
+                category: .nutrition, icon: "leaf.fill", targetValue: 100, unit: "g"
+            ))
+        }
+        if !existingCategories.contains(.mindfulness) {
+            suggestions.append(GoalSuggestion(
+                title: "Daily Meditation", description: "Meditate for 10 minutes daily",
+                category: .mindfulness, icon: "brain.head.profile.fill", targetValue: 30, unit: "days"
+            ))
+        }
+
+        persistGoals()
+    }
+
+    private func persistGoals() {
+        if let data = try? JSONEncoder().encode(activeGoals) {
+            UserDefaults.standard.set(data, forKey: Self.goalsKey)
+        }
+        if let data = try? JSONEncoder().encode(completedGoals) {
+            UserDefaults.standard.set(data, forKey: Self.completedGoalsKey)
+        }
     }
 }
 

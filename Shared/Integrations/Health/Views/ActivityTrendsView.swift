@@ -647,94 +647,141 @@ final class ActivityActivityTrendsViewModel {
     var totalActiveDays: Int = 0
     var activeDaysThisMonth: Int = 0
 
+    private let healthKitService = HealthKitService()
+
     func loadData(metric: ActivityMetric, timeRange: ActivityTimeRange) async {
-        // Would integrate with HealthKit
-        // Mock data for demonstration
-        await generateMockData(metric: metric, timeRange: timeRange)
+        do {
+            _ = try await healthKitService.requestAuthorization()
+            await loadFromHealthKit(metric: metric, timeRange: timeRange)
+        } catch {
+            todayValue = "—"
+            averageValue = "—"
+            chartData = []
+        }
     }
 
-    private func generateMockData(metric: ActivityMetric, timeRange: ActivityTimeRange) async {
-        // Simulate loading
-        try? await Task.sleep(for: .milliseconds(300))
+    private func loadFromHealthKit(metric: ActivityMetric, timeRange: ActivityTimeRange) async {
+        let calendar = Calendar.current
+        let today = Date()
 
-        // Mock values
+        do {
+            let todaySummary = try await healthKitService.fetchActivityData(for: today)
+            let todayVal = extractMetric(metric, from: todaySummary)
+            todayValue = formatValue(todayVal, metric: metric)
+
+            var dataPoints: [ActivityDataPoint] = []
+            var total: Double = 0
+
+            for dayOffset in (0 ..< timeRange.days).reversed() {
+                let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) ?? today
+                do {
+                    let summary = try await healthKitService.fetchActivityData(for: date)
+                    let value = extractMetric(metric, from: summary)
+                    dataPoints.append(ActivityDataPoint(date: date, value: value))
+                    total += value
+                } catch {
+                    dataPoints.append(ActivityDataPoint(date: date, value: 0))
+                }
+            }
+
+            chartData = dataPoints
+            let avg = dataPoints.isEmpty ? 0 : total / Double(dataPoints.count)
+            averageValue = formatValue(avg, metric: metric)
+
+            let halfCount = max(1, dataPoints.count / 2)
+            let firstHalf = dataPoints.prefix(halfCount).map(\.value).reduce(0, +) / Double(halfCount)
+            let secondHalf = dataPoints.suffix(halfCount).map(\.value).reduce(0, +) / Double(halfCount)
+            if firstHalf > 0 {
+                let change = (secondHalf - firstHalf) / firstHalf * 100
+                trendPercentage = String(format: "%+.0f%%", change)
+                trend = change > 5 ? .improving : change < -5 ? .declining : .stable
+            } else {
+                trendPercentage = "+0%"
+                trend = .stable
+            }
+
+            goalValue = switch metric {
+            case .steps: 10000
+            case .distance: 8.0
+            case .calories: 500
+            case .activeMinutes: 60
+            }
+
+            var streak = 0
+            var longest = 0
+            var activeDays = 0
+            let thisMonth = calendar.component(.month, from: today)
+            var monthDays = 0
+            for point in dataPoints.reversed() {
+                if point.value >= (goalValue ?? 0) {
+                    streak += 1
+                    activeDays += 1
+                    longest = max(longest, streak)
+                    if calendar.component(.month, from: point.date) == thisMonth { monthDays += 1 }
+                } else {
+                    streak = 0
+                }
+            }
+            currentStreak = streak
+            longestStreak = longest
+            totalActiveDays = activeDays
+            activeDaysThisMonth = monthDays
+
+            insights = buildInsights(todayVal: todayVal, avg: avg, metric: metric, timeRange: timeRange)
+            goals = [
+                ActivityGoal(name: "Daily \(metric.displayName)", current: todayVal, target: goalValue ?? 0, unit: metric.unit)
+            ]
+
+        } catch {
+            todayValue = "—"
+            averageValue = "—"
+        }
+    }
+
+    private func extractMetric(_ metric: ActivityMetric, from summary: ActivitySummary) -> Double {
         switch metric {
-        case .steps:
-            todayValue = "9,847"
-            averageValue = "8,523"
-            goalValue = 10000
-        case .distance:
-            todayValue = "7.2"
-            averageValue = "6.4"
-            goalValue = 8.0
-        case .calories:
-            todayValue = "487"
-            averageValue = "425"
-            goalValue = 500
-        case .activeMinutes:
-            todayValue = "64"
-            averageValue = "52"
-            goalValue = 60
+        case .steps: Double(summary.steps)
+        case .distance: summary.distance / 1000.0
+        case .calories: Double(summary.activeCalories)
+        case .activeMinutes: Double(summary.activeMinutes)
         }
+    }
 
-        trendPercentage = "+15%"
-        trend = .improving
+    private func formatValue(_ value: Double, metric: ActivityMetric) -> String {
+        switch metric {
+        case .steps: String(format: "%.0f", value)
+        case .distance: String(format: "%.1f", value)
+        case .calories: String(format: "%.0f", value)
+        case .activeMinutes: String(format: "%.0f", value)
+        }
+    }
 
-        // Generate chart data
-        chartData = (0 ..< timeRange.days).map { dayOffset in
-            let date = Calendar.current.date(byAdding: .day, value: -timeRange.days + dayOffset, to: Date()) ?? Date().addingTimeInterval(Double(-timeRange.days + dayOffset) * 86400)
-            let baseValue: Double = switch metric {
-            case .steps: 8500
-            case .distance: 6.5
-            case .calories: 425
-            case .activeMinutes: 50
+    private func buildInsights(todayVal: Double, avg: Double, metric: ActivityMetric, timeRange: ActivityTimeRange) -> [ActivityInsight] {
+        var result: [ActivityInsight] = []
+        if avg > 0 {
+            let pctDiff = (todayVal - avg) / avg * 100
+            if pctDiff > 10 {
+                result.append(ActivityInsight(
+                    type: .positive, title: "Above Average!",
+                    message: "Today's \(metric.displayName.lowercased()) is \(String(format: "%.0f", pctDiff))% above your \(timeRange.displayName.lowercased()) average",
+                    icon: "chart.line.improvingtrend.xyaxis"
+                ))
+            } else if pctDiff < -10 {
+                result.append(ActivityInsight(
+                    type: .warning, title: "Below Average",
+                    message: "Today's \(metric.displayName.lowercased()) is \(String(format: "%.0f", abs(pctDiff)))% below your average",
+                    icon: "exclamationmark.triangle"
+                ))
             }
-            let variance = baseValue * 0.3
-            let value = baseValue + Double.random(in: -variance ... variance)
-            return ActivityDataPoint(date: date, value: max(0, value))
         }
-
-        // Generate hourly data
-        hourlyData = (0 ..< 24).map { hour in
-            let baseValue: Double = switch metric {
-            case .steps: hour >= 8 && hour <= 20 ? 600 : 50
-            case .distance: hour >= 8 && hour <= 20 ? 0.5 : 0.05
-            case .calories: hour >= 8 && hour <= 20 ? 35 : 5
-            case .activeMinutes: hour >= 8 && hour <= 20 ? 4 : 0.5
-            }
-            let variance = baseValue * 0.4
-            let value = baseValue + Double.random(in: -variance ... variance)
-            return HourlyActivityData(hour: hour, value: max(0, value))
+        if let goal = goalValue, todayVal >= goal {
+            result.append(ActivityInsight(
+                type: .positive, title: "Goal Reached!",
+                message: "You've hit your daily \(metric.displayName.lowercased()) goal",
+                icon: "checkmark.circle.fill"
+            ))
         }
-
-        // Generate insights
-        insights = [
-            ActivityInsight(
-                type: .positive,
-                title: "Great Progress!",
-                message: "You're 15% more active than last \(timeRange.displayName.lowercased())",
-                icon: "chart.line.improvingtrend.xyaxis"
-            ),
-            ActivityInsight(
-                type: .neutral,
-                title: "Peak Activity Time",
-                message: "You're most active between 2 PM - 6 PM",
-                icon: "clock.fill"
-            )
-        ]
-
-        // Generate goals
-        goals = [
-            ActivityGoal(name: "Daily Steps", current: 9847, target: 10000, unit: "steps"),
-            ActivityGoal(name: "Weekly Distance", current: 45, target: 50, unit: "km"),
-            ActivityGoal(name: "Monthly Calories", current: 12750, target: 15000, unit: "kcal")
-        ]
-
-        // Generate streaks
-        currentStreak = 12
-        longestStreak = 28
-        totalActiveDays = 156
-        activeDaysThisMonth = 18
+        return result
     }
 }
 

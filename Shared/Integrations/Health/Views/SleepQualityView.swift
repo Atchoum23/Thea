@@ -637,126 +637,105 @@ final class SleepQualityViewModel {
     var hasPreviousData: Bool = true
     var hasNextData: Bool = true
 
+    private let healthKitService = HealthKitService()
+
     func loadData(for date: Date) async {
-        // Would integrate with HealthKit
-        // Mock data for demonstration
-        await generateMockData(for: date)
-    }
-
-    private func generateMockData(for date: Date) async {
-        // Simulate loading
-        try? await Task.sleep(for: .milliseconds(300))
-
-        let bedtime = Calendar.current.date(bySettingHour: 22, minute: 30, second: 0, of: date.addingTimeInterval(-86400)) ?? date.addingTimeInterval(-86400 + 22.5 * 3600)
-        let wakeTime = Calendar.current.date(bySettingHour: 6, minute: 45, second: 0, of: date) ?? date.addingTimeInterval(6.75 * 3600)
-
-        let totalMinutes = 450 // 7h 30m
-
-        let stages = [
-            SleepStageData(stage: .awake, minutes: 30, percentage: 6.7),
-            SleepStageData(stage: .light, minutes: 225, percentage: 50.0),
-            SleepStageData(stage: .deep, minutes: 105, percentage: 23.3),
-            SleepStageData(stage: .rem, minutes: 90, percentage: 20.0)
-        ]
-
-        let timeline = generateMockTimeline(from: bedtime, totalMinutes: totalMinutes)
-
-        let factors = [
-            SleepFactor(
-                name: "Room Temperature",
-                description: "Optimal at 68°F",
-                icon: "thermometer.medium",
-                impact: .positive
-            ),
-            SleepFactor(
-                name: "Exercise",
-                description: "Moderate activity 3 hours before bed",
-                icon: "figure.run",
-                impact: .positive
-            ),
-            SleepFactor(
-                name: "Caffeine",
-                description: "Last coffee at 2 PM",
-                icon: "cup.and.saucer.fill",
-                impact: .positive
-            ),
-            SleepFactor(
-                name: "Screen Time",
-                description: "Device usage until 11 PM",
-                icon: "iphone",
-                impact: .negative
-            )
-        ]
-
-        selectedDaySleep = SleepData(
-            date: date,
-            bedtime: bedtime,
-            wakeTime: wakeTime,
-            totalMinutes: totalMinutes,
-            qualityScore: 82.0,
-            efficiency: 88.0,
-            sleepLatency: 12,
-            interruptions: 2,
-            restfulness: 85.0,
-            stages: stages,
-            timeline: timeline,
-            factors: factors
-        )
-
-        // Generate weekly data
-        weeklyData = (0 ..< 7).compactMap { dayOffset in
-            let weekDate = Calendar.current.date(byAdding: .day, value: -dayOffset, to: date) ?? date.addingTimeInterval(Double(-dayOffset) * 86400)
-            let randomQuality = Double.random(in: 65 ... 90)
-            let randomMinutes = Int.random(in: 360 ... 480)
-
-            return SleepData(
-                date: weekDate,
-                bedtime: bedtime,
-                wakeTime: wakeTime,
-                totalMinutes: randomMinutes,
-                qualityScore: randomQuality,
-                efficiency: 85.0,
-                sleepLatency: 12,
-                interruptions: 2,
-                restfulness: 85.0,
-                stages: stages,
-                timeline: [],
-                factors: []
-            )
-        }.reversed()
-    }
-
-    private func generateMockTimeline(from bedtime: Date, totalMinutes _: Int) -> [SleepTimelineSegment] {
-        var segments: [SleepTimelineSegment] = []
-        var currentTime = bedtime
-
-        let stagePattern: [(SleepStage, Int)] = [
-            (.awake, 12),
-            (.light, 45),
-            (.deep, 35),
-            (.light, 30),
-            (.rem, 25),
-            (.light, 40),
-            (.deep, 35),
-            (.light, 35),
-            (.rem, 30),
-            (.light, 50),
-            (.rem, 35),
-            (.light, 45),
-            (.awake, 18)
-        ]
-
-        for (stage, minutes) in stagePattern {
-            let endTime = currentTime.addingTimeInterval(TimeInterval(minutes * 60))
-            segments.append(SleepTimelineSegment(
-                stage: stage,
-                startTime: currentTime,
-                endTime: endTime
-            ))
-            currentTime = endTime
+        do {
+            _ = try await healthKitService.requestAuthorization()
+            await loadFromHealthKit(for: date)
+        } catch {
+            selectedDaySleep = nil
+            weeklyData = []
         }
+    }
 
-        return segments
+    private func loadFromHealthKit(for date: Date) async {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        let sleepStart = calendar.date(byAdding: .hour, value: -30, to: startOfDay) ?? startOfDay.addingTimeInterval(-30 * 3600)
+        let sleepEnd = calendar.date(byAdding: .hour, value: 12, to: startOfDay) ?? startOfDay.addingTimeInterval(12 * 3600)
+        let dateRange = DateInterval(start: sleepStart, end: sleepEnd)
+
+        do {
+            let records = try await healthKitService.fetchSleepData(for: dateRange)
+
+            if let record = records.last {
+                let totalMinutes = Int(record.endDate.timeIntervalSince(record.startDate) / 60)
+                let stages = buildStageData(from: record.stages, totalMinutes: totalMinutes)
+                let timeline = record.stages.map { segment in
+                    SleepTimelineSegment(stage: segment.stage, startTime: segment.startDate, endTime: segment.endDate)
+                }
+
+                let awakeMinutes = record.stages.filter { $0.stage == .awake }.reduce(0) { $0 + $1.durationMinutes }
+                let sleepMinutes = totalMinutes - awakeMinutes
+                let efficiency = totalMinutes > 0 ? Double(sleepMinutes) / Double(totalMinutes) * 100 : 0
+                let interruptions = record.stages.filter { $0.stage == .awake }.count
+
+                selectedDaySleep = SleepData(
+                    date: date,
+                    bedtime: record.startDate,
+                    wakeTime: record.endDate,
+                    totalMinutes: totalMinutes,
+                    qualityScore: Double(record.quality.score),
+                    efficiency: efficiency,
+                    sleepLatency: record.stages.first?.stage == .awake ? record.stages.first!.durationMinutes : 0,
+                    interruptions: max(0, interruptions - 1),
+                    restfulness: record.quality.score * 1.05,
+                    stages: stages,
+                    timeline: timeline,
+                    factors: []
+                )
+            } else {
+                selectedDaySleep = nil
+            }
+
+            // Load weekly data
+            let weekStart = calendar.date(byAdding: .day, value: -6, to: startOfDay) ?? startOfDay.addingTimeInterval(-6 * 86400)
+            let weekRange = DateInterval(start: weekStart.addingTimeInterval(-30 * 3600), end: sleepEnd)
+            let weekRecords = try await healthKitService.fetchSleepData(for: weekRange)
+
+            weeklyData = (0 ..< 7).compactMap { dayOffset in
+                let weekDate = calendar.date(byAdding: .day, value: -6 + dayOffset, to: date) ?? date
+                let dayStart = calendar.startOfDay(for: weekDate)
+                let dayRecords = weekRecords.filter { record in
+                    record.startDate >= dayStart.addingTimeInterval(-30 * 3600) &&
+                        record.startDate < dayStart.addingTimeInterval(12 * 3600)
+                }
+                guard let record = dayRecords.last else { return nil }
+                let totalMin = Int(record.endDate.timeIntervalSince(record.startDate) / 60)
+                return SleepData(
+                    date: weekDate,
+                    bedtime: record.startDate,
+                    wakeTime: record.endDate,
+                    totalMinutes: totalMin,
+                    qualityScore: Double(record.quality.score),
+                    efficiency: 0,
+                    sleepLatency: 0,
+                    interruptions: 0,
+                    restfulness: 0,
+                    stages: [],
+                    timeline: [],
+                    factors: []
+                )
+            }
+        } catch {
+            selectedDaySleep = nil
+            weeklyData = []
+        }
+    }
+
+    private func buildStageData(from segments: [SleepStageSegment], totalMinutes: Int) -> [SleepStageData] {
+        let awake = segments.filter { $0.stage == .awake }.reduce(0) { $0 + $1.durationMinutes }
+        let light = segments.filter { $0.stage == .light }.reduce(0) { $0 + $1.durationMinutes }
+        let deep = segments.filter { $0.stage == .deep }.reduce(0) { $0 + $1.durationMinutes }
+        let rem = segments.filter { $0.stage == .rem }.reduce(0) { $0 + $1.durationMinutes }
+        let total = max(1, Double(totalMinutes))
+        return [
+            SleepStageData(stage: .awake, minutes: awake, percentage: Double(awake) / total * 100),
+            SleepStageData(stage: .light, minutes: light, percentage: Double(light) / total * 100),
+            SleepStageData(stage: .deep, minutes: deep, percentage: Double(deep) / total * 100),
+            SleepStageData(stage: .rem, minutes: rem, percentage: Double(rem) / total * 100)
+        ]
     }
 }
 

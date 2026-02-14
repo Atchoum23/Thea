@@ -340,11 +340,21 @@ private struct BloodPressureLoggerView: View {
 final class BloodPressureViewModel {
     var readings: [BloodPressureReading] = []
     var isLoading = false
+    private let healthKitService = HealthKitService()
 
     func loadData() async {
-        // Would load from HealthKit
-        // Mock data for now
-        readings = []
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            _ = try await healthKitService.requestAuthorization()
+            let endDate = Date()
+            let startDate = Calendar.current.date(byAdding: .month, value: -3, to: endDate) ?? endDate.addingTimeInterval(-90 * 86400)
+            let dateRange = DateInterval(start: startDate, end: endDate)
+            readings = try await healthKitService.fetchBloodPressureData(for: dateRange)
+                .sorted { $0.timestamp > $1.timestamp }
+        } catch {
+            readings = []
+        }
     }
 
     func logReading(systolic: Int, diastolic: Int, pulse: Int?, timestamp: Date) async {
@@ -352,7 +362,8 @@ final class BloodPressureViewModel {
             timestamp: timestamp,
             systolic: systolic,
             diastolic: diastolic,
-            pulse: pulse
+            pulse: pulse,
+            source: .manual
         )
         readings.insert(reading, at: 0)
     }
