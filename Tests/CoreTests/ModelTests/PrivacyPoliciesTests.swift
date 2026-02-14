@@ -136,6 +136,8 @@ fileprivate struct PermissivePolicy: PrivacyPolicy {
     let maxContentLength = 0
 }
 
+// swiftlint:enable private_over_fileprivate
+
 // MARK: - All Policies Tests
 
 final class AllPoliciesTests: XCTestCase {
