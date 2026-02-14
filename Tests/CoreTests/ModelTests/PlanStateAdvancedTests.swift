@@ -33,7 +33,7 @@ final class PlanStateAdvancedTests: XCTestCase {
         XCTAssertEqual(step.duration, 0)
     }
 
-    func testStepDurationLongRunning() {
+    func testStepDurationLongRunning() throws {
         let start = Date(timeIntervalSince1970: 0)
         let end = Date(timeIntervalSince1970: 86400) // 24 hours
         let step = PlanStep(
@@ -42,7 +42,8 @@ final class PlanStateAdvancedTests: XCTestCase {
             startedAt: start,
             completedAt: end
         )
-        XCTAssertEqual(step.duration, 86400, accuracy: 0.001)
+        let duration = try XCTUnwrap(step.duration)
+        XCTAssertEqual(duration, 86400, accuracy: 0.001)
     }
 
     // MARK: - PlanPhase — isComplete with All Statuses

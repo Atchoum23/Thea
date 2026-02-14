@@ -10,6 +10,7 @@
         private var profiles: [DisplayProfile] = []
         private var activeProfile: DisplayProfile?
         private var automaticSwitching = false
+        private static let profilesKey = "thea.display.profiles"
 
         public enum ProfileError: Error, Sendable, LocalizedError {
             case profileNotFound
@@ -142,17 +143,19 @@
         // MARK: - Private Helpers
 
         private func loadDefaultProfiles() async {
-            profiles = [
-                .daytime,
-                .evening,
-                .night,
-                .reading,
-                .movie
-            ]
+            if let data = UserDefaults.standard.data(forKey: Self.profilesKey),
+               let saved = try? JSONDecoder().decode([DisplayProfile].self, from: data)
+            {
+                profiles = saved
+            } else {
+                profiles = [.daytime, .evening, .night, .reading, .movie]
+            }
         }
 
         private func saveProfiles() async {
-            // TODO: Persist to disk using SwiftData or UserDefaults
+            if let data = try? JSONEncoder().encode(profiles) {
+                UserDefaults.standard.set(data, forKey: Self.profilesKey)
+            }
         }
 
         private func getActiveDisplays() -> [CGDirectDisplayID] {
