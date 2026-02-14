@@ -45,6 +45,7 @@ struct TheaClipCardView: View {
                 Image(systemName: "link")
                     .font(.caption2)
                     .foregroundStyle(.blue)
+                    .accessibilityHidden(true)
                 Text(entry.urlString ?? entry.previewText)
                     .font(.caption)
                     .lineLimit(2)
@@ -74,6 +75,7 @@ struct TheaClipCardView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "doc")
                             .font(.caption2)
+                            .accessibilityHidden(true)
                         Text(name)
                             .font(.caption)
                             .lineLimit(1)
@@ -114,18 +116,21 @@ struct TheaClipCardView: View {
                 Image(systemName: "star.fill")
                     .font(.system(size: 9))
                     .foregroundStyle(.yellow)
+                    .accessibilityHidden(true)
             }
 
             if entry.isPinned {
                 Image(systemName: "pin.fill")
                     .font(.system(size: 9))
                     .foregroundStyle(.orange)
+                    .accessibilityHidden(true)
             }
 
             if entry.isSensitive {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 9))
                     .foregroundStyle(.red)
+                    .accessibilityHidden(true)
             }
 
             Text(entry.createdAt, style: .relative)
