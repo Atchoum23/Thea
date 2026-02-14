@@ -166,9 +166,12 @@ final class FunctionGemmaEngine {
         return nil
     }
 
-    // MARK: - Calendar Intent Parsing
+}
 
-    private func parseCalendarIntent(_ lower: String, original: String) -> FunctionCall? {
+// MARK: - Intent Parsing
+
+extension FunctionGemmaEngine {
+    func parseCalendarIntent(_ lower: String, original: String) -> FunctionCall? {
         let calendarTriggers = ["calendar", "event", "meeting", "appointment", "schedule"]
         guard calendarTriggers.contains(where: { lower.contains($0) }) else { return nil }
 
@@ -178,45 +181,31 @@ final class FunctionGemmaEngine {
                 ?? "New Event"
 
             var args: [String: String] = ["title": title]
-
-            if let time = extractTimeExpression(lower) {
-                args["time"] = time
-            }
+            if let time = extractTimeExpression(lower) { args["time"] = time }
 
             return FunctionCall(
-                module: "calendar",
-                function: "createEvent",
-                arguments: args,
-                confidence: 0.8,
-                originalInstruction: original
+                module: "calendar", function: "createEvent",
+                arguments: args, confidence: 0.8, originalInstruction: original
             )
         }
 
         if lower.contains("show") || lower.contains("list") || lower.contains("what") || lower.contains("get") {
             if lower.contains("today") {
                 return FunctionCall(
-                    module: "calendar",
-                    function: "getTodayEvents",
-                    arguments: [:],
-                    confidence: 0.9,
-                    originalInstruction: original
+                    module: "calendar", function: "getTodayEvents",
+                    arguments: [:], confidence: 0.9, originalInstruction: original
                 )
             }
             return FunctionCall(
-                module: "calendar",
-                function: "getEvents",
-                arguments: [:],
-                confidence: 0.7,
-                originalInstruction: original
+                module: "calendar", function: "getEvents",
+                arguments: [:], confidence: 0.7, originalInstruction: original
             )
         }
 
         return nil
     }
 
-    // MARK: - Reminder Intent Parsing
-
-    private func parseReminderIntent(_ lower: String, original: String) -> FunctionCall? {
+    func parseReminderIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["reminder", "remind", "todo", "to-do", "task"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
 
@@ -226,98 +215,72 @@ final class FunctionGemmaEngine {
                 ?? "New Reminder"
 
             var args: [String: String] = ["title": title]
-
-            if let time = extractTimeExpression(lower) {
-                args["dueDate"] = time
-            }
+            if let time = extractTimeExpression(lower) { args["dueDate"] = time }
 
             return FunctionCall(
-                module: "reminders",
-                function: "createReminder",
-                arguments: args,
-                confidence: 0.85,
-                originalInstruction: original
+                module: "reminders", function: "createReminder",
+                arguments: args, confidence: 0.85, originalInstruction: original
             )
         }
 
         if lower.contains("show") || lower.contains("list") || lower.contains("get") {
             return FunctionCall(
-                module: "reminders",
-                function: "fetchReminders",
-                arguments: [:],
-                confidence: 0.8,
-                originalInstruction: original
+                module: "reminders", function: "fetchReminders",
+                arguments: [:], confidence: 0.8, originalInstruction: original
             )
         }
 
         return nil
     }
 
-    // MARK: - Safari Intent Parsing
-
-    private func parseSafariIntent(_ lower: String, original: String) -> FunctionCall? {
+    func parseSafariIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["safari", "browse", "website", "web page", "open url", "search for", "search the web"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
 
         if lower.contains("open") || lower.contains("navigate") || lower.contains("go to") {
             if let url = extractURL(original) {
                 return FunctionCall(
-                    module: "safari",
-                    function: "navigateTo",
-                    arguments: ["url": url],
-                    confidence: 0.9,
-                    originalInstruction: original
+                    module: "safari", function: "navigateTo",
+                    arguments: ["url": url], confidence: 0.9, originalInstruction: original
                 )
             }
         }
 
         if lower.contains("search") {
-            let query = extractQuotedOrAfter(original, keywords: ["search for", "search", "look up"])
-                ?? "query"
+            let query = extractQuotedOrAfter(original, keywords: ["search for", "search", "look up"]) ?? "query"
             return FunctionCall(
-                module: "safari",
-                function: "navigateTo",
+                module: "safari", function: "navigateTo",
                 arguments: ["url": "https://www.google.com/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query)"],
-                confidence: 0.8,
-                originalInstruction: original
+                confidence: 0.8, originalInstruction: original
             )
         }
 
         return nil
     }
 
-    // MARK: - Finder Intent Parsing
-
-    private func parseFinderIntent(_ lower: String, original: String) -> FunctionCall? {
+    func parseFinderIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["finder", "folder", "file", "directory"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
 
         if lower.contains("open") || lower.contains("show") || lower.contains("reveal") {
             return FunctionCall(
-                module: "finder",
-                function: "getSelectedFiles",
-                arguments: [:],
-                confidence: 0.7,
-                originalInstruction: original
+                module: "finder", function: "getSelectedFiles",
+                arguments: [:], confidence: 0.7, originalInstruction: original
             )
         }
 
         return nil
     }
 
-    // MARK: - Terminal Intent Parsing
-
-    private func parseTerminalIntent(_ lower: String, original: String) -> FunctionCall? {
+    func parseTerminalIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["terminal", "command line", "shell", "run command", "execute"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
 
         if lower.contains("run") || lower.contains("execute") || lower.contains("open terminal") {
             let command = extractQuotedOrAfter(original, keywords: ["run", "execute"]) ?? ""
             return FunctionCall(
-                module: "terminal",
-                function: "executeCommand",
-                arguments: ["command": command],
-                confidence: command.isEmpty ? 0.5 : 0.8,
+                module: "terminal", function: "executeCommand",
+                arguments: ["command": command], confidence: command.isEmpty ? 0.5 : 0.8,
                 originalInstruction: original
             )
         }
@@ -325,88 +288,45 @@ final class FunctionGemmaEngine {
         return nil
     }
 
-    // MARK: - Music Intent Parsing
-
-    private func parseMusicIntent(_ lower: String, original: String) -> FunctionCall? {
+    func parseMusicIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["music", "song", "play", "pause", "skip", "volume"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
 
         if lower.contains("play") {
-            return FunctionCall(
-                module: "music",
-                function: "play",
-                arguments: [:],
-                confidence: 0.8,
-                originalInstruction: original
-            )
+            return FunctionCall(module: "music", function: "play", arguments: [:], confidence: 0.8, originalInstruction: original)
         }
-
         if lower.contains("pause") || lower.contains("stop") {
-            return FunctionCall(
-                module: "music",
-                function: "pause",
-                arguments: [:],
-                confidence: 0.85,
-                originalInstruction: original
-            )
+            return FunctionCall(module: "music", function: "pause", arguments: [:], confidence: 0.85, originalInstruction: original)
         }
-
         if lower.contains("skip") || lower.contains("next") {
-            return FunctionCall(
-                module: "music",
-                function: "nextTrack",
-                arguments: [:],
-                confidence: 0.85,
-                originalInstruction: original
-            )
+            return FunctionCall(module: "music", function: "nextTrack", arguments: [:], confidence: 0.85, originalInstruction: original)
         }
 
         return nil
     }
 
-    // MARK: - System Intent Parsing
-
-    private func parseSystemIntent(_ lower: String, original: String) -> FunctionCall? {
+    func parseSystemIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["system", "brightness", "volume", "dark mode", "sleep", "lock"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
 
         if lower.contains("dark mode") {
             let enable = lower.contains("enable") || lower.contains("turn on") || lower.contains("activate")
             return FunctionCall(
-                module: "system",
-                function: "setDarkMode",
-                arguments: ["enabled": enable ? "true" : "false"],
-                confidence: 0.9,
-                originalInstruction: original
+                module: "system", function: "setDarkMode",
+                arguments: ["enabled": enable ? "true" : "false"], confidence: 0.9, originalInstruction: original
             )
         }
-
         if lower.contains("lock") {
-            return FunctionCall(
-                module: "system",
-                function: "lockScreen",
-                arguments: [:],
-                confidence: 0.9,
-                originalInstruction: original
-            )
+            return FunctionCall(module: "system", function: "lockScreen", arguments: [:], confidence: 0.9, originalInstruction: original)
         }
-
         if lower.contains("sleep") {
-            return FunctionCall(
-                module: "system",
-                function: "sleep",
-                arguments: [:],
-                confidence: 0.85,
-                originalInstruction: original
-            )
+            return FunctionCall(module: "system", function: "sleep", arguments: [:], confidence: 0.85, originalInstruction: original)
         }
 
         return nil
     }
 
-    // MARK: - Mail Intent Parsing
-
-    private func parseMailIntent(_ lower: String, original: String) -> FunctionCall? {
+    func parseMailIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["email", "mail", "send an email", "compose"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
 
@@ -414,41 +334,34 @@ final class FunctionGemmaEngine {
             let recipient = extractAfter(original, keyword: "to") ?? ""
             let subject = extractQuotedOrAfter(original, keywords: ["about", "subject", "regarding"]) ?? ""
             return FunctionCall(
-                module: "mail",
-                function: "composeEmail",
-                arguments: ["to": recipient, "subject": subject],
-                confidence: 0.7,
-                originalInstruction: original
+                module: "mail", function: "composeEmail",
+                arguments: ["to": recipient, "subject": subject], confidence: 0.7, originalInstruction: original
             )
         }
 
         return nil
     }
 
-    // MARK: - Shortcuts Intent Parsing
-
-    private func parseShortcutsIntent(_ lower: String, original: String) -> FunctionCall? {
+    func parseShortcutsIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["shortcut", "automation", "run shortcut"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
 
         if lower.contains("run") {
             let name = extractQuotedOrAfter(original, keywords: ["run", "shortcut", "called", "named"]) ?? ""
             return FunctionCall(
-                module: "shortcuts",
-                function: "runShortcut",
-                arguments: ["name": name],
-                confidence: name.isEmpty ? 0.4 : 0.85,
-                originalInstruction: original
+                module: "shortcuts", function: "runShortcut",
+                arguments: ["name": name], confidence: name.isEmpty ? 0.4 : 0.85, originalInstruction: original
             )
         }
 
         return nil
     }
+}
 
-    // MARK: - Text Extraction Helpers
+// MARK: - Text Extraction & Prompt Helpers
 
-    private func extractQuotedOrAfter(_ text: String, keywords: [String]) -> String? {
-        // Try quoted text first
+extension FunctionGemmaEngine {
+    func extractQuotedOrAfter(_ text: String, keywords: [String]) -> String? {
         if let range = text.range(of: "\"[^\"]+\"", options: .regularExpression) {
             let quoted = text[range]
             return String(quoted.dropFirst().dropLast())
@@ -458,7 +371,6 @@ final class FunctionGemmaEngine {
             return String(quoted.dropFirst().dropLast())
         }
 
-        // Try after keywords
         for keyword in keywords {
             if let result = extractAfter(text, keyword: keyword) {
                 return result
@@ -468,11 +380,10 @@ final class FunctionGemmaEngine {
         return nil
     }
 
-    private func extractAfter(_ text: String, keyword: String) -> String? {
+    func extractAfter(_ text: String, keyword: String) -> String? {
         guard let range = text.lowercased().range(of: keyword) else { return nil }
         let after = text[range.upperBound...].trimmingCharacters(in: .whitespaces)
         guard !after.isEmpty else { return nil }
-        // Take up to the next conjunction or punctuation
         let stopWords = [" and ", " then ", " but ", " or ", ".", ",", ";"]
         var result = after
         for stop in stopWords {
@@ -483,7 +394,7 @@ final class FunctionGemmaEngine {
         return result.trimmingCharacters(in: .whitespaces)
     }
 
-    private func extractURL(_ text: String) -> String? {
+    func extractURL(_ text: String) -> String? {
         let pattern = "https?://[^\\s]+"
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
         let range = NSRange(text.startIndex..<text.endIndex, in: text)
@@ -495,12 +406,9 @@ final class FunctionGemmaEngine {
         return nil
     }
 
-    private func extractTimeExpression(_ text: String) -> String? {
-        // Simple time extraction — "at 3pm", "tomorrow", "in 2 hours"
+    func extractTimeExpression(_ text: String) -> String? {
         let patterns = [
-            "tomorrow",
-            "today",
-            "tonight",
+            "tomorrow", "today", "tonight",
             "in \\d+ (?:hour|minute|day|week)s?",
             "at \\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?",
             "next (?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)"
@@ -518,8 +426,7 @@ final class FunctionGemmaEngine {
         return nil
     }
 
-    private func splitInstruction(_ text: String) -> [String] {
-        // Split on "and then", "then", "and also", ", and "
+    func splitInstruction(_ text: String) -> [String] {
         let separators = [" and then ", " then ", " and also ", ", and "]
         var parts = [text]
 
@@ -534,11 +441,7 @@ final class FunctionGemmaEngine {
         return parts.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
     }
 
-    // MARK: - CoreML Output Parsing
-
-    private func parseFunctionCallFromOutput(_ output: String) -> FunctionCall? {
-        // Parse JSON function call from CoreML output
-        // Expected format: {"module": "calendar", "function": "createEvent", "arguments": {"title": "Meeting"}}
+    func parseFunctionCallFromOutput(_ output: String) -> FunctionCall? {
         guard let data = output.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let module = json["module"] as? String,
@@ -549,17 +452,12 @@ final class FunctionGemmaEngine {
         let confidence = json["confidence"] as? Double ?? 0.7
 
         return FunctionCall(
-            module: module,
-            function: function,
-            arguments: arguments,
-            confidence: confidence,
-            originalInstruction: ""
+            module: module, function: function,
+            arguments: arguments, confidence: confidence, originalInstruction: ""
         )
     }
 
-    // MARK: - Prompt Building
-
-    private func buildFunctionCallingPrompt(instruction: String) -> String {
+    func buildFunctionCallingPrompt(instruction: String) -> String {
         var prompt = "You are a function-calling assistant. Parse the user instruction into a function call.\n\n"
         prompt += "Available functions:\n"
 
@@ -576,53 +474,36 @@ final class FunctionGemmaEngine {
         return prompt
     }
 
-    // MARK: - Function Catalog
-
-    private func buildFunctionCatalog() {
+    func buildFunctionCatalog() {
         functionCatalog = [
-            // Calendar
             FunctionDefinition(module: "calendar", name: "createEvent", description: "Create a calendar event", parameters: [
                 .init(name: "title", type: "string", required: true),
                 .init(name: "time", type: "string", required: false)
             ]),
             FunctionDefinition(module: "calendar", name: "getTodayEvents", description: "Get today's calendar events", parameters: []),
             FunctionDefinition(module: "calendar", name: "getEvents", description: "Get calendar events", parameters: []),
-
-            // Reminders
             FunctionDefinition(module: "reminders", name: "createReminder", description: "Create a reminder", parameters: [
                 .init(name: "title", type: "string", required: true),
                 .init(name: "dueDate", type: "string", required: false)
             ]),
             FunctionDefinition(module: "reminders", name: "fetchReminders", description: "List reminders", parameters: []),
-
-            // Safari
             FunctionDefinition(module: "safari", name: "navigateTo", description: "Open URL in Safari", parameters: [
                 .init(name: "url", type: "string", required: true)
             ]),
-
-            // Terminal
             FunctionDefinition(module: "terminal", name: "executeCommand", description: "Execute a shell command", parameters: [
                 .init(name: "command", type: "string", required: true)
             ]),
-
-            // Music
             FunctionDefinition(module: "music", name: "play", description: "Play music", parameters: []),
             FunctionDefinition(module: "music", name: "pause", description: "Pause music", parameters: []),
             FunctionDefinition(module: "music", name: "nextTrack", description: "Skip to next track", parameters: []),
-
-            // System
             FunctionDefinition(module: "system", name: "setDarkMode", description: "Toggle dark mode", parameters: [
                 .init(name: "enabled", type: "boolean", required: true)
             ]),
             FunctionDefinition(module: "system", name: "lockScreen", description: "Lock the screen", parameters: []),
-
-            // Mail
             FunctionDefinition(module: "mail", name: "composeEmail", description: "Compose an email", parameters: [
                 .init(name: "to", type: "string", required: true),
                 .init(name: "subject", type: "string", required: false)
             ]),
-
-            // Shortcuts
             FunctionDefinition(module: "shortcuts", name: "runShortcut", description: "Run a Shortcuts automation", parameters: [
                 .init(name: "name", type: "string", required: true)
             ])

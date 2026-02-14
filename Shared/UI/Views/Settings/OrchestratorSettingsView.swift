@@ -576,34 +576,6 @@ extension OrchestratorSettingsView {
         }
     }
 
-    var debugSection: some View {
-        Section("Debug & Monitoring") {
-            Toggle("Show Decomposition Details", isOn: $config.showDecompositionDetails)
-                .onChange(of: config.showDecompositionDetails) { _, _ in
-                    saveConfig()
-                }
-
-            Toggle("Log Model Routing", isOn: $config.logModelRouting)
-                .onChange(of: config.logModelRouting) { _, _ in
-                    saveConfig()
-                }
-
-            Toggle("Show Agent Coordination", isOn: $config.showAgentCoordination)
-                .onChange(of: config.showAgentCoordination) { _, _ in
-                    saveConfig()
-                }
-
-            Toggle("Enable Result Validation", isOn: $config.enableResultValidation)
-                .onChange(of: config.enableResultValidation) { _, _ in
-                    saveConfig()
-                }
-
-            Text("Enable these options to see detailed information about orchestrator decisions and execution.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-    }
-
     func saveConfig() {
         config.save()
     }

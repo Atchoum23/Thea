@@ -208,24 +208,7 @@ final class LocalModelManager {
 
     private func discoverMLXModels() async {
         #if os(macOS)
-            let home = FileManager.default.homeDirectoryForCurrentUser
-
-            // HuggingFace cache: check HF_HOME env, then standard default
-            let hfHome = ProcessInfo.processInfo.environment["HF_HOME"]
-                .map { URL(fileURLWithPath: $0) }
-                ?? home.appendingPathComponent(".cache/huggingface")
-
-            // Check multiple locations for MLX models
-            // The scanner expects a "hub" subdirectory with HF Hub structure (models--org--name/snapshots/hash/)
-            let mlxPaths = [
-                // Standard HuggingFace cache (contains hub/ with models--org--name/ dirs)
-                hfHome,
-                // SharedLLMs models-mlx (primary location with HuggingFace Hub structure)
-                home.appendingPathComponent(config.sharedLLMsDirectory)
-                    .appendingPathComponent("models-mlx"),
-                // Legacy mlx-models directory
-                home.appendingPathComponent(config.mlxModelsDirectory)
-            ]
+            let mlxPaths = buildMLXSearchPaths()
 
             print("🔍 Searching for MLX models in paths:")
             for path in mlxPaths {
@@ -240,88 +223,8 @@ final class LocalModelManager {
                 print("✅ Scanning path: \(mlxPath.path)")
 
                 do {
-                    // Handle HuggingFace Hub structure: models-mlx/hub/models--org--name/snapshots/hash/
-                    let hubPath = mlxPath.appendingPathComponent("hub")
-                    if FileManager.default.fileExists(atPath: hubPath.path) {
-                        let modelDirs = try FileManager.default.contentsOfDirectory(at: hubPath, includingPropertiesForKeys: [.isDirectoryKey])
-
-                        for modelDir in modelDirs {
-                            // Skip hidden files
-                            guard !modelDir.lastPathComponent.hasPrefix(".") else { continue }
-
-                            // Find the snapshot directory
-                            let snapshotsPath = modelDir.appendingPathComponent("snapshots")
-                            guard FileManager.default.fileExists(atPath: snapshotsPath.path) else { continue }
-
-                            let snapshots = try FileManager.default.contentsOfDirectory(at: snapshotsPath, includingPropertiesForKeys: [.isDirectoryKey])
-
-                            // Use the first (typically only) snapshot
-                            guard let snapshotDir = snapshots.first else { continue }
-
-                            // Verify it's a valid MLX model directory
-                            let configPath = snapshotDir.appendingPathComponent("config.json")
-                            guard FileManager.default.fileExists(atPath: configPath.path) else { continue }
-
-                            // Check for weights file
-                            let hasWeights = FileManager.default.fileExists(atPath: snapshotDir.appendingPathComponent("weights.safetensors").path) ||
-                                FileManager.default.fileExists(atPath: snapshotDir.appendingPathComponent("model.safetensors").path) ||
-                                FileManager.default.fileExists(atPath: snapshotDir.appendingPathComponent("tokenizer.json").path)
-
-                            guard hasWeights else { continue }
-
-                            // Extract friendly name from "models--mlx-community--ModelName-8bit"
-                            let dirName = modelDir.lastPathComponent
-                            let modelName = extractModelName(from: dirName)
-
-                            // Calculate directory size
-                            let size = calculateDirectorySize(snapshotDir)
-
-                            let model = LocalModel(
-                                id: UUID(),
-                                name: modelName,
-                                path: snapshotDir,
-                                type: .mlx,
-                                format: "MLX",
-                                sizeInBytes: Int(size),
-                                runtime: .mlx,
-                                size: size,
-                                parameters: extractParameters(from: modelName),
-                                quantization: extractQuantization(from: modelName)
-                            )
-
-                            availableModels.append(model)
-                            print("✅ Discovered MLX model: \(modelName)")
-                        }
-                    }
-
-                    // Also check for direct model directories (non-Hub structure)
-                    let directModels = try FileManager.default.contentsOfDirectory(at: mlxPath, includingPropertiesForKeys: [.isDirectoryKey])
-                    for modelDir in directModels {
-                        guard !modelDir.lastPathComponent.hasPrefix("."),
-                              modelDir.lastPathComponent != "hub" else { continue }
-
-                        let configPath = modelDir.appendingPathComponent("config.json")
-                        guard FileManager.default.fileExists(atPath: configPath.path) else { continue }
-
-                        let modelName = modelDir.lastPathComponent
-                        let size = calculateDirectorySize(modelDir)
-
-                        let model = LocalModel(
-                            id: UUID(),
-                            name: modelName,
-                            path: modelDir,
-                            type: .mlx,
-                            format: "MLX",
-                            sizeInBytes: Int(size),
-                            runtime: .mlx,
-                            size: size,
-                            parameters: extractParameters(from: modelName),
-                            quantization: extractQuantization(from: modelName)
-                        )
-
-                        availableModels.append(model)
-                        print("✅ Discovered MLX model: \(modelName)")
-                    }
+                    discoverHubModels(at: mlxPath)
+                    try discoverDirectModels(at: mlxPath)
                 } catch {
                     print("Failed to discover MLX models in \(mlxPath.path): \(error)")
                 }
@@ -330,6 +233,93 @@ final class LocalModelManager {
             // iOS: MLX requires macOS - not available on iOS
         #endif
     }
+
+    #if os(macOS)
+    private func buildMLXSearchPaths() -> [URL] {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let hfHome = ProcessInfo.processInfo.environment["HF_HOME"]
+            .map { URL(fileURLWithPath: $0) }
+            ?? home.appendingPathComponent(".cache/huggingface")
+
+        return [
+            hfHome,
+            home.appendingPathComponent(config.sharedLLMsDirectory)
+                .appendingPathComponent("models-mlx"),
+            home.appendingPathComponent(config.mlxModelsDirectory)
+        ]
+    }
+
+    private func discoverHubModels(at mlxPath: URL) {
+        let hubPath = mlxPath.appendingPathComponent("hub")
+        guard FileManager.default.fileExists(atPath: hubPath.path) else { return }
+
+        guard let modelDirs = try? FileManager.default.contentsOfDirectory(
+            at: hubPath, includingPropertiesForKeys: [.isDirectoryKey]
+        ) else { return }
+
+        for modelDir in modelDirs {
+            guard !modelDir.lastPathComponent.hasPrefix(".") else { continue }
+
+            let snapshotsPath = modelDir.appendingPathComponent("snapshots")
+            guard FileManager.default.fileExists(atPath: snapshotsPath.path),
+                  let snapshots = try? FileManager.default.contentsOfDirectory(
+                      at: snapshotsPath, includingPropertiesForKeys: [.isDirectoryKey]),
+                  let snapshotDir = snapshots.first else { continue }
+
+            guard isValidMLXModelDirectory(snapshotDir) else { continue }
+
+            let modelName = extractModelName(from: modelDir.lastPathComponent)
+            let size = calculateDirectorySize(snapshotDir)
+
+            let model = LocalModel(
+                id: UUID(), name: modelName, path: snapshotDir,
+                type: .mlx, format: "MLX", sizeInBytes: Int(size),
+                runtime: .mlx, size: size,
+                parameters: extractParameters(from: modelName),
+                quantization: extractQuantization(from: modelName)
+            )
+
+            availableModels.append(model)
+            print("✅ Discovered MLX model: \(modelName)")
+        }
+    }
+
+    private func discoverDirectModels(at mlxPath: URL) throws {
+        let directModels = try FileManager.default.contentsOfDirectory(
+            at: mlxPath, includingPropertiesForKeys: [.isDirectoryKey]
+        )
+        for modelDir in directModels {
+            guard !modelDir.lastPathComponent.hasPrefix("."),
+                  modelDir.lastPathComponent != "hub" else { continue }
+
+            let configPath = modelDir.appendingPathComponent("config.json")
+            guard FileManager.default.fileExists(atPath: configPath.path) else { continue }
+
+            let modelName = modelDir.lastPathComponent
+            let size = calculateDirectorySize(modelDir)
+
+            let model = LocalModel(
+                id: UUID(), name: modelName, path: modelDir,
+                type: .mlx, format: "MLX", sizeInBytes: Int(size),
+                runtime: .mlx, size: size,
+                parameters: extractParameters(from: modelName),
+                quantization: extractQuantization(from: modelName)
+            )
+
+            availableModels.append(model)
+            print("✅ Discovered MLX model: \(modelName)")
+        }
+    }
+
+    private func isValidMLXModelDirectory(_ dir: URL) -> Bool {
+        let configPath = dir.appendingPathComponent("config.json")
+        guard FileManager.default.fileExists(atPath: configPath.path) else { return false }
+
+        return FileManager.default.fileExists(atPath: dir.appendingPathComponent("weights.safetensors").path) ||
+            FileManager.default.fileExists(atPath: dir.appendingPathComponent("model.safetensors").path) ||
+            FileManager.default.fileExists(atPath: dir.appendingPathComponent("tokenizer.json").path)
+    }
+    #endif
 
     /// Extract friendly model name from HuggingFace Hub directory name
     private func extractModelName(from dirName: String) -> String {
