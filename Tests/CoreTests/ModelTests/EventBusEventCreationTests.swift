@@ -4,7 +4,7 @@
 // Mirrors types in Shared/Core/EventBus/EventBusEvents.swift.
 // See also: EventBusEventExtendedTests.swift (Learning, Memory,
 // Verification, Navigation, Component, Lifecycle) and
-// EventBusEventCrossTests.swift (cross-event ID + category mapping).
+// EventBusCrossCuttingTests.swift (cross-event ID + category mapping).
 import XCTest
 
 final class EventBusEventCreationTests: XCTestCase {
