@@ -13,53 +13,26 @@ private enum TDCodeLanguage: String, Codable, Sendable, CaseIterable {
     case html, css, sql, bash, ruby, php, scala, haskell, elixir, clojure
 
     var displayName: String {
-        switch self {
-        case .swift: "Swift"
-        case .python: "Python"
-        case .javascript: "JavaScript"
-        case .typescript: "TypeScript"
-        case .java: "Java"
-        case .kotlin: "Kotlin"
-        case .rust: "Rust"
-        case .go: "Go"
-        case .cpp: "C++"
-        case .csharp: "C#"
-        case .html: "HTML"
-        case .css: "CSS"
-        case .sql: "SQL"
-        case .bash: "Bash"
-        case .ruby: "Ruby"
-        case .php: "PHP"
-        case .scala: "Scala"
-        case .haskell: "Haskell"
-        case .elixir: "Elixir"
-        case .clojure: "Clojure"
-        }
+        let names: [TDCodeLanguage: String] = [
+            .swift: "Swift", .python: "Python", .javascript: "JavaScript",
+            .typescript: "TypeScript", .java: "Java", .kotlin: "Kotlin",
+            .rust: "Rust", .go: "Go", .cpp: "C++", .csharp: "C#",
+            .html: "HTML", .css: "CSS", .sql: "SQL", .bash: "Bash",
+            .ruby: "Ruby", .php: "PHP", .scala: "Scala", .haskell: "Haskell",
+            .elixir: "Elixir", .clojure: "Clojure"
+        ]
+        return names[self]!
     }
 
     var fileExtension: String {
-        switch self {
-        case .swift: "swift"
-        case .python: "py"
-        case .javascript: "js"
-        case .typescript: "ts"
-        case .java: "java"
-        case .kotlin: "kt"
-        case .rust: "rs"
-        case .go: "go"
-        case .cpp: "cpp"
-        case .csharp: "cs"
-        case .html: "html"
-        case .css: "css"
-        case .sql: "sql"
-        case .bash: "sh"
-        case .ruby: "rb"
-        case .php: "php"
-        case .scala: "scala"
-        case .haskell: "hs"
-        case .elixir: "ex"
-        case .clojure: "clj"
-        }
+        let exts: [TDCodeLanguage: String] = [
+            .swift: "swift", .python: "py", .javascript: "js", .typescript: "ts",
+            .java: "java", .kotlin: "kt", .rust: "rs", .go: "go",
+            .cpp: "cpp", .csharp: "cs", .html: "html", .css: "css",
+            .sql: "sql", .bash: "sh", .ruby: "rb", .php: "php",
+            .scala: "scala", .haskell: "hs", .elixir: "ex", .clojure: "clj"
+        ]
+        return exts[self]!
     }
 }
 
