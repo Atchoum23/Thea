@@ -260,12 +260,12 @@ packages:
   # Provides: MLX, MLXNN, MLXOptimizers, MLXRandom
   mlx-swift:
     url: https://github.com/ml-explore/mlx-swift
-    from: 0.21.0
+    from: 0.30.3
   # MLX LM for LLM/VLM implementations with HuggingFace Hub integration
   # Provides: MLXLLM, MLXVLM, MLXLMCommon, MLXEmbedders
   mlx-swift-lm:
     url: https://github.com/ml-explore/mlx-swift-lm
-    branch: main
+    from: 2.30.3
   # MLX Audio for on-device TTS (Soprano) and STT (GLM-ASR-Nano)
   # Provides: MLXAudioTTS, MLXAudioSTT, MLXAudioCore
   mlx-audio-swift:
@@ -445,6 +445,9 @@ targets:
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         MACOSX_DEPLOYMENT_TARGET: "26.0"
         COMBINE_HIDPI_IMAGES: YES
+        # Build for Apple Silicon only (MLX requires arm64, Float16 not available on x86_64)
+        ARCHS: arm64
+        ONLY_ACTIVE_ARCH: YES
 
         # Hardened Runtime (required for notarization)
         ENABLE_HARDENED_RUNTIME: YES
