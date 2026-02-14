@@ -3152,7 +3152,6 @@
 		2682FF17F727492A04AEED50 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				3B9281D1B4A5A4B3FFC83690 /* Clipboard */,
 				57DDD00D5D10DC688AB0BA2A /* Components */,
 				914E665F0A59BB7F6FF0E23D /* Cowork */,
 				9CFD329EFE978EC2EFFA9DD9 /* Errors */,
@@ -3432,13 +3431,6 @@
 				77A0E6521036FC1C3978A7EA /* AutonomousAgentV3.swift */,
 			);
 			path = AgentMode;
-			sourceTree = "<group>";
-		};
-		3B9281D1B4A5A4B3FFC83690 /* Clipboard */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Clipboard;
 			sourceTree = "<group>";
 		};
 		3EAA4BA862217F50E3BD25D6 /* Code */ = {
