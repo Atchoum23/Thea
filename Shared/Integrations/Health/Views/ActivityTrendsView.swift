@@ -729,7 +729,7 @@ final class ActivityActivityTrendsViewModel {
 
             insights = buildInsights(todayVal: todayVal, avg: avg, metric: metric, timeRange: timeRange)
             goals = [
-                ActivityGoal(name: "Daily \(metric.displayName)", current: todayVal, target: goalValue ?? 0, unit: metric.unit)
+                ActivityGoal(name: "Daily \(metric.displayName)", current: Int(todayVal), target: Int(goalValue ?? 0), unit: metric.unit)
             ]
 
         } catch {

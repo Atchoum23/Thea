@@ -501,7 +501,7 @@ final class CalendarAssistant {
 
     func getTodayOverview() async -> AssistantCalendarSummary? {
         let status = EKEventStore.authorizationStatus(for: .event)
-        guard status == .fullAccess || status == .authorized else {
+        guard status == .fullAccess else {
             return nil
         }
         let calendar = Calendar.current
@@ -525,7 +525,7 @@ final class CalendarAssistant {
 
     func getUpcomingEvents(hours: Int) async -> [AssistantCalendarEvent] {
         let status = EKEventStore.authorizationStatus(for: .event)
-        guard status == .fullAccess || status == .authorized else { return [] }
+        guard status == .fullAccess else { return [] }
         let now = Date()
         let end = Calendar.current.date(byAdding: .hour, value: hours, to: now)!
         let predicate = eventStore.predicateForEvents(withStart: now, end: end, calendars: nil)
