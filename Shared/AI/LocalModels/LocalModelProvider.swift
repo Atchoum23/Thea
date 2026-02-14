@@ -366,8 +366,11 @@ final class LocalModelManager {
         return config.defaultQuantization
     }
 
-    // MARK: - Model Capability Detection
+}
 
+// MARK: - Model Capability Detection
+
+extension LocalModelManager {
     /// Detect capabilities from model name for richer metadata
     static func detectModelCapabilities(name: String) -> (
         supportsVision: Bool, supportsFunctionCalling: Bool, contextWindow: Int,
@@ -375,39 +378,28 @@ final class LocalModelManager {
     ) {
         let lower = name.lowercased()
 
-        // GPT-OSS: OpenAI open-weight models with tool use and 128K context
         if lower.contains("gpt-oss") || lower.contains("gpt_oss") {
             let params = lower.contains("120b") ? "120B" : lower.contains("20b") ? "20B" : nil
             return (false, true, 128_000, params, "MXFP4")
         }
-
-        // Qwen VL: Vision-language models
         if lower.contains("qwen") && (lower.contains("-vl") || lower.contains("_vl")) {
             return (true, false, 32_768, nil, nil)
         }
-
-        // Gemma: Google open models with function calling
         if lower.contains("gemma") {
             let hasVision = lower.contains("pali") || lower.contains("vl")
             return (hasVision, true, 128_000, nil, nil)
         }
-
-        // Llama: Meta models
         if lower.contains("llama") {
             return (false, true, 128_000, nil, nil)
         }
-
-        // Default: basic text model
         return (false, false, 4096, nil, nil)
     }
 
     /// Calculate total size of a directory
-    private func calculateDirectorySize(_ url: URL) -> Int64 {
+    func calculateDirectorySize(_ url: URL) -> Int64 {
         var totalSize: Int64 = 0
         guard let enumerator = FileManager.default.enumerator(
-            at: url,
-            includingPropertiesForKeys: [.fileSizeKey],
-            options: [.skipsHiddenFiles]
+            at: url, includingPropertiesForKeys: [.fileSizeKey], options: [.skipsHiddenFiles]
         ) else { return 0 }
 
         for case let fileURL as URL in enumerator {
@@ -417,9 +409,12 @@ final class LocalModelManager {
         }
         return totalSize
     }
+}
 
-    private func discoverGGUFModels() async {
-        // Check custom paths first, then common GGUF locations
+// MARK: - GGUF Discovery & Model Loading
+
+extension LocalModelManager {
+    func discoverGGUFModels() async {
         var ggufPaths = customModelPaths
 
         #if os(macOS)
@@ -442,12 +437,8 @@ final class LocalModelManager {
                         let model = LocalModel(
                             id: UUID(),
                             name: fileURL.deletingPathExtension().lastPathComponent,
-                            path: fileURL,
-                            type: .gguf,
-                            format: "GGUF",
-                            sizeInBytes: size,
-                            runtime: .gguf,
-                            size: Int64(size),
+                            path: fileURL, type: .gguf, format: "GGUF",
+                            sizeInBytes: size, runtime: .gguf, size: Int64(size),
                             parameters: config.defaultParameters,
                             quantization: config.defaultQuantization
                         )
@@ -461,49 +452,30 @@ final class LocalModelManager {
         }
     }
 
-    // MARK: - Model Loading
-
     func loadModel(_ model: LocalModel) async throws -> LocalModelInstance {
-        // Check if already loaded
         if let instance = runningModels[model.name] {
             return instance
         }
 
         let instance: LocalModelInstance = switch model.runtime {
-        case .ollama:
-            try await loadOllamaModel(model)
-        case .mlx:
-            try await loadMLXModel(model)
-        case .gguf:
-            try await loadGGUFModel(model)
-        case .coreML:
-            CoreMLModelInstance(model: model)
+        case .ollama: OllamaModelInstance(model: model)
+        case .mlx: MLXModelInstance(model: model)
+        case .gguf: GGUFModelInstance(model: model)
+        case .coreML: CoreMLModelInstance(model: model)
         }
 
         runningModels[model.name] = instance
-
         return instance
-    }
-
-    private func loadOllamaModel(_ model: LocalModel) async throws -> LocalModelInstance {
-        // Ollama models are loaded on-demand
-        OllamaModelInstance(model: model)
-    }
-
-    private func loadMLXModel(_ model: LocalModel) async throws -> LocalModelInstance {
-        MLXModelInstance(model: model)
-    }
-
-    private func loadGGUFModel(_ model: LocalModel) async throws -> LocalModelInstance {
-        GGUFModelInstance(model: model)
     }
 
     func unloadModel(_ modelName: String) {
         runningModels.removeValue(forKey: modelName)
     }
+}
 
-    // MARK: - Model Installation
+// MARK: - Model Installation
 
+extension LocalModelManager {
     func installOllamaModel(_ modelName: String) async throws {
         guard isOllamaInstalled else {
             throw LocalModelError.runtimeNotInstalled("Ollama")
@@ -521,10 +493,8 @@ final class LocalModelManager {
                 throw LocalModelError.installationFailed
             }
 
-            // Refresh model list
             await discoverModels()
         #else
-            // iOS: Ollama requires macOS - not available on iOS
             throw LocalModelError.runtimeNotInstalled("Ollama")
         #endif
     }
@@ -535,20 +505,16 @@ final class LocalModelManager {
                 .appendingPathComponent(config.ggufModelsDirectory)
                 .appendingPathComponent("\(name).gguf")
 
-            // Create directory if needed
             try FileManager.default.createDirectory(
                 at: destinationPath.deletingLastPathComponent(),
                 withIntermediateDirectories: true
             )
 
-            // Download file
             let (localURL, _) = try await URLSession.shared.download(from: url)
             try FileManager.default.moveItem(at: localURL, to: destinationPath)
 
-            // Refresh model list
             await discoverModels()
         #else
-            // iOS: Home directory access not available on iOS
             throw LocalModelError.notImplemented
         #endif
     }
