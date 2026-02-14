@@ -37,6 +37,11 @@ public actor CrossDeviceService {
 
     private var subscriptions: [CKSubscription.ID: CKSubscription] = [:]
 
+    // MARK: - Transport
+
+    /// Active transport for direct device communication (non-CloudKit paths)
+    private(set) var activeTransport: TheaTransport = .cloudKit
+
     // MARK: - Initialization
 
     private init() {
@@ -81,6 +86,10 @@ public actor CrossDeviceService {
 
         isInitialized = true
         syncEnabled = configuration.autoSyncEnabled
+
+        // Start smart transport monitoring for optimal device-to-device sync
+        await SmartTransportManager.shared.startMonitoring()
+        activeTransport = await SmartTransportManager.shared.probeAndSelect()
     }
 
     private func createZoneIfNeeded() async throws {
@@ -240,6 +249,11 @@ public actor CrossDeviceService {
     }
 
     // MARK: - Status
+
+    /// Get the current transport summary for UI display
+    public func getTransportSummary() async -> [(transport: TheaTransport, available: Bool, latency: Double?, active: Bool)] {
+        await SmartTransportManager.shared.transportSummary()
+    }
 
     /// Get sync status
     public func getStatus() async -> SyncStatus {

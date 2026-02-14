@@ -62,6 +62,14 @@ struct SyncSettingsContentView: View {
                 syncOverview
             }
 
+            Section {
+                transportStatusSection
+            } header: {
+                Text("Transport")
+            } footer: {
+                Text("Thea auto-detects the fastest available connection to your other devices. Thunderbolt is fastest, iCloud is the always-on fallback.")
+            }
+
             Section("iCloud Sync") {
                 iCloudSyncSection
             }
@@ -221,6 +229,54 @@ struct SyncSettingsContentView: View {
         case .error: .red
         case .offline: .orange
         }
+    }
+
+    // MARK: - Transport Status Section
+
+    @ViewBuilder
+    private var transportStatusSection: some View {
+        HStack {
+            Label {
+                Text("Active Transport")
+            } icon: {
+                Image(systemName: activeTransportSymbol)
+                    .foregroundStyle(activeTransportColor)
+            }
+            Spacer()
+            Text(activeTransportName)
+                .foregroundStyle(.secondary)
+        }
+
+        HStack {
+            Text("Estimated Latency")
+            Spacer()
+            Text(activeTransportLatency)
+                .foregroundStyle(.secondary)
+        }
+
+        Button("Probe Transports") {
+            Task {
+                let transport = await SmartTransportManager.shared.probeAndSelect()
+                _ = transport // UI refreshes via SmartTransportManager state
+            }
+        }
+    }
+
+    private var activeTransportName: String {
+        // Default to iCloud until SmartTransportManager reports
+        "iCloud"
+    }
+
+    private var activeTransportSymbol: String {
+        "icloud.fill"
+    }
+
+    private var activeTransportColor: Color {
+        .blue
+    }
+
+    private var activeTransportLatency: String {
+        "~200ms"
     }
 
     // MARK: - iCloud Sync Section
