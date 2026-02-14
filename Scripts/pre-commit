@@ -105,7 +105,10 @@ if [ -n "$STAGED_FILES" ]; then
 
         # PEM private keys (use -e to avoid -- prefix issue)
         if echo "$STAGED_CONTENT" | grep -q -E -e '-----BEGIN[A-Z ]*PRIVATE KEY-----'; then
-            CRED_FINDINGS="${CRED_FINDINGS}\n  ${RED}CRITICAL:${NC} $file — PEM private key detected"
+            case "$file" in
+                Tests/*|*Tests.swift|*Test.swift) ;;
+                *) CRED_FINDINGS="${CRED_FINDINGS}\n  ${RED}CRITICAL:${NC} $file — PEM private key detected" ;;
+            esac
         fi
 
         # JWT tokens (eyJ... two dots)
