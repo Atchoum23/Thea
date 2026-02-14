@@ -144,33 +144,178 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
 
     // MARK: - API Methods
 
-    public func searchUSDA(query _: String, pageSize _: Int = 20) async throws -> [FoodItem] {
-        // In production, would make actual API call
-        // For now, return mock data
-        [
-            FoodItem(
-                name: "Apple, raw",
-                servingSize: 100,
-                nutrients: NutrientProfile(),
-                source: .usda
-            ),
-            FoodItem(
-                name: "Banana, raw",
-                servingSize: 100,
-                nutrients: NutrientProfile(),
+    public func searchUSDA(query: String, pageSize: Int = 20) async throws -> [FoodItem] {
+        let params = [
+            "query": query,
+            "pageSize": String(pageSize),
+            "dataType": "Foundation,SR Legacy"
+        ]
+        let data = try await makeRequest(endpoint: "/foods/search", parameters: params)
+
+        struct USDASearchResponse: Decodable {
+            let foods: [USDAFoodResult]?
+        }
+        struct USDAFoodResult: Decodable {
+            let fdcId: Int
+            let description: String
+            let brandName: String?
+            let foodNutrients: [USDANutrient]?
+            let servingSize: Double?
+        }
+        struct USDANutrient: Decodable {
+            let nutrientId: Int?
+            let nutrientName: String?
+            let value: Double?
+            let unitName: String?
+        }
+
+        let response = try JSONDecoder().decode(USDASearchResponse.self, from: data)
+        return (response.foods ?? []).map { food in
+            var profile = NutrientProfile()
+            for nutrient in food.foodNutrients ?? [] {
+                let val = nutrient.value ?? 0
+                switch nutrient.nutrientId {
+                case 1008: profile.calories = val
+                case 1003: profile.protein = val
+                case 1005: profile.carbohydrates = val
+                case 1079: profile.fiber = val
+                case 2000: profile.sugars = val
+                case 1004: profile.totalFat = val
+                case 1258: profile.saturatedFat = val
+                case 1257: profile.transFat = val
+                case 1292: profile.monounsaturatedFat = val
+                case 1293: profile.polyunsaturatedFat = val
+                case 1106: profile.vitaminA = val
+                case 1114: profile.vitaminD = val
+                case 1109: profile.vitaminE = val
+                case 1185: profile.vitaminK = val
+                case 1162: profile.vitaminC = val
+                case 1165: profile.thiamin = val
+                case 1166: profile.riboflavin = val
+                case 1167: profile.niacin = val
+                case 1170: profile.vitaminB6 = val
+                case 1177: profile.folate = val
+                case 1178: profile.vitaminB12 = val
+                case 1087: profile.calcium = val
+                case 1089: profile.iron = val
+                case 1090: profile.magnesium = val
+                case 1091: profile.phosphorus = val
+                case 1092: profile.potassium = val
+                case 1093: profile.sodium = val
+                case 1095: profile.zinc = val
+                case 1098: profile.copper = val
+                case 1101: profile.manganese = val
+                case 1103: profile.selenium = val
+                case 1253: profile.cholesterol = val
+                default: break
+                }
+            }
+            return FoodItem(
+                name: food.description,
+                brand: food.brandName,
+                servingSize: food.servingSize ?? 100,
+                nutrients: profile,
                 source: .usda
             )
+        }
+    }
+
+    public func fetchFoodDetails(fdcID: String) async throws -> FoodItem {
+        let data = try await makeRequest(endpoint: "/food/\(fdcID)")
+
+        struct USDAFoodDetail: Decodable {
+            let fdcId: Int
+            let description: String
+            let brandName: String?
+            let foodNutrients: [USDADetailNutrient]?
+            let servingSize: Double?
+        }
+        struct USDADetailNutrient: Decodable {
+            let nutrient: USDANutrientInfo?
+            let amount: Double?
+        }
+        struct USDANutrientInfo: Decodable {
+            let id: Int
+            let name: String?
+            let unitName: String?
+        }
+
+        let detail = try JSONDecoder().decode(USDAFoodDetail.self, from: data)
+        var profile = NutrientProfile()
+        for nutrient in detail.foodNutrients ?? [] {
+            let val = nutrient.amount ?? 0
+            switch nutrient.nutrient?.id {
+            case 1008: profile.calories = val
+            case 1003: profile.protein = val
+            case 1005: profile.carbohydrates = val
+            case 1079: profile.fiber = val
+            case 2000: profile.sugars = val
+            case 1004: profile.totalFat = val
+            case 1258: profile.saturatedFat = val
+            case 1162: profile.vitaminC = val
+            case 1087: profile.calcium = val
+            case 1089: profile.iron = val
+            case 1093: profile.sodium = val
+            case 1092: profile.potassium = val
+            default: break
+            }
+        }
+        return FoodItem(
+            name: detail.description,
+            brand: detail.brandName,
+            servingSize: detail.servingSize ?? 100,
+            nutrients: profile,
+            source: .usda
+        )
+    }
+
+    public func fetchBrandedFood(barcode: String) async throws -> FoodItem? {
+        let params = [
+            "query": barcode,
+            "dataType": "Branded"
         ]
-    }
+        let data = try await makeRequest(endpoint: "/foods/search", parameters: params)
 
-    public func fetchFoodDetails(fdcID _: String) async throws -> FoodItem {
-        // Would make API call: GET /v1/food/{fdcID}
-        throw NutritionError.foodNotFound
-    }
+        struct USDASearchResponse: Decodable {
+            let foods: [USDABrandedResult]?
+        }
+        struct USDABrandedResult: Decodable {
+            let fdcId: Int
+            let description: String
+            let brandName: String?
+            let gtinUpc: String?
+            let foodNutrients: [USDABrandedNutrient]?
+            let servingSize: Double?
+        }
+        struct USDABrandedNutrient: Decodable {
+            let nutrientId: Int?
+            let value: Double?
+        }
 
-    public func fetchBrandedFood(barcode _: String) async throws -> FoodItem? {
-        // Would query: GET /v1/foods/search?query=gtinUpc:{barcode}
-        nil
+        let response = try JSONDecoder().decode(USDASearchResponse.self, from: data)
+        guard let match = response.foods?.first(where: { $0.gtinUpc == barcode }) ?? response.foods?.first else {
+            return nil
+        }
+        var profile = NutrientProfile()
+        for nutrient in match.foodNutrients ?? [] {
+            let val = nutrient.value ?? 0
+            switch nutrient.nutrientId {
+            case 1008: profile.calories = val
+            case 1003: profile.protein = val
+            case 1005: profile.carbohydrates = val
+            case 1004: profile.totalFat = val
+            case 1093: profile.sodium = val
+            default: break
+            }
+        }
+        return FoodItem(
+            name: match.description,
+            brand: match.brandName,
+            servingSize: match.servingSize ?? 100,
+            barcode: match.gtinUpc,
+            nutrients: profile,
+            source: .usda
+        )
     }
 
     // MARK: - Private Helpers
@@ -178,9 +323,8 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
     /// Make a secure API request with API key in header (not URL parameters)
     /// Security: API keys in URL parameters are logged in server access logs and browser history
     private func makeRequest(endpoint: String, parameters: [String: String] = [:]) async throws -> Data {
-        guard let apiKey else {
-            throw NutritionError.usdaAPIError("API key not configured")
-        }
+        // Use provided API key, or fall back to DEMO_KEY (limited: 30 req/hour, 50/day)
+        let effectiveKey = apiKey ?? "DEMO_KEY"
 
         var components = URLComponents(string: "\(baseURL)\(endpoint)")
         // Only add non-sensitive query parameters
@@ -192,7 +336,7 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
 
         // Create request with API key in header (more secure than URL parameter)
         var request = URLRequest(url: url)
-        request.setValue(apiKey, forHTTPHeaderField: "X-Api-Key")
+        request.setValue(effectiveKey, forHTTPHeaderField: "X-Api-Key")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         let (data, response) = try await URLSession.shared.data(for: request)
