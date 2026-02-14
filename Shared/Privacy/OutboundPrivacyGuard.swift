@@ -1,12 +1,54 @@
 // OutboundPrivacyGuard.swift
-// Thea — System-Wide Outbound Privacy Layer
+// Thea — System-Wide Outbound Privacy Firewall
 //
 // Every piece of data leaving the device passes through this guard.
+// Default-deny in strict mode: only registered channels can transmit data.
 // Delegates PII detection to PIISanitizer, adds credential/secret/topic checks.
 // Maintains a full audit log of all redactions and blocks.
 
 import Foundation
 import OSLog
+
+// MARK: - Firewall Mode
+
+/// Controls how unregistered channels are handled
+enum FirewallMode: String, Codable, Sendable {
+    case strict     // Default-deny: only registered+allowed channels pass
+    case standard   // Sanitize known channels, pass unknown with default policy
+    case permissive // Log only, never block (debugging)
+}
+
+/// Categories of outbound data for fine-grained channel permissions
+enum OutboundDataType: String, CaseIterable, Sendable, Codable {
+    case text
+    case structuredData   // JSON, plist
+    case credentials      // API keys, tokens, passwords
+    case personalInfo     // PII: name, email, phone, address
+    case healthData       // HealthKit data
+    case financialData    // Bank, tax, investment data
+    case locationData     // GPS coordinates, addresses
+    case deviceInfo       // Hardware IDs, OS version
+    case codeContent      // Source code, configs
+}
+
+/// Registration for a specific outbound channel
+struct ChannelRegistration: Sendable {
+    let channelId: String
+    let description: String
+    let policy: any PrivacyPolicy
+    let allowedDataTypes: Set<OutboundDataType>
+    let registeredAt: Date
+    let registeredBy: String
+}
+
+/// Finding from a security scan (used by pre-commit hook integration)
+struct SecurityFinding: Sendable {
+    enum Severity: String, Sendable { case critical, warning, info }
+    let severity: Severity
+    let file: String
+    let description: String
+    let recommendation: String
+}
 
 // MARK: - Outbound Privacy Guard
 
@@ -20,7 +62,13 @@ actor OutboundPrivacyGuard {
     /// Whether the guard is active (kill switch)
     var isEnabled = true
 
-    /// Default policies per channel type
+    /// Firewall operating mode (default: strict = default-deny)
+    var mode: FirewallMode = .strict
+
+    /// Registered outbound channels with allowed data types
+    private var registeredChannels: [String: ChannelRegistration] = [:]
+
+    /// Legacy fallback policies for standard mode
     private var channelPolicies: [String: any PrivacyPolicy] = [
         "cloud_api": CloudAPIPolicy(),
         "messaging": MessagingPolicy(),
@@ -33,18 +81,87 @@ actor OutboundPrivacyGuard {
     private var auditLog: [PrivacyAuditEntry] = []
     private let maxAuditEntries = 5000
 
-    private init() {}
+    private init() {
+        // Register default channels inline (cannot call actor-isolated methods from init)
+        let defaults: [(String, String, any PrivacyPolicy, Set<OutboundDataType>)] = [
+            ("cloud_api", "AI model API calls", CloudAPIPolicy(), [.text, .codeContent, .structuredData]),
+            ("messaging", "Messaging services", MessagingPolicy(), [.text]),
+            ("mcp", "MCP tool calls", MCPPolicy(), [.text, .structuredData, .codeContent]),
+            ("web_api", "Web API calls", WebAPIPolicy(), [.text, .structuredData]),
+            ("moltbook", "Moltbook discussions", MoltbookPolicy(), [.text]),
+            ("cloudkit_sync", "iCloud sync", CloudAPIPolicy(), [.text, .structuredData, .deviceInfo]),
+            ("health_ai", "Health data to AI", CloudAPIPolicy(), [.text, .healthData])
+        ]
+        for (id, desc, policy, types) in defaults {
+            registeredChannels[id] = ChannelRegistration(
+                channelId: id, description: desc, policy: policy,
+                allowedDataTypes: types, registeredAt: Date(), registeredBy: "OutboundPrivacyGuard"
+            )
+        }
+    }
+
+    // MARK: - Channel Registration
+
+    /// Register a channel for outbound communication
+    func registerChannel(
+        id: String,
+        description: String,
+        policy: any PrivacyPolicy,
+        allowedDataTypes: Set<OutboundDataType>,
+        registeredBy: String
+    ) {
+        registeredChannels[id] = ChannelRegistration(
+            channelId: id,
+            description: description,
+            policy: policy,
+            allowedDataTypes: allowedDataTypes,
+            registeredAt: Date(),
+            registeredBy: registeredBy
+        )
+    }
+
+    /// Get all registered channel IDs
+    func registeredChannelIds() -> [String] {
+        Array(registeredChannels.keys.sorted())
+    }
 
     // MARK: - Public API
 
     /// Sanitize content for a given channel.
-    /// Returns `.clean`, `.redacted`, or `.blocked`.
+    /// In strict mode, unregistered channels are blocked.
     func sanitize(_ content: String, channel: String) async -> SanitizationOutcome {
         guard isEnabled else {
             return .clean(content)
         }
 
-        let policy = channelPolicies[channel] ?? CloudAPIPolicy()
+        // In strict mode, channel must be registered
+        let registration = registeredChannels[channel]
+        if mode == .strict && registration == nil {
+            let entry = PrivacyAuditEntry(
+                id: UUID(), timestamp: Date(), channel: channel, policyName: "FIREWALL",
+                outcome: .blocked, redactionCount: 0,
+                originalLength: content.count, sanitizedLength: 0
+            )
+            appendAuditEntry(entry)
+            return .blocked(reason: "Channel '\(channel)' is not registered (strict firewall mode)")
+        }
+
+        // Check content against allowed data types (strict mode)
+        if mode == .strict, let reg = registration {
+            let detectedTypes = classifyContent(content)
+            let disallowed = detectedTypes.subtracting(reg.allowedDataTypes)
+            if !disallowed.isEmpty {
+                let entry = PrivacyAuditEntry(
+                    id: UUID(), timestamp: Date(), channel: channel, policyName: reg.policy.name,
+                    outcome: .blocked, redactionCount: 0,
+                    originalLength: content.count, sanitizedLength: 0
+                )
+                appendAuditEntry(entry)
+                return .blocked(reason: "Disallowed data types for \(channel): \(disallowed.map(\.rawValue).joined(separator: ", "))")
+            }
+        }
+
+        let policy = registration?.policy ?? channelPolicies[channel] ?? CloudAPIPolicy()
         let outcome = await applySanitization(content: content, policy: policy)
 
         // Audit
@@ -333,6 +450,81 @@ actor OutboundPrivacyGuard {
         }
 
         return LayerResult(text: result, redactions: redactions)
+    }
+
+    // MARK: - Content Classification
+
+    /// Classify content to determine what data types it contains
+    func classifyContent(_ content: String) -> Set<OutboundDataType> {
+        var types: Set<OutboundDataType> = [.text]
+
+        // Credentials
+        let credentialPatterns = [
+            "sk-[a-zA-Z0-9]{20,}", "ghp_[a-zA-Z0-9]{36}", "AKIA[0-9A-Z]{16}",
+            "-----BEGIN[A-Z ]*PRIVATE KEY-----",
+            "(?i)(api[_-]?key|token|secret|password|bearer)\\s*[:=]\\s*['\"]?[A-Za-z0-9+/=_-]{16,}"
+        ]
+        if matchesAny(content, patterns: credentialPatterns) { types.insert(.credentials) }
+
+        // Health data
+        let healthPatterns = ["(?i)(blood.?pressure|heart.?rate|bpm|glucose|cholesterol|bmi|steps|sleep.?duration|health.?kit|HKQuantity)"]
+        if matchesAny(content, patterns: healthPatterns) { types.insert(.healthData) }
+
+        // Financial data
+        let financePatterns = ["(?i)(iban|swift|bic|account.?number|routing|tax.?id|ssn|social.?security|credit.?card|\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b)"]
+        if matchesAny(content, patterns: financePatterns) { types.insert(.financialData) }
+
+        // Location data
+        let locationPatterns = ["(?i)(latitude|longitude|gps|geoloc)"]
+        if matchesAny(content, patterns: locationPatterns) { types.insert(.locationData) }
+
+        // Device info
+        let devicePatterns = ["(?i)(serial.?number|udid|device.?id|mac.?address|[0-9a-f]{2}(:[0-9a-f]{2}){5})"]
+        if matchesAny(content, patterns: devicePatterns) { types.insert(.deviceInfo) }
+
+        // Code content
+        let codePatterns = ["(?m)^(func |class |struct |import |let |var |if |for |while |switch |protocol |extension )"]
+        if matchesAny(content, patterns: codePatterns) { types.insert(.codeContent) }
+
+        // Structured data
+        if content.contains("{") && content.contains("}") && content.contains("\"") {
+            types.insert(.structuredData)
+        }
+
+        return types
+    }
+
+    private func matchesAny(_ text: String, patterns: [String]) -> Bool {
+        let range = NSRange(text.startIndex..<text.endIndex, in: text)
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+            if regex.firstMatch(in: text, range: range) != nil { return true }
+        }
+        return false
+    }
+
+    // MARK: - Pre-Commit Scan
+
+    /// Scan content for credentials/secrets (used by git pre-commit hook integration)
+    func preCommitScan(_ content: String, filename: String) -> [SecurityFinding] {
+        var findings: [SecurityFinding] = []
+        let types = classifyContent(content)
+
+        if types.contains(.credentials) {
+            findings.append(SecurityFinding(
+                severity: .critical, file: filename,
+                description: "Potential credentials detected",
+                recommendation: "Move to Keychain or .env file"
+            ))
+        }
+        if types.contains(.personalInfo) {
+            findings.append(SecurityFinding(
+                severity: .warning, file: filename,
+                description: "PII detected",
+                recommendation: "Ensure this is test data, not real personal information"
+            ))
+        }
+        return findings
     }
 
     // MARK: - Audit Log Management
