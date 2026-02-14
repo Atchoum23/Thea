@@ -680,7 +680,7 @@ final class SleepQualityViewModel {
                     efficiency: efficiency,
                     sleepLatency: record.stages.first?.stage == .awake ? record.stages.first!.durationMinutes : 0,
                     interruptions: max(0, interruptions - 1),
-                    restfulness: record.quality.score * 1.05,
+                    restfulness: Double(record.quality.score) * 1.05,
                     stages: stages,
                     timeline: timeline,
                     factors: []
