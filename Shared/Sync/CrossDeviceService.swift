@@ -39,10 +39,24 @@ public actor CrossDeviceService {
     // MARK: - Initialization
 
     private init() {
-        container = CKContainer.default()
+        container = Self.createSafeContainer()
         privateDatabase = container.privateCloudDatabase
         sharedDatabase = container.sharedCloudDatabase
         configuration = CrossDeviceSyncConfiguration.load()
+    }
+
+    /// Create CloudKit container with entitlements validation
+    private static func createSafeContainer() -> CKContainer {
+        let id = "iCloud.app.theathe"
+        if let containers = Bundle.main.object(
+            forInfoDictionaryKey: "com.apple.developer.icloud-container-identifiers"
+        ) as? [String],
+            containers.contains(id)
+        {
+            return CKContainer(identifier: id)
+        }
+        // Fallback for testing/CI environments
+        return CKContainer.default()
     }
 
     // MARK: - Setup
