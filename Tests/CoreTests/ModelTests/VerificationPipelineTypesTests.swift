@@ -178,7 +178,7 @@ final class VerificationPipelineTypesTests: XCTestCase {
             ConfidenceSource(
                 id: UUID(), type: .webVerification, name: "Web",
                 confidence: 0.7, weight: 0.25, details: "", verified: true
-            ),
+            )
         ]
         let result = calculateOverallConfidence(from: sources)
         // (0.9 * 0.30 + 0.7 * 0.25) / (0.30 + 0.25) = (0.27 + 0.175) / 0.55 = 0.809
@@ -210,7 +210,7 @@ final class VerificationPipelineTypesTests: XCTestCase {
     func testConsensusAllAgree() {
         let responses = [
             ModelResponse(modelId: "m1", agrees: true, accuracy: 0.9, quality: 0.9),
-            ModelResponse(modelId: "m2", agrees: true, accuracy: 0.8, quality: 0.85),
+            ModelResponse(modelId: "m2", agrees: true, accuracy: 0.8, quality: 0.85)
         ]
         let consensus = calculateConsensus(responses: responses)
         // agreement=1.0, avgAccuracy=0.85, avgQuality=0.875
@@ -221,7 +221,7 @@ final class VerificationPipelineTypesTests: XCTestCase {
     func testConsensusNoneAgree() {
         let responses = [
             ModelResponse(modelId: "m1", agrees: false, accuracy: 0.3, quality: 0.4),
-            ModelResponse(modelId: "m2", agrees: false, accuracy: 0.2, quality: 0.3),
+            ModelResponse(modelId: "m2", agrees: false, accuracy: 0.2, quality: 0.3)
         ]
         let consensus = calculateConsensus(responses: responses)
         // agreement=0.0, avgAccuracy=0.25, avgQuality=0.35
@@ -233,7 +233,7 @@ final class VerificationPipelineTypesTests: XCTestCase {
         let responses = [
             ModelResponse(modelId: "m1", agrees: true, accuracy: 0.9, quality: 0.8),
             ModelResponse(modelId: "m2", agrees: false, accuracy: 0.5, quality: 0.6),
-            ModelResponse(modelId: "m3", agrees: true, accuracy: 0.7, quality: 0.7),
+            ModelResponse(modelId: "m3", agrees: true, accuracy: 0.7, quality: 0.7)
         ]
         let consensus = calculateConsensus(responses: responses)
         // agreement=0.667, avgAccuracy=0.7, avgQuality=0.7
@@ -376,9 +376,13 @@ final class VerificationPipelineTypesTests: XCTestCase {
 
     func generatePatternKey(taskType: String, response: String) -> String {
         let length: String
-        if response.count < 200 { length = "short" }
-        else if response.count < 1000 { length = "medium" }
-        else { length = "long" }
+        if response.count < 200 {
+            length = "short"
+        } else if response.count < 1000 {
+            length = "medium"
+        } else {
+            length = "long"
+        }
         let hasCode = response.contains("```")
         return "\(taskType)_\(length)_\(hasCode)"
     }

@@ -153,6 +153,7 @@
                     Image(systemName: "sparkles")
                         .font(.theaTitle2)
                         .foregroundStyle(Color.theaPrimaryDefault)
+                        .accessibilityHidden(true)
 
                     // Text field
                     TextField("Ask THEA anything...", text: $inputText)
@@ -173,6 +174,7 @@
                     }
                     .buttonStyle(.plain)
                     .help("Capture screenshot")
+                    .accessibilityLabel("Capture screenshot")
 
                     // Send button
                     Button {
@@ -184,6 +186,7 @@
                     }
                     .buttonStyle(.plain)
                     .disabled(inputText.isEmpty)
+                    .accessibilityLabel("Send message")
                 }
                 .padding(16)
 
@@ -206,6 +209,7 @@
                                 .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Remove screenshot")
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)

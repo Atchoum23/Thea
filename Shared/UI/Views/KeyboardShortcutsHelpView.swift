@@ -131,6 +131,7 @@ struct KeyboardShortcutsHelpView: View {
                 Image(systemName: "keyboard")
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundStyle(TheaBrandColors.spiralGradient)
+                    .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Keyboard Shortcuts")
@@ -168,6 +169,7 @@ struct KeyboardShortcutsHelpView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 14))
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
 
             TextField("Search shortcuts...", text: $searchText)
                 .textFieldStyle(.plain)
@@ -182,6 +184,7 @@ struct KeyboardShortcutsHelpView: View {
                         .foregroundStyle(.tertiary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
             }
         }
         .padding(.horizontal, TheaSpacing.md)
@@ -226,6 +229,7 @@ struct KeyboardShortcutsHelpView: View {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(TheaBrandColors.gold)
                     .frame(width: 20)
+                    .accessibilityHidden(true)
 
                 Text(category.title)
                     .font(.system(size: 14, weight: .semibold))
@@ -308,6 +312,7 @@ struct KeyboardShortcutsHelpView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 40))
                 .foregroundStyle(.tertiary)
+                .accessibilityHidden(true)
 
             Text("No shortcuts found")
                 .font(.headline)

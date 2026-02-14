@@ -321,7 +321,7 @@ final class AIProviderTypesTests: XCTestCase {
     // MARK: - Cloud Provider Fallback Order (mirror ProviderRegistry.swift)
 
     func getCloudProviderFallback(defaultProvider: String?,
-                                   available: Set<String>) -> String? {
+                                  available: Set<String>) -> String? {
         let fallbackOrder = [defaultProvider, "openrouter", "openai", "anthropic"]
             .compactMap { $0 }
 

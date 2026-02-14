@@ -93,7 +93,7 @@ final class OutboundPrivacyGuardTypesTests: XCTestCase {
         ("xoxp-[a-zA-Z0-9\\-]+", "Slack user token"),
         ("Bearer [a-zA-Z0-9_\\-.~+/]+", "Bearer token"),
         ("AKIA[0-9A-Z]{16}", "AWS access key"),
-        ("eyJ[a-zA-Z0-9_\\-]+\\.[a-zA-Z0-9_\\-]+\\.[a-zA-Z0-9_\\-]+", "JWT token"),
+        ("eyJ[a-zA-Z0-9_\\-]+\\.[a-zA-Z0-9_\\-]+\\.[a-zA-Z0-9_\\-]+", "JWT token")
     ]
 
     func detectCredential(in text: String) -> Bool {
@@ -334,7 +334,7 @@ final class OutboundPrivacyGuardTypesTests: XCTestCase {
         let piiPatterns = [
             "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",  // Email
             "\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b",                // Phone (US)
-            "\\b\\d{3}-\\d{2}-\\d{4}\\b",                         // SSN
+            "\\b\\d{3}-\\d{2}-\\d{4}\\b"                          // SSN
         ]
         for pattern in piiPatterns {
             if let regex = try? NSRegularExpression(pattern: pattern),

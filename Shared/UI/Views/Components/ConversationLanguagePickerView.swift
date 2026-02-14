@@ -29,6 +29,7 @@ struct ConversationLanguagePickerView: View {
                         Text("\(lang.flag) \(lang.name)")
                         if current?.code == lang.code {
                             Image(systemName: "checkmark")
+                                .accessibilityHidden(true)
                         }
                     }
                 }
