@@ -636,17 +636,116 @@ public final class PredictiveLifeEngine: ObservableObject {
     }
 
     private func generateAIPredictions() async {
-        // Use LLM to generate more complex predictions
-        // This would integrate with the AI provider system
+        guard let provider = ProviderRegistry.shared.getProvider(id: "openrouter")
+                          ?? ProviderRegistry.shared.getProvider(id: "anthropic")
+                          ?? ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
+            logger.info("No provider available for AI predictions")
+            return
+        }
 
-        // Build context summary for LLM
         let contextSummary = buildContextSummary()
-        _ = buildPatternSummary()
+        let patternSummary = buildPatternSummary()
 
-        // For now, generate heuristic-based predictions
-        // In full implementation, this would call the AI provider
+        let prompt = """
+        Analyze user activity patterns and generate up to 3 actionable predictions. \
+        Respond in JSON array format only.
 
-        logger.debug("AI predictions would be generated from context: \(contextSummary.count) chars")
+        \(contextSummary)
+        \(patternSummary)
+        Current time: \(ISO8601DateFormatter().string(from: Date()))
+
+        Each prediction must have:
+        {"type": "one of: energy_peak|focus_window|break_needed|task_completion|context_switch|\
+        sleep_impact|activity_deficit|nutrition|bottleneck",
+        "title": "Short title",
+        "description": "1-2 sentence explanation",
+        "confidence": 0.0-1.0,
+        "timeframe_hours": 0.5-24,
+        "action": "Suggested action"}
+
+        Respond with ONLY a JSON array of predictions, no other text.
+        """
+
+        let modelId = "openai/gpt-4o-mini"
+        do {
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(prompt),
+                timestamp: Date(),
+                model: modelId
+            )
+
+            var responseText = ""
+            let stream = try await provider.chat(
+                messages: [message],
+                model: modelId,
+                stream: false
+            )
+
+            for try await chunk in stream {
+                if case .delta(let text) = chunk.type {
+                    responseText += text
+                } else if case .complete(let msg) = chunk.type {
+                    responseText = msg.content.textValue
+                }
+            }
+
+            // Parse JSON predictions
+            guard let jsonStart = responseText.firstIndex(of: "["),
+                  let jsonEnd = responseText.lastIndex(of: "]") else {
+                logger.warning("AI predictions response not in expected JSON array format")
+                return
+            }
+
+            let jsonStr = String(responseText[jsonStart...jsonEnd])
+            guard let data = jsonStr.data(using: .utf8) else { return }
+
+            struct AIPrediction: Decodable {
+                let type: String
+                let title: String
+                let description: String
+                let confidence: Double
+                // swiftlint:disable:next identifier_name
+                let timeframe_hours: Double?
+                let action: String?
+            }
+
+            let aiPredictions = try JSONDecoder().decode([AIPrediction].self, from: data)
+
+            for ai in aiPredictions.prefix(3) {
+                let predType = LifePredictionType(rawValue: ai.type) ?? .contextSwitch
+                let hours = ai.timeframe_hours ?? 1.0
+                let prediction = LifePrediction(
+                    type: predType,
+                    title: ai.title,
+                    description: ai.description,
+                    confidence: min(max(ai.confidence, 0.1), 0.95),
+                    timeframe: PredictionTimeframe(horizon: hours * 3600),
+                    relevance: ai.confidence,
+                    actionability: ai.confidence > 0.7 ? .recommended : .informational,
+                    suggestedActions: ai.action.map { action in
+                        [PredictedAction(
+                            title: action,
+                            description: action,
+                            type: .adjust,
+                            automatable: false,
+                            impact: ai.confidence,
+                            effort: "Low"
+                        )]
+                    } ?? [],
+                    basedOn: ["AI analysis of activity patterns"],
+                    createdAt: Date(),
+                    expiresAt: Date().addingTimeInterval(hours * 3600)
+                )
+                addOrUpdatePrediction(prediction)
+            }
+
+            logger.info("Generated \(aiPredictions.count) AI predictions")
+        } catch {
+            logger.warning("AI prediction generation failed: \(error.localizedDescription)")
+        }
     }
 
     private func buildContextSummary() -> String {
