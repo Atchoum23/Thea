@@ -515,7 +515,7 @@ extension LocalModelManager {
 
             await discoverModels()
         #else
-            throw LocalModelError.notImplemented
+            throw LocalModelError.platformNotSupported("Model download requires macOS")
         #endif
     }
 }

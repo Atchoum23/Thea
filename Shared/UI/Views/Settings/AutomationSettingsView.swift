@@ -332,7 +332,7 @@ struct AutomationSettingsView: View {
                 }
 
                 Section {
-                    Text("More workflow templates coming soon!")
+                    Label("Create workflows using @agent in chat", systemImage: "plus.circle")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

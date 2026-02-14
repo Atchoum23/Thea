@@ -118,7 +118,7 @@ enum MigrationStatus {
 enum MigrationError: LocalizedError {
     case manualExportRequired
     case webBasedApp
-    case notImplemented
+    case sourceNotSupported(String)
     case noModelContext
 
     var errorDescription: String? {
@@ -127,8 +127,8 @@ enum MigrationError: LocalizedError {
             "This app requires manual export. Please export your data and import the file."
         case .webBasedApp:
             "This is a web-based app. Migration not supported."
-        case .notImplemented:
-            "Migration for this app is not yet implemented"
+        case let .sourceNotSupported(name):
+            "Migration from \(name) is not yet supported"
         case .noModelContext:
             "Database context not available. Please restart Thea and try again."
         }

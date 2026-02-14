@@ -112,22 +112,79 @@ public struct QuerySuggestionOverlay: View {
         suggestions = Array(unique.sorted { $0.confidence > $1.confidence }.prefix(5))
     }
 
+    @MainActor
     private func fetchIntentPrediction() async -> String? {
-        // Use ProactivityEngine for intent prediction
-        // This would integrate with the existing ProactivityEngine
-        nil // Placeholder - wire to ProactivityEngine.predictNextIntent()
+        // Use BehavioralFingerprint for time-based intent prediction
+        let hour = Calendar.current.component(.hour, from: Date())
+        let weekday = (Calendar.current.component(.weekday, from: Date()) + 5) % 7
+        let fingerprint = BehavioralFingerprint.shared
+        let slots = fingerprint.timeSlots
+        guard weekday < slots.count, hour < slots[weekday].count else { return nil }
+        let slot = slots[weekday][hour]
+        let totalActivity = slot.activityCounts.values.reduce(0, +)
+
+        // Suggest based on time-of-day activity patterns
+        if totalActivity > 5 && slot.dominantActivity != .idle {
+            return "Continue where you left off"
+        }
+        return nil
     }
 
+    @MainActor
     private func fetchContextSuggestions(for conversationId: UUID) async -> [QuerySuggestion] {
-        // Placeholder: wire to conversation context analysis when available
-        _ = conversationId
-        return []
+        // Pull the last few messages from the conversation to derive context
+        guard let conversation = ChatManager.shared.conversations.first(where: { $0.id == conversationId }) else {
+            return []
+        }
+
+        let recentMessages = conversation.messages.suffix(5)
+        guard let lastAssistant = recentMessages.last(where: { $0.role == "assistant" }) else {
+            return []
+        }
+
+        // Generate follow-up suggestions from the last assistant message
+        var contextSuggestions: [QuerySuggestion] = []
+
+        let content = lastAssistant.content.textValue
+        if content.contains("```") {
+            contextSuggestions.append(QuerySuggestion(
+                text: "Explain this code in more detail",
+                source: .contextBased,
+                confidence: 0.75
+            ))
+        }
+        if content.count > 500 {
+            contextSuggestions.append(QuerySuggestion(
+                text: "Summarize the key points",
+                source: .contextBased,
+                confidence: 0.7
+            ))
+        }
+        if recentMessages.count >= 3 {
+            contextSuggestions.append(QuerySuggestion(
+                text: "What are the next steps?",
+                source: .contextBased,
+                confidence: 0.65
+            ))
+        }
+
+        return contextSuggestions
     }
 
+    @MainActor
     private func fetchMemorySuggestions() async -> [QuerySuggestion] {
-        // Get suggestions from MemoryService based on patterns
-        // This would integrate with MemoryService.recall()
-        [] // Placeholder
+        // Get recent entities from PersonalKnowledgeGraph as topic suggestions
+        let recentEntities = await PersonalKnowledgeGraph.shared.searchEntities(query: "")
+            .sorted(by: { $0.lastUpdatedAt > $1.lastUpdatedAt })
+            .prefix(3)
+
+        return recentEntities.map { entity in
+            QuerySuggestion(
+                text: "Tell me more about \(entity.name)",
+                source: .memoryBased,
+                confidence: 0.6
+            )
+        }
     }
 
     private func removeDuplicates(_ suggestions: [QuerySuggestion]) -> [QuerySuggestion] {

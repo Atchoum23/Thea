@@ -27,7 +27,7 @@ struct OllamaModelInstance: LocalModelInstance {
             Task {
                 do {
                     guard let url = URL(string: generateURL) else {
-                        throw LocalModelError.notImplemented
+                        throw LocalModelError.invalidURL(generateURL)
                     }
                     var request = URLRequest(url: url)
                     request.httpMethod = "POST"
@@ -68,7 +68,7 @@ struct OllamaModelInstance: LocalModelInstance {
             Task {
                 do {
                     guard let url = URL(string: chatURL) else {
-                        throw LocalModelError.notImplemented
+                        throw LocalModelError.invalidURL(chatURL)
                     }
                     var request = URLRequest(url: url)
                     request.httpMethod = "POST"
@@ -147,7 +147,7 @@ struct MLXModelInstance: LocalModelInstance {
         #else
         // iOS: MLX requires macOS - not available on iOS
         return AsyncThrowingStream { continuation in
-            continuation.finish(throwing: LocalModelError.notImplemented)
+            continuation.finish(throwing: LocalModelError.platformNotSupported("MLX inference requires macOS"))
         }
         #endif
     }
@@ -159,8 +159,7 @@ struct GGUFModelInstance: LocalModelInstance {
     func generate(prompt _: String, maxTokens _: Int) async throws -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {
-                // GGUF requires llama.cpp or similar runtime
-                continuation.finish(throwing: LocalModelError.notImplemented)
+                continuation.finish(throwing: LocalModelError.runtimeNotAvailable("GGUF (llama.cpp)"))
             }
         }
     }
@@ -234,7 +233,9 @@ enum LocalModelError: LocalizedError {
     case runtimeNotInstalled(String)
     case modelNotFound
     case installationFailed
-    case notImplemented
+    case invalidURL(String)
+    case platformNotSupported(String)
+    case runtimeNotAvailable(String)
 
     var errorDescription: String? {
         switch self {
@@ -244,8 +245,12 @@ enum LocalModelError: LocalizedError {
             "Model not found"
         case .installationFailed:
             "Model installation failed"
-        case .notImplemented:
-            "Feature not yet implemented"
+        case let .invalidURL(url):
+            "Invalid model endpoint URL: \(url)"
+        case let .platformNotSupported(detail):
+            "Not supported on this platform: \(detail)"
+        case let .runtimeNotAvailable(runtime):
+            "\(runtime) runtime is not available — install or enable it to use these models"
         }
     }
 }
