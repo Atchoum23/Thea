@@ -168,6 +168,7 @@ private struct SuggestionRow: View {
                     Image(systemName: "sparkles")
                         .font(.caption2)
                         .foregroundColor(.yellow)
+                        .accessibilityHidden(true)
                 }
             }
             .padding(.horizontal, 12)

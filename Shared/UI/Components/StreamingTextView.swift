@@ -327,6 +327,7 @@ public struct ThinkingDisplayView: View {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.secondary)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .accessibilityHidden(true)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -415,6 +416,7 @@ public struct ToolCallDisplayView: View {
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(isExecuting ? Color.orange : .secondary)
                     .symbolEffect(.bounce, options: .repeating, isActive: isExecuting)
+                    .accessibilityHidden(true)
 
                 Text(isExecuting ? "Using \(toolName)..." : "Used \(toolName)")
                     .font(.caption)
@@ -426,6 +428,7 @@ public struct ToolCallDisplayView: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 12))
                         .foregroundStyle(.green)
+                        .accessibilityLabel("Completed")
                 }
             }
             .padding(.horizontal, 12)
