@@ -123,7 +123,6 @@ public final class BackupManager: ObservableObject {
 
         logger.info("Starting backup (type: \(type.rawValue))")
 
-        // Generate backup metadata
         let backupId = UUID().uuidString
         let timestamp = Date()
         let backupName = name ?? generateBackupName(type: type, date: timestamp)
@@ -136,10 +135,31 @@ public final class BackupManager: ObservableObject {
             try? fileManager.removeItem(at: tempDir)
         }
 
+        // Backup data categories and user defaults
+        let (includedItems, totalSize) = try backupDataCategories(to: tempDir)
+
+        // Create metadata, compress, and finalize
+        let backupInfo = try await finalizeBackup(
+            id: backupId,
+            name: backupName,
+            type: type,
+            timestamp: timestamp,
+            tempDir: tempDir,
+            items: includedItems,
+            totalSize: totalSize
+        )
+
+        logger.info("Backup created: \(backupName) (\(backupInfo.size) bytes)")
+
+        return backupInfo
+    }
+
+    // MARK: - Backup Data Categories
+
+    private func backupDataCategories(to tempDir: URL) throws -> ([BackupItem], Int64) {
         var includedItems: [BackupItem] = []
         var totalSize: Int64 = 0
 
-        // Backup data categories
         let categories: [(name: String, path: String, priority: Int)] = [
             ("conversations", "Conversations", 1),
             ("agents", "Agents", 1),
@@ -191,7 +211,20 @@ public final class BackupManager: ObservableObject {
             itemCount: 1
         ))
 
-        // Create metadata
+        return (includedItems, totalSize)
+    }
+
+    // MARK: - Finalize Backup
+
+    private func finalizeBackup(
+        id backupId: String,
+        name backupName: String,
+        type: BackupType,
+        timestamp: Date,
+        tempDir: URL,
+        items: [BackupItem],
+        totalSize: Int64
+    ) async throws -> BackupInfo {
         let metadata = BackupMetadata(
             id: backupId,
             name: backupName,
@@ -200,23 +233,20 @@ public final class BackupManager: ObservableObject {
             appVersion: getAppVersion(),
             osVersion: ProcessInfo.processInfo.operatingSystemVersionString,
             deviceName: getDeviceName(),
-            items: includedItems,
+            items: items,
             totalSize: totalSize
         )
 
-        // Write metadata
         let metadataPath = tempDir.appendingPathComponent("metadata.json")
         let metadataData = try JSONEncoder().encode(metadata)
         try metadataData.write(to: metadataPath)
 
-        // Compress backup
         backupProgress = 0.9
         let backupFileName = "\(backupId).theabackup"
         let backupPath = backupDirectory.appendingPathComponent(backupFileName)
 
         try await compressDirectory(tempDir, to: backupPath)
 
-        // Update state
         let backupInfo = try BackupInfo(
             id: backupId,
             name: backupName,
@@ -230,10 +260,7 @@ public final class BackupManager: ObservableObject {
         lastBackupDate = timestamp
         UserDefaults.standard.set(timestamp, forKey: "backup.lastDate")
 
-        // Clean up old backups
         await cleanupOldBackups()
-
-        logger.info("Backup created: \(backupName) (\(backupInfo.size) bytes)")
 
         return backupInfo
     }

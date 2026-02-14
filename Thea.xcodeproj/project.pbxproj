@@ -1379,7 +1379,6 @@
 		BBCD57F640F402DE9CC22B8E /* cosmetic-filter-rules.js in Resources */ = {isa = PBXBuildFile; fileRef = 7C44BC179DB646E0C2E1B8A9 /* cosmetic-filter-rules.js */; };
 		BC57659FF0692741E4984CD7 /* BadgeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418E8673B0275094BFCAC501 /* BadgeManager.swift */; };
 		BC59EC9E1A22C02E05FE6822 /* CodeBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF846BD7C72F3F070222F23 /* CodeBlockView.swift */; };
-		BC71EF98EF79E415DF1CC916 /* WorkWithAppsService+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA244BB0ED53DBBDA0FFA404 /* WorkWithAppsService+Actions.swift */; };
 		BCA9E3B7E0C106BAC102144E /* PrivacyPreservingAIRouterTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84713B5564DFA13C7990DD32 /* PrivacyPreservingAIRouterTypes.swift */; };
 		BCB9C77527513F7E895783D6 /* LocationTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E987E8F72EC93271972697 /* LocationTrackingManager.swift */; };
 		BCDA6E0B3F9865C625E23C2D /* session-manager.js in Resources */ = {isa = PBXBuildFile; fileRef = 73D9AC842C2086280AC04E6F /* session-manager.js */; };
@@ -2885,7 +2884,6 @@
 		D9990FF8297FF11E970ED677 /* TheaClipRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipRowView.swift; sourceTree = "<group>"; };
 		D9D990D1848AECFEA69EF44B /* InputTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTrackingManager.swift; sourceTree = "<group>"; };
 		DA1A95AD763A8BE07399BC04 /* dark-mode-themes.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "dark-mode-themes.js"; sourceTree = "<group>"; };
-		DA244BB0ED53DBBDA0FFA404 /* WorkWithAppsService+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WorkWithAppsService+Actions.swift"; sourceTree = "<group>"; };
 		DA442AE1630095516AB91743 /* AdaptiveOCREngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveOCREngine.swift; sourceTree = "<group>"; };
 		DA51376D068195F9D9ABAC78 /* TestGenerator+CoverageAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TestGenerator+CoverageAnalysis.swift"; sourceTree = "<group>"; };
 		DA59F7DE23369BDDE886752E /* CoworkContextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkContextView.swift; sourceTree = "<group>"; };
@@ -6056,7 +6054,6 @@
 				E94FD5F1B67F61CB77B2C82C /* AppStateMonitor.swift */,
 				7EE31955DBC99AB204F007FF /* UIElementInspector.swift */,
 				959BCACCB17BD0CEA220C3F2 /* WorkWithAppsService.swift */,
-				DA244BB0ED53DBBDA0FFA404 /* WorkWithAppsService+Actions.swift */,
 				045C15A1EF156A9A05E261A8 /* WorkWithAppsService+AppActions.swift */,
 				9641450E7D068F17A551318D /* WorkWithAppsService+FinderSafari.swift */,
 				BDAE31CE6CBC13E34C760848 /* WorkWithAppsServiceTypes.swift */,
@@ -8710,7 +8707,6 @@
 				21C7E28BBE64720519476917 /* WellnessProtocols.swift in Sources */,
 				3925A1A997B75969CCB66373 /* WellnessViewModel.swift in Sources */,
 				4597013678E959BB7CEF3A6F /* WindowManager.swift in Sources */,
-				BC71EF98EF79E415DF1CC916 /* WorkWithAppsService+Actions.swift in Sources */,
 				38B001034D6F24676A9627B1 /* WorkWithAppsService+AppActions.swift in Sources */,
 				7EBE5FB0245C9663C5F7BF7A /* WorkWithAppsService+FinderSafari.swift in Sources */,
 				557DC55E3F82F05F97A2F185 /* WorkWithAppsService.swift in Sources */,
