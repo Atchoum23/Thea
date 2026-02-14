@@ -214,6 +214,11 @@ extension ChatManager {
         #if os(macOS)
         let totalRAM = ProcessInfo.processInfo.physicalMemory / (1024 * 1024 * 1024)
         lines.append("- RAM: \(totalRAM) GB")
+        if totalRAM >= 128 {
+            lines.append("- This is a high-capability machine: can run large ML models (70B+), parallel builds, heavy inference")
+        } else if totalRAM <= 32 {
+            lines.append("- This is a lightweight machine: prefer smaller models, avoid memory-intensive operations")
+        }
         #endif
 
         if allDevices.count > 1 {
@@ -280,8 +285,10 @@ extension ChatManager {
         switch category {
         case .generation:
             return """
-            You are a senior software engineer. Write clean, production-ready code. \
-            Follow best practices for the language. Include error handling. \
+            You are a senior software engineer. Write clean, production-ready, self-documenting code. \
+            Prefer composition over inheritance. Use dependency injection for testability. \
+            Use proper types, enums, and protocols — never Any or force casts. \
+            Include error handling and edge cases. Keep files under 500 lines. \
             Explain your design decisions briefly.
             """
         case .analysis:
@@ -293,7 +300,8 @@ extension ChatManager {
             return """
             Debug systematically. Identify the root cause, not just symptoms. \
             Explain why the bug occurs and provide a targeted fix. \
-            Verify the fix doesn't introduce regressions.
+            Verify the fix doesn't introduce regressions. \
+            Fix issues immediately — no deferring or "pre-existing" excuses.
             """
         case .explanation:
             return """
@@ -304,7 +312,8 @@ extension ChatManager {
             return """
             Refactor for clarity, maintainability, and performance. \
             Preserve existing behavior. Explain each change and its benefit. \
-            Follow SOLID principles where applicable.
+            Prefer composition over inheritance. Respect existing patterns — extend, don't hack. \
+            Design for extensibility. Follow SOLID principles where applicable.
             """
         }
     }
