@@ -6,7 +6,7 @@
 import Foundation
 import XCTest
 
-final class OnboardingAndLocalizationTypesTests: XCTestCase {
+final class OnboardingTypesTests: XCTestCase {
 
     // MARK: - Test Doubles: Onboarding Types
 

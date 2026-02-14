@@ -2,9 +2,9 @@
 // Tests for concrete event struct creation: MessageEvent, ActionEvent,
 // StateEvent, ErrorEvent, PerformanceEvent.
 // Mirrors types in Shared/Core/EventBus/EventBusEvents.swift.
-// Extended event tests and cross-event validation are in
-// EventBusEventExtendedTests.swift.
-import Foundation
+// See also: EventBusEventExtendedTests.swift (Learning, Memory,
+// Verification, Navigation, Component, Lifecycle) and
+// EventBusEventCrossTests.swift (cross-event ID + category mapping).
 import XCTest
 
 final class EventBusEventCreationTests: XCTestCase {
