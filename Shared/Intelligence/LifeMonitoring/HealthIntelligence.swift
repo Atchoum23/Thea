@@ -684,15 +684,78 @@ public actor HealthIntelligence {
     }
 
     private func fetchTodayHealthData() async -> [String: Double] {
-        let data: [String: Double] = [:]
+        var data: [String: Double] = [:]
 
         #if canImport(HealthKit)
-        // Would fetch from HealthKit
-        // For now, return empty
+        let store = HKHealthStore()
+        guard HKHealthStore.isHealthDataAvailable() else { return data }
+
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: Date())
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date(), options: .strictStartDate)
+
+        // Query step count
+        if let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) {
+            if let steps = try? await querySumStatistics(store: store, type: stepType, predicate: predicate, unit: .count()) {
+                data["steps"] = steps
+            }
+        }
+
+        // Query active energy burned
+        if let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) {
+            if let energy = try? await querySumStatistics(store: store, type: energyType, predicate: predicate, unit: .kilocalorie()) {
+                data["activeCalories"] = energy
+            }
+        }
+
+        // Query heart rate (latest)
+        if let hrType = HKQuantityType.quantityType(forIdentifier: .heartRate) {
+            if let hr = try? await queryLatestSample(store: store, type: hrType, unit: HKUnit.count().unitDivided(by: .minute())) {
+                data["heartRate"] = hr
+            }
+        }
+
+        // Query distance walked/run
+        if let distType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning) {
+            if let dist = try? await querySumStatistics(store: store, type: distType, predicate: predicate, unit: .meter()) {
+                data["distanceMeters"] = dist
+            }
+        }
         #endif
 
         return data
     }
+
+    #if canImport(HealthKit)
+    private func querySumStatistics(store: HKHealthStore, type: HKQuantityType, predicate: NSPredicate, unit: HKUnit) async throws -> Double {
+        try await withCheckedThrowingContinuation { continuation in
+            let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: result?.sumQuantity()?.doubleValue(for: unit) ?? 0)
+                }
+            }
+            store.execute(query)
+        }
+    }
+
+    private func queryLatestSample(store: HKHealthStore, type: HKQuantityType, unit: HKUnit) async throws -> Double {
+        try await withCheckedThrowingContinuation { continuation in
+            let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+            let query = HKSampleQuery(sampleType: type, predicate: nil, limit: 1, sortDescriptors: [sortDescriptor]) { _, samples, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let sample = samples?.first as? HKQuantitySample {
+                    continuation.resume(returning: sample.quantity.doubleValue(for: unit))
+                } else {
+                    continuation.resume(returning: 0)
+                }
+            }
+            store.execute(query)
+        }
+    }
+    #endif
 
     private func analyzeMedicationEffectiveness(_ medicationId: UUID) async {
         let logs = getMedicationLogs(medicationId, limit: 30)

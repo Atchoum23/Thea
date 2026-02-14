@@ -356,10 +356,19 @@ public final class BackupManager: ObservableObject {
         #endif
     }
 
-    func isCompatible(metadata _: BackupMetadata) -> Bool {
-        // For now, accept all backups
-        // In production, check version compatibility
-        true
+    func isCompatible(metadata: BackupMetadata) -> Bool {
+        // Check major version compatibility
+        let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let currentMajor = currentVersion.split(separator: ".").first.flatMap { Int($0) } ?? 1
+        let backupMajor = metadata.appVersion.split(separator: ".").first.flatMap { Int($0) } ?? 1
+
+        // Accept same major version or one major version back
+        guard abs(currentMajor - backupMajor) <= 1 else { return false }
+
+        // Verify backup has valid items
+        guard !metadata.items.isEmpty else { return false }
+
+        return true
     }
 
     // MARK: - UserDefaults Backup

@@ -64,8 +64,50 @@ final class VoiceActivationManager {
 
     func startWakeWordDetection() throws {
         guard isEnabled else { return }
-        // Wake word detection implementation would go here
-        // For now, this is a stub
+        guard let recognizer = speechRecognizer, recognizer.isAvailable else {
+            throw VoiceError.recognizerNotAvailable
+        }
+
+        stopWakeWordDetection() // Clean up any existing session
+
+        audioEngine = AVAudioEngine()
+        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+        recognitionRequest?.shouldReportPartialResults = true
+
+        guard let audioEngine, let recognitionRequest else { return }
+
+        let inputNode = audioEngine.inputNode
+        let recordingFormat = inputNode.outputFormat(forBus: 0)
+
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+            recognitionRequest.append(buffer)
+        }
+
+        recognitionTask = recognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+            guard let self else { return }
+            if let result {
+                let text = result.bestTranscription.formattedString.lowercased()
+                let wakePhrase = self.wakeWord.lowercased()
+                if text.contains(wakePhrase) {
+                    // Wake word detected — stop listening and trigger voice command
+                    Task { @MainActor in
+                        self.stopWakeWordDetection()
+                        try? self.startVoiceCommand()
+                    }
+                }
+            }
+            if error != nil || (result?.isFinal ?? false) {
+                // Restart wake word detection on completion/error
+                Task { @MainActor in
+                    self.stopWakeWordDetection()
+                    try? self.startWakeWordDetection()
+                }
+            }
+        }
+
+        audioEngine.prepare()
+        try audioEngine.start()
+        isListening = true
     }
 
     func stopWakeWordDetection() {
