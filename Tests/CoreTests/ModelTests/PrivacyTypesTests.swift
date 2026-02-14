@@ -8,7 +8,7 @@ final class PrivacyTypesTests: XCTestCase {
 
     // MARK: - StrictnessLevel (mirror PrivacyPolicy.swift)
 
-    private enum StrictnessLevel: String, Codable, Comparable {
+    enum StrictnessLevel: String, Codable, Comparable {
         case permissive, standard, strict, paranoid
 
         private var rank: Int {
@@ -152,7 +152,7 @@ final class PrivacyTypesTests: XCTestCase {
 
     // MARK: - Policy Configuration Tests
 
-    private struct TestPolicy {
+    struct TestPolicy {
         let name: String
         let strictnessLevel: StrictnessLevel
         let allowPII: Bool
