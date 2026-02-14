@@ -150,71 +150,175 @@ public actor NutritionDataImporter {
         }
     }
 
-    private func importFromUSDA(_ foodName: String) async throws -> [FoodItem] {
-        // Would implement actual USDA FoodData Central API call
-        // For now, return mock data
+    // USDA FoodData Central API — free API key from fdc.nal.usda.gov
+    // To go live: set your API key in SettingsManager.shared (key: "usdaApiKey")
+    // Default "DEMO_KEY" has rate limits but works for testing
+    private var usdaApiKey: String {
+        // Check if owner has set a real key, otherwise use demo
+        UserDefaults.standard.string(forKey: "usdaApiKey") ?? "DEMO_KEY"
+    }
 
+    private func importFromUSDA(_ foodName: String) async throws -> [FoodItem] {
         guard !foodName.isEmpty else {
             throw ImportError.invalidFormat
         }
 
-        // Simulate API call
-        try await Task.sleep(for: .milliseconds(500))
+        // Call USDA FoodData Central search API
+        let query = foodName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? foodName
+        guard let url = URL(string: "https://api.nal.usda.gov/fdc/v1/foods/search?api_key=\(usdaApiKey)&query=\(query)&pageSize=5&dataType=Foundation,SR%20Legacy") else {
+            throw ImportError.networkError
+        }
 
-        // Mock USDA API response
-        var mockNutrients = NutrientProfile()
-        mockNutrients.calories = 150.0
-        mockNutrients.protein = 5.0
-        mockNutrients.carbohydrates = 25.0
-        mockNutrients.totalFat = 3.0
-        mockNutrients.fiber = 3.0
-        mockNutrients.sugars = 5.0
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw ImportError.networkError
+        }
 
-        let mockItem = FoodItem(
-            name: foodName,
-            brand: "USDA",
-            servingSize: 100,
-            servingUnit: .gram,
-            nutrients: mockNutrients,
-            barcode: nil
-        )
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let foods = json["foods"] as? [[String: Any]] else {
+            throw ImportError.parsingFailed
+        }
 
-        return [mockItem]
+        var foodItems: [FoodItem] = []
+        for food in foods {
+            let name = food["description"] as? String ?? foodName
+            let brand = food["brandName"] as? String ?? food["brandOwner"] as? String
+            let nutrients = parseUSDANutrients(food["foodNutrients"] as? [[String: Any]] ?? [])
+
+            let item = FoodItem(
+                name: name,
+                brand: brand ?? "USDA",
+                servingSize: 100,
+                servingUnit: .gram,
+                nutrients: nutrients,
+                barcode: food["gtinUpc"] as? String,
+                source: .usda
+            )
+            foodItems.append(item)
+        }
+
+        if foodItems.isEmpty {
+            throw ImportError.parsingFailed
+        }
+        return foodItems
     }
 
+    /// Parse USDA FoodData Central nutrient array into NutrientProfile
+    private func parseUSDANutrients(_ nutrients: [[String: Any]]) -> NutrientProfile {
+        var profile = NutrientProfile()
+        // USDA nutrient IDs: https://fdc.nal.usda.gov/api-guide.html
+        for nutrient in nutrients {
+            guard let value = nutrient["value"] as? Double else { continue }
+            let nutrientId = nutrient["nutrientId"] as? Int ?? 0
+            let name = (nutrient["nutrientName"] as? String ?? "").lowercased()
+
+            switch nutrientId {
+            case 1008: profile.calories = value        // Energy (kcal)
+            case 1003: profile.protein = value         // Protein
+            case 1005: profile.carbohydrates = value   // Carbohydrate
+            case 1079: profile.fiber = value           // Fiber
+            case 1063: profile.sugars = value          // Total Sugars
+            case 1004: profile.totalFat = value        // Total Fat
+            case 1258: profile.saturatedFat = value    // Saturated Fat
+            case 1257: profile.transFat = value        // Trans Fat
+            case 1292: profile.monounsaturatedFat = value
+            case 1293: profile.polyunsaturatedFat = value
+            case 1106: profile.vitaminA = value        // Vitamin A
+            case 1114: profile.vitaminD = value        // Vitamin D
+            case 1109: profile.vitaminE = value        // Vitamin E
+            case 1185: profile.vitaminK = value        // Vitamin K
+            case 1162: profile.vitaminC = value        // Vitamin C
+            case 1165: profile.thiamin = value         // Thiamin (B1)
+            case 1166: profile.riboflavin = value      // Riboflavin (B2)
+            case 1167: profile.niacin = value          // Niacin (B3)
+            case 1170: profile.vitaminB6 = value       // Vitamin B6
+            case 1177: profile.folate = value          // Folate
+            case 1178: profile.vitaminB12 = value      // Vitamin B12
+            case 1087: profile.calcium = value         // Calcium
+            case 1089: profile.iron = value            // Iron
+            case 1090: profile.magnesium = value       // Magnesium
+            case 1091: profile.phosphorus = value      // Phosphorus
+            case 1092: profile.potassium = value       // Potassium
+            case 1093: profile.sodium = value          // Sodium
+            case 1095: profile.zinc = value            // Zinc
+            case 1098: profile.copper = value          // Copper
+            case 1101: profile.manganese = value       // Manganese
+            case 1103: profile.selenium = value        // Selenium
+            case 1253: profile.cholesterol = value     // Cholesterol
+            default:
+                // Match by name for nutrients without standard IDs
+                if name.contains("iron") { profile.iron = value }
+            }
+        }
+        return profile
+    }
+
+    // Open Food Facts API — free, no API key needed
+    // https://wiki.openfoodfacts.org/API
     private func importFromBarcode(_ barcode: String) async throws -> [FoodItem] {
-        // Would implement barcode lookup (Open Food Facts API, etc.)
         guard !barcode.isEmpty else {
             throw ImportError.invalidFormat
         }
 
-        // Validate barcode format (UPC-A is 12 digits, EAN is 13)
-        guard barcode.count == 12 || barcode.count == 13 else {
+        // Validate barcode format (UPC-A is 12 digits, EAN-13 is 13)
+        guard barcode.count >= 8, barcode.count <= 13,
+              barcode.allSatisfy(\.isNumber) else {
             throw ImportError.invalidFormat
         }
 
-        // Simulate API call
-        try await Task.sleep(for: .milliseconds(800))
+        // Call Open Food Facts API
+        guard let url = URL(string: "https://world.openfoodfacts.org/api/v2/product/\(barcode).json") else {
+            throw ImportError.networkError
+        }
 
-        // Mock barcode lookup response
-        var mockNutrients = NutrientProfile()
-        mockNutrients.calories = 200.0
-        mockNutrients.protein = 8.0
-        mockNutrients.carbohydrates = 30.0
-        mockNutrients.totalFat = 5.0
-        mockNutrients.fiber = 4.0
-        mockNutrients.sugars = 12.0
+        var request = URLRequest(url: url)
+        request.setValue("Thea/1.0 (macOS; contact: thea@app.com)", forHTTPHeaderField: "User-Agent")
 
-        let mockItem = FoodItem(
-            name: "Scanned Product",
-            brand: "Brand Name",
-            servingSize: 100,
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw ImportError.networkError
+        }
+
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let status = json["status"] as? Int, status == 1,
+              let product = json["product"] as? [String: Any] else {
+            throw ImportError.barcodeNotFound
+        }
+
+        let name = product["product_name"] as? String ?? "Unknown Product"
+        let brand = product["brands"] as? String
+        let nutriments = product["nutriments"] as? [String: Any] ?? [:]
+
+        var nutrients = NutrientProfile()
+        nutrients.calories = nutriments["energy-kcal_100g"] as? Double ?? 0
+        nutrients.protein = nutriments["proteins_100g"] as? Double ?? 0
+        nutrients.carbohydrates = nutriments["carbohydrates_100g"] as? Double ?? 0
+        nutrients.fiber = nutriments["fiber_100g"] as? Double ?? 0
+        nutrients.sugars = nutriments["sugars_100g"] as? Double ?? 0
+        nutrients.totalFat = nutriments["fat_100g"] as? Double ?? 0
+        nutrients.saturatedFat = nutriments["saturated-fat_100g"] as? Double ?? 0
+        nutrients.sodium = nutriments["sodium_100g"] as? Double ?? 0
+        nutrients.calcium = nutriments["calcium_100g"] as? Double ?? 0
+        nutrients.iron = nutriments["iron_100g"] as? Double ?? 0
+        nutrients.vitaminC = nutriments["vitamin-c_100g"] as? Double ?? 0
+        nutrients.vitaminA = nutriments["vitamin-a_100g"] as? Double ?? 0
+        nutrients.potassium = nutriments["potassium_100g"] as? Double ?? 0
+        nutrients.cholesterol = nutriments["cholesterol_100g"] as? Double ?? 0
+        nutrients.transFat = nutriments["trans-fat_100g"] as? Double ?? 0
+
+        let servingSize = product["serving_quantity"] as? Double ?? 100
+
+        let foodItem = FoodItem(
+            name: name,
+            brand: brand,
+            servingSize: servingSize,
             servingUnit: .gram,
-            nutrients: mockNutrients,
-            barcode: barcode
+            nutrients: nutrients,
+            barcode: barcode,
+            source: .openFoodFacts
         )
 
-        return [mockItem]
+        return [foodItem]
     }
 
     // MARK: - Helper Methods

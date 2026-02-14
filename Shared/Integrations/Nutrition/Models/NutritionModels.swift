@@ -347,6 +347,7 @@ public enum FoodDataSource: String, Sendable, Codable {
     case barcode = "Barcode Scan"
     case recipe = "Recipe"
     case restaurant = "Restaurant Database"
+    case openFoodFacts = "Open Food Facts"
 }
 
 public enum BiologicalSex: String, Sendable, Codable {
