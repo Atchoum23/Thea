@@ -87,6 +87,7 @@ struct ChatInputView: View {
                 HStack(spacing: TheaSpacing.sm) {
                     Image(systemName: "tray.full")
                         .foregroundStyle(.theaPrimary)
+                        .accessibilityHidden(true)
                     Text("\(ChatManager.shared.messageQueue.count) message\(ChatManager.shared.messageQueue.count == 1 ? "" : "s") queued")
                         .font(.theaCaption2)
                         .foregroundStyle(.secondary)

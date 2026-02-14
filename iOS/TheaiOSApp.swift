@@ -52,6 +52,10 @@ struct TheaiOSApp: App {
         MigrationEngine.shared.setModelContext(context)
         ClipboardHistoryManager.shared.setModelContext(context)
 
+        // Initialize sync singletons (non-blocking, defers heavy work to Tasks)
+        _ = CloudKitService.shared
+        _ = PreferenceSyncEngine.shared
+
         // Life Monitoring — deferred startup to avoid blocking app launch
         Task {
             try? await Task.sleep(for: .milliseconds(500))

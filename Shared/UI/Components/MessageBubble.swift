@@ -212,6 +212,7 @@ struct MessageBubble: View {
                     }
                     .buttonStyle(.plain)
                     .help("Rewrite")
+                    .accessibilityLabel("Rewrite response")
                 }
 
                 // Continue from here
@@ -256,6 +257,7 @@ struct MessageBubble: View {
                 }
                 .buttonStyle(.plain)
                 .help("More actions")
+                .accessibilityLabel("More actions")
             }
             .padding(.horizontal, 4)
             .padding(.vertical, 2)
