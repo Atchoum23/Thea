@@ -374,17 +374,145 @@ public final class ResourceDiscoveryEngine: ObservableObject {
     // MARK: - MCP Hub Discovery
 
     private func discoverFromMCPHub() async -> [DiscoveredResource] {
-        // MCP Hub is another registry - implement when API is available
-        logger.debug("MCP Hub discovery not yet implemented")
-        return []
+        guard let baseURL = ResourceRegistry.mcpHub.baseURL else { return [] }
+
+        var resources: [DiscoveredResource] = []
+
+        do {
+            // MCP Hub provides a REST API for server listing
+            let url = baseURL.appendingPathComponent("servers")
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+            components.queryItems = [
+                URLQueryItem(name: "limit", value: "\(maxResourcesPerRegistry)")
+            ]
+
+            let request = URLRequest(url: components.url!)
+            let (data, response) = try await urlSession.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                logger.debug("MCP Hub returned non-200, skipping")
+                return []
+            }
+
+            // Parse generic JSON array of server entries
+            guard let servers = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+                return []
+            }
+
+            for server in servers.prefix(maxResourcesPerRegistry) {
+                guard let name = server["name"] as? String else { continue }
+                let description = server["description"] as? String ?? "MCP Hub server"
+                let qualifiedName = server["qualified_name"] as? String ?? "mcphub/\(name)"
+                let isVerified = server["verified"] as? Bool ?? false
+
+                // Parse tools if available
+                var tools: [DiscoveredTool] = []
+                if let toolList = server["tools"] as? [[String: Any]] {
+                    for tool in toolList {
+                        let toolName = tool["name"] as? String ?? ""
+                        let toolDesc = tool["description"] as? String ?? ""
+                        if !toolName.isEmpty {
+                            tools.append(DiscoveredTool(name: toolName, description: toolDesc))
+                        }
+                    }
+                }
+
+                let resource = DiscoveredResource(
+                    sourceRegistry: .mcpHub,
+                    qualifiedName: qualifiedName,
+                    displayName: name,
+                    description: description,
+                    capabilities: tools.map { tool in
+                        ResourceCapability(name: tool.name, category: .tools, description: tool.description)
+                    },
+                    tools: tools,
+                    trustScore: isVerified ? 0.8 : 0.5,
+                    popularity: server["downloads"] as? Int ?? 0,
+                    lastUpdated: Date(),
+                    connectionConfig: ResourceConnectionConfig(
+                        transportType: .stdio,
+                        authType: .none
+                    ),
+                    tags: Set(server["tags"] as? [String] ?? []),
+                    isVerified: isVerified
+                )
+                resources.append(resource)
+            }
+
+            logger.debug("Discovered \(resources.count) resources from MCP Hub")
+
+        } catch {
+            logger.error("MCP Hub discovery failed: \(error.localizedDescription)")
+            lastError = "MCP Hub: \(error.localizedDescription)"
+        }
+
+        return resources
     }
 
     // MARK: - Official MCP Discovery
 
     private func discoverFromOfficialMCP() async -> [DiscoveredResource] {
-        // Official MCP servers from modelcontextprotocol.io
-        logger.debug("Official MCP discovery not yet implemented")
-        return []
+        guard let baseURL = ResourceRegistry.officialMCP.baseURL else { return [] }
+
+        var resources: [DiscoveredResource] = []
+
+        do {
+            // Fetch the official MCP servers page and parse JSON-LD or embedded data
+            let request = URLRequest(url: baseURL)
+            let (data, response) = try await urlSession.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200,
+                  let html = String(data: data, encoding: .utf8) else {
+                logger.debug("Official MCP returned non-200 or invalid response")
+                return []
+            }
+
+            // Extract server entries from the HTML page using regex
+            // The official site lists servers with name, description, and npm package
+            let serverPattern = #"\"name\"\s*:\s*\"([^\"]+)\"\s*,\s*\"description\"\s*:\s*\"([^\"]+)\""#
+            let regex = try NSRegularExpression(pattern: serverPattern)
+            let range = NSRange(html.startIndex..., in: html)
+            let matches = regex.matches(in: html, range: range)
+
+            for match in matches.prefix(maxResourcesPerRegistry) {
+                guard match.numberOfRanges >= 3,
+                      let nameRange = Range(match.range(at: 1), in: html),
+                      let descRange = Range(match.range(at: 2), in: html) else { continue }
+
+                let name = String(html[nameRange])
+                let description = String(html[descRange])
+
+                // Skip non-server entries (section headers, etc.)
+                guard name.count > 2, name.count < 100, description.count > 5 else { continue }
+
+                let resource = DiscoveredResource(
+                    sourceRegistry: .officialMCP,
+                    qualifiedName: "official/\(name.lowercased().replacingOccurrences(of: " ", with: "-"))",
+                    displayName: name,
+                    description: description,
+                    trustScore: 0.9,
+                    popularity: 0,
+                    lastUpdated: Date(),
+                    connectionConfig: ResourceConnectionConfig(
+                        transportType: .stdio,
+                        authType: .none
+                    ),
+                    tags: ["official", "mcp"],
+                    isVerified: true
+                )
+                resources.append(resource)
+            }
+
+            logger.debug("Discovered \(resources.count) resources from Official MCP")
+
+        } catch {
+            logger.error("Official MCP discovery failed: \(error.localizedDescription)")
+            lastError = "Official MCP: \(error.localizedDescription)"
+        }
+
+        return resources
     }
 
     // MARK: - Local Discovery
