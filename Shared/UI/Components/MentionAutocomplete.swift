@@ -138,6 +138,7 @@ struct MentionAutocompleteView: View {
 
     @State private var selectedIndex = 0
     @State private var items: [MentionItem] = []
+    @State private var cachedProjectItems: [MentionItem] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -181,6 +182,9 @@ struct MentionAutocompleteView: View {
         .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
         .onAppear {
             updateItems()
+        }
+        .task {
+            await loadProjectItems()
         }
         .onChange(of: context.query) { _, _ in
             updateItems()
@@ -256,18 +260,31 @@ struct MentionAutocompleteView: View {
     }
 
     private func generateProjectItems(query: String) -> [MentionItem] {
-        // Query PersonalKnowledgeGraph for project entities
-        var items: [MentionItem] = [
+        var results: [MentionItem] = [
             MentionItem(type: .project, title: "Current Project", subtitle: "Use current project context")
         ]
-        let graph = PersonalKnowledgeGraph.shared
-        // nonisolated sync access not possible for actor — use cached recent data
-        // The autocomplete is synchronous, so we provide the current project as fallback
+        results.append(contentsOf: cachedProjectItems)
         if !query.isEmpty {
-            items = items.filter { $0.title.localizedCaseInsensitiveContains(query) }
+            results = results.filter { $0.title.localizedCaseInsensitiveContains(query) }
         }
-        _ = graph // Suppress unused warning; async query would go in updateItems()
-        return items
+        return results
+    }
+
+    private func loadProjectItems() async {
+        let graph = PersonalKnowledgeGraph.shared
+        let projectEntities = await graph.entities(ofType: .project)
+        cachedProjectItems = projectEntities.prefix(20).map { entity in
+            MentionItem(
+                type: .project,
+                title: entity.name,
+                subtitle: "Project",
+                value: entity.name
+            )
+        }
+        // Refresh items if we're currently showing project type
+        if context.type == .project {
+            items = generateItems(for: .project, query: context.query)
+        }
     }
 
     private func generateConversationItems(query: String) -> [MentionItem] {
