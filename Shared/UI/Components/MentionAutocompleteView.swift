@@ -315,6 +315,7 @@ struct MentionAutocompleteRow: View {
                 .font(.system(size: 14))
                 .foregroundStyle(isSelected ? .white : .secondary)
                 .frame(width: 22, alignment: .center)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: TheaSpacing.xxs) {
                 Text(item.name)

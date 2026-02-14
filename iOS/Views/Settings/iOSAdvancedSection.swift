@@ -8,7 +8,9 @@ struct IOSAdvancedSettingsView: View {
             // Developer
             Section {
                 Toggle("Debug Mode", isOn: $config.debugMode)
+                    .accessibilityHint("Enables developer debugging features")
                 Toggle("Verbose Logging", isOn: $config.verboseLogging)
+                    .accessibilityHint("Logs detailed information for troubleshooting")
             } header: {
                 Text("Developer")
             }
@@ -16,7 +18,9 @@ struct IOSAdvancedSettingsView: View {
             // Network
             Section {
                 Toggle("Use Cellular Data", isOn: $config.useCellularData)
+                    .accessibilityHint("Allows Thea to use cellular data for AI requests")
                 Stepper("Timeout: \(config.networkTimeout)s", value: $config.networkTimeout, in: 10...120, step: 10)
+                    .accessibilityHint("Adjusts network timeout in seconds from 10 to 120")
             } header: {
                 Text("Network")
             }
@@ -24,7 +28,9 @@ struct IOSAdvancedSettingsView: View {
             // Performance
             Section {
                 Toggle("Background Refresh", isOn: $config.backgroundRefresh)
+                    .accessibilityHint("Allows Thea to refresh content in the background")
                 Toggle("Prefetch Content", isOn: $config.prefetchContent)
+                    .accessibilityHint("Preloads content for faster access")
             } header: {
                 Text("Performance")
             }

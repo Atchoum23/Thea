@@ -42,6 +42,7 @@ struct IOSAIProvidersSettingsView: View {
                         Circle()
                             .fill(statusColor(for: providerHealth[provider] ?? .unknown))
                             .frame(width: 10, height: 10)
+                            .accessibilityHidden(true)
 
                         Text(provider)
 
@@ -51,6 +52,7 @@ struct IOSAIProvidersSettingsView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                    .accessibilityElement(children: .combine)
                 }
 
                 Button("Refresh Status") {
@@ -155,6 +157,7 @@ struct IOSModelsSettingsView: View {
                                 .foregroundStyle(favoriteModels.contains(model.0) ? .yellow : .secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(favoriteModels.contains(model.0) ? "Remove \(model.0) from favorites" : "Add \(model.0) to favorites")
                     }
                 }
             } header: {
@@ -184,6 +187,7 @@ struct IOSLocalModelsUnavailableView: View {
             Image(systemName: "desktopcomputer")
                 .font(.system(size: 60))
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
 
             VStack(spacing: 12) {
                 Text("Local Models")
@@ -290,10 +294,13 @@ struct IOSOrchestratorSettingsView: View {
             // Routing
             Section {
                 Toggle("Smart Routing", isOn: $config.smartRouting)
+                    .accessibilityHint("Automatically selects the best model for each task")
 
                 Toggle("Auto Fallback", isOn: $config.autoFallback)
+                    .accessibilityHint("Falls back to alternative models if the primary fails")
 
                 Toggle("Cost Optimization", isOn: $config.costOptimization)
+                    .accessibilityHint("Prefers cheaper models when quality requirements are met")
             } header: {
                 Text("Routing")
             } footer: {

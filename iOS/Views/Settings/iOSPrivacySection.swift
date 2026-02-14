@@ -14,11 +14,13 @@ struct IOSPrivacySettingsView: View {
                         Image(systemName: "checkmark.shield.fill")
                             .font(.title)
                             .foregroundStyle(.green)
+                            .accessibilityHidden(true)
                         Text("Protected")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity)
+                    .accessibilityElement(children: .combine)
 
                     VStack {
                         Text("\(privacyScore)%")
@@ -39,7 +41,9 @@ struct IOSPrivacySettingsView: View {
             // Data Collection
             Section {
                 Toggle("Analytics", isOn: $settingsManager.analyticsEnabled)
+                    .accessibilityHint("Shares anonymous usage data to help improve Thea")
                 Toggle("Crash Reports", isOn: $config.crashReportsEnabled)
+                    .accessibilityHint("Sends crash reports to help fix issues")
             } header: {
                 Text("Data Collection")
             } footer: {
@@ -61,7 +65,9 @@ struct IOSPrivacySettingsView: View {
             // Security
             Section {
                 Toggle("Require Face ID", isOn: $config.requireBiometric)
+                    .accessibilityHint("Requires biometric authentication to open Thea")
                 Toggle("Lock on Background", isOn: $config.lockOnBackground)
+                    .accessibilityHint("Locks Thea when the app moves to the background")
             } header: {
                 Text("Security")
             }

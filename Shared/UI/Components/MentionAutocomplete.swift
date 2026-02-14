@@ -321,6 +321,7 @@ struct MentionChip: View {
                         .font(.system(size: 8, weight: .bold))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Remove mention")
             }
         }
         .padding(.horizontal, 8)
