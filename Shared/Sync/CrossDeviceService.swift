@@ -27,6 +27,7 @@ public actor CrossDeviceService {
     private let container: CKContainer
     private let privateDatabase: CKDatabase
     private let sharedDatabase: CKDatabase
+    private let zoneID: CKRecordZone.ID
 
     // MARK: - Configuration
 
@@ -42,6 +43,7 @@ public actor CrossDeviceService {
         container = Self.createSafeContainer()
         privateDatabase = container.privateCloudDatabase
         sharedDatabase = container.sharedCloudDatabase
+        zoneID = CKRecordZone.ID(zoneName: "TheaZone", ownerName: CKCurrentUserDefaultName)
         configuration = CrossDeviceSyncConfiguration.load()
     }
 
@@ -71,11 +73,23 @@ public actor CrossDeviceService {
             throw CrossDeviceSyncError.iCloudNotAvailable
         }
 
+        // Create custom zone for consolidated sync
+        try await createZoneIfNeeded()
+
         // Setup subscriptions
         try await setupSubscriptions()
 
         isInitialized = true
         syncEnabled = configuration.autoSyncEnabled
+    }
+
+    private func createZoneIfNeeded() async throws {
+        let zone = CKRecordZone(zoneID: zoneID)
+        do {
+            _ = try await privateDatabase.save(zone)
+        } catch let error as CKError where error.code == .zoneNotFound || error.code == .serverRejectedRequest {
+            // Zone already exists or other expected error
+        }
     }
 
     /// Setup CloudKit subscriptions for real-time sync
@@ -160,7 +174,8 @@ public actor CrossDeviceService {
             DeviceRegistry.shared.currentDevice
         }
 
-        let record = CKRecord(recordType: "Device")
+        let recordID = CKRecord.ID(recordName: "device-\(deviceInfo.id)", zoneID: zoneID)
+        let record = CKRecord(recordType: "Device", recordID: recordID)
         record["deviceId"] = deviceInfo.id
         record["name"] = deviceInfo.name
         record["type"] = deviceInfo.type.rawValue
@@ -175,7 +190,7 @@ public actor CrossDeviceService {
     public func pushChange(_ change: SyncChange) async throws {
         guard syncEnabled else { return }
 
-        let record = change.toCKRecord()
+        let record = change.toCKRecord(zoneID: zoneID)
         _ = try await privateDatabase.save(record)
     }
 
@@ -369,8 +384,13 @@ public struct SyncChange: Sendable {
         data = Dictionary(fromAny: rawData)
     }
 
-    func toCKRecord() -> CKRecord {
-        let recordId = CKRecord.ID(recordName: self.recordId)
+    func toCKRecord(zoneID: CKRecordZone.ID? = nil) -> CKRecord {
+        let recordId: CKRecord.ID
+        if let zoneID {
+            recordId = CKRecord.ID(recordName: self.recordId, zoneID: zoneID)
+        } else {
+            recordId = CKRecord.ID(recordName: self.recordId)
+        }
         let record = CKRecord(recordType: recordType, recordID: recordId)
 
         for (key, value) in data {

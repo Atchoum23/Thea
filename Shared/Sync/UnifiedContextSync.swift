@@ -55,9 +55,22 @@ public actor UnifiedContextSync {
     // MARK: - Initialization
 
     private init() {
-        container = CKContainer(identifier: "iCloud.app.theathe")
+        container = Self.createSafeContainer()
         database = container.privateCloudDatabase
-        zoneID = CKRecordZone.ID(zoneName: "TheaContext", ownerName: CKCurrentUserDefaultName)
+        zoneID = CKRecordZone.ID(zoneName: "TheaZone", ownerName: CKCurrentUserDefaultName)
+    }
+
+    /// Create CloudKit container with entitlements validation
+    private static func createSafeContainer() -> CKContainer {
+        let id = "iCloud.app.theathe"
+        if let containers = Bundle.main.object(
+            forInfoDictionaryKey: "com.apple.developer.icloud-container-identifiers"
+        ) as? [String],
+            containers.contains(id)
+        {
+            return CKContainer(identifier: id)
+        }
+        return CKContainer.default()
     }
 
     // MARK: - Setup
