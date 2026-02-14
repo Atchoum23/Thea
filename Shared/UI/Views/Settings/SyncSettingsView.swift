@@ -303,15 +303,21 @@ struct SyncSettingsContentView: View {
         }
     }
 
+}
+
+// MARK: - Preference Sync, Data Sync, Devices & Updates
+
+extension SyncSettingsContentView {
+
     // MARK: - Preference Sync Scope Section
 
-    private var preferenceSyncScopeSection: some View {
+    var preferenceSyncScopeSection: some View {
         ForEach(SyncCategory.allCases, id: \.self) { category in
             categoryScopeRow(for: category)
         }
     }
 
-    private func categoryScopeRow(for category: SyncCategory) -> some View {
+    func categoryScopeRow(for category: SyncCategory) -> some View {
         let currentScope = syncEngine.effectiveScope(for: category)
         let isDefault = syncEngine.scopeOverrides[category] == nil
         let descriptors = PreferenceRegistry.descriptors(for: category)
@@ -371,7 +377,7 @@ struct SyncSettingsContentView: View {
         .padding(.vertical, 2)
     }
 
-    private func scopeColor(for scope: SyncScope) -> Color {
+    func scopeColor(for scope: SyncScope) -> Color {
         switch scope {
         case .universal: .blue
         case .deviceClass: .orange
@@ -381,7 +387,7 @@ struct SyncSettingsContentView: View {
 
     // MARK: - Data Sync Section (CloudKit)
 
-    private var dataSyncSection: some View {
+    var dataSyncSection: some View {
         Group {
             Toggle("Conversations", isOn: $syncConversations)
             Toggle("Knowledge Base", isOn: $syncKnowledge)
@@ -396,7 +402,7 @@ struct SyncSettingsContentView: View {
 
     // MARK: - Connected Devices Section
 
-    private var connectedDevicesSection: some View {
+    var connectedDevicesSection: some View {
         Group {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -443,7 +449,7 @@ struct SyncSettingsContentView: View {
         }
     }
 
-    private func deviceRow(_ device: DeviceProfile) -> some View {
+    func deviceRow(_ device: DeviceProfile) -> some View {
         let isCurrentDevice = device.id == cachedDeviceProfile.id
 
         return HStack(spacing: 12) {
@@ -493,7 +499,7 @@ struct SyncSettingsContentView: View {
 
     #if os(macOS)
     @ViewBuilder
-    private var deviceUpdatesSection: some View {
+    var deviceUpdatesSection: some View {
         // Update availability banner
         if let update = updateService.availableUpdate {
             HStack(spacing: 12) {
@@ -624,7 +630,7 @@ struct SyncSettingsContentView: View {
         }
     }
 
-    private func publishCurrentBuild() async {
+    func publishCurrentBuild() async {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
         let deviceName = cachedDeviceProfile.name
@@ -646,7 +652,7 @@ struct SyncSettingsContentView: View {
         }
     }
 
-    private func currentCommitHash() async -> String {
+    func currentCommitHash() async -> String {
         let bundleURL = Bundle.main.bundleURL
         return await Task.detached {
             let process = Process()
@@ -669,7 +675,6 @@ struct SyncSettingsContentView: View {
         }.value
     }
     #endif
-
 }
 
 // Handoff, Advanced, Device List Sheet, Actions, and Preview

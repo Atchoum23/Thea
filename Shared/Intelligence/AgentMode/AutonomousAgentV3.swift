@@ -296,7 +296,8 @@ extension AutonomousAgentV3 {
             message: state.status == .completed ? "Plan completed successfully" : "Plan failed"
         ))
 
-        logger.info("Execution finished: \(state.status.rawValue)")
+        let statusValue = state.status.rawValue
+        logger.info("Execution finished: \(statusValue)")
 
         return AutonomousPlanResult(
             planId: plan.id, success: state.failedSteps.isEmpty,

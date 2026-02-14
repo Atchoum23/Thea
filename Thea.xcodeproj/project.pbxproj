@@ -1003,6 +1003,7 @@
 		8D740C7C81833C7B000D6C83 /* MemorySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5900B3D94C20F38A746A675B /* MemorySystem.swift */; };
 		8D985025543DD64BAB0353A2 /* IntegrationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5427843F93176F4C55BF2A2B /* IntegrationsManager.swift */; };
 		8DCCCD57FAF216E1F1E73B47 /* Scriptserror-summary.sh in Resources */ = {isa = PBXBuildFile; fileRef = BF4145F0BDEF139330DA0734 /* Scriptserror-summary.sh */; };
+		8DE8E1D0504AA4E80E89C7EE /* MacSettingsView+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E921CDD94958A3377A0B522 /* MacSettingsView+Actions.swift */; };
 		8DF1EBAB8070FF35229D1824 /* QAToolsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD3F97B247B7F411AEEBE44F /* QAToolsManager.swift */; };
 		8E11CA887FD8FA573DD9DCF7 /* ClipboardContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF00ECA64645F18D5F3B1EC7 /* ClipboardContextProvider.swift */; };
 		8E2539ED0E44E6094C4E9A37 /* CallMonitorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19B9AC871DAEC9726E72B3F /* CallMonitorTypes.swift */; };
@@ -2317,6 +2318,7 @@
 		6DB01955DB6324DA02F8702C /* IncomeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeService.swift; sourceTree = "<group>"; };
 		6DB66A72703EA94C865C8271 /* VoiceFirstModeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceFirstModeManager.swift; sourceTree = "<group>"; };
 		6DBA15108113B06F408639E7 /* AsanaMCPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsanaMCPClient.swift; sourceTree = "<group>"; };
+		6E921CDD94958A3377A0B522 /* MacSettingsView+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MacSettingsView+Actions.swift"; sourceTree = "<group>"; };
 		6F1D529663D235ED1CE630B7 /* AIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIModel.swift; sourceTree = "<group>"; };
 		6FBAC801F87D5C9FF66525A3 /* VisualTimerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualTimerService.swift; sourceTree = "<group>"; };
 		6FF86F27F0214F1E41B24F47 /* QueuedMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueuedMessage.swift; sourceTree = "<group>"; };
@@ -4806,6 +4808,7 @@
 				2FA47485FFD1AFB20CEE720D /* MacChatDetailView.swift */,
 				BAF6605C0F73BF08FF699B2C /* MacProjectDetailView.swift */,
 				36961E79ECB7AEFC08F0720B /* MacSettingsView.swift */,
+				6E921CDD94958A3377A0B522 /* MacSettingsView+Actions.swift */,
 				F3C1296015C9B1441BFF9C3B /* MacSettingsView+Sections.swift */,
 				8D53A7C7AC531FF9BCF6CBB1 /* QuickEntryWindow.swift */,
 				A69D52A26057121DAFE15E7A /* TheaAgentDetailView.swift */,
@@ -7964,6 +7967,7 @@
 				2C2CEC0ED74634E7DFB7AE6F /* MLXVoiceBackend.swift in Sources */,
 				12709665BF90ABAA18A7425C /* MacChatDetailView.swift in Sources */,
 				668CB8401A11C87910A75387 /* MacProjectDetailView.swift in Sources */,
+				8DE8E1D0504AA4E80E89C7EE /* MacSettingsView+Actions.swift in Sources */,
 				1CBAF8CF1CA0A1C96D86D0A0 /* MacSettingsView+Sections.swift in Sources */,
 				DD97385F9D8576815519D018 /* MacSettingsView.swift in Sources */,
 				2E2962F3E018A8026A9A3414 /* MacSystemObserver.swift in Sources */,
