@@ -1,6 +1,9 @@
 // EventBusCrossCuttingTests.swift
-// Tests for cross-event ID uniqueness and category mapping.
-// Companion to EventBusEventExtendedTests.swift.
+// Cross-event ID uniqueness and category mapping tests
+// that validate all 11 event types together.
+// Companion to EventBusEventCreationTests.swift and
+// EventBusEventExtendedTests.swift.
+// Mirrors types in Shared/Core/EventBus/EventBusEvents.swift.
 
 import Foundation
 import XCTest
