@@ -21,9 +21,9 @@ public final class ExtensionSyncBridge: ObservableObject {
 
     // MARK: - Published State
 
-    @Published public private(set) var connectedExtensions: [ExtensionConnection] = []
+    @Published public internal(set) var connectedExtensions: [ExtensionConnection] = []
     @Published public private(set) var isServerRunning = false
-    @Published public private(set) var lastSyncTime: Date?
+    @Published public internal(set) var lastSyncTime: Date?
     @Published public var settings = SyncSettings()
 
     // MARK: - Extension Stats (shared state)
