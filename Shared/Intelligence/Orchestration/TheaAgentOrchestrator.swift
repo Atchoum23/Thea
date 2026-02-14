@@ -93,7 +93,7 @@ public final class TheaAgentOrchestrator {
     // MARK: - Task Registry & Cache
 
     /// Registry of delegated tasks, keyed by content hash for deduplication
-    private var taskRegistry: [String: UUID] = []  // taskHash -> sessionID
+    private var taskRegistry: [String: UUID] = [:]  // taskHash -> sessionID
 
     /// Subscribers waiting for a shared task result
     private var taskSubscribers: [String: [UUID]] = [:]  // taskHash -> [sessionIDs wanting result]
