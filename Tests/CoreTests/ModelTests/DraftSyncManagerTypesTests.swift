@@ -271,11 +271,11 @@ struct InputDraftCreationTests {
     @Test("Default creation")
     func defaultCreation() {
         let draft = TestInputDraft()
-        #expect(draft.text == "")
+        #expect(draft.text.isEmpty)
         #expect(draft.attachments.isEmpty)
         #expect(draft.conversationId == nil)
         #expect(draft.cursorPosition == nil)
-        #expect(draft.deviceId == "")
+        #expect(draft.deviceId.isEmpty)
     }
 
     @Test("Full creation")

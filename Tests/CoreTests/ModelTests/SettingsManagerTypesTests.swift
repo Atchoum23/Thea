@@ -551,6 +551,6 @@ struct SettingsReloadTests {
     func stringEmptyPreserved() {
         let value: String? = ""
         let result = value ?? "system"
-        #expect(result == "")
+        #expect(result.isEmpty)
     }
 }

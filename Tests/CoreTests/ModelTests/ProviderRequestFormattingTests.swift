@@ -325,7 +325,9 @@ struct OpenAIStreamParsingTests {
     @Test("Empty content parsed")
     func emptyContent() {
         let line = "data: {\"choices\":[{\"delta\":{\"content\":\"\"}}]}"
-        #expect(parseStreamLine(line) == "")
+        let result = parseStreamLine(line)
+        #expect(result != nil)
+        #expect(result?.isEmpty == true)
     }
 
     @Test("Missing content key returns nil")
