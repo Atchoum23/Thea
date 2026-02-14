@@ -15,10 +15,6 @@ struct TheatvOSApp: App {
                 .environmentObject(streamingService)
                 .environmentObject(mediaService)
                 .task {
-                    // Initialize sync singletons (non-blocking)
-                    _ = CloudKitService.shared
-                    _ = PreferenceSyncEngine.shared
-
                     // Start background services
                     healthMonitor.startMonitoring(interval: 120)
 
