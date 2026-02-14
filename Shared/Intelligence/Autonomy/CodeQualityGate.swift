@@ -103,7 +103,7 @@ actor CodeQualityGate {
             #"ghp_[A-Za-z0-9]{36}"#,
             #"AKIA[A-Z0-9]{16}"#,
             #"-----BEGIN.*PRIVATE KEY-----"#,
-            #"AIzaSy[A-Za-z0-9_-]{33}"#,
+            #"AIzaSy[A-Za-z0-9_-]{33}"#
         ]
 
         var findings: [String] = []
