@@ -7,6 +7,7 @@
 import Foundation
 import OSLog
 
+#if os(macOS)
 actor CodeQualityGate {
     static let shared = CodeQualityGate()
 
@@ -180,3 +181,4 @@ actor CodeQualityGate {
         }
     }
 }
+#endif

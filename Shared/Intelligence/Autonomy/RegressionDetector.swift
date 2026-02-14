@@ -7,6 +7,7 @@
 import Foundation
 import OSLog
 
+#if os(macOS)
 actor RegressionDetector {
     static let shared = RegressionDetector()
 
@@ -261,3 +262,4 @@ actor RegressionDetector {
         }
     }
 }
+#endif
