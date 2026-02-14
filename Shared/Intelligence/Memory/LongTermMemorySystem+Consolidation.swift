@@ -413,16 +413,9 @@ public struct MemoryContext: Sendable {
 
 // MARK: - Helpers
 
-private extension Array where Element: Hashable {
+extension Array where Element: Hashable {
     func uniqued() -> [Element] {
         var seen = Set<Element>()
-        return filter { seen.insert($0).inserted }
-    }
-}
-
-private extension Array where Element == String {
-    func uniqued() -> [String] {
-        var seen = Set<String>()
         return filter { seen.insert($0).inserted }
     }
 }

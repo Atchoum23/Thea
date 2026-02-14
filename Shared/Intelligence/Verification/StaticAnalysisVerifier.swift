@@ -49,7 +49,6 @@ public final class StaticAnalysisVerifier {
         }
 
         var allIssues: [AnalysisIssue] = []
-        var factors: [ConfidenceDecomposition.DecompositionFactor] = []
 
         for block in codeBlocks {
             switch block.language {
@@ -76,10 +75,13 @@ public final class StaticAnalysisVerifier {
             allIssues.append(contentsOf: aiIssues)
         }
 
-        // Calculate confidence based on issues
-        let errorCount = allIssues.filter { $0.severity == .error }.count
-        let warningCount = allIssues.filter { $0.severity == .warning }.count
-        let infoCount = allIssues.filter { $0.severity == .info }.count
+        return buildResult(issues: allIssues, codeBlockCount: codeBlocks.count)
+    }
+
+    private func buildResult(issues: [AnalysisIssue], codeBlockCount: Int) -> StaticAnalysisResult {
+        let errorCount = issues.filter { $0.severity == .error }.count
+        let warningCount = issues.filter { $0.severity == .warning }.count
+        let infoCount = issues.filter { $0.severity == .info }.count
 
         var confidence = 1.0
         confidence -= Double(errorCount) * 0.25
@@ -87,12 +89,13 @@ public final class StaticAnalysisVerifier {
         confidence -= Double(infoCount) * 0.02
         confidence = max(0.0, confidence)
 
-        // Build factors
+        var factors: [ConfidenceDecomposition.DecompositionFactor] = []
+
         if errorCount > 0 {
             factors.append(ConfidenceDecomposition.DecompositionFactor(
                 name: "Critical Issues",
                 contribution: -0.3 * Double(min(3, errorCount)),
-                explanation: "\(errorCount) error(s) found: \(allIssues.filter { $0.severity == .error }.first?.message ?? "")"
+                explanation: "\(errorCount) error(s) found: \(issues.filter { $0.severity == .error }.first?.message ?? "")"
             ))
         }
 
@@ -113,7 +116,7 @@ public final class StaticAnalysisVerifier {
         }
 
         let details = """
-            Analyzed \(codeBlocks.count) code block(s).
+            Analyzed \(codeBlockCount) code block(s).
             Errors: \(errorCount), Warnings: \(warningCount), Info: \(infoCount)
             Tools: \(enableSwiftLint ? "SwiftLint " : "")\(enableCompilerCheck ? "Compiler " : "")\(enableAIAnalysis ? "AI" : "")
             """
@@ -128,7 +131,7 @@ public final class StaticAnalysisVerifier {
                 verified: errorCount == 0
             ),
             factors: factors,
-            issues: allIssues
+            issues: issues
         )
     }
 

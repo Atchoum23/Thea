@@ -435,7 +435,13 @@ extension KnowledgeSourceManager {
 
     /// Load default knowledge sources
     private func loadDefaultSources() {
-        sources = [
+        sources = defaultAIProviderSources() + defaultToolSources()
+        save()
+        logger.info("Loaded \(self.sources.count) default knowledge sources")
+    }
+
+    private func defaultAIProviderSources() -> [KnowledgeSource] {
+        [
             KnowledgeSource(
                 url: URL(string: "https://platform.claude.com/docs")!,
                 name: "Claude API",
@@ -484,7 +490,12 @@ extension KnowledgeSourceManager {
                 description: "Perplexity API documentation",
                 category: .aiProvider,
                 auditFrequency: .weekly
-            ),
+            )
+        ]
+    }
+
+    private func defaultToolSources() -> [KnowledgeSource] {
+        [
             KnowledgeSource(
                 url: URL(string: "https://docs.vapi.ai")!,
                 name: "Vapi",
@@ -521,8 +532,6 @@ extension KnowledgeSourceManager {
                 auditFrequency: .weekly
             )
         ]
-        save()
-        logger.info("Loaded \(self.sources.count) default knowledge sources")
     }
 
     // MARK: - Statistics
