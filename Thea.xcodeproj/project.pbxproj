@@ -556,6 +556,7 @@
 		553C56B14FFD96BDEC9AC7CC /* ShortcutsOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FAC1F86EEAA8EB29F656BA /* ShortcutsOrchestrator.swift */; };
 		557DC55E3F82F05F97A2F185 /* WorkWithAppsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 959BCACCB17BD0CEA220C3F2 /* WorkWithAppsService.swift */; };
 		5597AA6A26245BF44B5C1C70 /* WorkflowSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F38F8AACB3311713FA335FB /* WorkflowSettingsView.swift */; };
+		55AEAAA366E854B1EDFCD56A /* TheaClipWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566FA3F6CD26A1C22C1FE97B /* TheaClipWindowController.swift */; };
 		55BD573678051661066CE050 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 376303DA04EC95F86A836EAF /* AppIcon.icns */; };
 		55E23500FC3512B0E8C702E5 /* ShortcutsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 428F384A89E9245DCA91F64C /* ShortcutsSettingsView.swift */; };
 		560116BC6365903A2550F1BA /* WebSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E24E037F60BC671AFDA581C /* WebSocketServer.swift */; };
@@ -935,7 +936,6 @@
 		93A094626DC36E596651CD15 /* CompilerError+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50BBA77C706BDFACD80323A /* CompilerError+Convenience.swift */; };
 		94D2EF338D29FA31090BE1D6 /* AssessmentServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C0A3B85602C5963D7D0511 /* AssessmentServiceTests.swift */; };
 		953E9A3395AF31C6D0E439ED /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3579242B3BC082722588D04E /* BrowserAutomationService.swift */; };
-		95556B1D0F9518EAEE10868D /* TheaClipModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE0F80561949E45736F96EC /* TheaClipModels.swift */; };
 		955D09776429208AF47BBAD9 /* AppUsageMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5981EE45534F8BD517361F83 /* AppUsageMonitor.swift */; };
 		957FCBD45BA949980B256E31 /* writing-assistant.js in Resources */ = {isa = PBXBuildFile; fileRef = 1D395678DA91951D20705A95 /* writing-assistant.js */; };
 		95A840B0DB91BB3B8DDE77FC /* FocusModeTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDFADF41C672BD8282A4DD0 /* FocusModeTemplates.swift */; };
@@ -1100,6 +1100,7 @@
 		AFE69489A46D4331B4F0FC27 /* CareerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91D436114138C4A47CD07B13 /* CareerService.swift */; };
 		B00E78EA83E6EF575F08775D /* NutritionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 276B8253B52AD21C3D9EC7A5 /* NutritionViewModel.swift */; };
 		B0700972FE8564B5E54DC51C /* CognitiveAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFDD30D1CE751C01D0947D04 /* CognitiveAssistant.swift */; };
+		B09B652E808131C69A92C8EC /* ClipboardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9F28861295002D95BF677C /* ClipboardModels.swift */; };
 		B0A890148EF6D42443F1F5E5 /* SiriShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119E655F208CE7BAFF433FBC /* SiriShortcuts.swift */; };
 		B0AD7E96994D4302B423916C /* AIModelGovernor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA2C2984F91DCA78C56338 /* AIModelGovernor.swift */; };
 		B0B481BAD213EA09D15F0D8A /* TerminalOutputParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A572ACAF0108F8ED69DE8B /* TerminalOutputParser.swift */; };
@@ -1463,6 +1464,7 @@
 		EC3FBD08AECB98FC6B8D8E14 /* AutonomousAgentV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77A0E6521036FC1C3978A7EA /* AutonomousAgentV3.swift */; };
 		EC6175AA942F4EC0ECD7A1F9 /* MemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C8ECE96F68E07389334095 /* MemoryService.swift */; };
 		EC8C5610EEDB0D13F7834F35 /* ModelSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A31D5A95202A25306AF85DA /* ModelSelectorView.swift */; };
+		ECFD2DBB1CA5260E0FF63EEA /* TheaClipWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566FA3F6CD26A1C22C1FE97B /* TheaClipWindowController.swift */; };
 		ED03EDC8465A846ACDDDF57C /* TaskBreakdownService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27D90B373D6905F399C035F /* TaskBreakdownService.swift */; };
 		ED375DA6222D54A6DBD38A93 /* AppleFinanceKitProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2832D2023B8A23B43161DB3 /* AppleFinanceKitProvider.swift */; };
 		ED59233BC69DA2402676A910 /* ConversationIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA47D1889A0DF7617094D88 /* ConversationIntelligence.swift */; };
@@ -1507,7 +1509,6 @@
 		F4B0509C959749260F0BCFEB /* SiriIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7853DB6959DC8D9D05D49042 /* SiriIntegration.swift */; };
 		F4DAF9DDEE8B849C36C8D159 /* AssessmentProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C317A416D1B86598194C7C7F /* AssessmentProtocols.swift */; };
 		F4F6B4F51A74F6A890C4C75E /* ScreenshotPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC53BAD4FF4D60020E98F59 /* ScreenshotPreview.swift */; };
-		F518522D0E52F7E1B3579BC2 /* TheaClipModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE0F80561949E45736F96EC /* TheaClipModels.swift */; };
 		F5191CCE0CB386FA358BB02E /* PlanManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954D1F5B8BA0920CC2DA1EAD /* PlanManager.swift */; };
 		F51DF2D8A7A54D44718F6336 /* CoworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0952B592B1ECFF299AB8556B /* CoworkSettingsView.swift */; };
 		F528DD502683D22C0E98766F /* .vscodetasks.json in Resources */ = {isa = PBXBuildFile; fileRef = B672E60E1BDE705287E8B242 /* .vscodetasks.json */; };
@@ -1551,6 +1552,7 @@
 		FD32C35712D8D883EF4DA19B /* SupraModelSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBAACCCCCCE6D357E5B565B6 /* SupraModelSelector.swift */; };
 		FD64653F0C8C599AD0666611 /* CoworkProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20139D179BC17752B359CC7C /* CoworkProgressView.swift */; };
 		FD6C766236484C795EDB4869 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 5909E7EB51E6633C5691F827 /* background.js */; };
+		FD7198F1723857832F9B4F2E /* ClipboardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9F28861295002D95BF677C /* ClipboardModels.swift */; };
 		FD782C3C5445A5E37034EAC3 /* HDKnowledgeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3151C1AA921620527D16FC69 /* HDKnowledgeScanner.swift */; };
 		FD9B37B2E8B8D13F0849BAD5 /* ClipboardHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB8D88337B0652859585DD0 /* ClipboardHistoryManager.swift */; };
 		FDA5E5A2D2A7C40A6295D24A /* StreamingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F31B883CFBAD460B87029FB6 /* StreamingIndicator.swift */; };
@@ -2013,6 +2015,7 @@
 		55ED60A26645151D1B26BE21 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = popup.js; sourceTree = "<group>"; };
 		55F91D6A6458E1AD8965E2A8 /* ExtensionSyncBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionSyncBridge.swift; sourceTree = "<group>"; };
 		56466E07E84C9C940F83D535 /* MobileIntelligenceOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileIntelligenceOrchestrator.swift; sourceTree = "<group>"; };
+		566FA3F6CD26A1C22C1FE97B /* TheaClipWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipWindowController.swift; sourceTree = "<group>"; };
 		567B6BA67CC7217C24B6F423 /* YouTubeIntelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubeIntelligence.swift; sourceTree = "<group>"; };
 		56B851219F6C9A71A90F6833 /* AdaptiveModelRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveModelRouter.swift; sourceTree = "<group>"; };
 		5754C968953F564F15B7EBFF /* iOSAutomationSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSAutomationSection.swift; sourceTree = "<group>"; };
@@ -2323,6 +2326,7 @@
 		AE8D699C51A337162D4453E6 /* TodoistIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoistIntegration.swift; sourceTree = "<group>"; };
 		AEF467C34A028512D49539FE /* GDPRDataExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GDPRDataExporter.swift; sourceTree = "<group>"; };
 		AF9A602963894A83668CD0A8 /* APIBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIBuilderView.swift; sourceTree = "<group>"; };
+		AF9F28861295002D95BF677C /* ClipboardModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardModels.swift; sourceTree = "<group>"; };
 		AFA444BB269C0E5224B08869 /* VoiceModeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceModeController.swift; sourceTree = "<group>"; };
 		B010DAC620D1393D294B373A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B18BFEE9F889C2D711A65F35 /* IntentsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IntentsExtension.entitlements; sourceTree = "<group>"; };
@@ -2474,7 +2478,6 @@
 		DF41D7B50ADAD52B6CB74541 /* TheaFocusFilterExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TheaFocusFilterExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF81E960712B2416AD931985 /* MediaMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaMonitor.swift; sourceTree = "<group>"; };
 		DFA2EF92AFF6A8A09A41FC68 /* PermissionsTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsTypes.swift; sourceTree = "<group>"; };
-		DFE0F80561949E45736F96EC /* TheaClipModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipModels.swift; sourceTree = "<group>"; };
 		E07B93655FF8AAA4E0965339 /* AssessmentDataExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentDataExporter.swift; sourceTree = "<group>"; };
 		E0C0A3B85602C5963D7D0511 /* AssessmentServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentServiceTests.swift; sourceTree = "<group>"; };
 		E14704B52B7CA21BBCDD9B4C /* OrchestratorSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorSettingsView.swift; sourceTree = "<group>"; };
@@ -3082,6 +3085,7 @@
 			children = (
 				6F1D529663D235ED1CE630B7 /* AIModel.swift */,
 				1F3EDD38D4D04B72138D09FA /* AIProviderConfig.swift */,
+				AF9F28861295002D95BF677C /* ClipboardModels.swift */,
 				AA65CF6F48987A1BFB88CF3A /* Conversation.swift */,
 				4318671F8DE98472EC663FBF /* FinancialModels.swift */,
 				D135755814137B96503285B2 /* IndexedFile.swift */,
@@ -3090,7 +3094,6 @@
 				4F02095E4726D071A1B0EC8A /* Project.swift */,
 				C2C9E67F316E11C79A15D6FC /* PromptEngineeringModels.swift */,
 				6FF86F27F0214F1E41B24F47 /* QueuedMessage.swift */,
-				DFE0F80561949E45736F96EC /* TheaClipModels.swift */,
 				AA8FD2C37F45BB996BAFEA7E /* TrackingModels.swift */,
 			);
 			path = Models;
@@ -3134,6 +3137,7 @@
 		2682FF17F727492A04AEED50 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3B9281D1B4A5A4B3FFC83690 /* Clipboard */,
 				57DDD00D5D10DC688AB0BA2A /* Components */,
 				914E665F0A59BB7F6FF0E23D /* Cowork */,
 				9CFD329EFE978EC2EFFA9DD9 /* Errors */,
@@ -3413,6 +3417,14 @@
 				77A0E6521036FC1C3978A7EA /* AutonomousAgentV3.swift */,
 			);
 			path = AgentMode;
+			sourceTree = "<group>";
+		};
+		3B9281D1B4A5A4B3FFC83690 /* Clipboard */ = {
+			isa = PBXGroup;
+			children = (
+				566FA3F6CD26A1C22C1FE97B /* TheaClipWindowController.swift */,
+			);
+			path = Clipboard;
 			sourceTree = "<group>";
 		};
 		3EAA4BA862217F50E3BD25D6 /* Code */ = {
@@ -6420,6 +6432,7 @@
 				E4A34D3DFD147C863DA35559 /* ClaudeAppBridge.swift in Sources */,
 				8E11CA887FD8FA573DD9DCF7 /* ClipboardContextProvider.swift in Sources */,
 				0212A612CF6DB5FB40AE4256 /* ClipboardHistoryManager.swift in Sources */,
+				B09B652E808131C69A92C8EC /* ClipboardModels.swift in Sources */,
 				FEB4E5A2C44924F2CAFDA31B /* ClipboardMonitor.swift in Sources */,
 				79DD161B0693776600C5FACB /* ClipboardSyncService.swift in Sources */,
 				BFC402CB6C4147506218649C /* CloudKitService.swift in Sources */,
@@ -6877,8 +6890,8 @@
 				0CFBBCA2E55EDB84C53580CD /* TheaApp.swift in Sources */,
 				B45ACC988DF358341015F3FD /* TheaAppIntents.swift in Sources */,
 				24D7D5E665E313AEFEF0D43F /* TheaAssistantSchemas.swift in Sources */,
-				F518522D0E52F7E1B3579BC2 /* TheaClipModels.swift in Sources */,
 				A1773A6E1C5CAEF10D8F6E29 /* TheaClipSettingsView.swift in Sources */,
+				ECFD2DBB1CA5260E0FF63EEA /* TheaClipWindowController.swift in Sources */,
 				C3D83275131B8EDD5A4ED074 /* TheaConfig.swift in Sources */,
 				616F5000163FBADA6F9988FA /* TheaControls.swift in Sources */,
 				9BD515D0A5D67AB72CE507B7 /* TheaDesignSystem.swift in Sources */,
@@ -7217,6 +7230,7 @@
 				D24D10F914431A8B7481065A /* ClaudeAppBridge.swift in Sources */,
 				5D043763D4866B0F65AE5FC9 /* ClipboardContextProvider.swift in Sources */,
 				FD9B37B2E8B8D13F0849BAD5 /* ClipboardHistoryManager.swift in Sources */,
+				FD7198F1723857832F9B4F2E /* ClipboardModels.swift in Sources */,
 				92A9290681071F5A8B4C7DAE /* ClipboardMonitor.swift in Sources */,
 				7539461341067BF4EE2C514C /* ClipboardObserver.swift in Sources */,
 				7E35F20DC5B6DCA3A41A42BC /* ClipboardSyncService.swift in Sources */,
@@ -7726,8 +7740,8 @@
 				36E37E807499AF9FFF5706C6 /* TheaApp.swift in Sources */,
 				29606B23A2216E9B54F20D42 /* TheaAppIntents.swift in Sources */,
 				A93E47DABEA388FB43D49DD0 /* TheaAssistantSchemas.swift in Sources */,
-				95556B1D0F9518EAEE10868D /* TheaClipModels.swift in Sources */,
 				66E00C2C823DC1DB5AD234C2 /* TheaClipSettingsView.swift in Sources */,
+				55AEAAA366E854B1EDFCD56A /* TheaClipWindowController.swift in Sources */,
 				4EF05F89B87750C2EF03D43C /* TheaConfig.swift in Sources */,
 				C94925D9673BDD6F4DCFA67A /* TheaControls.swift in Sources */,
 				625770CFFC930D2AE55B0DA3 /* TheaDesignSystem.swift in Sources */,
