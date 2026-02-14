@@ -196,7 +196,7 @@ final class ContextManagerTests: XCTestCase {
             ),
             ContextManager.TokenizedMessage(
                 id: UUID(), role: "assistant", content: "Hi there", tokenCount: 8, timestamp: Date()
-            ),
+            )
         ]
 
         let window = await manager.getContextWindow(
@@ -217,7 +217,7 @@ final class ContextManagerTests: XCTestCase {
             ),
             ContextManager.TokenizedMessage(
                 id: UUID(), role: "user", content: "Hello", tokenCount: 5, timestamp: Date()
-            ),
+            )
         ]
 
         let normalWindow = await manager.getContextWindow(

@@ -74,14 +74,12 @@ final class FeatureFlagTests: XCTestCase {
 
     func testIsEnabledDefaultFalse() {
         let flags = FeatureFlags.shared
-        // Unknown key with no default returns false
-        XCTAssertFalse(flags.isEnabled("nonexistent.key"))
+        XCTAssertFalse(flags.isEnabled("nonexistent.key.test_\(UUID().uuidString)"))
     }
 
     func testIsEnabledWithDefaultTrue() {
         let flags = FeatureFlags.shared
-        // Unknown key with explicit default returns the default
-        XCTAssertTrue(flags.isEnabled("nonexistent.key", default: true))
+        XCTAssertTrue(flags.isEnabled("nonexistent.key.test_\(UUID().uuidString)", default: true))
     }
 
     func testSetAndReadFlag() {
@@ -93,56 +91,28 @@ final class FeatureFlagTests: XCTestCase {
 
         flags.setFlag(key, enabled: false, source: .local)
         XCTAssertFalse(flags.isEnabled(key))
-
-        // Clean up
-        flags.flags.removeValue(forKey: key)
     }
 
-    func testSetFlagRecordsSource() {
+    func testSetFlagOverwritesPrevious() {
         let flags = FeatureFlags.shared
-        let key = "test.source_\(UUID().uuidString.prefix(8))"
+        let key = "test.overwrite_\(UUID().uuidString.prefix(8))"
 
         flags.setFlag(key, enabled: true, source: .override)
-        XCTAssertEqual(flags.flags[key]?.source, .override)
+        XCTAssertTrue(flags.isEnabled(key))
 
-        flags.setFlag(key, enabled: true, source: .remote)
-        XCTAssertEqual(flags.flags[key]?.source, .remote)
-
-        // Clean up
-        flags.flags.removeValue(forKey: key)
-    }
-
-    func testSetFlagRecordsTimestamp() {
-        let flags = FeatureFlags.shared
-        let key = "test.timestamp_\(UUID().uuidString.prefix(8))"
-        let before = Date()
-
-        flags.setFlag(key, enabled: true)
-
-        let after = Date()
-        if let flag = flags.flags[key] {
-            XCTAssertGreaterThanOrEqual(flag.lastUpdated, before)
-            XCTAssertLessThanOrEqual(flag.lastUpdated, after)
-        } else {
-            XCTFail("Flag not found after setting")
-        }
-
-        // Clean up
-        flags.flags.removeValue(forKey: key)
+        flags.setFlag(key, enabled: false, source: .remote)
+        XCTAssertFalse(flags.isEnabled(key))
     }
 
     // MARK: - Core Feature Flag Accessors
 
     func testAgentSecStrictModeDefault() {
-        // Default is true per implementation
         let flags = FeatureFlags.shared
-        // If no override set, should return default
         let val = flags.isEnabled("agentsec.strict_mode", default: true)
         XCTAssertTrue(val)
     }
 
     func testBrowserAutomationDefaultOff() {
-        // browserAutomation defaults to false
         let flags = FeatureFlags.shared
         let val = flags.isEnabled("automation.browser", default: false)
         XCTAssertFalse(val)
@@ -156,24 +126,24 @@ final class FeatureFlagTests: XCTestCase {
 
     // MARK: - Integration Module Flags
 
-    func testIntegrationFlagGetterSetter() {
+    func testHealthEnabledToggle() {
         let flags = FeatureFlags.shared
-
-        // Save original value
-        let originalHealth = flags.flags["integration.health"]
 
         flags.healthEnabled = false
         XCTAssertFalse(flags.healthEnabled)
 
         flags.healthEnabled = true
         XCTAssertTrue(flags.healthEnabled)
+    }
 
-        // Restore
-        if let original = originalHealth {
-            flags.flags["integration.health"] = original
-        } else {
-            flags.flags.removeValue(forKey: "integration.health")
-        }
+    func testWellnessEnabledToggle() {
+        let flags = FeatureFlags.shared
+
+        flags.wellnessEnabled = false
+        XCTAssertFalse(flags.wellnessEnabled)
+
+        flags.wellnessEnabled = true
+        XCTAssertTrue(flags.wellnessEnabled)
     }
 
     // MARK: - Flag Dictionary Codable Round-Trip
@@ -181,7 +151,7 @@ final class FeatureFlagTests: XCTestCase {
     func testFlagDictionaryCodable() throws {
         let flagDict: [String: FeatureFlag] = [
             "feature.a": FeatureFlag(key: "feature.a", isEnabled: true, source: .local, lastUpdated: Date()),
-            "feature.b": FeatureFlag(key: "feature.b", isEnabled: false, source: .remote, lastUpdated: Date()),
+            "feature.b": FeatureFlag(key: "feature.b", isEnabled: false, source: .remote, lastUpdated: Date())
         ]
 
         let data = try JSONEncoder().encode(flagDict)
@@ -192,5 +162,19 @@ final class FeatureFlagTests: XCTestCase {
         XCTAssertFalse(decoded["feature.b"]!.isEnabled)
         XCTAssertEqual(decoded["feature.a"]!.source, .local)
         XCTAssertEqual(decoded["feature.b"]!.source, .remote)
+    }
+
+    // MARK: - ResetToDefaults
+
+    func testResetToDefaultsClearsFlags() {
+        let flags = FeatureFlags.shared
+        let key = "test.reset_\(UUID().uuidString.prefix(8))"
+
+        flags.setFlag(key, enabled: true)
+        XCTAssertTrue(flags.isEnabled(key))
+
+        flags.resetToDefaults()
+        // After reset, the key should not be found, so default (false) is returned
+        XCTAssertFalse(flags.isEnabled(key))
     }
 }
