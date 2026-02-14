@@ -1,6 +1,9 @@
 import Foundation
 import Observation
+import os.log
 @preconcurrency import SwiftData
+
+private let tabLogger = Logger(subsystem: "ai.thea.app", category: "TabManager")
 
 // MARK: - Tab Manager
 
@@ -41,7 +44,7 @@ final class TabManager {
                 createdAt: Date()
             )
             context.insert(newConversation)
-            try? context.save()
+            do { try context.save() } catch { tabLogger.error("Failed to save new conversation for tab: \(error.localizedDescription)") }
 
             tab = ConversationTab(
                 conversation: newConversation,
@@ -198,7 +201,7 @@ final class TabManager {
             createdAt: Date()
         )
         context.insert(newConversation)
-        try? context.save()
+        do { try context.save() } catch { tabLogger.error("Failed to save duplicated tab conversation: \(error.localizedDescription)") }
 
         let newTab = ConversationTab(
             conversation: newConversation,
