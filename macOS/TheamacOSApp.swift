@@ -21,7 +21,7 @@ struct TheamacOSApp: App {
     init() {
         let schema = Schema([
             Conversation.self, Message.self, Project.self,
-            TheaClipEntry.self, TheaClipPinboard.self, TheaClipPinboardEntry.self,
+            TheaClipEntry.self, TheaClipPinboard.self, TheaClipPinboardEntry.self
         ])
         let useInMemory = isUITesting || isUnitTesting
 
