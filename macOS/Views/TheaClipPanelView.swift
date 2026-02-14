@@ -100,11 +100,10 @@ struct TheaClipPanelView: View {
                     ForEach(filtered) { entry in
                         TheaClipCardView(
                             entry: entry,
-                            isSelected: selectedEntry?.id == entry.id,
-                            onPaste: {
-                                clipManager.pasteEntry(entry)
-                            }
-                        )
+                            isSelected: selectedEntry?.id == entry.id
+                        ) {
+                            clipManager.pasteEntry(entry)
+                        }
                         .onTapGesture {
                             selectedEntry = entry
                         }

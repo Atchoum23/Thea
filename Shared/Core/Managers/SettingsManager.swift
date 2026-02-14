@@ -253,6 +253,44 @@ final class SettingsManager: ObservableObject {
         didSet { persist(moltbookMaxDailyPosts, forKey: "moltbookMaxDailyPosts") }
     }
 
+    // MARK: - Clipboard History Settings
+
+    @Published var clipboardHistoryEnabled: Bool {
+        didSet { persist(clipboardHistoryEnabled, forKey: "clipboardHistoryEnabled") }
+    }
+
+    @Published var clipboardRecordImages: Bool {
+        didSet { persist(clipboardRecordImages, forKey: "clipboardRecordImages") }
+    }
+
+    @Published var clipboardMaxHistory: Int {
+        didSet { persist(clipboardMaxHistory, forKey: "clipboardMaxHistory") }
+    }
+
+    @Published var clipboardRetentionDays: Int {
+        didSet { persist(clipboardRetentionDays, forKey: "clipboardRetentionDays") }
+    }
+
+    @Published var clipboardAutoDetectSensitive: Bool {
+        didSet { persist(clipboardAutoDetectSensitive, forKey: "clipboardAutoDetectSensitive") }
+    }
+
+    @Published var clipboardSensitiveExpiryHours: Int {
+        didSet { persist(clipboardSensitiveExpiryHours, forKey: "clipboardSensitiveExpiryHours") }
+    }
+
+    @Published var clipboardAutoSummarize: Bool {
+        didSet { persist(clipboardAutoSummarize, forKey: "clipboardAutoSummarize") }
+    }
+
+    @Published var clipboardSyncEnabled: Bool {
+        didSet { persist(clipboardSyncEnabled, forKey: "clipboardSyncEnabled") }
+    }
+
+    @Published var clipboardExcludedApps: [String] {
+        didSet { persist(clipboardExcludedApps, forKey: "clipboardExcludedApps") }
+    }
+
     // MARK: - Focus & Search Settings
 
     @Published var activeFocusMode: String {
@@ -339,6 +377,18 @@ final class SettingsManager: ObservableObject {
         moltbookPreviewMode = UserDefaults.standard.object(forKey: "moltbookPreviewMode") as? Bool ?? true
         moltbookMaxDailyPosts = UserDefaults.standard.integer(forKey: "moltbookMaxDailyPosts") != 0
             ? UserDefaults.standard.integer(forKey: "moltbookMaxDailyPosts") : 10
+        clipboardHistoryEnabled = UserDefaults.standard.object(forKey: "clipboardHistoryEnabled") as? Bool ?? true
+        clipboardRecordImages = UserDefaults.standard.object(forKey: "clipboardRecordImages") as? Bool ?? true
+        clipboardMaxHistory = UserDefaults.standard.integer(forKey: "clipboardMaxHistory") != 0
+            ? UserDefaults.standard.integer(forKey: "clipboardMaxHistory") : 500
+        clipboardRetentionDays = UserDefaults.standard.integer(forKey: "clipboardRetentionDays") != 0
+            ? UserDefaults.standard.integer(forKey: "clipboardRetentionDays") : 30
+        clipboardAutoDetectSensitive = UserDefaults.standard.object(forKey: "clipboardAutoDetectSensitive") as? Bool ?? true
+        clipboardSensitiveExpiryHours = UserDefaults.standard.integer(forKey: "clipboardSensitiveExpiryHours") != 0
+            ? UserDefaults.standard.integer(forKey: "clipboardSensitiveExpiryHours") : 24
+        clipboardAutoSummarize = UserDefaults.standard.bool(forKey: "clipboardAutoSummarize")
+        clipboardSyncEnabled = UserDefaults.standard.bool(forKey: "clipboardSyncEnabled")
+        clipboardExcludedApps = UserDefaults.standard.stringArray(forKey: "clipboardExcludedApps") ?? []
         activeFocusMode = UserDefaults.standard.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = UserDefaults.standard.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = UserDefaults.standard.string(forKey: "defaultExportFormat") ?? "markdown"
