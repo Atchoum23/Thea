@@ -1,0 +1,404 @@
+# Thea CI/CD Pipeline
+# Version: 4.1.0 - Added swift package resolve, increased build timeout, SPM test step
+# Last Updated: February 10, 2026
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**', 'release/**']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Build configuration'
+        required: true
+        default: 'Release'
+        type: choice
+        options: [Debug, Release]
+
+env:
+  XCODE_VERSION: '26.2'
+  DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================
+  # SWIFTLINT - Strict enforcement
+  # ============================================
+  swiftlint:
+    name: SwiftLint
+    runs-on: macos-26
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Cache SwiftLint
+        id: swiftlint-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: /opt/homebrew/Cellar/swiftlint
+          key: ${{ runner.os }}-swiftlint-0.57.0
+
+      - name: Install SwiftLint
+        run: |
+          if [ "${{ steps.swiftlint-cache.outputs.cache-hit }}" == "true" ]; then
+            brew link swiftlint 2>/dev/null || true
+          fi
+          command -v swiftlint || brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint lint --reporter github-actions-logging
+
+      - name: Generate Report
+        if: always()
+        run: swiftlint lint --reporter json > swiftlint-report.json 2>/dev/null || true
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: swiftlint-report
+          path: swiftlint-report.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ============================================
+  # BUILD ALL PLATFORMS (Matrix Strategy)
+  # ============================================
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: macos-26
+    needs: swiftlint
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: iOS
+            scheme: Thea-iOS
+            destination: 'generic/platform=iOS'
+          - platform: macOS
+            scheme: Thea-macOS
+            destination: 'platform=macOS'
+          - platform: watchOS
+            scheme: Thea-watchOS
+            destination: 'generic/platform=watchOS'
+          - platform: tvOS
+            scheme: Thea-tvOS
+            destination: 'generic/platform=tvOS'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          else
+            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
+            xcodebuild -version
+          fi
+
+      - name: Cache XcodeGen
+        id: xcodegen-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: /opt/homebrew/Cellar/xcodegen
+          key: ${{ runner.os }}-xcodegen-2.42.0
+
+      - name: Install XcodeGen
+        run: |
+          if [ "${{ steps.xcodegen-cache.outputs.cache-hit }}" == "true" ]; then
+            brew link xcodegen 2>/dev/null || true
+          fi
+          command -v xcodegen || brew install xcodegen
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Cache DerivedData
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: build
+          key: ${{ runner.os }}-derived-${{ matrix.platform }}-${{ hashFiles('**/*.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-derived-${{ matrix.platform }}-
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Resolve SPM Dependencies
+        run: |
+          swift package resolve 2>&1 || {
+            echo "::warning::swift package resolve failed, xcodebuild will handle resolution"
+          }
+
+      - name: Validate Package.swift
+        run: |
+          # Validate SPM manifest syntax (integrated from dependencies.yml)
+          swift package dump-package > /dev/null 2>&1 || {
+            echo "::error::Package.swift has invalid syntax"
+            exit 1
+          }
+          echo "Package.swift validated successfully"
+
+      - name: Build ${{ matrix.scheme }}
+        run: |
+          xcodebuild build \
+            -project Thea.xcodeproj \
+            -scheme ${{ matrix.scheme }} \
+            -destination '${{ matrix.destination }}' \
+            -configuration ${{ inputs.configuration || 'Debug' }} \
+            -derivedDataPath build \
+            -resultBundlePath build/results-${{ matrix.platform }}.xcresult \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build-${{ matrix.platform }}.log
+
+      - name: Check for Warnings
+        run: |
+          WARNINGS=$(grep -c " warning:" build-${{ matrix.platform }}.log 2>/dev/null || true)
+          WARNINGS=${WARNINGS:-0}
+          echo "warnings_count=$WARNINGS" >> $GITHUB_OUTPUT
+          echo "Warnings found: $WARNINGS"
+          if [ "$WARNINGS" -gt 0 ]; then
+            echo "::warning::${{ matrix.platform }} build has $WARNINGS warnings"
+            grep " warning:" build-${{ matrix.platform }}.log | head -20 || true
+          fi
+
+      - name: Upload Build Log
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: build-log-${{ matrix.platform }}
+          path: build-${{ matrix.platform }}.log
+          retention-days: 7
+
+      - name: Upload Build Results
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: build-results-${{ matrix.platform }}
+          path: build/results-${{ matrix.platform }}.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ============================================
+  # UNIT TESTS (macOS + iOS Simulator)
+  # ============================================
+  test:
+    name: Unit Tests
+    runs-on: macos-26
+    needs: build
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          else
+            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
+            xcodebuild -version
+          fi
+
+      - name: Cache XcodeGen
+        id: xcodegen-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: /opt/homebrew/Cellar/xcodegen
+          key: ${{ runner.os }}-xcodegen-2.42.0
+
+      - name: Install XcodeGen
+        run: |
+          if [ "${{ steps.xcodegen-cache.outputs.cache-hit }}" == "true" ]; then
+            brew link xcodegen 2>/dev/null || true
+          fi
+          command -v xcodegen || brew install xcodegen
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Run SPM Tests (Fast)
+        run: |
+          swift test 2>&1 | tee test-spm.log
+          echo "SPM tests completed"
+
+      - name: Run macOS Tests
+        run: |
+          xcodebuild test \
+            -project Thea.xcodeproj \
+            -scheme Thea-macOS \
+            -destination 'platform=macOS' \
+            -configuration Debug \
+            -derivedDataPath build \
+            -resultBundlePath build/test-results-macos.xcresult \
+            -enableCodeCoverage YES \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee test-macos.log
+
+      - name: Run iOS Simulator Tests
+        run: |
+          # Get available iPhone simulator
+          SIMULATOR=$(xcrun simctl list devices available | grep "iPhone 16" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+          if [ -z "$SIMULATOR" ]; then
+            SIMULATOR=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+          fi
+          echo "Using simulator: $SIMULATOR"
+
+          xcodebuild test \
+            -project Thea.xcodeproj \
+            -scheme Thea-iOS \
+            -destination "platform=iOS Simulator,id=$SIMULATOR" \
+            -configuration Debug \
+            -derivedDataPath build \
+            -resultBundlePath build/test-results-ios.xcresult \
+            -enableCodeCoverage YES \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee test-ios.log
+
+      - name: Export Coverage
+        if: always()
+        run: |
+          xcrun xccov view --report --json build/test-results-macos.xcresult > coverage-macos.json 2>/dev/null || true
+          xcrun xccov view --report --json build/test-results-ios.xcresult > coverage-ios.json 2>/dev/null || true
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: test-results
+          path: |
+            build/test-results-*.xcresult
+            test-*.log
+            coverage-*.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+  # ============================================
+  # CODECOV & SONARCLOUD (Parallel)
+  # ============================================
+  codecov:
+    name: CodeCov Upload
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download Coverage
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: test-results
+          path: ./
+        continue-on-error: true
+
+      - name: Upload to CodeCov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: Atchoum23/Thea
+          files: ./coverage-macos.json,./coverage-ios.json
+          flags: unittests
+          fail_ci_if_error: false
+          verbose: true
+
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Download SwiftLint Report
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: swiftlint-report
+          path: ./
+        continue-on-error: true
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
+        continue-on-error: true  # Allow CI to pass while SonarCloud Automatic Analysis is being disabled
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ============================================
+  # QUALITY GATE
+  # ============================================
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [swiftlint, build, test]
+    if: always()
+    steps:
+      - name: Check Results
+        run: |
+          echo "## CI Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # SwiftLint
+          if [[ "${{ needs.swiftlint.result }}" == "success" ]]; then
+            echo "| SwiftLint | Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| SwiftLint | Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Builds
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            echo "| All Platform Builds | Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| All Platform Builds | Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Tests
+          if [[ "${{ needs.test.result }}" == "success" ]]; then
+            echo "| Unit Tests | Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Unit Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if critical checks failed
+        if: needs.swiftlint.result == 'failure' || needs.build.result == 'failure' || needs.test.result == 'failure'
+        run: |
+          echo "::error::Critical checks failed"
+          exit 1

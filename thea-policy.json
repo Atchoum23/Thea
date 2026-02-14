@@ -1,0 +1,110 @@
+{
+  "network": {
+    "blockedHosts": [
+      "localhost",
+      "127.0.0.1",
+      "::1",
+      "0.0.0.0",
+      "169.254.169.254",
+      "metadata.google.internal",
+      "metadata.internal",
+      "169.254.170.2",
+      "10.*",
+      "172.16.*",
+      "172.17.*",
+      "172.18.*",
+      "172.19.*",
+      "172.20.*",
+      "172.21.*",
+      "172.22.*",
+      "172.23.*",
+      "172.24.*",
+      "172.25.*",
+      "172.26.*",
+      "172.27.*",
+      "172.28.*",
+      "172.29.*",
+      "172.30.*",
+      "172.31.*",
+      "192.168.*"
+    ],
+    "allowExternalRequests": true,
+    "maxRequestTimeout": 30
+  },
+  "filesystem": {
+    "blockedPaths": [
+      "/System",
+      "/Library",
+      "/private",
+      "/var",
+      "/etc",
+      "/bin",
+      "/sbin",
+      "/usr",
+      ".ssh",
+      ".gnupg",
+      ".aws",
+      ".kube",
+      "Keychain",
+      ".env",
+      ".credentials",
+      ".git/config",
+      ".gitconfig"
+    ],
+    "allowedWritePaths": [],
+    "allowExternalReads": false
+  },
+  "terminal": {
+    "blockedPatterns": [
+      "rm -rf /",
+      "rm -rf /*",
+      "rm -rf ~",
+      ":(){ :|:& };:",
+      "dd if=/dev/zero of=/dev/",
+      "mkfs",
+      "> /dev/sda",
+      "chmod -R 777 /",
+      "curl.*\\|.*sh",
+      "curl.*\\|.*bash",
+      "wget.*\\|.*sh",
+      "wget.*\\|.*bash",
+      "curl.*\\|.*python",
+      "nc\\s+-e",
+      "bash\\s+-i.*>&",
+      "/dev/tcp/"
+    ],
+    "requireApprovalPatterns": [
+      "sudo",
+      "rm -r",
+      "chmod",
+      "chown",
+      "kill",
+      "pkill",
+      "killall",
+      "osascript",
+      "shutdown",
+      "reboot"
+    ],
+    "maxExecutionTime": 120,
+    "allowSudo": false
+  },
+  "approval": {
+    "requiredForTypes": [
+      "fileWrite",
+      "fileDelete",
+      "terminalExec",
+      "networkRequest",
+      "systemConfig",
+      "processKill",
+      "credentialAccess"
+    ],
+    "autoApproveLowRisk": false,
+    "approvalTimeout": 300
+  },
+  "killSwitch": {
+    "enabled": true,
+    "triggerOnCritical": true,
+    "notifyUser": true,
+    "logToAudit": true
+  }
+}

@@ -1,0 +1,299 @@
+/* Thea Chrome Extension Content Styles */
+/* Brand: Blue #0066FF, Teal #00D4AA, Purple #8B5CF6, Gold #FFB84D */
+
+/* Dark Mode Styles */
+.thea-dark-mode {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.thea-dark-mode img,
+.thea-dark-mode video,
+.thea-dark-mode canvas,
+.thea-dark-mode [style*="background-image"] {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Thea Quick Action Fab */
+.thea-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #0066FF, #00D4AA);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 102, 255, 0.3);
+  cursor: pointer;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.thea-fab:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 24px rgba(0, 102, 255, 0.4);
+}
+
+.thea-fab:active {
+  transform: scale(0.97);
+}
+
+.thea-fab svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+/* Thea Tooltip */
+.thea-tooltip {
+  position: fixed;
+  background: #1C1C22;
+  color: #F5F5F7;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 2147483647;
+  max-width: 400px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  animation: thea-fade-in 0.2s ease-out;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes thea-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.thea-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 24px;
+  border: 8px solid transparent;
+  border-top-color: #1C1C22;
+}
+
+.thea-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.thea-tooltip-header img {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.thea-tooltip-header span {
+  font-weight: 600;
+  background: linear-gradient(135deg, #0066FF, #00D4AA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.thea-tooltip-content {
+  color: #8E8E93;
+}
+
+.thea-tooltip-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.thea-tooltip-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.thea-tooltip-btn-primary {
+  background: #0066FF;
+  color: white;
+}
+
+.thea-tooltip-btn-primary:hover {
+  background: #0052CC;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.3);
+}
+
+.thea-tooltip-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #F5F5F7;
+}
+
+.thea-tooltip-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Selection Popup */
+.thea-selection-popup {
+  position: fixed;
+  background: #1C1C22;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  z-index: 2147483647;
+  display: flex;
+  gap: 2px;
+  animation: thea-fade-in 0.15s ease-out;
+}
+
+.thea-selection-btn {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.thea-selection-btn:hover {
+  background: rgba(0, 102, 255, 0.12);
+}
+
+.thea-selection-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: #8E8E93;
+  transition: stroke 0.15s ease;
+}
+
+.thea-selection-btn:hover svg {
+  stroke: #0066FF;
+}
+
+/* Loading Spinner */
+.thea-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.thea-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 102, 255, 0.2);
+  border-top-color: #0066FF;
+  border-radius: 50%;
+  animation: thea-spin 0.8s linear infinite;
+}
+
+@keyframes thea-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Overlay for modals */
+.thea-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2147483646;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: thea-fade-in 0.2s ease-out;
+}
+
+/* Modal */
+.thea-modal {
+  background: #1C1C22;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.thea-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.thea-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #F5F5F7;
+}
+
+.thea-modal-close {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.thea-modal-close:hover {
+  background: rgba(0, 102, 255, 0.12);
+}
+
+.thea-modal-close svg {
+  width: 16px;
+  height: 16px;
+  stroke: #8E8E93;
+}
+
+/* Highlight for autofill fields */
+.thea-autofill-highlight {
+  outline: 2px solid #0066FF !important;
+  outline-offset: 2px;
+  background: rgba(0, 102, 255, 0.05) !important;
+}
+
+/* Badge for blocked items */
+.thea-blocked-badge {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #0066FF, #00D4AA);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  z-index: 2147483647;
+  animation: thea-fade-in 0.3s ease-out;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+}

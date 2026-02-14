@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thea Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="../icons/icon48.png" alt="Thea" width="32" height="32">
+        <h1>Thea</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-section="general">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          General
+        </button>
+        <button class="nav-item" data-section="privacy">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Privacy & Blocking
+        </button>
+        <button class="nav-item" data-section="darkmode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Dark Mode
+        </button>
+        <button class="nav-item" data-section="video">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Video Speed
+        </button>
+        <button class="nav-item" data-section="ai">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
+          AI & Sidebar
+        </button>
+        <button class="nav-item" data-section="passwords">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Passwords
+        </button>
+        <button class="nav-item" data-section="memory">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+          Memory
+        </button>
+        <button class="nav-item" data-section="data">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Data & Export
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <span>v2.0.0</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- General -->
+      <section class="settings-section active" id="section-general">
+        <h2>General Settings</h2>
+
+        <div class="card">
+          <h3>Connection</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Thea App Status</span>
+              <span class="setting-desc" id="connection-status">Checking...</span>
+            </div>
+            <button class="btn btn-secondary" id="test-connection">Test</button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">iCloud Sync</span>
+              <span class="setting-desc" id="icloud-status">Checking...</span>
+            </div>
+            <button class="btn btn-secondary" id="connect-icloud">Connect</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Appearance</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Extension Theme</span>
+              <span class="setting-desc">Popup and options page theme</span>
+            </div>
+            <select id="opt-theme">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="system">System</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Keyboard Shortcuts</h3>
+          <div class="shortcuts-grid">
+            <div class="shortcut-row"><kbd>Alt+T</kbd> <span>Open popup</span></div>
+            <div class="shortcut-row"><kbd>Alt+D</kbd> <span>Toggle dark mode</span></div>
+            <div class="shortcut-row"><kbd>Alt+Space</kbd> <span>Toggle AI sidebar</span></div>
+            <div class="shortcut-row"><kbd>Alt+P</kbd> <span>Reader / print-friendly view</span></div>
+            <div class="shortcut-row"><kbd>Alt+V</kbd> <span>Video speed controller</span></div>
+          </div>
+          <p class="hint">Customize at <code>chrome://extensions/shortcuts</code></p>
+        </div>
+      </section>
+
+      <!-- Privacy & Blocking -->
+      <section class="settings-section" id="section-privacy">
+        <h2>Privacy & Blocking</h2>
+
+        <div class="card">
+          <h3>Ad Blocker</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Enable Ad Blocking</span>
+              <span class="setting-desc">Block ads via declarative rules</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-adblock" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Cosmetic Filtering</span>
+              <span class="setting-desc">Hide ad containers and empty placeholders</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-cosmetic" checked><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Privacy Shield</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Cookie Auto-Decline</span>
+              <span class="setting-desc">Automatically reject cookie consent banners</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-cookie-decline" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Fingerprint Protection</span>
+              <span class="setting-desc">Randomize browser fingerprint data</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-fingerprint" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Referrer Stripping</span>
+              <span class="setting-desc">Remove referrer data from cross-origin requests</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-referrer" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Link Unshimming</span>
+              <span class="setting-desc">Remove tracking redirects from links</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-unshim" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Tracking Parameter Removal</span>
+              <span class="setting-desc">Strip UTM and tracking parameters from URLs</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-tracking-params" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Social Widget Blocking</span>
+              <span class="setting-desc">Block social media tracking widgets</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-social"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">WebRTC Protection</span>
+              <span class="setting-desc">Prevent WebRTC IP leaks</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-webrtc"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Email Protection</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Hide My Email</span>
+              <span class="setting-desc">Auto-fill iCloud email aliases</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-email" checked><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Whitelist</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Whitelisted Sites</span>
+              <span class="setting-desc">Disable blocking on these domains</span>
+            </div>
+            <button class="btn btn-secondary" id="manage-whitelist">Manage</button>
+          </div>
+          <div id="whitelist-editor" class="hidden">
+            <textarea id="whitelist-textarea" rows="6" placeholder="example.com&#10;another-site.org"></textarea>
+            <button class="btn" id="save-whitelist">Save Whitelist</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dark Mode -->
+      <section class="settings-section" id="section-darkmode">
+        <h2>Dark Mode</h2>
+
+        <div class="card">
+          <h3>Settings</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Enable Dark Mode</span>
+              <span class="setting-desc">Apply dark theme to websites</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-darkmode"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Follow System Theme</span>
+              <span class="setting-desc">Enable/disable based on OS dark mode</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-darkmode-system" checked><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Theme</h3>
+          <div class="theme-grid" id="theme-grid">
+            <button class="theme-chip active" data-theme="midnight">Midnight</button>
+            <button class="theme-chip" data-theme="deep-ocean">Deep Ocean</button>
+            <button class="theme-chip" data-theme="charcoal">Charcoal</button>
+            <button class="theme-chip" data-theme="slate">Slate</button>
+            <button class="theme-chip" data-theme="forest">Forest</button>
+            <button class="theme-chip" data-theme="nord">Nord</button>
+            <button class="theme-chip" data-theme="dracula">Dracula</button>
+            <button class="theme-chip" data-theme="monokai">Monokai</button>
+            <button class="theme-chip" data-theme="solarized">Solarized Dark</button>
+            <button class="theme-chip" data-theme="gruvbox">Gruvbox</button>
+            <button class="theme-chip" data-theme="tokyo-night">Tokyo Night</button>
+            <button class="theme-chip" data-theme="catppuccin">Catppuccin</button>
+            <button class="theme-chip" data-theme="one-dark">One Dark</button>
+            <button class="theme-chip" data-theme="material">Material</button>
+            <button class="theme-chip" data-theme="github-dark">GitHub Dark</button>
+            <button class="theme-chip" data-theme="ayu">Ayu Dark</button>
+            <button class="theme-chip" data-theme="palenight">Palenight</button>
+            <button class="theme-chip" data-theme="horizon">Horizon</button>
+            <button class="theme-chip" data-theme="night-owl">Night Owl</button>
+            <button class="theme-chip" data-theme="amoled">AMOLED</button>
+            <button class="theme-chip" data-theme="sepia">Sepia</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Per-Site Overrides</h3>
+          <p class="hint">Right-click the extension icon to set dark mode per site.</p>
+        </div>
+      </section>
+
+      <!-- Video Speed -->
+      <section class="settings-section" id="section-video">
+        <h2>Video Speed Controller</h2>
+
+        <div class="card">
+          <h3>Settings</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Enable Video Speed Control</span>
+              <span class="setting-desc">Show speed overlay on videos</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-video" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Show Speed Overlay</span>
+              <span class="setting-desc">Display current speed on video</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-video-overlay" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Remember Speed Per Site</span>
+              <span class="setting-desc">Restore last used speed on revisit</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-video-remember" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Default Speed</span>
+              <span class="setting-desc">Starting playback speed</span>
+            </div>
+            <select id="opt-video-speed">
+              <option value="0.5">0.5x</option>
+              <option value="0.75">0.75x</option>
+              <option value="1.0" selected>1.0x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+              <option value="1.75">1.75x</option>
+              <option value="2.0">2.0x</option>
+              <option value="3.0">3.0x</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Speed Step</span>
+              <span class="setting-desc">Increment per key press</span>
+            </div>
+            <select id="opt-video-step">
+              <option value="0.05">0.05x</option>
+              <option value="0.1" selected>0.1x</option>
+              <option value="0.25">0.25x</option>
+              <option value="0.5">0.5x</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI & Sidebar -->
+      <section class="settings-section" id="section-ai">
+        <h2>AI & Sidebar</h2>
+
+        <div class="card">
+          <h3>AI Assistant</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Enable AI Features</span>
+              <span class="setting-desc">Sidebar, summarization, quick actions</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-ai" checked><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Reader Mode</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Enable Reader Mode</span>
+              <span class="setting-desc">Clean page for distraction-free reading</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-reader" checked><span class="slider"></span></label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Passwords -->
+      <section class="settings-section" id="section-passwords">
+        <h2>Passwords & Autofill</h2>
+
+        <div class="card">
+          <h3>Password Manager</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Enable Password Manager</span>
+              <span class="setting-desc">Autofill and save passwords via iCloud Keychain</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-passwords" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Strong Password Suggestions</span>
+              <span class="setting-desc">Suggest strong passwords on signup forms</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-password-suggest" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Password Update Detection</span>
+              <span class="setting-desc">Prompt to update when password changes</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-password-update" checked><span class="slider"></span></label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Memory -->
+      <section class="settings-section" id="section-memory">
+        <h2>Memory System</h2>
+
+        <div class="card">
+          <h3>Settings</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Enable Memory</span>
+              <span class="setting-desc">Save browsing context and knowledge</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-memory" checked><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Auto-Capture</span>
+              <span class="setting-desc">Automatically save important pages</span>
+            </div>
+            <label class="toggle"><input type="checkbox" id="opt-memory-auto"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Statistics</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-num" id="mem-total">0</span>
+              <span class="stat-lbl">Total Memories</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" id="mem-active">0</span>
+              <span class="stat-lbl">Active</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" id="mem-archived">0</span>
+              <span class="stat-lbl">Archived</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Data & Export -->
+      <section class="settings-section" id="section-data">
+        <h2>Data & Export</h2>
+
+        <div class="card">
+          <h3>Usage Statistics</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-num" id="stats-ads">0</span>
+              <span class="stat-lbl">Ads Blocked</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" id="stats-trackers">0</span>
+              <span class="stat-lbl">Trackers Blocked</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" id="stats-cookies">0</span>
+              <span class="stat-lbl">Cookies Declined</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num" id="stats-passwords">0</span>
+              <span class="stat-lbl">Passwords Filled</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Export & Import</h3>
+          <div class="action-row">
+            <button class="btn" id="export-data">Export All Data</button>
+            <button class="btn btn-secondary" id="import-data">Import Data</button>
+            <input type="file" id="import-file" accept=".json" class="hidden">
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Reset</h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Reset All Settings</span>
+              <span class="setting-desc">Restore all settings to factory defaults</span>
+            </div>
+            <button class="btn btn-danger" id="reset-btn">Reset</button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-label">Clear All Data</span>
+              <span class="setting-desc">Delete memories, stats, and settings</span>
+            </div>
+            <button class="btn btn-danger" id="clear-all-btn">Clear</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Save Toast -->
+      <div class="toast" id="toast">Settings saved</div>
+    </main>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

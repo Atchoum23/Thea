@@ -1,0 +1,248 @@
+/* ==========================================================================
+   Thea Safari Extension - Video Controller Styles
+   Overlay controls for video speed, Picture-in-Picture, and playback.
+
+   Brand Colors:
+     Blue   #0066FF
+     Teal   #00D4AA
+     Purple #8B5CF6
+
+   All selectors prefixed with .thea- to avoid page conflicts.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Video Wrapper
+   Wraps the native <video> element so overlay controls can be absolutely
+   positioned relative to the video frame.
+   --------------------------------------------------------------------------- */
+
+.thea-video-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* ---------------------------------------------------------------------------
+   Speed Overlay
+   Shows current playback speed in the top-left corner of the video.
+   Appears briefly when speed changes, then fades out.
+   --------------------------------------------------------------------------- */
+
+.thea-speed-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2147483640;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.thea-speed-overlay.thea-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.thea-speed-overlay .thea-speed-value {
+  color: #00D4AA;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.thea-speed-overlay .thea-speed-label {
+  color: #8E8E93;
+  font-size: 11px;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Compact variant (inline speed badge) */
+.thea-speed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #00D4AA;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Video Control Bar
+   Floating toolbar centered at the bottom of the video with speed and
+   playback controls. Shows on hover.
+   --------------------------------------------------------------------------- */
+
+.thea-video-controls {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483640;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 8px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.thea-video-controls.thea-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Control bar buttons */
+.thea-video-controls button {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.1s ease;
+  font-family: inherit;
+}
+
+.thea-video-controls button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.thea-video-controls button:active {
+  transform: scale(0.92);
+}
+
+/* Active state for toggleable buttons (loop, PiP) */
+.thea-video-controls button.thea-active {
+  background: #0066FF;
+}
+
+.thea-video-controls button.thea-active:hover {
+  background: #0055DD;
+}
+
+/* Speed display between decrement/increment buttons */
+.thea-video-controls .thea-speed-display {
+  color: #00D4AA;
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 48px;
+  text-align: center;
+  user-select: none;
+}
+
+/* Speed slider (range input) */
+.thea-video-controls .thea-speed-slider {
+  width: 80px;
+  accent-color: #0066FF;
+  cursor: pointer;
+}
+
+/* Separator line between control groups */
+.thea-video-controls .thea-separator {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ---------------------------------------------------------------------------
+   PiP Indicator
+   Persistent badge shown while Picture-in-Picture mode is active.
+   --------------------------------------------------------------------------- */
+
+.thea-pip-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 2147483640;
+  background: rgba(0, 0, 0, 0.8);
+  color: #00D4AA;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: theaSlideIn 0.3s ease-out;
+  border: 1px solid rgba(0, 212, 170, 0.2);
+}
+
+.thea-pip-indicator .thea-pip-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #00D4AA;
+  border-radius: 50%;
+  margin-right: 6px;
+  animation: theaPipPulse 1.5s ease-in-out infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Keyboard Shortcut Hints
+   Small hints displayed inside the control bar.
+   --------------------------------------------------------------------------- */
+
+.thea-video-controls .thea-shortcut-hint {
+  color: #8E8E93;
+  font-size: 10px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  font-family: 'SF Mono', SFMono-Regular, Menlo, monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   Animations
+   --------------------------------------------------------------------------- */
+
+@keyframes theaSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes theaPipPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+/* ---------------------------------------------------------------------------
+   Dark Mode Adjustments
+   Video controls are already dark-themed; minor tweaks for consistency.
+   --------------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  .thea-speed-overlay {
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .thea-video-controls {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}

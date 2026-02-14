@@ -1,0 +1,104 @@
+/* Thea Safari Extension - Content Styles */
+/* Brand: Blue #0066FF, Teal #00D4AA */
+
+#thea-overlay {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+#thea-selection-popup {
+    animation: theaPopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#thea-notification {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+@keyframes theaPopIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Highlight selected text when Thea is processing */
+::selection {
+    background: rgba(0, 102, 255, 0.25);
+}
+
+/* Light mode (default for Safari) */
+#thea-quick-menu {
+    background: #FFFFFF !important;
+    color: #1C1C1E !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+#thea-quick-menu button {
+    background: #F2F2F7 !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    border-radius: 8px !important;
+    color: #1C1C1E !important;
+    transition: all 0.15s ease !important;
+}
+
+#thea-quick-menu button:hover {
+    background: rgba(0, 102, 255, 0.08) !important;
+    border-color: rgba(0, 102, 255, 0.3) !important;
+    color: #0066FF !important;
+}
+
+#thea-result-modal {
+    background: #FFFFFF !important;
+    color: #1C1C1E !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+#thea-result-modal div {
+    color: #3C3C43 !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    ::selection {
+        background: rgba(0, 102, 255, 0.35);
+    }
+
+    #thea-quick-menu {
+        background: #1C1C22 !important;
+        color: #F5F5F7 !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    #thea-quick-menu button {
+        background: #26262E !important;
+        border-color: rgba(255, 255, 255, 0.06) !important;
+        color: #F5F5F7 !important;
+    }
+
+    #thea-quick-menu button:hover {
+        background: rgba(0, 102, 255, 0.12) !important;
+        border-color: rgba(0, 102, 255, 0.4) !important;
+        color: #0066FF !important;
+    }
+
+    #thea-result-modal {
+        background: #1C1C22 !important;
+        color: #F5F5F7 !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    #thea-result-modal div {
+        color: #EBEBF0 !important;
+    }
+}

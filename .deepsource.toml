@@ -1,0 +1,55 @@
+# DeepSource Configuration for Thea
+# Version: 1.0.0
+# Last Updated: January 16, 2026
+
+version = 1
+
+# ============================================
+# TEST COVERAGE
+# ============================================
+test_patterns = [
+  "Tests/**",
+  "**/Tests/**",
+  "**/*Tests.swift",
+  "**/*Test.swift"
+]
+
+# ============================================
+# EXCLUDE PATTERNS
+# ============================================
+exclude_patterns = [
+  "build/**",
+  ".build/**",
+  "DerivedData/**",
+  "Pods/**",
+  "Carthage/**",
+  "SourcePackages/**",
+  "*.generated.swift",
+  "Package.swift",
+  "*.xcodeproj/**",
+  "*.xcworkspace/**",
+  ".backup*/**"
+]
+
+# ============================================
+# SWIFT ANALYZER
+# ============================================
+[[analyzers]]
+name = "swift"
+enabled = true
+
+  [analyzers.meta]
+  # Swift version (only supported meta key for Swift analyzer)
+  swift_version = "5.9"
+
+# ============================================
+# QUALITY THRESHOLDS
+# ============================================
+# These are recommendations - adjust based on your needs
+
+# Code coverage threshold (percentage)
+# Recommended: 70% for production apps
+# coverage_threshold = 70
+
+# Maximum allowed issues per 1000 lines of code
+# issues_threshold = 5

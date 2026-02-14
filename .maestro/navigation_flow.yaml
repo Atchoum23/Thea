@@ -1,0 +1,32 @@
+# Thea Navigation Flow - Test tab navigation and basic screen transitions
+appId: app.thea.ios
+---
+- launchApp
+
+# Start on Chat tab
+- assertVisible:
+    text: "Chat"
+    timeout: 10000
+
+# Navigate to Projects tab
+- tapOn:
+    text: "Projects"
+- takeScreenshot: projects_tab
+
+# Navigate to Knowledge tab
+- tapOn:
+    text: "Knowledge"
+- takeScreenshot: knowledge_tab
+
+# Navigate to Settings tab
+- tapOn:
+    text: "Settings"
+- assertVisible:
+    text: "AI & Models"
+    optional: true
+- takeScreenshot: settings_tab
+
+# Navigate back to Chat tab
+- tapOn:
+    text: "Chat"
+- takeScreenshot: chat_tab_return

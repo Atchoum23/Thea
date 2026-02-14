@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thea AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>&#x2728;</text></svg>">
+</head>
+<body>
+    <div id="app">
+        <!-- Auth Screen -->
+        <div id="auth-screen" class="screen">
+            <div class="auth-container">
+                <div class="logo">
+                    <span class="logo-icon">&#x2728;</span>
+                    <h1>Thea</h1>
+                    <p class="tagline">Your AI assistant</p>
+                </div>
+                <div class="auth-form">
+                    <label for="api-key-input">API Key</label>
+                    <input type="password" id="api-key-input" placeholder="Enter your Thea API key">
+                    <button id="login-btn" class="btn-primary">Sign In</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="screen hidden">
+            <!-- Sidebar -->
+            <aside id="sidebar">
+                <div class="sidebar-header">
+                    <span class="logo-icon-sm">&#x2728;</span>
+                    <span class="logo-text">Thea</span>
+                    <button id="new-chat-btn" class="btn-icon" title="New conversation">+</button>
+                </div>
+                <div id="conversation-list"></div>
+                <div class="sidebar-footer">
+                    <button id="logout-btn" class="btn-text">Sign Out</button>
+                </div>
+            </aside>
+
+            <!-- Main Chat Area -->
+            <main id="chat-main">
+                <div id="chat-header">
+                    <button id="sidebar-toggle" class="btn-icon">&#9776;</button>
+                    <span id="chat-title">New Conversation</span>
+                    <span id="model-badge">Claude Sonnet</span>
+                </div>
+
+                <div id="messages-container">
+                    <div id="welcome-message" class="welcome">
+                        <span class="welcome-icon">&#x2728;</span>
+                        <h2>How can I help you today?</h2>
+                        <div class="suggestions">
+                            <button class="suggestion" data-prompt="Explain quantum computing in simple terms">Explain quantum computing</button>
+                            <button class="suggestion" data-prompt="Write a Python function to parse CSV files">Write a CSV parser</button>
+                            <button class="suggestion" data-prompt="Help me plan a weekend trip to Paris">Plan a Paris trip</button>
+                            <button class="suggestion" data-prompt="Review my code for security issues">Review code security</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="input-area">
+                    <div id="input-wrapper">
+                        <textarea id="message-input" placeholder="Message Thea..." rows="1"></textarea>
+                        <button id="send-btn" class="btn-send" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="input-hint">Press Enter to send, Shift+Enter for new line</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1228 @@
+# ==============================================================================
+# IMPORTANT BUILD NOTES - READ BEFORE BUILDING
+# ==============================================================================
+#
+# 1. CODESIGN ERROR "resource fork...detritus not allowed":
+#    - Build with: -derivedDataPath /tmp/TheaBuild
+#    - This avoids iCloud File Provider adding problematic extended attributes
+#    - See BUILD_GUIDE.md for full details
+#
+# 2. MISSING PACKAGES (Highlightr, KeychainAccess, etc.):
+#    - Run: xcodebuild -resolvePackageDependencies -project Thea.xcodeproj
+#    - If still failing, delete DerivedData and Package.resolved, then retry
+#
+# 3. After modifying this file, regenerate project:
+#    - Run: xcodegen generate
+#
+# ==============================================================================
+
+name: Thea
+options:
+  bundleIdPrefix: app.thea
+  deploymentTarget:
+    macOS: "26.0"
+    iOS: "26.0"
+    watchOS: "26.0"
+    tvOS: "26.0"
+    visionOS: "26.0"
+  xcodeVersion: "26.0"
+  generateEmptyDirectories: true
+  groupSortPosition: top
+  developmentLanguage: en
+  indentWidth: 4
+  tabWidth: 4
+  usesTabs: false
+  defaultConfig: Release
+  createIntermediateGroups: true
+  transitivelyLinkDependencies: true
+
+# ============================================
+# Build Configurations
+# ============================================
+configs:
+  Debug: debug
+  Release: release
+
+# ============================================
+# Project-Level Build Settings
+# ============================================
+settings:
+  base:
+    # ===========================================
+    # Version Information
+    # ===========================================
+    MARKETING_VERSION: "1.5.0"
+    CURRENT_PROJECT_VERSION: "15"
+
+    # ===========================================
+    # Swift Configuration
+    # ===========================================
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_EMIT_MODULE_INTERFACE: NO
+    BUILD_LIBRARY_FOR_DISTRIBUTION: NO
+    SWIFT_ENFORCE_EXCLUSIVE_ACCESS: "full"
+
+    # ===========================================
+    # Code Signing
+    # ===========================================
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 6B66PM4JLK
+
+    # ===========================================
+    # Build Options
+    # ===========================================
+    DEAD_CODE_STRIPPING: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CLANG_ENABLE_MODULES: YES
+    CLANG_ENABLE_OBJC_ARC: YES
+    ENABLE_STRICT_OBJC_MSGSEND: YES
+    GCC_NO_COMMON_BLOCKS: YES
+
+    # ===========================================
+    # Swift Package Dependencies
+    # ===========================================
+    SWIFT_INCLUDE_PATHS: "$(inherited)"
+
+    # ===========================================
+    # Localization (Xcode 16 recommended)
+    # ===========================================
+    LOCALIZATION_EXPORT_SUPPORTED: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    STRING_CATALOG_GENERATE_SYMBOLS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    LOCALIZED_STRING_SWIFTUI_SUPPORT: YES
+
+    # ===========================================
+    # Asset Catalog (Xcode 16 recommended)
+    # ===========================================
+    ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS: YES
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+
+    # ===========================================
+    # Clang Warnings - Implicit Conversions
+    # ===========================================
+    CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING: YES
+    CLANG_WARN_EMPTY_BODY: YES
+    CLANG_WARN_BOOL_CONVERSION: YES
+    CLANG_WARN_CONSTANT_CONVERSION: YES
+    GCC_WARN_64_TO_32_BIT_CONVERSION: YES
+    CLANG_WARN_ENUM_CONVERSION: YES
+    CLANG_WARN_FLOAT_CONVERSION: YES
+    CLANG_WARN_INT_CONVERSION: YES
+    CLANG_WARN_NON_LITERAL_NULL_CONVERSION: YES
+    CLANG_WARN_IMPLICIT_SIGN_CONVERSION: YES
+    CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION: YES
+
+    # ===========================================
+    # Clang Warnings - Code Quality
+    # ===========================================
+    CLANG_WARN_INFINITE_RECURSION: YES
+    CLANG_WARN_UNREACHABLE_CODE: YES
+    CLANG_WARN_COMMA: YES
+    CLANG_WARN_ASSIGN_ENUM: YES
+    CLANG_WARN_STRICT_PROTOTYPES: YES
+    CLANG_WARN_SEMICOLON_BEFORE_METHOD_BODY: YES
+    CLANG_WARN_RANGE_LOOP_ANALYSIS: YES
+    CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: YES
+
+    # ===========================================
+    # Clang Warnings - Documentation
+    # ===========================================
+    CLANG_WARN_DOCUMENTATION_COMMENTS: YES
+
+    # ===========================================
+    # Clang Warnings - Availability
+    # ===========================================
+    CLANG_WARN_UNGUARDED_AVAILABILITY: YES_AGGRESSIVE
+
+    # ===========================================
+    # Clang Warnings - Objective-C
+    # ===========================================
+    CLANG_WARN_DIRECT_OBJC_ISA_USAGE: YES_ERROR
+    CLANG_WARN__DUPLICATE_METHOD_MATCH: YES
+    CLANG_WARN_OBJC_LITERAL_CONVERSION: YES
+    CLANG_WARN_OBJC_ROOT_CLASS: YES_ERROR
+    CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS: YES
+    CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF: YES
+
+    # ===========================================
+    # GCC Warnings
+    # ===========================================
+    GCC_WARN_ABOUT_RETURN_TYPE: YES_ERROR
+    GCC_WARN_UNDECLARED_SELECTOR: YES
+    GCC_WARN_UNINITIALIZED_AUTOS: YES_AGGRESSIVE
+    GCC_WARN_UNUSED_FUNCTION: YES
+    GCC_WARN_UNUSED_VARIABLE: YES
+    GCC_WARN_SHADOW: YES
+    GCC_WARN_FOUR_CHARACTER_CONSTANTS: YES
+    GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED: YES
+    GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS: YES
+    GCC_WARN_ABOUT_MISSING_NEWLINE: YES
+    GCC_WARN_SIGN_COMPARE: YES
+    GCC_WARN_ABOUT_MISSING_PROTOTYPES: YES
+    GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS: YES
+
+    # ===========================================
+    # Static Analyzer
+    # ===========================================
+    CLANG_ANALYZER_NONNULL: YES
+    CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION: YES_AGGRESSIVE
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+    CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER: YES
+    CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND: YES
+    CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY: YES
+
+    # ===========================================
+    # Security (NS_ASSERTIONS set per-config: YES for Debug, NO for Release)
+    # ===========================================
+
+  # ===========================================
+  # Debug Configuration
+  # ===========================================
+  configs:
+    Debug:
+      # Optimization
+      ONLY_ACTIVE_ARCH: YES
+      SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+      SWIFT_COMPILATION_MODE: singlefile
+      GCC_OPTIMIZATION_LEVEL: "0"
+
+      # Debug Information
+      DEBUG_INFORMATION_FORMAT: dwarf
+      MTL_ENABLE_DEBUG_INFO: INCLUDE_SOURCE
+
+      # Testability
+      ENABLE_TESTABILITY: YES
+      ENABLE_NS_ASSERTIONS: YES
+
+      # Code Stripping
+      COPY_PHASE_STRIP: NO
+      GCC_DYNAMIC_NO_PIC: NO
+
+      # Preprocessor
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+      GCC_PREPROCESSOR_DEFINITIONS:
+        - "$(inherited)"
+        - "DEBUG=1"
+
+    # ===========================================
+    # Release Configuration
+    # ===========================================
+    Release:
+      # Optimization
+      ONLY_ACTIVE_ARCH: NO
+      SWIFT_OPTIMIZATION_LEVEL: "-O"
+      SWIFT_COMPILATION_MODE: wholemodule
+      GCC_OPTIMIZATION_LEVEL: "s"
+
+      # Debug Information
+      DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
+      MTL_ENABLE_DEBUG_INFO: NO
+      MTL_FAST_MATH: YES
+
+      # Testability
+      ENABLE_TESTABILITY: NO
+      ENABLE_NS_ASSERTIONS: NO
+
+      # Code Stripping
+      DEAD_CODE_STRIPPING: YES
+      COPY_PHASE_STRIP: NO
+
+      # Deployment
+      DEPLOYMENT_POSTPROCESSING: YES
+      VALIDATE_PRODUCT: YES
+
+      # Link Time Optimization
+      LLVM_LTO: YES_THIN
+
+      # Exclusive Access (compile-time only for release)
+      SWIFT_ENFORCE_EXCLUSIVE_ACCESS: "compile-time"
+
+# ============================================
+# Package Dependencies
+# ============================================
+packages:
+  OpenAI:
+    url: https://github.com/MacPaw/OpenAI
+    from: 0.2.0
+  KeychainAccess:
+    url: https://github.com/kishikawakatsumi/KeychainAccess
+    from: 4.2.0
+  MarkdownUI:
+    url: https://github.com/gonzalezreal/swift-markdown-ui
+    from: 2.0.0
+  Highlightr:
+    url: https://github.com/raspu/Highlightr
+    from: 2.1.0
+  # MLX Swift for native on-device LLM inference (macOS 26+ best practices)
+  # Provides: MLX, MLXNN, MLXOptimizers, MLXRandom
+  mlx-swift:
+    url: https://github.com/ml-explore/mlx-swift
+    from: 0.21.0
+  # MLX LM for LLM/VLM implementations with HuggingFace Hub integration
+  # Provides: MLXLLM, MLXVLM, MLXLMCommon, MLXEmbedders
+  mlx-swift-lm:
+    url: https://github.com/ml-explore/mlx-swift-lm
+    branch: main
+  # MLX Audio for on-device TTS (Soprano) and STT (GLM-ASR-Nano)
+  # Provides: MLXAudioTTS, MLXAudioSTT, MLXAudioCore
+  mlx-audio-swift:
+    url: https://github.com/Blaizzy/mlx-audio-swift
+    branch: main
+
+# ============================================
+# Targets
+# ============================================
+targets:
+  # ============ macOS App ============
+  Thea-macOS:
+    type: application
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Shared
+        excludes:
+          - "**/*iOS*"
+          - "**/*watchOS*"
+          - "**/*tvOS*"
+          - "**/*.md"
+          - "**/Core/Interfaces/**"
+          - "**/Core/Services/Mock*.swift"
+          - "**/Core/Services/ChatService.swift"
+          - "**/Core/Services/ProjectService.swift"
+          # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
+          - "**/Execution/Terminal/**"
+          # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
+          # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
+          # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
+          - "**/Providers/Anthropic/**"
+          - "**/Providers/DeepSeek/**"
+          - "**/Providers/Google/**"
+          - "**/Providers/Groq/**"
+          - "**/Providers/OpenAI/**"
+          - "**/Providers/OpenRouter/**"
+          - "**/Providers/Perplexity/**"
+          - "**/Providers/Helpers/**"
+          - "**/Providers/Protocol/**"
+          - "**/Providers/Registry/**"
+          # ============================================================
+          # MetaAI ARCHIVED to .v1-archive/ on 2026-02-11.
+          # 73 source files + 10 test files (~30K LOC) moved to .v1-archive/Shared/AI/MetaAI/
+          # Superseded by Shared/Intelligence/ (canonical implementation).
+          # No files remain in Shared/ (all archived). Exclusion removed 2026-02-14.
+          # ============================================================
+          # ACTIVATED: NotesIntegration + RemindersIntegration (macOS)
+          # - "**/Integrations/NotesIntegration.swift"
+          # - "**/Integrations/RemindersIntegration.swift"
+          # Exclude duplicate Memory (use Memory folder not AI/Memory)
+          - "**/AI/Memory/**"
+          # Exclude DesignTokens (duplicates TheaDesignSystem definitions)
+          - "**/Theme/DesignTokens.swift"
+          # LocalModelsSettingsView — no file at this path (subfolder version at Settings/LocalModels/ separately excluded)
+          # AutonomousTaskSettingsView — no file at this path
+          # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11 (no files remain in Shared/)
+          # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
+          # MemorySettingsView — ACTIVATED
+          # PrivacySettingsView — ACTIVATED
+          # AdvancedSettingsView — ACTIVATED
+          # AIProvidersSettingsView — ACTIVATED
+          # ResourceManagement — ACTIVATED
+          # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
+          - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
+          - "**/Components/TheaTextInputField.swift"
+          # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
+          - "**/Views/Code/**"  # CodeProjectView extracted sub-view, duplicates types in parent
+          # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
+          # SelfExecutionView — REMOVED from codebase on 2026-02-13
+          # MultiModal — ACTIVATED (VisionIntelligence, SpeechIntelligence, DocumentIntelligence all active)
+          # DeviceCapabilityRouter — ACTIVATED
+          # DeviceSwitcherView — ACTIVATED
+          # THEAThinkingView — ACTIVATED
+          # ResponseNotificationHandler.swift — ACTIVATED
+          # DistributedTaskExecutor — ACTIVATED (DeviceCapabilityRouter + CloudKit active)
+          # ============================================================
+          # BLANKET DIRECTORY ACTIVATIONS (macOS)
+          # Most blanket exclusions REMOVED — files now compile.
+          # ============================================================
+          # PatternLearning — ACTIVATED (self-contained)
+          # LifeMonitoring — ACTIVATED (35 files, self-contained ecosystem)
+          # LifeAssistant — ACTIVATED (single file, system frameworks only)
+          # Anticipatory — ACTIVATED (14 files, self-contained)
+          # Prediction — ACTIVATED (ModelPrewarmingService)
+          # Autonomy — ACTIVATED (AutonomyController + AutonomousMaintenanceService)
+          # Automation — ACTIVATED (13 files, macOS-only with platform guards)
+          # Autonomous — ACTIVATED (BlueprintExecutor)
+          # AgentMode — FULLY ACTIVATED (all files)
+          # IntelligenceOrchestrator — ACTIVATED (all deps in Intelligence/ are active)
+          # SelfEvolution — ACTIVATED (2 files, self-contained)
+          # Squads — ACTIVATED
+          # PromptEngineering — ACTIVATED (SubAgentOrchestrator.AgentType replaced with String, TaskContext moved to Intelligence/Classification)
+          # LocalModels — ALL ACTIVATED (governance files enabled for macOS)
+          # ProactiveModelManager, LocalModelRecommendationEngine (+extensions),
+          # LocalModelRecommendationTypes, AIModelGovernor, ModelGovernanceEngine,
+          # UnifiedLocalModelOrchestrator, SupraModelSelector, OllamaAgentLoop,
+          # ModelQualityBenchmark, PredictivePreloader
+          # AI/Context — ACTIVATED (MemoryManager is active, all deps available)
+          # AI/Adaptive — ACTIVATED (self-contained, no external deps)
+          # AI/Proactive — ACTIVATED (MemoryManager is active)
+          # ResourceManagement — ACTIVATED
+          - "**/Widgets/**"
+          # **/Views/Code/** already excluded above (line ~338)
+          - "**/Views/LocalModels/**"  # LocalModelsView extracted sub-view (duplicate at UI/Views/LocalModels/)
+          # Views/LifeTracking — ACTIVATED (LifeTrackingDashboardView, LifeMonitoring active)
+          - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView inline types
+          - "**/Settings/LocalModels/**"  # Extracted sub-views duplicate LocalModelsSettingsView inline types
+          - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView inline types
+          - "**/Settings/Orchestrator/**"  # Extracted sub-views duplicate OrchestratorSettingsView inline types
+          - "**/Settings/AutonomousTasks/**"  # Extracted sub-views duplicate AutonomousTaskSettingsView inline types
+          # ============================================================
+          # INDIVIDUAL FILE EXCLUSIONS (macOS)
+          # Files outside the blanket-excluded directories that still
+          # need to be excluded due to missing types or dependencies.
+          # ============================================================
+          # ConfigurationManager, PhaseProgressView, SelfExecutionView, ErrorKnowledgeBaseManager
+          # REMOVED from codebase on 2026-02-13 (dead code, all references were self-referential)
+          # IntegrationsManager — ACTIVATED (all service deps in Integrations/ are active)
+          # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
+          # IntegrationModule — ACTIVATED (protocol + registry for all integrations)
+          - "**/Integrations/MCPConnectionManager.swift"  # Duplicate MCPConnection type in MCPServerGenerator
+          - "**/Integrations/MCPGateway.swift"  # Duplicate MCPRequest/MCPError types in MCPServerGenerator
+          # Integration modules — ALL ACTIVATED (macOS, use AppKit/AppleScript)
+          # MailIntegration, TerminalIntegration, MusicIntegration, SystemIntegration,
+          # FinderIntegration, SafariIntegration, CalendarIntegration, ShortcutsIntegration,
+          # MessagesIntegration, XcodeIntegration — all macOS-only with AppKit
+          # ActiveMemoryRetrieval — ACTIVATED (MemoryManager active, ProviderRegistry active)
+          # MemoryAugmentedChat — ACTIVATED (ActiveMemoryRetrieval now active)
+          # MetaAI/ModelBenchmarkService.swift — Archived to .v1-archive on 2026-02-11 (no file remains)
+          # PlatformFeaturesHub — ACTIVATED (Platform enum, PlatformFeature, platform detection)
+          # LiveAutoCorrect — ACTIVATED (system frameworks only)
+          # THEAMCPServer — ACTIVATED (MCP server with THEA-prefixed types)
+          # UnifiedDeviceAwareness — ACTIVATED (device hardware, system state, storage, network info)
+          # CodeIntelligence — ACTIVATED (see above)
+          # MultiModal — ACTIVATED (see above, both copies removed)
+          # DeviceCapabilityRouter — ACTIVATED (see above)
+          # TheaIntegrationHub, MessageRegeneration, TheaIntegrationHub+NewFeatures
+          # REMOVED from codebase on 2026-02-13 (dead code, all excluded and unreferenced)
+          # TestGenerator — ACTIVATED (AI-powered test generation, AIProviderHelpers replaced with direct streaming)
+          # RemoteCommandService — ACTIVATED (CloudKit-based remote commands)
+          # QuickLauncher — ACTIVATED (Raycast-style command palette)
+          # Intelligence/Subagents — ACTIVATED
+          # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
+          # MemorySettingsView — ACTIVATED
+          # PrivacySettingsView — ACTIVATED
+          # LocalModelsSettingsView — no file at this path
+          # AutonomousTaskSettingsView — no file at this path
+          # ResourceAllocationSettingsView — ACTIVATED (see above)
+          # AutoCorrectSettingsView — ACTIVATED (uses active LiveAutoCorrect)
+          # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
+          # AutomationSettingsView — ACTIVATED (WorkflowTemplates replaced with stub)
+          # WorkflowSettingsView — ACTIVATED
+          # TerminalSettingsView — ACTIVATED (macOS only, uses active TerminalIntegrationManager)
+          # IntegrationsSettingsView — ACTIVATED (IntegrationsManager, FeatureFlags active)
+          # AutonomousSettingsView — ACTIVATED (AIModelGovernor, ProactiveModelManager, UnifiedLocalModelOrchestrator active)
+          # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
+          # SystemPromptSettingsView — ACTIVATED (uses active TaskType + SystemPromptConfiguration)
+          # SettingsPrivacyAboutViews — ACTIVATED (supplementary settings views)
+          # SettingsConfigurationViews — ACTIVATED (supplementary settings views)
+          # SettingsViewModel — ACTIVATED (uses SettingsManager + ProviderRegistry)
+          # AIProvidersSettingsView — ACTIVATED (uses SettingsManager + ProviderRegistry)
+          # Theme exclusions (canonical DesignTokens exclusion is at line 333)
+          # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
+          - "**/Design/DesignSystemStubs.swift"
+      - path: macOS
+      - path: Shared/Resources/Assets.xcassets
+      - path: Shared/Resources/Localizable.xcstrings
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos
+        PRODUCT_NAME: Thea
+        PRODUCT_MODULE_NAME: TheaCore
+        INFOPLIST_FILE: macOS/Info.plist
+        CODE_SIGN_ENTITLEMENTS: macOS/Thea.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
+        MACOSX_DEPLOYMENT_TARGET: "26.0"
+        COMBINE_HIDPI_IMAGES: YES
+
+        # Hardened Runtime (required for notarization)
+        ENABLE_HARDENED_RUNTIME: YES
+
+        # App Sandbox - DISABLED for full system access
+        # Note: Required for Mac App Store, but Thea needs unsandboxed access for:
+        # - Local MLX/GGUF models in ~/Library/Application Support/SharedLLMs
+        # - AppleScript automation
+        # - Running local AI processes (ollama, mlx-lm)
+        # - Full file system access for code analysis
+        # If distributing via Mac App Store, re-enable this
+        ENABLE_APP_SANDBOX: NO
+
+        # Network Connections
+        ENABLE_INCOMING_NETWORK_CONNECTIONS: YES
+        ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+
+        # App Groups
+        REGISTER_APP_GROUPS: YES
+
+        # Code Signing Identity
+        CODE_SIGN_IDENTITY: "Apple Development"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+
+      debug:
+        CODE_SIGN_IDENTITY: "Apple Development"
+
+      release:
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+        GCC_TREAT_WARNINGS_AS_ERRORS: YES
+
+    dependencies:
+      - package: OpenAI
+      - package: KeychainAccess
+      - package: MarkdownUI
+      - package: Highlightr
+      # MLX Swift for native on-device LLM inference (macOS only)
+      - package: mlx-swift
+        products:
+          - MLX
+          - MLXNN
+      - package: mlx-swift-lm
+        products:
+          - MLXLLM
+          - MLXVLM
+          - MLXLMCommon
+      # MLX Audio for on-device TTS/STT (macOS only)
+      - package: mlx-audio-swift
+        products:
+          - MLXAudioTTS
+          - MLXAudioSTT
+          - MLXAudioCore
+      - target: TheaFinderSyncExtension
+        embed: true
+        codeSign: true
+      - target: TheaQuickLookExtension
+        embed: true
+        codeSign: true
+      - target: TheaSafariExtensionMac
+        embed: true
+        codeSign: true
+
+  # ============ iOS App ============
+  Thea-iOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Shared
+        excludes:
+          - "**/*macOS*"
+          - "**/*watchOS*"
+          - "**/*tvOS*"
+          - "**/*.md"
+          - "**/Core/Interfaces/**"
+          - "**/Core/Services/Mock*.swift"
+          - "**/Core/Services/ChatService.swift"
+          - "**/Core/Services/ProjectService.swift"
+          - "**/Terminal/**"
+          - "**/ScreenCapture.swift"
+          - "**/InputTrackingManager.swift"
+          - "**/*AutomationEngine.swift"
+          - "**/AppIntegration/**"
+          - "**/TerminalService.swift"
+          - "**/TerminalIntegration.swift"
+          - "**/DisplayProfileManager.swift"
+          - "**/DisplayService.swift"
+          - "**/DisplayModels.swift"
+          - "**/MLXModelManager.swift"
+          - "**/ScreenshotPreview.swift"
+          - "**/LocalModelsView.swift"
+          - "**/LocalModelsSettingsView.swift"
+          - "**/FolderAccessManager.swift"
+          - "**/RemoteScreenService.swift"
+          - "**/RemoteInputService.swift"
+          - "**/RemoteSystemService.swift"
+          - "**/Resources/Info.plist"
+          # Exclude duplicate folders
+          - "**/Execution/Terminal/**"
+          - "**/Providers/Anthropic/**"
+          - "**/Providers/DeepSeek/**"
+          - "**/Providers/Google/**"
+          - "**/Providers/Groq/**"
+          - "**/Providers/OpenAI/**"
+          - "**/Providers/OpenRouter/**"
+          - "**/Providers/Perplexity/**"
+          - "**/Providers/Helpers/**"
+          - "**/Providers/Protocol/**"
+          - "**/Providers/Registry/**"
+          # AnthropicFilesAPI + AnthropicTokenCounter — ACTIVATED (Foundation only, iOS-ready)
+          # MetaAI ARCHIVED to .v1-archive/ on 2026-02-11 (no files remain in Shared/)
+          # NotesIntegration — ACTIVATED (no file in Shared/, cleanup only)
+          # RemindersIntegration — ACTIVATED (no file in Shared/, cleanup only)
+          - "**/AI/Memory/**"
+          # LocalModelsSettingsView — no file at this path
+          # AutonomousTaskSettingsView — no file at this path
+          # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11 (no files remain in Shared/)
+          # OrchestratorSettingsView — ACTIVATED (macOS-only via #if os(macOS), safe on iOS)
+          - "**/Settings/Orchestrator/**"
+          # MemorySettingsView — ACTIVATED
+          # PrivacySettingsView — ACTIVATED
+          # AdvancedSettingsView — ACTIVATED (self-contained)
+          # AIProvidersSettingsView — ACTIVATED
+          # ResourceManagement — ACTIVATED
+          # EnhancedMessageBubble — ACTIVATED
+          - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
+          # ExecutableCodeBlock — ACTIVATED
+          - "**/Components/TheaTextInputField.swift"
+          - "**/Code/CodeIntelligence.swift"
+          - "**/Views/Code/**"
+          - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift
+          # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
+          # SelfExecutionView REMOVED from codebase on 2026-02-13
+          - "**/AI/MultiModal/MultiModalCoordinator.swift"
+          - "**/AI/MultiModal/MultiModalAnalyzer.swift"
+          # LiquidGlassStyle and DesignTokens kept for iOS/iPadHomeView
+          # DeviceCapabilityRouter — ACTIVATED
+          # DeviceSwitcherView — ACTIVATED
+          # THEAThinkingView — ACTIVATED
+          # ResponseNotificationHandler.swift — ACTIVATED (wired to ChatManager)
+          # DistributedTaskExecutor — ACTIVATED (CloudKit works on iOS)
+          # LifeMonitoring — ACTIVATED (35 files, self-contained)
+          # PatternLearning — ACTIVATED (single file, self-contained)
+          # AI/Context — ACTIVATED
+          # ConfigurationManager, PhaseProgressView, ErrorKnowledgeBaseManager
+          # REMOVED from codebase on 2026-02-13 (dead code)
+          - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView.swift
+          # AgentMode — FULLY ACTIVATED
+          # IntegrationModule — ACTIVATED (protocol + registry, has #if os(macOS) guards)
+          - "**/Integrations/MCPConnectionManager.swift"
+          - "**/Integrations/MCPGateway.swift"
+          - "**/Integrations/MailIntegration.swift"
+          # Anticipatory — ACTIVATED (all files)
+          # TaskClassifier — ACTIVATED
+          # LifeMonitoring — ACTIVATED (all files including TaskIntelligence)
+          - "**/Integrations/MusicIntegration.swift"
+          - "**/Integrations/SystemIntegration.swift"
+          # AI/Adaptive/AdaptivePromptEngine — ACTIVATED (AI/Adaptive now active)
+          # LocalModels governance — ACTIVATED (all governance files enabled for iOS)
+          # ProactiveModelManager, LocalModelRecommendationEngine (+extensions),
+          # LocalModelRecommendationTypes, AIModelGovernor, ModelGovernanceEngine,
+          # UnifiedLocalModelOrchestrator — all use Foundation/OSLog with platform guards
+          # MetaAI/ModelBenchmarkService — Archived to .v1-archive on 2026-02-11 (no file remains in Shared/)
+          # ProactivityEngine — ACTIVATED
+          # AutonomousSettingsView — ACTIVATED (governance deps now active)
+          - "**/Settings/LocalModels/**"
+          - "**/Integrations/FinderIntegration.swift"
+          - "**/Views/LocalModels/**"
+          # PlatformFeaturesHub — ACTIVATED (has #if canImport(UIKit) guards)
+          # LiveAutoCorrect — ACTIVATED (system frameworks only)
+          # AutoCorrectSettingsView — ACTIVATED
+          - "**/Integrations/SafariIntegration.swift"
+          # ChatInputView — ACTIVATED (has #if os(macOS) guards, pure SwiftUI)
+          - "**/Search/SemanticSearchService*.swift"
+          # QuerySuggestionOverlay — ACTIVATED (pure SwiftUI)
+          # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
+          # ActiveMemoryRetrieval — ACTIVATED
+          # MemoryContextView — ACTIVATED
+          # StreamingTextView — ACTIVATED (pure SwiftUI with platform guards)
+          # THEAMCPServer — ACTIVATED (has #if os(macOS) guard, compiles empty on iOS)
+          # UnifiedDeviceAwareness — ACTIVATED (has IOKit guards)
+          # Prediction — ACTIVATED (ModelPrewarmingService)
+          # ModelRouter — ACTIVATED
+          # Autonomous/BlueprintExecutor — ACTIVATED
+          # CalendarIntegration — ACTIVATED (EventKit works on iOS)
+          # ShortcutsIntegration — ACTIVATED (has platform guards)
+          # ShortcutsOrchestrator — ACTIVATED (proper #if canImport guards)
+          # SettingsPrivacyAboutViews — ACTIVATED
+          # SettingsViewModel — ACTIVATED
+          # MessageRegeneration — REMOVED from codebase on 2026-02-13 (dead code)
+          - "**/Integrations/MessagesIntegration.swift"
+          # PromptOptimizer — ACTIVATED (SubAgentOrchestrator.AgentType→String)
+          # RemoteCommandService — ACTIVATED (CloudKit works on iOS)
+          # SettingsConfigurationViews — ACTIVATED
+          # PromptEngineeringSettingsView — ACTIVATED (PromptEngineering folder now active)
+          # AutomaticPromptEngineering — ACTIVATED (PromptEngineering folder now active)
+          # AutomationSettingsView — ACTIVATED (stub-based, self-contained)
+          # AgentMode — FULLY ACTIVATED
+          # SelfEvolution — ACTIVATED
+          # KeyboardShortcutsView — ACTIVATED
+          # LifeAssistant — ACTIVATED
+          - "**/Views/LifeTracking/**"
+          # TerminalSettingsView — ACTIVATED
+          - "**/Execution/Testing/TestGenerator*.swift"
+          # Automation/WorkflowEngine — ACTIVATED
+          # WorkflowSettingsView — ACTIVATED
+          - "**/Integrations/XcodeIntegration.swift"
+          # Autonomy — ACTIVATED (all files)
+          # Automation/AutonomousTaskExecutor — ACTIVATED (has #if os(macOS) guard)
+          - "**/Settings/AutonomousTasks/**"
+          # SquadOrchestrator — ACTIVATED
+          # SupraModelSelector — ACTIVATED (governance files active)
+          # TheaIntegrationHub + NewFeatures extension REMOVED from codebase on 2026-02-13
+          # QuickLauncher — ACTIVATED (pure SwiftUI with platform guards)
+          # MemoryAugmentedChat — ACTIVATED
+          # Anticipatory — ACTIVATED (all files)
+          # KeyboardShortcutsHelpView now active (Cmd+/ overlay)
+          # LocalModels — ACTIVATED (governance files enabled for iOS, MLX files remain excluded)
+          - "**/LocalModels/MLXModelManager.swift"
+          - "**/LocalModels/MLXInferenceEngine.swift"
+          - "**/LocalModels/MLXModelScanner.swift"
+          # FocusOrchestrator — ACTIVATED (iOS Focus mode integration)
+          # SiriIntegration — ACTIVATED (has #if os(iOS) guards + macOS stub)
+          # Exclude macOS-only browser automation files
+          - "**/Automation/BrowserAutomationOrchestrator.swift"
+          - "**/Automation/UserInterventionDetector.swift"
+          - "**/Automation/ScreenAnalyzer.swift"
+          - "**/Automation/AutomationAction.swift"
+          # TheaDesignSystem.swift KEPT for iOS - contains design tokens
+          - "**/Design/LiquidGlassDesign.swift"
+          # Exclude stubs since TheaDesignSystem is included
+          - "**/Design/DesignSystemStubs.swift"
+      - path: iOS
+      - path: Shared/Resources/Assets.xcassets
+      - path: Shared/Resources/Localizable.xcstrings
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios
+        PRODUCT_NAME: Thea
+        PRODUCT_MODULE_NAME: TheaCore
+        INFOPLIST_FILE: iOS/Info.plist
+        CODE_SIGN_ENTITLEMENTS: iOS/Thea.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+        SUPPORTS_MACCATALYST: NO
+
+        # Code Signing Identity
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+
+      debug:
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+        GCC_TREAT_WARNINGS_AS_ERRORS: YES
+
+    dependencies:
+      - package: OpenAI
+      - package: KeychainAccess
+      - package: MarkdownUI
+      - package: Highlightr
+      - target: TheaShareExtension
+        embed: true
+        codeSign: true
+      - target: TheaWidgetExtension
+        embed: true
+        codeSign: true
+      - target: TheaKeyboardExtension
+        embed: true
+        codeSign: true
+      - target: TheaNotificationServiceExtension
+        embed: true
+        codeSign: true
+      - target: TheaSafariExtension
+        embed: true
+        codeSign: true
+      - target: TheaFocusFilterExtension
+        embed: true
+        codeSign: true
+      - target: TheaCredentialsExtension
+        embed: true
+        codeSign: true
+      - target: TheaIntentsExtension
+        embed: true
+        codeSign: true
+
+  # ============ watchOS App ============
+  Thea-watchOS:
+    type: application
+    platform: watchOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: watchOS
+      - path: Shared/Resources/Localizable.xcstrings
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.watchos
+        PRODUCT_NAME: "Thea Watch"
+        PRODUCT_MODULE_NAME: TheaWatch
+        INFOPLIST_FILE: watchOS/Info.plist
+        CODE_SIGN_ENTITLEMENTS: watchOS/Thea.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        WATCHOS_DEPLOYMENT_TARGET: "26.0"
+        TARGETED_DEVICE_FAMILY: 4
+        SKIP_INSTALL: NO
+
+        # Code Signing (explicit for watchOS)
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 6B66PM4JLK
+        CODE_SIGN_IDENTITY: "Apple Development"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+
+      debug:
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+        GCC_TREAT_WARNINGS_AS_ERRORS: YES
+
+    dependencies:
+      - package: KeychainAccess
+
+  # ============ tvOS App ============
+  Thea-tvOS:
+    type: application
+    platform: tvOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: tvOS
+        excludes:
+          - "**/TVFeatures/**"
+      - path: Shared/Resources/Assets.xcassets
+      - path: Shared/Resources/Localizable.xcstrings
+      - path: Shared/InferenceRelay
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.tvos
+        PRODUCT_NAME: "Thea TV"
+        PRODUCT_MODULE_NAME: TheaTV
+        INFOPLIST_FILE: tvOS/Info.plist
+        CODE_SIGN_ENTITLEMENTS: tvOS/Thea.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        TVOS_DEPLOYMENT_TARGET: "26.0"
+        TARGETED_DEVICE_FAMILY: 3
+
+        # Code Signing (explicit for tvOS)
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 6B66PM4JLK
+        CODE_SIGN_IDENTITY: "Apple Development"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+
+      debug:
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+        GCC_TREAT_WARNINGS_AS_ERRORS: YES
+
+    dependencies:
+      - package: OpenAI
+      - package: KeychainAccess
+      - package: MarkdownUI
+
+  # ============================================
+  # iOS Extensions
+  # ============================================
+
+  # ============ Share Extension (iOS) ============
+  TheaShareExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/ShareExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.share
+        PRODUCT_NAME: "Share to Thea"
+        INFOPLIST_FILE: Extensions/ShareExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/ShareExtension/ShareExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+
+  # ============ Widget Extension (iOS) ============
+  TheaWidgetExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/WidgetExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.widgets
+        PRODUCT_NAME: "Thea Widgets"
+        INFOPLIST_FILE: Extensions/WidgetExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/WidgetExtension/WidgetExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+
+  # ============ Keyboard Extension (iOS) ============
+  TheaKeyboardExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/KeyboardExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.keyboard
+        PRODUCT_NAME: "Thea Keyboard"
+        INFOPLIST_FILE: Extensions/KeyboardExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/KeyboardExtension/KeyboardExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+
+  # ============ Notification Service Extension (iOS) ============
+  TheaNotificationServiceExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/NotificationServiceExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.notifications
+        PRODUCT_NAME: "Thea Notifications"
+        INFOPLIST_FILE: Extensions/NotificationServiceExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/NotificationServiceExtension/NotificationServiceExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+
+  # ============================================
+  # macOS Extensions
+  # ============================================
+
+  # ============ Finder Sync Extension (macOS) ============
+  TheaFinderSyncExtension:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/FinderSyncExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.finder
+        PRODUCT_NAME: "Thea Finder"
+        INFOPLIST_FILE: Extensions/FinderSyncExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/FinderSyncExtension/FinderSyncExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "Apple Development"
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: YES
+        REGISTER_APP_GROUPS: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@executable_path/../../../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+
+  # ============ Quick Look Extension (macOS) ============
+  TheaQuickLookExtension:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/QuickLookExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.quicklook
+        PRODUCT_NAME: "Thea Quick Look"
+        INFOPLIST_FILE: Extensions/QuickLookExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/QuickLookExtension/QuickLookExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "Apple Development"
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: YES
+        REGISTER_APP_GROUPS: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@executable_path/../../../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+
+  # ============ Safari Extension (macOS) ============
+  TheaSafariExtensionMac:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/SafariExtension
+        excludes:
+          - "**/background/**"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.macos.safari
+        PRODUCT_NAME: "Thea"
+        INFOPLIST_FILE: Extensions/SafariExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/SafariExtension/SafariExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "Apple Development"
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: YES
+        REGISTER_APP_GROUPS: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@executable_path/../../../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+
+  # ============================================
+  # Additional iOS Extensions
+  # ============================================
+
+  # ============ Safari Extension (iOS) ============
+  TheaSafariExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/SafariExtension
+        excludes:
+          - "**/background/**"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.safari
+        PRODUCT_NAME: "Thea"
+        INFOPLIST_FILE: Extensions/SafariExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/SafariExtension/SafariExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+
+  # ============ Focus Filter Extension (iOS) ============
+  TheaFocusFilterExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/FocusFilterExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.focusfilter
+        PRODUCT_NAME: "Thea Focus"
+        INFOPLIST_FILE: Extensions/FocusFilterExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/FocusFilterExtension/FocusFilterExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+
+  # ============ Credentials Extension (iOS) ============
+  TheaCredentialsExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/CredentialsExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.credentials
+        PRODUCT_NAME: "Thea Credentials"
+        INFOPLIST_FILE: Extensions/CredentialsExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/CredentialsExtension/CredentialsExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+
+  # ============ Intents Extension (iOS) ============
+  TheaIntentsExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Extensions/IntentsExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.intents
+        PRODUCT_NAME: "Thea Intents"
+        INFOPLIST_FILE: Extensions/IntentsExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extensions/IntentsExtension/IntentsExtension.entitlements
+        SKIP_INSTALL: YES
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@executable_path/../../Frameworks"
+      release:
+        CODE_SIGN_IDENTITY: "iPhone Distribution"
+
+  # ============ Tests ============
+  TheaTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Tests
+        excludes:
+          - "**/SecurityRemediationTests.swift"
+          - "CoreTests/**"
+          - "UITests/**"
+          - "**/OrchestrationIntegrationTests.swift"
+          - "**/OrchestratorRoutingTests.swift"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.tests
+        INFOPLIST_FILE: Tests/Info.plist
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Thea.app/Contents/MacOS/Thea"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        MACOSX_DEPLOYMENT_TARGET: "26.0"
+        COMBINE_HIDPI_IMAGES: YES
+        CODE_SIGN_IDENTITY: "Apple Development"
+
+        # Runpath Search Paths
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@loader_path/../Frameworks"
+
+    dependencies:
+      - target: Thea-macOS
+      - package: OpenAI
+      - package: KeychainAccess
+
+# ============================================
+# Schemes
+# ============================================
+schemes:
+  Thea-macOS:
+    build:
+      targets:
+        Thea-macOS: all
+      parallelizeBuild: true
+      buildImplicitDependencies: true
+    run:
+      config: Debug
+      commandLineArguments:
+        "-com.apple.CoreData.ConcurrencyDebug": true
+      environmentVariables:
+        - variable: SQLITE_ENABLE_THREAD_ASSERTIONS
+          value: "1"
+          isEnabled: true
+    test:
+      config: Debug
+      gatherCoverageData: true
+      coverageTargets:
+        - Thea-macOS
+      targets:
+        - name: TheaTests
+          parallelizable: true
+          randomExecutionOrder: true
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+      revealArchiveInOrganizer: true
+
+  Thea-iOS:
+    build:
+      targets:
+        Thea-iOS: all
+      parallelizeBuild: true
+      buildImplicitDependencies: true
+    run:
+      config: Debug
+      commandLineArguments:
+        "-com.apple.CoreData.ConcurrencyDebug": true
+    test:
+      config: Debug
+      gatherCoverageData: true
+      coverageTargets:
+        - Thea-iOS
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+      revealArchiveInOrganizer: true
+
+  Thea-watchOS:
+    build:
+      targets:
+        Thea-watchOS: all
+      parallelizeBuild: true
+      buildImplicitDependencies: true
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+      revealArchiveInOrganizer: true
+
+  Thea-tvOS:
+    build:
+      targets:
+        Thea-tvOS: all
+      parallelizeBuild: true
+      buildImplicitDependencies: true
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      coverageTargets:
+        - Thea-tvOS
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+      revealArchiveInOrganizer: true

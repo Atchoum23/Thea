@@ -1,0 +1,372 @@
+# Thea E2E Tests Workflow
+# Version: 1.4.0 - Updated to macOS 26 runners, added swift package resolve
+# Last Updated: February 10, 2026
+
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+  schedule:
+    # Run nightly at 3 AM UTC for regression testing
+    - cron: '0 3 * * *'
+
+env:
+  XCODE_VERSION: '26.2'
+  DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+  MAESTRO_DRIVER_STARTUP_TIMEOUT: 240000  # 4 minutes for driver startup
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================
+  # BUILD iOS APP FOR SIMULATOR
+  # ============================================
+  build-simulator:
+    name: Build iOS Simulator App
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          else
+            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
+            xcodebuild -version
+          fi
+
+      - name: Cache XcodeGen
+        id: xcodegen-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: /opt/homebrew/Cellar/xcodegen
+          key: ${{ runner.os }}-xcodegen-2.42.0
+
+      - name: Install XcodeGen
+        run: |
+          if [ "${{ steps.xcodegen-cache.outputs.cache-hit }}" == "true" ]; then
+            brew link xcodegen 2>/dev/null || true
+          fi
+          command -v xcodegen || brew install xcodegen
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Resolve SPM Dependencies
+        run: |
+          swift package resolve 2>&1 || {
+            echo "::warning::swift package resolve failed, xcodebuild will handle resolution"
+          }
+
+      - name: List Available Simulators
+        run: |
+          echo "Available iOS Simulators:"
+          xcrun simctl list devices available | grep -E "iPhone|iPad" | head -20
+
+      - name: Build for Simulator
+        run: |
+          # Find first available iPhone simulator (macOS 26 has iPhone 17 Pro, not 16 Pro)
+          SIM_NAME=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed 's/^[[:space:]]*//' | sed 's/ (.*//')
+          echo "Building for simulator: $SIM_NAME"
+          xcodebuild build \
+            -project Thea.xcodeproj \
+            -scheme Thea-iOS \
+            -destination "platform=iOS Simulator,name=$SIM_NAME" \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=YES \
+            MARKETING_VERSION="1.5.0" \
+            CURRENT_PROJECT_VERSION="15" \
+            SWIFT_STRICT_CONCURRENCY=complete \
+            2>&1 | tee build-simulator.log
+
+      - name: Inject Info.plist Versions
+        run: |
+          APP_PATH=$(find build -name "Thea.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            PLIST="$APP_PATH/Info.plist"
+            echo "Checking Info.plist at: $PLIST"
+
+            # If Info.plist doesn't exist or is missing CFBundleIdentifier, copy from source
+            if [ ! -f "$PLIST" ] || ! /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$PLIST" 2>/dev/null; then
+              echo "Info.plist missing or incomplete, copying from iOS/Info.plist..."
+              cp iOS/Info.plist "$PLIST"
+
+              # Now fix the build variables that won't be expanded
+              /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable Thea" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier app.thea.ios" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Set :CFBundleName Thea" "$PLIST"
+              /usr/libexec/PlistBuddy -c "Set :CFBundleDevelopmentRegion en" "$PLIST"
+            fi
+
+            # Verify the fix worked
+            echo "CFBundleVersion: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+            echo "CFBundleShortVersionString: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
+            echo "CFBundleIdentifier: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST")"
+            echo "CFBundleExecutable: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$PLIST")"
+          fi
+
+      - name: Verify Build Output
+        id: verify
+        run: |
+          APP_PATH=$(find build -name "Thea.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::Thea.app not found in build directory"
+            find build -name "*.app" -type d || echo "No .app found"
+            exit 1
+          fi
+          echo "app_path=$APP_PATH" >> $GITHUB_OUTPUT
+          echo "Build successful: $APP_PATH"
+
+          # Debug: Check Info.plist versions (non-fatal)
+          echo "Checking Info.plist versions..."
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PATH/Info.plist" || echo "Note: CFBundleShortVersionString uses build variable"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PATH/Info.plist" || echo "Note: CFBundleVersion uses build variable"
+
+      - name: Package Simulator App
+        run: |
+          APP_PATH="${{ steps.verify.outputs.app_path }}"
+          mkdir -p artifacts
+          cp -R "$APP_PATH" artifacts/
+          cd artifacts && zip -r ../Thea-Simulator.zip Thea.app
+
+      - name: Upload Simulator App
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: thea-simulator-app
+          path: Thea-Simulator.zip
+          retention-days: 7
+
+      - name: Upload Build Log
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: e2e-build-log
+          path: build-simulator.log
+          retention-days: 7
+
+  # ============================================
+  # MAESTRO E2E TESTS
+  # ============================================
+  maestro-tests:
+    name: Maestro E2E Tests
+    runs-on: macos-26
+    needs: build-simulator
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download Simulator App
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: thea-simulator-app
+          path: ./
+
+      - name: Unzip App
+        run: unzip -o Thea-Simulator.zip -d app
+
+      - name: Verify App Bundle
+        run: |
+          echo "Checking app bundle..."
+          ls -la app/Thea.app/
+          echo ""
+          echo "Info.plist contents (version keys):"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" app/Thea.app/Info.plist || echo "CFBundleShortVersionString not found"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" app/Thea.app/Info.plist || echo "CFBundleVersion not found"
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: |
+          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+          else
+            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
+            xcodebuild -version
+          fi
+
+      - name: Boot Simulator
+        id: simulator
+        run: |
+          # Get first available iPhone simulator (macOS 26 runners have iPhone 17 Pro, not 16 Pro)
+          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
+
+          if [ -z "$DEVICE_ID" ]; then
+            echo "::error::No iPhone simulator found"
+            xcrun simctl list devices available
+            exit 1
+          fi
+
+          echo "Using simulator: $DEVICE_ID"
+          echo "device_id=$DEVICE_ID" >> $GITHUB_OUTPUT
+
+          # Boot the simulator
+          xcrun simctl boot "$DEVICE_ID" 2>/dev/null || true
+
+          # Wait for boot
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+
+      - name: Cache Maestro
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.maestro
+          key: ${{ runner.os }}-maestro-1.38.1
+
+      - name: Install idb-companion (Recommended for iOS)
+        run: |
+          # idb-companion improves simulator interaction reliability
+          brew tap facebook/fb 2>/dev/null || true
+          brew install facebook/fb/idb-companion 2>/dev/null || echo "idb-companion already installed or not available"
+
+      - name: Install Maestro
+        run: |
+          if [ ! -f "$HOME/.maestro/bin/maestro" ]; then
+            curl -Ls "https://get.maestro.mobile.dev" | bash
+          fi
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Verify Maestro Installation
+        run: |
+          export PATH="$HOME/.maestro/bin:$PATH"
+          maestro --version
+          echo "Maestro driver startup timeout: $MAESTRO_DRIVER_STARTUP_TIMEOUT ms"
+
+      - name: Install App on Simulator
+        run: |
+          # Verify app bundle has executable before installing
+          if [ ! -f "app/Thea.app/Thea" ]; then
+            echo "::error::Executable not found in app bundle"
+            ls -la app/Thea.app/
+            exit 1
+          fi
+
+          # Verify architecture is correct (should be arm64 for M1 runners)
+          ARCH=$(lipo -info app/Thea.app/Thea 2>&1 || echo "unknown")
+          echo "App architecture: $ARCH"
+
+          # Install with retry logic for transient failures
+          for attempt in 1 2 3; do
+            echo "Install attempt $attempt..."
+            if xcrun simctl install "${{ steps.simulator.outputs.device_id }}" app/Thea.app 2>&1; then
+              echo "App installed successfully"
+              break
+            else
+              if [ $attempt -lt 3 ]; then
+                echo "Install failed, waiting before retry..."
+                sleep 5
+                # Reboot simulator and try again
+                xcrun simctl shutdown "${{ steps.simulator.outputs.device_id }}" 2>/dev/null || true
+                sleep 2
+                xcrun simctl boot "${{ steps.simulator.outputs.device_id }}" 2>/dev/null || true
+                xcrun simctl bootstatus "${{ steps.simulator.outputs.device_id }}" -b
+              else
+                echo "::error::Failed to install app after 3 attempts"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Run Maestro Tests
+        id: maestro
+        run: |
+          export PATH="$HOME/.maestro/bin:$PATH"
+
+          mkdir -p maestro-results
+
+          # Run all flows
+          maestro test .maestro/ \
+            --format junit \
+            --output maestro-results/results.xml \
+            --device "${{ steps.simulator.outputs.device_id }}" \
+            2>&1 | tee maestro-output.log || MAESTRO_EXIT=$?
+
+          # Copy screenshots if they exist
+          find ~/.maestro -name "*.png" -exec cp {} maestro-results/ \; 2>/dev/null || true
+
+          echo "exit_code=${MAESTRO_EXIT:-0}" >> $GITHUB_OUTPUT
+
+      - name: Upload Maestro Results
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: maestro-results
+          path: |
+            maestro-results/
+            maestro-output.log
+          retention-days: 30
+
+      - name: Publish Test Results
+        if: always()
+        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4.3.1
+        with:
+          report_paths: 'maestro-results/results.xml'
+          check_name: 'Maestro E2E Test Results'
+          fail_on_failure: true
+
+      - name: Shutdown Simulator
+        if: always()
+        run: |
+          xcrun simctl shutdown "${{ steps.simulator.outputs.device_id }}" 2>/dev/null || true
+
+      - name: Check Test Results
+        run: |
+          if [ "${{ steps.maestro.outputs.exit_code }}" != "0" ]; then
+            echo "::error::Maestro E2E tests failed"
+            exit 1
+          fi
+          echo "Maestro E2E tests passed"
+
+  # ============================================
+  # E2E SUMMARY
+  # ============================================
+  e2e-summary:
+    name: E2E Summary
+    runs-on: ubuntu-latest
+    needs: [build-simulator, maestro-tests]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.build-simulator.result }}" == "success" ]]; then
+            echo "| Simulator Build | Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Simulator Build | Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.maestro-tests.result }}" == "success" ]]; then
+            echo "| Maestro E2E Tests | Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Maestro E2E Tests | Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if E2E Failed
+        if: needs.build-simulator.result == 'failure' || needs.maestro-tests.result == 'failure'
+        run: |
+          echo "::error::E2E tests failed"
+          exit 1

@@ -1,0 +1,369 @@
+# SwiftLint Configuration for Thea
+# Version: 3.0.0 - Production Quality Configuration
+# Last Updated: January 16, 2026
+# Focus: Code quality issues, not style preferences
+
+# ============================================
+# INCLUDED PATHS
+# ============================================
+included:
+  - Shared
+  - Platforms
+  - iOS
+  - macOS
+  - watchOS
+  - tvOS
+  - iPadOS
+  - Tests
+
+# ============================================
+# EXCLUDED PATHS
+# ============================================
+excluded:
+  - .build
+  - build
+  - .swiftpm
+  - Pods
+  - Carthage
+  - DerivedData
+  - .backup*
+  - .v1-archive
+  - Package.swift
+  - "**/.build"
+  - "**/Backups"
+  - "**/*.legacy"
+  - "**/*.wip"
+  # Excluded from build targets (dead code) — no point linting
+  - Shared/AI/MetaAI
+  - Shared/AI/Context
+  - Shared/AI/Adaptive
+  - Shared/AI/MultiModal
+  - Shared/AI/Proactive
+  - Shared/AI/PromptEngineering
+  - Shared/AI/Providers
+  - Shared/AI/Memory
+  - Shared/AI/LocalModels/ProactiveModelManager.swift
+  - Shared/AI/LocalModels/LocalModelRecommendationEngine.swift
+  - Shared/AI/LocalModels/LocalModelRecommendationEngine+Hardware.swift
+  - Shared/AI/LocalModels/AIModelGovernor.swift
+  - Shared/AI/LocalModels/ModelGovernanceEngine.swift
+  - Shared/AI/LocalModels/UnifiedLocalModelOrchestrator.swift
+  - Shared/AI/LocalModels/SupraModelSelector.swift
+  - Shared/AI/LocalModels/OllamaAgentLoop.swift
+  - Shared/AI/LocalModels/ModelQualityBenchmark.swift
+  - Shared/AI/LocalModels/PredictivePreloader.swift
+  - Shared/Autonomy
+  - Shared/Automation
+  - Shared/Autonomous
+  - Shared/AgentMode
+  - Shared/SelfEvolution
+  - Shared/PatternLearning
+  - Shared/LifeMonitoring
+  - Shared/LifeAssistant
+  - Shared/Integrations
+  - Shared/Anticipatory
+  - Shared/Prediction
+  - Shared/ResourceManagement
+  - Shared/Intelligence/Squads
+  - Shared/Intelligence/LifeMonitoring
+  - Shared/Intelligence/LifeAssistant
+  - Shared/Intelligence/PatternLearning
+  - Shared/Execution/Terminal
+  - Shared/Widgets
+  - Shared/UI/Views/MetaAI
+  - Shared/UI/Views/Settings/Orchestrator
+  - Shared/UI/Views/Settings/LocalModels
+  - Shared/UI/Views/Settings/Privacy
+  - Shared/UI/Views/Settings/Advanced
+  - Shared/UI/Views/Settings/AutonomousTasks
+  - Shared/UI/Views/Code
+  - Shared/UI/Views/LocalModels
+  - Shared/UI/Views/LifeTracking
+  - Tools
+
+# ============================================
+# DISABLED RULES
+# ============================================
+# Style-only rules disabled to focus on code quality
+disabled_rules:
+  - line_length               # Too many legitimate long lines in SwiftUI and URLs
+  - trailing_whitespace       # Auto-fixed by Xcode
+  - todo                      # TODOs are intentional during development
+  - force_cast                # Required for system APIs (Accessibility, FSEvents, etc.)
+  - multiple_closures_with_trailing_closure  # Common in SwiftUI
+  - opening_brace             # Conflicts with some SwiftUI patterns
+  - vertical_whitespace       # Allow extra blank lines for readability
+  - type_contents_order       # Style preference - too many violations
+  - switch_case_on_newline    # Style preference - too many violations
+  - explicit_type_interface   # Not always needed
+  - attributes                # Style preference
+  - missing_docs              # Will add docs incrementally
+  - raw_value_for_camel_cased_codable_enum  # Style preference
+  - file_name                 # Too strict for some cases
+  - pattern_matching_keywords # Style preference
+  - for_where                 # Style preference
+  - convenience_type          # Not always applicable
+  - vertical_parameter_alignment_on_call # Style preference
+  - multiline_function_chains # Style preference
+  - multiline_arguments       # Style preference
+  - number_separator          # Style preference
+  - closure_end_indentation   # SwiftUI patterns vary indentation
+  - switch_case_alignment     # Style preference
+  - unavailable_function      # Not all stubs need @available
+  - inclusive_language        # Scientific terms like stigmasterol are valid
+  - optional_data_string_conversion  # Legacy code patterns
+  - unused_optional_binding   # Sometimes needed for side effects
+  - unused_enumerated         # Sometimes index is used for debugging
+  - function_name_whitespace  # False positives with async functions
+
+# ============================================
+# OPT-IN RULES (Quality Focused)
+# ============================================
+opt_in_rules:
+  # Array and Collection
+  - empty_collection_literal
+  - empty_count
+  - empty_string
+
+  # Closures
+  - trailing_closure
+  - unneeded_parentheses_in_closure_argument
+
+  # Code Quality
+  - implicit_return
+  - modifier_order
+
+  # Contains/Filter optimization (relaxed)
+  - contains_over_filter_count
+  - contains_over_first_not_nil
+  - contains_over_range_nil_comparison
+
+  # Error Handling
+  - fatal_error_message
+
+  # Extensions - removed extension_access_modifier (too many violations)
+
+  # Functions
+  - explicit_init
+  - joined_default_parameter
+
+  # Legacy - removed legacy_multiple (too many violations)
+  - legacy_random
+
+  # Map/Reduce/Filter
+  - flatmap_over_map_reduce
+  - reduce_into
+
+  # Nil handling
+  - redundant_nil_coalescing
+
+  # Operators
+  - identical_operands
+  - static_operator
+  - yoda_condition
+
+  # Self
+  - lower_acl_than_parent
+  - prefer_self_type_over_type_of_self
+  - prefer_zero_over_explicit_init
+
+  # Super
+  - overridden_super_call
+
+  # Toggles
+  - toggle_bool
+
+  # Types
+  - redundant_type_annotation
+
+  # Variables
+  - fallthrough
+  - unowned_variable_capture
+
+# ============================================
+# ANALYZER RULES (Requires Compilation)
+# ============================================
+analyzer_rules:
+  - explicit_self
+  - unused_declaration
+  - unused_import
+
+# ============================================
+# RULE CONFIGURATIONS
+# ============================================
+
+# File Length - aspirational: 500, error at current max + buffer
+# Worst active file: OrchestratorSettingsView.swift (936 lines)
+# Ratchet down error threshold as files are decomposed
+file_length:
+  warning: 500
+  error: 950
+  ignore_comment_only_lines: true
+
+# Type Body Length - aspirational: 400, error at current max + buffer
+# Worst active type: OrchestratorSettingsView (871 lines)
+# Ratchet down error threshold as types are decomposed
+type_body_length:
+  warning: 400
+  error: 880
+
+# Function Body Length - aspirational: 80, error at current max + buffer
+# Worst active function: SwiftBestPracticesLibrary (274 lines)
+# Ratchet down error threshold as functions are decomposed
+function_body_length:
+  warning: 80
+  error: 280
+
+# Function Parameter Count
+function_parameter_count:
+  warning: 8
+  error: 10
+  ignores_default_parameters: true
+
+# Cyclomatic Complexity - aspirational: 15, error at current max + buffer
+# Worst active function: AnthropicProvider (25)
+# Ratchet down error threshold as functions are simplified
+cyclomatic_complexity:
+  warning: 15
+  error: 26
+  ignores_case_statements: true
+
+# Nesting - relaxed
+nesting:
+  type_level:
+    warning: 4
+    error: 6
+  function_level:
+    warning: 4
+    error: 6
+
+# Identifier Name
+identifier_name:
+  min_length:
+    warning: 1
+    error: 0
+  max_length:
+    warning: 60
+    error: 80
+  allowed_symbols:
+    - _
+  excluded:
+    - id
+    - db
+    - ai
+    - ok
+    - to
+    - x
+    - y
+    - z
+    - i
+    - j
+    - k
+    - n
+    - a
+    - b
+    - r
+    - g
+    - UI
+    - ID
+    - AI
+    - OS
+
+# Large Tuple (increased for C interop)
+large_tuple:
+  warning: 10
+  error: 20
+
+# Type Name
+type_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 60
+    error: 80
+  allowed_symbols:
+    - _
+  validates_start_with_lowercase: warning
+  excluded:
+    - AI
+    - ID
+    - UI
+    - OK
+    - OS
+    - proc_bsdinfo     # C struct name
+    - proc_taskinfo    # C struct name
+    # Platform-prefixed view types (intentional naming convention)
+    - iOSProjectsView
+    - iOSNewProjectView
+    - iOSProjectDetailView
+    - iOSHomeView
+    - iOSChatListView
+    - iOSChatView
+    - iOSNewConversationView
+    - iOSKnowledgeView
+    - iOSKnowledgeScannerView
+    - iOSSettingsView
+    - iOSAPIKeysView
+    - iOSMigrationView
+    - iOSMigrationImportView
+    - iOSAboutView
+    - iOSVoiceSettingsView
+    - iOSFinancialView
+    - iOSAddAccountView
+    - MacChatDetailView
+    - MacProjectDetailView
+    - macOSKnowledgeView
+    - macOSFinancialView
+    - macOSCodeView
+    - macOSMigrationView
+    - watchOSHomeView
+    - watchOSChatListView
+    - watchOSChatView
+    - watchOSSettingsView
+    - watchOSMessageBubble
+    - watchOSVoiceView
+    - watchOSRecentView
+    - watchOSNewChatView
+    - tvOSHomeView
+    - tvOSChatView
+    - tvOSSettingsView
+    - tvOSMessageBubble
+    - tvOSProjectsView
+    - tvOSNewChatView
+    - iPadOSHomeView
+    - iPadOSChatView
+    - iPadOSChatDetailView
+    - iPadOSProjectDetailView
+
+# Line Length (disabled - too many legitimate long lines)
+# line_length:
+#   warning: 200
+#   error: 300
+#   ignores_urls: true
+#   ignores_function_declarations: true
+#   ignores_comments: true
+#   ignores_interpolated_strings: true
+
+# Trailing Comma
+trailing_comma:
+  mandatory_comma: false
+
+# Warning Threshold - gradually tighten as code improves
+warning_threshold: 200
+
+# ============================================
+# CUSTOM RULES (Quality Focused)
+# ============================================
+custom_rules:
+  # Prevent force try in production code
+  force_try_usage:
+    name: "Force Try Usage"
+    regex: 'try!'
+    message: "Avoid try! - use do/catch for proper error handling."
+    severity: warning
+
+# ============================================
+# REPORTER
+# ============================================
+reporter: "xcode"

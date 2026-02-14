@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- ================================ -->
+	<!-- App Groups                       -->
+	<!-- ================================ -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.app.theathe</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- HealthKit                        -->
+	<!-- ================================ -->
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<key>com.apple.developer.healthkit.access</key>
+	<array>
+		<string>health-records</string>
+	</array>
+	<key>com.apple.developer.healthkit.background-delivery</key>
+	<true/>
+	<key>com.apple.developer.healthkit.recalibrate-estimates</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Siri & Shortcuts                 -->
+	<!-- ================================ -->
+	<key>com.apple.developer.siri</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Push Notifications               -->
+	<!-- ================================ -->
+	<key>aps-environment</key>
+	<string>development</string>
+
+	<!-- ================================ -->
+	<!-- iCloud Services                  -->
+	<!-- ================================ -->
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>iCloud.app.theathe</string>
+	</array>
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudDocuments</string>
+		<string>CloudKit</string>
+	</array>
+	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
+	<string>$(TeamIdentifierPrefix)app.theathe</string>
+
+	<!-- ================================ -->
+	<!-- Associated Domains               -->
+	<!-- ================================ -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:theathe.app</string>
+		<string>webcredentials:theathe.app</string>
+		<string>activitycontinuation:theathe.app</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- HomeKit                          -->
+	<!-- ================================ -->
+	<key>com.apple.developer.homekit</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Default Data Protection          -->
+	<!-- ================================ -->
+	<key>com.apple.developer.default-data-protection</key>
+	<string>NSFileProtectionComplete</string>
+
+	<!-- ================================ -->
+	<!-- Network - WiFi Info              -->
+	<!-- ================================ -->
+	<key>com.apple.developer.networking.wifi-info</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Inter-App Audio                  -->
+	<!-- ================================ -->
+	<key>inter-app-audio</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- App Attest (Security)            -->
+	<!-- ================================ -->
+	<key>com.apple.developer.devicecheck.appattest-environment</key>
+	<string>development</string>
+
+	<!-- ================================ -->
+	<!-- Communication Notifications      -->
+	<!-- ================================ -->
+	<key>com.apple.developer.usernotifications.communication</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Time Sensitive Notifications     -->
+	<!-- ================================ -->
+	<key>com.apple.developer.usernotifications.time-sensitive</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Group Activities (SharePlay)     -->
+	<!-- ================================ -->
+	<key>com.apple.developer.group-session</key>
+	<true/>
+
+	<!-- ================================ -->
+	<!-- Keychain Sharing                 -->
+	<!-- ================================ -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)app.thea.ios</string>
+		<string>$(AppIdentifierPrefix)group.app.theathe</string>
+	</array>
+
+	<!-- ================================ -->
+	<!-- Family Controls / Screen Time    -->
+	<!-- APPROVED by Apple (2026-02-06) for app.thea.ios -->
+	<!-- ================================ -->
+	<key>com.apple.developer.family-controls</key>
+	<true/>
+
+	<!-- ======================================================== -->
+	<!-- RESTRICTED ENTITLEMENTS - Uncomment after Apple approval -->
+	<!-- Request at: https://developer.apple.com/contact/request/network-extension -->
+	<!-- ======================================================== -->
+	<!--
+	<key>com.apple.developer.networking.networkextension</key>
+	<array>
+		<string>content-filter-provider</string>
+		<string>packet-tunnel-provider</string>
+		<string>dns-proxy</string>
+		<string>dns-settings</string>
+	</array>
+
+	<key>com.apple.developer.authentication-services.autofill-credential-provider</key>
+	<true/>
+
+	<key>com.apple.developer.kernel.extended-virtual-addressing</key>
+	<true/>
+	-->
+</dict>
+</plist>
