@@ -479,16 +479,21 @@ struct OrchestratorSettingsView: View {
         }
     }
 
+}
+
+// MARK: - Cost, Execution, Debug & Actions
+
+extension OrchestratorSettingsView {
+
     func shortModelName(_ model: String) -> String {
         if model.hasPrefix("local-") {
-            return "🖥️ " + model.replacingOccurrences(of: "local-", with: "")
+            return "Local " + model.replacingOccurrences(of: "local-", with: "")
         }
         let parts = model.split(separator: "/")
         return String(parts.last ?? Substring(model))
     }
 
     func formatTaskType(_ taskType: String) -> String {
-        // Convert camelCase to Title Case with spaces
         var result = ""
         for char in taskType {
             if char.isUppercase && !result.isEmpty {
@@ -498,12 +503,6 @@ struct OrchestratorSettingsView: View {
         }
         return result.prefix(1).uppercased() + result.dropFirst()
     }
-
-}
-
-// MARK: - Cost, Execution, Debug & Actions
-
-extension OrchestratorSettingsView {
 
     var costManagementSection: some View {
         Section("Cost Optimization") {

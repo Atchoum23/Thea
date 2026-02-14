@@ -4,9 +4,9 @@
 import SwiftUI
 
 struct IntegrationsSettingsView: View {
-    @State private var featureFlags = FeatureFlags.shared
-    @State private var integrationsManager = IntegrationsManager.shared
-    @State private var showingModuleDetail: IntegrationModuleType?
+    @State var featureFlags = FeatureFlags.shared
+    @State var integrationsManager = IntegrationsManager.shared
+    @State var showingModuleDetail: IntegrationModuleType?
     @State private var showingResetConfirmation = false
 
     var body: some View {

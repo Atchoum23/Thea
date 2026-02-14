@@ -345,109 +345,7 @@ final class SettingsManager: ObservableObject {
     // MARK: - Init
 
     private init() {
-        defaultProvider = UserDefaults.standard.string(forKey: "defaultProvider") ?? "openrouter"
-        streamResponses = UserDefaults.standard.object(forKey: "streamResponses") as? Bool ?? true
-        theme = UserDefaults.standard.string(forKey: "theme") ?? "system"
-        fontSize = UserDefaults.standard.string(forKey: "fontSize") ?? "medium"
-        iCloudSyncEnabled = UserDefaults.standard.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
-        analyticsEnabled = UserDefaults.standard.bool(forKey: "analyticsEnabled")
-        handoffEnabled = UserDefaults.standard.object(forKey: "handoffEnabled") as? Bool ?? true
-        cloudAPIPrivacyGuardEnabled = UserDefaults.standard.bool(forKey: "cloudAPIPrivacyGuardEnabled")
-
-        launchAtLogin = UserDefaults.standard.bool(forKey: "launchAtLogin")
-        showInMenuBar = UserDefaults.standard.object(forKey: "showInMenuBar") as? Bool ?? true
-        notificationsEnabled = UserDefaults.standard.object(forKey: "notificationsEnabled") as? Bool ?? true
-
-        windowFloatOnTop = UserDefaults.standard.bool(forKey: "windowFloatOnTop")
-        rememberWindowPosition = UserDefaults.standard.object(forKey: "rememberWindowPosition") as? Bool ?? true
-        defaultWindowSize = UserDefaults.standard.string(forKey: "defaultWindowSize") ?? "default"
-
-        messageDensity = UserDefaults.standard.string(forKey: "messageDensity") ?? "comfortable"
-        timestampDisplay = UserDefaults.standard.string(forKey: "timestampDisplay") ?? "relative"
-        autoScrollToBottom = UserDefaults.standard.object(forKey: "autoScrollToBottom") as? Bool ?? true
-
-        showSidebarOnLaunch = UserDefaults.standard.object(forKey: "showSidebarOnLaunch") as? Bool ?? true
-        restoreLastSession = UserDefaults.standard.bool(forKey: "restoreLastSession")
-
-        readResponsesAloud = UserDefaults.standard.bool(forKey: "readResponsesAloud")
-        selectedVoice = UserDefaults.standard.string(forKey: "selectedVoice") ?? "default"
-
-        debugMode = UserDefaults.standard.bool(forKey: "debugMode")
-        showPerformanceMetrics = UserDefaults.standard.bool(forKey: "showPerformanceMetrics")
-        betaFeaturesEnabled = UserDefaults.standard.bool(forKey: "betaFeaturesEnabled")
-
-        preferLocalModels = UserDefaults.standard.bool(forKey: "preferLocalModels")
-        mlxModelsPath = UserDefaults.standard.string(forKey: "mlxModelsPath") ?? "~/.cache/huggingface/hub/"
-        ollamaEnabled = UserDefaults.standard.bool(forKey: "ollamaEnabled")
-        ollamaURL = UserDefaults.standard.string(forKey: "ollamaURL") ?? "http://localhost:11434"
-
-        executionMode = UserDefaults.standard.string(forKey: "executionMode") ?? "manual"
-        allowFileCreation = UserDefaults.standard.bool(forKey: "allowFileCreation")
-        allowFileEditing = UserDefaults.standard.bool(forKey: "allowFileEditing")
-        allowCodeExecution = UserDefaults.standard.bool(forKey: "allowCodeExecution")
-        allowExternalAPICalls = UserDefaults.standard.bool(forKey: "allowExternalAPICalls")
-        requireDestructiveApproval = UserDefaults.standard.object(forKey: "requireDestructiveApproval") as? Bool ?? true
-        enableRollback = UserDefaults.standard.object(forKey: "enableRollback") as? Bool ?? true
-        createBackups = UserDefaults.standard.object(forKey: "createBackups") as? Bool ?? true
-        preventSleepDuringExecution = UserDefaults.standard.object(forKey: "preventSleepDuringExecution") as? Bool ?? true
-        maxConcurrentTasks = UserDefaults.standard.integer(forKey: "maxConcurrentTasks") != 0
-            ? UserDefaults.standard.integer(forKey: "maxConcurrentTasks") : 3
-
-        submitShortcut = UserDefaults.standard.string(forKey: "submitShortcut") ?? "enter"
-        notifyOnResponseComplete = UserDefaults.standard.object(forKey: "notifyOnResponseComplete") as? Bool ?? true
-        notifyOnAttentionRequired = UserDefaults.standard.object(forKey: "notifyOnAttentionRequired") as? Bool ?? true
-        playNotificationSound = UserDefaults.standard.object(forKey: "playNotificationSound") as? Bool ?? true
-        showDockBadge = UserDefaults.standard.object(forKey: "showDockBadge") as? Bool ?? true
-        doNotDisturb = UserDefaults.standard.bool(forKey: "doNotDisturb")
-        moltbookAgentEnabled = UserDefaults.standard.bool(forKey: "moltbookAgentEnabled")
-        moltbookPreviewMode = UserDefaults.standard.object(forKey: "moltbookPreviewMode") as? Bool ?? true
-        moltbookMaxDailyPosts = UserDefaults.standard.integer(forKey: "moltbookMaxDailyPosts") != 0
-            ? UserDefaults.standard.integer(forKey: "moltbookMaxDailyPosts") : 10
-        clipboardHistoryEnabled = UserDefaults.standard.object(forKey: "clipboardHistoryEnabled") as? Bool ?? true
-        clipboardRecordImages = UserDefaults.standard.object(forKey: "clipboardRecordImages") as? Bool ?? true
-        clipboardMaxHistory = UserDefaults.standard.integer(forKey: "clipboardMaxHistory") != 0
-            ? UserDefaults.standard.integer(forKey: "clipboardMaxHistory") : 500
-        clipboardRetentionDays = UserDefaults.standard.integer(forKey: "clipboardRetentionDays") != 0
-            ? UserDefaults.standard.integer(forKey: "clipboardRetentionDays") : 30
-        clipboardAutoDetectSensitive = UserDefaults.standard.object(forKey: "clipboardAutoDetectSensitive") as? Bool ?? true
-        clipboardSensitiveExpiryHours = UserDefaults.standard.integer(forKey: "clipboardSensitiveExpiryHours") != 0
-            ? UserDefaults.standard.integer(forKey: "clipboardSensitiveExpiryHours") : 24
-        clipboardAutoSummarize = UserDefaults.standard.bool(forKey: "clipboardAutoSummarize")
-        clipboardSyncEnabled = UserDefaults.standard.bool(forKey: "clipboardSyncEnabled")
-        clipboardAutoCategorize = UserDefaults.standard.bool(forKey: "clipboardAutoCategorize")
-        clipboardSyncPinboards = UserDefaults.standard.bool(forKey: "clipboardSyncPinboards")
-        clipboardExcludedApps = UserDefaults.standard.stringArray(forKey: "clipboardExcludedApps") ?? []
-        agentDelegationEnabled = UserDefaults.standard.object(forKey: "agentDelegationEnabled") as? Bool ?? true
-        agentAutoDelegateComplexTasks = UserDefaults.standard.bool(forKey: "agentAutoDelegateComplexTasks")
-        agentMaxConcurrent = UserDefaults.standard.integer(forKey: "agentMaxConcurrent") != 0
-            ? UserDefaults.standard.integer(forKey: "agentMaxConcurrent") : 4
-        agentDefaultAutonomy = UserDefaults.standard.string(forKey: "agentDefaultAutonomy") ?? "balanced"
-        activeFocusMode = UserDefaults.standard.string(forKey: "activeFocusMode") ?? "general"
-        enableSemanticSearch = UserDefaults.standard.object(forKey: "enableSemanticSearch") as? Bool ?? true
-        defaultExportFormat = UserDefaults.standard.string(forKey: "defaultExportFormat") ?? "markdown"
-
-        if let savedFavorites = UserDefaults.standard.array(forKey: "favoriteModels") as? [String] {
-            favoriteModels = Set(savedFavorites)
-        } else {
-            favoriteModels = []
-        }
-
-        // Listen for sync engine pull events to reload values from UserDefaults
-        syncObserver = NotificationCenter.default
-            .publisher(for: .preferenceSyncDidPull)
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.reloadFromDefaults()
-            }
-    }
-
-    // MARK: - Reload from Defaults (after sync pull)
-
-    /// Re-reads every @Published property from UserDefaults after the sync
-    /// engine writes new cloud values into local storage.
-    func reloadFromDefaults() {
         let d = UserDefaults.standard
-
         defaultProvider = d.string(forKey: "defaultProvider") ?? "openrouter"
         streamResponses = d.object(forKey: "streamResponses") as? Bool ?? true
         theme = d.string(forKey: "theme") ?? "system"
@@ -476,6 +374,32 @@ final class SettingsManager: ObservableObject {
         mlxModelsPath = d.string(forKey: "mlxModelsPath") ?? "~/.cache/huggingface/hub/"
         ollamaEnabled = d.bool(forKey: "ollamaEnabled")
         ollamaURL = d.string(forKey: "ollamaURL") ?? "http://localhost:11434"
+
+        // Load execution, notification, clipboard, agent, and remaining settings
+        loadExecutionSettings(from: d)
+        loadNotificationSettings(from: d)
+        loadMoltbookSettings(from: d)
+        loadClipboardSettings(from: d)
+        loadAgentSettings(from: d)
+        loadRemainingSettings(from: d)
+
+        if let savedFavorites = d.array(forKey: "favoriteModels") as? [String] {
+            favoriteModels = Set(savedFavorites)
+        } else {
+            favoriteModels = []
+        }
+
+        syncObserver = NotificationCenter.default
+            .publisher(for: .preferenceSyncDidPull)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.reloadFromDefaults()
+            }
+    }
+
+    // MARK: - Init Helpers
+
+    private func loadExecutionSettings(from d: UserDefaults) {
         executionMode = d.string(forKey: "executionMode") ?? "manual"
         allowFileCreation = d.bool(forKey: "allowFileCreation")
         allowFileEditing = d.bool(forKey: "allowFileEditing")
@@ -487,8 +411,126 @@ final class SettingsManager: ObservableObject {
         preventSleepDuringExecution = d.object(forKey: "preventSleepDuringExecution") as? Bool ?? true
         maxConcurrentTasks = d.integer(forKey: "maxConcurrentTasks") != 0
             ? d.integer(forKey: "maxConcurrentTasks") : 3
-
         submitShortcut = d.string(forKey: "submitShortcut") ?? "enter"
+    }
+
+    private func loadNotificationSettings(from d: UserDefaults) {
+        notifyOnResponseComplete = d.object(forKey: "notifyOnResponseComplete") as? Bool ?? true
+        notifyOnAttentionRequired = d.object(forKey: "notifyOnAttentionRequired") as? Bool ?? true
+        playNotificationSound = d.object(forKey: "playNotificationSound") as? Bool ?? true
+        showDockBadge = d.object(forKey: "showDockBadge") as? Bool ?? true
+        doNotDisturb = d.bool(forKey: "doNotDisturb")
+    }
+
+    private func loadMoltbookSettings(from d: UserDefaults) {
+        moltbookAgentEnabled = d.bool(forKey: "moltbookAgentEnabled")
+        moltbookPreviewMode = d.object(forKey: "moltbookPreviewMode") as? Bool ?? true
+        moltbookMaxDailyPosts = d.integer(forKey: "moltbookMaxDailyPosts") != 0
+            ? d.integer(forKey: "moltbookMaxDailyPosts") : 10
+    }
+
+    private func loadClipboardSettings(from d: UserDefaults) {
+        clipboardHistoryEnabled = d.object(forKey: "clipboardHistoryEnabled") as? Bool ?? true
+        clipboardRecordImages = d.object(forKey: "clipboardRecordImages") as? Bool ?? true
+        clipboardMaxHistory = d.integer(forKey: "clipboardMaxHistory") != 0
+            ? d.integer(forKey: "clipboardMaxHistory") : 500
+        clipboardRetentionDays = d.integer(forKey: "clipboardRetentionDays") != 0
+            ? d.integer(forKey: "clipboardRetentionDays") : 30
+        clipboardAutoDetectSensitive = d.object(forKey: "clipboardAutoDetectSensitive") as? Bool ?? true
+        clipboardSensitiveExpiryHours = d.integer(forKey: "clipboardSensitiveExpiryHours") != 0
+            ? d.integer(forKey: "clipboardSensitiveExpiryHours") : 24
+        clipboardAutoSummarize = d.bool(forKey: "clipboardAutoSummarize")
+        clipboardSyncEnabled = d.bool(forKey: "clipboardSyncEnabled")
+        clipboardAutoCategorize = d.bool(forKey: "clipboardAutoCategorize")
+        clipboardSyncPinboards = d.bool(forKey: "clipboardSyncPinboards")
+        clipboardExcludedApps = d.stringArray(forKey: "clipboardExcludedApps") ?? []
+    }
+
+    private func loadAgentSettings(from d: UserDefaults) {
+        agentDelegationEnabled = d.object(forKey: "agentDelegationEnabled") as? Bool ?? true
+        agentAutoDelegateComplexTasks = d.bool(forKey: "agentAutoDelegateComplexTasks")
+        agentMaxConcurrent = d.integer(forKey: "agentMaxConcurrent") != 0
+            ? d.integer(forKey: "agentMaxConcurrent") : 4
+        agentDefaultAutonomy = d.string(forKey: "agentDefaultAutonomy") ?? "balanced"
+    }
+
+    private func loadRemainingSettings(from d: UserDefaults) {
+        activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
+        enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
+        defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
+    }
+
+    // MARK: - Reload from Defaults (after sync pull)
+
+    /// Re-reads every @Published property from UserDefaults after the sync
+    /// engine writes new cloud values into local storage.
+    func reloadFromDefaults() {
+        let d = UserDefaults.standard
+
+        reloadCoreSettings(from: d)
+        reloadUISettings(from: d)
+        reloadExecutionSettings(from: d)
+        reloadNotificationSettings(from: d)
+        reloadClipboardSettings(from: d)
+        reloadAgentAndMiscSettings(from: d)
+
+        if let savedFavorites = d.array(forKey: "favoriteModels") as? [String] {
+            favoriteModels = Set(savedFavorites)
+        }
+
+        AppConfiguration.applyFontSize(fontSize)
+    }
+
+    private func reloadCoreSettings(from d: UserDefaults) {
+        defaultProvider = d.string(forKey: "defaultProvider") ?? "openrouter"
+        streamResponses = d.object(forKey: "streamResponses") as? Bool ?? true
+        theme = d.string(forKey: "theme") ?? "system"
+        fontSize = d.string(forKey: "fontSize") ?? "medium"
+        iCloudSyncEnabled = d.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
+        analyticsEnabled = d.bool(forKey: "analyticsEnabled")
+        handoffEnabled = d.object(forKey: "handoffEnabled") as? Bool ?? true
+        cloudAPIPrivacyGuardEnabled = d.bool(forKey: "cloudAPIPrivacyGuardEnabled")
+        launchAtLogin = d.bool(forKey: "launchAtLogin")
+        showInMenuBar = d.object(forKey: "showInMenuBar") as? Bool ?? true
+        notificationsEnabled = d.object(forKey: "notificationsEnabled") as? Bool ?? true
+    }
+
+    private func reloadUISettings(from d: UserDefaults) {
+        windowFloatOnTop = d.bool(forKey: "windowFloatOnTop")
+        rememberWindowPosition = d.object(forKey: "rememberWindowPosition") as? Bool ?? true
+        defaultWindowSize = d.string(forKey: "defaultWindowSize") ?? "default"
+        messageDensity = d.string(forKey: "messageDensity") ?? "comfortable"
+        timestampDisplay = d.string(forKey: "timestampDisplay") ?? "relative"
+        autoScrollToBottom = d.object(forKey: "autoScrollToBottom") as? Bool ?? true
+        showSidebarOnLaunch = d.object(forKey: "showSidebarOnLaunch") as? Bool ?? true
+        restoreLastSession = d.bool(forKey: "restoreLastSession")
+        readResponsesAloud = d.bool(forKey: "readResponsesAloud")
+        selectedVoice = d.string(forKey: "selectedVoice") ?? "default"
+        debugMode = d.bool(forKey: "debugMode")
+        showPerformanceMetrics = d.bool(forKey: "showPerformanceMetrics")
+        betaFeaturesEnabled = d.bool(forKey: "betaFeaturesEnabled")
+        preferLocalModels = d.bool(forKey: "preferLocalModels")
+        mlxModelsPath = d.string(forKey: "mlxModelsPath") ?? "~/.cache/huggingface/hub/"
+        ollamaEnabled = d.bool(forKey: "ollamaEnabled")
+        ollamaURL = d.string(forKey: "ollamaURL") ?? "http://localhost:11434"
+    }
+
+    private func reloadExecutionSettings(from d: UserDefaults) {
+        executionMode = d.string(forKey: "executionMode") ?? "manual"
+        allowFileCreation = d.bool(forKey: "allowFileCreation")
+        allowFileEditing = d.bool(forKey: "allowFileEditing")
+        allowCodeExecution = d.bool(forKey: "allowCodeExecution")
+        allowExternalAPICalls = d.bool(forKey: "allowExternalAPICalls")
+        requireDestructiveApproval = d.object(forKey: "requireDestructiveApproval") as? Bool ?? true
+        enableRollback = d.object(forKey: "enableRollback") as? Bool ?? true
+        createBackups = d.object(forKey: "createBackups") as? Bool ?? true
+        preventSleepDuringExecution = d.object(forKey: "preventSleepDuringExecution") as? Bool ?? true
+        maxConcurrentTasks = d.integer(forKey: "maxConcurrentTasks") != 0
+            ? d.integer(forKey: "maxConcurrentTasks") : 3
+        submitShortcut = d.string(forKey: "submitShortcut") ?? "enter"
+    }
+
+    private func reloadNotificationSettings(from d: UserDefaults) {
         notifyOnResponseComplete = d.object(forKey: "notifyOnResponseComplete") as? Bool ?? true
         notifyOnAttentionRequired = d.object(forKey: "notifyOnAttentionRequired") as? Bool ?? true
         playNotificationSound = d.object(forKey: "playNotificationSound") as? Bool ?? true
@@ -498,6 +540,9 @@ final class SettingsManager: ObservableObject {
         moltbookPreviewMode = d.object(forKey: "moltbookPreviewMode") as? Bool ?? true
         moltbookMaxDailyPosts = d.integer(forKey: "moltbookMaxDailyPosts") != 0
             ? d.integer(forKey: "moltbookMaxDailyPosts") : 10
+    }
+
+    private func reloadClipboardSettings(from d: UserDefaults) {
         clipboardHistoryEnabled = d.object(forKey: "clipboardHistoryEnabled") as? Bool ?? true
         clipboardRecordImages = d.object(forKey: "clipboardRecordImages") as? Bool ?? true
         clipboardMaxHistory = d.integer(forKey: "clipboardMaxHistory") != 0
@@ -510,6 +555,9 @@ final class SettingsManager: ObservableObject {
         clipboardAutoSummarize = d.bool(forKey: "clipboardAutoSummarize")
         clipboardSyncEnabled = d.bool(forKey: "clipboardSyncEnabled")
         clipboardExcludedApps = d.stringArray(forKey: "clipboardExcludedApps") ?? []
+    }
+
+    private func reloadAgentAndMiscSettings(from d: UserDefaults) {
         agentDelegationEnabled = d.object(forKey: "agentDelegationEnabled") as? Bool ?? true
         agentAutoDelegateComplexTasks = d.bool(forKey: "agentAutoDelegateComplexTasks")
         agentMaxConcurrent = d.integer(forKey: "agentMaxConcurrent") != 0
@@ -518,17 +566,12 @@ final class SettingsManager: ObservableObject {
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
-
-        if let savedFavorites = d.array(forKey: "favoriteModels") as? [String] {
-            favoriteModels = Set(savedFavorites)
-        }
-
-        // Re-apply font size after iCloud sync pull so AppConfiguration stays in sync
-        AppConfiguration.applyFontSize(fontSize)
     }
+}
 
-    // MARK: - API Key Management (Keychain - NEVER synced to iCloud KVS)
+// MARK: - API Key Management (Keychain - NEVER synced to iCloud KVS)
 
+extension SettingsManager {
     func getAPIKey(for provider: String) -> String? {
         if let key = try? SecureStorage.shared.loadAPIKey(for: provider), !key.isEmpty {
             return key
@@ -575,9 +618,11 @@ final class SettingsManager: ObservableObject {
         }
         return getAPIKey(for: provider) != nil
     }
+}
 
-    // MARK: - Reset
+// MARK: - Reset
 
+extension SettingsManager {
     func resetToDefaults() {
         defaultProvider = "openrouter"
         streamResponses = true

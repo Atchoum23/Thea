@@ -142,7 +142,7 @@ struct PromptLibrary: Codable {
                 scope: .all,
                 isActive: true,
                 priority: 8
-            ),
+            )
         ]
     }
 }
