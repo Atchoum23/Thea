@@ -8,7 +8,7 @@ import Accelerate
 
 // MARK: - Supporting Types
 
-private struct ParsedQuery {
+struct ParsedQuery {
     let terms: [String]
     let exactPhrases: [String]
     let excludeTerms: [String]
@@ -16,7 +16,7 @@ private struct ParsedQuery {
     let symbolPatterns: [String]
 }
 
-private struct SearchHistoryEntry {
+struct SearchHistoryEntry {
     let query: String
     let timestamp: Date
     let resultCount: Int

@@ -31,30 +31,30 @@ struct SyncSettingsView: View {
     }
 }
 
-private struct SyncSettingsContentView: View {
-    @StateObject private var cloudKitService = CloudKitService.shared
-    @StateObject private var syncEngine = PreferenceSyncEngine.shared
+struct SyncSettingsContentView: View {
+    @StateObject var cloudKitService = CloudKitService.shared
+    @StateObject var syncEngine = PreferenceSyncEngine.shared
     #if os(macOS)
-    @StateObject private var updateService = AppUpdateService.shared
+    @StateObject var updateService = AppUpdateService.shared
     #endif
-    @State private var settingsManager = SettingsManager.shared
-    @State private var handoffService = HandoffService.shared
-    @State private var showingDeviceList = false
-    @State private var isSyncing = false
-    @State private var lastSyncError: String?
-    @State private var cachedDeviceProfile = DeviceProfile.current()
+    @State var settingsManager = SettingsManager.shared
+    @State var handoffService = HandoffService.shared
+    @State var showingDeviceList = false
+    @State var isSyncing = false
+    @State var lastSyncError: String?
+    @State var cachedDeviceProfile = DeviceProfile.current()
     #if os(macOS)
-    @State private var isUpdating = false
-    @State private var updateResult: UpdateResult?
+    @State var isUpdating = false
+    @State var updateResult: SyncUpdateResult?
     #endif
 
     // Data-level sync toggles (CloudKit)
-    @AppStorage("sync.conversations") private var syncConversations = true
-    @AppStorage("sync.knowledge") private var syncKnowledge = true
-    @AppStorage("sync.projects") private var syncProjects = true
-    @AppStorage("sync.favorites") private var syncFavorites = true
-    @AppStorage("sync.backgroundEnabled") private var backgroundSyncEnabled = true
-    @AppStorage("sync.overCellular") private var syncOverCellular = false
+    @AppStorage("sync.conversations") var syncConversations = true
+    @AppStorage("sync.knowledge") var syncKnowledge = true
+    @AppStorage("sync.projects") var syncProjects = true
+    @AppStorage("sync.favorites") var syncFavorites = true
+    @AppStorage("sync.backgroundEnabled") var backgroundSyncEnabled = true
+    @AppStorage("sync.overCellular") var syncOverCellular = false
 
     var body: some View {
         Form {
@@ -670,315 +670,7 @@ private struct SyncSettingsContentView: View {
     }
     #endif
 
-    // MARK: - Handoff Section
-
-    private var handoffSection: some View {
-        Group {
-            Toggle("Enable Handoff", isOn: $settingsManager.handoffEnabled)
-
-            HStack {
-                Text("Handoff Status")
-                Spacer()
-                if handoffService.isEnabled {
-                    Label("Active", systemImage: "hand.raised.fill")
-                        .font(.caption)
-                        .foregroundStyle(.blue)
-                } else {
-                    Label("Disabled", systemImage: "hand.raised.slash")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            if handoffService.currentActivity != nil {
-                HStack {
-                    Image(systemName: "arrow.left.arrow.right")
-                        .foregroundStyle(.blue)
-                        .accessibilityHidden(true)
-                    Text("Activity ready for handoff")
-                        .font(.caption)
-                        .foregroundStyle(.blue)
-                }
-            }
-
-            Text("Continue conversations seamlessly across your Apple devices.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            Divider()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Requirements")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-
-                requirementRow(
-                    icon: "icloud",
-                    title: "iCloud Account",
-                    status: syncEngine.isCloudAvailable
-                )
-
-                requirementRow(
-                    icon: "wifi",
-                    title: "Same Wi-Fi Network",
-                    status: true
-                )
-
-                requirementRow(
-                    icon: "bluetooth",
-                    title: "Bluetooth Enabled",
-                    status: true
-                )
-            }
-        }
-    }
-
-    private func requirementRow(icon: String, title: String, status: Bool) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundStyle(.secondary)
-                .frame(width: 20)
-                .accessibilityHidden(true)
-
-            Text(title)
-                .font(.caption)
-
-            Spacer()
-
-            Image(systemName: status ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundStyle(status ? .green : .red)
-                .accessibilityHidden(true)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title): \(status ? "met" : "not met")")
-    }
-
-    // MARK: - Advanced Section
-
-    private var advancedSyncSection: some View {
-        Group {
-            Toggle("Background Sync", isOn: $backgroundSyncEnabled)
-
-            Text("Sync data in the background when the app is not active")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            #if os(iOS)
-            Toggle("Sync Over Cellular", isOn: $syncOverCellular)
-
-            Text("Allow syncing when not connected to Wi-Fi (may use mobile data)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            Divider()
-            #endif
-
-            Button("Force Full Sync") {
-                forceFullSync()
-            }
-            .buttonStyle(.bordered)
-
-            Text("Re-syncs all preferences and data from iCloud. Use if you notice sync issues.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            Divider()
-
-            Button("Reset Category Overrides") {
-                syncEngine.scopeOverrides = [:]
-            }
-            .font(.caption)
-
-            Text("Revert all sync scope settings to their recommended defaults.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    // MARK: - Device List Sheet
-
-    private var deviceListSheet: some View {
-        NavigationStack {
-            List {
-                if syncEngine.registeredDevices.isEmpty {
-                    Text("No devices registered")
-                        .foregroundStyle(.secondary)
-                } else {
-                    ForEach(syncEngine.registeredDevices) { device in
-                        let isCurrentDevice = device.id == cachedDeviceProfile.id
-
-                        HStack(spacing: 12) {
-                            Image(systemName: device.deviceClass.systemImage)
-                                .font(.title2)
-                                .foregroundStyle(.blue)
-                                .frame(width: 40)
-                                .accessibilityHidden(true)
-
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack {
-                                    Text(device.name)
-                                        .font(.headline)
-
-                                    if isCurrentDevice {
-                                        Text("Current")
-                                            .font(.caption2)
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 2)
-                                            .background(Color.green.opacity(0.2))
-                                            .foregroundStyle(.green)
-                                            .cornerRadius(4)
-                                    }
-                                }
-
-                                Text("\(device.model) · \(device.deviceClass.displayName)")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-
-                                Text("OS: \(device.osVersion)")
-                                    .font(.caption2)
-                                    .foregroundStyle(.tertiary)
-
-                                Text("Last active: \(device.lastActive, style: .relative) ago")
-                                    .font(.caption2)
-                                    .foregroundStyle(.tertiary)
-                            }
-
-                            Spacer()
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-
-                Section("Sync Groups") {
-                    syncGroupInfo
-                }
-            }
-            .navigationTitle("Connected Devices")
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        showingDeviceList = false
-                    }
-                }
-            }
-        }
-        #if os(macOS)
-        .frame(width: 550, height: 550)
-        #endif
-    }
-
-    @ViewBuilder
-    private var syncGroupInfo: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Devices in the same sync group share \"Same Device Type\" preferences.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: 4) {
-                Image(systemName: "desktopcomputer")
-                    .accessibilityHidden(true)
-                Text("Mac ↔ Mac")
-                    .font(.caption)
-            }
-
-            HStack(spacing: 4) {
-                Image(systemName: "iphone")
-                    .accessibilityHidden(true)
-                Text("iPhone ↔ iPad")
-                    .font(.caption)
-            }
-
-            HStack(spacing: 4) {
-                Image(systemName: "appletv")
-                    .accessibilityHidden(true)
-                Text("Apple TV (standalone)")
-                    .font(.caption)
-            }
-
-            HStack(spacing: 4) {
-                Image(systemName: "applewatch")
-                    .accessibilityHidden(true)
-                Text("Apple Watch (standalone)")
-                    .font(.caption)
-            }
-        }
-    }
-
-    // MARK: - Actions
-
-    private func syncNow() {
-        isSyncing = true
-        lastSyncError = nil
-
-        Task {
-            do {
-                syncEngine.forceSync()
-                try await cloudKitService.syncAll()
-            } catch {
-                await MainActor.run {
-                    lastSyncError = error.localizedDescription
-                }
-            }
-
-            await MainActor.run {
-                isSyncing = false
-            }
-        }
-    }
-
-    private func forceFullSync() {
-        isSyncing = true
-        lastSyncError = nil
-
-        Task {
-            do {
-                syncEngine.forceSync()
-                try await cloudKitService.syncAll()
-            } catch {
-                await MainActor.run {
-                    lastSyncError = error.localizedDescription
-                }
-            }
-
-            await MainActor.run {
-                isSyncing = false
-            }
-        }
-    }
-
-    private func resetSyncSettings() {
-        syncEngine.scopeOverrides = [:]
-        syncConversations = true
-        syncKnowledge = true
-        syncProjects = true
-        syncFavorites = true
-        backgroundSyncEnabled = true
-        syncOverCellular = false
-    }
 }
 
-// MARK: - Update Result
-
-private enum UpdateResult: Equatable {
-    case success
-    case failure
-}
-
-// MARK: - Preview
-
-#if os(macOS)
-#Preview {
-    SyncSettingsView()
-        .frame(width: 700, height: 900)
-}
-#else
-#Preview {
-    NavigationStack {
-        SyncSettingsView()
-            .navigationTitle("Sync")
-    }
-}
-#endif
+// Handoff, Advanced, Device List Sheet, Actions, and Preview
+// are in SyncSettingsViewSections.swift

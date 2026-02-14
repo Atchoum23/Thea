@@ -302,10 +302,10 @@ public final class EpisodicMemoryManager: ObservableObject {
     }
 
     public func lessonsForTaskType(_ taskType: String) -> [String] {
-        episodes
+        Array(episodes
             .filter { $0.taskType == taskType }
             .flatMap { $0.lessonsLearned }
-            .uniqued()
+            .uniqued())
     }
 
     public func startNewSession() {

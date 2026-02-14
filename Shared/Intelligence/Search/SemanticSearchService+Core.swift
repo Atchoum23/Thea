@@ -11,6 +11,8 @@ import os.log
 import AppKit
 #endif
 
+private let searchLogger = Logger(subsystem: "ai.thea.app", category: "SemanticSearch")
+
 // MARK: - Semantic Search Service
 
 @MainActor

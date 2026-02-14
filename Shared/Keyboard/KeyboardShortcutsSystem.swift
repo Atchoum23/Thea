@@ -51,228 +51,70 @@ public final class KeyboardShortcutsSystem: ObservableObject {
             KeyboardShortcutCategory(id: "tools", name: "Tools", icon: "wrench.and.screwdriver")
         ]
 
-        shortcuts = [
-            // Navigation
-            KeyboardShortcut(
-                id: "new-conversation",
-                name: "New Conversation",
-                description: "Start a new conversation",
-                category: "conversations",
-                defaultKey: KeyCombo(key: "n", modifiers: [.command]),
-                action: "newConversation"
-            ),
-            KeyboardShortcut(
-                id: "close-conversation",
-                name: "Close Conversation",
-                description: "Close current conversation",
-                category: "conversations",
-                defaultKey: KeyCombo(key: "w", modifiers: [.command]),
-                action: "closeConversation"
-            ),
-            KeyboardShortcut(
-                id: "next-conversation",
-                name: "Next Conversation",
-                description: "Switch to next conversation",
-                category: "navigation",
-                defaultKey: KeyCombo(key: "]", modifiers: [.command, .shift]),
-                action: "nextConversation"
-            ),
-            KeyboardShortcut(
-                id: "previous-conversation",
-                name: "Previous Conversation",
-                description: "Switch to previous conversation",
-                category: "navigation",
-                defaultKey: KeyCombo(key: "[", modifiers: [.command, .shift]),
-                action: "previousConversation"
-            ),
-            KeyboardShortcut(
-                id: "search",
-                name: "Search",
-                description: "Search conversations and content",
-                category: "navigation",
-                defaultKey: KeyCombo(key: "f", modifiers: [.command]),
-                action: "search"
-            ),
-            KeyboardShortcut(
-                id: "command-palette",
-                name: "Command Palette",
-                description: "Open command palette",
-                category: "navigation",
-                defaultKey: KeyCombo(key: "k", modifiers: [.command]),
-                action: "commandPalette"
-            ),
-            KeyboardShortcut(
-                id: "quick-switcher",
-                name: "Quick Switcher",
-                description: "Quickly switch between conversations",
-                category: "navigation",
-                defaultKey: KeyCombo(key: "p", modifiers: [.command]),
-                action: "quickSwitcher"
-            ),
-
-            // AI Actions
-            KeyboardShortcut(
-                id: "quick-ask",
-                name: "Quick Ask",
-                description: "Open quick ask overlay",
-                category: "ai",
-                defaultKey: KeyCombo(key: " ", modifiers: [.command, .shift]),
-                action: "quickAsk",
-                isGlobal: true
-            ),
-            KeyboardShortcut(
-                id: "voice-mode",
-                name: "Toggle Voice Mode",
-                description: "Start or stop voice input",
-                category: "ai",
-                defaultKey: KeyCombo(key: "v", modifiers: [.command, .shift]),
-                action: "toggleVoice"
-            ),
-            KeyboardShortcut(
-                id: "regenerate",
-                name: "Regenerate Response",
-                description: "Ask AI to regenerate last response",
-                category: "ai",
-                defaultKey: KeyCombo(key: "r", modifiers: [.command, .shift]),
-                action: "regenerate"
-            ),
-            KeyboardShortcut(
-                id: "stop-generation",
-                name: "Stop Generation",
-                description: "Stop AI response generation",
-                category: "ai",
-                defaultKey: KeyCombo(key: ".", modifiers: [.command]),
-                action: "stopGeneration"
-            ),
-            KeyboardShortcut(
-                id: "explain-selection",
-                name: "Explain Selection",
-                description: "Ask AI to explain selected text",
-                category: "ai",
-                defaultKey: KeyCombo(key: "e", modifiers: [.command, .shift]),
-                action: "explainSelection"
-            ),
-
-            // Editing
-            KeyboardShortcut(
-                id: "edit-message",
-                name: "Edit Last Message",
-                description: "Edit your last message",
-                category: "editing",
-                defaultKey: KeyCombo(key: "↑", modifiers: [.command]),
-                action: "editLastMessage"
-            ),
-            KeyboardShortcut(
-                id: "copy-response",
-                name: "Copy Response",
-                description: "Copy AI response to clipboard",
-                category: "editing",
-                defaultKey: KeyCombo(key: "c", modifiers: [.command, .shift]),
-                action: "copyResponse"
-            ),
-            KeyboardShortcut(
-                id: "copy-code",
-                name: "Copy Code Block",
-                description: "Copy focused code block",
-                category: "editing",
-                defaultKey: KeyCombo(key: "c", modifiers: [.command, .option]),
-                action: "copyCode"
-            ),
-            KeyboardShortcut(
-                id: "insert-code",
-                name: "Insert Code Block",
-                description: "Insert a code block",
-                category: "editing",
-                defaultKey: KeyCombo(key: "`", modifiers: [.command]),
-                action: "insertCode"
-            ),
-
-            // Window
-            KeyboardShortcut(
-                id: "toggle-sidebar",
-                name: "Toggle Sidebar",
-                description: "Show or hide sidebar",
-                category: "window",
-                defaultKey: KeyCombo(key: "s", modifiers: [.command, .control]),
-                action: "toggleSidebar"
-            ),
-            KeyboardShortcut(
-                id: "toggle-fullscreen",
-                name: "Toggle Fullscreen",
-                description: "Enter or exit fullscreen",
-                category: "window",
-                defaultKey: KeyCombo(key: "f", modifiers: [.command, .control]),
-                action: "toggleFullscreen"
-            ),
-            KeyboardShortcut(
-                id: "zoom-in",
-                name: "Zoom In",
-                description: "Increase text size",
-                category: "window",
-                defaultKey: KeyCombo(key: "=", modifiers: [.command]),
-                action: "zoomIn"
-            ),
-            KeyboardShortcut(
-                id: "zoom-out",
-                name: "Zoom Out",
-                description: "Decrease text size",
-                category: "window",
-                defaultKey: KeyCombo(key: "-", modifiers: [.command]),
-                action: "zoomOut"
-            ),
-            KeyboardShortcut(
-                id: "reset-zoom",
-                name: "Reset Zoom",
-                description: "Reset text size to default",
-                category: "window",
-                defaultKey: KeyCombo(key: "0", modifiers: [.command]),
-                action: "resetZoom"
-            ),
-
-            // Tools
-            KeyboardShortcut(
-                id: "open-settings",
-                name: "Open Settings",
-                description: "Open app settings",
-                category: "tools",
-                defaultKey: KeyCombo(key: ",", modifiers: [.command]),
-                action: "openSettings"
-            ),
-            KeyboardShortcut(
-                id: "open-agents",
-                name: "Open Agents",
-                description: "Open agents panel",
-                category: "tools",
-                defaultKey: KeyCombo(key: "a", modifiers: [.command, .shift]),
-                action: "openAgents"
-            ),
-            KeyboardShortcut(
-                id: "open-artifacts",
-                name: "Open Artifacts",
-                description: "Open artifacts panel",
-                category: "tools",
-                defaultKey: KeyCombo(key: "o", modifiers: [.command, .shift]),
-                action: "openArtifacts"
-            ),
-            KeyboardShortcut(
-                id: "open-memories",
-                name: "Open Memories",
-                description: "Open memories panel",
-                category: "tools",
-                defaultKey: KeyCombo(key: "m", modifiers: [.command, .shift]),
-                action: "openMemories"
-            ),
-            KeyboardShortcut(
-                id: "sync-now",
-                name: "Sync Now",
-                description: "Trigger manual sync",
-                category: "tools",
-                defaultKey: KeyCombo(key: "s", modifiers: [.command, .shift]),
-                action: "syncNow"
-            )
-        ]
+        shortcuts = navigationShortcuts()
+            + conversationShortcuts()
+            + aiShortcuts()
+            + editingShortcuts()
+            + windowShortcuts()
+            + toolsShortcuts()
 
         logger.info("Registered \(self.shortcuts.count) default shortcuts")
+    }
+
+    private func navigationShortcuts() -> [KeyboardShortcut] {
+        [
+            KeyboardShortcut(id: "next-conversation", name: "Next Conversation", description: "Switch to next conversation", category: "navigation", defaultKey: KeyCombo(key: "]", modifiers: [.command, .shift]), action: "nextConversation"),
+            KeyboardShortcut(id: "previous-conversation", name: "Previous Conversation", description: "Switch to previous conversation", category: "navigation", defaultKey: KeyCombo(key: "[", modifiers: [.command, .shift]), action: "previousConversation"),
+            KeyboardShortcut(id: "search", name: "Search", description: "Search conversations and content", category: "navigation", defaultKey: KeyCombo(key: "f", modifiers: [.command]), action: "search"),
+            KeyboardShortcut(id: "command-palette", name: "Command Palette", description: "Open command palette", category: "navigation", defaultKey: KeyCombo(key: "k", modifiers: [.command]), action: "commandPalette"),
+            KeyboardShortcut(id: "quick-switcher", name: "Quick Switcher", description: "Quickly switch between conversations", category: "navigation", defaultKey: KeyCombo(key: "p", modifiers: [.command]), action: "quickSwitcher")
+        ]
+    }
+
+    private func conversationShortcuts() -> [KeyboardShortcut] {
+        [
+            KeyboardShortcut(id: "new-conversation", name: "New Conversation", description: "Start a new conversation", category: "conversations", defaultKey: KeyCombo(key: "n", modifiers: [.command]), action: "newConversation"),
+            KeyboardShortcut(id: "close-conversation", name: "Close Conversation", description: "Close current conversation", category: "conversations", defaultKey: KeyCombo(key: "w", modifiers: [.command]), action: "closeConversation")
+        ]
+    }
+
+    private func aiShortcuts() -> [KeyboardShortcut] {
+        [
+            KeyboardShortcut(id: "quick-ask", name: "Quick Ask", description: "Open quick ask overlay", category: "ai", defaultKey: KeyCombo(key: " ", modifiers: [.command, .shift]), action: "quickAsk", isGlobal: true),
+            KeyboardShortcut(id: "voice-mode", name: "Toggle Voice Mode", description: "Start or stop voice input", category: "ai", defaultKey: KeyCombo(key: "v", modifiers: [.command, .shift]), action: "toggleVoice"),
+            KeyboardShortcut(id: "regenerate", name: "Regenerate Response", description: "Ask AI to regenerate last response", category: "ai", defaultKey: KeyCombo(key: "r", modifiers: [.command, .shift]), action: "regenerate"),
+            KeyboardShortcut(id: "stop-generation", name: "Stop Generation", description: "Stop AI response generation", category: "ai", defaultKey: KeyCombo(key: ".", modifiers: [.command]), action: "stopGeneration"),
+            KeyboardShortcut(id: "explain-selection", name: "Explain Selection", description: "Ask AI to explain selected text", category: "ai", defaultKey: KeyCombo(key: "e", modifiers: [.command, .shift]), action: "explainSelection")
+        ]
+    }
+
+    private func editingShortcuts() -> [KeyboardShortcut] {
+        [
+            KeyboardShortcut(id: "edit-message", name: "Edit Last Message", description: "Edit your last message", category: "editing", defaultKey: KeyCombo(key: "\u{2191}", modifiers: [.command]), action: "editLastMessage"),
+            KeyboardShortcut(id: "copy-response", name: "Copy Response", description: "Copy AI response to clipboard", category: "editing", defaultKey: KeyCombo(key: "c", modifiers: [.command, .shift]), action: "copyResponse"),
+            KeyboardShortcut(id: "copy-code", name: "Copy Code Block", description: "Copy focused code block", category: "editing", defaultKey: KeyCombo(key: "c", modifiers: [.command, .option]), action: "copyCode"),
+            KeyboardShortcut(id: "insert-code", name: "Insert Code Block", description: "Insert a code block", category: "editing", defaultKey: KeyCombo(key: "`", modifiers: [.command]), action: "insertCode")
+        ]
+    }
+
+    private func windowShortcuts() -> [KeyboardShortcut] {
+        [
+            KeyboardShortcut(id: "toggle-sidebar", name: "Toggle Sidebar", description: "Show or hide sidebar", category: "window", defaultKey: KeyCombo(key: "s", modifiers: [.command, .control]), action: "toggleSidebar"),
+            KeyboardShortcut(id: "toggle-fullscreen", name: "Toggle Fullscreen", description: "Enter or exit fullscreen", category: "window", defaultKey: KeyCombo(key: "f", modifiers: [.command, .control]), action: "toggleFullscreen"),
+            KeyboardShortcut(id: "zoom-in", name: "Zoom In", description: "Increase text size", category: "window", defaultKey: KeyCombo(key: "=", modifiers: [.command]), action: "zoomIn"),
+            KeyboardShortcut(id: "zoom-out", name: "Zoom Out", description: "Decrease text size", category: "window", defaultKey: KeyCombo(key: "-", modifiers: [.command]), action: "zoomOut"),
+            KeyboardShortcut(id: "reset-zoom", name: "Reset Zoom", description: "Reset text size to default", category: "window", defaultKey: KeyCombo(key: "0", modifiers: [.command]), action: "resetZoom")
+        ]
+    }
+
+    private func toolsShortcuts() -> [KeyboardShortcut] {
+        [
+            KeyboardShortcut(id: "open-settings", name: "Open Settings", description: "Open app settings", category: "tools", defaultKey: KeyCombo(key: ",", modifiers: [.command]), action: "openSettings"),
+            KeyboardShortcut(id: "open-agents", name: "Open Agents", description: "Open agents panel", category: "tools", defaultKey: KeyCombo(key: "a", modifiers: [.command, .shift]), action: "openAgents"),
+            KeyboardShortcut(id: "open-artifacts", name: "Open Artifacts", description: "Open artifacts panel", category: "tools", defaultKey: KeyCombo(key: "o", modifiers: [.command, .shift]), action: "openArtifacts"),
+            KeyboardShortcut(id: "open-memories", name: "Open Memories", description: "Open memories panel", category: "tools", defaultKey: KeyCombo(key: "m", modifiers: [.command, .shift]), action: "openMemories"),
+            KeyboardShortcut(id: "sync-now", name: "Sync Now", description: "Trigger manual sync", category: "tools", defaultKey: KeyCombo(key: "s", modifiers: [.command, .shift]), action: "syncNow")
+        ]
     }
 
     // MARK: - Handler Registration
@@ -524,281 +366,4 @@ public final class KeyboardShortcutsSystem: ObservableObject {
     }
 }
 
-// MARK: - Types
-
-public struct KeyboardShortcut: Identifiable {
-    public let id: String
-    public let name: String
-    public let description: String
-    public let category: String
-    public let defaultKey: KeyCombo
-    public let action: String
-    public var isGlobal: Bool = false
-    public var customKey: KeyCombo?
-
-    public var effectiveKeyCombo: KeyCombo {
-        customKey ?? defaultKey
-    }
-
-    public var isCustomized: Bool {
-        customKey != nil
-    }
-}
-
-public struct KeyCombo: Equatable, Codable {
-    public let key: String
-    public let modifiers: Set<KeyModifier>
-
-    public init(key: String, modifiers: Set<KeyModifier>) {
-        self.key = key
-        self.modifiers = modifiers
-    }
-
-    public var displayString: String {
-        var parts: [String] = []
-
-        if modifiers.contains(.control) { parts.append("⌃") }
-        if modifiers.contains(.option) { parts.append("⌥") }
-        if modifiers.contains(.shift) { parts.append("⇧") }
-        if modifiers.contains(.command) { parts.append("⌘") }
-
-        // Map special keys
-        let keyDisplay: String = switch key.lowercased() {
-        case " ": "Space"
-        case "\r", "return": "↩"
-        case "\t", "tab": "⇥"
-        case "delete", "\u{7f}": "⌫"
-        case "escape", "\u{1b}": "⎋"
-        case "↑", "up": "↑"
-        case "↓", "down": "↓"
-        case "←", "left": "←"
-        case "→", "right": "→"
-        default: key.uppercased()
-        }
-
-        parts.append(keyDisplay)
-
-        return parts.joined()
-    }
-}
-
-public enum KeyModifier: Int, Codable, Hashable {
-    case command = 1
-    case option = 2
-    case control = 3
-    case shift = 4
-}
-
-public struct KeyboardShortcutCategory: Identifiable {
-    public let id: String
-    public let name: String
-    public let icon: String
-}
-
-public struct ShortcutConflict: Identifiable {
-    public let id = UUID()
-    public let shortcut1Id: String
-    public let shortcut2Id: String
-    public let keyCombo: KeyCombo
-}
-
-public struct RecordedShortcut {
-    public let keyCombo: KeyCombo
-    public let timestamp: Date
-}
-
-// MARK: - SwiftUI Views
-
-#if os(macOS)
-    public struct KeyboardShortcutsView: View {
-        @ObservedObject var system = KeyboardShortcutsSystem.shared
-        @State private var selectedCategory: String?
-        @State private var editingShortcut: KeyboardShortcut?
-
-        public init() {}
-
-        public var body: some View {
-            HSplitView {
-                // Categories list
-                List(selection: $selectedCategory) {
-                    ForEach(system.categories) { category in
-                        Label(category.name, systemImage: category.icon)
-                            .tag(category.id)
-                    }
-                }
-                .listStyle(.sidebar)
-                .frame(minWidth: 150)
-
-                // Shortcuts list
-                List {
-                    if let category = selectedCategory {
-                        ForEach(system.shortcuts(in: category)) { shortcut in
-                            ShortcutRowView(shortcut: shortcut) {
-                                editingShortcut = shortcut
-                            }
-                        }
-                    } else {
-                        Text("Select a category")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .frame(minWidth: 400)
-            }
-            .sheet(item: $editingShortcut) { shortcut in
-                ShortcutEditorView(shortcut: shortcut)
-            }
-            .toolbar {
-                ToolbarItem {
-                    Button("Reset All") {
-                        system.resetAllToDefaults()
-                    }
-                }
-            }
-            .onAppear {
-                selectedCategory = system.categories.first?.id
-            }
-        }
-    }
-#else
-    public struct KeyboardShortcutsView: View {
-        @ObservedObject var system = KeyboardShortcutsSystem.shared
-        @State private var selectedCategory: String?
-        @State private var editingShortcut: KeyboardShortcut?
-
-        public init() {}
-
-        public var body: some View {
-            NavigationStack {
-                List {
-                    ForEach(system.categories) { category in
-                        NavigationLink {
-                            List {
-                                ForEach(system.shortcuts(in: category.id)) { shortcut in
-                                    ShortcutRowView(shortcut: shortcut) {
-                                        editingShortcut = shortcut
-                                    }
-                                }
-                            }
-                            .navigationTitle(category.name)
-                        } label: {
-                            Label(category.name, systemImage: category.icon)
-                        }
-                    }
-                }
-                .navigationTitle("Keyboard Shortcuts")
-            }
-            .sheet(item: $editingShortcut) { shortcut in
-                ShortcutEditorView(shortcut: shortcut)
-            }
-        }
-    }
-#endif
-
-struct ShortcutRowView: View {
-    let shortcut: KeyboardShortcut
-    let onEdit: () -> Void
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(shortcut.name)
-                    .font(.headline)
-                Text(shortcut.description)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            // Key combo display
-            Text(shortcut.effectiveKeyCombo.displayString)
-                .font(.system(.body, design: .monospaced))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(.regularMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-
-            // Customization indicator
-            if shortcut.isCustomized {
-                Image(systemName: "pencil.circle.fill")
-                    .foregroundStyle(.blue)
-            }
-
-            Button("Edit") {
-                onEdit()
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.vertical, 4)
-    }
-}
-
-struct ShortcutEditorView: View {
-    let shortcut: KeyboardShortcut
-    @ObservedObject var system = KeyboardShortcutsSystem.shared
-    @Environment(\.dismiss) var dismiss
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Edit Shortcut")
-                .font(.headline)
-
-            Text(shortcut.name)
-                .font(.title2)
-
-            // Current shortcut
-            VStack {
-                Text("Current: \(shortcut.effectiveKeyCombo.displayString)")
-                    .font(.system(.title, design: .monospaced))
-
-                if shortcut.isCustomized {
-                    Text("Default: \(shortcut.defaultKey.displayString)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding()
-            .background(.regularMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-
-            // Recording
-            if system.isListening {
-                Text("Press new shortcut...")
-                    .foregroundStyle(.blue)
-            } else if let recorded = system.recordedShortcut {
-                Text("New: \(recorded.keyCombo.displayString)")
-                    .font(.system(.title2, design: .monospaced))
-            }
-
-            // Actions
-            HStack(spacing: 16) {
-                Button("Record New") {
-                    system.startRecording()
-                }
-                .buttonStyle(.borderedProminent)
-
-                if shortcut.isCustomized {
-                    Button("Reset to Default") {
-                        system.resetToDefault(shortcut.id)
-                        dismiss()
-                    }
-                }
-
-                Button("Cancel") {
-                    system.stopRecording()
-                    dismiss()
-                }
-
-                if let recorded = system.recordedShortcut {
-                    Button("Save") {
-                        system.setCustomKey(shortcut.id, keyCombo: recorded.keyCombo)
-                        dismiss()
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-            }
-        }
-        .padding()
-        .frame(width: 400)
-    }
-}
+// Types and views are in KeyboardShortcutsTypes.swift
