@@ -132,6 +132,12 @@ public final class StaticAnalysisVerifier {
         )
     }
 
+}
+
+// MARK: - Swift Analysis
+
+extension StaticAnalysisVerifier {
+
     // MARK: - Swift Analysis
 
     private func analyzeSwift(code: String) async -> [AnalysisIssue] {

@@ -109,6 +109,12 @@ public final class ReflexionEngine: ObservableObject {
         return cycle
     }
 
+}
+
+// MARK: - Critique Generation
+
+extension ReflexionEngine {
+
     // MARK: - Critique Generation
 
     private func generateCritique(task: String, output: String, context: String) async -> SelfCritique {

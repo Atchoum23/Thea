@@ -206,6 +206,12 @@ public final class UnifiedIntelligenceHub {
         }
     }
 
+}
+
+// MARK: - Private Event Handlers
+
+extension UnifiedIntelligenceHub {
+
     // MARK: - Private Event Handlers
 
     private func handleQueryReceived(query: String, conversationId _conversationId: UUID) async {

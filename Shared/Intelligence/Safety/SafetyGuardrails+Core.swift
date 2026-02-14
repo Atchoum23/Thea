@@ -337,6 +337,12 @@ public final class SafetyGuardrailsManager: ObservableObject {
         logger.info("Started new safety session: \(self.currentSessionId)")
     }
 
+}
+
+// MARK: - Private Helpers
+
+extension SafetyGuardrailsManager {
+
     // MARK: - Private Helpers
 
     private func determineCategory(_ action: String) -> SafetyActionCategory {

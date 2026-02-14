@@ -69,6 +69,12 @@ public final class KnowledgeSourceManager: ObservableObject {
         save()
     }
 
+}
+
+// MARK: - Audit Operations
+
+extension KnowledgeSourceManager {
+
     // MARK: - Audit Operations
 
     /// Audit a single knowledge source

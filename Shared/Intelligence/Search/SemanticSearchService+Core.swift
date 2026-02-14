@@ -300,6 +300,12 @@ public final class SemanticSearchService: ObservableObject {
         await embeddingIndex.saveToDisk()
     }
 
+}
+
+// MARK: - Private Search Methods
+
+extension SemanticSearchService {
+
     // MARK: - Private Search Methods
 
     private func textSearch(

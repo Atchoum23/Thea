@@ -267,6 +267,12 @@ public final class SemanticCodeIndexer: ObservableObject {
         await indexFile(at: newPath)
     }
 
+}
+
+// MARK: - Private Methods
+
+extension SemanticCodeIndexer {
+
     // MARK: - Private Methods
 
     private func discoverFiles(at rootPath: String) async throws -> [String] {

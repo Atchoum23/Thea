@@ -144,6 +144,12 @@ public final class ModelRouter: ObservableObject {
         logger.info("ModelRouter updated with \(models.count) dynamic models")
     }
 
+}
+
+// MARK: - Candidate Selection
+
+extension ModelRouter {
+
     // MARK: - Candidate Selection
 
     private func getCandidateModels(for taskType: TaskType) -> [AIModel] {

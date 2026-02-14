@@ -300,6 +300,11 @@ public final class GoalInferenceEngine {
     public func dismissGoal(goalId: UUID) {
         inferredGoals.removeAll { $0.id == goalId }
     }
+}
+
+// MARK: - Signal Extraction
+
+extension GoalInferenceEngine {
 
     // MARK: - Signal Extraction
 
