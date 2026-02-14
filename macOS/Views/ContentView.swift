@@ -145,8 +145,6 @@ struct ContentView: View {
             KnowledgeManagementView()
         case .financial:
             FinancialDashboardView()
-        case .code:
-            CodeProjectView()
         case .migration:
             MigrationView()
         case .none:
@@ -398,7 +396,6 @@ extension ContentView {
         case projects = "Projects"
         case knowledge = "Knowledge"
         case financial = "Financial"
-        case code = "Code"
         case migration = "Migration"
 
         var id: String { rawValue }
@@ -409,7 +406,6 @@ extension ContentView {
             case .projects: "folder.fill"
             case .knowledge: "brain.head.profile"
             case .financial: "dollarsign.circle.fill"
-            case .code: "chevron.left.forwardslash.chevron.right"
             case .migration: "arrow.down.doc.fill"
             }
         }
