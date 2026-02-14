@@ -106,6 +106,7 @@
                                     .foregroundStyle(colorForStepStatus(step.status))
                             }
                         }
+                        .accessibilityHidden(true)
 
                         // Step info
                         VStack(alignment: .leading, spacing: 2) {
@@ -135,7 +136,10 @@
                         // Expand indicator
                         Image(systemName: expandedSteps.contains(step.id) ? "chevron.up" : "chevron.down")
                             .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Step \(step.stepNumber), \(step.status.rawValue): \(step.description)")
                     .padding()
                     .contentShape(Rectangle())
                 }
@@ -249,6 +253,7 @@
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
+                        .accessibilityHidden(true)
                     Text("Session Complete")
                         .font(.headline)
                 }
@@ -278,12 +283,15 @@
                 Image(systemName: icon)
                     .font(.title3)
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
                 Text(value)
                     .font(.headline)
                 Text(label)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(label): \(value)")
         }
 
         // MARK: - Empty State

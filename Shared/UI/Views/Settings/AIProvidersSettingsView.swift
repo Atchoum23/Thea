@@ -230,6 +230,7 @@ struct AIProvidersSettingsView: View {
             Image(systemName: (providerStatuses[provider.id] ?? .disconnected).icon)
                 .foregroundStyle((providerStatuses[provider.id] ?? .disconnected).color)
                 .font(.title3)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack {

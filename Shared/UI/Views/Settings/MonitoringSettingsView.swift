@@ -49,8 +49,10 @@ struct MonitoringSettingsView: View {
                 HStack {
                     Image(systemName: screenCapturePermissionGranted ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                         .foregroundStyle(screenCapturePermissionGranted ? .green : .orange)
+                        .accessibilityHidden(true)
                     Text(screenCapturePermissionGranted ? "Screen Recording Enabled" : "Screen Recording Required")
                 }
+                .accessibilityElement(children: .combine)
 
                 if !screenCapturePermissionGranted {
                     Button("Open System Settings") {
@@ -86,8 +88,10 @@ struct MonitoringSettingsView: View {
                 HStack {
                     Image(systemName: microphonePermissionGranted ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                         .foregroundStyle(microphonePermissionGranted ? .green : .orange)
+                        .accessibilityHidden(true)
                     Text(microphonePermissionGranted ? "Microphone Access Enabled" : "Microphone Access Required")
                 }
+                .accessibilityElement(children: .combine)
 
                 if !microphonePermissionGranted {
                     Button("Open System Settings") {

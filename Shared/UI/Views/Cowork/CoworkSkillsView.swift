@@ -40,8 +40,10 @@
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
                     TextField("Search skills...", text: $searchText)
                         .textFieldStyle(.plain)
+                        .accessibilityLabel("Search skills")
                 }
                 .padding(8)
                 .background(Color(nsColor: .controlBackgroundColor))
@@ -72,6 +74,7 @@
                     Image(systemName: skill.icon)
                         .foregroundStyle(skillsManager.isEnabled(skill) ? Color.accentColor : Color.secondary)
                 }
+                .accessibilityHidden(true)
 
                 // Name
                 VStack(alignment: .leading, spacing: 2) {
@@ -89,8 +92,11 @@
                 if skillsManager.isEnabled(skill) {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
+                        .accessibilityHidden(true)
                 }
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(skill.rawValue), \(skill.supportedExtensions.count) formats, \(skillsManager.isEnabled(skill) ? "enabled" : "disabled")")
         }
 
         // MARK: - Skill Detail View

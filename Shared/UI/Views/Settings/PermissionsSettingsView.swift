@@ -53,8 +53,10 @@ struct PermissionsSettingsView: View {
                         if isRefreshing {
                             ProgressView()
                                 .scaleEffect(0.7)
+                                .accessibilityHidden(true)
                         } else {
                             Image(systemName: "arrow.clockwise")
+                                .accessibilityHidden(true)
                         }
                         Text("Refresh")
                     }
@@ -125,6 +127,7 @@ private struct PermissionRowView: View {
                 .font(.title3)
                 .foregroundStyle(iconColor)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             // Permission info
             VStack(alignment: .leading, spacing: 2) {
@@ -153,6 +156,8 @@ private struct PermissionRowView: View {
             actionButton
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(permission.type.rawValue), \(permission.status.rawValue)")
     }
 
     @ViewBuilder
@@ -174,6 +179,7 @@ private struct PermissionRowView: View {
             .buttonStyle(.bordered)
             .controlSize(.small)
             .help("Open in System Settings")
+            .accessibilityLabel("Open in System Settings")
         }
     }
 
