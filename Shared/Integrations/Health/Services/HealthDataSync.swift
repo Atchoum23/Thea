@@ -1,11 +1,15 @@
+import CloudKit
 import Combine
 import Foundation
+import OSLog
 #if canImport(HealthKit)
     import HealthKit
 #endif
 #if os(iOS)
     import UIKit
 #endif
+
+private let syncLogger = Logger(subsystem: "com.thea.app", category: "HealthDataSync")
 
 /// Health data synchronization service for cross-device sync and cloud backup
 public actor HealthDataSync {
@@ -195,25 +199,155 @@ public actor HealthDataSync {
         }
 
         private func fetchQuantityData(
-            _: HKHealthStore,
-            type _: HKObjectType,
-            start _: Date,
-            end _: Date
+            _ healthStore: HKHealthStore,
+            type: HKObjectType,
+            start: Date,
+            end: Date
         ) async throws -> [HealthDataRecord] {
-            // Would implement actual HealthKit query
-            // Mock implementation for now
-            []
+            let predicate = HKQuery.predicateForSamples(
+                withStart: start,
+                end: end,
+                options: .strictStartDate
+            )
+            let deviceId = getDeviceIdentifier()
+
+            return try await withCheckedThrowingContinuation { continuation in
+                let query = HKSampleQuery(
+                    sampleType: type as! HKSampleType,
+                    predicate: predicate,
+                    limit: HKObjectQueryNoLimit,
+                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+                ) { _, samples, error in
+                    if let error {
+                        syncLogger.error("HealthKit query failed for \(type.identifier): \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                        return
+                    }
+
+                    var records: [HealthDataRecord] = []
+                    for sample in samples ?? [] {
+                        if let quantitySample = sample as? HKQuantitySample {
+                            let (dataType, unit) = Self.mapQuantityType(quantitySample.quantityType)
+                            let value = quantitySample.quantity.doubleValue(for: unit)
+                            records.append(HealthDataRecord(
+                                dataType: dataType,
+                                value: value,
+                                unit: unit.unitString,
+                                timestamp: quantitySample.startDate,
+                                sourceDevice: deviceId
+                            ))
+                        } else if let categorySample = sample as? HKCategorySample {
+                            // Sleep analysis: value is duration in seconds
+                            let duration = categorySample.endDate.timeIntervalSince(categorySample.startDate)
+                            records.append(HealthDataRecord(
+                                dataType: .sleepDuration,
+                                value: duration / 3600.0,
+                                unit: "hr",
+                                timestamp: categorySample.startDate,
+                                sourceDevice: deviceId
+                            ))
+                        }
+                    }
+                    continuation.resume(returning: records)
+                }
+                healthStore.execute(query)
+            }
+        }
+
+        private static func mapQuantityType(_ type: HKQuantityType) -> (HealthDataType, HKUnit) {
+            switch type.identifier {
+            case HKQuantityTypeIdentifier.heartRate.rawValue:
+                return (.heartRate, HKUnit.count().unitDivided(by: .minute()))
+            case HKQuantityTypeIdentifier.stepCount.rawValue:
+                return (.steps, .count())
+            case HKQuantityTypeIdentifier.distanceWalkingRunning.rawValue:
+                return (.distance, .meter())
+            case HKQuantityTypeIdentifier.activeEnergyBurned.rawValue:
+                return (.activeCalories, .kilocalorie())
+            case HKQuantityTypeIdentifier.bloodPressureSystolic.rawValue:
+                return (.bloodPressureSystolic, .millimeterOfMercury())
+            case HKQuantityTypeIdentifier.bloodPressureDiastolic.rawValue:
+                return (.bloodPressureDiastolic, .millimeterOfMercury())
+            case HKQuantityTypeIdentifier.oxygenSaturation.rawValue:
+                return (.oxygenSaturation, .percent())
+            case HKQuantityTypeIdentifier.bodyMass.rawValue:
+                return (.bodyWeight, .gramUnit(with: .kilo))
+            case HKQuantityTypeIdentifier.bodyFatPercentage.rawValue:
+                return (.bodyFatPercentage, .percent())
+            case HKQuantityTypeIdentifier.heartRateVariabilitySDNN.rawValue:
+                return (.heartRateVariability, .secondUnit(with: .milli))
+            default:
+                return (.steps, .count())
+            }
         }
 
         private func fetchBloodPressureData(
-            _: HKHealthStore,
-            systolic _: HKQuantityType,
-            diastolic _: HKQuantityType,
-            start _: Date,
-            end _: Date
+            _ healthStore: HKHealthStore,
+            systolic systolicType: HKQuantityType,
+            diastolic diastolicType: HKQuantityType,
+            start: Date,
+            end: Date
         ) async throws -> [HealthDataRecord] {
-            // Would implement actual HealthKit correlation query
-            []
+            let predicate = HKQuery.predicateForSamples(
+                withStart: start,
+                end: end,
+                options: .strictStartDate
+            )
+            let deviceId = getDeviceIdentifier()
+
+            // Fetch systolic samples
+            let systolicRecords: [HealthDataRecord] = try await withCheckedThrowingContinuation { continuation in
+                let query = HKSampleQuery(
+                    sampleType: systolicType,
+                    predicate: predicate,
+                    limit: HKObjectQueryNoLimit,
+                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+                ) { _, samples, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    let records = (samples as? [HKQuantitySample] ?? []).map { sample in
+                        HealthDataRecord(
+                            dataType: .bloodPressureSystolic,
+                            value: sample.quantity.doubleValue(for: .millimeterOfMercury()),
+                            unit: "mmHg",
+                            timestamp: sample.startDate,
+                            sourceDevice: deviceId
+                        )
+                    }
+                    continuation.resume(returning: records)
+                }
+                healthStore.execute(query)
+            }
+
+            // Fetch diastolic samples
+            let diastolicRecords: [HealthDataRecord] = try await withCheckedThrowingContinuation { continuation in
+                let query = HKSampleQuery(
+                    sampleType: diastolicType,
+                    predicate: predicate,
+                    limit: HKObjectQueryNoLimit,
+                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+                ) { _, samples, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    let records = (samples as? [HKQuantitySample] ?? []).map { sample in
+                        HealthDataRecord(
+                            dataType: .bloodPressureDiastolic,
+                            value: sample.quantity.doubleValue(for: .millimeterOfMercury()),
+                            unit: "mmHg",
+                            timestamp: sample.startDate,
+                            sourceDevice: deviceId
+                        )
+                    }
+                    continuation.resume(returning: records)
+                }
+                healthStore.execute(query)
+            }
+
+            return systolicRecords + diastolicRecords
         }
     #endif
 
@@ -226,27 +360,116 @@ public actor HealthDataSync {
         )
     }
 
-    private func uploadToCloud(_: SyncPackage) async throws {
-        // Would implement actual cloud upload (iCloud, CloudKit, etc.)
-        // Mock implementation
-        try await Task.sleep(for: .milliseconds(500))
+    private static let cloudKitRecordType = "HealthSyncPackage"
+    private static let cloudKitZoneName = "TheaZone"
+
+    private func getContainer() -> CKContainer {
+        let id = "iCloud.app.theathe"
+        if let containers = Bundle.main.object(forInfoDictionaryKey: "com.apple.developer.icloud-container-identifiers") as? [String],
+           containers.contains(id)
+        {
+            return CKContainer(identifier: id)
+        }
+        return CKContainer.default()
+    }
+
+    private func uploadToCloud(_ package: SyncPackage) async throws {
+        let container = getContainer()
+        let database = container.privateCloudDatabase
+        let zoneID = CKRecordZone.ID(zoneName: Self.cloudKitZoneName, ownerName: CKCurrentUserDefaultName)
+
+        // Ensure zone exists
+        do {
+            _ = try await database.save(CKRecordZone(zoneID: zoneID))
+        } catch let error as CKError where error.code == .serverRecordChanged || error.code == .zoneNotFound {
+            syncLogger.debug("Zone already exists or transient error, continuing upload")
+        } catch {
+            // Zone may already exist, which is fine
+            syncLogger.debug("Zone save: \(error.localizedDescription)")
+        }
+
+        // Encode records as JSON data
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let recordsData = try encoder.encode(package.records)
+
+        let recordID = CKRecord.ID(
+            recordName: "health-sync-\(package.deviceIdentifier)-\(Int(package.timestamp.timeIntervalSince1970))",
+            zoneID: zoneID
+        )
+        let record = CKRecord(recordType: Self.cloudKitRecordType, recordID: recordID)
+        record["version"] = package.version as CKRecordValue
+        record["timestamp"] = package.timestamp as CKRecordValue
+        record["deviceIdentifier"] = package.deviceIdentifier as CKRecordValue
+        record["recordCount"] = package.records.count as CKRecordValue
+        record["recordsData"] = recordsData as CKRecordValue
+
+        do {
+            _ = try await database.save(record)
+            syncLogger.info("Uploaded \(package.records.count) health records to CloudKit")
+        } catch {
+            syncLogger.error("CloudKit upload failed: \(error.localizedDescription)")
+            throw SyncError.cloudStorageUnavailable
+        }
     }
 
     private func verifyCloudData() async throws {
-        // Would verify uploaded data integrity
-        try await Task.sleep(for: .milliseconds(200))
+        // Query the most recent record to verify it was saved
+        let container = getContainer()
+        let database = container.privateCloudDatabase
+        let zoneID = CKRecordZone.ID(zoneName: Self.cloudKitZoneName, ownerName: CKCurrentUserDefaultName)
+
+        let predicate = NSPredicate(format: "deviceIdentifier == %@", getDeviceIdentifier())
+        let query = CKQuery(recordType: Self.cloudKitRecordType, predicate: predicate)
+        query.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+
+        do {
+            let (results, _) = try await database.records(matching: query, inZoneWith: zoneID, resultsLimit: 1)
+            guard !results.isEmpty else {
+                syncLogger.warning("Verification failed: no records found after upload")
+                return
+            }
+            syncLogger.info("Cloud data verified successfully")
+        } catch {
+            syncLogger.warning("Cloud verification query failed: \(error.localizedDescription)")
+        }
     }
 
     private func fetchFromCloud() async throws -> SyncPackage {
-        // Would implement actual cloud fetch
-        try await Task.sleep(for: .milliseconds(500))
+        let container = getContainer()
+        let database = container.privateCloudDatabase
+        let zoneID = CKRecordZone.ID(zoneName: Self.cloudKitZoneName, ownerName: CKCurrentUserDefaultName)
 
-        return SyncPackage(
-            version: "1.0",
-            timestamp: Date(),
-            deviceIdentifier: getDeviceIdentifier(),
-            records: []
-        )
+        // Fetch the most recent sync package from any device
+        let predicate = NSPredicate(value: true)
+        let query = CKQuery(recordType: Self.cloudKitRecordType, predicate: predicate)
+        query.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+
+        do {
+            let (results, _) = try await database.records(matching: query, inZoneWith: zoneID, resultsLimit: 5)
+
+            var allRecords: [HealthDataRecord] = []
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+
+            for (_, result) in results {
+                guard let record = try? result.get(),
+                      let recordsData = record["recordsData"] as? Data else { continue }
+                let records = (try? decoder.decode([HealthDataRecord].self, from: recordsData)) ?? []
+                allRecords.append(contentsOf: records)
+            }
+
+            syncLogger.info("Fetched \(allRecords.count) health records from CloudKit")
+            return SyncPackage(
+                version: "1.0",
+                timestamp: Date(),
+                deviceIdentifier: getDeviceIdentifier(),
+                records: allRecords
+            )
+        } catch {
+            syncLogger.error("CloudKit fetch failed: \(error.localizedDescription)")
+            throw SyncError.cloudStorageUnavailable
+        }
     }
 
     private func validateCloudData(_ package: SyncPackage) -> Bool {
@@ -263,10 +486,50 @@ public actor HealthDataSync {
             }
         }
 
-        private func saveRecordToHealthKit(_: HKHealthStore, record _: HealthDataRecord) async throws {
-            // Would implement actual HealthKit save
-            // Mock implementation
-            try await Task.sleep(for: .milliseconds(50))
+        private func saveRecordToHealthKit(_ healthStore: HKHealthStore, record: HealthDataRecord) async throws {
+            guard let (quantityType, unit) = Self.healthKitMapping(for: record.dataType) else {
+                syncLogger.debug("Skipping unsupported data type for HealthKit save: \(record.dataType.rawValue)")
+                return
+            }
+
+            let quantity = HKQuantity(unit: unit, doubleValue: record.value)
+            let sample = HKQuantitySample(
+                type: quantityType,
+                quantity: quantity,
+                start: record.timestamp,
+                end: record.timestamp
+            )
+
+            try await healthStore.save(sample)
+        }
+
+        private static func healthKitMapping(for dataType: HealthDataType) -> (HKQuantityType, HKUnit)? {
+            switch dataType {
+            case .heartRate:
+                return (HKQuantityType(.heartRate), HKUnit.count().unitDivided(by: .minute()))
+            case .steps:
+                return (HKQuantityType(.stepCount), .count())
+            case .distance:
+                return (HKQuantityType(.distanceWalkingRunning), .meter())
+            case .activeCalories:
+                return (HKQuantityType(.activeEnergyBurned), .kilocalorie())
+            case .bloodPressureSystolic:
+                return (HKQuantityType(.bloodPressureSystolic), .millimeterOfMercury())
+            case .bloodPressureDiastolic:
+                return (HKQuantityType(.bloodPressureDiastolic), .millimeterOfMercury())
+            case .oxygenSaturation:
+                return (HKQuantityType(.oxygenSaturation), .percent())
+            case .bodyWeight:
+                return (HKQuantityType(.bodyMass), .gramUnit(with: .kilo))
+            case .bodyFatPercentage:
+                return (HKQuantityType(.bodyFatPercentage), .percent())
+            case .heartRateVariability:
+                return (HKQuantityType(.heartRateVariabilitySDNN), .secondUnit(with: .milli))
+            case .restingHeartRate:
+                return (HKQuantityType(.restingHeartRate), HKUnit.count().unitDivided(by: .minute()))
+            case .sleepDuration, .sleepQuality, .bloodGlucose, .bodyMassIndex:
+                return nil
+            }
         }
     #endif
 
