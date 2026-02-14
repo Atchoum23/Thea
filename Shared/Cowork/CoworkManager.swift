@@ -175,18 +175,44 @@
             var steps: [CoworkStep] = []
             let lowercased = instruction.lowercased()
 
-            if lowercased.contains("organize") || lowercased.contains("sort") {
+            // Match instruction to task domain for domain-aware decomposition
+            if lowercased.contains("organize") || lowercased.contains("sort") || lowercased.contains("clean") {
                 steps.append(CoworkStep.builder().number(1).description("Scan directory for files").tool("FileScanner").build())
                 steps.append(CoworkStep.builder().number(2).description("Analyze file types and dates").tool("FileAnalyzer").build())
                 steps.append(CoworkStep.builder().number(3).description("Create organization structure").tool("DirectoryCreator").build())
                 steps.append(CoworkStep.builder().number(4).description("Move files to organized locations").tool("FileMover").build())
-                steps.append(CoworkStep.builder().number(5).description("Generate organization report").tool("ReportGenerator").build())
-            } else if lowercased.contains("create") || lowercased.contains("generate") {
-                steps.append(CoworkStep.builder().number(1).description("Analyze requirements").tool("RequirementAnalyzer").build())
-                steps.append(CoworkStep.builder().number(2).description("Generate content").tool("ContentGenerator").build())
-                steps.append(CoworkStep.builder().number(3).description("Save to file").tool("FileWriter").build())
+                steps.append(CoworkStep.builder().number(5).description("Verify and generate report").tool("ReportGenerator").build())
+            } else if lowercased.contains("create") || lowercased.contains("generate") || lowercased.contains("write") {
+                steps.append(CoworkStep.builder().number(1).description("Analyze requirements from instruction").tool("RequirementAnalyzer").build())
+                steps.append(CoworkStep.builder().number(2).description("Generate content based on requirements").tool("ContentGenerator").build())
+                steps.append(CoworkStep.builder().number(3).description("Review and refine output").tool("QualityChecker").build())
+                steps.append(CoworkStep.builder().number(4).description("Save to file").tool("FileWriter").build())
+            } else if lowercased.contains("search") || lowercased.contains("find") || lowercased.contains("look") {
+                steps.append(CoworkStep.builder().number(1).description("Define search criteria from instruction").build())
+                steps.append(CoworkStep.builder().number(2).description("Search across available sources").tool("SearchEngine").build())
+                steps.append(CoworkStep.builder().number(3).description("Rank and filter results").tool("ResultRanker").build())
+                steps.append(CoworkStep.builder().number(4).description("Present findings summary").tool("SummaryGenerator").build())
+            } else if lowercased.contains("analyze") || lowercased.contains("review") || lowercased.contains("audit") {
+                steps.append(CoworkStep.builder().number(1).description("Gather data for analysis").tool("DataCollector").build())
+                steps.append(CoworkStep.builder().number(2).description("Perform analysis").tool("Analyzer").build())
+                steps.append(CoworkStep.builder().number(3).description("Identify key findings").tool("InsightExtractor").build())
+                steps.append(CoworkStep.builder().number(4).description("Generate analysis report").tool("ReportGenerator").build())
+            } else if lowercased.contains("fix") || lowercased.contains("debug") || lowercased.contains("resolve") {
+                steps.append(CoworkStep.builder().number(1).description("Identify the issue").tool("Diagnostics").build())
+                steps.append(CoworkStep.builder().number(2).description("Analyze root cause").tool("RootCauseAnalyzer").build())
+                steps.append(CoworkStep.builder().number(3).description("Apply fix").tool("CodeModifier").build())
+                steps.append(CoworkStep.builder().number(4).description("Verify fix resolved the issue").tool("Verifier").build())
+            } else if lowercased.contains("install") || lowercased.contains("setup") || lowercased.contains("configure") {
+                steps.append(CoworkStep.builder().number(1).description("Check prerequisites").tool("EnvironmentChecker").build())
+                steps.append(CoworkStep.builder().number(2).description("Download/install components").tool("Installer").build())
+                steps.append(CoworkStep.builder().number(3).description("Configure settings").tool("Configurator").build())
+                steps.append(CoworkStep.builder().number(4).description("Verify installation").tool("Verifier").build())
             } else {
-                steps.append(CoworkStep.builder().number(1).description("Execute task: \(instruction)").build())
+                // Generic decomposition for unrecognized tasks
+                steps.append(CoworkStep.builder().number(1).description("Understand task: \(instruction)").build())
+                steps.append(CoworkStep.builder().number(2).description("Gather required information").build())
+                steps.append(CoworkStep.builder().number(3).description("Execute primary action").build())
+                steps.append(CoworkStep.builder().number(4).description("Verify results").build())
             }
 
             return steps

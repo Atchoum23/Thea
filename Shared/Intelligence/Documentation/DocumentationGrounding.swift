@@ -232,13 +232,36 @@ public final class DocumentationGroundingService: ObservableObject {
     }
 
     private func fetchDocumentation(from url: URL, topic: String?) async -> String? {
-        // In production, this would:
-        // 1. Fetch the documentation page
-        // 2. Parse and extract relevant content
-        // 3. Filter by topic if specified
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode),
+                  let html = String(data: data, encoding: .utf8) else {
+                return nil
+            }
 
-        // For now, return nil to use fallback
-        nil
+            // Strip HTML tags for plain text extraction
+            var text = html
+                .replacingOccurrences(of: "<script[^>]*>[\\s\\S]*?</script>", with: "", options: .regularExpression)
+                .replacingOccurrences(of: "<style[^>]*>[\\s\\S]*?</style>", with: "", options: .regularExpression)
+                .replacingOccurrences(of: "<[^>]+>", with: " ", options: .regularExpression)
+                .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Filter by topic if specified
+            if let topic {
+                let paragraphs = text.components(separatedBy: ". ")
+                let relevant = paragraphs.filter { $0.localizedCaseInsensitiveContains(topic) }
+                if !relevant.isEmpty {
+                    text = relevant.joined(separator: ". ")
+                }
+            }
+
+            // Truncate to reasonable length for context
+            return String(text.prefix(4000))
+        } catch {
+            return nil
+        }
     }
 
     private func loadCache() async {
