@@ -116,12 +116,37 @@ final class MentionDataProvider: ObservableObject {
                 }
             results.append(contentsOf: matchingConversations)
 
-            // --- Projects (stub — return empty for now) ---
-            let matchingProjects: [MentionItem] = []
+            // --- Projects (from conversations with projectIDs) ---
+            let projectIDs = Set(conversations.compactMap(\.projectID))
+            let matchingProjects: [MentionItem] = projectIDs
+                .prefix(maxResults)
+                .map { projectID in
+                    let relatedConv = conversations.first { $0.projectID == projectID }
+                    let name = relatedConv?.title ?? "Project"
+                    return MentionItem(
+                        type: .project,
+                        name: name,
+                        subtitle: "Project",
+                        icon: MentionType.project.icon
+                    )
+                }
+                .filter { trimmed.isEmpty || $0.name.lowercased().contains(trimmed) }
             results.append(contentsOf: matchingProjects)
 
-            // --- Memories (stub — return empty for now) ---
-            let matchingMemories: [MentionItem] = []
+            // --- Memories (from PersonalKnowledgeGraph) ---
+            let kgEntities = await PersonalKnowledgeGraph.shared.searchEntities(
+                query: trimmed.isEmpty ? "" : trimmed
+            )
+            let matchingMemories: [MentionItem] = kgEntities
+                .prefix(maxResults)
+                .map { entity in
+                    MentionItem(
+                        type: .memoryEntry,
+                        name: entity.name,
+                        subtitle: entity.type.rawValue.capitalized,
+                        icon: MentionType.memoryEntry.icon
+                    )
+                }
             results.append(contentsOf: matchingMemories)
 
             guard !Task.isCancelled else { return }

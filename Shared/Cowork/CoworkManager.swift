@@ -97,70 +97,94 @@
             return targetSession.steps
         }
 
-        /// Generate steps from instruction (placeholder for LLM integration)
-        private func generateSteps(for instruction: String, context _: CoworkContext) async -> [CoworkStep] {
-            // This would integrate with the AI orchestrator
-            // For now, return a basic template
+        /// Generate steps from instruction via AI provider, with heuristic fallback
+        private func generateSteps(for instruction: String, context: CoworkContext) async -> [CoworkStep] {
+            // Try AI-powered step generation first
+            if let aiSteps = await generateStepsViaAI(for: instruction, context: context), !aiSteps.isEmpty {
+                return aiSteps
+            }
 
+            // Fallback to heuristic templates when no AI provider is available
+            return generateHeuristicSteps(for: instruction)
+        }
+
+        private func generateStepsViaAI(for instruction: String, context: CoworkContext) async -> [CoworkStep]? {
+            let provider = ProviderRegistry.shared.getProvider(id: "openrouter")
+                ?? ProviderRegistry.shared.getProvider(id: "anthropic")
+                ?? ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+
+            guard let provider else { return nil }
+
+            let systemMessage = AIMessage(
+                id: UUID(), conversationID: UUID(), role: .system,
+                content: """
+                You are a task planner. Given a user instruction, break it into numbered steps.
+                Each step should have a description and optionally a tool name.
+                Available tools: FileScanner, FileAnalyzer, DirectoryCreator, FileMover, \
+                FileWriter, ContentGenerator, RequirementAnalyzer, ReportGenerator, CodeGenerator.
+                Working directory: \(context.workingDirectory?.path ?? "unknown")
+                Respond ONLY with a JSON array: [{"description": "...", "tool": "..."}]
+                """,
+                timestamp: Date()
+            )
+            let userMessage = AIMessage(
+                id: UUID(), conversationID: UUID(), role: .user,
+                content: instruction,
+                timestamp: Date()
+            )
+
+            do {
+                let stream = try await provider.chat(
+                    messages: [systemMessage, userMessage],
+                    model: "openai/gpt-4o-mini",
+                    stream: false
+                )
+                var responseText = ""
+                for try await chunk in stream {
+                    if case .delta(let text) = chunk {
+                        responseText += text
+                    } else if case .complete(let msg) = chunk {
+                        responseText = msg.content
+                    }
+                }
+
+                // Parse JSON array of steps
+                guard let jsonStart = responseText.firstIndex(of: "["),
+                      let jsonEnd = responseText.lastIndex(of: "]") else { return nil }
+                let jsonStr = String(responseText[jsonStart...jsonEnd])
+                guard let data = jsonStr.data(using: .utf8),
+                      let parsed = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+                    return nil
+                }
+
+                return parsed.enumerated().map { index, dict in
+                    let desc = dict["description"] as? String ?? "Step \(index + 1)"
+                    let tool = dict["tool"] as? String
+                    var builder = CoworkStep.builder().number(index + 1).description(desc)
+                    if let tool { builder = builder.tool(tool) }
+                    return builder.build()
+                }
+            } catch {
+                return nil
+            }
+        }
+
+        private func generateHeuristicSteps(for instruction: String) -> [CoworkStep] {
             var steps: [CoworkStep] = []
-
-            // Simple heuristic-based step generation
             let lowercased = instruction.lowercased()
 
             if lowercased.contains("organize") || lowercased.contains("sort") {
-                steps.append(CoworkStep.builder()
-                    .number(1)
-                    .description("Scan directory for files")
-                    .tool("FileScanner")
-                    .build())
-
-                steps.append(CoworkStep.builder()
-                    .number(2)
-                    .description("Analyze file types and dates")
-                    .tool("FileAnalyzer")
-                    .build())
-
-                steps.append(CoworkStep.builder()
-                    .number(3)
-                    .description("Create organization structure")
-                    .tool("DirectoryCreator")
-                    .build())
-
-                steps.append(CoworkStep.builder()
-                    .number(4)
-                    .description("Move files to organized locations")
-                    .tool("FileMover")
-                    .build())
-
-                steps.append(CoworkStep.builder()
-                    .number(5)
-                    .description("Generate organization report")
-                    .tool("ReportGenerator")
-                    .build())
+                steps.append(CoworkStep.builder().number(1).description("Scan directory for files").tool("FileScanner").build())
+                steps.append(CoworkStep.builder().number(2).description("Analyze file types and dates").tool("FileAnalyzer").build())
+                steps.append(CoworkStep.builder().number(3).description("Create organization structure").tool("DirectoryCreator").build())
+                steps.append(CoworkStep.builder().number(4).description("Move files to organized locations").tool("FileMover").build())
+                steps.append(CoworkStep.builder().number(5).description("Generate organization report").tool("ReportGenerator").build())
             } else if lowercased.contains("create") || lowercased.contains("generate") {
-                steps.append(CoworkStep.builder()
-                    .number(1)
-                    .description("Analyze requirements")
-                    .tool("RequirementAnalyzer")
-                    .build())
-
-                steps.append(CoworkStep.builder()
-                    .number(2)
-                    .description("Generate content")
-                    .tool("ContentGenerator")
-                    .build())
-
-                steps.append(CoworkStep.builder()
-                    .number(3)
-                    .description("Save to file")
-                    .tool("FileWriter")
-                    .build())
+                steps.append(CoworkStep.builder().number(1).description("Analyze requirements").tool("RequirementAnalyzer").build())
+                steps.append(CoworkStep.builder().number(2).description("Generate content").tool("ContentGenerator").build())
+                steps.append(CoworkStep.builder().number(3).description("Save to file").tool("FileWriter").build())
             } else {
-                // Default single-step plan
-                steps.append(CoworkStep.builder()
-                    .number(1)
-                    .description("Execute task: \(instruction)")
-                    .build())
+                steps.append(CoworkStep.builder().number(1).description("Execute task: \(instruction)").build())
             }
 
             return steps

@@ -243,14 +243,25 @@ public actor TrustScoreCalculator {
             description: updateScore > 0.5 ? "Recently updated" : "May be outdated"
         ))
 
-        // Security scan placeholder (weight: 2.0)
-        // In production, this would integrate with actual security scanning
-        let securityScore = 0.7 // Default moderate score
+        // Security scan using OutboundPrivacyGuard audit data (weight: 2.0)
+        let auditStats = await OutboundPrivacyGuard.shared.getPrivacyAuditStatistics()
+        let totalAudited = auditStats.totalChecks
+        let securityScore: Double
+        let securityDescription: String
+        if totalAudited > 0 {
+            let passRate = Double(auditStats.passed) / Double(totalAudited)
+            securityScore = min(1.0, passRate)
+            securityDescription = passRate > 0.9 ? "Security scan passed" :
+                passRate > 0.5 ? "Some security concerns detected" : "Multiple security issues found"
+        } else {
+            securityScore = 0.5
+            securityDescription = "No security audit data available"
+        }
         factors.append(TrustFactor(
             type: .securityScan,
             weight: 2.0,
             value: securityScore,
-            description: "Security scan pending"
+            description: securityDescription
         ))
 
         // Calculate total score
