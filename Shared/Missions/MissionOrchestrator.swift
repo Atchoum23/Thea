@@ -709,9 +709,7 @@ public final class MissionOrchestrator: ObservableObject {
     }
 }
 
-// MARK: - Types
-
-public class Mission: Identifiable, ObservableObject, Codable {
+// Supporting types in MissionOrchestratorTypes.swift
     public let id: UUID
     public let goal: String
     public let context: MissionContext

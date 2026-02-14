@@ -629,7 +629,7 @@ targets:
           # AutoCorrectSettingsView — ACTIVATED
           - "**/Integrations/SafariIntegration.swift"
           - "**/Components/ChatInputView.swift"
-          - "**/Search/SemanticSearchService.swift"
+          - "**/Search/SemanticSearchService*.swift"
           # QuerySuggestionOverlay — ACTIVATED (pure SwiftUI)
           # AIFeaturesSettingsView — ACTIVATED (MetaAI deps replaced with UserDefaults)
           # ActiveMemoryRetrieval — ACTIVATED
