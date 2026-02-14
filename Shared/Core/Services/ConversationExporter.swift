@@ -86,7 +86,7 @@ struct ConversationExporter: Sendable {
         case .plainText: ext = "txt"
         }
 
-        let dateStr = ISO8601DateFormatter.exportDate.string(from: conversation.createdAt)
+        let dateStr = Self.formatDateCompact(conversation.createdAt)
         return "\(sanitized)_\(dateStr).\(ext)"
     }
 
@@ -219,14 +219,10 @@ struct ConversationExporter: Sendable {
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
-}
 
-// MARK: - ISO8601 Date Formatter
-
-private extension ISO8601DateFormatter {
-    static let exportDate: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withFullDate]
-        return f
-    }()
+    private static func formatDateCompact(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
 }
