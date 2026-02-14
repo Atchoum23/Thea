@@ -47,13 +47,13 @@ public struct SiriAskTheaIntent: AppIntent {
             role: .user,
             content: .text(query),
             timestamp: Date(),
-            model: SettingsManager.shared.defaultModel
+            model: ""
         )
 
         var responseText = ""
         let stream = try await provider.chat(
             messages: [message],
-            model: SettingsManager.shared.defaultModel,
+            model: "",
             stream: false
         )
         for try await chunk in stream {

@@ -74,10 +74,51 @@ struct AskWithContextIntent: AppIntent {
             }
         }
 
-        // Process with AI (placeholder)
-        let response = "AI response to: \(fullContext.prefix(100))..."
-
+        // Route through AI provider for real response
+        let response = await ShortcutsAIHelper.chat(prompt: fullContext)
         return .result(value: response)
+    }
+}
+
+// MARK: - Shared AI Helper for Shortcuts
+
+@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
+enum ShortcutsAIHelper {
+    @MainActor
+    static func chat(prompt: String) async -> String {
+        guard let provider = ProviderRegistry.shared.getProvider(
+            id: SettingsManager.shared.defaultProvider
+        ) else {
+            return "No AI provider configured. Please set up a provider in Thea Settings."
+        }
+
+        let message = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(prompt),
+            timestamp: Date(),
+            model: ""
+        )
+
+        do {
+            var responseText = ""
+            let stream = try await provider.chat(
+                messages: [message],
+                model: "",
+                stream: false
+            )
+            for try await chunk in stream {
+                if case .delta(let text) = chunk.type {
+                    responseText += text
+                } else if case .complete(let msg) = chunk.type {
+                    responseText = msg.content.textValue
+                }
+            }
+            return responseText.isEmpty ? "I couldn't generate a response." : responseText
+        } catch {
+            return "Error: \(error.localizedDescription)"
+        }
     }
 }
 
@@ -108,16 +149,16 @@ struct GenerateCodeIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        // Code generation logic would go here
-        let code = """
-        // Generated \(language.rawValue) code
-        // Description: \(description)
-
-        func generatedFunction() {
-            // Implementation
+        var prompt = "Generate \(language.rawValue) code for: \(description)"
+        if includeComments {
+            prompt += "\nInclude clear comments explaining the code."
         }
-        """
+        if let framework {
+            prompt += "\nUse the \(framework) framework/library."
+        }
+        prompt += "\nReturn only the code, no explanations outside of code comments."
 
+        let code = await ShortcutsAIHelper.chat(prompt: prompt)
         return .result(value: code)
     }
 }
@@ -158,21 +199,41 @@ struct SummarizeContentIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        let textToSummarize: String = switch contentType {
+        var textToSummarize: String
+        switch contentType {
         case .text:
-            content ?? ""
+            textToSummarize = content ?? ""
         case .url:
-            // Fetch URL content
-            "Content from URL: \(url?.absoluteString ?? "")"
+            if let url {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                textToSummarize = String(data: data, encoding: .utf8) ?? ""
+            } else {
+                textToSummarize = ""
+            }
         case .file:
             if let data = file?.data, let text = String(data: data, encoding: .utf8) {
-                text
+                textToSummarize = text
             } else {
-                ""
+                textToSummarize = ""
             }
         }
 
-        let summary = "Summary of: \(textToSummarize.prefix(200))..."
+        guard !textToSummarize.isEmpty else {
+            return .result(value: "No content provided to summarize.")
+        }
+
+        let styleInstructions: String
+        switch style ?? .paragraph {
+        case .bullets: styleInstructions = "Format as bullet points."
+        case .paragraph: styleInstructions = "Write as a concise paragraph."
+        case .keyPoints: styleInstructions = "List only the key points."
+        case .executive: styleInstructions = "Write an executive summary suitable for decision makers."
+        }
+
+        let lengthInstruction = maxLength.map { "Keep the summary under \($0) words." } ?? ""
+        let prompt = "Summarize the following content. \(styleInstructions) \(lengthInstruction)\n\n\(textToSummarize)"
+
+        let summary = await ShortcutsAIHelper.chat(prompt: prompt)
         return .result(value: summary)
     }
 }
@@ -204,7 +265,16 @@ struct AutomationTranslateIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> {
-        let translation = "Translated text: \(text)"
+        var prompt = "Translate the following text to \(targetLanguage.rawValue)."
+        if let sourceLanguage {
+            prompt += " The source language is \(sourceLanguage.rawValue)."
+        }
+        if preserveFormatting {
+            prompt += " Preserve all formatting (line breaks, bullet points, etc.)."
+        }
+        prompt += " Return ONLY the translated text, nothing else.\n\n\(text)"
+
+        let translation = await ShortcutsAIHelper.chat(prompt: prompt)
         return .result(value: translation)
     }
 }

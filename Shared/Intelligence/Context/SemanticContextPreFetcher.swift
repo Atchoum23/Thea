@@ -329,38 +329,57 @@ public final class SemanticContextPreFetcher {
         // Extract key terms
         let keyTerms = extractKeyTerms(from: query)
 
-        // Check for code-related queries
+        // Check for code-related queries — search PersonalKnowledgeGraph for relevant entities
         if queryLower.contains("function") || queryLower.contains("class") ||
            queryLower.contains("implement") || queryLower.contains("fix") {
-            // Would search for relevant code snippets
+            let codeEntities = PersonalKnowledgeGraph.shared.searchEntities(
+                query: keyTerms.joined(separator: " "),
+                limit: 5
+            )
+            let codeContext = codeEntities.isEmpty
+                ? "Related topics: \(keyTerms.joined(separator: ", "))"
+                : codeEntities.map { "\($0.name): \($0.description ?? $0.type)" }.joined(separator: "\n")
             items.append(ContextItem(
                 type: .codeSnippet,
                 identifier: "query_related_code",
-                content: "Code context placeholder for: \(keyTerms.joined(separator: ", "))",
+                content: codeContext,
                 relevanceScore: 0.7,
                 source: .semanticSimilarity
             ))
         }
 
-        // Check for documentation queries
+        // Check for documentation queries — pull from knowledge graph
         if queryLower.contains("how") || queryLower.contains("what") ||
            queryLower.contains("explain") || queryLower.contains("docs") {
+            let docEntities = PersonalKnowledgeGraph.shared.searchEntities(
+                query: keyTerms.joined(separator: " "),
+                limit: 3
+            )
+            let docContext = docEntities.isEmpty
+                ? "Query topics: \(keyTerms.joined(separator: ", "))"
+                : docEntities.map { "\($0.name) (\($0.type)): \($0.description ?? "")" }.joined(separator: "\n")
             items.append(ContextItem(
                 type: .documentation,
                 identifier: "query_docs",
-                content: "Documentation context for: \(keyTerms.joined(separator: ", "))",
+                content: docContext,
                 relevanceScore: 0.6,
                 source: .semanticSimilarity
             ))
         }
 
-        // Check for error-related queries
+        // Check for error-related queries — pull from conversation memory
         if queryLower.contains("error") || queryLower.contains("bug") ||
            queryLower.contains("crash") || queryLower.contains("fail") {
+            let summaries = ConversationMemory.shared.conversationSummaries
+                .filter { $0.keyTopics.contains { $0.lowercased().contains("error") || $0.lowercased().contains("bug") } }
+                .suffix(3)
+            let errorContext = summaries.isEmpty
+                ? "Troubleshooting context for: \(keyTerms.joined(separator: ", "))"
+                : summaries.map { $0.summary }.joined(separator: "\n")
             items.append(ContextItem(
                 type: .errorHistory,
                 identifier: "error_context",
-                content: "Error history context for troubleshooting",
+                content: errorContext,
                 relevanceScore: 0.8,
                 source: .patternPrediction
             ))

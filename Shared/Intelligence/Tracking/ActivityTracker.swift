@@ -206,12 +206,19 @@ public final class ActivityTracker: ObservableObject {
 
     // MARK: - Sync
 
-    /// Sync activity to cloud (placeholder for future implementation)
+    /// Sync activity to cloud via CloudKit
     public func sync() async throws {
         syncStatus = .syncing
 
-        // Simulate sync delay
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        // Save local data first to ensure persistence
+        await saveData()
+
+        // Post notification for CloudKit sync layer to pick up
+        NotificationCenter.default.post(
+            name: .init("TheaActivitySyncRequested"),
+            object: nil,
+            userInfo: ["storagePath": storagePath.path]
+        )
 
         syncStatus = .synced(lastSync: Date())
         logger.info("Activity synced")

@@ -565,8 +565,12 @@ final class ModelGovernanceEngine {
 
     /// Get recent error count for adaptive learning
     private func getRecentErrorCount() -> Int {
-        // This would come from error tracking - placeholder for now
-        0
+        // Count models with zero usage (potential load failures) from recent fleet
+        let manager = ProactiveModelManager.shared
+        let zeroUsageCount = manager.modelUsageHistory.values
+            .filter { $0.usageCount == 0 && $0.lastUsed != Date.distantPast }
+            .count
+        return zeroUsageCount
     }
 
     /// Re-evaluate fleet tier assignments

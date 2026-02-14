@@ -4,6 +4,9 @@
 
 import Foundation
 import UserNotifications
+#if canImport(Speech)
+import Speech
+#endif
 #if canImport(AppKit)
 import AppKit
 #endif
@@ -510,10 +513,31 @@ extension FocusModeIntelligence {
 
     func transcribeVoiceMessage(audioURL: URL) async -> String? {
         #if os(macOS) || os(iOS)
-        // Use Speech framework for transcription
-        // This is a simplified placeholder
-        print("[VoiceMessage] Would transcribe: \(audioURL)")
-        return nil
+        guard FileManager.default.fileExists(atPath: audioURL.path) else {
+            print("[VoiceMessage] Audio file not found: \(audioURL)")
+            return nil
+        }
+
+        return await withCheckedContinuation { continuation in
+            let recognizer = SFSpeechRecognizer()
+            guard let recognizer, recognizer.isAvailable else {
+                print("[VoiceMessage] Speech recognizer unavailable")
+                continuation.resume(returning: nil)
+                return
+            }
+
+            let request = SFSpeechURLRecognitionRequest(url: audioURL)
+            request.shouldReportPartialResults = false
+
+            recognizer.recognitionTask(with: request) { result, error in
+                if let error {
+                    print("[VoiceMessage] Transcription error: \(error.localizedDescription)")
+                    continuation.resume(returning: nil)
+                } else if let result, result.isFinal {
+                    continuation.resume(returning: result.bestTranscription.formattedString)
+                }
+            }
+        }
         #else
         return nil
         #endif

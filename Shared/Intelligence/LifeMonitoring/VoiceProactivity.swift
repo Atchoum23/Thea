@@ -8,6 +8,7 @@
 
 import Foundation
 import AVFoundation
+import UserNotifications
 #if canImport(Speech)
 import Speech
 #endif
@@ -550,11 +551,25 @@ public actor VoiceProactivity {
         }
     }
 
-    /// Read recent notifications
+    /// Read recent notifications from the notification center
     public func readNotifications(limit: Int = 5) async {
-        // Would integrate with notification center
-        // For now, placeholder
-        await speakImmediate("You have no new important notifications.")
+        let center = UNUserNotificationCenter.current()
+        let delivered = await center.deliveredNotifications()
+
+        guard !delivered.isEmpty else {
+            await speakImmediate("You have no new notifications.")
+            return
+        }
+
+        let recent = delivered.prefix(limit)
+        await speakImmediate("You have \(delivered.count) notification\(delivered.count == 1 ? "" : "s"). Here are the most recent:")
+
+        for notification in recent {
+            let title = notification.request.content.title
+            let body = notification.request.content.body
+            let text = body.isEmpty ? title : "\(title): \(body)"
+            await speakImmediate(text)
+        }
     }
 
     /// Navigate to a destination

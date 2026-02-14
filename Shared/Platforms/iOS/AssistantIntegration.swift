@@ -253,9 +253,39 @@
         }
 
         private func forwardToTheaAI(_ query: String) async -> String {
-            // This would connect to Thea's AI backend
-            // For now, return a placeholder
-            "I understand you're asking about \(query). Let me think about that."
+            guard let provider = ProviderRegistry.shared.getProvider(
+                id: SettingsManager.shared.defaultProvider
+            ) else {
+                return "No AI provider configured. Please set up a provider in Thea Settings."
+            }
+
+            let message = AIMessage(
+                id: UUID(),
+                conversationID: UUID(),
+                role: .user,
+                content: .text(query),
+                timestamp: Date(),
+                model: ""
+            )
+
+            do {
+                var responseText = ""
+                let stream = try await provider.chat(
+                    messages: [message],
+                    model: "",
+                    stream: false
+                )
+                for try await chunk in stream {
+                    if case .delta(let text) = chunk.type {
+                        responseText += text
+                    } else if case .complete(let msg) = chunk.type {
+                        responseText = msg.content.textValue
+                    }
+                }
+                return responseText.isEmpty ? "I couldn't generate a response." : responseText
+            } catch {
+                return "Error processing your request: \(error.localizedDescription)"
+            }
         }
 
         private func extractNumber(from text: String) -> Int? {
