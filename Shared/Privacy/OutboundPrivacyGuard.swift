@@ -100,6 +100,18 @@ actor OutboundPrivacyGuard {
         }
     }
 
+    // MARK: - Control
+
+    /// Enable or disable the firewall
+    func setEnabled(_ enabled: Bool) {
+        isEnabled = enabled
+    }
+
+    /// Change the firewall operating mode
+    func setMode(_ newMode: FirewallMode) {
+        mode = newMode
+    }
+
     // MARK: - Channel Registration
 
     /// Register a channel for outbound communication

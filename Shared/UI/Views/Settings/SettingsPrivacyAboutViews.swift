@@ -14,6 +14,10 @@ import UniformTypeIdentifiers
 struct ConfigurationPrivacySettingsView: View {
     @State private var showingExportDialog = false
     @State private var showingDeleteConfirmation = false
+    @State private var firewallMode: String = "strict"
+    @State private var firewallEnabled = true
+    @State private var auditStats: (total: Int, passed: Int, redacted: Int, blocked: Int) = (0, 0, 0, 0)
+    @State private var registeredChannels: [String] = []
 
     var body: some View {
         Form {
@@ -22,6 +26,12 @@ struct ConfigurationPrivacySettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+
+            firewallSection
+
+            channelsSection
+
+            auditSection
 
             Section("Data Storage") {
                 LabeledContent("Location", value: "Local (On-Device)")
@@ -40,6 +50,9 @@ struct ConfigurationPrivacySettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .task {
+            await loadFirewallState()
+        }
         .fileExporter(
             isPresented: $showingExportDialog,
             document: DataExportDocument(),
@@ -60,8 +73,141 @@ struct ConfigurationPrivacySettingsView: View {
         }
     }
 
+    // MARK: - Firewall Section
+
+    @ViewBuilder
+    private var firewallSection: some View {
+        Section("Outbound Firewall") {
+            HStack {
+                Image(systemName: firewallEnabled ? "flame.fill" : "flame")
+                    .foregroundStyle(firewallEnabled ? Color.theaSuccess : .secondary)
+                Toggle("Firewall Active", isOn: $firewallEnabled)
+                    .onChange(of: firewallEnabled) { _, newValue in
+                        Task { await OutboundPrivacyGuard.shared.setEnabled(newValue) }
+                    }
+            }
+
+            Picker("Mode", selection: $firewallMode) {
+                Text("Strict (Default-Deny)").tag("strict")
+                Text("Standard").tag("standard")
+                Text("Permissive (Log Only)").tag("permissive")
+            }
+            .onChange(of: firewallMode) { _, newValue in
+                Task { await updateFirewallMode(newValue) }
+            }
+
+            switch firewallMode {
+            case "strict":
+                Label("Only registered channels can transmit. Data types are enforced per channel.", systemImage: "lock.shield.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            case "standard":
+                Label("Known channels are sanitized. Unknown channels use default policy.", systemImage: "shield.lefthalf.filled")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            case "permissive":
+                Label("All traffic is logged but never blocked. Use for debugging only.", systemImage: "eye")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            default:
+                EmptyView()
+            }
+        }
+    }
+
+    // MARK: - Channels Section
+
+    @ViewBuilder
+    private var channelsSection: some View {
+        Section("Registered Channels (\(registeredChannels.count))") {
+            if registeredChannels.isEmpty {
+                Text("No channels registered")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(registeredChannels, id: \.self) { channel in
+                    HStack {
+                        Image(systemName: iconForChannel(channel))
+                            .foregroundStyle(Color.theaPrimaryDefault)
+                            .frame(width: 20)
+                        Text(channel.replacingOccurrences(of: "_", with: " ").capitalized)
+                        Spacer()
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                            .font(.caption)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Audit Section
+
+    @ViewBuilder
+    private var auditSection: some View {
+        Section("Audit Summary") {
+            HStack(spacing: TheaSpacing.lg) {
+                auditStatBadge(label: "Passed", count: auditStats.passed, color: .green)
+                auditStatBadge(label: "Redacted", count: auditStats.redacted, color: .orange)
+                auditStatBadge(label: "Blocked", count: auditStats.blocked, color: .red)
+            }
+            .frame(maxWidth: .infinity)
+
+            if auditStats.total > 0 {
+                LabeledContent("Total Checks", value: "\(auditStats.total)")
+            }
+
+            Button("Clear Audit Log") {
+                Task {
+                    await OutboundPrivacyGuard.shared.clearAuditLog()
+                    await loadFirewallState()
+                }
+            }
+            .disabled(auditStats.total == 0)
+        }
+    }
+
+    private func auditStatBadge(label: String, count: Int, color: Color) -> some View {
+        VStack(spacing: 2) {
+            Text("\(count)")
+                .font(.theaTitle2)
+                .foregroundStyle(count > 0 ? color : .secondary)
+            Text(label)
+                .font(.theaCaption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Helpers
+
+    private func iconForChannel(_ channel: String) -> String {
+        switch channel {
+        case "cloud_api": "cloud"
+        case "messaging": "bubble.left"
+        case "mcp": "wrench"
+        case "web_api": "globe"
+        case "moltbook": "bubble.left.and.text.bubble.right"
+        case "cloudkit_sync": "icloud"
+        case "health_ai": "heart"
+        default: "circle"
+        }
+    }
+
+    private func loadFirewallState() async {
+        firewallEnabled = await OutboundPrivacyGuard.shared.isEnabled
+        let mode = await OutboundPrivacyGuard.shared.mode
+        firewallMode = mode.rawValue
+        registeredChannels = await OutboundPrivacyGuard.shared.registeredChannelIds()
+        let stats = await OutboundPrivacyGuard.shared.getPrivacyAuditStatistics()
+        auditStats = (stats.totalChecks, stats.passed, stats.redacted, stats.blocked)
+    }
+
+    private func updateFirewallMode(_ rawValue: String) async {
+        guard let newMode = FirewallMode(rawValue: rawValue) else { return }
+        await OutboundPrivacyGuard.shared.setMode(newMode)
+    }
+
     private func deleteAllData() {
-        // Reset all configuration to defaults as part of data deletion
         AppConfiguration.shared.resetAllToDefaults()
         print("Data deletion requested - configuration reset complete")
     }
