@@ -71,15 +71,15 @@
 
         // MARK: - Profile Application
 
-        public func applyProfile(_ profile: DisplayProfile, to _: CGDirectDisplayID) async throws {
-            // Note: Actual DDC/CI implementation requires IOKit framework and is complex
-            // This is a simplified version that sets software-based brightness
+        public func applyProfile(_ profile: DisplayProfile, to displayID: CGDirectDisplayID) async throws {
+            let displayService = DisplayService()
 
-            // Set brightness using CoreGraphics
-            // Note: CGDisplaySetUserBrightness is deprecated/unavailable in newer macOS
-            // TODO: Implement using DDC/CI or alternative APIs
-            // var brightness = Float(profile.brightness) / 100.0
-            // CGDisplaySetUserBrightness(displayID, brightness)
+            do {
+                try await displayService.setBrightness(profile.brightness, for: displayID)
+                try await displayService.setContrast(profile.contrast, for: displayID)
+            } catch {
+                throw ProfileError.applyFailed
+            }
 
             activeProfile = profile
         }

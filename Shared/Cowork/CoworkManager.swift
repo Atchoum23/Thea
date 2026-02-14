@@ -84,8 +84,7 @@
             targetSession.status = .planning
             targetSession.context.userInstructions = instruction
 
-            // This would typically call an LLM to generate steps
-            // For now, return a simple placeholder
+            // Generate steps via AI provider (falls back to heuristic templates)
             let steps = await generateSteps(for: instruction, context: targetSession.context)
 
             for (index, var step) in steps.enumerated() {

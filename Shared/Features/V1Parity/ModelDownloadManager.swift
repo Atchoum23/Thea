@@ -172,8 +172,7 @@ public final class ModelDownloadManager {
         )
         activeDownloads.append(download)
 
-        // Use huggingface-cli or direct download
-        // This is a stub - actual implementation would use URLSession with progress tracking
+        // Download model files from HuggingFace via URLSession
         do {
             try await performDownload(model: model, download: download)
 
