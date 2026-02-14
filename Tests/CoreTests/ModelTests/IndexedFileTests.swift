@@ -51,7 +51,7 @@ final class IndexedFileTests: XCTestCase {
             ("/archive.zip", "zip"),
             ("/script.py", "py"),
             ("/code.swift", "swift"),
-            ("/readme.md", "md"),
+            ("/readme.md", "md")
         ]
         for (path, expectedType) in cases {
             let file = IndexedFile(path: path, name: URL(fileURLWithPath: path).lastPathComponent, size: 0)
