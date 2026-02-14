@@ -207,10 +207,31 @@ public final class SmartTriggerEngine: ObservableObject {
         return nil
     }
 
-    private func calculateNextCron(_: String) -> Date? {
-        // Simplified cron parsing (minute hour day month weekday)
-        // For full cron support, use a proper cron library
-        Date().addingTimeInterval(3600) // Placeholder: 1 hour
+    private func calculateNextCron(_ expression: String) -> Date? {
+        // Simplified cron: "minute hour * * *" — handles minute and hour fields
+        let fields = expression.split(separator: " ").map(String.init)
+        guard fields.count >= 2 else { return nil }
+
+        let calendar = Calendar.current
+        let now = Date()
+        var components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: now)
+
+        if let minute = Int(fields[0]) {
+            components.minute = minute
+        }
+        if let hour = Int(fields[1]) {
+            components.hour = hour
+        }
+        components.second = 0
+
+        // Get next occurrence: today if still in the future, otherwise tomorrow
+        if let date = calendar.date(from: components), date > now {
+            return date
+        }
+        if let date = calendar.date(from: components) {
+            return calendar.date(byAdding: .day, value: 1, to: date)
+        }
+        return nil
     }
 
     // MARK: - Location Triggers

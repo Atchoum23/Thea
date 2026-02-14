@@ -32,10 +32,39 @@ public struct SiriAskTheaIntent: AppIntent {
         )
     }
 
+    @MainActor
     private func processQuery(_ query: String) async throws -> String {
-        // This would integrate with your AI service
-        // For now, return a placeholder
-        "I'll help you with: \(query)"
+        // Route through the AI provider registry for a quick single-turn response
+        guard let provider = ProviderRegistry.shared.getProvider(
+            id: SettingsManager.shared.defaultProvider
+        ) else {
+            return "No AI provider configured. Please set up a provider in Thea Settings."
+        }
+
+        let message = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(query),
+            timestamp: Date(),
+            model: SettingsManager.shared.defaultModel
+        )
+
+        var responseText = ""
+        let stream = try await provider.chat(
+            messages: [message],
+            model: SettingsManager.shared.defaultModel,
+            stream: false
+        )
+        for try await chunk in stream {
+            if case .delta(let text) = chunk.type {
+                responseText += text
+            } else if case .complete(let msg) = chunk.type {
+                responseText = msg.content.textValue
+            }
+        }
+
+        return responseText.isEmpty ? "I couldn't generate a response. Please try again." : responseText
     }
 }
 

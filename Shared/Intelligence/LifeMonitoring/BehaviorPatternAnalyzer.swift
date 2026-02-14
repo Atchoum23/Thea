@@ -325,9 +325,25 @@ public final class BehaviorPatternAnalyzer: ObservableObject {
     private func detectWorkflowInefficiencies() -> [BehaviorPattern] {
         var patterns: [BehaviorPattern] = []
 
-        // Detect frequent copy-paste between apps (could use automation)
-        // This would need clipboard history - for now just a placeholder
-        // TODO: Integrate with clipboard history when available
+        // Detect frequent copy-paste between apps — suggests automation opportunity
+        let clipboardEntries = ClipboardHistoryManager.shared.recentEntries
+        let recentClips = clipboardEntries.filter {
+            $0.createdAt.timeIntervalSinceNow > -3600 // last hour
+        }
+        if recentClips.count >= 10 {
+            patterns.append(BehaviorPattern(
+                id: UUID(),
+                type: .inefficiency,
+                title: "Frequent Copy-Paste",
+                description: "\(recentClips.count) clipboard operations in the last hour. Consider automating this workflow.",
+                frequency: recentClips.count,
+                significance: .medium,
+                suggestion: "Create a Thea automation to handle this repetitive data transfer.",
+                potentialTimeSaved: TimeInterval(recentClips.count * 5),
+                detectedAt: Date(),
+                relatedApps: []
+            ))
+        }
 
         // Detect long idle periods followed by burst activity (poor time management)
         let sessions = InputActivityMonitor.shared.recentSessions
