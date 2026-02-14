@@ -1,6 +1,5 @@
 @preconcurrency import SwiftData
 import SwiftUI
-import UniformTypeIdentifiers
 
 // MARK: - Unified Chat View
 
@@ -608,20 +607,3 @@ extension ChatView {
     }
 }
 
-// MARK: - Error Alert
-
-extension View {
-    func alert(error: Binding<Error?>) -> some View {
-        alert(
-            "Error",
-            isPresented: .constant(error.wrappedValue != nil),
-            presenting: error.wrappedValue
-        ) { _ in
-            Button("OK") {
-                error.wrappedValue = nil
-            }
-        } message: { error in
-            Text(error.localizedDescription)
-        }
-    }
-}
