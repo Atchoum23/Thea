@@ -7,7 +7,7 @@ import XCTest
 
 // MARK: - Mirrored Types
 
-fileprivate enum TheaDeviceClass: String, CaseIterable, Codable, Sendable {
+private enum TheaDeviceClass: String, CaseIterable, Codable, Sendable {
     case mac
     case iPhone
     case iPad
@@ -38,7 +38,7 @@ fileprivate enum TheaDeviceClass: String, CaseIterable, Codable, Sendable {
     }
 }
 
-fileprivate enum SyncScope: String, CaseIterable, Codable, Sendable {
+private enum SyncScope: String, CaseIterable, Codable, Sendable {
     case universal
     case deviceClass
     case deviceLocal
@@ -60,7 +60,7 @@ fileprivate enum SyncScope: String, CaseIterable, Codable, Sendable {
     }
 }
 
-fileprivate enum SyncCategory: String, CaseIterable, Codable, Sendable {
+private enum SyncCategory: String, CaseIterable, Codable, Sendable {
     case appearance
     case aiProviders
     case behavior
@@ -106,7 +106,7 @@ fileprivate enum SyncCategory: String, CaseIterable, Codable, Sendable {
     }
 }
 
-fileprivate struct PreferenceDescriptor: Sendable {
+private struct PreferenceDescriptor: Sendable {
     let key: String
     let category: SyncCategory
     let defaultScope: SyncScope
@@ -130,7 +130,7 @@ private func cloudKey(
     }
 }
 
-fileprivate struct ParsedCloudKey {
+private struct ParsedCloudKey {
     let localKey: String
     let deviceClass: TheaDeviceClass?
     let scope: SyncScope

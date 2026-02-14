@@ -444,7 +444,7 @@ struct SpendingAnalyzerTests {
             TestTransaction(amount: -50, description: "Food", date: now.addingTimeInterval(-86400)),
             TestTransaction(amount: -100, description: "Gas", date: now.addingTimeInterval(-172800)),
             TestTransaction(amount: 2000, description: "Salary", date: now.addingTimeInterval(-86400)), // Income, excluded
-            TestTransaction(amount: -200, description: "Old purchase", date: now.addingTimeInterval(-86400 * 60)), // >30 days, excluded
+            TestTransaction(amount: -200, description: "Old purchase", date: now.addingTimeInterval(-86400 * 60)) // >30 days, excluded
         ]
         let spending = TestSpendingAnalyzer.monthlySpending(from: transactions)
         #expect(spending == 150)
@@ -457,7 +457,7 @@ struct SpendingAnalyzerTests {
             TestTransaction(amount: -150, description: "Dinner", category: .dining),
             TestTransaction(amount: -50, description: "Uber", category: .transportation),
             TestTransaction(amount: -300, description: "Rent", category: .housing),
-            TestTransaction(amount: 3000, description: "Salary", category: .income), // Positive, excluded
+            TestTransaction(amount: 3000, description: "Salary", category: .income) // Positive, excluded
         ]
         let top = TestSpendingAnalyzer.topCategories(from: transactions)
         #expect(top.first?.0 == .housing)
@@ -472,7 +472,7 @@ struct SpendingAnalyzerTests {
             TestTransaction(amount: -60, description: "Normal"),
             TestTransaction(amount: -40, description: "Normal"),
             TestTransaction(amount: -55, description: "Normal"),
-            TestTransaction(amount: -500, description: "Unusual"), // >3x avg of 50
+            TestTransaction(amount: -500, description: "Unusual") // >3x avg of 50
         ]
         let unusual = TestSpendingAnalyzer.detectUnusual(in: transactions)
         #expect(unusual.count == 1)

@@ -166,6 +166,7 @@ private final class TestMemoryStore: @unchecked Sendable {
 
     func getMemory(_ id: UUID) -> TestLongTermMemory? { memories[id] }
     var count: Int { memories.count }
+    var isEmpty: Bool { memories.isEmpty }
     var allMemories: [TestLongTermMemory] { Array(memories.values) }
 }
 
@@ -335,7 +336,7 @@ struct MemoryStoreReinforcementTests {
     func nonexistentReinforcement() {
         let store = TestMemoryStore()
         store.reinforceFact(UUID()) // Should not crash
-        #expect(store.count == 0)
+        #expect(store.isEmpty)
     }
 
     @Test("Diminishing returns at high strength")

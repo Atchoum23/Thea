@@ -353,8 +353,8 @@ struct KGRelationshipTests {
         graph.addEntity(TestKGEntity(id: "b", name: "B", type: .person))
         graph.addRelationship(from: "a", to: "b", relationship: "mentors")
         #expect(graph.outgoingRelationships(for: "a").count == 1)
-        #expect(graph.incomingRelationships(for: "a").count == 0)
-        #expect(graph.outgoingRelationships(for: "b").count == 0)
+        #expect(graph.incomingRelationships(for: "a").isEmpty)
+        #expect(graph.outgoingRelationships(for: "b").isEmpty)
         #expect(graph.incomingRelationships(for: "b").count == 1)
     }
 

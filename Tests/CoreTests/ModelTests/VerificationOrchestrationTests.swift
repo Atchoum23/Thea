@@ -210,24 +210,24 @@ final class VerifierTypeTests: XCTestCase {
     }
 
     func testMultiModelHasHighestWeight() {
-        let maxWeight = VerifierType.allCases.max(by: { $0.defaultWeight < $1.defaultWeight })
+        let maxWeight = VerifierType.allCases.max { $0.defaultWeight < $1.defaultWeight }
         XCTAssertEqual(maxWeight, .multiModel)
     }
 
     func testUserFeedbackHasLowestWeight() {
-        let minWeight = VerifierType.allCases.min(by: { $0.defaultWeight < $1.defaultWeight })
+        let minWeight = VerifierType.allCases.min { $0.defaultWeight < $1.defaultWeight }
         XCTAssertEqual(minWeight, .userFeedback)
     }
 
     func testStaticAnalysisIsFastest() {
         let fastest = VerifierType.allCases
             .filter { $0 != .userFeedback }
-            .min(by: { $0.typicalLatencyMs < $1.typicalLatencyMs })
+            .min { $0.typicalLatencyMs < $1.typicalLatencyMs }
         XCTAssertEqual(fastest, .staticAnalysis)
     }
 
     func testMultiModelIsSlowest() {
-        let slowest = VerifierType.allCases.max(by: { $0.typicalLatencyMs < $1.typicalLatencyMs })
+        let slowest = VerifierType.allCases.max { $0.typicalLatencyMs < $1.typicalLatencyMs }
         XCTAssertEqual(slowest, .multiModel)
     }
 
@@ -298,7 +298,7 @@ final class WeightedConfidenceTests: XCTestCase {
     func testHighWeightDominates() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.1), // weight 0.30
-            VerifierResult(verifier: .userFeedback, confidence: 0.9), // weight 0.10
+            VerifierResult(verifier: .userFeedback, confidence: 0.9) // weight 0.10
         ]
         let score = calculateWeightedConfidence(results: results)
         // (0.1 * 0.30 + 0.9 * 0.10) / (0.30 + 0.10) = (0.03 + 0.09) / 0.40 = 0.30
