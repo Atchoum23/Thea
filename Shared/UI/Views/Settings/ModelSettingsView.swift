@@ -47,6 +47,7 @@ struct ModelSettingsView: View {
                     Image(systemName: "brain.head.profile")
                         .font(.title2)
                         .foregroundStyle(.purple)
+                        .accessibilityHidden(true)
                     Text("AI Orchestrator Active")
                         .font(.headline)
                 }
@@ -58,6 +59,7 @@ struct ModelSettingsView: View {
                 HStack {
                     Image(systemName: "arrow.right.circle")
                         .foregroundStyle(.blue)
+                        .accessibilityHidden(true)
                     Text("Configure orchestration in the **Orchestrator** tab")
                         .font(.caption)
                 }
@@ -77,6 +79,7 @@ struct ModelSettingsView: View {
                     HStack {
                         Image(systemName: "star")
                             .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
                         Text("No favorite models")
                             .foregroundStyle(.secondary)
                     }
@@ -117,6 +120,7 @@ struct ModelSettingsView: View {
                         .font(.caption)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Remove from favorites")
             }
 
             Text(model.providerName)
@@ -328,6 +332,7 @@ struct ModelSettingsView: View {
                     HStack {
                         Image(systemName: "exclamationmark.triangle")
                             .foregroundStyle(.orange)
+                            .accessibilityHidden(true)
                         Text("Error: \(error.localizedDescription)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -364,6 +369,7 @@ struct ModelSettingsView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.title)
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
 
                     Text("No models found")
                         .foregroundStyle(.secondary)
@@ -417,6 +423,7 @@ struct ModelSettingsView: View {
                     .foregroundStyle(selectedForComparison.contains(model.id) ? .blue : .secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(selectedForComparison.contains(model.id) ? "Remove from comparison" : "Add to comparison")
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
@@ -428,6 +435,7 @@ struct ModelSettingsView: View {
                         Image(systemName: "star.fill")
                             .foregroundStyle(.yellow)
                             .font(.caption2)
+                            .accessibilityHidden(true)
                     }
                 }
 
@@ -462,6 +470,7 @@ struct ModelSettingsView: View {
                     .foregroundStyle(settingsManager.favoriteModels.contains(model.id) ? .yellow : .secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(settingsManager.favoriteModels.contains(model.id) ? "Remove from favorites" : "Add to favorites")
 
             // Info button
             Button {
@@ -471,6 +480,7 @@ struct ModelSettingsView: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Details for \(model.displayName)")
         }
         .padding(.vertical, 4)
     }
@@ -525,6 +535,7 @@ struct ModelSettingsView: View {
                                     .foregroundStyle(settingsManager.favoriteModels.contains(model.id) ? .yellow : .secondary)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel(settingsManager.favoriteModels.contains(model.id) ? "Remove from favorites" : "Add to favorites")
                         }
 
                         if let description = model.description {
