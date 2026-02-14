@@ -131,7 +131,7 @@ public final class LocalizationManager: ObservableObject {
     /// Change the app language
     public func setLanguage(_ language: Language) {
         guard supportedLanguages.contains(where: { $0.code == language.code }) else {
-            logger.warning("Unsupported language: \(language.code)")
+            logger.warning("Unsupported language: \(language.code, privacy: .public)")
             return
         }
 
@@ -149,7 +149,7 @@ public final class LocalizationManager: ObservableObject {
         // Post notification for UI updates
         NotificationCenter.default.post(name: .languageDidChange, object: language)
 
-        logger.info("Language changed to: \(language.code)")
+        logger.info("Language changed to: \(language.code, privacy: .public)")
     }
 
     /// Get system preferred language
@@ -389,7 +389,7 @@ public final class LocalizationManager: ObservableObject {
             stringTables[language]?.merge(strings) { _, new in new }
         }
 
-        logger.info("Loaded remote translations for \(translations.count) languages")
+        logger.info("Loaded remote translations for \(translations.count, privacy: .public) languages")
     }
 }
 

@@ -68,13 +68,13 @@ public final class AnalyticsManager: ObservableObject {
             clearLocalData()
         }
 
-        logger.info("Analytics \(enabled ? "enabled" : "disabled")")
+        logger.info("Analytics \(enabled ? "enabled" : "disabled", privacy: .public)")
     }
 
     /// Register analytics provider
     public func registerProvider(_ provider: AnalyticsProvider) {
         providers.append(provider)
-        logger.info("Registered analytics provider: \(type(of: provider))")
+        logger.info("Registered analytics provider: \(String(describing: type(of: provider)), privacy: .public)")
     }
 
     // MARK: - Session Management
@@ -96,7 +96,7 @@ public final class AnalyticsManager: ObservableObject {
         ]
 
         track("session_start")
-        logger.info("Session started: \(self.sessionId)")
+        logger.info("Session started: \(self.sessionId, privacy: .private)")
     }
 
     private func endSession() {
@@ -165,7 +165,7 @@ public final class AnalyticsManager: ObservableObject {
             events.removeFirst(events.count - maxEventsInMemory)
         }
 
-        logger.debug("Tracked event: \(eventName)")
+        logger.debug("Tracked event: \(eventName, privacy: .public)")
     }
 
     /// Track screen view
@@ -348,7 +348,7 @@ public final class AnalyticsManager: ObservableObject {
         events.removeFirst(min(eventsSize, events.count))
         lastSyncTime = Date()
 
-        logger.debug("Synced \(eventsToSync.count) events")
+        logger.debug("Synced \(eventsToSync.count, privacy: .public) events")
     }
 
     private var eventsSize: Int { min(batchSize, events.count) }
@@ -576,9 +576,9 @@ public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendabl
         do {
             let data = try JSONEncoder().encode(events)
             try data.write(to: fileURL)
-            logger.debug("Saved \(events.count) events to local storage")
+            logger.debug("Saved \(events.count, privacy: .public) events to local storage")
         } catch {
-            logger.error("Failed to save events: \(error.localizedDescription)")
+            logger.error("Failed to save events: \(error.localizedDescription, privacy: .public)")
         }
     }
 }
@@ -592,25 +592,25 @@ public final class ConsoleAnalyticsProvider: AnalyticsProvider, @unchecked Senda
 
     public func track(_ event: AnalyticsEvent) {
         #if DEBUG
-            logger.info("📊 [\(event.name)] \(event.properties)")
+            logger.info("[\(event.name, privacy: .public)] \(String(describing: event.properties), privacy: .private)")
         #endif
     }
 
     public func setUserProperty(_ key: String, value: Any) {
         #if DEBUG
-            logger.info("👤 User property: \(key) = \(String(describing: value))")
+            logger.info("User property: \(key, privacy: .public) = \(String(describing: value), privacy: .private)")
         #endif
     }
 
     public func setUserId(_ userId: String?) {
         #if DEBUG
-            logger.info("👤 User ID: \(userId ?? "nil")")
+            logger.info("User ID: \(userId ?? "nil", privacy: .private)")
         #endif
     }
 
     public func flush(_ events: [AnalyticsEvent]) async {
         #if DEBUG
-            logger.info("📤 Flushing \(events.count) events")
+            logger.info("Flushing \(events.count, privacy: .public) events")
         #endif
     }
 }

@@ -84,7 +84,7 @@ struct TheamacOSApp: App {
 
         let missingColumns = requiredColumns.filter { !existingColumns.contains($0) }
         if !missingColumns.isEmpty {
-            logger.warning("Store schema outdated (missing: \(missingColumns.joined(separator: ", "))). Deleting store.")
+            logger.warning("Store schema outdated (missing: \(missingColumns.joined(separator: ", "), privacy: .public)). Deleting store.")
             // Close DB before deleting
             sqlite3_close(db)
             for suffix in ["", "-shm", "-wal"] {
@@ -284,7 +284,7 @@ struct TheamacOSApp: App {
                     maxDailyPosts: settings.moltbookMaxDailyPosts
                 )
                 await agent.enable()
-                logger.info("MoltbookAgent enabled (preview: \(settings.moltbookPreviewMode))")
+                logger.info("MoltbookAgent enabled (preview: \(settings.moltbookPreviewMode, privacy: .public))")
             }
             // Wire OpenClaw message routing
             OpenClawBridge.shared.setup()
@@ -331,11 +331,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Task.detached(priority: .utility) {
             await LocalModelManager.shared.waitForDiscovery()
             let localCount = await LocalModelManager.shared.availableModels.count
-            logger.info("LocalModelManager: \(localCount) models discovered")
+            logger.info("LocalModelManager: \(localCount, privacy: .public) models discovered")
 
             await MLXModelManager.shared.waitForScan()
             let mlxCount = await MLXModelManager.shared.scannedModels.count
-            logger.info("MLXModelManager: \(mlxCount) models scanned")
+            logger.info("MLXModelManager: \(mlxCount, privacy: .public) models scanned")
 
             _ = await ProviderRegistry.shared.getAvailableLocalModels().count
             logger.info("Startup model discovery complete")
@@ -357,7 +357,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        logger.warning("Failed to register for remote notifications: \(error.localizedDescription)")
+        logger.warning("Failed to register for remote notifications: \(error.localizedDescription, privacy: .public)")
     }
 
     func application(
@@ -378,6 +378,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Forward to CloudKitService for data sync
         Task {
             await CloudKitService.shared.handleNotification(anyHashableUserInfo)
+        }
+
+        // Forward to TheaClipSyncService for clipboard sync
+        Task { @MainActor in
+            await TheaClipSyncService.shared.handleRemoteNotification()
         }
     }
 

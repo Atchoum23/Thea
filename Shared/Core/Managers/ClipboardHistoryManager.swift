@@ -55,6 +55,12 @@ final class ClipboardHistoryManager: ObservableObject {
         loadPinboards()
         isRecording = settings.clipboardHistoryEnabled
 
+        // Configure iCloud sync
+        TheaClipSyncService.shared.configure(modelContext: context)
+
+        // Pull remote changes on startup
+        Task { await TheaClipSyncService.shared.pullChanges() }
+
         #if os(macOS)
             connectToClipboardObserver()
         #endif
@@ -164,6 +170,11 @@ final class ClipboardHistoryManager: ObservableObject {
             saveContext()
             recentEntries.insert(entry, at: 0)
 
+            // Push to iCloud (non-sensitive only)
+            if !entry.isSensitive {
+                Task { await TheaClipSyncService.shared.pushEntry(entry) }
+            }
+
             // Trim history
             trimHistory()
 
@@ -199,19 +210,23 @@ final class ClipboardHistoryManager: ObservableObject {
     }
 
     func deleteEntry(_ entry: TheaClipEntry) {
+        let entryID = entry.id
         modelContext?.delete(entry)
         saveContext()
-        recentEntries.removeAll { $0.id == entry.id }
+        recentEntries.removeAll { $0.id == entryID }
+        Task { await TheaClipSyncService.shared.deleteRemoteEntry(entryID) }
     }
 
     func togglePin(_ entry: TheaClipEntry) {
         entry.isPinned.toggle()
         saveContext()
+        Task { await TheaClipSyncService.shared.pushEntry(entry) }
     }
 
     func toggleFavorite(_ entry: TheaClipEntry) {
         entry.isFavorite.toggle()
         saveContext()
+        Task { await TheaClipSyncService.shared.pushEntry(entry) }
     }
 
     func clearHistory(keepPinned: Bool = true) {
@@ -255,12 +270,15 @@ final class ClipboardHistoryManager: ObservableObject {
         modelContext?.insert(pinboard)
         saveContext()
         pinboards.append(pinboard)
+        Task { await TheaClipSyncService.shared.pushPinboard(pinboard) }
         return pinboard
     }
 
     func deletePinboard(_ pinboard: TheaClipPinboard) {
+        let pinboardID = pinboard.id
         modelContext?.delete(pinboard)
         saveContext()
+        Task { await TheaClipSyncService.shared.deleteRemotePinboard(pinboardID) }
         pinboards.removeAll { $0.id == pinboard.id }
     }
 
