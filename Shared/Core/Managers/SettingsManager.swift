@@ -374,7 +374,6 @@ final class SettingsManager: ObservableObject {
         mlxModelsPath = d.string(forKey: "mlxModelsPath") ?? "~/.cache/huggingface/hub/"
         ollamaEnabled = d.bool(forKey: "ollamaEnabled")
         ollamaURL = d.string(forKey: "ollamaURL") ?? "http://localhost:11434"
-
         // Execution settings
         executionMode = d.string(forKey: "executionMode") ?? "manual"
         allowFileCreation = d.bool(forKey: "allowFileCreation")
@@ -388,20 +387,17 @@ final class SettingsManager: ObservableObject {
         maxConcurrentTasks = d.integer(forKey: "maxConcurrentTasks") != 0
             ? d.integer(forKey: "maxConcurrentTasks") : 3
         submitShortcut = d.string(forKey: "submitShortcut") ?? "enter"
-
         // Notification settings
         notifyOnResponseComplete = d.object(forKey: "notifyOnResponseComplete") as? Bool ?? true
         notifyOnAttentionRequired = d.object(forKey: "notifyOnAttentionRequired") as? Bool ?? true
         playNotificationSound = d.object(forKey: "playNotificationSound") as? Bool ?? true
         showDockBadge = d.object(forKey: "showDockBadge") as? Bool ?? true
         doNotDisturb = d.bool(forKey: "doNotDisturb")
-
         // Moltbook settings
         moltbookAgentEnabled = d.bool(forKey: "moltbookAgentEnabled")
         moltbookPreviewMode = d.object(forKey: "moltbookPreviewMode") as? Bool ?? true
         moltbookMaxDailyPosts = d.integer(forKey: "moltbookMaxDailyPosts") != 0
             ? d.integer(forKey: "moltbookMaxDailyPosts") : 10
-
         // Clipboard settings
         clipboardHistoryEnabled = d.object(forKey: "clipboardHistoryEnabled") as? Bool ?? true
         clipboardRecordImages = d.object(forKey: "clipboardRecordImages") as? Bool ?? true
@@ -417,25 +413,17 @@ final class SettingsManager: ObservableObject {
         clipboardAutoCategorize = d.bool(forKey: "clipboardAutoCategorize")
         clipboardSyncPinboards = d.bool(forKey: "clipboardSyncPinboards")
         clipboardExcludedApps = d.stringArray(forKey: "clipboardExcludedApps") ?? []
-
         // Agent settings
         agentDelegationEnabled = d.object(forKey: "agentDelegationEnabled") as? Bool ?? true
         agentAutoDelegateComplexTasks = d.bool(forKey: "agentAutoDelegateComplexTasks")
         agentMaxConcurrent = d.integer(forKey: "agentMaxConcurrent") != 0
             ? d.integer(forKey: "agentMaxConcurrent") : 4
         agentDefaultAutonomy = d.string(forKey: "agentDefaultAutonomy") ?? "balanced"
-
         // Remaining settings
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
-
-        if let savedFavorites = d.array(forKey: "favoriteModels") as? [String] {
-            favoriteModels = Set(savedFavorites)
-        } else {
-            favoriteModels = []
-        }
-
+        favoriteModels = Set(d.array(forKey: "favoriteModels") as? [String] ?? [])
         syncObserver = NotificationCenter.default
             .publisher(for: .preferenceSyncDidPull)
             .receive(on: RunLoop.main)
@@ -607,72 +595,3 @@ extension SettingsManager {
     }
 }
 
-// MARK: - Reset
-
-extension SettingsManager {
-    func resetToDefaults() {
-        defaultProvider = "openrouter"
-        streamResponses = true
-        theme = "system"
-        fontSize = "medium"
-        iCloudSyncEnabled = false
-        analyticsEnabled = false
-        handoffEnabled = true
-        cloudAPIPrivacyGuardEnabled = false
-
-        launchAtLogin = false
-        showInMenuBar = true
-        notificationsEnabled = true
-
-        windowFloatOnTop = false
-        rememberWindowPosition = true
-        defaultWindowSize = "default"
-
-        messageDensity = "comfortable"
-        timestampDisplay = "relative"
-        autoScrollToBottom = true
-
-        showSidebarOnLaunch = true
-        restoreLastSession = false
-
-        readResponsesAloud = false
-        selectedVoice = "default"
-
-        debugMode = false
-        showPerformanceMetrics = false
-        betaFeaturesEnabled = false
-
-        mlxModelsPath = "~/.cache/huggingface/hub/"
-        ollamaEnabled = false
-        ollamaURL = "http://localhost:11434"
-
-        executionMode = "manual"
-        allowFileCreation = false
-        allowFileEditing = false
-        allowCodeExecution = false
-        allowExternalAPICalls = false
-        requireDestructiveApproval = true
-        enableRollback = true
-        createBackups = true
-        preventSleepDuringExecution = true
-        maxConcurrentTasks = 3
-
-        submitShortcut = "enter"
-        notifyOnResponseComplete = true
-        notifyOnAttentionRequired = true
-        playNotificationSound = true
-        showDockBadge = true
-        doNotDisturb = false
-        agentDelegationEnabled = true
-        agentAutoDelegateComplexTasks = false
-        agentMaxConcurrent = 4
-        agentDefaultAutonomy = "balanced"
-        activeFocusMode = "general"
-        enableSemanticSearch = true
-        defaultExportFormat = "markdown"
-
-        for provider in availableProviders {
-            deleteAPIKey(for: provider)
-        }
-    }
-}

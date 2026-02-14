@@ -84,15 +84,24 @@ public final class MemoryManager: ObservableObject {
         logger.info("MemoryManager initialized with \(self.memories.count) memories")
     }
 
-    // MARK: - Importance Scoring
+    // MARK: - Setup (SwiftData compatibility stub)
 
+    public func setModelContext(_ context: Any) {
+        modelContext = context
+        isInitialized = true
+    }
+}
+
+// MARK: - Importance Scoring
+
+extension MemoryManager {
     /// Calculate importance score for a memory record
     public func calculateImportance(for record: OmniMemoryRecord) -> Double {
         var score = 0.0
 
         // 1. Recency (more recent = more important)
         let daysSinceAccess = Date().timeIntervalSince(record.lastAccessed) / 86400
-        let recencyScore = exp(-daysSinceAccess / 30.0) // Exponential decay over 30 days
+        let recencyScore = exp(-daysSinceAccess / 30.0)
         score += recencyScore * importanceWeights.recency
 
         // 2. Frequency (more accesses = more important)
@@ -112,10 +121,10 @@ public final class MemoryManager: ObservableObject {
 
         // 5. Type-specific bonuses
         let typeBonus: Double = switch record.type {
-        case .procedural: 0.2  // Procedural knowledge is valuable
-        case .prospective: 0.3 // Future intentions are important
-        case .semantic: 0.1    // Knowledge base entries
-        case .episodic: 0.0    // Episodes are context-dependent
+        case .procedural: 0.2
+        case .prospective: 0.3
+        case .semantic: 0.1
+        case .episodic: 0.0
         }
         score += typeBonus
 
@@ -135,9 +144,11 @@ public final class MemoryManager: ObservableObject {
             .prefix(limit)
             .map { $0.record }
     }
+}
 
-    // MARK: - Time Decay
+// MARK: - Time Decay & Spaced Repetition
 
+extension MemoryManager {
     /// Apply time-based decay to all memories
     public func applyTimeDecay() {
         guard enableTimeDecay else { return }
@@ -147,12 +158,9 @@ public final class MemoryManager: ObservableObject {
 
         for i in 0..<memories.count {
             let daysSinceAccess = now.timeIntervalSince(memories[i].lastAccessed) / 86400
-
-            // Apply exponential decay based on half-life
             let decayFactor = pow(0.5, daysSinceAccess / decayHalfLifeDays)
             let originalConfidence = memories[i].confidence
 
-            // Don't decay below minimum or recently accessed memories
             if daysSinceAccess > 1 && originalConfidence > minimumConfidenceForRetention {
                 let newConfidence = max(minimumConfidenceForRetention, originalConfidence * decayFactor)
                 if abs(newConfidence - originalConfidence) > 0.01 {
@@ -169,11 +177,10 @@ public final class MemoryManager: ObservableObject {
     }
 
     /// Schedule periodic decay application
-    private func scheduleDecayApplication() {
-        // Apply decay every hour
+    func scheduleDecayApplication() {
         Task {
             while true {
-                try? await Task.sleep(nanoseconds: 3600_000_000_000) // 1 hour
+                try? await Task.sleep(nanoseconds: 3600_000_000_000)
                 applyTimeDecay()
             }
         }
@@ -183,11 +190,9 @@ public final class MemoryManager: ObservableObject {
     public func strengthenMemory(id: UUID) async {
         guard let index = memories.firstIndex(where: { $0.id == id }) else { return }
 
-        // Increase confidence based on spaced repetition
         let currentConfidence = memories[index].confidence
         let accessCount = memories[index].accessCount
 
-        // Diminishing returns on strengthening
         let strengthenAmount = 0.1 * pow(0.9, Double(accessCount))
         let newConfidence = min(1.0, currentConfidence + strengthenAmount)
 
@@ -195,25 +200,23 @@ public final class MemoryManager: ObservableObject {
         memories[index].accessCount += 1
         memories[index].lastAccessed = Date()
 
-        // Update cache
         memoryCache[memories[index].key] = memories[index]
 
         saveMemories()
         logger.debug("Strengthened memory \(id) to confidence \(newConfidence)")
     }
+}
 
-    // MARK: - Semantic Search
+// MARK: - Semantic Search
 
+extension MemoryManager {
     /// Search memories using semantic similarity
     public func semanticSearch(query: String, limit: Int = 10) async -> [OmniMemoryRecord] {
         guard enableSemanticSearch else {
-            // Fallback to keyword search
             return keywordSearch(query: query, limit: limit)
         }
 
         let queryEmbedding = generateEmbedding(for: query)
-
-        // Calculate similarity for all memories with embeddings
         var similarities: [(UUID, Double)] = []
 
         for (id, embedding) in memoryEmbeddings {
@@ -221,7 +224,6 @@ public final class MemoryManager: ObservableObject {
             similarities.append((id, similarity))
         }
 
-        // Sort by similarity and return top matches
         let topIds = similarities
             .sorted { $0.1 > $1.1 }
             .prefix(limit)
@@ -254,7 +256,6 @@ public final class MemoryManager: ObservableObject {
     /// Find similar memories to a given memory
     public func findSimilarMemories(to record: OmniMemoryRecord, limit: Int = 5) async -> [OmniMemoryRecord] {
         guard let embedding = memoryEmbeddings[record.id] else {
-            // Generate embedding on the fly
             let newEmbedding = generateEmbedding(for: "\(record.key) \(record.value)")
             return findMemoriesBySimilarity(embedding: newEmbedding, excluding: record.id, limit: limit)
         }
@@ -262,7 +263,6 @@ public final class MemoryManager: ObservableObject {
         return findMemoriesBySimilarity(embedding: embedding, excluding: record.id, limit: limit)
     }
 
-    /// Find memories by embedding similarity
     private func findMemoriesBySimilarity(embedding: [Float], excluding: UUID? = nil, limit: Int) -> [OmniMemoryRecord] {
         var similarities: [(UUID, Double)] = []
 
@@ -280,15 +280,13 @@ public final class MemoryManager: ObservableObject {
         return memories.filter { topIds.contains($0.id) }
     }
 
-    /// Generate embedding for text using simple hash-based approach
-    private func generateEmbedding(for text: String) -> [Float] {
+    func generateEmbedding(for text: String) -> [Float] {
         var embedding = [Float](repeating: 0, count: embeddingDimension)
 
         let normalized = text.lowercased()
         let words = normalized.components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { !$0.isEmpty }
 
-        // Word-level features
         for word in words {
             let hash = abs(word.hashValue)
             let dim1 = hash % embeddingDimension
@@ -297,7 +295,6 @@ public final class MemoryManager: ObservableObject {
             embedding[dim2] += 0.5
         }
 
-        // Character trigram features
         for i in 0..<max(0, normalized.count - 2) {
             let startIdx = normalized.index(normalized.startIndex, offsetBy: i)
             let endIdx = normalized.index(startIdx, offsetBy: 3)
@@ -309,8 +306,7 @@ public final class MemoryManager: ObservableObject {
         return normalizeVector(embedding)
     }
 
-    /// Generate embeddings for all memories
-    private func generateMemoryEmbeddings() {
+    func generateMemoryEmbeddings() {
         for memory in memories {
             let text = "\(memory.key) \(memory.value)"
             memoryEmbeddings[memory.id] = generateEmbedding(for: text)
@@ -318,7 +314,6 @@ public final class MemoryManager: ObservableObject {
         logger.debug("Generated embeddings for \(self.memories.count) memories")
     }
 
-    /// Cosine similarity between two vectors
     private func cosineSimilarity(_ a: [Float], _ b: [Float]) -> Double {
         guard a.count == b.count, !a.isEmpty else { return 0 }
 
@@ -338,7 +333,6 @@ public final class MemoryManager: ObservableObject {
         return Double(dotProduct / (normA * normB))
     }
 
-    /// Normalize a vector to unit length
     private func normalizeVector(_ v: [Float]) -> [Float] {
         var sumSquares: Float = 0
         vDSP_svesq(v, 1, &sumSquares, vDSP_Length(v.count))
@@ -352,16 +346,11 @@ public final class MemoryManager: ObservableObject {
 
         return result
     }
+}
 
-    // MARK: - Setup (SwiftData compatibility stub)
+// MARK: - Memory Types (Semantic, Episodic, Procedural, Prospective)
 
-    public func setModelContext(_ context: Any) {
-        modelContext = context
-        isInitialized = true
-    }
-
-    // MARK: - Semantic Memory (Learned Knowledge)
-
+extension MemoryManager {
     /// Store a learned pattern or preference
     public func storeSemanticMemory(
         category: OmniSemanticCategory,
@@ -371,174 +360,105 @@ public final class MemoryManager: ObservableObject {
         source: OmniMemorySource = .inferred
     ) async {
         let record = OmniMemoryRecord(
-            type: .semantic,
-            category: category.rawValue,
-            key: key,
-            value: value,
-            confidence: confidence,
-            source: source
+            type: .semantic, category: category.rawValue,
+            key: key, value: value, confidence: confidence, source: source
         )
-
         await store(record)
         logger.debug("Stored semantic memory: \(key) = \(value.prefix(50))...")
     }
 
     /// Retrieve semantic memories by category
     public func retrieveSemanticMemories(
-        category: OmniSemanticCategory,
-        limit: Int = 10
+        category: OmniSemanticCategory, limit: Int = 10
     ) async -> [OmniMemoryRecord] {
-        await retrieve(
-            type: .semantic,
-            category: category.rawValue,
-            limit: limit
-        )
+        await retrieve(type: .semantic, category: category.rawValue, limit: limit)
     }
-
-    // MARK: - Episodic Memory (Experiences)
 
     /// Store an episodic memory (a specific interaction/event)
     public func storeEpisodicMemory(
-        event: String,
-        context: String,
-        outcome: String? = nil,
-        emotionalValence: Double = 0.0  // -1 to 1 (negative to positive)
+        event: String, context: String,
+        outcome: String? = nil, emotionalValence: Double = 0.0
     ) async {
-        let metadata = OmniEpisodicMetadata(
-            outcome: outcome,
-            emotionalValence: emotionalValence
-        )
-
+        let metadata = OmniEpisodicMetadata(outcome: outcome, emotionalValence: emotionalValence)
         let record = OmniMemoryRecord(
-            type: .episodic,
-            category: "event",
-            key: event,
-            value: context,
-            metadata: metadata.encoded()
+            type: .episodic, category: "event",
+            key: event, value: context, metadata: metadata.encoded()
         )
-
         await store(record)
         logger.debug("Stored episodic memory: \(event.prefix(50))...")
     }
 
     /// Retrieve episodic memories within a time range
     public func retrieveEpisodicMemories(
-        from startDate: Date? = nil,
-        to endDate: Date? = nil,
-        limit: Int = 20
+        from startDate: Date? = nil, to endDate: Date? = nil, limit: Int = 20
     ) async -> [OmniMemoryRecord] {
-        await retrieve(
-            type: .episodic,
-            startDate: startDate,
-            endDate: endDate,
-            limit: limit
-        )
+        await retrieve(type: .episodic, startDate: startDate, endDate: endDate, limit: limit)
     }
-
-    // MARK: - Procedural Memory (How to do things)
 
     /// Store a learned workflow or procedure
     public func storeProceduralMemory(
-        taskType: String,
-        procedure: String,
-        successRate: Double,
-        averageDuration: TimeInterval
+        taskType: String, procedure: String,
+        successRate: Double, averageDuration: TimeInterval
     ) async {
         let metadata = OmniProceduralMetadata(
-            successRate: successRate,
-            averageDuration: averageDuration,
-            executionCount: 1
+            successRate: successRate, averageDuration: averageDuration, executionCount: 1
         )
-
         let record = OmniMemoryRecord(
-            type: .procedural,
-            category: taskType,
-            key: "procedure_\(taskType)",
-            value: procedure,
-            confidence: successRate,
-            metadata: metadata.encoded()
+            type: .procedural, category: taskType,
+            key: "procedure_\(taskType)", value: procedure,
+            confidence: successRate, metadata: metadata.encoded()
         )
-
         await store(record)
         logger.debug("Stored procedural memory: \(taskType)")
     }
 
     /// Retrieve best procedure for a task type
     public func retrieveBestProcedure(for taskType: String) async -> OmniMemoryRecord? {
-        let procedures = await retrieve(
-            type: .procedural,
-            category: taskType,
-            limit: 5
-        )
-
-        // Return highest confidence procedure
+        let procedures = await retrieve(type: .procedural, category: taskType, limit: 5)
         return procedures.max { $0.confidence < $1.confidence }
     }
 
-    // MARK: - Prospective Memory (Future intentions)
-
     /// Store a future intention or reminder
     public func storeProspectiveMemory(
-        intention: String,
-        triggerCondition: MemoryTriggerCondition,
+        intention: String, triggerCondition: MemoryTriggerCondition,
         priority: OmniMemoryPriority = .normal
     ) async {
-        let metadata = OmniProspectiveMetadata(
-            triggerCondition: triggerCondition,
-            isTriggered: false
-        )
-
+        let metadata = OmniProspectiveMetadata(triggerCondition: triggerCondition, isTriggered: false)
         let record = OmniMemoryRecord(
-            type: .prospective,
-            category: priority.rawValue,
-            key: intention,
-            value: triggerCondition.description,
-            metadata: metadata.encoded()
+            type: .prospective, category: priority.rawValue,
+            key: intention, value: triggerCondition.description, metadata: metadata.encoded()
         )
-
         await store(record)
         logger.debug("Stored prospective memory: \(intention.prefix(50))...")
     }
 
     /// Check for triggered prospective memories
-    public func checkProspectiveMemories(
-        currentContext: MemoryContextSnapshot
-    ) async -> [OmniMemoryRecord] {
+    public func checkProspectiveMemories(currentContext: MemoryContextSnapshot) async -> [OmniMemoryRecord] {
         let prospective = await retrieve(type: .prospective, limit: 100)
-
         return prospective.filter { record in
             guard let metadata = OmniProspectiveMetadata.decode(record.metadata),
-                  !metadata.isTriggered else {
-                return false
-            }
-
+                  !metadata.isTriggered else { return false }
             return metadata.triggerCondition.isSatisfied(by: currentContext)
         }
     }
+}
 
-    // MARK: - User Preference Learning
+// MARK: - User Preference Learning
 
+extension MemoryManager {
     /// Learn a user preference from interaction
     public func learnPreference(
-        category: OmniPreferenceCategory,
-        preference: String,
-        strength: Double = 0.5  // 0-1, increases with repeated observation
+        category: OmniPreferenceCategory, preference: String, strength: Double = 0.5
     ) async {
-        // Check if preference already exists
         let key = "\(category.rawValue):\(preference)"
         if let existing = memoryCache[key] {
-            // Strengthen existing preference
             let newStrength = min(1.0, existing.confidence + (strength * 0.2))
             await updateConfidence(recordId: existing.id, newConfidence: newStrength)
             logger.debug("Strengthened preference: \(preference) -> \(newStrength)")
         } else {
-            // Store new preference
             await storeSemanticMemory(
-                category: .userPreference,
-                key: key,
-                value: preference,
-                confidence: strength,
-                source: .inferred
+                category: .userPreference, key: key, value: preference,
+                confidence: strength, source: .inferred
             )
             logger.debug("Learned new preference: \(preference)")
         }
@@ -547,80 +467,63 @@ public final class MemoryManager: ObservableObject {
     /// Get learned preferences for a category
     public func getPreferences(category: OmniPreferenceCategory) async -> [String: Double] {
         let memories = await retrieveSemanticMemories(category: .userPreference, limit: 50)
-
         var preferences: [String: Double] = [:]
         for memory in memories {
             if memory.key.hasPrefix("\(category.rawValue):") {
-                let preference = memory.value
-                preferences[preference] = memory.confidence
+                preferences[memory.value] = memory.confidence
             }
         }
-
         return preferences
     }
+}
 
-    // MARK: - Pattern Detection
+// MARK: - Pattern Detection
 
+extension MemoryManager {
     /// Analyze episodic memories for patterns
-    public func detectPatterns(
-        windowDays: Int = 30,
-        minOccurrences: Int = 3
-    ) async -> [MemoryDetectedPattern] {
+    public func detectPatterns(windowDays: Int = 30, minOccurrences: Int = 3) async -> [MemoryDetectedPattern] {
         let startDate = Calendar.current.date(byAdding: .day, value: -windowDays, to: Date())
         let episodes = await retrieveEpisodicMemories(from: startDate, limit: 500)
 
-        // Group by hour of day and day of week
         var timePatterns: [String: [OmniMemoryRecord]] = [:]
-
         for episode in episodes {
             let calendar = Calendar.current
             let hour = calendar.component(.hour, from: episode.timestamp)
             let weekday = calendar.component(.weekday, from: episode.timestamp)
             let key = "hour:\(hour):weekday:\(weekday)"
-
             timePatterns[key, default: []].append(episode)
         }
 
-        // Find patterns with enough occurrences
         var patterns: [MemoryDetectedPattern] = []
-
         for (timeKey, entries) in timePatterns where entries.count >= minOccurrences {
-            // Group similar events
             let eventGroups = Dictionary(grouping: entries) { $0.key }
-
             for (event, occurrences) in eventGroups where occurrences.count >= minOccurrences {
                 let components = timeKey.split(separator: ":")
                 if components.count >= 4,
                    let hour = Int(components[1]),
                    let weekday = Int(components[3]) {
                     patterns.append(MemoryDetectedPattern(
-                        event: event,
-                        frequency: occurrences.count,
-                        hourOfDay: hour,
-                        dayOfWeek: weekday,
+                        event: event, frequency: occurrences.count,
+                        hourOfDay: hour, dayOfWeek: weekday,
                         confidence: Double(occurrences.count) / Double(entries.count)
                     ))
                 }
             }
         }
-
         return patterns.sorted { $0.confidence > $1.confidence }
     }
+}
 
-    // MARK: - Memory Health
+// MARK: - Memory Health & Consolidation
 
+extension MemoryManager {
     /// Generate a health report for the memory system
     public func generateHealthReport() async -> MemoryHealthReport {
-        let memoriesByType = Dictionary(grouping: memories) { $0.type }
-            .mapValues { $0.count }
-
+        let memoriesByType = Dictionary(grouping: memories) { $0.type }.mapValues { $0.count }
         let avgConfidence = memories.isEmpty ? 0.0 :
             memories.map(\.confidence).reduce(0, +) / Double(memories.count)
-
         let memoriesAtRisk = memories.filter { $0.confidence < minimumConfidenceForRetention + 0.1 }.count
-
         let oldestAge = memories.map { Date().timeIntervalSince($0.timestamp) }.max() ?? 0
-
         let categoryGroups = Dictionary(grouping: memories) { $0.category }
         let mostAccessed = categoryGroups
             .mapValues { $0.map(\.accessCount).reduce(0, +) }
@@ -638,52 +541,34 @@ public final class MemoryManager: ObservableObject {
         }
 
         return MemoryHealthReport(
-            totalMemories: memories.count,
-            memoriesByType: memoriesByType,
-            averageConfidence: avgConfidence,
-            memoriesAtRisk: memoriesAtRisk,
-            oldestMemoryAge: oldestAge,
-            mostAccessedCategory: mostAccessed,
+            totalMemories: memories.count, memoriesByType: memoriesByType,
+            averageConfidence: avgConfidence, memoriesAtRisk: memoriesAtRisk,
+            oldestMemoryAge: oldestAge, mostAccessedCategory: mostAccessed,
             suggestedActions: suggestions
         )
     }
 
-    // MARK: - Memory Consolidation
-
     /// Consolidate and prune old memories (run periodically)
     public func consolidateMemories() async {
         logger.info("Starting memory consolidation...")
-
-        // 1. Prune low-confidence semantic memories older than 30 days
         await pruneOldMemories(type: .semantic, maxAge: 30, minConfidence: 0.3)
-
-        // 2. Archive episodic memories older than 90 days
         await archiveOldMemories(type: .episodic, maxAge: 90)
-
-        // 3. Remove triggered prospective memories
         await removeTriggeredProspective()
-
-        // 4. Evict least-recently-used cache entries
         evictCacheIfNeeded()
-
-        // 5. Save to disk
         saveMemories()
-
         await loadMemoryStats()
         logger.info("Memory consolidation complete. Stats: \(self.memoryStats)")
     }
+}
 
-    // MARK: - Private Storage Methods
+// MARK: - Private Storage Methods
 
-    private func store(_ record: OmniMemoryRecord) async {
-        // Store in cache
+extension MemoryManager {
+    func store(_ record: OmniMemoryRecord) async {
         memoryCache[record.key] = record
         accessTimes[record.key] = Date()
-
-        // Store in memory array
         memories.append(record)
 
-        // Generate embedding for semantic search
         if enableSemanticSearch {
             let text = "\(record.key) \(record.value)"
             memoryEmbeddings[record.id] = generateEmbedding(for: text)
@@ -693,12 +578,9 @@ public final class MemoryManager: ObservableObject {
         saveMemories()
     }
 
-    private func retrieve(
-        type: OmniMemoryType,
-        category: String? = nil,
-        startDate: Date? = nil,
-        endDate: Date? = nil,
-        limit: Int = 20
+    func retrieve(
+        type: OmniMemoryType, category: String? = nil,
+        startDate: Date? = nil, endDate: Date? = nil, limit: Int = 20
     ) async -> [OmniMemoryRecord] {
         let filtered = memories.filter { record in
             guard record.type == type else { return false }
@@ -707,11 +589,10 @@ public final class MemoryManager: ObservableObject {
             if let endDate, record.timestamp > endDate { return false }
             return true
         }
-
         return Array(filtered.sorted { $0.timestamp > $1.timestamp }.prefix(limit))
     }
 
-    private func updateConfidence(recordId: UUID, newConfidence: Double) async {
+    func updateConfidence(recordId: UUID, newConfidence: Double) async {
         if let index = memories.firstIndex(where: { $0.id == recordId }) {
             memories[index].confidence = newConfidence
             memories[index].lastAccessed = Date()
@@ -721,20 +602,15 @@ public final class MemoryManager: ObservableObject {
 
     private func pruneOldMemories(type: OmniMemoryType, maxAge: Int, minConfidence: Double) async {
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -maxAge, to: Date()) ?? Date()
-
         let beforeCount = memories.count
         memories.removeAll { record in
-            record.type == type &&
-            record.timestamp < cutoffDate &&
-            record.confidence < minConfidence
+            record.type == type && record.timestamp < cutoffDate && record.confidence < minConfidence
         }
-
         let removed = beforeCount - memories.count
         logger.debug("Pruned \(removed) old \(type.rawValue) memories")
     }
 
     private func archiveOldMemories(type: OmniMemoryType, maxAge: Int) async {
-        // For now, just log - could export to file or compress
         logger.debug("Archiving old \(type.rawValue) memories (>= \(maxAge) days)")
     }
 
@@ -742,32 +618,25 @@ public final class MemoryManager: ObservableObject {
         let beforeCount = memories.count
         memories.removeAll { record in
             guard record.type == .prospective,
-                  let metadata = OmniProspectiveMetadata.decode(record.metadata) else {
-                return false
-            }
+                  let metadata = OmniProspectiveMetadata.decode(record.metadata) else { return false }
             return metadata.isTriggered
         }
-
         let removed = beforeCount - memories.count
         logger.debug("Removed \(removed) triggered prospective memories")
     }
 
-    private func evictCacheIfNeeded() {
+    func evictCacheIfNeeded() {
         guard memoryCache.count > maxCacheSize else { return }
-
-        // Sort by last access time, remove oldest
         let sorted = accessTimes.sorted { $0.value < $1.value }
         let toRemove = sorted.prefix(memoryCache.count - maxCacheSize)
-
         for (key, _) in toRemove {
             memoryCache.removeValue(forKey: key)
             accessTimes.removeValue(forKey: key)
         }
     }
 
-    private func loadMemoryStats() async {
+    func loadMemoryStats() async {
         let grouped = Dictionary(grouping: memories) { $0.type }
-
         memoryStats = OmniMemoryStats(
             semanticCount: grouped[.semantic]?.count ?? 0,
             episodicCount: grouped[.episodic]?.count ?? 0,
@@ -777,10 +646,12 @@ public final class MemoryManager: ObservableObject {
             lastConsolidation: Date()
         )
     }
+}
 
-    // MARK: - File Persistence
+// MARK: - File Persistence
 
-    private func loadMemories() {
+extension MemoryManager {
+    func loadMemories() {
         guard FileManager.default.fileExists(atPath: memoryFileURL.path) else {
             memories = []
             return
@@ -789,8 +660,6 @@ public final class MemoryManager: ObservableObject {
         do {
             let data = try Data(contentsOf: memoryFileURL)
             memories = try JSONDecoder().decode([OmniMemoryRecord].self, from: data)
-
-            // Rebuild cache from recent entries
             for memory in memories.suffix(maxCacheSize) {
                 memoryCache[memory.key] = memory
                 accessTimes[memory.key] = memory.lastAccessed
@@ -801,7 +670,7 @@ public final class MemoryManager: ObservableObject {
         }
     }
 
-    private func saveMemories() {
+    func saveMemories() {
         do {
             let data = try JSONEncoder().encode(memories)
             try data.write(to: memoryFileURL, options: .atomic)

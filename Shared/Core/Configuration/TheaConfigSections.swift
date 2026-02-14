@@ -5,6 +5,73 @@
 
 import Foundation
 
+// MARK: - AI Configuration
+
+public struct AIConfiguration: Codable, Sendable {
+    public var defaultProvider: String = "openrouter"
+    public var defaultModel: String = "anthropic/claude-sonnet-4"
+    public var temperature: Double = 0.7
+    public var maxTokens: Int = 8192
+    public var streamingEnabled: Bool = true
+
+    public var enableTaskClassification: Bool = true
+    public var enableModelRouting: Bool = true
+    public var enableQueryDecomposition: Bool = true
+    public var enableMultiAgentOrchestration: Bool = true
+
+    public var learningRate: Double = 0.1
+    public var feedbackDecayFactor: Double = 0.95
+
+    public init() {}
+
+    func getValue(_ key: String) -> Any? {
+        switch key {
+        case "defaultProvider": return defaultProvider
+        case "defaultModel": return defaultModel
+        case "temperature": return temperature
+        case "maxTokens": return maxTokens
+        case "streamingEnabled": return streamingEnabled
+        case "enableTaskClassification": return enableTaskClassification
+        case "enableModelRouting": return enableModelRouting
+        case "enableQueryDecomposition": return enableQueryDecomposition
+        case "enableMultiAgentOrchestration": return enableMultiAgentOrchestration
+        case "learningRate": return learningRate
+        case "feedbackDecayFactor": return feedbackDecayFactor
+        default: return nil
+        }
+    }
+
+    mutating func setValue(_ value: Any, forKey key: String) -> Bool {
+        switch key {
+        case "defaultProvider":
+            if let val = value as? String { defaultProvider = val; return true }
+        case "defaultModel":
+            if let val = value as? String { defaultModel = val; return true }
+        case "temperature":
+            if let val = value as? Double { temperature = val; return true }
+        case "maxTokens":
+            if let val = value as? Int { maxTokens = val; return true }
+        case "streamingEnabled":
+            if let val = value as? Bool { streamingEnabled = val; return true }
+        case "enableTaskClassification":
+            if let val = value as? Bool { enableTaskClassification = val; return true }
+        case "enableModelRouting":
+            if let val = value as? Bool { enableModelRouting = val; return true }
+        case "enableQueryDecomposition":
+            if let val = value as? Bool { enableQueryDecomposition = val; return true }
+        case "enableMultiAgentOrchestration":
+            if let val = value as? Bool { enableMultiAgentOrchestration = val; return true }
+        case "learningRate":
+            if let val = value as? Double { learningRate = val; return true }
+        case "feedbackDecayFactor":
+            if let val = value as? Double { feedbackDecayFactor = val; return true }
+        default:
+            break
+        }
+        return false
+    }
+}
+
 // MARK: - Verification Configuration
 
 public struct VerificationConfiguration: Codable, Sendable {
