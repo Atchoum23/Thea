@@ -220,7 +220,8 @@ final class SubagentTaskPriorityTests: XCTestCase {
 
     func testEqualityReflexive() {
         for priority in TestTaskPriority.allCases {
-            XCTAssertFalse(priority < priority, "\(priority) should not be less than itself")
+            let copy = priority
+            XCTAssertFalse(copy < priority, "\(priority) should not be less than itself")
         }
     }
 }
@@ -587,7 +588,7 @@ final class SubagentAggregationLogicTests: XCTestCase {
     }
 
     private func aggregateByBestConfidence(results: [(output: String, confidence: Float)]) -> String? {
-        results.max(by: { $0.confidence < $1.confidence })?.output
+        results.max { $0.confidence < $1.confidence }?.output
     }
 
     private func aggregateConsensusConfidence(results: [Float]) -> Float {
