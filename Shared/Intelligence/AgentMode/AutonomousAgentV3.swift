@@ -351,7 +351,7 @@ extension AutonomousAgentV3 {
         logger.info("Modifying file: \(path)")
         let fileURL = URL(fileURLWithPath: path)
         guard FileManager.default.fileExists(atPath: path) else {
-            throw AutonomousAgentError.executionFailed("File not found: \(path)")
+            throw AutonomousAgentError.stepFailed("File not found: \(path)")
         }
         var content = try String(contentsOf: fileURL, encoding: .utf8)
         content += "\n" + changes
