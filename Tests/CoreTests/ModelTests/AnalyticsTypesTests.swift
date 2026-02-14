@@ -184,7 +184,8 @@ final class AnyCodableTests: XCTestCase {
         let value = AnyCodable(3.14)
         let data = try JSONEncoder().encode(value)
         let decoded = try JSONDecoder().decode(AnyCodable.self, from: data)
-        XCTAssertEqual(decoded.value as? Double, 3.14, accuracy: 0.001)
+        let doubleValue = try XCTUnwrap(decoded.value as? Double)
+        XCTAssertEqual(doubleValue, 3.14, accuracy: 0.001)
     }
 
     func testEncodeBool() throws {
@@ -675,7 +676,7 @@ final class SessionTimeoutLogicTests: XCTestCase {
         let lastActivityTime = Date().addingTimeInterval(-30 * 60)
         // At exact boundary, should NOT timeout (uses > not >=)
         let interval = Date().timeIntervalSince(lastActivityTime)
-        let isTimedOut = interval > sessionTimeout
+        _ = interval > sessionTimeout
         // Due to time passage during test, this will be slightly > 30min
         // So we just check the logic is correct for > semantics
         XCTAssertTrue(interval >= sessionTimeout)
