@@ -210,7 +210,8 @@ public final class ModelDownloadManager {
     public func cancelDownload(_ modelId: String) {
         if let index = activeDownloads.firstIndex(where: { $0.model.id == modelId }) {
             activeDownloads[index].status = .cancelled
-            // Cancel actual download task
+            downloadTasks[modelId]?.cancel()
+            downloadTasks.removeValue(forKey: modelId)
         }
     }
 
@@ -226,25 +227,87 @@ public final class ModelDownloadManager {
 
     // MARK: - Private
 
-    private func performDownload(model: DownloadableModel, download: ModelDownload) async throws {
-        // Stub implementation
-        // Actual implementation would:
-        // 1. Create directory structure
-        // 2. Download model files from Hugging Face
-        // 3. Track progress
-        // 4. Verify integrity
+    /// Active download tasks keyed by model ID for cancellation support
+    private var downloadTasks: [String: Task<Void, Error>] = [:]
 
-        // For now, simulate download
-        for progress in stride(from: 0.0, through: 1.0, by: 0.1) {
-            try await Task.sleep(for: .milliseconds(100))
-            if let index = activeDownloads.firstIndex(where: { $0.model.id == model.id }) {
-                activeDownloads[index].progress = progress
-            }
+    private func performDownload(model: DownloadableModel, download _download: ModelDownload) async throws {
+        // Create local directory structure matching HuggingFace hub layout
+        let modelDirName = "models--\(model.id.replacingOccurrences(of: "/", with: "--"))"
+        let modelDir = modelsDirectory.appendingPathComponent(modelDirName, isDirectory: true)
+        let snapshotsDir = modelDir.appendingPathComponent("snapshots/main", isDirectory: true)
+        try FileManager.default.createDirectory(at: snapshotsDir, withIntermediateDirectories: true)
+
+        // Fetch file listing from HuggingFace API
+        let apiURL = URL(string: "https://huggingface.co/api/models/\(model.id)")!
+        let (apiData, apiResponse) = try await URLSession.shared.data(from: apiURL)
+        guard let httpResponse = apiResponse as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw ModelDownloadError.apiFailed("Failed to fetch model metadata from HuggingFace")
         }
 
-        // In real implementation:
-        // let hubPath = "~/.cache/huggingface/hub/models--\(model.id.replacingOccurrences(of: "/", with: "--"))"
-        // Use snapshot_download or similar
+        // Parse siblings (file list) from API response
+        guard let json = try JSONSerialization.jsonObject(with: apiData) as? [String: Any],
+              let siblings = json["siblings"] as? [[String: Any]] else {
+            throw ModelDownloadError.apiFailed("Invalid API response structure")
+        }
+
+        let filenames = siblings.compactMap { $0["rfilename"] as? String }
+        // Filter to essential model files (weights, config, tokenizer)
+        let essentialExtensions = ["safetensors", "json", "txt", "model", "bin", "gguf"]
+        let filesToDownload = filenames.filter { name in
+            essentialExtensions.contains(where: { name.hasSuffix(".\($0)") })
+        }
+
+        guard !filesToDownload.isEmpty else {
+            throw ModelDownloadError.noFilesFound("No downloadable model files found")
+        }
+
+        // Download each file with progress tracking
+        let totalFiles = filesToDownload.count
+        for (fileIndex, filename) in filesToDownload.enumerated() {
+            try Task.checkCancellation()
+
+            let fileURL = URL(string: "https://huggingface.co/\(model.id)/resolve/main/\(filename)")!
+            let destPath = snapshotsDir.appendingPathComponent(filename)
+
+            // Create subdirectories if needed
+            let destDir = destPath.deletingLastPathComponent()
+            try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+
+            // Skip if file already exists and has content
+            if FileManager.default.fileExists(atPath: destPath.path),
+               let attrs = try? FileManager.default.attributesOfItem(atPath: destPath.path),
+               let size = attrs[.size] as? Int64, size > 0 {
+                logger.info("Skipping existing file: \(filename)")
+                let overallProgress = Double(fileIndex + 1) / Double(totalFiles)
+                if let index = activeDownloads.firstIndex(where: { $0.model.id == model.id }) {
+                    activeDownloads[index].progress = overallProgress
+                }
+                continue
+            }
+
+            // Download with URLSession
+            logger.info("Downloading: \(filename)")
+            let (tempURL, response) = try await URLSession.shared.download(from: fileURL)
+            guard let httpResp = response as? HTTPURLResponse, httpResp.statusCode == 200 else {
+                logger.warning("Failed to download \(filename), skipping")
+                continue
+            }
+
+            // Move to final location
+            if FileManager.default.fileExists(atPath: destPath.path) {
+                try FileManager.default.removeItem(at: destPath)
+            }
+            try FileManager.default.moveItem(at: tempURL, to: destPath)
+
+            // Update progress
+            let overallProgress = Double(fileIndex + 1) / Double(totalFiles)
+            if let index = activeDownloads.firstIndex(where: { $0.model.id == model.id }) {
+                activeDownloads[index].progress = overallProgress
+            }
+            logger.info("Downloaded \(filename) (\(fileIndex + 1)/\(totalFiles))")
+        }
+
+        logger.info("All files downloaded for model: \(model.id)")
     }
 }
 
@@ -309,6 +372,22 @@ public enum DownloadStatus: String, Sendable {
     case completed
     case failed
     case cancelled
+}
+
+// MARK: - Download Errors
+
+public enum ModelDownloadError: LocalizedError, Sendable {
+    case apiFailed(String)
+    case noFilesFound(String)
+    case downloadFailed(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case let .apiFailed(msg): return "HuggingFace API error: \(msg)"
+        case let .noFilesFound(msg): return "No model files: \(msg)"
+        case let .downloadFailed(msg): return "Download failed: \(msg)"
+        }
+    }
 }
 
 // MARK: - FileManager Extension
