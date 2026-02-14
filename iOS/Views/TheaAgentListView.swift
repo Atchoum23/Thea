@@ -92,7 +92,7 @@ struct TheaAgentListView: View {
             }
         }
         .sheet(item: $selectedSession) { session in
-            iOSAgentDetailView(session: session)
+            IOSAgentDetailView(session: session)
         }
     }
 
@@ -159,7 +159,7 @@ struct TheaAgentListView: View {
 
 // MARK: - iOS Agent Detail
 
-private struct iOSAgentDetailView: View {
+private struct IOSAgentDetailView: View {
     let session: TheaAgentSession
     @Environment(\.dismiss) private var dismiss
 
