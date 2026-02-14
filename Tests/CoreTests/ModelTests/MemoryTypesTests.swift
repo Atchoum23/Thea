@@ -82,148 +82,14 @@ final class MemoryTypesTests: XCTestCase {
         }
     }
 
-    // MARK: - MemoryContextSnapshot (mirror)
-
-    struct MemoryContextSnapshot: Sendable {
-        var userActivity: String?
-        var currentQuery: String?
-        var location: String?
-        var timeOfDay: Int
-        var dayOfWeek: Int
-        var batteryLevel: Int?
-        var isPluggedIn: Bool?
-
-        init(
-            userActivity: String? = nil,
-            currentQuery: String? = nil,
-            location: String? = nil,
-            timeOfDay: Int = 12,
-            dayOfWeek: Int = 2
-        ) {
-            self.userActivity = userActivity
-            self.currentQuery = currentQuery
-            self.location = location
-            self.timeOfDay = timeOfDay
-            self.dayOfWeek = dayOfWeek
-        }
-    }
-
-    // MARK: - MemoryTriggerCondition (mirror)
-
-    enum MemoryTriggerCondition: Codable {
-        case time(Date)
-        case location(String)
-        case activity(String)
-        case appLaunch(String)
-        case keyword(String)
-        case contextMatch(String)
-
-        var descriptionText: String {
-            switch self {
-            case .time(let date): "At \(date)"
-            case .location(let loc): "At location: \(loc)"
-            case .activity(let act): "During activity: \(act)"
-            case .appLaunch(let app): "When \(app) opens"
-            case .keyword(let kw): "When mentioned: \(kw)"
-            case .contextMatch(let ctx): "When context matches: \(ctx)"
-            }
-        }
-
-        func isSatisfied(by context: MemoryContextSnapshot) -> Bool {
-            switch self {
-            case .time(let date):
-                return Date() >= date
-            case .activity(let activity):
-                return context.userActivity?.lowercased().contains(activity.lowercased()) ?? false
-            case .keyword(let keyword):
-                return context.currentQuery?.lowercased().contains(keyword.lowercased()) ?? false
-            default:
-                return false
-            }
-        }
-    }
-
-    // MARK: - MemoryDetectedPattern (mirror)
-
-    struct MemoryDetectedPattern: Sendable {
-        let event: String
-        let frequency: Int
-        let hourOfDay: Int
-        let dayOfWeek: Int
-        let confidence: Double
-
-        var description: String {
-            let dayNames = ["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-            let dayName = dayOfWeek >= 1 && dayOfWeek <= 7 ? dayNames[dayOfWeek] : "?"
-            return "\(event) typically occurs at \(hourOfDay):00 on \(dayName)s (\(Int(confidence * 100))% confidence)"
-        }
-    }
-
-    // MARK: - MemoryHealthReport (mirror)
-
-    struct MemoryHealthReport: Sendable {
-        let totalMemories: Int
-        let memoriesByType: [OmniMemoryType: Int]
-        let averageConfidence: Double
-        let memoriesAtRisk: Int
-        let oldestMemoryAge: TimeInterval
-        let mostAccessedCategory: String?
-        let suggestedActions: [String]
-
-        var healthScore: Double {
-            var score = 0.0
-            let countScore = min(1.0, Double(totalMemories) / 1000.0) * 0.3
-            score += countScore
-            score += averageConfidence * 0.4
-            let riskRatio = Double(memoriesAtRisk) / max(1, Double(totalMemories))
-            score += (1.0 - riskRatio) * 0.3
-            return score
-        }
-    }
-
-    // MARK: - MemoryImportanceWeights (mirror)
-
-    struct MemoryImportanceWeights {
-        var recency: Double = 0.25
-        var frequency: Double = 0.20
-        var confidence: Double = 0.30
-        var source: Double = 0.15
-        var feedback: Double = 0.10
-    }
-
-    // MARK: - Metadata (mirror)
+    // MARK: - Metadata (mirror, for record tests)
 
     struct OmniEpisodicMetadata: Codable {
-        let outcome: String?
-        let emotionalValence: Double
-
+        let outcome: String?; let emotionalValence: Double
         func encoded() -> Data? { try? JSONEncoder().encode(self) }
         static func decode(_ data: Data?) -> OmniEpisodicMetadata? {
             guard let data else { return nil }
             return try? JSONDecoder().decode(OmniEpisodicMetadata.self, from: data)
-        }
-    }
-
-    struct OmniProceduralMetadata: Codable {
-        var successRate: Double
-        var averageDuration: TimeInterval
-        var executionCount: Int
-
-        func encoded() -> Data? { try? JSONEncoder().encode(self) }
-        static func decode(_ data: Data?) -> OmniProceduralMetadata? {
-            guard let data else { return nil }
-            return try? JSONDecoder().decode(OmniProceduralMetadata.self, from: data)
-        }
-    }
-
-    struct OmniProspectiveMetadata: Codable {
-        let triggerCondition: MemoryTriggerCondition
-        var isTriggered: Bool
-
-        func encoded() -> Data? { try? JSONEncoder().encode(self) }
-        static func decode(_ data: Data?) -> OmniProspectiveMetadata? {
-            guard let data else { return nil }
-            return try? JSONDecoder().decode(OmniProspectiveMetadata.self, from: data)
         }
     }
 
@@ -318,6 +184,102 @@ final class MemoryTypesTests: XCTestCase {
         XCTAssertTrue(stats.description.contains("total: 8"))
         XCTAssertTrue(stats.description.contains("semantic: 5"))
         XCTAssertTrue(stats.description.contains("episodic: 3"))
+    }
+
+}
+
+// MARK: - Memory Advanced Tests (split to avoid type_body_length)
+
+final class MemoryAdvancedTypesTests: XCTestCase {
+
+    // Re-mirror minimal types needed for these tests
+    struct MemoryContextSnapshot: Sendable {
+        var userActivity: String?
+        var currentQuery: String?
+        var location: String?
+        var timeOfDay: Int = 12
+        var dayOfWeek: Int = 2
+        var batteryLevel: Int?
+        var isPluggedIn: Bool?
+    }
+
+    enum MemoryTriggerCondition: Codable {
+        case time(Date), location(String), activity(String)
+        case appLaunch(String), keyword(String), contextMatch(String)
+
+        var descriptionText: String {
+            switch self {
+            case .time(let date): "At \(date)"
+            case .location(let loc): "At location: \(loc)"
+            case .activity(let act): "During activity: \(act)"
+            case .appLaunch(let app): "When \(app) opens"
+            case .keyword(let kw): "When mentioned: \(kw)"
+            case .contextMatch(let ctx): "When context matches: \(ctx)"
+            }
+        }
+
+        func isSatisfied(by context: MemoryContextSnapshot) -> Bool {
+            switch self {
+            case .time(let date): Date() >= date
+            case .activity(let a): context.userActivity?.lowercased().contains(a.lowercased()) ?? false
+            case .keyword(let k): context.currentQuery?.lowercased().contains(k.lowercased()) ?? false
+            default: false
+            }
+        }
+    }
+
+    struct MemoryDetectedPattern: Sendable {
+        let event: String; let frequency: Int; let hourOfDay: Int; let dayOfWeek: Int; let confidence: Double
+        var description: String {
+            let dayNames = ["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+            let dayName = dayOfWeek >= 1 && dayOfWeek <= 7 ? dayNames[dayOfWeek] : "?"
+            return "\(event) typically occurs at \(hourOfDay):00 on \(dayName)s (\(Int(confidence * 100))% confidence)"
+        }
+    }
+
+    enum OmniMemoryType: String, Codable, Sendable { case semantic, episodic, procedural, prospective }
+
+    struct MemoryHealthReport: Sendable {
+        let totalMemories: Int; let memoriesByType: [OmniMemoryType: Int]; let averageConfidence: Double
+        let memoriesAtRisk: Int; let oldestMemoryAge: TimeInterval; let mostAccessedCategory: String?; let suggestedActions: [String]
+        var healthScore: Double {
+            var score = min(1.0, Double(totalMemories) / 1000.0) * 0.3
+            score += averageConfidence * 0.4
+            score += (1.0 - Double(memoriesAtRisk) / max(1, Double(totalMemories))) * 0.3
+            return score
+        }
+    }
+
+    struct MemoryImportanceWeights {
+        var recency: Double = 0.25; var frequency: Double = 0.20; var confidence: Double = 0.30
+        var source: Double = 0.15; var feedback: Double = 0.10
+    }
+
+    struct OmniEpisodicMetadata: Codable {
+        let outcome: String?; let emotionalValence: Double
+        func encoded() -> Data? { try? JSONEncoder().encode(self) }
+        static func decode(_ data: Data?) -> OmniEpisodicMetadata? {
+            guard let data else { return nil }
+            return try? JSONDecoder().decode(OmniEpisodicMetadata.self, from: data)
+        }
+    }
+
+    struct OmniProceduralMetadata: Codable {
+        var successRate: Double; var averageDuration: TimeInterval; var executionCount: Int
+        func encoded() -> Data? { try? JSONEncoder().encode(self) }
+        static func decode(_ data: Data?) -> OmniProceduralMetadata? {
+            guard let data else { return nil }
+            return try? JSONDecoder().decode(OmniProceduralMetadata.self, from: data)
+        }
+    }
+
+    struct OmniProspectiveMetadata: Codable {
+        let triggerCondition: MemoryTriggerCondition; var isTriggered: Bool
+        func encoded() -> Data? { try? JSONEncoder().encode(self) }
+        static func decode(_ data: Data?) -> OmniProspectiveMetadata? {
+            guard let data else { return nil }
+            return try? JSONDecoder().decode(OmniProspectiveMetadata.self, from: data)
+        }
     }
 
     // MARK: - Tests: MemoryTriggerCondition
