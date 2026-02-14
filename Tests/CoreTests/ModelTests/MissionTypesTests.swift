@@ -494,7 +494,7 @@ struct MissionReportTests {
         let logs = [
             TestMissionLog(level: .info, message: "Started"),
             TestMissionLog(level: .success, message: "Phase 1 done"),
-            TestMissionLog(level: .error, message: "Phase 2 failed"),
+            TestMissionLog(level: .error, message: "Phase 2 failed")
         ]
         let report = TestMissionReport(missionId: UUID(), goal: "test", status: .failed, phasesCompleted: 1, totalPhases: 3, duration: 60.0, logs: logs, generatedAt: Date())
         #expect(report.logs.count == 3)
@@ -513,7 +513,7 @@ struct MissionErrorTests {
             .validationFailed("invalid goal"),
             .phaseExecutionFailed("timeout"),
             .stepExecutionFailed("permission denied"),
-            .checkpointRestoreFailed,
+            .checkpointRestoreFailed
         ]
         for error in errors {
             #expect(error.errorDescription != nil)

@@ -321,7 +321,7 @@ struct PlanPhaseTests {
     func creation() {
         let phase = TestPlanPhase(title: "Phase 1", steps: [
             TestPlanStep(title: "A"),
-            TestPlanStep(title: "B"),
+            TestPlanStep(title: "B")
         ])
         #expect(phase.title == "Phase 1")
         #expect(phase.steps.count == 2)
@@ -333,7 +333,7 @@ struct PlanPhaseTests {
             TestPlanStep(title: "A"),
             TestPlanStep(title: "B"),
             TestPlanStep(title: "C"),
-            TestPlanStep(title: "D"),
+            TestPlanStep(title: "D")
         ])
         phase.steps[0].status = .completed
         phase.steps[1].status = .completed
@@ -350,7 +350,7 @@ struct PlanPhaseTests {
     func completion() {
         var phase = TestPlanPhase(title: "Test", steps: [
             TestPlanStep(title: "A"),
-            TestPlanStep(title: "B"),
+            TestPlanStep(title: "B")
         ])
         #expect(!phase.isComplete)
         phase.steps[0].status = .completed
@@ -362,7 +362,7 @@ struct PlanPhaseTests {
     func mixedTerminal() {
         var phase = TestPlanPhase(title: "Test", steps: [
             TestPlanStep(title: "A"),
-            TestPlanStep(title: "B"),
+            TestPlanStep(title: "B")
         ])
         phase.steps[0].status = .completed
         phase.steps[1].status = .skipped
@@ -373,7 +373,7 @@ struct PlanPhaseTests {
     func currentStep() {
         var phase = TestPlanPhase(title: "Test", steps: [
             TestPlanStep(title: "A"),
-            TestPlanStep(title: "B"),
+            TestPlanStep(title: "B")
         ])
         #expect(phase.currentStep == nil)
         phase.steps[0].status = .inProgress
@@ -384,7 +384,7 @@ struct PlanPhaseTests {
     func nextPending() {
         var phase = TestPlanPhase(title: "Test", steps: [
             TestPlanStep(title: "A"),
-            TestPlanStep(title: "B"),
+            TestPlanStep(title: "B")
         ])
         phase.steps[0].status = .completed
         #expect(phase.nextPendingStep?.title == "B")
@@ -504,11 +504,11 @@ struct MultiPhasePlanTests {
     func multiPhase() {
         let phase1 = TestPlanPhase(title: "Design", steps: [
             TestPlanStep(title: "Wireframes"),
-            TestPlanStep(title: "Mockups"),
+            TestPlanStep(title: "Mockups")
         ])
         let phase2 = TestPlanPhase(title: "Implementation", steps: [
             TestPlanStep(title: "Frontend"),
-            TestPlanStep(title: "Backend"),
+            TestPlanStep(title: "Backend")
         ])
         let plan = TestPlanStatePM(title: "Project", phases: [phase1, phase2])
         #expect(plan.totalSteps == 4)

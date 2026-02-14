@@ -234,7 +234,7 @@ private let testModels: [TestModelCapability] = [
         costPerOutputToken: 0.005,
         averageLatency: 2.5,
         qualityScore: 0.95
-    ),
+    )
 ]
 
 // MARK: - Tests

@@ -209,83 +209,13 @@ public final class MobileIntelligenceOrchestrator {
         var score: Float = 0.5
         var reasons: [String] = []
 
-        switch mode {
-        case .localLight:
-            // Good for simple tasks, low power
-            if taskType.isSimple {
-                score += 0.3
-                reasons.append("Simple task suits light model")
-            }
-            if power.batteryLevel < 0.40 {
-                score += 0.2
-                reasons.append("Low battery favors light model")
-            }
-            if network.connectionType == .none {
-                score += 0.4
-                reasons.append("No network, must use local")
-            }
-
-        case .localFull:
-            // Good for complex tasks when we have power
-            if !taskType.isSimple {
-                score += 0.2
-                reasons.append("Complex task benefits from full model")
-            }
-            if power.isCharging {
-                score += 0.3
-                reasons.append("Charging, can use full model")
-            }
-            if network.connectionType == .none {
-                score += 0.4
-                reasons.append("No network, using local")
-            }
-            if power.batteryLevel < 0.30 {
-                score -= 0.3
-                reasons.append("Low battery penalty")
-            }
-
-        case .remoteMac:
-            // Great when available - full power of Mac, minimal local cost
-            score += 0.3
-            reasons.append("Remote Mac available")
-            if !taskType.isSimple {
-                score += 0.2
-                reasons.append("Complex task benefits from Mac")
-            }
-            if power.batteryLevel < 0.50 {
-                score += 0.2
-                reasons.append("Saves device battery")
-            }
-            if network.connectionType == .wifi {
-                score += 0.1
-                reasons.append("Good WiFi connection")
-            }
-
-        case .cloud:
-            // Default fallback, good quality
-            if network.canUseCloud {
-                score += 0.2
-                reasons.append("Cloud available")
-            }
-            if urgency == .high {
-                score += 0.2
-                reasons.append("Fast response needed")
-            }
-            if network.isExpensive {
-                score -= 0.3
-                reasons.append("Expensive connection penalty")
-            }
-            if !taskType.isSimple {
-                score += 0.1
-                reasons.append("Complex task")
-            }
-
-        case .hybrid:
-            // Use when we need to split work
-            if queryLength > 1000 {
-                score += 0.2
-                reasons.append("Long query benefits from hybrid")
-            }
+        let modeAdjustments = scoreModeAdjustments(
+            mode, power: power, network: network,
+            taskType: taskType, urgency: urgency, queryLength: queryLength
+        )
+        for (delta, reason) in modeAdjustments {
+            score += delta
+            reasons.append(reason)
         }
 
         // Apply learned preferences
@@ -297,6 +227,63 @@ public final class MobileIntelligenceOrchestrator {
         }
 
         return (score, reasons.joined(separator: "; "))
+    }
+
+    /// Returns score adjustments for a given inference mode based on device context.
+    private func scoreModeAdjustments(
+        _ mode: InferenceMode,
+        power: MobilePowerState,
+        network: NetworkCondition,
+        taskType: TaskType,
+        urgency: QueryUrgency,
+        queryLength: Int
+    ) -> [(Float, String)] {
+        switch mode {
+        case .localLight:
+            return scoreLocalLight(power: power, network: network, taskType: taskType)
+        case .localFull:
+            return scoreLocalFull(power: power, network: network, taskType: taskType)
+        case .remoteMac:
+            return scoreRemoteMac(power: power, network: network, taskType: taskType)
+        case .cloud:
+            return scoreCloud(network: network, taskType: taskType, urgency: urgency)
+        case .hybrid:
+            return queryLength > 1000 ? [(0.2, "Long query benefits from hybrid")] : []
+        }
+    }
+
+    private func scoreLocalLight(power: MobilePowerState, network: NetworkCondition, taskType: TaskType) -> [(Float, String)] {
+        var adjustments: [(Float, String)] = []
+        if taskType.isSimple { adjustments.append((0.3, "Simple task suits light model")) }
+        if power.batteryLevel < 0.40 { adjustments.append((0.2, "Low battery favors light model")) }
+        if network.connectionType == .none { adjustments.append((0.4, "No network, must use local")) }
+        return adjustments
+    }
+
+    private func scoreLocalFull(power: MobilePowerState, network: NetworkCondition, taskType: TaskType) -> [(Float, String)] {
+        var adjustments: [(Float, String)] = []
+        if !taskType.isSimple { adjustments.append((0.2, "Complex task benefits from full model")) }
+        if power.isCharging { adjustments.append((0.3, "Charging, can use full model")) }
+        if network.connectionType == .none { adjustments.append((0.4, "No network, using local")) }
+        if power.batteryLevel < 0.30 { adjustments.append((-0.3, "Low battery penalty")) }
+        return adjustments
+    }
+
+    private func scoreRemoteMac(power: MobilePowerState, network: NetworkCondition, taskType: TaskType) -> [(Float, String)] {
+        var adjustments: [(Float, String)] = [(0.3, "Remote Mac available")]
+        if !taskType.isSimple { adjustments.append((0.2, "Complex task benefits from Mac")) }
+        if power.batteryLevel < 0.50 { adjustments.append((0.2, "Saves device battery")) }
+        if network.connectionType == .wifi { adjustments.append((0.1, "Good WiFi connection")) }
+        return adjustments
+    }
+
+    private func scoreCloud(network: NetworkCondition, taskType: TaskType, urgency: QueryUrgency) -> [(Float, String)] {
+        var adjustments: [(Float, String)] = []
+        if network.canUseCloud { adjustments.append((0.2, "Cloud available")) }
+        if urgency == .high { adjustments.append((0.2, "Fast response needed")) }
+        if network.isExpensive { adjustments.append((-0.3, "Expensive connection penalty")) }
+        if !taskType.isSimple { adjustments.append((0.1, "Complex task")) }
+        return adjustments
     }
 
     private func defaultConstraints(for mode: InferenceMode, budget: InferenceBudget) -> MobileRoutingDecision.RoutingConstraints {

@@ -347,7 +347,7 @@ struct TaskPlanTests {
             TestTaskPlanNode(title: "A", action: "a"),
             TestTaskPlanNode(title: "B", action: "b"),
             TestTaskPlanNode(title: "C", action: "c"),
-            TestTaskPlanNode(title: "D", action: "d"),
+            TestTaskPlanNode(title: "D", action: "d")
         ])
         plan.nodes[0].status = .completed
         plan.nodes[1].status = .completed
@@ -357,7 +357,7 @@ struct TaskPlanTests {
     @Test("Progress calculation - all completed")
     func progressComplete() {
         var plan = TestTaskPlan(goal: "Test", nodes: [
-            TestTaskPlanNode(title: "A", action: "a"),
+            TestTaskPlanNode(title: "A", action: "a")
         ])
         plan.nodes[0].status = .completed
         #expect(plan.progress == 1.0)
@@ -368,7 +368,7 @@ struct TaskPlanTests {
         var plan = TestTaskPlan(goal: "Test", nodes: [
             TestTaskPlanNode(title: "A", action: "a"),
             TestTaskPlanNode(title: "B", action: "b"),
-            TestTaskPlanNode(title: "C", action: "c"),
+            TestTaskPlanNode(title: "C", action: "c")
         ])
         plan.nodes[0].status = .completed
         plan.nodes[2].status = .failed
@@ -433,7 +433,7 @@ struct DAGValidationTests {
         let plan = TestTaskPlan(goal: "Parallel", nodes: [
             TestTaskPlanNode(title: "A", action: "a"),
             TestTaskPlanNode(title: "B", action: "b"),
-            TestTaskPlanNode(title: "C", action: "c"),
+            TestTaskPlanNode(title: "C", action: "c")
         ])
         #expect(validateDAG(plan))
     }
@@ -483,7 +483,7 @@ struct TopologicalSortTests {
     func independentNodes() {
         let plan = TestTaskPlan(goal: "Parallel", nodes: [
             TestTaskPlanNode(title: "A", action: "a"),
-            TestTaskPlanNode(title: "B", action: "b"),
+            TestTaskPlanNode(title: "B", action: "b")
         ])
         let sorted = topologicalSort(plan)
         #expect(sorted != nil)
@@ -506,7 +506,7 @@ struct ExecutableNodeTests {
         let plan = TestTaskPlan(goal: "Test", nodes: [
             TestTaskPlanNode(title: "A", action: "a"),
             TestTaskPlanNode(title: "B", action: "b"),
-            TestTaskPlanNode(title: "C", action: "c"),
+            TestTaskPlanNode(title: "C", action: "c")
         ])
         let executable = findExecutableNodes(plan)
         #expect(executable.count == 3)

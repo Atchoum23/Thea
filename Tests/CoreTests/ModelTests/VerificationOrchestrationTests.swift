@@ -252,7 +252,7 @@ final class WeightedConfidenceTests: XCTestCase {
     func testMultipleVerifierResults() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.8),
+            VerifierResult(verifier: .webSearch, confidence: 0.8)
         ]
         let score = calculateWeightedConfidence(results: results)
         // (0.9 * 0.30 + 0.8 * 0.25) / (0.30 + 0.25) = (0.27 + 0.20) / 0.55 = 0.854
@@ -265,7 +265,7 @@ final class WeightedConfidenceTests: XCTestCase {
             VerifierResult(verifier: .webSearch, confidence: 0.85),
             VerifierResult(verifier: .staticAnalysis, confidence: 0.95),
             VerifierResult(verifier: .codeExecution, confidence: 0.8),
-            VerifierResult(verifier: .userFeedback, confidence: 0.7),
+            VerifierResult(verifier: .userFeedback, confidence: 0.7)
         ]
         let score = calculateWeightedConfidence(results: results)
         XCTAssertTrue(score > 0.8, "Expected high overall confidence")
@@ -280,7 +280,7 @@ final class WeightedConfidenceTests: XCTestCase {
     func testFailedResultsExcluded() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.0, error: "Network failure"),
+            VerifierResult(verifier: .webSearch, confidence: 0.0, error: "Network failure")
         ]
         let score = calculateWeightedConfidence(results: results)
         XCTAssertEqual(score, 0.9, accuracy: 0.001) // Only multiModel counted
@@ -289,7 +289,7 @@ final class WeightedConfidenceTests: XCTestCase {
     func testAllFailed() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.0, error: "Timeout"),
-            VerifierResult(verifier: .webSearch, confidence: 0.0, error: "Timeout"),
+            VerifierResult(verifier: .webSearch, confidence: 0.0, error: "Timeout")
         ]
         let score = calculateWeightedConfidence(results: results)
         XCTAssertEqual(score, 0.0)
@@ -312,7 +312,7 @@ final class ConflictDetectionTests: XCTestCase {
     func testNoConflicts() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.85),
+            VerifierResult(verifier: .webSearch, confidence: 0.85)
         ]
         let conflicts = determineConflicts(results: results)
         XCTAssertTrue(conflicts.isEmpty)
@@ -321,7 +321,7 @@ final class ConflictDetectionTests: XCTestCase {
     func testConflictDetected() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.3),
+            VerifierResult(verifier: .webSearch, confidence: 0.3)
         ]
         let conflicts = determineConflicts(results: results)
         XCTAssertEqual(conflicts.count, 1)
@@ -330,7 +330,7 @@ final class ConflictDetectionTests: XCTestCase {
     func testBorderlineNoConflict() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.61),
+            VerifierResult(verifier: .webSearch, confidence: 0.61)
         ]
         let conflicts = determineConflicts(results: results, threshold: 0.3)
         XCTAssertTrue(conflicts.isEmpty) // Difference is 0.29, below 0.3
@@ -339,7 +339,7 @@ final class ConflictDetectionTests: XCTestCase {
     func testBorderlineConflict() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.59),
+            VerifierResult(verifier: .webSearch, confidence: 0.59)
         ]
         let conflicts = determineConflicts(results: results, threshold: 0.3)
         XCTAssertEqual(conflicts.count, 1) // Difference is 0.31, above 0.3
@@ -349,7 +349,7 @@ final class ConflictDetectionTests: XCTestCase {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.95),
             VerifierResult(verifier: .webSearch, confidence: 0.4),
-            VerifierResult(verifier: .staticAnalysis, confidence: 0.3),
+            VerifierResult(verifier: .staticAnalysis, confidence: 0.3)
         ]
         let conflicts = determineConflicts(results: results)
         XCTAssertEqual(conflicts.count, 2) // multiModel vs web, multiModel vs static
@@ -358,7 +358,7 @@ final class ConflictDetectionTests: XCTestCase {
     func testCustomThreshold() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.8),
+            VerifierResult(verifier: .webSearch, confidence: 0.8)
         ]
         let conflicts = determineConflicts(results: results, threshold: 0.05)
         XCTAssertEqual(conflicts.count, 1) // 0.1 > 0.05
@@ -367,7 +367,7 @@ final class ConflictDetectionTests: XCTestCase {
     func testFailedResultsIgnored() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.1, error: "Failed"),
+            VerifierResult(verifier: .webSearch, confidence: 0.1, error: "Failed")
         ]
         let conflicts = determineConflicts(results: results)
         XCTAssertTrue(conflicts.isEmpty) // Failed result excluded
@@ -430,7 +430,7 @@ final class ConfidenceAggregationTests: XCTestCase {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.95),
             VerifierResult(verifier: .webSearch, confidence: 0.90),
-            VerifierResult(verifier: .staticAnalysis, confidence: 0.92),
+            VerifierResult(verifier: .staticAnalysis, confidence: 0.92)
         ]
         let (level, score, sufficient) = aggregateConfidence(results: results)
         XCTAssertEqual(level, .high)
@@ -441,7 +441,7 @@ final class ConfidenceAggregationTests: XCTestCase {
     func testLowConfidence() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.3),
-            VerifierResult(verifier: .webSearch, confidence: 0.4),
+            VerifierResult(verifier: .webSearch, confidence: 0.4)
         ]
         let (level, _, sufficient) = aggregateConfidence(results: results)
         XCTAssertEqual(level, .low)
@@ -450,7 +450,7 @@ final class ConfidenceAggregationTests: XCTestCase {
 
     func testInsufficientVerifiers() {
         let results = [
-            VerifierResult(verifier: .multiModel, confidence: 0.95),
+            VerifierResult(verifier: .multiModel, confidence: 0.95)
         ]
         let (_, _, sufficient) = aggregateConfidence(results: results, minimumVerifiers: 2)
         XCTAssertFalse(sufficient)
@@ -459,7 +459,7 @@ final class ConfidenceAggregationTests: XCTestCase {
     func testSufficientVerifiers() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.9),
-            VerifierResult(verifier: .webSearch, confidence: 0.8),
+            VerifierResult(verifier: .webSearch, confidence: 0.8)
         ]
         let (_, _, sufficient) = aggregateConfidence(results: results, minimumVerifiers: 2)
         XCTAssertTrue(sufficient)
@@ -468,7 +468,7 @@ final class ConfidenceAggregationTests: XCTestCase {
     func testAllFailedResults() {
         let results = [
             VerifierResult(verifier: .multiModel, confidence: 0.0, error: "Timeout"),
-            VerifierResult(verifier: .webSearch, confidence: 0.0, error: "Network"),
+            VerifierResult(verifier: .webSearch, confidence: 0.0, error: "Network")
         ]
         let (level, score, sufficient) = aggregateConfidence(results: results)
         XCTAssertEqual(level, .unverified)

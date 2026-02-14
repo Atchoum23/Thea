@@ -431,63 +431,18 @@ extension SemanticCodeIndexer {
     }
 
     private func analyzeChunk(content: String, language: ProgrammingLanguage) -> (ChunkType, ChunkMetadata) {
-        var chunkType: ChunkType = .block
         var metadata = ChunkMetadata()
-
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Swift-specific patterns
+        let chunkType: ChunkType
         if language == .swift {
-            if trimmed.contains("func ") {
-                chunkType = .function
-                if let match = trimmed.range(of: #"func\s+(\w+)"#, options: .regularExpression) {
-                    let funcName = String(trimmed[match]).replacingOccurrences(of: "func ", with: "")
-                    metadata.symbolName = funcName.trimmingCharacters(in: .whitespaces)
-                }
-            } else if trimmed.contains("class ") {
-                chunkType = .classDefinition
-                if let match = trimmed.range(of: #"class\s+(\w+)"#, options: .regularExpression) {
-                    let className = String(trimmed[match]).replacingOccurrences(of: "class ", with: "")
-                    metadata.symbolName = className.trimmingCharacters(in: .whitespaces)
-                }
-            } else if trimmed.contains("struct ") {
-                chunkType = .structDefinition
-                if let match = trimmed.range(of: #"struct\s+(\w+)"#, options: .regularExpression) {
-                    let structName = String(trimmed[match]).replacingOccurrences(of: "struct ", with: "")
-                    metadata.symbolName = structName.trimmingCharacters(in: .whitespaces)
-                }
-            } else if trimmed.contains("enum ") {
-                chunkType = .enumDefinition
-                if let match = trimmed.range(of: #"enum\s+(\w+)"#, options: .regularExpression) {
-                    let enumName = String(trimmed[match]).replacingOccurrences(of: "enum ", with: "")
-                    metadata.symbolName = enumName.trimmingCharacters(in: .whitespaces)
-                }
-            } else if trimmed.contains("protocol ") {
-                chunkType = .protocolDefinition
-                if let match = trimmed.range(of: #"protocol\s+(\w+)"#, options: .regularExpression) {
-                    let protocolName = String(trimmed[match]).replacingOccurrences(of: "protocol ", with: "")
-                    metadata.symbolName = protocolName.trimmingCharacters(in: .whitespaces)
-                }
-            } else if trimmed.contains("extension ") {
-                chunkType = .extensionDefinition
-            } else if trimmed.hasPrefix("import ") {
-                chunkType = .import_
-            } else if trimmed.hasPrefix("///") || trimmed.hasPrefix("/**") {
-                chunkType = .documentation
-            } else if trimmed.hasPrefix("//") {
-                chunkType = .comment
-            }
-
-            // Detect visibility
-            if trimmed.contains("public ") {
-                metadata.visibility = "public"
-            } else if trimmed.contains("private ") {
-                metadata.visibility = "private"
-            } else if trimmed.contains("internal ") {
-                metadata.visibility = "internal"
-            } else if trimmed.contains("fileprivate ") {
-                metadata.visibility = "fileprivate"
-            }
+            let (swiftType, symbolName) = detectSwiftChunkType(in: trimmed)
+            chunkType = swiftType
+            metadata.symbolName = symbolName
+            metadata.visibility = detectSwiftVisibility(in: trimmed)
+        } else {
+            chunkType = .block
         }
 
         // Count lines of actual code
@@ -497,6 +452,47 @@ extension SemanticCodeIndexer {
         metadata.linesOfCode = codeLines.count
 
         return (chunkType, metadata)
+    }
+
+    /// Detects the chunk type and optional symbol name from Swift source text.
+    private func detectSwiftChunkType(in trimmed: String) -> (ChunkType, String?) {
+        // Keyword-to-type mapping with regex for symbol extraction
+        let definitionPatterns: [(keyword: String, type: ChunkType, regex: String?)] = [
+            ("func ", .function, #"func\s+(\w+)"#),
+            ("class ", .classDefinition, #"class\s+(\w+)"#),
+            ("struct ", .structDefinition, #"struct\s+(\w+)"#),
+            ("enum ", .enumDefinition, #"enum\s+(\w+)"#),
+            ("protocol ", .protocolDefinition, #"protocol\s+(\w+)"#),
+            ("extension ", .extensionDefinition, nil)
+        ]
+
+        for pattern in definitionPatterns {
+            guard trimmed.contains(pattern.keyword) else { continue }
+            let symbolName = pattern.regex.flatMap { extractSymbolName(from: trimmed, regex: $0, keyword: pattern.keyword) }
+            return (pattern.type, symbolName)
+        }
+
+        if trimmed.hasPrefix("import ") { return (.import_, nil) }
+        if trimmed.hasPrefix("///") || trimmed.hasPrefix("/**") { return (.documentation, nil) }
+        if trimmed.hasPrefix("//") { return (.comment, nil) }
+
+        return (.block, nil)
+    }
+
+    /// Extracts a symbol name from source text using the given regex and keyword.
+    private func extractSymbolName(from text: String, regex: String, keyword: String) -> String? {
+        guard let match = text.range(of: regex, options: .regularExpression) else { return nil }
+        return String(text[match])
+            .replacingOccurrences(of: keyword, with: "")
+            .trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Detects the visibility modifier in Swift source text.
+    private func detectSwiftVisibility(in trimmed: String) -> String? {
+        let visibilityKeywords = ["public ", "private ", "internal ", "fileprivate "]
+        return visibilityKeywords
+            .first { trimmed.contains($0) }?
+            .trimmingCharacters(in: .whitespaces)
     }
 
     private func addChunkToIndices(_ chunk: CodeChunk) {

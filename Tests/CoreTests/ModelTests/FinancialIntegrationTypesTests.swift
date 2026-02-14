@@ -484,7 +484,7 @@ struct SpendingAnalyzerTests {
         let transactions = [
             TestTransaction(amount: -50, description: "A"),
             TestTransaction(amount: -55, description: "B"),
-            TestTransaction(amount: -45, description: "C"),
+            TestTransaction(amount: -45, description: "C")
         ]
         let unusual = TestSpendingAnalyzer.detectUnusual(in: transactions)
         #expect(unusual.isEmpty)

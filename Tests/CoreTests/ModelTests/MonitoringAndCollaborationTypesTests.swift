@@ -137,7 +137,7 @@ private enum TestKnowledgeSearch {
             let contentWords = Set(item.content.lowercased().split(separator: " ").map(String.init))
             let keywordWords = Set(item.keywords.map { $0.lowercased() })
             let combined = contentWords.union(keywordWords)
-            return !queryWords.intersection(combined).isEmpty
+            return !queryWords.isDisjoint(with: combined)
         }
     }
 
@@ -361,7 +361,7 @@ struct KnowledgeSearchTests {
     private let items: [TestSharedKnowledgeItem] = [
         TestSharedKnowledgeItem(teamId: "t1", content: "Swift concurrency patterns with actors", category: "dev", keywords: ["swift", "concurrency"], sharedBy: "alice"),
         TestSharedKnowledgeItem(teamId: "t1", content: "UI testing best practices", category: "qa", keywords: ["testing", "ui"], sharedBy: "bob"),
-        TestSharedKnowledgeItem(teamId: "t1", content: "CloudKit sync implementation guide", category: "dev", keywords: ["cloudkit", "sync"], sharedBy: "charlie"),
+        TestSharedKnowledgeItem(teamId: "t1", content: "CloudKit sync implementation guide", category: "dev", keywords: ["cloudkit", "sync"], sharedBy: "charlie")
     ]
 
     @Test("Search by content word")

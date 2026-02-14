@@ -381,7 +381,7 @@ struct ImplementationPlanTests {
         let steps = [
             TestImplementationStep(order: 1, title: "Create file", estimatedDuration: 5),
             TestImplementationStep(order: 2, title: "Add logic", estimatedDuration: 15),
-            TestImplementationStep(order: 3, title: "Add tests", estimatedDuration: 10),
+            TestImplementationStep(order: 3, title: "Add tests", estimatedDuration: 10)
         ]
         let plan = TestImplementationPlan(steps: steps, requiredCapabilities: ["swift"])
         #expect(plan.estimatedTotalDuration == 30)

@@ -136,7 +136,7 @@ private enum TestPreferenceRegistry {
         TestPreferenceDescriptor(key: "piiSanitization", category: .privacy, defaultScope: .universal, displayName: "PII Sanitization"),
         TestPreferenceDescriptor(key: "localModelPath", category: .localModels, defaultScope: .deviceLocal, displayName: "Local Model Path"),
         TestPreferenceDescriptor(key: "debugMode", category: .advanced, defaultScope: .deviceLocal, displayName: "Debug Mode"),
-        TestPreferenceDescriptor(key: "syncInterval", category: .sync, defaultScope: .deviceClass, displayName: "Sync Interval"),
+        TestPreferenceDescriptor(key: "syncInterval", category: .sync, defaultScope: .deviceClass, displayName: "Sync Interval")
     ]
 
     static func descriptor(for key: String) -> TestPreferenceDescriptor? {

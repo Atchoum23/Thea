@@ -134,7 +134,7 @@ private struct TestMigrationSourceInfo: Sendable {
         TestMigrationSourceInfo(sourceName: "ChatGPT", sourceIcon: "bubble.left.and.text.bubble.right", sourceDescription: "Import from OpenAI ChatGPT", isInstalled: false, supportedPlatform: "macOS"),
         TestMigrationSourceInfo(sourceName: "Cursor", sourceIcon: "cursorarrow", sourceDescription: "Import from Cursor IDE", isInstalled: true, supportedPlatform: "macOS"),
         TestMigrationSourceInfo(sourceName: "Perplexity", sourceIcon: "globe", sourceDescription: "Import from Perplexity", isInstalled: false, supportedPlatform: "macOS"),
-        TestMigrationSourceInfo(sourceName: "Claude Code CLI", sourceIcon: "terminal", sourceDescription: "Import from Claude Code CLI sessions", isInstalled: true, supportedPlatform: "macOS"),
+        TestMigrationSourceInfo(sourceName: "Claude Code CLI", sourceIcon: "terminal", sourceDescription: "Import from Claude Code CLI sessions", isInstalled: true, supportedPlatform: "macOS")
     ]
 }
 
@@ -410,7 +410,7 @@ struct MigratedConversationTests {
         let now = Date()
         let messages = [
             TestMigratedMessage(role: .user, content: .text("Hello"), timestamp: now),
-            TestMigratedMessage(role: .assistant, content: .text("Hi!"), timestamp: now.addingTimeInterval(1)),
+            TestMigratedMessage(role: .assistant, content: .text("Hi!"), timestamp: now.addingTimeInterval(1))
         ]
         let convo = TestMigratedConversation(title: "Test", messages: messages, createdAt: now, updatedAt: now.addingTimeInterval(2), model: "claude-4.5-sonnet", provider: "anthropic")
         #expect(convo.messageCount == 2)
