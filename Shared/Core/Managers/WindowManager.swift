@@ -1,7 +1,10 @@
 import Foundation
 import Observation
+import os.log
 @preconcurrency import SwiftData
 import SwiftUI
+
+private let windowLogger = Logger(subsystem: "ai.thea.app", category: "WindowManager")
 
 // MARK: - Window Manager
 
@@ -126,8 +129,8 @@ final class WindowManager {
         guard let context = modelContext else { return }
 
         // Encode position and size
-        let positionData = try? JSONEncoder().encode(window.position)
-        let sizeData = try? JSONEncoder().encode(window.size)
+        let positionData = try? JSONEncoder().encode(window.position) // try? OK: encoding CGPoint is best-effort
+        let sizeData = try? JSONEncoder().encode(window.size) // try? OK: encoding CGSize is best-effort
 
         let windowState = WindowState(
             id: window.id,
@@ -141,7 +144,13 @@ final class WindowManager {
 
         // Check if state already exists - fetch all and filter to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<WindowState>()
-        let allStates = (try? context.fetch(descriptor)) ?? []
+        let allStates: [WindowState]
+        do {
+            allStates = try context.fetch(descriptor)
+        } catch {
+            windowLogger.error("Failed to fetch window states for save: \(error.localizedDescription)")
+            allStates = []
+        }
 
         if let existingState = allStates.first(where: { $0.id == window.id }) {
             // Update existing
@@ -153,7 +162,7 @@ final class WindowManager {
             context.insert(windowState)
         }
 
-        try? context.save()
+        do { try context.save() } catch { windowLogger.error("Failed to save window state: \(error.localizedDescription)") }
     }
 
     /// Deletes window state from SwiftData
@@ -162,11 +171,17 @@ final class WindowManager {
 
         // Fetch all and filter to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<WindowState>()
-        let allStates = (try? context.fetch(descriptor)) ?? []
+        let allStates: [WindowState]
+        do {
+            allStates = try context.fetch(descriptor)
+        } catch {
+            windowLogger.error("Failed to fetch window states for delete: \(error.localizedDescription)")
+            allStates = []
+        }
 
         if let state = allStates.first(where: { $0.id == windowID }) {
             context.delete(state)
-            try? context.save()
+            do { try context.save() } catch { windowLogger.error("Failed to save after deleting window state: \(error.localizedDescription)") }
         }
     }
 
@@ -186,8 +201,8 @@ final class WindowManager {
                     continue
                 }
 
-                let position = try? JSONDecoder().decode(CGPoint.self, from: state.position)
-                let size = try? JSONDecoder().decode(CGSize.self, from: state.size)
+                let position = try? JSONDecoder().decode(CGPoint.self, from: state.position) // try? OK: decoding CGPoint is best-effort
+                let size = try? JSONDecoder().decode(CGSize.self, from: state.size) // try? OK: decoding CGSize is best-effort
 
                 let window = WindowInstance(
                     id: state.id,
@@ -204,7 +219,7 @@ final class WindowManager {
 
             activeWindow = openWindows.first
         } catch {
-            print("Error restoring window state: \(error)")
+            windowLogger.error("Failed to restore window state: \(error.localizedDescription)")
         }
     }
 
