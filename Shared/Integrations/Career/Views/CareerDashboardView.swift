@@ -259,7 +259,7 @@ private struct RecommendationsTabView: View {
                     )
                 } else {
                     ForEach(viewModel.recommendations) { recommendation in
-                        RecommendationCard(recommendation: recommendation, viewModel: viewModel)
+                        CareerRecommendationCard(recommendation: recommendation, viewModel: viewModel)
                     }
                 }
             }
@@ -422,7 +422,7 @@ private struct CareerReflectionField: View {
     }
 }
 
-private struct RecommendationCard: View {
+private struct CareerRecommendationCard: View {
     let recommendation: GrowthRecommendation
     let viewModel: CareerDashboardViewModel
 
