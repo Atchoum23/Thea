@@ -332,13 +332,12 @@ public final class SemanticContextPreFetcher {
         // Check for code-related queries — search PersonalKnowledgeGraph for relevant entities
         if queryLower.contains("function") || queryLower.contains("class") ||
            queryLower.contains("implement") || queryLower.contains("fix") {
-            let codeEntities = PersonalKnowledgeGraph.shared.searchEntities(
-                query: keyTerms.joined(separator: " "),
-                limit: 5
-            )
+            let codeEntities = await Array(PersonalKnowledgeGraph.shared.searchEntities(
+                query: keyTerms.joined(separator: " ")
+            ).prefix(5))
             let codeContext = codeEntities.isEmpty
                 ? "Related topics: \(keyTerms.joined(separator: ", "))"
-                : codeEntities.map { "\($0.name): \($0.description ?? $0.type)" }.joined(separator: "\n")
+                : codeEntities.map { "\($0.name): \($0.attributes["description"] ?? $0.type.rawValue)" }.joined(separator: "\n")
             items.append(ContextItem(
                 type: .codeSnippet,
                 identifier: "query_related_code",
@@ -351,13 +350,12 @@ public final class SemanticContextPreFetcher {
         // Check for documentation queries — pull from knowledge graph
         if queryLower.contains("how") || queryLower.contains("what") ||
            queryLower.contains("explain") || queryLower.contains("docs") {
-            let docEntities = PersonalKnowledgeGraph.shared.searchEntities(
-                query: keyTerms.joined(separator: " "),
-                limit: 3
-            )
+            let docEntities = await Array(PersonalKnowledgeGraph.shared.searchEntities(
+                query: keyTerms.joined(separator: " ")
+            ).prefix(3))
             let docContext = docEntities.isEmpty
                 ? "Query topics: \(keyTerms.joined(separator: ", "))"
-                : docEntities.map { "\($0.name) (\($0.type)): \($0.description ?? "")" }.joined(separator: "\n")
+                : docEntities.map { "\($0.name) (\($0.type.rawValue)): \($0.attributes["description"] ?? "")" }.joined(separator: "\n")
             items.append(ContextItem(
                 type: .documentation,
                 identifier: "query_docs",

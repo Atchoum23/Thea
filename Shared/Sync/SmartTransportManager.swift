@@ -299,9 +299,9 @@ actor SmartTransportManager {
             guard let self = self else { return }
             switch state {
             case .ready:
-                Task { await self.logger.debug("Bonjour browser ready") }
+                Task { self.logger.debug("Bonjour browser ready") }
             case .failed(let error):
-                Task { await self.logger.error("Bonjour browser failed: \(error.localizedDescription)") }
+                Task { self.logger.error("Bonjour browser failed: \(error.localizedDescription)") }
             default:
                 break
             }
@@ -339,9 +339,9 @@ actor SmartTransportManager {
                 guard let self = self else { return }
                 switch state {
                 case .ready:
-                    Task { await self.logger.debug("Bonjour advertising started") }
+                    Task { self.logger.debug("Bonjour advertising started") }
                 case .failed(let error):
-                    Task { await self.logger.error("Bonjour advertising failed: \(error.localizedDescription)") }
+                    Task { self.logger.error("Bonjour advertising failed: \(error.localizedDescription)") }
                 default:
                     break
                 }
@@ -583,7 +583,9 @@ actor SmartTransportManager {
                     if getnameinfo(addr, socklen_t(addr.pointee.sa_len),
                                    &hostname, socklen_t(hostname.count),
                                    nil, 0, NI_NUMERICHOST) == 0 {
-                        let ip = String(cString: hostname)
+                        let ip = hostname.withUnsafeBufferPointer { buf in
+                            String(decoding: buf.prefix(while: { $0 != 0 }).map { UInt8(bitPattern: $0) }, as: UTF8.self)
+                        }
                         address = ip
                         isLinkLocal = ip.hasPrefix("169.254.")
                     }

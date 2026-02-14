@@ -156,7 +156,7 @@ public final class BrowserAutomationEngine: ObservableObject {
             delay 2
         end tell
         """
-        try await runAppleScript(navScript)
+        _ = try await runAppleScript(navScript)
 
         var filledFields: [String] = []
         for (field, value) in config.fields {
@@ -183,7 +183,7 @@ public final class BrowserAutomationEngine: ObservableObject {
                 do JavaScript "\(submitJS.escapedForAppleScript)" in current tab of front window
             end tell
             """
-            try await runAppleScript(submitScript)
+            _ = try await runAppleScript(submitScript)
         }
 
         let duration = Date().timeIntervalSince(startTime)
@@ -214,7 +214,7 @@ public final class BrowserAutomationEngine: ObservableObject {
             delay 2
         end tell
         """
-        try await runAppleScript(navScript)
+        _ = try await runAppleScript(navScript)
 
         let jsCode = """
         var el = document.querySelector('\(config.selector.escapedForJS)');
@@ -264,7 +264,7 @@ public final class BrowserAutomationEngine: ObservableObject {
             activate
         end tell
         """
-        try await runAppleScript(navScript)
+        _ = try await runAppleScript(navScript)
 
         // Use screencapture to capture the frontmost window
         let tempPath = NSTemporaryDirectory() + "thea_screenshot_\(UUID().uuidString).png"
