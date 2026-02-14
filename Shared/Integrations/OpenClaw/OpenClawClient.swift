@@ -26,7 +26,7 @@ actor OpenClawClient {
     func connect() -> AsyncStream<OpenClawGatewayEvent> {
         AsyncStream { continuation in
             self.eventContinuation = continuation
-            Task { await self.startConnection() }
+            Task { self.startConnection() }
 
             continuation.onTermination = { _ in
                 Task { await self.disconnect() }

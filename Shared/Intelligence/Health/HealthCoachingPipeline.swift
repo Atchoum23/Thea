@@ -358,7 +358,7 @@ final class HealthCoachingPipeline {
             )
         } else {
             let service = NotificationService.shared
-            try? await service.scheduleReminder(
+            _ = try? await service.scheduleReminder(
                 title: insight.title,
                 body: insight.message,
                 at: Date()

@@ -424,9 +424,12 @@ final class UnifiedDeviceAwareness {
     }
 
     private func getScreenResolution() -> String {
-        let screen = UIScreen.main
-        let bounds = screen.nativeBounds
-        return "\(Int(bounds.width))x\(Int(bounds.height))"
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        if let screen = scenes.first?.screen {
+            let bounds = screen.nativeBounds
+            return "\(Int(bounds.width))x\(Int(bounds.height))"
+        }
+        return "unknown"
     }
     #endif
 
