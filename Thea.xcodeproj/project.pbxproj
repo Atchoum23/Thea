@@ -305,6 +305,7 @@
 		2FAD36AFCC44FE8FD123ECB3 /* DocumentationGrounding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E31752880976FC52698EA4 /* DocumentationGrounding.swift */; };
 		2FB9B4A0915540F064763B88 /* WebSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E24E037F60BC671AFDA581C /* WebSocketServer.swift */; };
 		2FD2FB1519624C018A7836D5 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CC5E9A02DF4C87912DC6C5BB /* Info.plist */; };
+		2FF7BF31FA0A74C3447959FA /* TheaClipSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48B618D8E77233F77D02CD0 /* TheaClipSyncService.swift */; };
 		3047CF07427B59ABD30391A7 /* UserModelBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A87FCD0AA7267315B918E5F /* UserModelBuilder.swift */; };
 		306FFEA121995FAFC85EE97E /* PrivacyPolicies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7350AB103244416C877EE30F /* PrivacyPolicies.swift */; };
 		30B11717B8D44C2B734B2972 /* RemoteMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65791F2F7974019D1F5C6D1D /* RemoteMessages.swift */; };
@@ -937,6 +938,7 @@
 		93A094626DC36E596651CD15 /* CompilerError+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50BBA77C706BDFACD80323A /* CompilerError+Convenience.swift */; };
 		94D2EF338D29FA31090BE1D6 /* AssessmentServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C0A3B85602C5963D7D0511 /* AssessmentServiceTests.swift */; };
 		953E9A3395AF31C6D0E439ED /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3579242B3BC082722588D04E /* BrowserAutomationService.swift */; };
+		95556B1D0F9518EAEE10868D /* TheaClipModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE0F80561949E45736F96EC /* TheaClipModels.swift */; };
 		955D09776429208AF47BBAD9 /* AppUsageMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5981EE45534F8BD517361F83 /* AppUsageMonitor.swift */; };
 		957FCBD45BA949980B256E31 /* writing-assistant.js in Resources */ = {isa = PBXBuildFile; fileRef = 1D395678DA91951D20705A95 /* writing-assistant.js */; };
 		95A840B0DB91BB3B8DDE77FC /* FocusModeTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDFADF41C672BD8282A4DD0 /* FocusModeTemplates.swift */; };
@@ -1102,7 +1104,6 @@
 		AFE69489A46D4331B4F0FC27 /* CareerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91D436114138C4A47CD07B13 /* CareerService.swift */; };
 		B00E78EA83E6EF575F08775D /* NutritionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 276B8253B52AD21C3D9EC7A5 /* NutritionViewModel.swift */; };
 		B0700972FE8564B5E54DC51C /* CognitiveAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFDD30D1CE751C01D0947D04 /* CognitiveAssistant.swift */; };
-		B09B652E808131C69A92C8EC /* ClipboardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9F28861295002D95BF677C /* ClipboardModels.swift */; };
 		B0A890148EF6D42443F1F5E5 /* SiriShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119E655F208CE7BAFF433FBC /* SiriShortcuts.swift */; };
 		B0AD7E96994D4302B423916C /* AIModelGovernor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA2C2984F91DCA78C56338 /* AIModelGovernor.swift */; };
 		B0B481BAD213EA09D15F0D8A /* TerminalOutputParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A572ACAF0108F8ED69DE8B /* TerminalOutputParser.swift */; };
@@ -1461,6 +1462,7 @@
 		EAE2D1BEB0BF7C0E917A9658 /* NutritionDataImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8D18BE29EA58B17F342D35 /* NutritionDataImporter.swift */; };
 		EAF016CA5B89E8B616858C70 /* XcodeBuildRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A929EC8E304E78BBAF968AD /* XcodeBuildRunner.swift */; };
 		EB0D3A44824927BAE8D04522 /* NutritionDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2325FF7CE9DC47C5C6352D /* NutritionDashboardView.swift */; };
+		EB41AD5CF1174684C02861D2 /* TheaClipSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48B618D8E77233F77D02CD0 /* TheaClipSyncService.swift */; };
 		EB82C8A0723C00F6F6032732 /* HealthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20FFEC451BD40BDCEF955614 /* HealthModels.swift */; };
 		EB8792708884614111FCA976 /* NetworkDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88E698F95E65BD37E781DA91 /* NetworkDiscoveryService.swift */; };
 		EBC34B33224B402B5DCD9729 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E91EEB1BBF14E9ECDD7995B /* WelcomeView.swift */; };
@@ -1514,6 +1516,7 @@
 		F4B0509C959749260F0BCFEB /* SiriIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7853DB6959DC8D9D05D49042 /* SiriIntegration.swift */; };
 		F4DAF9DDEE8B849C36C8D159 /* AssessmentProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C317A416D1B86598194C7C7F /* AssessmentProtocols.swift */; };
 		F4F6B4F51A74F6A890C4C75E /* ScreenshotPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC53BAD4FF4D60020E98F59 /* ScreenshotPreview.swift */; };
+		F518522D0E52F7E1B3579BC2 /* TheaClipModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE0F80561949E45736F96EC /* TheaClipModels.swift */; };
 		F5191CCE0CB386FA358BB02E /* PlanManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954D1F5B8BA0920CC2DA1EAD /* PlanManager.swift */; };
 		F51DF2D8A7A54D44718F6336 /* CoworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0952B592B1ECFF299AB8556B /* CoworkSettingsView.swift */; };
 		F528DD502683D22C0E98766F /* .vscodetasks.json in Resources */ = {isa = PBXBuildFile; fileRef = B672E60E1BDE705287E8B242 /* .vscodetasks.json */; };
@@ -1557,7 +1560,6 @@
 		FD32C35712D8D883EF4DA19B /* SupraModelSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBAACCCCCCE6D357E5B565B6 /* SupraModelSelector.swift */; };
 		FD64653F0C8C599AD0666611 /* CoworkProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20139D179BC17752B359CC7C /* CoworkProgressView.swift */; };
 		FD6C766236484C795EDB4869 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 5909E7EB51E6633C5691F827 /* background.js */; };
-		FD7198F1723857832F9B4F2E /* ClipboardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9F28861295002D95BF677C /* ClipboardModels.swift */; };
 		FD782C3C5445A5E37034EAC3 /* HDKnowledgeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3151C1AA921620527D16FC69 /* HDKnowledgeScanner.swift */; };
 		FD9B37B2E8B8D13F0849BAD5 /* ClipboardHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB8D88337B0652859585DD0 /* ClipboardHistoryManager.swift */; };
 		FDA5E5A2D2A7C40A6295D24A /* StreamingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F31B883CFBAD460B87029FB6 /* StreamingIndicator.swift */; };
@@ -2331,7 +2333,6 @@
 		AE8D699C51A337162D4453E6 /* TodoistIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoistIntegration.swift; sourceTree = "<group>"; };
 		AEF467C34A028512D49539FE /* GDPRDataExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GDPRDataExporter.swift; sourceTree = "<group>"; };
 		AF9A602963894A83668CD0A8 /* APIBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIBuilderView.swift; sourceTree = "<group>"; };
-		AF9F28861295002D95BF677C /* ClipboardModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardModels.swift; sourceTree = "<group>"; };
 		AFA444BB269C0E5224B08869 /* VoiceModeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceModeController.swift; sourceTree = "<group>"; };
 		B010DAC620D1393D294B373A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B18BFEE9F889C2D711A65F35 /* IntentsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IntentsExtension.entitlements; sourceTree = "<group>"; };
@@ -2396,6 +2397,7 @@
 		C454FD864840A71312FC7AB0 /* QuickLookExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuickLookExtension.entitlements; sourceTree = "<group>"; };
 		C45F4146CF8C7A4E92AB0DB4 /* options.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = options.css; sourceTree = "<group>"; };
 		C489DE8C2C91836682E9371C /* Scriptsconfigure-xcode.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "Scriptsconfigure-xcode.sh"; sourceTree = "<group>"; };
+		C48B618D8E77233F77D02CD0 /* TheaClipSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipSyncService.swift; sourceTree = "<group>"; };
 		C48BF2393DFCBE59636EB062 /* CollaborativeMemorySystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollaborativeMemorySystem.swift; sourceTree = "<group>"; };
 		C4CCD191D66EBCE2FE015189 /* ClipboardSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardSyncService.swift; sourceTree = "<group>"; };
 		C574D14D40228EC8A8FE5311 /* DeviceOriginBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceOriginBadge.swift; sourceTree = "<group>"; };
@@ -2487,6 +2489,7 @@
 		DF41D7B50ADAD52B6CB74541 /* TheaFocusFilterExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TheaFocusFilterExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF81E960712B2416AD931985 /* MediaMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaMonitor.swift; sourceTree = "<group>"; };
 		DFA2EF92AFF6A8A09A41FC68 /* PermissionsTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsTypes.swift; sourceTree = "<group>"; };
+		DFE0F80561949E45736F96EC /* TheaClipModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipModels.swift; sourceTree = "<group>"; };
 		E07B93655FF8AAA4E0965339 /* AssessmentDataExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentDataExporter.swift; sourceTree = "<group>"; };
 		E0C0A3B85602C5963D7D0511 /* AssessmentServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentServiceTests.swift; sourceTree = "<group>"; };
 		E14704B52B7CA21BBCDD9B4C /* OrchestratorSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorSettingsView.swift; sourceTree = "<group>"; };
@@ -2760,6 +2763,7 @@
 				1AE015CDA0C3F95CE3FBB4F3 /* DeviceRegistry.swift */,
 				7279FAB1D028DD8804694B21 /* HandoffService.swift */,
 				7B22A03578915E3A117AB6AA /* PreferenceSyncEngine.swift */,
+				C48B618D8E77233F77D02CD0 /* TheaClipSyncService.swift */,
 				AAD68D6416E308F43865C790 /* UnifiedContextSync.swift */,
 			);
 			path = Sync;
@@ -3096,7 +3100,6 @@
 			children = (
 				6F1D529663D235ED1CE630B7 /* AIModel.swift */,
 				1F3EDD38D4D04B72138D09FA /* AIProviderConfig.swift */,
-				AF9F28861295002D95BF677C /* ClipboardModels.swift */,
 				AA65CF6F48987A1BFB88CF3A /* Conversation.swift */,
 				4318671F8DE98472EC663FBF /* FinancialModels.swift */,
 				D135755814137B96503285B2 /* IndexedFile.swift */,
@@ -3105,6 +3108,7 @@
 				4F02095E4726D071A1B0EC8A /* Project.swift */,
 				C2C9E67F316E11C79A15D6FC /* PromptEngineeringModels.swift */,
 				6FF86F27F0214F1E41B24F47 /* QueuedMessage.swift */,
+				DFE0F80561949E45736F96EC /* TheaClipModels.swift */,
 				AA8FD2C37F45BB996BAFEA7E /* TrackingModels.swift */,
 			);
 			path = Models;
@@ -6449,7 +6453,6 @@
 				E4A34D3DFD147C863DA35559 /* ClaudeAppBridge.swift in Sources */,
 				8E11CA887FD8FA573DD9DCF7 /* ClipboardContextProvider.swift in Sources */,
 				0212A612CF6DB5FB40AE4256 /* ClipboardHistoryManager.swift in Sources */,
-				B09B652E808131C69A92C8EC /* ClipboardModels.swift in Sources */,
 				FEB4E5A2C44924F2CAFDA31B /* ClipboardMonitor.swift in Sources */,
 				79DD161B0693776600C5FACB /* ClipboardSyncService.swift in Sources */,
 				BFC402CB6C4147506218649C /* CloudKitService.swift in Sources */,
@@ -6908,8 +6911,10 @@
 				B45ACC988DF358341015F3FD /* TheaAppIntents.swift in Sources */,
 				24D7D5E665E313AEFEF0D43F /* TheaAssistantSchemas.swift in Sources */,
 				7DFE85D733AE9C5C0C74CBD1 /* TheaClipHistoryView.swift in Sources */,
+				F518522D0E52F7E1B3579BC2 /* TheaClipModels.swift in Sources */,
 				D1E6C9E6DBC4F5813BF4F4E8 /* TheaClipRowView.swift in Sources */,
 				A1773A6E1C5CAEF10D8F6E29 /* TheaClipSettingsView.swift in Sources */,
+				EB41AD5CF1174684C02861D2 /* TheaClipSyncService.swift in Sources */,
 				C3D83275131B8EDD5A4ED074 /* TheaConfig.swift in Sources */,
 				616F5000163FBADA6F9988FA /* TheaControls.swift in Sources */,
 				9BD515D0A5D67AB72CE507B7 /* TheaDesignSystem.swift in Sources */,
@@ -7249,7 +7254,6 @@
 				D24D10F914431A8B7481065A /* ClaudeAppBridge.swift in Sources */,
 				5D043763D4866B0F65AE5FC9 /* ClipboardContextProvider.swift in Sources */,
 				FD9B37B2E8B8D13F0849BAD5 /* ClipboardHistoryManager.swift in Sources */,
-				FD7198F1723857832F9B4F2E /* ClipboardModels.swift in Sources */,
 				92A9290681071F5A8B4C7DAE /* ClipboardMonitor.swift in Sources */,
 				7539461341067BF4EE2C514C /* ClipboardObserver.swift in Sources */,
 				7E35F20DC5B6DCA3A41A42BC /* ClipboardSyncService.swift in Sources */,
@@ -7760,8 +7764,10 @@
 				29606B23A2216E9B54F20D42 /* TheaAppIntents.swift in Sources */,
 				A93E47DABEA388FB43D49DD0 /* TheaAssistantSchemas.swift in Sources */,
 				AFC6A41D9E9BAB3782D140AD /* TheaClipCardView.swift in Sources */,
+				95556B1D0F9518EAEE10868D /* TheaClipModels.swift in Sources */,
 				E3E10F75165B17641B112306 /* TheaClipPanelView.swift in Sources */,
 				66E00C2C823DC1DB5AD234C2 /* TheaClipSettingsView.swift in Sources */,
+				2FF7BF31FA0A74C3447959FA /* TheaClipSyncService.swift in Sources */,
 				F3AC62230678009F6B97D138 /* TheaClipWindowController.swift in Sources */,
 				4EF05F89B87750C2EF03D43C /* TheaConfig.swift in Sources */,
 				C94925D9673BDD6F4DCFA67A /* TheaControls.swift in Sources */,

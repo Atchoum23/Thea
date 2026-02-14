@@ -66,15 +66,19 @@ public struct PrivacyControlsView: View {
             // Data Settings Section
             Section {
                 Toggle("Encrypt Activity Logs", isOn: $monitoringConfig.encryptLogs)
+                    .accessibilityHint("When enabled, all activity logs are encrypted on disk")
 
                 Stepper(
                     "Keep data for \(monitoringConfig.retentionDays) days",
                     value: $monitoringConfig.retentionDays,
                     in: 7 ... 365
                 )
+                .accessibilityValue("\(monitoringConfig.retentionDays) days")
+                .accessibilityHint("Adjusts how long activity data is retained before automatic deletion")
 
                 Toggle("Sync to iCloud", isOn: $monitoringConfig.syncToCloud)
                     .disabled(true) // Not yet implemented
+                    .accessibilityHint("Not yet available. Will sync activity data to iCloud when enabled.")
             } header: {
                 Text("Data Storage")
             }
