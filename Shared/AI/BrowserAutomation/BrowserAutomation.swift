@@ -136,10 +136,8 @@ public final class BrowserAutomationEngine: ObservableObject {
     }
 
     private func executeFillTask(_ task: BrowserTask, config: FillConfig) async throws -> BrowserTaskResult {
-        // Form filling would require WebKit/WebView integration
-        // This is a placeholder for the architecture
-
         logger.info("Form fill task for: \(config.url)")
+        let startTime = Date()
 
         // Security: Never fill sensitive fields
         let sensitiveFields = ["password", "ssn", "credit_card", "cvv", "pin"]
@@ -149,27 +147,101 @@ public final class BrowserAutomationEngine: ObservableObject {
             }
         }
 
+        #if os(macOS)
+        // Navigate to the URL first, then fill fields via JavaScript in Safari
+        let navScript = """
+        tell application "Safari"
+            if (count of windows) is 0 then make new document
+            set URL of current tab of front window to "\(config.url.escapedForAppleScript)"
+            delay 2
+        end tell
+        """
+        try await runAppleScript(navScript)
+
+        var filledFields: [String] = []
+        for (field, value) in config.fields {
+            let jsCode = """
+            var el = document.querySelector('[name=\"\(field.escapedForJS)\"]') \
+            || document.getElementById('\(field.escapedForJS)');
+            if (el) { el.value = '\(value.escapedForJS)'; el.dispatchEvent(new Event('input')); 'filled'; } \
+            else { 'not_found'; }
+            """
+            let fillScript = """
+            tell application "Safari"
+                set jsResult to do JavaScript "\(jsCode.escapedForAppleScript)" in current tab of front window
+                return jsResult
+            end tell
+            """
+            let result = try await runAppleScript(fillScript)
+            if result.contains("filled") { filledFields.append(field) }
+        }
+
+        if let submitSelector = config.submitSelector {
+            let submitJS = "document.querySelector('\(submitSelector.escapedForJS)').click();"
+            let submitScript = """
+            tell application "Safari"
+                do JavaScript "\(submitJS.escapedForAppleScript)" in current tab of front window
+            end tell
+            """
+            try await runAppleScript(submitScript)
+        }
+
+        let duration = Date().timeIntervalSince(startTime)
         return BrowserTaskResult(
-            taskId: task.id,
-            success: true,
-            data: ["filled": config.fields.keys.map(\.self)],
-            screenshot: nil,
-            duration: 0,
-            timestamp: Date()
+            taskId: task.id, success: !filledFields.isEmpty,
+            data: ["filled": filledFields], screenshot: nil,
+            duration: duration, timestamp: Date()
         )
+        #else
+        return BrowserTaskResult(
+            taskId: task.id, success: false,
+            data: ["error": "Form filling requires macOS"], screenshot: nil,
+            duration: 0, timestamp: Date()
+        )
+        #endif
     }
 
     private func executeClickTask(_ task: BrowserTask, config: ClickConfig) async throws -> BrowserTaskResult {
         logger.info("Click task for: \(config.url), selector: \(config.selector)")
+        let startTime = Date()
 
+        #if os(macOS)
+        // Navigate to URL then click element via JavaScript in Safari
+        let navScript = """
+        tell application "Safari"
+            if (count of windows) is 0 then make new document
+            set URL of current tab of front window to "\(config.url.escapedForAppleScript)"
+            delay 2
+        end tell
+        """
+        try await runAppleScript(navScript)
+
+        let jsCode = """
+        var el = document.querySelector('\(config.selector.escapedForJS)');
+        if (el) { el.click(); 'clicked'; } else { 'not_found'; }
+        """
+        let clickScript = """
+        tell application "Safari"
+            set jsResult to do JavaScript "\(jsCode.escapedForAppleScript)" in current tab of front window
+            return jsResult
+        end tell
+        """
+        let result = try await runAppleScript(clickScript)
+        let success = result.contains("clicked")
+
+        let duration = Date().timeIntervalSince(startTime)
         return BrowserTaskResult(
-            taskId: task.id,
-            success: true,
-            data: ["clicked": config.selector],
-            screenshot: nil,
-            duration: 0,
-            timestamp: Date()
+            taskId: task.id, success: success,
+            data: ["clicked": config.selector, "result": result], screenshot: nil,
+            duration: duration, timestamp: Date()
         )
+        #else
+        return BrowserTaskResult(
+            taskId: task.id, success: false,
+            data: ["error": "Click requires macOS"], screenshot: nil,
+            duration: 0, timestamp: Date()
+        )
+        #endif
     }
 
     private func executeScreenshotTask(_ task: BrowserTask, config: ScreenshotConfig) async throws -> BrowserTaskResult {
@@ -180,19 +252,83 @@ public final class BrowserAutomationEngine: ObservableObject {
         }
 
         logger.info("Screenshot task for: \(config.url)")
+        let startTime = Date()
 
-        // Screenshot capture would require WebKit integration
-        // Return placeholder result
+        #if os(macOS)
+        // Navigate to URL in Safari, then capture window screenshot via screencapture
+        let navScript = """
+        tell application "Safari"
+            if (count of windows) is 0 then make new document
+            set URL of current tab of front window to "\(config.url.escapedForAppleScript)"
+            delay 3
+            activate
+        end tell
+        """
+        try await runAppleScript(navScript)
 
+        // Use screencapture to capture the frontmost window
+        let tempPath = NSTemporaryDirectory() + "thea_screenshot_\(UUID().uuidString).png"
+        let screenshotOutput = try await runShellCommand("/usr/sbin/screencapture -l$(osascript -e 'tell app \"Safari\" to id of window 1') \"\(tempPath)\"")
+        _ = screenshotOutput
+
+        var screenshotData: Data?
+        if FileManager.default.fileExists(atPath: tempPath) {
+            screenshotData = try? Data(contentsOf: URL(fileURLWithPath: tempPath))
+            try? FileManager.default.removeItem(atPath: tempPath)
+        }
+
+        let duration = Date().timeIntervalSince(startTime)
         return BrowserTaskResult(
-            taskId: task.id,
-            success: true,
-            data: ["url": config.url],
-            screenshot: nil,
-            duration: 0,
-            timestamp: Date()
+            taskId: task.id, success: screenshotData != nil,
+            data: ["url": config.url, "hasScreenshot": screenshotData != nil],
+            screenshot: screenshotData, duration: duration, timestamp: Date()
         )
+        #else
+        return BrowserTaskResult(
+            taskId: task.id, success: false,
+            data: ["error": "Screenshots require macOS"], screenshot: nil,
+            duration: 0, timestamp: Date()
+        )
+        #endif
     }
+
+    // MARK: - AppleScript / Shell Helpers
+
+    #if os(macOS)
+    private func runAppleScript(_ script: String) async throws -> String {
+        try await Task.detached {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+            process.arguments = ["-e", script]
+            let outputPipe = Pipe()
+            let errorPipe = Pipe()
+            process.standardOutput = outputPipe
+            process.standardError = errorPipe
+            try process.run()
+            process.waitUntilExit()
+            let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+            if process.terminationStatus != 0 {
+                let errorOutput = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+                throw AIBrowserError.invalidResponse("AppleScript error: \(errorOutput)")
+            }
+            return output.trimmingCharacters(in: .whitespacesAndNewlines)
+        }.value
+    }
+
+    private func runShellCommand(_ command: String) async throws -> String {
+        try await Task.detached {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+            process.arguments = ["-c", command]
+            let outputPipe = Pipe()
+            process.standardOutput = outputPipe
+            process.standardError = Pipe()
+            try process.run()
+            process.waitUntilExit()
+            return String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        }.value
+    }
+    #endif
 
     private func executeNavigateTask(_ task: BrowserTask, config: NavigateConfig) async throws -> BrowserTaskResult {
         guard let url = URL(string: config.url),
@@ -628,6 +764,23 @@ public class MonitorSession {
 
     public func cancel() {
         isCancelled = true
+    }
+}
+
+// MARK: - String Escaping for AppleScript / JavaScript
+
+private extension String {
+    /// Escape for embedding inside AppleScript double-quoted strings
+    var escapedForAppleScript: String {
+        replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+    }
+
+    /// Escape for embedding inside JavaScript single-quoted strings
+    var escapedForJS: String {
+        replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "'", with: "\\'")
+            .replacingOccurrences(of: "\"", with: "\\\"")
     }
 }
 

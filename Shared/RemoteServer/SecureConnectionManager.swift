@@ -386,16 +386,16 @@ public class SecureConnectionManager: ObservableObject {
                     for: Data(serverIdentity.utf8),
                     using: key
                 )
-                let expectedToken = Data(expectedHMAC).base64EncodedString()
+                let expectedTokenData = Data(expectedHMAC)
 
-                if clientiCloudToken == expectedToken {
+                if clientiCloudToken == expectedTokenData {
                     logEvent(.clientConnected, "iCloud identity verified — same account")
                     return true
                 }
             }
 
             // Fallback: direct record name comparison (less secure, for initial pairing)
-            if clientiCloudToken == serverIdentity {
+            if clientiCloudToken == Data(serverIdentity.utf8) {
                 logEvent(.clientConnected, "iCloud identity matched via direct comparison")
                 return true
             }

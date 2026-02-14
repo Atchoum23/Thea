@@ -144,10 +144,10 @@
                 )
                 var responseText = ""
                 for try await chunk in stream {
-                    if case .delta(let text) = chunk {
+                    if case .delta(let text) = chunk.type {
                         responseText += text
-                    } else if case .complete(let msg) = chunk {
-                        responseText = msg.content
+                    } else if case .complete(let msg) = chunk.type {
+                        responseText = msg.content.textValue
                     }
                 }
 
