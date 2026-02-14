@@ -4,12 +4,12 @@
 import SwiftUI
 
 struct AdvancedSettingsView: View {
-    @State private var settingsManager = SettingsManager.shared
-    @State private var advancedConfig = AdvancedSettingsConfiguration.load()
-    @State private var showingDiagnosticReport = false
+    @State var settingsManager = SettingsManager.shared
+    @State var advancedConfig = AdvancedSettingsConfiguration.load()
+    @State var showingDiagnosticReport = false
     @State private var showingLogViewer = false
-    @State private var isGeneratingReport = false
-    @State private var cacheSize = "Calculating..."
+    @State var isGeneratingReport = false
+    @State var cacheSize = "Calculating..."
     @State private var memoryUsage = "Calculating..."
 
     var body: some View {

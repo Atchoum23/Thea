@@ -444,8 +444,11 @@ final class SettingsManager: ObservableObject {
             }
     }
 
-    // MARK: - Reload from Defaults (after sync pull)
+}
 
+// MARK: - Reload from Defaults (after sync pull)
+
+extension SettingsManager {
     /// Re-reads every @Published property from UserDefaults after the sync
     /// engine writes new cloud values into local storage.
     func reloadFromDefaults() {
