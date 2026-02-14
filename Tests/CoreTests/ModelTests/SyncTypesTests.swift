@@ -413,4 +413,3 @@ struct DeviceProfileCloudKeyTests {
         #expect(result == nil)
     }
 }
-
