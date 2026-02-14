@@ -702,4 +702,3 @@ public actor CrossDeviceNotificationService {
         currentDeviceRegistration != nil && subscriptionSetup
     }
 }
-

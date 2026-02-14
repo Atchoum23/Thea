@@ -295,11 +295,10 @@ extension ChatManager {
                     category: .analysis,
                     title: "Execute suggested action from \(taskType.rawValue) response",
                     description: "AI response for \(taskType.description) may contain actionable steps",
-                    riskLevel: .low,
-                    execute: {
-                        AutonomousAction.ActionResult(success: true, message: "Evaluated")
-                    }
-                )
+                    riskLevel: .low
+                ) {
+                    AutonomousAction.ActionResult(success: true, message: "Evaluated")
+                }
                 let decision = await AutonomyController.shared.requestAction(action)
                 switch decision {
                 case .autoExecute:

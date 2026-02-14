@@ -12,7 +12,7 @@ final class CoreMLInferenceEngine {
 
     // MARK: - State
 
-    nonisolated(unsafe) private(set) var loadedModel: MLModel?
+    private(set) var loadedModel: MLModel?
     private(set) var loadedModelID: String?
     private(set) var isLoading = false
     private(set) var lastError: Error?

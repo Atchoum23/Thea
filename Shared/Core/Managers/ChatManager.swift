@@ -18,8 +18,8 @@ final class ChatManager: ObservableObject {
     @Published var activeConversation: Conversation?
     @Published var isStreaming: Bool = false
     @Published var streamingText: String = ""
-    @Published internal(set) var conversations: [Conversation] = []
-    @Published internal(set) var messageQueue: [(text: String, conversation: Conversation)] = []
+    @Published var conversations: [Conversation] = []
+    @Published var messageQueue: [(text: String, conversation: Conversation)] = []
 
     /// Agent execution state for the current conversation
     @Published var agentState = AgentExecutionState()
