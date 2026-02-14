@@ -255,13 +255,8 @@ final class AutonomousTaskExecutor {
     }
 
     private func checkFocusModeActive() async -> Bool {
-        #if os(macOS) || os(iOS)
-        // Would need to use Focus API
-        // For now, return false as a placeholder
-        return false
-        #else
-        return false
-        #endif
+        // Check if a Focus mode was saved in UserDefaults by FocusModeIntelligence
+        UserDefaults.standard.string(forKey: "currentFocusModeId") != nil
     }
 
     private func checkUserAway(durationMinutes: Int) async -> Bool {

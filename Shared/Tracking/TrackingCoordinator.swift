@@ -142,13 +142,26 @@ public final class TrackingCoordinator: ObservableObject {
         ))
     }
 
-    /// Export all tracked data
+    /// Export all tracked data as JSON
     public func exportData() async -> Data? {
         logger.info("Exporting tracked data")
 
-        // Collect data from all trackers
-        // Return as JSON
-        return nil // Placeholder
+        var exportPayload: [String: Any] = [
+            "exportDate": ISO8601DateFormatter().string(from: Date()),
+            "activeTrackers": activeTrackers.map(\.rawValue),
+            "isTracking": isTracking
+        ]
+
+        if let lastUpdate {
+            exportPayload["lastUpdate"] = ISO8601DateFormatter().string(from: lastUpdate)
+        }
+
+        do {
+            return try JSONSerialization.data(withJSONObject: exportPayload, options: [.prettyPrinted, .sortedKeys])
+        } catch {
+            logger.error("Failed to serialize tracking data: \(error.localizedDescription)")
+            return nil
+        }
     }
 }
 
