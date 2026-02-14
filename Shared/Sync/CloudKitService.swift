@@ -21,10 +21,10 @@ public class CloudKitService: ObservableObject {
 
     // MARK: - Published State
 
-    @Published public private(set) var syncStatus: CloudSyncStatus = .idle
-    @Published public private(set) var lastSyncDate: Date?
+    @Published public internal(set) var syncStatus: CloudSyncStatus = .idle
+    @Published public internal(set) var lastSyncDate: Date?
     @Published public private(set) var iCloudAvailable = false
-    @Published public private(set) var pendingChanges = 0
+    @Published public internal(set) var pendingChanges = 0
     @Published public var syncEnabled = true
 
     // MARK: - CloudKit Configuration
