@@ -348,43 +348,7 @@ extension PrivacySettingsView {
     // MARK: - Custom Pattern Editor Sheet
 
     var customPatternEditorSheet: some View {
-        NavigationStack {
-            Form {
-                Section("Add Custom Pattern") {
-                    Text("Define regex patterns to detect and mask custom sensitive data")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    // Placeholder - full implementation in PIISanitizer
-                    Text("Coming soon: Custom pattern editor")
-                        .foregroundStyle(.tertiary)
-                }
-
-                Section("Example Patterns") {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("• API Key: [A-Za-z0-9]{32,}")
-                        Text("• JWT Token: eyJ[A-Za-z0-9_-]+")
-                        Text("• UUID: [0-9a-f]{8}-...")
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
-            }
-            .navigationTitle("Custom Patterns")
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        showingCustomPatternSheet = false
-                    }
-                }
-            }
-        }
-        #if os(macOS)
-        .frame(width: 400, height: 300)
-        #endif
+        CustomPatternEditorView(onDismiss: { showingCustomPatternSheet = false })
     }
 
     // MARK: - Export Options Sheet
@@ -591,6 +555,121 @@ extension PrivacySettingsView {
         case .login: .purple
         case .syncEvent: .teal
         }
+    }
+}
+
+// MARK: - Custom Pattern Editor View
+
+struct CustomPatternEditorView: View {
+    let onDismiss: () -> Void
+
+    private let sanitizer = PIISanitizer.shared
+
+    @State private var newPatternName = ""
+    @State private var newPatternRegex = ""
+    @State private var newPatternReplacement = "[REDACTED]"
+    @State private var validationError: String?
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Existing Patterns") {
+                    if sanitizer.configuration.customPatterns.isEmpty {
+                        Text("No custom patterns defined")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(sanitizer.configuration.customPatterns) { pattern in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(pattern.name)
+                                        .font(.body)
+                                    Text(pattern.pattern)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+
+                                Spacer()
+
+                                Text(pattern.isEnabled ? "Active" : "Disabled")
+                                    .font(.caption2)
+                                    .foregroundStyle(pattern.isEnabled ? .green : .secondary)
+
+                                Button(role: .destructive) {
+                                    sanitizer.removeCustomPattern(id: pattern.id)
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .font(.caption)
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                    }
+                }
+
+                Section("Add New Pattern") {
+                    TextField("Pattern Name", text: $newPatternName)
+                    TextField("Regex Pattern", text: $newPatternRegex)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.system(.body, design: .monospaced))
+                    TextField("Replacement", text: $newPatternReplacement)
+
+                    if let error = validationError {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+
+                    Button("Add Pattern") {
+                        addPattern()
+                    }
+                    .disabled(newPatternName.isEmpty || newPatternRegex.isEmpty)
+                }
+
+                Section("Example Patterns") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("API Key: [A-Za-z0-9]{32,}")
+                        Text("JWT Token: eyJ[A-Za-z0-9_-]+")
+                        Text("UUID: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+                        Text("IP Address: \\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Custom Patterns")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { onDismiss() }
+                }
+            }
+        }
+        #if os(macOS)
+        .frame(width: 500, height: 450)
+        #endif
+    }
+
+    private func addPattern() {
+        // Validate regex
+        guard (try? NSRegularExpression(pattern: newPatternRegex)) != nil else {
+            validationError = "Invalid regex pattern"
+            return
+        }
+
+        validationError = nil
+        let pattern = PIISanitizer.CustomPattern(
+            name: newPatternName,
+            pattern: newPatternRegex,
+            replacement: newPatternReplacement
+        )
+        sanitizer.addCustomPattern(pattern)
+
+        newPatternName = ""
+        newPatternRegex = ""
+        newPatternReplacement = "[REDACTED]"
     }
 }
 

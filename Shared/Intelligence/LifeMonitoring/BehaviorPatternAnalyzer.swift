@@ -451,7 +451,7 @@ public struct AnalyzerConfiguration: Sendable {
     public var analysisIntervalSeconds: TimeInterval = 300 // 5 minutes
     public var minSequenceLengthForPattern: Int = 3
     public var minRepetitionsForPattern: Int = 3
-    public var appSwitchDistractioThreshold: Int = 60 // per hour
+    public var appSwitchDistractionThreshold: Int = 60 // per hour
 }
 
 /// A detected behavior pattern

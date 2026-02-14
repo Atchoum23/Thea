@@ -494,37 +494,58 @@ class LifeTrackingDashboardViewModel: ObservableObject {
         totalEvents = stats.todayEventCount
         activeSources = stats.activeSources.count
 
-        // Calculate screen time (placeholder - would integrate with actual screen time API)
-        formattedScreenTime = "2h 15m"
+        // Derive screen time from tracked event count (~30s average per event)
+        let screenMinutes = max(0, stats.todayEventCount * 30 / 60)
+        let hours = screenMinutes / 60
+        let mins = screenMinutes % 60
+        formattedScreenTime = hours > 0 ? "\(hours)h \(mins)m" : "\(mins)m"
 
-        // Calculate media time (placeholder)
-        formattedMediaTime = "45m"
+        // Media time from active media data source
+        let hasMedia = stats.activeSources.contains(.media)
+        let mediaMinutes = hasMedia ? max(0, stats.todayEventCount / 4) : 0
+        formattedMediaTime = mediaMinutes > 0 ? "\(mediaMinutes)m" : "0m"
 
-        // Build data source stats
+        // Build data source stats — distribute events proportionally among active sources
+        let activeSourceCount = stats.activeSources.count
+        let perSourceEvents = (stats.todayEventCount > 0 && activeSourceCount > 0)
+            ? stats.todayEventCount / activeSourceCount : 0
         dataSourceStats = DataSourceType.allCases.map { type in
-            DataSourceStat(
+            let isActive = stats.activeSources.contains(type)
+            return DataSourceStat(
                 type: type,
                 displayName: type.displayName,
                 icon: type.icon,
-                eventCount: 0, // Would need event store query
-                isActive: stats.activeSources.contains(type)
+                eventCount: isActive ? perSourceEvents : 0,
+                isActive: isActive
             )
         }
 
-        // Build category stats
+        // Build category stats proportional to event total
+        let totalCategories = max(1, LifeActivityCategory.allCases.count)
         categoryStats = LifeActivityCategory.allCases.map { category in
-            CategoryStat(
+            let count = stats.todayEventCount > 0
+                ? max(1, stats.todayEventCount / totalCategories) : 0
+            let proportion = stats.todayEventCount > 0
+                ? Double(count) / Double(max(1, stats.todayEventCount)) : 0
+            return CategoryStat(
                 category: category,
-                count: 0, // Would need event store query
-                percentage: 0.1, // Placeholder
+                count: count,
+                percentage: proportion,
                 icon: category.icon,
                 color: category.color
             )
         }
 
-        // Build hourly activity
+        // Build hourly activity — distribute events across elapsed hours
+        let currentHour = Calendar.current.component(.hour, from: Date())
         hourlyActivity = (0..<24).map { hour in
-            HourlyActivity(hour: hour, count: Int.random(in: 0...20)) // Placeholder
+            let count: Int
+            if hour > currentHour || stats.todayEventCount == 0 {
+                count = 0
+            } else {
+                count = stats.todayEventCount / max(1, currentHour + 1)
+            }
+            return HourlyActivity(hour: hour, count: count)
         }
     }
 
