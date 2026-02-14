@@ -208,23 +208,31 @@ final class TheaClipSyncService: ObservableObject {
             )
             descriptor.fetchLimit = 1
 
-            let existing = (try? context.fetch(descriptor))?.first
+            let existing: TheaClipEntry?
+            do {
+                existing = try context.fetch(descriptor).first
+            } catch {
+                syncLogger.error("❌ Failed to fetch clip entry: \(error.localizedDescription)")
+                existing = nil
+            }
 
             if let existing {
-                // Update if remote is newer
                 let remoteDate = record["createdAt"] as? Date ?? Date.distantPast
                 if remoteDate > existing.createdAt {
                     applyRecordToEntry(record, entry: existing)
                 }
             } else {
-                // Create new local entry
                 let entry = TheaClipEntry()
                 entry.id = remoteID
                 applyRecordToEntry(record, entry: entry)
                 context.insert(entry)
             }
 
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                syncLogger.error("❌ Failed to save clip entry: \(error.localizedDescription)")
+            }
 
         case "ClipPinboard":
             let remoteID = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "pinboard-", with: "")) ?? UUID()
@@ -234,7 +242,13 @@ final class TheaClipSyncService: ObservableObject {
             )
             descriptor.fetchLimit = 1
 
-            let existing = (try? context.fetch(descriptor))?.first
+            let existing: TheaClipPinboard?
+            do {
+                existing = try context.fetch(descriptor).first
+            } catch {
+                syncLogger.error("❌ Failed to fetch pinboard: \(error.localizedDescription)")
+                existing = nil
+            }
 
             if let existing {
                 existing.name = record["name"] as? String ?? existing.name
@@ -253,7 +267,11 @@ final class TheaClipSyncService: ObservableObject {
                 context.insert(pinboard)
             }
 
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                syncLogger.error("❌ Failed to save pinboard: \(error.localizedDescription)")
+            }
 
         default:
             break
@@ -284,24 +302,28 @@ final class TheaClipSyncService: ObservableObject {
         guard let context = modelContext else { return }
         let name = recordID.recordName
 
-        if name.hasPrefix("clip-"), let uuid = UUID(uuidString: String(name.dropFirst(5))) {
-            var descriptor = FetchDescriptor<TheaClipEntry>(
-                predicate: #Predicate { $0.id == uuid }
-            )
-            descriptor.fetchLimit = 1
-            if let entry = try? context.fetch(descriptor).first {
-                context.delete(entry)
-                try? context.save()
+        do {
+            if name.hasPrefix("clip-"), let uuid = UUID(uuidString: String(name.dropFirst(5))) {
+                var descriptor = FetchDescriptor<TheaClipEntry>(
+                    predicate: #Predicate { $0.id == uuid }
+                )
+                descriptor.fetchLimit = 1
+                if let entry = try context.fetch(descriptor).first {
+                    context.delete(entry)
+                    try context.save()
+                }
+            } else if name.hasPrefix("pinboard-"), let uuid = UUID(uuidString: String(name.dropFirst(9))) {
+                var descriptor = FetchDescriptor<TheaClipPinboard>(
+                    predicate: #Predicate { $0.id == uuid }
+                )
+                descriptor.fetchLimit = 1
+                if let pinboard = try context.fetch(descriptor).first {
+                    context.delete(pinboard)
+                    try context.save()
+                }
             }
-        } else if name.hasPrefix("pinboard-"), let uuid = UUID(uuidString: String(name.dropFirst(9))) {
-            var descriptor = FetchDescriptor<TheaClipPinboard>(
-                predicate: #Predicate { $0.id == uuid }
-            )
-            descriptor.fetchLimit = 1
-            if let pinboard = try? context.fetch(descriptor).first {
-                context.delete(pinboard)
-                try? context.save()
-            }
+        } catch {
+            syncLogger.error("❌ Failed to process remote deletion: \(error.localizedDescription)")
         }
     }
 
@@ -391,6 +413,7 @@ final class TheaClipSyncService: ObservableObject {
 
     private func loadChangeToken() {
         guard let data = UserDefaults.standard.data(forKey: tokenKey) else { return }
+        // try? OK: missing token just triggers full sync
         changeToken = try? NSKeyedUnarchiver.unarchivedObject(
             ofClass: CKServerChangeToken.self,
             from: data
@@ -399,6 +422,7 @@ final class TheaClipSyncService: ObservableObject {
 
     private func saveChangeToken() {
         guard let token = changeToken else { return }
+        // try? OK: token will be re-fetched on next sync if save fails
         let data = try? NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true)
         UserDefaults.standard.set(data, forKey: tokenKey)
     }
