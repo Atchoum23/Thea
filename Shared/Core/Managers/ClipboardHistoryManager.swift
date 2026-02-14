@@ -40,7 +40,7 @@ final class ClipboardHistoryManager: ObservableObject {
             "\\b\\d{3}-\\d{2}-\\d{4}\\b",
             "(?i)(api[_-]?key|apikey|secret[_-]?key|access[_-]?token)[\"']?\\s*[:=]\\s*[\"']?[a-zA-Z0-9_-]{20,}",
             "(?i)AKIA[0-9A-Z]{16}",
-            "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----",
+            "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
         ]
         return patterns.compactMap { try? NSRegularExpression(pattern: $0) }
     }()
