@@ -324,21 +324,105 @@ public actor EnhancedSubagentSystem {
     // MARK: - Private Helpers
 
     private func executeTask(_ task: SubagentTask, context: SubagentContext) async -> EnhancedSubagentResult {
-        // Simulate task execution
-        // In production, this would call the actual AI provider
-        try? await Task.sleep(nanoseconds: 500_000_000)  // 0.5 seconds
+        // Get a real AI provider for execution
+        let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+            ?? ProviderRegistry.shared.getProvider(id: "anthropic")
+            ?? ProviderRegistry.shared.getProvider(id: "openrouter")
 
-        let output = "Executed \(task.agentType.rawValue) task: \(task.description)"
-        let tokensUsed = (task.input.count + output.count) / 4
+        guard let provider else {
+            return EnhancedSubagentResult(
+                taskId: task.id,
+                agentType: task.agentType,
+                status: .failed,
+                output: "No AI provider available for task execution",
+                confidence: 0.0,
+                tokensUsed: 0
+            )
+        }
 
-        return EnhancedSubagentResult(
-            taskId: task.id,
-            agentType: task.agentType,
-            status: .success,
-            output: output,
-            confidence: 0.85,
-            tokensUsed: tokensUsed
+        // Build messages with system prompt from agent type
+        let systemMessage = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .system,
+            content: .text(task.agentType.systemPrompt),
+            timestamp: Date(),
+            model: ""
         )
+
+        let userMessage = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(task.input),
+            timestamp: Date(),
+            model: ""
+        )
+
+        // Select a model appropriate for the task
+        let preferred = task.agentType.preferredModel
+        let modelId: String
+        if preferred.contains("opus") || preferred.contains("sonnet") {
+            modelId = "anthropic/claude-sonnet-4-5-20250929"
+        } else if preferred.contains("haiku") {
+            modelId = "openai/gpt-4o-mini"
+        } else {
+            modelId = "openai/gpt-4o-mini"
+        }
+
+        do {
+            var responseText = ""
+            var tokensUsed = 0
+
+            let stream = try await provider.chat(
+                messages: [systemMessage, userMessage],
+                model: modelId,
+                stream: false
+            )
+
+            for try await chunk in stream {
+                if case .delta(let text) = chunk.type {
+                    responseText += text
+                } else if case .complete(let msg) = chunk.type {
+                    responseText = msg.content.textValue
+                    tokensUsed = (msg.tokenCount ?? 0)
+                }
+            }
+
+            if tokensUsed == 0 {
+                tokensUsed = (task.input.count + responseText.count) / 4
+            }
+
+            // Estimate confidence based on response quality
+            let confidence = estimateResponseConfidence(responseText)
+
+            return EnhancedSubagentResult(
+                taskId: task.id,
+                agentType: task.agentType,
+                status: .success,
+                output: responseText,
+                confidence: confidence,
+                tokensUsed: tokensUsed
+            )
+        } catch {
+            return EnhancedSubagentResult(
+                taskId: task.id,
+                agentType: task.agentType,
+                status: .failed,
+                output: "Task execution failed: \(error.localizedDescription)",
+                confidence: 0.0,
+                tokensUsed: 0
+            )
+        }
+    }
+
+    private func estimateResponseConfidence(_ response: String) -> Double {
+        var confidence = 0.5
+        if response.count > 100 { confidence += 0.1 }
+        if response.count > 500 { confidence += 0.1 }
+        if response.contains("```") { confidence += 0.1 }
+        if response.contains("##") || response.contains("**") { confidence += 0.05 }
+        return min(confidence, 0.95)
     }
 
     private func findConsensus(_ outputs: [String]) -> String {
