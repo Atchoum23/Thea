@@ -233,7 +233,9 @@ final class ClipboardHistoryManager: ObservableObject {
         guard let context = modelContext else { return }
         let entriesToDelete = keepPinned ? recentEntries.filter { !$0.isPinned } : recentEntries
         for entry in entriesToDelete {
+            let entryID = entry.id
             context.delete(entry)
+            Task { await TheaClipSyncService.shared.deleteRemoteEntry(entryID) }
         }
         saveContext()
         recentEntries = keepPinned ? recentEntries.filter(\.isPinned) : []
