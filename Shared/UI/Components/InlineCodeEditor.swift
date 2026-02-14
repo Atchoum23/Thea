@@ -622,6 +622,7 @@ struct InlineCodeBlockView: View {
                             .font(.caption)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Copy code")
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)

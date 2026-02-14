@@ -155,6 +155,7 @@ private struct SuggestionRow: View {
                 Image(systemName: suggestion.source.icon)
                     .font(.theaCaption1)
                     .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
 
                 Text(suggestion.text)
                     .font(.theaSubhead)

@@ -345,9 +345,28 @@ struct MemoryConfigurationView: View {
 
 struct AgentConfigurationView: View {
     @State private var config = AppConfiguration.shared.agentConfig
+    @StateObject private var settings = SettingsManager.shared
 
     var body: some View {
         Form {
+            Section {
+                Toggle("Enable agent delegation", isOn: $settings.agentDelegationEnabled)
+                Toggle("Auto-delegate complex tasks", isOn: $settings.agentAutoDelegateComplexTasks)
+                    .disabled(!settings.agentDelegationEnabled)
+                Picker("Default autonomy", selection: $settings.agentDefaultAutonomy) {
+                    Text("Disabled").tag("disabled")
+                    Text("Ask Always").tag("askAlways")
+                    Text("Balanced").tag("balanced")
+                    Text("Proactive").tag("proactive")
+                    Text("Full Auto").tag("fullAuto")
+                }
+                .disabled(!settings.agentDelegationEnabled)
+            } header: {
+                Text("Delegation")
+            } footer: {
+                Text("Use @agent prefix in chat to delegate tasks to specialized sub-agents.")
+            }
+
             Section("Task Execution") {
                 Stepper("Max Retries: \(config.maxRetryCount)", value: $config.maxRetryCount, in: 0 ... 10)
                 Stepper("Base Task Duration: \(Int(config.baseTaskDurationSeconds))s", value: $config.baseTaskDurationSeconds, in: 10 ... 120, step: 10)
