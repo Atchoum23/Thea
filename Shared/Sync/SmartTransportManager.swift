@@ -506,38 +506,19 @@ actor SmartTransportManager {
         let nwHost = NWEndpoint.Host(host)
         let nwPort = NWEndpoint.Port(rawValue: port) ?? NWEndpoint.Port(rawValue: 18790)!
         let connection = NWConnection(host: nwHost, port: nwPort, using: .tcp)
+        let guard_ = ContinuationGuard()
 
-        return await withCheckedContinuation { continuation in
-            var hasResumed = false
-            let lock = NSLock()
-
-            // Timeout
-            let timeoutWork = DispatchWorkItem {
-                lock.lock()
-                defer { lock.unlock() }
-                guard !hasResumed else { return }
-                hasResumed = true
-                connection.cancel()
-                continuation.resume(returning: nil)
-            }
-            DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: timeoutWork)
-
-            connection.stateUpdateHandler = { state in
-                lock.lock()
-                defer { lock.unlock() }
-                guard !hasResumed else { return }
-
+        let connectResult: Double? = await withCheckedContinuation { (continuation: CheckedContinuation<Double?, Never>) in
+            connection.stateUpdateHandler = { [guard_] state in
                 switch state {
                 case .ready:
-                    hasResumed = true
-                    timeoutWork.cancel()
-                    let elapsed = (CFAbsoluteTimeGetCurrent() - startTime) * 1000.0 // ms
+                    guard guard_.tryResume() else { return }
+                    let elapsed = (CFAbsoluteTimeGetCurrent() - startTime) * 1000.0
                     connection.cancel()
                     continuation.resume(returning: elapsed)
 
                 case .failed, .cancelled:
-                    hasResumed = true
-                    timeoutWork.cancel()
+                    guard guard_.tryResume() else { return }
                     continuation.resume(returning: nil)
 
                 default:
@@ -546,6 +527,30 @@ actor SmartTransportManager {
             }
 
             connection.start(queue: .global(qos: .utility))
+
+            // Schedule timeout on a detached task
+            Task.detached { [guard_] in
+                try? await Task.sleep(for: .seconds(timeout))
+                guard guard_.tryResume() else { return }
+                connection.cancel()
+                continuation.resume(returning: nil)
+            }
+        }
+
+        return connectResult
+    }
+
+    /// Thread-safe one-shot guard for continuation resumption
+    private final class ContinuationGuard: @unchecked Sendable {
+        private let lock = NSLock()
+        private var resumed = false
+
+        func tryResume() -> Bool {
+            lock.lock()
+            defer { lock.unlock() }
+            guard !resumed else { return false }
+            resumed = true
+            return true
         }
     }
 

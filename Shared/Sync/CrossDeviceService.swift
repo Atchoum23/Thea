@@ -251,7 +251,7 @@ public actor CrossDeviceService {
     // MARK: - Status
 
     /// Get the current transport summary for UI display
-    public func getTransportSummary() async -> [(transport: TheaTransport, available: Bool, latency: Double?, active: Bool)] {
+    func getTransportSummary() async -> [(transport: TheaTransport, available: Bool, latency: Double?, active: Bool)] {
         await SmartTransportManager.shared.transportSummary()
     }
 
