@@ -190,7 +190,8 @@ actor TheaAgentRunner {
                 session.updateContextPressure()
             }
 
-            logger.info("Summarized context for agent \(session.id.uuidString.prefix(8)), compression #\(await MainActor.run { session.summarizationCount })")
+            let compressionCount = await MainActor.run { session.summarizationCount }
+            logger.info("Summarized context for agent \(session.id.uuidString.prefix(8)), compression #\(compressionCount)")
 
         } catch {
             logger.warning("Context summarization failed for agent \(session.id.uuidString.prefix(8)): \(error.localizedDescription)")
@@ -218,12 +219,12 @@ actor TheaAgentRunner {
 
     // MARK: - Helpers
 
-    private func estimateTokens(_ text: String) -> Int {
+    nonisolated private func estimateTokens(_ text: String) -> Int {
         // Rough estimate: ~4 chars per token
         text.count / 4
     }
 
-    private func estimateConfidence(_ response: String) -> Float {
+    nonisolated private func estimateConfidence(_ response: String) -> Float {
         // Basic heuristic: longer, structured responses = higher confidence
         let length = response.count
         let hasCodeBlocks = response.contains("```")
