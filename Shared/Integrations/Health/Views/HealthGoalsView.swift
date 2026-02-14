@@ -690,9 +690,7 @@ final class HealthGoalsViewModel {
     }
 
     func loadGoals() async {
-        // Would load from persistent storage
-        // Mock data for demonstration
-        await generateMockData()
+        await loadPersistedGoalsAndRefresh()
     }
 
     func addGoal(_ goal: HealthGoal) async {
@@ -734,7 +732,7 @@ final class HealthGoalsViewModel {
     private static let completedGoalsKey = "thea.health.goals.completed"
     private let healthKitService = HealthKitService()
 
-    private func generateMockData() async {
+    private func loadPersistedGoalsAndRefresh() async {
         // Load persisted goals from UserDefaults
         if let data = UserDefaults.standard.data(forKey: Self.goalsKey),
            let saved = try? JSONDecoder().decode([HealthGoal].self, from: data)

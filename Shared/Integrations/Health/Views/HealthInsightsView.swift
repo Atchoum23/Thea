@@ -773,7 +773,20 @@ final class HealthInsightsViewModel {
             heartRateTrend = computeTrend(from: heartRateTrendData)
         }
 
-        nutritionScore = 50
+        // Nutrition score derived from activity + body composition signals
+        // (HealthKit dietary tracking requires explicit user logging)
+        // Use calorie balance and activity diversity as proxy
+        let calorieBalance = averageActiveCalories > 0
+            ? min(100.0, Double(averageActiveCalories) / 500.0 * 100.0)
+            : 0.0
+        let activityConsistency = stepValues.isEmpty ? 0.0 : {
+            let avg = stepValues.reduce(0, +) / Double(stepValues.count)
+            guard avg > 0 else { return 0.0 }
+            let variance = stepValues.map { ($0 - avg) * ($0 - avg) }.reduce(0, +) / Double(stepValues.count)
+            let cv = sqrt(variance) / avg // coefficient of variation
+            return min(100.0, max(0.0, (1.0 - cv) * 100.0))
+        }()
+        nutritionScore = (calorieBalance * 0.6 + activityConsistency * 0.4)
         healthScore = (sleepScore + activityScore + heartScore + nutritionScore) / 4
 
         generateInsightsFromData()
