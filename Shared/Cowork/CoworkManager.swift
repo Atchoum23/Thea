@@ -115,22 +115,25 @@
 
             guard let provider else { return nil }
 
+            let modelId = "openai/gpt-4o-mini"
             let systemMessage = AIMessage(
                 id: UUID(), conversationID: UUID(), role: .system,
-                content: """
+                content: .text("""
                 You are a task planner. Given a user instruction, break it into numbered steps.
                 Each step should have a description and optionally a tool name.
                 Available tools: FileScanner, FileAnalyzer, DirectoryCreator, FileMover, \
                 FileWriter, ContentGenerator, RequirementAnalyzer, ReportGenerator, CodeGenerator.
                 Working directory: \(context.workingDirectory?.path ?? "unknown")
                 Respond ONLY with a JSON array: [{"description": "...", "tool": "..."}]
-                """,
-                timestamp: Date()
+                """),
+                timestamp: Date(),
+                model: modelId
             )
             let userMessage = AIMessage(
                 id: UUID(), conversationID: UUID(), role: .user,
-                content: instruction,
-                timestamp: Date()
+                content: .text(instruction),
+                timestamp: Date(),
+                model: modelId
             )
 
             do {

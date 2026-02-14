@@ -217,20 +217,22 @@ import Foundation
             for byte in data { checksum ^= byte }
             data.append(checksum)
 
-            // Write via IOAVService
+            // Write via IOAVService using IOConnectCallMethod
             var connect: io_connect_t = IO_OBJECT_NULL
             let openResult = IOServiceOpen(avService, mach_task_self_, 0, &connect)
             guard openResult == kIOReturnSuccess else { throw DDCError.connectionFailed }
             defer { IOServiceClose(connect) }
 
-            // Use IOConnectCallScalarMethod selector 2 (I2C write) to send DDC data
-            var inputValues: [UInt64] = [0x6E, UInt64(data.count)] + data.map { UInt64($0) }
-            let writeResult = IOConnectCallScalarMethod(
-                connect,
-                2,
-                &inputValues,
-                UInt32(inputValues.count)
-            )
+            let writeResult = data.withUnsafeBufferPointer { buffer in
+                IOConnectCallMethod(
+                    connect,
+                    2,      // I2C write selector
+                    nil, 0, // no scalar inputs
+                    buffer.baseAddress, data.count,
+                    nil, nil, // no scalar outputs
+                    nil, nil  // no struct output
+                )
+            }
 
             guard writeResult == kIOReturnSuccess else { throw DDCError.commandFailed }
         }
