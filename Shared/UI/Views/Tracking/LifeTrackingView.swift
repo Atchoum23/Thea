@@ -76,7 +76,7 @@ struct LifeTrackingView: View {
 
         // Fetch recent insights
         var insightDescriptor = FetchDescriptor<LifeInsight>(
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+            sortBy: [SortDescriptor(\LifeInsight.date, order: .reverse)]
         )
         insightDescriptor.fetchLimit = 5
         insights = (try? modelContext.fetch(insightDescriptor)) ?? []
