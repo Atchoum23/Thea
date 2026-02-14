@@ -11,7 +11,9 @@ final class OfflineQueueAdvancedTests: XCTestCase {
     }
 
     func testRequestPriorityNotGreaterThanSelf() {
-        XCTAssertFalse(RequestPriority.normal > RequestPriority.normal)
+        let a = RequestPriority.normal
+        let b = RequestPriority.normal
+        XCTAssertFalse(a > b)
     }
 
     func testRequestPriorityRangeComparisons() {

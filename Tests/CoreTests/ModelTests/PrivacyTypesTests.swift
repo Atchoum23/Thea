@@ -152,7 +152,7 @@ final class PrivacyTypesTests: XCTestCase {
 
     // MARK: - Policy Configuration Tests
 
-    struct TestPolicy {
+    private struct TestPolicy {
         let name: String
         let strictnessLevel: StrictnessLevel
         let allowPII: Bool
