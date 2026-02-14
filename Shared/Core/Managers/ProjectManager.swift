@@ -1,6 +1,9 @@
 import Combine
 import Foundation
+import os.log
 @preconcurrency import SwiftData
+
+private let projectLogger = Logger(subsystem: "ai.thea.app", category: "ProjectManager")
 
 @MainActor
 final class ProjectManager: ObservableObject {
@@ -30,7 +33,7 @@ final class ProjectManager: ObservableObject {
         )
 
         modelContext?.insert(project)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { projectLogger.error("Failed to save new project: \(error.localizedDescription)") }
 
         projects.insert(project, at: 0)
         return project
@@ -46,12 +49,12 @@ final class ProjectManager: ObservableObject {
         }
 
         project.updatedAt = Date()
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { projectLogger.error("Failed to save project update: \(error.localizedDescription)") }
     }
 
     func deleteProject(_ project: Project) {
         modelContext?.delete(project)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { projectLogger.error("Failed to save after deleting project: \(error.localizedDescription)") }
 
         projects.removeAll { $0.id == project.id }
 
@@ -66,7 +69,7 @@ final class ProjectManager: ObservableObject {
         for project in projects {
             context.delete(project)
         }
-        try? context.save()
+        do { try context.save() } catch { projectLogger.error("Failed to save after clearing all data: \(error.localizedDescription)") }
 
         projects.removeAll()
         activeProject = nil
@@ -81,13 +84,13 @@ final class ProjectManager: ObservableObject {
     func addConversation(_ conversation: Conversation, to project: Project) {
         conversation.projectID = project.id
         project.conversations.append(conversation)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { projectLogger.error("Failed to save after adding conversation to project: \(error.localizedDescription)") }
     }
 
     func removeConversation(_ conversation: Conversation, from project: Project) {
         conversation.projectID = nil
         project.conversations.removeAll { $0.id == conversation.id }
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { projectLogger.error("Failed to save after removing conversation from project: \(error.localizedDescription)") }
     }
 
     // MARK: - File Management
@@ -102,12 +105,12 @@ final class ProjectManager: ObservableObject {
         )
 
         project.files.append(file)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { projectLogger.error("Failed to save after adding file to project: \(error.localizedDescription)") }
     }
 
     func removeFile(from project: Project, fileID: UUID) {
         project.files.removeAll { $0.id == fileID }
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { projectLogger.error("Failed to save after removing file from project: \(error.localizedDescription)") }
     }
 
     // MARK: - Private Methods
@@ -117,7 +120,13 @@ final class ProjectManager: ObservableObject {
 
         // Fetch all and sort in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<Project>()
-        let allProjects = (try? context.fetch(descriptor)) ?? []
+        let allProjects: [Project]
+        do {
+            allProjects = try context.fetch(descriptor)
+        } catch {
+            projectLogger.error("Failed to fetch projects: \(error.localizedDescription)")
+            allProjects = []
+        }
         projects = allProjects.sorted { $0.updatedAt > $1.updatedAt }
     }
 }
