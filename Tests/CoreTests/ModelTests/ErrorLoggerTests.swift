@@ -134,7 +134,7 @@ final class ErrorLoggerTryOrNilTests: XCTestCase {
     }
 
     func testTryOrNilDoesNotLogOnSuccess() {
-        let _ = TestErrorLogger.tryOrNil(context: "no error") {
+        _ = TestErrorLogger.tryOrNil(context: "no error") {
             [1, 2, 3]
         }
         XCTAssertNil(TestErrorLogger.lastLoggedError)
@@ -214,14 +214,14 @@ final class ErrorLoggerTryOrDefaultTests: XCTestCase {
     }
 
     func testTryOrDefaultLogsErrorContext() {
-        let _ = TestErrorLogger.tryOrDefault(false, context: "bool check") {
+        _ = TestErrorLogger.tryOrDefault(false, context: "bool check") {
             throw TestError.withMessage("Failed check")
         }
         XCTAssertEqual(TestErrorLogger.lastLoggedError?.1, "bool check")
     }
 
     func testTryOrDefaultDoesNotLogOnSuccess() {
-        let _ = TestErrorLogger.tryOrDefault(0, context: "no log") {
+        _ = TestErrorLogger.tryOrDefault(0, context: "no log") {
             100
         }
         XCTAssertNil(TestErrorLogger.lastLoggedError)
