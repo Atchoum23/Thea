@@ -324,10 +324,12 @@ public actor EnhancedSubagentSystem {
     // MARK: - Private Helpers
 
     private func executeTask(_ task: SubagentTask, context: SubagentContext) async -> EnhancedSubagentResult {
-        // Get a real AI provider for execution
-        let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
-            ?? ProviderRegistry.shared.getProvider(id: "anthropic")
-            ?? ProviderRegistry.shared.getProvider(id: "openrouter")
+        // Get a real AI provider for execution (must access @MainActor singletons)
+        let provider = await MainActor.run {
+            ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider)
+                ?? ProviderRegistry.shared.getProvider(id: "anthropic")
+                ?? ProviderRegistry.shared.getProvider(id: "openrouter")
+        }
 
         guard let provider else {
             return EnhancedSubagentResult(
@@ -416,8 +418,8 @@ public actor EnhancedSubagentSystem {
         }
     }
 
-    private func estimateResponseConfidence(_ response: String) -> Double {
-        var confidence = 0.5
+    private func estimateResponseConfidence(_ response: String) -> Float {
+        var confidence: Float = 0.5
         if response.count > 100 { confidence += 0.1 }
         if response.count > 500 { confidence += 0.1 }
         if response.contains("```") { confidence += 0.1 }

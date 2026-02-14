@@ -150,8 +150,7 @@ extension ChatManager {
         let orchestrator = TheaAgentOrchestrator.shared
         let session = await orchestrator.delegateTask(
             description: text,
-            from: conversationID,
-            explicitAgentType: nil
+            from: conversationID
         )
         intLogger.info("Auto-delegated task to agent: \(session.name) [\(session.agentType.rawValue)]")
         return session

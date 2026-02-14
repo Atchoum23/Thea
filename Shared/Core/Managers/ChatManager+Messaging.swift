@@ -45,12 +45,20 @@ extension ChatManager {
                 context.insert(userMessage)
 
                 // Create an assistant message indicating delegation
-                let delegationMsg = createAssistantMessage(in: conversation, model: model, device: currentDevice)
-                delegationMsg.content = .text(
-                    "I've delegated this task to a specialized **\(session.agentType.displayName)** agent. "
+                let delegationText = "I've delegated this task to a specialized **\(session.agentType.displayName)** agent. "
                     + "You can monitor its progress in the Agents panel. "
                     + "I'll continue to be available for other requests while the agent works."
+                let orderIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
+                let delegationMsg = Message(
+                    conversationID: conversation.id,
+                    role: .assistant,
+                    content: .text(delegationText),
+                    orderIndex: orderIndex,
+                    deviceID: currentDevice.id,
+                    deviceName: currentDevice.name,
+                    deviceType: currentDevice.type.rawValue
                 )
+                delegationMsg.model = model
                 conversation.messages.append(delegationMsg)
                 context.insert(delegationMsg)
                 try context.save()
