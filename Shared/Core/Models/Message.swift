@@ -1,6 +1,11 @@
 import Foundation
 @preconcurrency import SwiftData
 
+/// Shared JSON coders to avoid repeated instantiation in computed properties.
+/// JSONDecoder/JSONEncoder are reference types and thread-safe for concurrent reads.
+private let sharedDecoder = JSONDecoder()
+private let sharedEncoder = JSONEncoder()
+
 @Model
 final class Message {
     @Attribute(.unique) var id: UUID
@@ -63,11 +68,11 @@ final class Message {
         self.id = id
         self.conversationID = conversationID
         self.role = role.rawValue
-        contentData = (try? JSONEncoder().encode(content)) ?? Data()
+        contentData = (try? sharedEncoder.encode(content)) ?? Data()
         self.timestamp = timestamp
         self.model = model
         self.tokenCount = tokenCount
-        metadataData = metadata.flatMap { try? JSONEncoder().encode($0) }
+        metadataData = metadata.flatMap { try? sharedEncoder.encode($0) }
         self.orderIndex = orderIndex
         self.parentMessageId = parentMessageId
         self.branchIndex = branchIndex
@@ -82,12 +87,12 @@ final class Message {
     }
 
     var content: MessageContent {
-        (try? JSONDecoder().decode(MessageContent.self, from: contentData)) ?? .text("")
+        (try? sharedDecoder.decode(MessageContent.self, from: contentData)) ?? .text("")
     }
 
     var metadata: MessageMetadata? {
         guard let data = metadataData else { return nil }
-        return try? JSONDecoder().decode(MessageMetadata.self, from: data)
+        return try? sharedDecoder.decode(MessageMetadata.self, from: data)
     }
 
     #if !THEA_MODELS_ONLY
@@ -115,7 +120,7 @@ final class Message {
     /// Original content if this message was edited
     var originalContent: MessageContent? {
         guard let data = originalContentData else { return nil }
-        return try? JSONDecoder().decode(MessageContent.self, from: data)
+        return try? sharedDecoder.decode(MessageContent.self, from: data)
     }
 
     /// Create an edited version of this message (for branching)

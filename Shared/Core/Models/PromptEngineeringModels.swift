@@ -181,3 +181,11 @@ final class CodeFewShotExample {
         self.createdAt = createdAt
     }
 }
+
+// MARK: - Identifiable Conformance
+
+extension UserPromptPreference: Identifiable {}
+extension CodeErrorRecord: Identifiable {}
+extension CodeCorrection: Identifiable {}
+extension PromptTemplate: Identifiable {}
+extension CodeFewShotExample: Identifiable {}

@@ -192,3 +192,9 @@ final class TheaClipPinboardEntry {
         self.pinboard = pinboard
     }
 }
+
+// MARK: - Identifiable Conformance
+
+extension TheaClipEntry: Identifiable {}
+extension TheaClipPinboard: Identifiable {}
+extension TheaClipPinboardEntry: Identifiable {}

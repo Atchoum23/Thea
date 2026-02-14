@@ -229,3 +229,13 @@ final class WindowState {
         self.lastOpened = lastOpened
     }
 }
+
+// MARK: - Identifiable Conformance
+
+extension HealthSnapshot: Identifiable {}
+extension DailyScreenTimeRecord: Identifiable {}
+extension DailyInputStatistics: Identifiable {}
+extension BrowsingRecord: Identifiable {}
+extension LocationVisitRecord: Identifiable {}
+extension LifeInsight: Identifiable {}
+extension WindowState: Identifiable {}
