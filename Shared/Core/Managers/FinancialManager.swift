@@ -1,6 +1,9 @@
 import Foundation
 import Observation
+import os.log
 @preconcurrency import SwiftData
+
+private let financialLogger = Logger(subsystem: "ai.thea.app", category: "FinancialManager")
 
 @MainActor
 @Observable
@@ -32,14 +35,14 @@ final class FinancialManager {
             currency: "USD"
         )
         modelContext?.insert(account)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { financialLogger.error("Failed to save new account: \(error.localizedDescription)") }
         accounts.append(account)
         return account
     }
 
     func removeAccount(_ account: FinancialAccount) {
         modelContext?.delete(account)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { financialLogger.error("Failed to save after removing account: \(error.localizedDescription)") }
         accounts.removeAll { $0.id == account.id }
     }
 
@@ -61,14 +64,14 @@ final class FinancialManager {
             date: date
         )
         modelContext?.insert(transaction)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { financialLogger.error("Failed to save new transaction: \(error.localizedDescription)") }
         transactions.append(transaction)
         return transaction
     }
 
     func removeTransaction(_ transaction: FinancialTransaction) {
         modelContext?.delete(transaction)
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { financialLogger.error("Failed to save after removing transaction: \(error.localizedDescription)") }
         transactions.removeAll { $0.id == transaction.id }
     }
 
@@ -81,7 +84,7 @@ final class FinancialManager {
         for account in accounts {
             context.delete(account)
         }
-        try? context.save()
+        do { try context.save() } catch { financialLogger.error("Failed to save after clearing all data: \(error.localizedDescription)") }
 
         transactions.removeAll()
         accounts.removeAll()
@@ -92,11 +95,11 @@ final class FinancialManager {
         isSyncing = true
 
         // Simulate sync delay
-        try? await Task.sleep(for: .seconds(1))
+        try? await Task.sleep(for: .seconds(1)) // try? OK: cancellation is best-effort
 
         // Update the account's last sync time
         account.updatedAt = Date()
-        try? modelContext?.save()
+        do { try modelContext?.save() } catch { financialLogger.error("Failed to save after syncing account: \(error.localizedDescription)") }
 
         isSyncing = false
     }
@@ -123,10 +126,20 @@ final class FinancialManager {
 
         var accountDescriptor = FetchDescriptor<FinancialAccount>()
         accountDescriptor.sortBy = [SortDescriptor(\.name)]
-        accounts = (try? context.fetch(accountDescriptor)) ?? []
+        do {
+            accounts = try context.fetch(accountDescriptor)
+        } catch {
+            financialLogger.error("Failed to fetch accounts: \(error.localizedDescription)")
+            accounts = []
+        }
 
         var transactionDescriptor = FetchDescriptor<FinancialTransaction>()
         transactionDescriptor.sortBy = [SortDescriptor(\.date, order: .reverse)]
-        transactions = (try? context.fetch(transactionDescriptor)) ?? []
+        do {
+            transactions = try context.fetch(transactionDescriptor)
+        } catch {
+            financialLogger.error("Failed to fetch transactions: \(error.localizedDescription)")
+            transactions = []
+        }
     }
 }
