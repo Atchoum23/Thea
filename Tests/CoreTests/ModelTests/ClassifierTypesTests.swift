@@ -203,14 +203,14 @@ final class SeededRandomGeneratorTests: XCTestCase {
 final class ClassificationResponseTests: XCTestCase {
 
     func testBasicCodable() throws {
-        let json = """
+        let json = Data("""
         {
             "taskType": "codeGeneration",
             "confidence": 0.95,
             "reasoning": "Contains code keywords",
             "alternatives": null
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let response = try JSONDecoder().decode(
             ClassificationResponse.self, from: json
@@ -222,7 +222,7 @@ final class ClassificationResponseTests: XCTestCase {
     }
 
     func testWithAlternatives() throws {
-        let json = """
+        let json = Data("""
         {
             "taskType": "analysis",
             "confidence": 0.7,
@@ -232,7 +232,7 @@ final class ClassificationResponseTests: XCTestCase {
                 {"type": "factual", "confidence": 0.1}
             ]
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let response = try JSONDecoder().decode(
             ClassificationResponse.self, from: json

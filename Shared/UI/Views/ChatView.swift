@@ -12,6 +12,7 @@ struct ChatView: View {
 
     @State private var chatManager = ChatManager.shared
     @State private var planManager = PlanManager.shared
+    @State private var orchestrator = TheaAgentOrchestrator.shared
     @State private var inputText = ""
     @State private var selectedProvider: AIProvider?
     @State private var showingError: Error?
@@ -23,6 +24,9 @@ struct ChatView: View {
 
     /// Message being edited (triggers edit sheet)
     @State private var editingMessage: Message?
+
+    /// Selected agent session (for inspector panel)
+    @State private var selectedAgentSession: TheaAgentSession?
 
     /// Tracks which branch index is selected for each parent message ID
     @State private var selectedBranches: [UUID: Int] = [:]
@@ -97,6 +101,13 @@ struct ChatView: View {
             }
             #endif
             messageList
+            if !orchestrator.activeSessions.isEmpty {
+                TheaAgentStatusBar(
+                    sessions: orchestrator.sessions
+                ) { session in
+                    selectedAgentSession = session
+                }
+            }
             chatInput
         }
         .overlay(alignment: .bottomTrailing) {
@@ -106,9 +117,19 @@ struct ChatView: View {
             }
         }
         #if os(macOS) || os(iOS)
-        .inspector(isPresented: $planManager.isPanelVisible) {
-            PlanPanel()
-                .inspectorColumnWidth(min: 300, ideal: 400, max: 500)
+        .inspector(isPresented: Binding(
+            get: { planManager.isPanelVisible || selectedAgentSession != nil },
+            set: { if !$0 { planManager.isPanelVisible = false; selectedAgentSession = nil } }
+        )) {
+            if let session = selectedAgentSession {
+                #if os(macOS)
+                TheaAgentDetailView(session: session)
+                    .inspectorColumnWidth(min: 300, ideal: 400, max: 500)
+                #endif
+            } else {
+                PlanPanel()
+                    .inspectorColumnWidth(min: 300, ideal: 400, max: 500)
+            }
         }
         #endif
         .navigationTitle(conversation.title)
@@ -125,6 +146,21 @@ struct ChatView: View {
                             Label("Plan", systemImage: "list.bullet.clipboard")
                         }
                         .help("Toggle plan panel")
+                    }
+                }
+
+                ToolbarItem {
+                    if !orchestrator.sessions.isEmpty {
+                        Button {
+                            if let first = orchestrator.activeSessions.first {
+                                selectedAgentSession = first
+                            } else if let first = orchestrator.sessions.first {
+                                selectedAgentSession = first
+                            }
+                        } label: {
+                            Label("Agents", systemImage: "person.3.fill")
+                        }
+                        .help("Show agent details")
                     }
                 }
 
@@ -544,6 +580,19 @@ struct ChatView: View {
 
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         inputText = ""
+
+        // Parse @agent prefix — delegate to orchestrator instead of direct chat
+        if text.hasPrefix("@agent "), SettingsManager.shared.agentDelegationEnabled {
+            let taskDescription = String(text.dropFirst(7))
+            Task {
+                let session = await orchestrator.delegateTask(
+                    description: taskDescription,
+                    from: conversation.id
+                )
+                selectedAgentSession = session
+            }
+            return
+        }
 
         Task {
             do {
