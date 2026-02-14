@@ -609,29 +609,22 @@ extension AdvancedSettingsView {
 
     func calculateCacheSize() {
         Task {
-            let totalBytes = await computeRealCacheSize()
-            await MainActor.run {
-                cacheSize = formatBytes(totalBytes)
-            }
+            let totalBytes = Self.computeRealCacheSize()
+            cacheSize = Self.formatBytes(totalBytes)
         }
     }
 
     func calculateMemoryUsage() {
-        Task {
-            let info = ProcessInfo.processInfo
-            let physicalMemory = info.physicalMemory
-            let footprint = currentMemoryFootprint()
-            await MainActor.run {
-                if footprint > 0 {
-                    memoryUsage = "\(formatBytes(UInt64(footprint))) / \(formatBytes(physicalMemory))"
-                } else {
-                    memoryUsage = formatBytes(physicalMemory)
-                }
-            }
+        let physicalMemory = ProcessInfo.processInfo.physicalMemory
+        let footprint = Self.currentMemoryFootprint()
+        if footprint > 0 {
+            memoryUsage = "\(Self.formatBytes(UInt64(footprint))) / \(Self.formatBytes(physicalMemory))"
+        } else {
+            memoryUsage = Self.formatBytes(physicalMemory)
         }
     }
 
-    private func currentMemoryFootprint() -> UInt64 {
+    private static func currentMemoryFootprint() -> UInt64 {
         var info = mach_task_basic_info()
         var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size / MemoryLayout<natural_t>.size)
         let result = withUnsafeMutablePointer(to: &info) {
@@ -642,18 +635,19 @@ extension AdvancedSettingsView {
         return result == KERN_SUCCESS ? info.resident_size : 0
     }
 
-    private func computeRealCacheSize() async -> UInt64 {
+    private static func computeRealCacheSize() -> UInt64 {
         let fm = FileManager.default
         var totalBytes: UInt64 = 0
+        let bundleId = Bundle.main.bundleIdentifier ?? "app.thea"
         let cacheDirs: [URL?] = [
             fm.urls(for: .cachesDirectory, in: .userDomainMask).first?
-                .appendingPathComponent(Bundle.main.bundleIdentifier ?? "app.thea"),
+                .appendingPathComponent(bundleId),
             fm.temporaryDirectory
         ]
         for dirOpt in cacheDirs {
             guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
             if let enumerator = fm.enumerator(at: dir, includingPropertiesForKeys: [.fileSizeKey]) {
-                for case let fileURL as URL in enumerator {
+                while let fileURL = enumerator.nextObject() as? URL {
                     if let values = try? fileURL.resourceValues(forKeys: [.fileSizeKey]),
                        let size = values.fileSize {
                         totalBytes += UInt64(size)
@@ -664,7 +658,7 @@ extension AdvancedSettingsView {
         return totalBytes
     }
 
-    private func formatBytes(_ bytes: UInt64) -> String {
+    private static func formatBytes(_ bytes: UInt64) -> String {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
         return formatter.string(fromByteCount: Int64(bytes))

@@ -713,7 +713,7 @@ final class AIModelGovernor {
         }
         guard result == KERN_SUCCESS else { return 0.5 }
 
-        let pageSize = Double(vm_page_size)
+        let pageSize = Double(getpagesize())
         let totalMemory = Double(ProcessInfo.processInfo.physicalMemory)
         let freeMemory = Double(stats.free_count) * pageSize
         let usedMemory = totalMemory - freeMemory
