@@ -27,28 +27,38 @@ extension BackupManager {
             try? fileManager.removeItem(at: tempDir)
         }
 
-        // Decompress to read metadata
-        Task {
-            try await decompressArchive(source, to: tempDir)
-        }
-
-        // For now, just copy the file
+        // Copy archive to backup directory
         let fileName = source.lastPathComponent
         let destPath = backupDirectory.appendingPathComponent(fileName)
 
         if fileManager.fileExists(atPath: destPath.path) {
             try fileManager.removeItem(at: destPath)
         }
-
         try fileManager.copyItem(at: source, to: destPath)
 
-        // Create backup info
+        // Try to read metadata from the archive
+        var backupName = source.deletingPathExtension().lastPathComponent
+        var backupDate = Date()
+        if let metadataURL = URL(string: tempDir.appendingPathComponent("metadata.json").path),
+           FileManager.default.fileExists(atPath: metadataURL.path),
+           let data = try? Data(contentsOf: metadataURL),
+           let metadata = try? JSONDecoder().decode(BackupMetadata.self, from: data) {
+            backupName = metadata.name
+            backupDate = metadata.createdAt
+            // Verify compatibility
+            guard isCompatible(metadata: metadata) else {
+                try? fileManager.removeItem(at: destPath)
+                throw BackupError.incompatibleVersion(metadata.appVersion)
+            }
+        }
+
+        let fileSize = (try? fileManager.attributesOfItem(atPath: destPath.path)[.size] as? Int64) ?? 0
         let backupInfo = try BackupInfo(
             id: UUID().uuidString,
-            name: source.deletingPathExtension().lastPathComponent,
+            name: backupName,
             type: .imported,
-            createdAt: Date(),
-            size: fileManager.attributesOfItem(atPath: destPath.path)[.size] as? Int64 ?? 0,
+            createdAt: backupDate,
+            size: fileSize,
             path: destPath
         )
 
