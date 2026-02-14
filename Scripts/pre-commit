@@ -175,9 +175,13 @@ SWIFT_FILES=$(git diff --cached --name-only --diff-filter=d | grep "\.swift$" ||
 if [ -n "$SWIFT_FILES" ]; then
     if command -v swiftlint &> /dev/null; then
         echo -e "${BLUE}Phase 2: Running SwiftLint on $(echo "$SWIFT_FILES" | wc -l | tr -d ' ') Swift files...${NC}"
-        if ! echo "$SWIFT_FILES" | xargs swiftlint lint --quiet --force-exclude 2>/dev/null; then
+        LINT_OUTPUT=$(echo "$SWIFT_FILES" | xargs swiftlint lint --force-exclude 2>&1 || true)
+        if echo "$LINT_OUTPUT" | grep -q "error:"; then
             echo -e "${RED}SwiftLint found issues in staged files${NC}"
+            echo "$LINT_OUTPUT" | grep "error:"
             FAILED=1
+        elif echo "$LINT_OUTPUT" | grep -q "No lintable files"; then
+            echo -e "${GREEN}SwiftLint passed (files excluded by config)${NC}"
         else
             echo -e "${GREEN}SwiftLint passed${NC}"
         fi
