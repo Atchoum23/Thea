@@ -12,8 +12,8 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
     public let id = "anthropic"
     public let name = "Anthropic"
 
-    private let logger = Logger(subsystem: "com.thea.v2", category: "AnthropicProvider")
-    private let baseURL = "https://api.anthropic.com/v1"
+    let logger = Logger(subsystem: "com.thea.v2", category: "AnthropicProvider")
+    let baseURL = "https://api.anthropic.com/v1"
     private let apiKey: String
     private let apiVersion = "2023-06-01"
 
@@ -44,7 +44,24 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
         model: String,
         options: ChatOptions
     ) async throws -> AsyncThrowingStream<StreamChunk, Error> {
-        // Anthropic requires separate system prompt and messages
+        let requestBody = buildRequestBody(messages: messages, model: model, options: options)
+
+        let request = try buildRequest(body: requestBody, options: options)
+
+        if options.stream {
+            return try await streamChat(request: request)
+        } else {
+            return try await nonStreamChat(request: request)
+        }
+    }
+
+    // MARK: - Request Body Construction
+
+    private func buildRequestBody(
+        messages: [ChatMessage],
+        model: String,
+        options: ChatOptions
+    ) -> [String: Any] {
         var systemPrompt: String?
         var anthropicMessages: [[String: Any]] = []
 
@@ -66,26 +83,41 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
             "stream": options.stream
         ]
 
-        // Handle system prompt with optional cache control
-        if let system = systemPrompt ?? options.systemPrompt {
-            if let cacheControl = options.cacheControl {
-                // Use content block format with cache_control for prompt caching
-                // Supports both 5-minute (ephemeral) and 1-hour (longLived) TTL
-                requestBody["system"] = [
-                    [
-                        "type": "text",
-                        "text": system,
-                        "cache_control": [
-                            "type": "ephemeral",
-                            "ttl": cacheControl.ttl
-                        ]
+        applySystemPrompt(to: &requestBody, systemPrompt: systemPrompt, options: options)
+        applyModelParameters(to: &requestBody, options: options)
+        applyOutputConfig(to: &requestBody, options: options)
+        applyContextManagement(to: &requestBody, options: options)
+        applyServerTools(to: &requestBody, options: options)
+
+        return requestBody
+    }
+
+    private func applySystemPrompt(
+        to requestBody: inout [String: Any],
+        systemPrompt: String?,
+        options: ChatOptions
+    ) {
+        guard let system = systemPrompt ?? options.systemPrompt else { return }
+
+        if let cacheControl = options.cacheControl {
+            // Use content block format with cache_control for prompt caching
+            // Supports both 5-minute (ephemeral) and 1-hour (longLived) TTL
+            requestBody["system"] = [
+                [
+                    "type": "text",
+                    "text": system,
+                    "cache_control": [
+                        "type": "ephemeral",
+                        "ttl": cacheControl.ttl
                     ]
                 ]
-            } else {
-                requestBody["system"] = system
-            }
+            ]
+        } else {
+            requestBody["system"] = system
         }
+    }
 
+    private func applyModelParameters(to requestBody: inout [String: Any], options: ChatOptions) {
         // Claude 4.5 does NOT allow both temperature AND top_p in the same request
         // Temperature takes precedence; only use top_p if temperature is not set
         if let temp = options.temperature {
@@ -101,7 +133,9 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
                 "budget_tokens": thinking.budgetTokens
             ]
         }
+    }
 
+    private func applyOutputConfig(to requestBody: inout [String: Any], options: ChatOptions) {
         // Structured outputs support (GA as of Jan 2026)
         var outputConfig: [String: Any] = [:]
         if let outputFormat = options.outputFormat {
@@ -127,39 +161,47 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
         if !outputConfig.isEmpty {
             requestBody["output_config"] = outputConfig
         }
+    }
 
+    private func applyContextManagement(to requestBody: inout [String: Any], options: ChatOptions) {
         // Context management (P1) - auto-clear old tool results
         // Beta header: context-management-2025-06-27
-        if let contextMgmt = options.contextManagement {
-            requestBody["context_management"] = [
-                "edits": contextMgmt.edits.map { edit -> [String: Any] in
-                    var editDict: [String: Any] = [
-                        "type": edit.type.rawValue,
-                        "trigger": ["input_tokens": edit.trigger.inputTokens]
-                    ]
-                    if let keep = edit.keep {
-                        editDict["keep"] = ["tool_uses": keep]
-                    }
-                    if let clearAtLeast = edit.clearAtLeast {
-                        editDict["clear_at_least"] = clearAtLeast
-                    }
-                    if let excludeTools = edit.excludeTools {
-                        editDict["exclude_tools"] = excludeTools
-                    }
-                    return editDict
+        guard let contextMgmt = options.contextManagement else { return }
+
+        requestBody["context_management"] = [
+            "edits": contextMgmt.edits.map { edit -> [String: Any] in
+                var editDict: [String: Any] = [
+                    "type": edit.type.rawValue,
+                    "trigger": ["input_tokens": edit.trigger.inputTokens]
+                ]
+                if let keep = edit.keep {
+                    editDict["keep"] = ["tool_uses": keep]
                 }
-            ]
-        }
-
-        // Server tools (P2) - web search, web fetch
-        if let serverTools = options.serverTools {
-            var tools = requestBody["tools"] as? [[String: Any]] ?? []
-            for serverTool in serverTools {
-                tools.append(serverTool.toolDefinition)
+                if let clearAtLeast = edit.clearAtLeast {
+                    editDict["clear_at_least"] = clearAtLeast
+                }
+                if let excludeTools = edit.excludeTools {
+                    editDict["exclude_tools"] = excludeTools
+                }
+                return editDict
             }
-            requestBody["tools"] = tools
-        }
+        ]
+    }
 
+    private func applyServerTools(to requestBody: inout [String: Any], options: ChatOptions) {
+        // Server tools (P2) - web search, web fetch
+        guard let serverTools = options.serverTools else { return }
+
+        var tools = requestBody["tools"] as? [[String: Any]] ?? []
+        for serverTool in serverTools {
+            tools.append(serverTool.toolDefinition)
+        }
+        requestBody["tools"] = tools
+    }
+
+    // MARK: - HTTP Request Construction
+
+    private func buildRequest(body: [String: Any], options: ChatOptions) throws -> URLRequest {
         guard let url = URL(string: "\(baseURL)/messages") else {
             throw ProviderError.invalidResponse(details: "Invalid URL")
         }
@@ -172,6 +214,16 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
         request.timeoutInterval = 120
 
         // Build beta headers based on features used
+        let betaHeaders = buildBetaHeaders(options: options)
+        if !betaHeaders.isEmpty {
+            request.setValue(betaHeaders.joined(separator: ","), forHTTPHeaderField: "anthropic-beta")
+        }
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        return request
+    }
+
+    private func buildBetaHeaders(options: ChatOptions) -> [String] {
         var betaHeaders: [String] = []
 
         // Effort parameter requires beta header (Opus 4.5 only)
@@ -194,18 +246,10 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
             betaHeaders.append("web-fetch-2025-09-10")
         }
 
-        if !betaHeaders.isEmpty {
-            request.setValue(betaHeaders.joined(separator: ","), forHTTPHeaderField: "anthropic-beta")
-        }
-
-        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-
-        if options.stream {
-            return try await streamChat(request: request)
-        } else {
-            return try await nonStreamChat(request: request)
-        }
+        return betaHeaders
     }
+
+    // MARK: - Stream Chat
 
     private func streamChat(request: URLRequest) async throws -> AsyncThrowingStream<StreamChunk, Error> {
         AsyncThrowingStream { continuation in
@@ -256,17 +300,7 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
                                     if let delta = json["delta"] as? [String: Any],
                                        let stopReason = delta["stop_reason"] as? String {
                                         // Parse usage if available (including cache tokens)
-                                        var usage: TokenUsage?
-                                        if let usageJson = json["usage"] as? [String: Any],
-                                           let outputTokens = usageJson["output_tokens"] as? Int {
-                                            let inputTokens = usageJson["input_tokens"] as? Int ?? 0
-                                            let cachedTokens = usageJson["cache_read_input_tokens"] as? Int
-                                            usage = TokenUsage(
-                                                promptTokens: inputTokens,
-                                                completionTokens: outputTokens,
-                                                cachedTokens: cachedTokens
-                                            )
-                                        }
+                                        let usage = self.parseUsage(from: json)
                                         continuation.yield(.done(finishReason: stopReason, usage: usage))
                                     }
                                 // Handle server tool use (web search, web fetch)
@@ -295,6 +329,8 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
             }
         }
     }
+
+    // MARK: - Non-Stream Chat
 
     private func nonStreamChat(request: URLRequest) async throws -> AsyncThrowingStream<StreamChunk, Error> {
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -325,18 +361,7 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
         }
 
         // Parse usage (including cache tokens for prompt caching)
-        var usage: TokenUsage?
-        if let usageJson = json["usage"] as? [String: Any],
-           let inputTokens = usageJson["input_tokens"] as? Int,
-           let outputTokens = usageJson["output_tokens"] as? Int {
-            let cachedTokens = usageJson["cache_read_input_tokens"] as? Int
-            usage = TokenUsage(
-                promptTokens: inputTokens,
-                completionTokens: outputTokens,
-                cachedTokens: cachedTokens
-            )
-        }
-
+        let usage = parseUsage(from: json)
         let stopReason = json["stop_reason"] as? String ?? "stop"
 
         return AsyncThrowingStream { continuation in
@@ -344,6 +369,24 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
             continuation.yield(.done(finishReason: stopReason, usage: usage))
             continuation.finish()
         }
+    }
+
+    // MARK: - Usage Parsing
+
+    private func parseUsage(from json: [String: Any]) -> TokenUsage? {
+        guard let usageJson = json["usage"] as? [String: Any],
+              let outputTokens = usageJson["output_tokens"] as? Int
+        else {
+            return nil
+        }
+
+        let inputTokens = usageJson["input_tokens"] as? Int ?? 0
+        let cachedTokens = usageJson["cache_read_input_tokens"] as? Int
+        return TokenUsage(
+            promptTokens: inputTokens,
+            completionTokens: outputTokens,
+            cachedTokens: cachedTokens
+        )
     }
 
     // MARK: - Health Check

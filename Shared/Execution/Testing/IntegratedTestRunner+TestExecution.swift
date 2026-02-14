@@ -102,10 +102,8 @@ extension IntegratedTestRunner {
             progress: 1.0
         ))
 
-        logger.info(
-            "Test run complete: \(result.passedTests)/\(result.totalTests) passed"
-            + " in \(String(format: "%.2f", result.duration))s"
-        )
+        let durationStr = String(format: "%.2f", result.duration)
+        logger.info("Test run complete: \(result.passedTests)/\(result.totalTests) passed in \(durationStr)s")
 
         return result
     }

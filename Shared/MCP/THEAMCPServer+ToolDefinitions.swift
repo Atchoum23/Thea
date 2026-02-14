@@ -62,6 +62,10 @@ extension THEAMCPServer {
     }
 
     private func appleIntegrationTools() -> [THEAMCPToolDefinition] {
+        contactAndReminderTools() + notesAndLocationTools()
+    }
+
+    private func contactAndReminderTools() -> [THEAMCPToolDefinition] {
         [
             THEAMCPToolDefinition(
                 name: "thea_search_contacts",
@@ -95,7 +99,12 @@ extension THEAMCPServer {
                     ],
                     required: ["title"]
                 )
-            ),
+            )
+        ]
+    }
+
+    private func notesAndLocationTools() -> [THEAMCPToolDefinition] {
+        [
             THEAMCPToolDefinition(
                 name: "thea_search_notes",
                 description: "Search notes by content",

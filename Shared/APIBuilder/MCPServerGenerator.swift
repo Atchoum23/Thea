@@ -115,7 +115,11 @@ public actor MCPServerGenerator {
     }
 
     private func generateServerClass(for spec: MCPServerSpec) -> String {
-        let code = """
+        generateServerHeader(for: spec) + generateServerRequestHandler() + generateServerInitializeHandler(for: spec)
+    }
+
+    private func generateServerHeader(for spec: MCPServerSpec) -> String {
+        """
 
         // MARK: - Server Implementation
 
@@ -163,6 +167,12 @@ public actor MCPServerGenerator {
                 connections.removeAll { $0.id == connectionId }
             }
 
+        """
+    }
+
+    private func generateServerRequestHandler() -> String {
+        """
+
             // MARK: - Request Handling
 
             public func handleRequest(_ request: MCPRequest) async throws -> MCPResponse {
@@ -186,6 +196,12 @@ public actor MCPServerGenerator {
                 }
             }
 
+        """
+    }
+
+    private func generateServerInitializeHandler(for spec: MCPServerSpec) -> String {
+        """
+
             // MARK: - Initialize Handler
 
             private func handleInitialize(_ request: MCPRequest) async throws -> MCPResponse {
@@ -204,8 +220,6 @@ public actor MCPServerGenerator {
 
 
         """
-
-        return code
     }
 
     private func generateToolHandler(_ tool: MCPToolSpec, serverName _: String) -> String {
@@ -357,7 +371,12 @@ public actor MCPServerGenerator {
     // MARK: - Template Management
 
     private func loadDefaultTemplates() {
-        // File operations template
+        loadFileOperationsTemplate()
+        loadDatabaseTemplate()
+        loadAPIProxyTemplate()
+    }
+
+    private func loadFileOperationsTemplate() {
         templates["file-operations"] = MCPTemplate(
             name: "file-operations",
             description: "File system operations server",
@@ -386,8 +405,9 @@ public actor MCPServerGenerator {
                 )
             ]
         )
+    }
 
-        // Database operations template
+    private func loadDatabaseTemplate() {
         templates["database"] = MCPTemplate(
             name: "database",
             description: "Database operations server",
@@ -409,8 +429,9 @@ public actor MCPServerGenerator {
                 )
             ]
         )
+    }
 
-        // API proxy template
+    private func loadAPIProxyTemplate() {
         templates["api-proxy"] = MCPTemplate(
             name: "api-proxy",
             description: "HTTP API proxy server",
