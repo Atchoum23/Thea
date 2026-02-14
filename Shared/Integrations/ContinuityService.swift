@@ -7,6 +7,8 @@
 
 import Combine
 import Foundation
+import Network
+import OSLog
 import SwiftUI
 
 #if canImport(UIKit)
@@ -267,10 +269,27 @@ public class ContinuityService: ObservableObject {
 
     // MARK: - Device Discovery
 
-    /// Discover nearby devices for Handoff
+    /// Discover nearby devices for Handoff via Bonjour
     public func discoverDevices() async {
-        // This would use Multipeer Connectivity or Bonjour
-        // For now, we'll use a placeholder
+        #if os(macOS) || os(iOS)
+        let browser = NWBrowser(for: .bonjour(type: "_thea-sync._tcp.", domain: nil), using: .tcp)
+        browser.stateUpdateHandler = { state in
+            if case .failed(let error) = state {
+                Logger(subsystem: "app.thea", category: "Continuity")
+                    .error("Device discovery failed: \(error.localizedDescription)")
+            }
+        }
+        browser.browseResultsChangedHandler = { results, _ in
+            let devices = results.map { String(describing: $0.endpoint) }
+            Logger(subsystem: "app.thea", category: "Continuity")
+                .info("Discovered \(devices.count) Thea device(s)")
+        }
+        browser.start(queue: .main)
+
+        // Browse for 5 seconds then stop
+        try? await Task.sleep(for: .seconds(5))
+        browser.cancel()
+        #endif
     }
 }
 

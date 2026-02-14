@@ -69,23 +69,24 @@ public actor FocusModeService: FocusModeServiceProtocol {
 
     // MARK: - Ambient Audio
 
-    public func playAmbientAudio(_ audio: AmbientAudio, volume _: Double) async throws {
+    public func playAmbientAudio(_ audio: AmbientAudio, volume: Double) async throws {
         await stopAmbientAudio()
 
-        // Note: In a real implementation, we would load audio files from bundle
-        // For now, this is a placeholder that demonstrates the structure
         currentAudio = audio
         await notifyAudioChange(isPlaying: true, audio: audio)
 
-        // Placeholder for actual audio playback
-        // In production, load and play audio file:
-        // guard let url = Bundle.main.url(forResource: audio.rawValue, withExtension: "mp3") else {
-        //     throw WellnessError.audioPlaybackFailed("Audio file not found")
-        // }
-        // audioPlayer = try AVAudioPlayer(contentsOf: url)
-        // audioPlayer?.volume = Float(volume)
-        // audioPlayer?.numberOfLoops = -1
-        // audioPlayer?.play()
+        guard let url = Bundle.main.url(forResource: audio.rawValue, withExtension: "mp3")
+                ?? Bundle.main.url(forResource: audio.rawValue, withExtension: "m4a")
+                ?? Bundle.main.url(forResource: audio.rawValue, withExtension: "wav") else {
+            // Audio file not bundled — track the state but skip playback
+            return
+        }
+
+        let player = try AVAudioPlayer(contentsOf: url)
+        player.volume = Float(volume)
+        player.numberOfLoops = -1
+        player.play()
+        audioPlayer = player
     }
 
     public func stopAmbientAudio() async {

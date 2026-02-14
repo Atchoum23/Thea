@@ -189,31 +189,88 @@ extension AdvancedSettingsView {
 
 extension AdvancedSettingsView {
     func calculateCacheSize() {
-        // Simulate cache calculation
         Task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
+            let totalBytes = await computeRealCacheSize()
             await MainActor.run {
-                cacheSize = "~\(Int.random(in: 20...150)) MB"
+                cacheSize = formatBytes(totalBytes)
             }
         }
     }
 
     func calculateMemoryUsage() {
-        // Simulate memory calculation
         Task {
-            try? await Task.sleep(nanoseconds: 300_000_000)
+            let info = ProcessInfo.processInfo
+            let physicalMemory = info.physicalMemory
+            let footprint = currentMemoryFootprint()
             await MainActor.run {
-                memoryUsage = "\(Int.random(in: 80...300)) MB"
+                if footprint > 0 {
+                    memoryUsage = "\(formatBytes(UInt64(footprint))) / \(formatBytes(physicalMemory))"
+                } else {
+                    memoryUsage = formatBytes(physicalMemory)
+                }
             }
         }
     }
 
+    private func currentMemoryFootprint() -> UInt64 {
+        var info = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size / MemoryLayout<natural_t>.size)
+        let result = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+            }
+        }
+        return result == KERN_SUCCESS ? info.resident_size : 0
+    }
+
+    private func computeRealCacheSize() async -> UInt64 {
+        let fm = FileManager.default
+        var totalBytes: UInt64 = 0
+        let cacheDirs: [URL?] = [
+            fm.urls(for: .cachesDirectory, in: .userDomainMask).first?
+                .appendingPathComponent(Bundle.main.bundleIdentifier ?? "app.thea"),
+            fm.temporaryDirectory
+        ]
+        for dirOpt in cacheDirs {
+            guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
+            if let enumerator = fm.enumerator(at: dir, includingPropertiesForKeys: [.fileSizeKey]) {
+                for case let fileURL as URL in enumerator {
+                    if let values = try? fileURL.resourceValues(forKeys: [.fileSizeKey]),
+                       let size = values.fileSize {
+                        totalBytes += UInt64(size)
+                    }
+                }
+            }
+        }
+        return totalBytes
+    }
+
+    private func formatBytes(_ bytes: UInt64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: Int64(bytes))
+    }
+
     func clearCache() {
-        cacheSize = "0 MB"
-        advancedConfig.apiCacheSize = "0 MB"
-        advancedConfig.modelCacheSize = "0 MB"
-        advancedConfig.imageCacheSize = "0 MB"
-        advancedConfig.tempCacheSize = "0 MB"
+        let fm = FileManager.default
+        let cacheDirs: [URL?] = [
+            fm.urls(for: .cachesDirectory, in: .userDomainMask).first?
+                .appendingPathComponent(Bundle.main.bundleIdentifier ?? "app.thea"),
+            fm.temporaryDirectory
+        ]
+        for dirOpt in cacheDirs {
+            guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
+            if let contents = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
+                for item in contents {
+                    try? fm.removeItem(at: item)
+                }
+            }
+        }
+        cacheSize = "0 bytes"
+        advancedConfig.apiCacheSize = "0 bytes"
+        advancedConfig.modelCacheSize = "0 bytes"
+        advancedConfig.imageCacheSize = "0 bytes"
+        advancedConfig.tempCacheSize = "0 bytes"
     }
 
     func clearLogs() {
@@ -223,14 +280,8 @@ extension AdvancedSettingsView {
 
     func generateDiagnosticReport() {
         isGeneratingReport = true
-
-        Task {
-            try? await Task.sleep(nanoseconds: 1_500_000_000)
-            await MainActor.run {
-                isGeneratingReport = false
-                showingDiagnosticReport = true
-            }
-        }
+        showingDiagnosticReport = true
+        isGeneratingReport = false
     }
 
     func generateReportText() -> String {

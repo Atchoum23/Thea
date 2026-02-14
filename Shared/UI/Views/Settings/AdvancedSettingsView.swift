@@ -607,19 +607,7 @@ extension AdvancedSettingsView {
         .accessibilityLabel("\(title): \(value)")
     }
 
-    func calculateCacheSize() {
-        Task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            await MainActor.run { cacheSize = "~\(Int.random(in: 20...150)) MB" }
-        }
-    }
-
-    func calculateMemoryUsage() {
-        Task {
-            try? await Task.sleep(nanoseconds: 300_000_000)
-            await MainActor.run { memoryUsage = "\(Int.random(in: 80...300)) MB" }
-        }
-    }
+    // Real implementations in AdvancedSheetsActions.swift
 
 }
 

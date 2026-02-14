@@ -619,11 +619,11 @@ final class AIModelGovernor {
 
     private func updateSystemState() {
         #if os(macOS)
-        // Get CPU usage (placeholder - would use host_processor_info for real values)
-        let cpuUsage: Double = 0.3
+        // Get real CPU usage via host_processor_info
+        let cpuUsage: Double = Self.currentCPUUsage()
 
-        // Get memory info (placeholder - would use host_statistics for real values)
-        let memoryUsage: Double = 0.5
+        // Get real memory usage via host_statistics64
+        let memoryUsage: Double = Self.currentMemoryUsage()
 
         // Get thermal state
         let thermalState = ProcessInfo.processInfo.thermalState
@@ -668,6 +668,58 @@ final class AIModelGovernor {
         }
         UserDefaults.standard.set(proactivityScore, forKey: "AIModelGovernor.proactivityScore")
     }
+
+    // MARK: - Real System Metrics
+
+    #if os(macOS)
+    private static func currentCPUUsage() -> Double {
+        var cpuInfo: processor_info_array_t?
+        var numCPUInfo: mach_msg_type_number_t = 0
+        var numCPUs: natural_t = 0
+
+        let result = host_processor_info(
+            mach_host_self(),
+            PROCESSOR_CPU_LOAD_INFO,
+            &numCPUs,
+            &cpuInfo,
+            &numCPUInfo
+        )
+        guard result == KERN_SUCCESS, let info = cpuInfo else { return 0.3 }
+        defer {
+            vm_deallocate(mach_task_self_, vm_address_t(bitPattern: info), vm_size_t(numCPUInfo) * vm_size_t(MemoryLayout<Int32>.stride))
+        }
+
+        var totalUser: Int32 = 0
+        var totalSystem: Int32 = 0
+        var totalIdle: Int32 = 0
+        for i in 0 ..< Int(numCPUs) {
+            let offset = Int(CPU_STATE_MAX) * i
+            totalUser += info[offset + Int(CPU_STATE_USER)]
+            totalSystem += info[offset + Int(CPU_STATE_SYSTEM)]
+            totalIdle += info[offset + Int(CPU_STATE_IDLE)]
+        }
+        let total = Double(totalUser + totalSystem + totalIdle)
+        guard total > 0 else { return 0.0 }
+        return Double(totalUser + totalSystem) / total
+    }
+
+    private static func currentMemoryUsage() -> Double {
+        var stats = vm_statistics64()
+        var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
+        let result = withUnsafeMutablePointer(to: &stats) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &count)
+            }
+        }
+        guard result == KERN_SUCCESS else { return 0.5 }
+
+        let pageSize = Double(vm_page_size)
+        let totalMemory = Double(ProcessInfo.processInfo.physicalMemory)
+        let freeMemory = Double(stats.free_count) * pageSize
+        let usedMemory = totalMemory - freeMemory
+        return usedMemory / totalMemory
+    }
+    #endif
 }
 
 // MARK: - Supporting Types

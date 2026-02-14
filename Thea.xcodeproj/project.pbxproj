@@ -1741,6 +1741,7 @@
 		EC3FBD08AECB98FC6B8D8E14 /* AutonomousAgentV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77A0E6521036FC1C3978A7EA /* AutonomousAgentV3.swift */; };
 		EC6175AA942F4EC0ECD7A1F9 /* MemoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C8ECE96F68E07389334095 /* MemoryService.swift */; };
 		EC8C5610EEDB0D13F7834F35 /* ModelSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A31D5A95202A25306AF85DA /* ModelSelectorView.swift */; };
+		EC960D3D73391AE92E397535 /* TVInferenceClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08CA1F45DD5F6B577CDEE925 /* TVInferenceClient.swift */; };
 		ECE485F687B31A6BA0735EF3 /* OnboardingManagerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85B1685CF8CDD2175144F48D /* OnboardingManagerTypes.swift */; };
 		ED03EDC8465A846ACDDDF57C /* TaskBreakdownService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27D90B373D6905F399C035F /* TaskBreakdownService.swift */; };
 		ED375DA6222D54A6DBD38A93 /* AppleFinanceKitProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2832D2023B8A23B43161DB3 /* AppleFinanceKitProvider.swift */; };
@@ -2025,6 +2026,7 @@
 		07A27CD26107B191EEDC2B90 /* CoworkSkillsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkSkillsManager.swift; sourceTree = "<group>"; };
 		081CC3DBD0AE36EAD887D490 /* WellnessViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WellnessViewModel.swift; sourceTree = "<group>"; };
 		0866884D25FF067DF83D91CC /* AmbientIntelligenceSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientIntelligenceSystem.swift; sourceTree = "<group>"; };
+		08CA1F45DD5F6B577CDEE925 /* TVInferenceClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVInferenceClient.swift; sourceTree = "<group>"; };
 		092322EA857D666CA9BE6749 /* Context7Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Context7Client.swift; sourceTree = "<group>"; };
 		0936318FA09A7042DDAA2F2D /* HealthServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthServiceTests.swift; sourceTree = "<group>"; };
 		0952B592B1ECFF299AB8556B /* CoworkSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkSettingsView.swift; sourceTree = "<group>"; };
@@ -3839,6 +3841,7 @@
 				830A8824378DAFA673E5A02A /* RemoteInferenceClient.swift */,
 				5B101D7016CEFD023816AE6C /* StreamingService.swift */,
 				4C5A1765C297CB988B0FCE32 /* TraktService.swift */,
+				08CA1F45DD5F6B577CDEE925 /* TVInferenceClient.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -7808,6 +7811,7 @@
 				2ABC5E71BDE857C3FF61CCCA /* TVEnhancedHomeView+Chat.swift in Sources */,
 				1B6D7C5F0B6BFCCD7791D6B0 /* TVEnhancedHomeView+Settings.swift in Sources */,
 				C95BFA4CDD1A35BDB46C9DF0 /* TVEnhancedHomeView.swift in Sources */,
+				EC960D3D73391AE92E397535 /* TVInferenceClient.swift in Sources */,
 				8805BDFF04B5D56F71584CDC /* TVInferenceRelaySettingsView.swift in Sources */,
 				F95A9DA65B8F58E628FE929B /* TVStreamingView.swift in Sources */,
 				EA50EF49960B767447FE82C7 /* TheaClipRelayView.swift in Sources */,
