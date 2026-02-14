@@ -16,8 +16,8 @@ final class Project {
     @Relationship(deleteRule: .nullify)
     var conversations: [Conversation]
 
-    @Transient var files: [ProjectFile] = []
-    @Transient var settings: ProjectSettings = ProjectSettings()
+    @Transient var files = [ProjectFile]()
+    @Transient var settings = ProjectSettings()
 
     init(
         id: UUID = UUID(),
