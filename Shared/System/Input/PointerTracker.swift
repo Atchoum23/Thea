@@ -1,114 +1,164 @@
 import Foundation
 import CoreGraphics
-import AppKit
 
 #if os(macOS)
+import AppKit
 
 // MARK: - Pointer Tracker
-// Uses CGEvent to track mouse position continuously
-// Publishes current pointer position for live guidance
+// Tracks mouse pointer position and movements using CGEvent
+// Requires Accessibility permission
 
 @MainActor
 @Observable
 final class PointerTracker {
+    static let shared = PointerTracker()
 
     // MARK: - State
 
     private(set) var currentPosition: CGPoint = .zero
-    private(set) var isTracking: Bool = false
-    private(set) var isAuthorized: Bool = false
+    private(set) var isTracking = false
+    private(set) var lastError: Error?
 
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
 
-    // MARK: - Authorization
+    private init() {}
 
-    func checkAuthorization() -> Bool {
-        let trusted = AXIsProcessTrusted()
-        isAuthorized = trusted
-        return trusted
+    // MARK: - Permission Check
+
+    /// Check if Accessibility permission is granted
+    var hasPermission: Bool {
+        AXIsProcessTrusted()
     }
 
-    func requestAuthorization() {
-        // Trigger authorization prompt
-        // Hardcoded string value to avoid concurrency warning
-        let options: NSDictionary = ["AXTrustedCheckOptionPrompt": true]
-        AXIsProcessTrustedWithOptions(options)
+    /// Request Accessibility permission (opens System Settings)
+    func requestPermission() {
+        // Prompt for accessibility permission
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+        let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
+
+        if !trusted {
+            print("[PointerTracker] Opening System Settings for Accessibility permission")
+        } else {
+            print("[PointerTracker] Accessibility permission already granted")
+        }
     }
 
-    // MARK: - Tracking Control
+    // MARK: - Tracking
 
+    /// Start tracking pointer position
     func startTracking() {
-        guard !isTracking else { return }
-
-        if !checkAuthorization() {
-            print("⚠️ PointerTracker: Not authorized. Request authorization first.")
+        guard hasPermission else {
+            lastError = PointerTrackingError.permissionDenied
+            print("[PointerTracker] Cannot start tracking - Accessibility permission denied")
             return
+        }
+
+        guard !isTracking else {
+            print("[PointerTracker] Already tracking")
+            return
+        }
+
+        // Get current mouse location as starting point
+        if let currentEvent = CGEvent(source: nil) {
+            currentPosition = currentEvent.location
         }
 
         // Create event tap for mouse moved events
         let eventMask = (1 << CGEventType.mouseMoved.rawValue) |
-                        (1 << CGEventType.leftMouseDragged.rawValue) |
-                        (1 << CGEventType.rightMouseDragged.rawValue)
+                       (1 << CGEventType.leftMouseDragged.rawValue) |
+                       (1 << CGEventType.rightMouseDragged.rawValue)
 
         guard let tap = CGEvent.tapCreate(
-            tap: .cghidEventTap,
+            tap: .cgSessionEventTap,
             place: .headInsertEventTap,
-            options: .listenOnly, // Non-invasive listening
+            options: .listenOnly,  // Listen-only doesn't require sudo
             eventsOfInterest: CGEventMask(eventMask),
-            callback: { (proxy, type, event, refcon) -> Unmanaged<CGEvent>? in
-                guard let refcon = refcon else {
-                    return Unmanaged.passRetained(event)
-                }
-
-                let tracker = Unmanaged<PointerTracker>.fromOpaque(refcon).takeUnretainedValue()
-                let location = event.location
-
+            callback: { [weak self] (proxy, type, event, refcon) -> Unmanaged<CGEvent>? in
+                guard let self = refcon else { return Unmanaged.passUnretained(event) }
+                
+                let tracker = Unmanaged<PointerTracker>.fromOpaque(self).takeUnretainedValue()
+                
                 Task { @MainActor in
+                    let location = event.location
                     tracker.currentPosition = location
                 }
-
-                return Unmanaged.passRetained(event)
+                
+                return Unmanaged.passUnretained(event)
             },
             userInfo: Unmanaged.passUnretained(self).toOpaque()
         ) else {
-            print("❌ PointerTracker: Failed to create event tap")
+            lastError = PointerTrackingError.eventTapCreationFailed
+            print("[PointerTracker] Failed to create event tap")
             return
         }
 
-        // Add to run loop
-        let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
+        eventTap = tap
+        runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
 
-        // Enable the event tap
+        guard let source = runLoopSource else {
+            lastError = PointerTrackingError.runLoopSourceCreationFailed
+            print("[PointerTracker] Failed to create run loop source")
+            return
+        }
+
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
         CGEvent.tapEnable(tap: tap, enable: true)
 
-        eventTap = tap
-        runLoopSource = source
         isTracking = true
-
-        print("✅ PointerTracker: Started tracking mouse position")
+        lastError = nil
+        print("[PointerTracker] Started tracking pointer")
     }
 
+    /// Stop tracking pointer position
     func stopTracking() {
         guard isTracking else { return }
 
         if let tap = eventTap {
             CGEvent.tapEnable(tap: tap, enable: false)
+            CFMachPortInvalidate(tap)
+            eventTap = nil
         }
 
         if let source = runLoopSource {
             CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
+            runLoopSource = nil
         }
 
-        eventTap = nil
-        runLoopSource = nil
         isTracking = false
-
-        print("🛑 PointerTracker: Stopped tracking")
+        print("[PointerTracker] Stopped tracking pointer")
     }
 
-    // deinit removed - caller is responsible for calling stopTracking()
+    /// Get current pointer position without continuous tracking
+    func getCurrentPosition() -> CGPoint {
+        if let currentEvent = CGEvent(source: nil) {
+            return currentEvent.location
+        }
+        return currentPosition
+    }
+
+    deinit {
+        stopTracking()
+    }
+}
+
+// MARK: - Errors
+
+enum PointerTrackingError: Error, LocalizedError {
+    case permissionDenied
+    case eventTapCreationFailed
+    case runLoopSourceCreationFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .permissionDenied:
+            "Accessibility permission denied. Grant permission in System Settings → Privacy & Security → Accessibility."
+        case .eventTapCreationFailed:
+            "Failed to create event tap for pointer tracking"
+        case .runLoopSourceCreationFailed:
+            "Failed to create run loop source for event tap"
+        }
+    }
 }
 
 #endif
