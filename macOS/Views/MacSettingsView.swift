@@ -59,6 +59,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
 
     // Group 2: Features
     case clipboard = "Clipboard"
+    case translation = "Translation"
     case voiceInput = "Voice & Input"
     case codeIntelligence = "Code Intelligence"
     case health = "Health"
@@ -91,6 +92,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .moltbook: "bubble.left.and.text.bubble.right"
         case .knowledge: "books.vertical"
         case .clipboard: "doc.on.clipboard"
+        case .translation: "character.bubble"
         case .voiceInput: "mic.fill"
         case .codeIntelligence: "chevron.left.forwardslash.chevron.right"
         case .health: "heart.fill"
@@ -111,7 +113,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .clipboard, .voiceInput, .codeIntelligence, .health, .finance, .tasks, .notifications: 2
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .health, .finance, .tasks, .notifications: 2
         case .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -227,6 +229,8 @@ struct MacSettingsView: View {
             KnowledgeScannerConfigurationView()
         case .clipboard:
             TheaClipSettingsView()
+        case .translation:
+            TranslationView()
         case .voiceInput:
             voiceInputSettings
         case .codeIntelligence:

@@ -44,7 +44,7 @@ struct TranslationView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(Color.theaSurfaceDefault.opacity(0.5))
+        .background(Color.theaSurface.opacity(0.5))
     }
 
     private var sourceLanguagePicker: some View {
@@ -71,9 +71,11 @@ struct TranslationView: View {
                 Image(systemName: "chevron.down")
                     .font(.caption2)
             }
-            .font(.theaSubheadline)
+            .font(.theaCaption1)
         }
+        #if os(macOS)
         .menuStyle(.borderlessButton)
+        #endif
         .accessibilityLabel("Source language")
     }
 
@@ -109,9 +111,11 @@ struct TranslationView: View {
                 Image(systemName: "chevron.down")
                     .font(.caption2)
             }
-            .font(.theaSubheadline)
+            .font(.theaCaption1)
         }
+        #if os(macOS)
         .menuStyle(.borderlessButton)
+        #endif
         .accessibilityLabel("Target language")
     }
 
@@ -177,7 +181,9 @@ struct TranslationView: View {
             }
             .foregroundStyle(.secondary)
         }
+        #if os(macOS)
         .menuStyle(.borderlessButton)
+        #endif
         .accessibilityLabel("Translation provider")
     }
 
@@ -202,7 +208,7 @@ struct TranslationView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Source")
-                    .font(.theaCaption)
+                    .font(.theaCaption1)
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("\(inputText.count)")
@@ -227,14 +233,14 @@ struct TranslationView: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 8)
         }
-        .background(Color.theaSurfaceDefault.opacity(0.2))
+        .background(Color.theaSurface.opacity(0.2))
     }
 
     private var outputPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Translation")
-                    .font(.theaCaption)
+                    .font(.theaCaption1)
                     .foregroundStyle(.secondary)
                 Spacer()
                 if engine.isTranslating {
@@ -277,7 +283,7 @@ struct TranslationView: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 8)
         }
-        .background(Color.theaSurfaceDefault.opacity(0.3))
+        .background(Color.theaSurface.opacity(0.3))
     }
 
     // MARK: - Action Buttons
@@ -349,7 +355,7 @@ struct TranslationView: View {
                 showingHistory.toggle()
             } label: {
                 Label("History", systemImage: "clock.arrow.circlepath")
-                    .font(.theaSubheadline)
+                    .font(.theaCaption1)
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
@@ -362,7 +368,7 @@ struct TranslationView: View {
                 }
             } label: {
                 Label("Translate", systemImage: "arrow.right.circle.fill")
-                    .font(.theaSubheadline)
+                    .font(.theaCaption1)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.theaPrimaryDefault)
@@ -571,7 +577,7 @@ struct TranslationHistoryView: View {
         .font(.caption2)
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .background(Color.theaSurfaceDefault)
+        .background(Color.theaSurface)
         .clipShape(Capsule())
     }
 }

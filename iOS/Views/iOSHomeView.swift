@@ -19,6 +19,7 @@ struct iOSHomeView: View {
         case projects = "Projects"
         case health = "Health"
         case knowledge = "Knowledge"
+        case translation = "Translate"
         case financial = "Financial"
         case settings = "Settings"
 
@@ -30,6 +31,7 @@ struct iOSHomeView: View {
             case .projects: "folder.fill"
             case .health: "heart.fill"
             case .knowledge: "books.vertical.fill"
+            case .translation: "character.bubble.fill"
             case .financial: "chart.pie.fill"
             case .settings: "gearshape"
             }
@@ -76,6 +78,8 @@ struct iOSHomeView: View {
             HealthDashboardView()
         case .knowledge:
             iOSKnowledgeView()
+        case .translation:
+            TranslationView()
         case .financial:
             iOSFinancialView()
         case .settings:
@@ -108,7 +112,7 @@ struct iOSHomeView: View {
                     .foregroundStyle(voiceManager.isEnabled ? .theaPrimary : .secondary)
             }
             .accessibilityLabel(voiceManager.isEnabled ? "Voice enabled, tap to configure" : "Voice disabled, tap to configure")
-        case .health, .financial, .settings:
+        case .health, .translation, .financial, .settings:
             EmptyView()
         }
     }

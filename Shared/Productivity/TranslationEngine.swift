@@ -172,8 +172,8 @@ struct LanguagePair: Codable, Sendable, Hashable {
     let target: String
 
     var displayName: String {
-        let sourceName = languageName(for: source)
-        let targetName = languageName(for: target)
+        let sourceName = Self.languageName(for: source)
+        let targetName = Self.languageName(for: target)
         return "\(sourceName) → \(targetName)"
     }
 
@@ -405,17 +405,17 @@ final class TranslationEngine: ObservableObject {
                 id: UUID(),
                 conversationID: UUID(),
                 role: .system,
-                content: systemPrompt,
+                content: .text(systemPrompt),
                 timestamp: Date(),
-                model: nil
+                model: ""
             ),
             AIMessage(
                 id: UUID(),
                 conversationID: UUID(),
                 role: .user,
-                content: text,
+                content: .text(text),
                 timestamp: Date(),
-                model: nil
+                model: ""
             )
         ]
 
@@ -430,14 +430,14 @@ final class TranslationEngine: ObservableObject {
 
         var translatedText = ""
         for try await chunk in responseStream {
-            switch chunk {
+            switch chunk.type {
             case .delta(let delta):
                 translatedText += delta
             case .complete(let message):
                 if translatedText.isEmpty {
-                    translatedText = message.content
+                    translatedText = message.content.textValue
                 }
-            default:
+            case .error:
                 break
             }
         }
@@ -458,15 +458,17 @@ final class TranslationEngine: ObservableObject {
 
     private func selectTranslationModel(for provider: any AIProvider) -> String {
         // Prefer fast, cheap models for translation
-        let providerType = String(describing: type(of: provider)).lowercased()
-        if providerType.contains("anthropic") {
+        let providerName = provider.metadata.name.lowercased()
+        if providerName.contains("anthropic") {
             return "claude-haiku-4-5-20251001"
-        } else if providerType.contains("openai") {
+        } else if providerName.contains("openai") {
             return "gpt-4o-mini"
-        } else if providerType.contains("openrouter") {
+        } else if providerName.contains("openrouter") {
             return "anthropic/claude-haiku-4-5-20251001"
+        } else if providerName.contains("google") {
+            return "gemini-2.0-flash"
         }
-        return provider.defaultModel
+        return "claude-haiku-4-5-20251001"
     }
 
     // MARK: - Apple Translation Framework
