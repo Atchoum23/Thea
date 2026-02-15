@@ -250,6 +250,17 @@ struct iOSSettingsView: View {
             // MARK: - Privacy & Security Section
             Section {
                 NavigationLink {
+                    SystemMonitorView()
+                } label: {
+                    SettingsRow(
+                        icon: "gauge.with.dots.needle.33percent",
+                        iconColor: .blue,
+                        title: "System Monitor",
+                        subtitle: SystemMonitor.shared.statusSummary
+                    )
+                }
+
+                NavigationLink {
                     IOSPrivacySettingsView()
                 } label: {
                     SettingsRow(

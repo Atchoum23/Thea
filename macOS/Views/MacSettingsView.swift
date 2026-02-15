@@ -69,6 +69,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case notifications = "Notifications"
 
     // Group 3: System
+    case systemMonitor = "System Monitor"
     case permissions = "Permissions"
     case sync = "Sync"
     case privacy = "Privacy"
@@ -101,6 +102,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .tasks: "checklist"
         case .packages: "shippingbox"
         case .notifications: "bell.badge"
+        case .systemMonitor: "gauge.with.dots.needle.33percent"
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
         case .privacy: "lock.shield"
@@ -116,7 +118,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .health, .finance, .tasks, .packages, .notifications: 2
-        case .permissions, .sync, .privacy: 3
+        case .systemMonitor, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
         }
@@ -247,6 +249,8 @@ struct MacSettingsView: View {
             PackageTrackerView()
         case .notifications:
             NotificationIntelligenceSettingsView()
+        case .systemMonitor:
+            SystemMonitorView()
         case .permissions:
             PermissionsSettingsView()
         case .sync:
