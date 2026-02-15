@@ -213,11 +213,11 @@ final class InvestmentTracker {
     func importHoldingsCSV(from url: URL, portfolioId: UUID) throws -> [Holding] {
         let data = try Data(contentsOf: url)
         guard let content = String(data: data, encoding: .utf8) else {
-            throw ImportError.invalidEncoding
+            throw TransactionImportError.invalidEncoding
         }
 
         let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
-        guard lines.count >= 2 else { throw ImportError.noDataRows }
+        guard lines.count >= 2 else { throw TransactionImportError.noDataRows }
 
         var imported: [Holding] = []
 

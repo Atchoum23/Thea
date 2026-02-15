@@ -10,7 +10,7 @@ final class TransactionImporter {
     static let shared = TransactionImporter()
 
     private(set) var lastImportCount = 0
-    private(set) var lastImportErrors: [ImportError] = []
+    private(set) var lastTransactionImportErrors: [TransactionImportError] = []
 
     private init() {}
 
@@ -21,14 +21,14 @@ final class TransactionImporter {
     func importCSV(from url: URL, accountId: UUID, currency: String = "CHF") throws -> [ImportedTransaction] {
         let data = try Data(contentsOf: url)
         guard let content = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) else {
-            throw ImportError.invalidEncoding
+            throw TransactionImportError.invalidEncoding
         }
 
         let delimiter = detectDelimiter(content)
         let lines = content.components(separatedBy: .newlines).filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
 
         guard lines.count >= 2 else {
-            throw ImportError.noDataRows
+            throw TransactionImportError.noDataRows
         }
 
         let headerLine = lines[0]
@@ -36,14 +36,14 @@ final class TransactionImporter {
         let mapping = detectColumnMapping(headers)
 
         guard mapping.dateColumn != nil, mapping.amountColumn != nil else {
-            throw ImportError.missingRequiredColumns(missing: [
+            throw TransactionImportError.missingRequiredColumns(missing: [
                 mapping.dateColumn == nil ? "date" : nil,
                 mapping.amountColumn == nil ? "amount" : nil
             ].compactMap { $0 })
         }
 
         var transactions: [ImportedTransaction] = []
-        var errors: [ImportError] = []
+        var errors: [TransactionImportError] = []
 
         for lineIndex in 1..<lines.count {
             let fields = parseCSVRow(lines[lineIndex], delimiter: delimiter)
@@ -58,7 +58,7 @@ final class TransactionImporter {
         }
 
         lastImportCount = transactions.count
-        lastImportErrors = errors
+        lastTransactionImportErrors = errors
         return transactions
     }
 
@@ -68,7 +68,7 @@ final class TransactionImporter {
     func importOFX(from url: URL, accountId: UUID) throws -> [ImportedTransaction] {
         let data = try Data(contentsOf: url)
         guard let content = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) else {
-            throw ImportError.invalidEncoding
+            throw TransactionImportError.invalidEncoding
         }
 
         var transactions: [ImportedTransaction] = []
@@ -109,7 +109,7 @@ final class TransactionImporter {
         }
 
         lastImportCount = transactions.count
-        lastImportErrors = []
+        lastTransactionImportErrors = []
         return transactions
     }
 
@@ -290,15 +290,15 @@ final class TransactionImporter {
 
     private func parseTransaction(fields: [String], mapping: ColumnMapping, accountId: UUID, currency: String) throws -> ImportedTransaction {
         guard let dateCol = mapping.dateColumn, dateCol < fields.count else {
-            throw ImportError.missingField("date")
+            throw TransactionImportError.missingField("date")
         }
         guard let amountCol = mapping.amountColumn, amountCol < fields.count else {
-            throw ImportError.missingField("amount")
+            throw TransactionImportError.missingField("amount")
         }
 
         let dateStr = fields[dateCol]
         guard let date = parseDate(dateStr) else {
-            throw ImportError.invalidDate(dateStr)
+            throw TransactionImportError.invalidDate(dateStr)
         }
 
         let amountStr = fields[amountCol]
@@ -306,7 +306,7 @@ final class TransactionImporter {
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: ",", with: ".")
         guard let amount = Double(amountStr) else {
-            throw ImportError.invalidAmount(fields[amountCol])
+            throw TransactionImportError.invalidAmount(fields[amountCol])
         }
 
         let description: String
@@ -443,7 +443,7 @@ struct ColumnMapping {
     var currencyColumn: Int?
 }
 
-enum ImportError: LocalizedError, Sendable {
+enum TransactionImportError: LocalizedError, Sendable {
     case invalidEncoding
     case noDataRows
     case missingRequiredColumns(missing: [String])

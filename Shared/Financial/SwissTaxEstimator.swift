@@ -10,7 +10,7 @@ import Foundation
 final class SwissTaxEstimator {
     static let shared = SwissTaxEstimator()
 
-    private(set) var lastEstimate: TaxEstimate?
+    private(set) var lastEstimate: SwissTaxResult?
     private(set) var deductions: [TaxDeduction] = []
     private(set) var quarterlyPayments: [QuarterlyPayment] = []
 
@@ -28,7 +28,7 @@ final class SwissTaxEstimator {
         municipality: String? = nil,
         filingStatus: FilingStatus = .single,
         children: Int = 0
-    ) -> TaxEstimate {
+    ) -> SwissTaxResult {
         // Social contributions (AHV/IV/EO/ALV)
         let ahvRate = 0.053 // Employee share 5.3%
         let alvRate = 0.011 // ALV 1.1%
@@ -65,7 +65,7 @@ final class SwissTaxEstimator {
 
         let totalTax = federalTax + cantonalTax + municipalTax + churchTax
 
-        let estimate = TaxEstimate(
+        let estimate = SwissTaxResult(
             grossIncome: grossIncome,
             taxableIncome: taxableIncome,
             federalTax: federalTax,
@@ -90,7 +90,7 @@ final class SwissTaxEstimator {
     // MARK: - Quarterly Planning
 
     /// Calculate quarterly payment schedule.
-    func generateQuarterlySchedule(estimate: TaxEstimate, year: Int = Calendar.current.component(.year, from: Date())) -> [QuarterlyPayment] {
+    func generateQuarterlySchedule(estimate: SwissTaxResult, year: Int = Calendar.current.component(.year, from: Date())) -> [QuarterlyPayment] {
         let calendar = Calendar.current
         let quarterlyAmount = estimate.quarterlyAmount
 
@@ -273,7 +273,7 @@ final class SwissTaxEstimator {
 
 // MARK: - Types
 
-struct TaxEstimate: Sendable {
+struct SwissTaxResult: Sendable {
     let grossIncome: Double
     let taxableIncome: Double
     let federalTax: Double
