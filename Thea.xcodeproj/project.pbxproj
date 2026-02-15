@@ -385,7 +385,6 @@
 		2C3C2260E6BB4A5B0FDABC2B /* RemoteNetworkMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDD3F224992743F651F2706 /* RemoteNetworkMessages.swift */; };
 		2C5D2ECE20502D946DA3F373 /* UnifiedDeviceAwareness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12A0524C0078CC2979B4539A /* UnifiedDeviceAwareness.swift */; };
 		2C8B4D62A9E3C259FB9EB820 /* StaticAnalysisVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8187E849AAA5EC9CBDB243F /* StaticAnalysisVerifier.swift */; };
-		2CA14A10DFCBC0B220717D64 /* TextEditorContextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200455DFCBB31346045DFD56 /* TextEditorContextExtractor.swift */; };
 		2CA2E3323FE852A26F316AD4 /* HDKnowledgeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3151C1AA921620527D16FC69 /* HDKnowledgeScanner.swift */; };
 		2CA928DA104E2772D0F67E1C /* InferenceRelayHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50342EEE33EF5DE86B78D9C2 /* InferenceRelayHandler.swift */; };
 		2CB9BE3C145E6DCEBE63AB31 /* PromptOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1131DF82F36E3117BD7462 /* PromptOptimizer.swift */; };
@@ -569,7 +568,6 @@
 		4343FEF9347232401D051F95 /* ResponseNotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72FA6DB594497FD8B397F1CE /* ResponseNotificationHandler.swift */; };
 		434BBADFAB15FFDD03D5E834 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 74925CC1319728AD55A5F849 /* PrivacyInfo.xcprivacy */; };
 		43882260101411CD35CF5960 /* DeadlineIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D704C439FD792570821E7386 /* DeadlineIntelligence.swift */; };
-		4493235F1106D858C4DC12AB /* TerminalContextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DA7C3637404F98FFD0F6862 /* TerminalContextExtractor.swift */; };
 		44D0DDE170F160B56A6A0E58 /* DeviceCapabilityRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010A46FB9A7C5C68902D3A47 /* DeviceCapabilityRouter.swift */; };
 		44FBDFC39B43ED30C7DC9BC4 /* PhotosMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D08008696D9C86E40E2A018 /* PhotosMonitor.swift */; };
 		4513BCC13FFD016A85D178EE /* ActiveMemoryRetrieval+Ranking.swift in Sources */ = {isa = PBXBuildFile; fileRef = B246E5246A5E7E56B1262F28 /* ActiveMemoryRetrieval+Ranking.swift */; };
@@ -642,7 +640,6 @@
 		4BD0D53CD96D5A8BA0769BA9 /* AppActivityContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A77ABDCD61C3A30906888A5 /* AppActivityContextProvider.swift */; };
 		4BDC2C702155E3EB1C19EAC6 /* TransactionImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723A3C145E26F2974DD9E148 /* TransactionImporter.swift */; };
 		4BDE65A79E2E8A1E5D6F35F3 /* RemoteCommandService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF92391A43F9CDEA1B9EC19 /* RemoteCommandService.swift */; };
-		4BE319A229A21BBE09117C84 /* XcodeContextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 345F459B0EEDFB20778B9AE9 /* XcodeContextExtractor.swift */; };
 		4BF79404CCFDCCE547467D8E /* ReflexionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A729AAAF6EC8A259362E6DFE /* ReflexionEngine.swift */; };
 		4C53FE8487A8B4A5273AED3E /* NutritionProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6B62D2961F52E41D17A7EA1 /* NutritionProtocols.swift */; };
 		4C62573F08128BE9F6E4FF5C /* AutonomyController+Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82355C7B74E1F61F7E0542E0 /* AutonomyController+Views.swift */; };
@@ -1384,7 +1381,6 @@
 		A86FD793C554CAC46003B683 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 11E5AC4907463FDE7AB36F48 /* manifest.json */; };
 		A8789BEA098CD506AD47E062 /* UniversalNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A74D3D8CF3D0113B136682 /* UniversalNotificationService.swift */; };
 		A8883309D2D61286F9FC9067 /* ContextualMultiArmedBandit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFDB048804A6C8CC1D372B /* ContextualMultiArmedBandit.swift */; };
-		A8BCC1872FA0FDAABBF7CB5D /* SafariContextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5941ECCEC8461B87C56F0D /* SafariContextExtractor.swift */; };
 		A8DBD04BAF577EA23A8BFFBC /* DeviceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE3F4288C165F9736A02094 /* DeviceDiscovery.swift */; };
 		A8DE689CF74C5DF871B75F61 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89C8E729F7046437DDE9E5C /* Colors.swift */; };
 		A93E47DABEA388FB43D49DD0 /* TheaAssistantSchemas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE69A60F2269AD914531B4A /* TheaAssistantSchemas.swift */; };
@@ -1470,7 +1466,6 @@
 		B3BD55B1D2C3DAD24E4CB85E /* SquadOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F663DAE1E86BE0D0C5CE12 /* SquadOrchestrator.swift */; };
 		B3C180ABE78BCA534A00F602 /* SwiftBestPracticesLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA71D9A17E303BD39C81021B /* SwiftBestPracticesLibrary.swift */; };
 		B3DF232218C6A3BE57C192DD /* ProjectMemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D481F245A51B8370C481C0E4 /* ProjectMemoryManager.swift */; };
-		B3F4A4E204D7E37DE13CD2B5 /* VSCodeContextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0BE9782E96E7EA50461D96F /* VSCodeContextExtractor.swift */; };
 		B44042B0081E390361DD1862 /* BlueprintExecutor+StepExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DE0D31409DA5BB1ABB0B51 /* BlueprintExecutor+StepExecution.swift */; };
 		B45ACC988DF358341015F3FD /* TheaAppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1E5812E31F47BF9AC08874 /* TheaAppIntents.swift */; };
 		B48789BF9F28A785B4AD8A99 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FACB88E06141C872453645 /* NotificationManager.swift */; };
@@ -8081,7 +8076,6 @@
 				41D7F1F85641360598622583 /* ResourceDiscoveryEngine.swift in Sources */,
 				D6EB06057D940D6831A0C8C0 /* ResourceDiscoveryTypes.swift in Sources */,
 				67575D52B2FB69D979846364 /* ResponseNotificationHandler.swift in Sources */,
-				A8BCC1872FA0FDAABBF7CB5D /* SafariContextExtractor.swift in Sources */,
 				FBD197765019C520294C1E0E /* SafetyGuardrails+Core.swift in Sources */,
 				E0032DFFA099174B6BB2F3AC /* SafetyGuardrails.swift in Sources */,
 				3ABB2D4C589F8CC5432709BD /* ScreenTimeObserver.swift in Sources */,
@@ -8192,10 +8186,8 @@
 				A0BB6AA15781AB19B2BC4AD8 /* TelegramChannel.swift in Sources */,
 				1465E5C532701AEE9224A753 /* TemporalPatternEngine.swift in Sources */,
 				86DD0D5A802801CC4E6A8B6B /* TemporalValidator.swift in Sources */,
-				4493235F1106D858C4DC12AB /* TerminalContextExtractor.swift in Sources */,
 				4F3CF44128232025C49F983D /* TerminalSettingsView.swift in Sources */,
 				0DBFCC1D77DA9D6718583B84 /* TerminalSettingsViewSections.swift in Sources */,
-				2CA14A10DFCBC0B220717D64 /* TextEditorContextExtractor.swift in Sources */,
 				46228D2CB0E145B08CB7EA4D /* TheaAgentListView.swift in Sources */,
 				AED22364394A8BD60BE5DBE0 /* TheaAgentOrchestrator.swift in Sources */,
 				2E8F39F6ABCFCBD71E52622F /* TheaAgentOrchestratorTypes.swift in Sources */,
@@ -8265,7 +8257,6 @@
 				7159E3212A3FE7CC1DD2F461 /* UserModelBuilder+Core.swift in Sources */,
 				B1A3CC8E4E61B1591C2931C1 /* UserModelBuilder.swift in Sources */,
 				D1EC5634073A5881C594F3DF /* UserPreferenceModel.swift in Sources */,
-				B3F4A4E204D7E37DE13CD2B5 /* VSCodeContextExtractor.swift in Sources */,
 				1B2F13ADB5FD170C3495D7BF /* VehicleMaintenanceView.swift in Sources */,
 				2DF04A44D6870904DCBFDC7F /* VehicleManager.swift in Sources */,
 				325F1B802ED1BE46F5642F5C /* VideoEncoderService.swift in Sources */,
@@ -8302,7 +8293,6 @@
 				95EB31D1960CAD87F3ADDB2B /* WorkflowRecorder.swift in Sources */,
 				5597AA6A26245BF44B5C1C70 /* WorkflowSettingsView.swift in Sources */,
 				EAF016CA5B89E8B616858C70 /* XcodeBuildRunner.swift in Sources */,
-				4BE319A229A21BBE09117C84 /* XcodeContextExtractor.swift in Sources */,
 				FDB9471159C1E5675A7B9EEC /* YouTubeIntelligence.swift in Sources */,
 				4A2F9B8D31284A1EA313D2D6 /* iMessageChannel.swift in Sources */,
 				CC88FFCEDF6235499055ECEF /* iOSAISettingsSection.swift in Sources */,
