@@ -119,6 +119,55 @@ struct iOSSettingsView: View {
                 Text("Integrations")
             }
 
+            // MARK: - Life Section
+            Section {
+                NavigationLink {
+                    TaskManagerView()
+                } label: {
+                    SettingsRow(
+                        icon: "checklist",
+                        iconColor: .green,
+                        title: "Tasks",
+                        subtitle: "\(TheaTaskManager.shared.pendingTasks.count) pending"
+                    )
+                }
+
+                NavigationLink {
+                    LifeManagementDashboardView()
+                } label: {
+                    SettingsRow(
+                        icon: "calendar.badge.clock",
+                        iconColor: .blue,
+                        title: "Life Dashboard",
+                        subtitle: "Daily review & goals"
+                    )
+                }
+
+                NavigationLink {
+                    HealthDashboardView()
+                } label: {
+                    SettingsRow(
+                        icon: "heart.fill",
+                        iconColor: .red,
+                        title: "Health",
+                        subtitle: "Metrics & insights"
+                    )
+                }
+
+                NavigationLink {
+                    FinancialDashboardView()
+                } label: {
+                    SettingsRow(
+                        icon: "chart.line.uptrend.xyaxis",
+                        iconColor: .green,
+                        title: "Finance",
+                        subtitle: "Transactions & budgets"
+                    )
+                }
+            } header: {
+                Text("Life")
+            }
+
             // MARK: - Appearance Section
             Section {
                 Picker("Theme", selection: $settingsManager.theme) {
