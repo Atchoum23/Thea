@@ -298,16 +298,18 @@ final class TelegramChannel: ObservableObject {
                 let mimeType = msgDict["mime_type"] as? String
                 let size = msgDict["file_size_bytes"] as? Int
                 let attachType: TelegramAttachmentType
-                if mimeType?.hasPrefix("audio/") == true {
-                    attachType = .audio
-                } else if mimeType?.hasPrefix("video/") == true {
-                    attachType = .video
-                } else if msgDict["media_type"] as? String == "voice_message" {
+                // Check media_type first — voice/video messages have audio/video mime types
+                // but should be classified by their specific media_type
+                if msgDict["media_type"] as? String == "voice_message" {
                     attachType = .voiceMessage
                 } else if msgDict["media_type"] as? String == "video_message" {
                     attachType = .videoNote
                 } else if msgDict["media_type"] as? String == "sticker" {
                     attachType = .sticker
+                } else if mimeType?.hasPrefix("audio/") == true {
+                    attachType = .audio
+                } else if mimeType?.hasPrefix("video/") == true {
+                    attachType = .video
                 } else {
                     attachType = .document
                 }
