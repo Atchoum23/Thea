@@ -167,6 +167,10 @@ final class ClipboardHistoryManager: ObservableObject {
             )
 
             modelContext?.insert(entry)
+
+            // AI categorization (if enabled)
+            ClipboardIntelligence.shared.processEntry(entry)
+
             saveContext()
             recentEntries.insert(entry, at: 0)
 
