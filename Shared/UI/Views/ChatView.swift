@@ -195,6 +195,11 @@ struct ChatView: View {
                 #endif
 
                 ToolbarItem {
+                    SyncStatusIndicator()
+                        .help("Sync status and transport info")
+                }
+
+                ToolbarItem {
                     ConversationLanguagePickerView(conversation: conversation)
                         .help("Set conversation language")
                 }

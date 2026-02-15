@@ -124,16 +124,19 @@ extension CloudKitService {
         }
     }
 
-    /// Process a changed record from delta sync
+    /// Process a changed record from delta sync, respecting selective sync toggles
     func processChangedRecord(_ record: CKRecord) async {
         switch record.recordType {
         case RecordType.conversation.rawValue:
+            guard isSyncEnabled(for: .conversations) else { return }
             let conversation = CloudConversation(from: record)
             await mergeConversation(conversation)
         case RecordType.knowledge.rawValue:
+            guard isSyncEnabled(for: .knowledge) else { return }
             let item = CloudKnowledgeItem(from: record)
             await mergeKnowledgeItem(item)
         case RecordType.project.rawValue:
+            guard isSyncEnabled(for: .projects) else { return }
             let project = CloudProject(from: record)
             await mergeProject(project)
         case RecordType.settings.rawValue:
@@ -142,6 +145,25 @@ extension CloudKitService {
         default:
             break
         }
+    }
+
+    // MARK: - Selective Sync
+
+    /// Data types that can be individually toggled for sync
+    enum SyncDataType: String, CaseIterable, Sendable {
+        case conversations
+        case knowledge
+        case projects
+        case favorites
+    }
+
+    /// Check whether sync is enabled for a specific data type via AppStorage toggles.
+    /// Defaults to true (syncing everything) if the user hasn't explicitly disabled a type.
+    func isSyncEnabled(for dataType: SyncDataType) -> Bool {
+        let key = "sync.\(dataType.rawValue)"
+        // If the key has never been set, default to enabled
+        guard UserDefaults.standard.object(forKey: key) != nil else { return true }
+        return UserDefaults.standard.bool(forKey: key)
     }
 
     /// Process a deleted record from delta sync
@@ -267,7 +289,7 @@ extension CloudKitService {
 
     /// Save a conversation to CloudKit with conflict resolution
     public func saveConversation(_ conversation: CloudConversation) async throws {
-        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .conversations) else { return }
 
         let record = conversation.toRecord()
         do {
@@ -299,7 +321,7 @@ extension CloudKitService {
 
     /// Save a knowledge item to CloudKit
     public func saveKnowledgeItem(_ item: CloudKnowledgeItem) async throws {
-        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .knowledge) else { return }
 
         let record = item.toRecord()
         try await privateDatabase.save(record)
@@ -307,7 +329,7 @@ extension CloudKitService {
 
     /// Save a project to CloudKit
     public func saveProject(_ project: CloudProject) async throws {
-        guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
+        guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .projects) else { return }
 
         let record = project.toRecord()
         try await privateDatabase.save(record)

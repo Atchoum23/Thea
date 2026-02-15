@@ -89,6 +89,7 @@
 		0AFE676DAD0066791B639161 /* PlanState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78CC001EDD4E7CE67C947E6 /* PlanState.swift */; };
 		0B04C5588103B79EC628E11D /* CoreMLInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FEAE1F35A07990D5E09CC0F /* CoreMLInferenceEngine.swift */; };
 		0B123AD56A0D09578E8AFDA2 /* TheaShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7303CE663767ABE390515D5C /* TheaShareExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0B1497E85A8732E70B2CAC13 /* SyncStatusIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FC079FF01D3AA2C5EE9B5C /* SyncStatusIndicator.swift */; };
 		0B38947FFB175728E7B139F7 /* Scriptserror-summary.sh in Resources */ = {isa = PBXBuildFile; fileRef = BF4145F0BDEF139330DA0734 /* Scriptserror-summary.sh */; };
 		0B7D24082ACFF1DDACB3467A /* HomeKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4716380D345E63618BB0BAC9 /* HomeKitService.swift */; };
 		0B81C531130F1A493C8AC86B /* MailMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0366352DF3B20EF963F814F3 /* MailMonitor.swift */; };
@@ -1224,6 +1225,7 @@
 		A275D4654289CAC60CBCB817 /* HealthContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817A13DB0843532696614A1D /* HealthContextProvider.swift */; };
 		A27FF50B764E3E457EF4D743 /* writing-assistant.js in Resources */ = {isa = PBXBuildFile; fileRef = 1D395678DA91951D20705A95 /* writing-assistant.js */; };
 		A2B54B50828F14555F7B38E5 /* AgentEnhancements.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8971C9CB1631EF6F27458F3 /* AgentEnhancements.swift */; };
+		A2EB0016B9E042985680FCEC /* SyncEncryption.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80B10B0D334BBE033B72360 /* SyncEncryption.swift */; };
 		A314B4F0AA2C33D91CAAB7BD /* WellnessModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784B813F3FAE2CE985E54ABC /* WellnessModels.swift */; };
 		A330CB1D562B38ABCB9D089F /* WebSearchVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D631DDFAC95F64E8E4DE5D1 /* WebSearchVerifier.swift */; };
 		A3414B4FFE74A2828F650019 /* PrivacyPreservingAIRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55D01F902573C48ACF0FE738 /* PrivacyPreservingAIRouter.swift */; };
@@ -1232,6 +1234,7 @@
 		A399135BE14985213B94AC34 /* ConversationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D764A76640C98A6FDCA1E4 /* ConversationSettingsView.swift */; };
 		A3BB51F152C53E8DF851457C /* ConversationExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C20BD2302402B55AC7520CB /* ConversationExporter.swift */; };
 		A417F54A86A7C19729A4BB6B /* ConvergenceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9B28E0923FBC9BBA77DADB /* ConvergenceDetector.swift */; };
+		A4241B8F85F26DDA029F4F77 /* SyncConflictResolutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD151422B1C56401D1576CE /* SyncConflictResolutionView.swift */; };
 		A447BCC7EB02891FC983852A /* MLXAudioCore in Frameworks */ = {isa = PBXBuildFile; productRef = A37145ECF30A25F3E0387B29 /* MLXAudioCore */; };
 		A45A8CDF074B9A236BD8B1DD /* HealthTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D67BC0C32E3ADA3EB479A3 /* HealthTrackingManager.swift */; };
 		A46191935FD4368CD7C29EC8 /* FocusModeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F887FAC64684B0348141357B /* FocusModeService.swift */; };
@@ -1382,6 +1385,7 @@
 		B95848B2FDB92BFEFDFA4328 /* TerminalSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C485B7F1A5C11C81BC974B7 /* TerminalSettingsView.swift */; };
 		B95EF3055EBAE644732EFBBE /* PrivacySettingsViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653DFB5BA5A429E7EDB8765A /* PrivacySettingsViewSections.swift */; };
 		B9AD32F9F3DFA1334AC9E51F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195908F24C579B94425A9585 /* HomeView.swift */; };
+		B9C3672E1BD24A43F9A60B2E /* SyncStatusIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FC079FF01D3AA2C5EE9B5C /* SyncStatusIndicator.swift */; };
 		BA070FD54714B4AD30ED6A5A /* LifeIntelligenceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50671203559B8D1DBBEB01C6 /* LifeIntelligenceCoordinator.swift */; };
 		BA2909F77929085309140D3A /* BrowserAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3579242B3BC082722588D04E /* BrowserAutomationService.swift */; };
 		BA5D28F3421DBEC7F1D81FA8 /* SelfBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A7C4F8C0EB1089B3D294DE /* SelfBenchmark.swift */; };
@@ -1569,6 +1573,7 @@
 		D565E08CAFD3DE5AA6AD0682 /* TOTPAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452746B2CD75A1E34EF12A38 /* TOTPAuthenticator.swift */; };
 		D578FB29EC61F4ACCC2001F2 /* OpenClawIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E367538A748B3F5634103301 /* OpenClawIntegration.swift */; };
 		D57C39A40F3E8F1BFDCDFFC1 /* icon-96.png in Resources */ = {isa = PBXBuildFile; fileRef = 99546E1BAE198E4685265A5A /* icon-96.png */; };
+		D5A47AB1845CFA91613E088C /* SyncEncryption.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80B10B0D334BBE033B72360 /* SyncEncryption.swift */; };
 		D5C0AD7B56106239E5D7BF38 /* ActivityLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FA8A5312027FA2898354A1 /* ActivityLogger.swift */; };
 		D5F04F5D59D9F407DF12E6E8 /* LiveAutoCorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E6DD57A3102D9677FCFE87 /* LiveAutoCorrect.swift */; };
 		D5F766ECEBBC56AF17F595EA /* RemoteAuthMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0D028DA9D8896EDE0B588 /* RemoteAuthMessages.swift */; };
@@ -1670,6 +1675,7 @@
 		E1CFA281E78AC2BAB4533D15 /* MLXVisionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B691B17B7A9CD08E4BE8614F /* MLXVisionEngine.swift */; };
 		E1F591380C9C17F9D0D0B641 /* BlueprintExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A267513D6EE787367169E2 /* BlueprintExecutor.swift */; };
 		E20E5EFA675F93960B37D69A /* TrustScoreSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB7956A6A63A1EE069548E9 /* TrustScoreSystem.swift */; };
+		E27F602A9E451B350C63E5D4 /* SyncConflictResolutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD151422B1C56401D1576CE /* SyncConflictResolutionView.swift */; };
 		E28FB1BE340EBD2F68255440 /* AppIntegrationFramework.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4078FB242939B81A937F2F3F /* AppIntegrationFramework.swift */; };
 		E2B57AD5376E564A966EF156 /* BluetoothDeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1217BC528F6264D7B6BF3423 /* BluetoothDeviceManager.swift */; };
 		E2D9E068301F684569BB3E2E /* ModelRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB9744B949BD7B4F272881A /* ModelRouter.swift */; };
@@ -2253,6 +2259,7 @@
 		3A39E657454A8273F0B46AEE /* WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetExtension.entitlements; sourceTree = "<group>"; };
 		3A4AD63B8991F00AB890CC10 /* KnowledgeManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeManagementView.swift; sourceTree = "<group>"; };
 		3AABB4A30E8D88394B584502 /* NotificationPayloadTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPayloadTypes.swift; sourceTree = "<group>"; };
+		3AD151422B1C56401D1576CE /* SyncConflictResolutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncConflictResolutionView.swift; sourceTree = "<group>"; };
 		3AD81309BBB16200ABB14BF9 /* CoworkSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkSession.swift; sourceTree = "<group>"; };
 		3B0765E168353C931937E1EE /* BrowserAutomationOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationOrchestrator.swift; sourceTree = "<group>"; };
 		3B0F2B235FB63C4FFAD580D5 /* TransferableService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferableService.swift; sourceTree = "<group>"; };
@@ -2920,6 +2927,7 @@
 		D78CC001EDD4E7CE67C947E6 /* PlanState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanState.swift; sourceTree = "<group>"; };
 		D83034A1686EC312EF8EE3D1 /* CareerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareerModels.swift; sourceTree = "<group>"; };
 		D84D7E044F5A030DFA5AEA30 /* MemoryManager+MemoryTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MemoryManager+MemoryTypes.swift"; sourceTree = "<group>"; };
+		D8FC079FF01D3AA2C5EE9B5C /* SyncStatusIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusIndicator.swift; sourceTree = "<group>"; };
 		D916B95EC2BD7D0E40A1E1CC /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		D922289175C3C1E5C74D88BD /* TestGeneratorTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGeneratorTypes.swift; sourceTree = "<group>"; };
 		D9990FF8297FF11E970ED677 /* TheaClipRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipRowView.swift; sourceTree = "<group>"; };
@@ -2986,6 +2994,7 @@
 		E730DD79BECB8358CB18B335 /* SymbolGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolGraph.swift; sourceTree = "<group>"; };
 		E7AB1E478B64D738B19D2451 /* blocking-rules.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "blocking-rules.json"; sourceTree = "<group>"; };
 		E7B369FB7197D1B5B8762E08 /* SelfEvolutionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfEvolutionEngine.swift; sourceTree = "<group>"; };
+		E80B10B0D334BBE033B72360 /* SyncEncryption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEncryption.swift; sourceTree = "<group>"; };
 		E83E6315354E6B9CB196EF63 /* CodeExecutionVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeExecutionVerifier.swift; sourceTree = "<group>"; };
 		E89F5D542A80CF44499FAD7A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		E8F9DEB3CB6633B6BCD4EF3C /* TheaAgentSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaAgentSidebarView.swift; sourceTree = "<group>"; };
@@ -3248,6 +3257,7 @@
 				7279FAB1D028DD8804694B21 /* HandoffService.swift */,
 				7B22A03578915E3A117AB6AA /* PreferenceSyncEngine.swift */,
 				21D3526CCC665056029CBF8C /* SmartTransportManager.swift */,
+				E80B10B0D334BBE033B72360 /* SyncEncryption.swift */,
 				C48B618D8E77233F77D02CD0 /* TheaClipSyncService.swift */,
 				AAD68D6416E308F43865C790 /* UnifiedContextSync.swift */,
 			);
@@ -4426,6 +4436,8 @@
 			children = (
 				517D8BF2B0861EE3FBDBC58A /* AgentFeedbackSection.swift */,
 				8DA22D1B018EDD72551C0A5A /* ConversationLanguagePickerView.swift */,
+				3AD151422B1C56401D1576CE /* SyncConflictResolutionView.swift */,
+				D8FC079FF01D3AA2C5EE9B5C /* SyncStatusIndicator.swift */,
 				F5F04DD909E0AA7EF54A88D1 /* TheaAgentStatusBar.swift */,
 			);
 			path = Components;
@@ -7656,8 +7668,11 @@
 				47A61A921C98FF076F0DC533 /* SwiftKnowledgeLearnerTypes.swift in Sources */,
 				79AA82A513A4A634FEA11F09 /* SwiftValidator.swift in Sources */,
 				F3FE0596843988526A2EA85C /* SymbolGraph.swift in Sources */,
+				A4241B8F85F26DDA029F4F77 /* SyncConflictResolutionView.swift in Sources */,
+				D5A47AB1845CFA91613E088C /* SyncEncryption.swift in Sources */,
 				675A4462FEFB2127D71B0CA4 /* SyncSettingsView.swift in Sources */,
 				20EA0D80679146D23D0D1776 /* SyncSettingsViewSections.swift in Sources */,
+				0B1497E85A8732E70B2CAC13 /* SyncStatusIndicator.swift in Sources */,
 				0F5191421DEDD840D27BC4CA /* SystemAudioMonitor.swift in Sources */,
 				59A41822D1CEAE5A65000962 /* SystemPromptConfiguration.swift in Sources */,
 				F2783BDF3B9B490436699E4C /* SystemPromptSettingsView.swift in Sources */,
@@ -8653,8 +8668,11 @@
 				46E6A4B7CB4203AB266EF6E0 /* SwiftKnowledgeLearnerTypes.swift in Sources */,
 				D0A9BF384687630386C574D6 /* SwiftValidator.swift in Sources */,
 				3EA3046BF7A1F249E7A16377 /* SymbolGraph.swift in Sources */,
+				E27F602A9E451B350C63E5D4 /* SyncConflictResolutionView.swift in Sources */,
+				A2EB0016B9E042985680FCEC /* SyncEncryption.swift in Sources */,
 				BDD9D97915B5F228F65F48D8 /* SyncSettingsView.swift in Sources */,
 				83ED5ECB689E48EB2F3936F4 /* SyncSettingsViewSections.swift in Sources */,
+				B9C3672E1BD24A43F9A60B2E /* SyncStatusIndicator.swift in Sources */,
 				4202D9C510D0F0744E7A9875 /* SystemAudioMonitor.swift in Sources */,
 				BAA6D5CC522D271EF3BAC316 /* SystemAutomationEngine.swift in Sources */,
 				8C32B3A63104F596567FE95E /* SystemIntegration.swift in Sources */,
