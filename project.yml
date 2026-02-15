@@ -682,6 +682,12 @@ targets:
           - "**/Automation/UserInterventionDetector.swift"
           - "**/Automation/ScreenAnalyzer.swift"
           - "**/Automation/AutomationAction.swift"
+          # Exclude macOS-only AppKit files (ActionExecutor, ForegroundAppMonitor, etc.)
+          - "**/System/Input/ActionExecutor.swift"
+          - "**/System/Input/PointerTracker.swift"
+          - "**/System/ScreenCapture/ScreenCaptureManager.swift"
+          - "**/Integrations/ForegroundAppMonitor.swift"
+          - "**/AI/LiveGuidance/LocalVisionGuidance.swift"
           # TheaDesignSystem.swift KEPT for iOS - contains design tokens
           - "**/Design/LiquidGlassDesign.swift"
           # Exclude stubs since TheaDesignSystem is included
