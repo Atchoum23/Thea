@@ -17,8 +17,8 @@ final class SystemActionExecutor {
         return AXIsProcessTrusted()
     }
 
-    func requestAuthorization() {
-        nonisolated(unsafe) let promptKey = kAXTrustedCheckOptionPrompt.takeRetainedValue() as String
+    nonisolated func requestAuthorization() {
+        let promptKey = kAXTrustedCheckOptionPrompt.takeRetainedValue() as String
         let options: NSDictionary = [promptKey: true]
         AXIsProcessTrustedWithOptions(options)
     }
