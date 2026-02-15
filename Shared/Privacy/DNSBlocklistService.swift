@@ -92,9 +92,58 @@ actor DNSBlocklistService {
     // MARK: - Initialization
 
     init() {
-        loadPersistedEntries()
+        // Inline persistence load (cannot call actor-isolated methods from init)
+        if let data = UserDefaults.standard.data(forKey: storageKey),
+           let persisted = try? JSONDecoder().decode([BlocklistEntry].self, from: data) {
+            for entry in persisted {
+                entries[entry.domain] = entry
+            }
+            let statsData = UserDefaults.standard.dictionary(forKey: statsKey)
+            blockedCountTotal = statsData?["total"] as? Int ?? 0
+        }
+
         if entries.isEmpty {
-            loadBuiltinBlocklists()
+            // Inline built-in blocklists
+            let adDomains = [
+                "doubleclick.net", "googlesyndication.com", "googleadservices.com",
+                "adservice.google.com", "pagead2.googlesyndication.com",
+                "ad.doubleclick.net", "ads.linkedin.com", "ads-twitter.com",
+                "adsserver.com", "adnxs.com", "adzerk.net", "moatads.com",
+                "serving-sys.com", "bidswitch.net", "casalemedia.com",
+                "contextweb.com", "criteo.com", "pubmatic.com", "rubiconproject.com",
+                "taboola.com", "outbrain.com", "mgid.com"
+            ]
+            let trackerDomains = [
+                "pixel.facebook.com", "connect.facebook.net", "pixel.wp.com",
+                "sb.scorecardresearch.com", "bat.bing.com", "tr.snapchat.com",
+                "static.ads-twitter.com", "t.co", "tags.tiqcdn.com",
+                "cdn.mxpnl.com", "ct.pinterest.com", "dc.ads.linkedin.com",
+                "smetrics.att.com", "b.scorecardresearch.com"
+            ]
+            let analyticsDomains = [
+                "google-analytics.com", "googletagmanager.com", "segment.io",
+                "mixpanel.com", "amplitude.com", "hotjar.com", "heap.io",
+                "fullstory.com", "mouseflow.com", "crazyegg.com",
+                "kissmetrics.io", "optimizely.com", "quantserve.com"
+            ]
+            let malwareDomains = ["malware-check.com.example", "phishing-test.example"]
+
+            for domain in adDomains {
+                let entry = BlocklistEntry(domain: domain, category: .advertising, source: .builtin)
+                entries[entry.domain] = entry
+            }
+            for domain in trackerDomains {
+                let entry = BlocklistEntry(domain: domain, category: .tracker, source: .builtin)
+                entries[entry.domain] = entry
+            }
+            for domain in analyticsDomains {
+                let entry = BlocklistEntry(domain: domain, category: .analytics, source: .builtin)
+                entries[entry.domain] = entry
+            }
+            for domain in malwareDomains {
+                let entry = BlocklistEntry(domain: domain, category: .malware, source: .builtin)
+                entries[entry.domain] = entry
+            }
         }
     }
 

@@ -33,6 +33,32 @@ struct ConfigurationPrivacySettingsView: View {
 
             auditSection
 
+            Section("Privacy Dashboard") {
+                NavigationLink {
+                    PrivacyTransparencyReportView()
+                } label: {
+                    Label("Transparency Report", systemImage: "doc.text.magnifyingglass")
+                }
+
+                NavigationLink {
+                    NetworkActivityMonitorView()
+                } label: {
+                    Label("Network Activity Monitor", systemImage: "network")
+                }
+
+                NavigationLink {
+                    DNSBlocklistManagerView()
+                } label: {
+                    Label("DNS Blocklist Manager", systemImage: "hand.raised.fill")
+                }
+
+                NavigationLink {
+                    FirewallAuditDetailView()
+                } label: {
+                    Label("Firewall Audit Log", systemImage: "list.bullet.rectangle")
+                }
+            }
+
             Section("Data Storage") {
                 LabeledContent("Location", value: "Local (On-Device)")
                 LabeledContent("Encryption", value: "Enabled")

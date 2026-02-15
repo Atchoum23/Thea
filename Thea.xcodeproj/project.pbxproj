@@ -220,6 +220,7 @@
 		1B2B41A62682B5BD7CE4A722 /* InterventionScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520122204AB7C7FDB6DCE80B /* InterventionScheduler.swift */; };
 		1B4A954F8CDA176697BE8949 /* RemoteInputMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D054738FAE50AC1B539112 /* RemoteInputMessages.swift */; };
 		1B6D7C5F0B6BFCCD7791D6B0 /* TVEnhancedHomeView+Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B2A6CF39C2556C14ECCF0B4 /* TVEnhancedHomeView+Settings.swift */; };
+		1B8C5357785A9F6F840A2CD9 /* NetworkPrivacyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0D6BCD88807D1613A174A6 /* NetworkPrivacyMonitor.swift */; };
 		1B8D3CE1226B484F2801D324 /* GDPRDataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF467C34A028512D49539FE /* GDPRDataExporter.swift */; };
 		1B9730FD0FFBCA63B674FF6F /* KnowledgeSourceManager+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87694DF7CF79D037131AF696 /* KnowledgeSourceManager+Core.swift */; };
 		1CA663AC5321B97D682ABF8D /* CollaborativeMemorySystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48BF2393DFCBE59636EB062 /* CollaborativeMemorySystem.swift */; };
@@ -1138,6 +1139,7 @@
 		96266D488EFE32382FCC592C /* LocationContextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F9D0D068A4F0D27BD17605 /* LocationContextProvider.swift */; };
 		968C533F18A5294A06D55559 /* DeviceSwitcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA82EC0C5E5B467BA04314 /* DeviceSwitcherView.swift */; };
 		96B933427745397CE3651ACE /* TaskContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A181168E87AFA4D4E9AAD1CB /* TaskContext.swift */; };
+		96D785A588566297C51E7B20 /* DNSBlocklistService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720EBAD12D57A0E378BC7145 /* DNSBlocklistService.swift */; };
 		96F36C885784453FEC15389C /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = 6A7A3FB90573D2EAB0FA237E /* popup.css */; };
 		972AA302C1C0403F2093FE01 /* RemoteFileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 074E07BC454AAE5357088F19 /* RemoteFileService.swift */; };
 		972C1A73511048BE461BEBF1 /* AAnticipatoryCommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19CD3B1C6BF1D449D68E2F41 /* AAnticipatoryCommonTypes.swift */; };
@@ -1196,6 +1198,7 @@
 		9F0F5E154A0B88F48C68B8BB /* TheaAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D38ED8E6F71CD71517A09 /* TheaAnimations.swift */; };
 		9F16201DCC93E06A9F2118E6 /* ProactiveEngine+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = E61ADDFD564C9CE575EBF048 /* ProactiveEngine+Core.swift */; };
 		9F1E3B75119BD69ABBC24DA6 /* ChatReflexionIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDEA36094ED8A9BFDFD58FCD /* ChatReflexionIntegration.swift */; };
+		9F441641E7A487ED0A18D8CB /* NetworkPrivacyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0D6BCD88807D1613A174A6 /* NetworkPrivacyMonitor.swift */; };
 		9F5118BECB5FCFDA4D8FF1A8 /* iOSSystemObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF85FD6CB609C421593F462 /* iOSSystemObserver.swift */; };
 		9F81D751EACEC0FD6C51E32E /* UnifiedSuggestionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B008A8ECD107BA625AEA7F /* UnifiedSuggestionCoordinator.swift */; };
 		A000187C072843E6636D7CDB /* RemoteSystemService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E37058C1F932EA069010006A /* RemoteSystemService.swift */; };
@@ -1302,6 +1305,7 @@
 		AE2708F002222EEDFAD3E86E /* MentionAutocompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826846983CA6501514B912D8 /* MentionAutocompleteView.swift */; };
 		AE2DE7795678F272F86B63D6 /* cosmetic-filter.js in Resources */ = {isa = PBXBuildFile; fileRef = 5F503B3196C42EA179CB74AD /* cosmetic-filter.js */; };
 		AE373A1846B9059F30D15245 /* TheaSharePlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D263A49EDCC79B973E539D /* TheaSharePlay.swift */; };
+		AE39877E35FD7F7AC2D8146D /* PrivacyFirewallDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C2FFA7B2F5842842E88FE9 /* PrivacyFirewallDashboardView.swift */; };
 		AE497D63599340BB90C15CDA /* RelationshipIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A27D66B7F2B5A459B21F2FE /* RelationshipIntelligence.swift */; };
 		AE822AE0A564A1B08D12874A /* FocusFilterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504F004E3218F648DBA1B73C /* FocusFilterManager.swift */; };
 		AEB1A0457E4B3A8DD25557FD /* AgentObservability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347B7549B7C7FF8E8EAA92DF /* AgentObservability.swift */; };
@@ -1540,6 +1544,7 @@
 		D0D344DD80B2C1A69FDA278E /* AudioOutputRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728260395A6CFA35077DF3EB /* AudioOutputRouter.swift */; };
 		D0D9D0EB9218E38CF3644919 /* AdvancedPromptSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15232BD8D9E81B18A70E72E4 /* AdvancedPromptSettingsView.swift */; };
 		D0FE48976E2A8F9B3FADC9B7 /* AdaptiveIntervalScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451EB43F894B6059289739F0 /* AdaptiveIntervalScheduler.swift */; };
+		D1249CBB0DA9EB9BF38AAAB4 /* DNSBlocklistService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720EBAD12D57A0E378BC7145 /* DNSBlocklistService.swift */; };
 		D12558FBAE63D42B12F37D44 /* DisplayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CBD5463EE84BC989A8CBE1D /* DisplayViewModel.swift */; };
 		D1B0F44CE1C2236004477BF0 /* HomeKitMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213DB857F500AF121B9B8CB2 /* HomeKitMonitor.swift */; };
 		D1C379D564F3561CF09951EC /* RemindersIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E9D82E9593330A9EC81607 /* RemindersIntegration.swift */; };
@@ -1817,6 +1822,7 @@
 		F5D1D37BD0AE3A1C8F1AA6FE /* InteractionTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BB0BE43AD93A41E1B9924F /* InteractionTracker.swift */; };
 		F5D83BC746BEDEF75A0A75D6 /* ProactiveModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2773F8F641292B6CCE461F4C /* ProactiveModelManager.swift */; };
 		F5E9CA51786F2F28E8A4CDFF /* UnifiedIntelligenceHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0269A46E02BD97A4CF52B0EA /* UnifiedIntelligenceHub.swift */; };
+		F60D7798506756CED86C0F78 /* PrivacyFirewallDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C2FFA7B2F5842842E88FE9 /* PrivacyFirewallDashboardView.swift */; };
 		F663640C3DDFC25D044D6159 /* AgentSecEnforcer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27F12B2A1D617DA383C60E5F /* AgentSecEnforcer.swift */; };
 		F6C4E21261129006478BE610 /* SiriIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7853DB6959DC8D9D05D49042 /* SiriIntegration.swift */; };
 		F713790A3290F08CD429F923 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E261D294AB8CABCBB792A2 /* NetworkManager.swift */; };
@@ -2017,6 +2023,7 @@
 		027D2881851331D5016F0C49 /* AssetInventoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetInventoryService.swift; sourceTree = "<group>"; };
 		02813E8977620F4DC591C8A2 /* VoiceActivationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceActivationManager.swift; sourceTree = "<group>"; };
 		028DE98F628A0F693BC65625 /* ChatManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatManager.swift; sourceTree = "<group>"; };
+		02C2FFA7B2F5842842E88FE9 /* PrivacyFirewallDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyFirewallDashboardView.swift; sourceTree = "<group>"; };
 		02C550157A4BDCB0B207470F /* PermissionsManagerRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManagerRequests.swift; sourceTree = "<group>"; };
 		02DF88A0D9B3677236656455 /* GitSavepoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitSavepoint.swift; sourceTree = "<group>"; };
 		02F12D17EF36121477D2546D /* LocalModelProviderChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModelProviderChat.swift; sourceTree = "<group>"; };
@@ -2507,6 +2514,7 @@
 		71A8FB7717FF86B2DA65BEE9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		71C71C1D907EAEA538CD82F9 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		71F663DAE1E86BE0D0C5CE12 /* SquadOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquadOrchestrator.swift; sourceTree = "<group>"; };
+		720EBAD12D57A0E378BC7145 /* DNSBlocklistService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSBlocklistService.swift; sourceTree = "<group>"; };
 		7210F0D8AF8B398D945828C2 /* CareerDashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareerDashboardViewModel.swift; sourceTree = "<group>"; };
 		7279FAB1D028DD8804694B21 /* HandoffService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandoffService.swift; sourceTree = "<group>"; };
 		728260395A6CFA35077DF3EB /* AudioOutputRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioOutputRouter.swift; sourceTree = "<group>"; };
@@ -2916,6 +2924,7 @@
 		D922289175C3C1E5C74D88BD /* TestGeneratorTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGeneratorTypes.swift; sourceTree = "<group>"; };
 		D9990FF8297FF11E970ED677 /* TheaClipRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipRowView.swift; sourceTree = "<group>"; };
 		D9D990D1848AECFEA69EF44B /* InputTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTrackingManager.swift; sourceTree = "<group>"; };
+		DA0D6BCD88807D1613A174A6 /* NetworkPrivacyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkPrivacyMonitor.swift; sourceTree = "<group>"; };
 		DA1A95AD763A8BE07399BC04 /* dark-mode-themes.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "dark-mode-themes.js"; sourceTree = "<group>"; };
 		DA442AE1630095516AB91743 /* AdaptiveOCREngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveOCREngine.swift; sourceTree = "<group>"; };
 		DA51376D068195F9D9ABAC78 /* TestGenerator+CoverageAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TestGenerator+CoverageAnalysis.swift"; sourceTree = "<group>"; };
@@ -3790,6 +3799,7 @@
 				E14704B52B7CA21BBCDD9B4C /* OrchestratorSettingsView.swift */,
 				25663A06DB0B6830B3824E4E /* OrchestratorSettingsViewSections.swift */,
 				B98179C2572BBED4C0F018C2 /* PermissionsSettingsView.swift */,
+				02C2FFA7B2F5842842E88FE9 /* PrivacyFirewallDashboardView.swift */,
 				4BB8F326D3517DBB6D737F8E /* PrivacySettingsView.swift */,
 				653DFB5BA5A429E7EDB8765A /* PrivacySettingsViewSections.swift */,
 				30BF97AC6017B13875B56F59 /* PromptEngineeringSettingsView.swift */,
@@ -4691,6 +4701,8 @@
 		6F528B7AAFF2051385A42705 /* Privacy */ = {
 			isa = PBXGroup;
 			children = (
+				720EBAD12D57A0E378BC7145 /* DNSBlocklistService.swift */,
+				DA0D6BCD88807D1613A174A6 /* NetworkPrivacyMonitor.swift */,
 				965F1FD10468FDC43C9488F4 /* OutboundPrivacyGuard.swift */,
 				806230C49B50DFD0E5F66CB4 /* PIISanitizer.swift */,
 				7350AB103244416C877EE30F /* PrivacyPolicies.swift */,
@@ -7214,6 +7226,7 @@
 				C3F6724F304421DA49C0DCEC /* CrossDeviceService.swift in Sources */,
 				BF3B333399AA31C61F470E80 /* CustomAgentBuilder.swift in Sources */,
 				139ED5771371CA87DCA1D112 /* CustomAgentBuilderTypes.swift in Sources */,
+				D1249CBB0DA9EB9BF38AAAB4 /* DNSBlocklistService.swift in Sources */,
 				FAEEB0BE0C7A34D90305EAEF /* DataStorageErrorView.swift in Sources */,
 				43882260101411CD35CF5960 /* DeadlineIntelligence.swift in Sources */,
 				B1542D4CA0B86C37DCD3557B /* DeepLinkRouter.swift in Sources */,
@@ -7443,6 +7456,7 @@
 				EB8792708884614111FCA976 /* NetworkDiscoveryService.swift in Sources */,
 				D9CA4FF95AE506C161C41000 /* NetworkManager.swift in Sources */,
 				F28B17BCF9774A740C2CC7F4 /* NetworkManagerTypes.swift in Sources */,
+				9F441641E7A487ED0A18D8CB /* NetworkPrivacyMonitor.swift in Sources */,
 				CE3B94053794BF17DE01436E /* NotesIntegration.swift in Sources */,
 				A10FE8042E8A08D39D27AF8F /* NotificationCategories.swift in Sources */,
 				FA99E191012F7021E473F234 /* NotificationExtensions.swift in Sources */,
@@ -7506,6 +7520,7 @@
 				8F0787E172A44DCB61BB01B0 /* PreferenceSyncEngine.swift in Sources */,
 				DE01AA8572D757756FA641C2 /* PriorityManager.swift in Sources */,
 				67D871137D813E13811EDC42 /* PrivacyControlsView.swift in Sources */,
+				F60D7798506756CED86C0F78 /* PrivacyFirewallDashboardView.swift in Sources */,
 				563F08649809315A4CF6E70B /* PrivacyManager.swift in Sources */,
 				5803B333EDBC63757019F62A /* PrivacyModeService.swift in Sources */,
 				DFA8FCDA89D8B051748AD615 /* PrivacyPolicies.swift in Sources */,
@@ -8174,6 +8189,7 @@
 				5D329130BA5952B5CE83AB11 /* CrossDeviceService.swift in Sources */,
 				2493B2009CA514EF17FAE191 /* CustomAgentBuilder.swift in Sources */,
 				C7DC3791B404A078591203F1 /* CustomAgentBuilderTypes.swift in Sources */,
+				96D785A588566297C51E7B20 /* DNSBlocklistService.swift in Sources */,
 				C81E4CB90206D14E4187FDD1 /* DataStorageErrorView.swift in Sources */,
 				B33CE64E99B358BA938CD19D /* DeadlineIntelligence.swift in Sources */,
 				7BCED260C47AE1029C241DBF /* DeepLinkRouter.swift in Sources */,
@@ -8429,6 +8445,7 @@
 				F713790A3290F08CD429F923 /* NetworkManager.swift in Sources */,
 				5E4C9A9C72A38CBDAD4B3114 /* NetworkManagerTypes.swift in Sources */,
 				FE57800F548BCBCA0DD2672F /* NetworkObserver.swift in Sources */,
+				1B8C5357785A9F6F840A2CD9 /* NetworkPrivacyMonitor.swift in Sources */,
 				D4074D4CAB3F35536133FB64 /* NotesIntegration.swift in Sources */,
 				E7C8CBB6C6380D5242F4A0C3 /* NotificationCategories.swift in Sources */,
 				B48789BF9F28A785B4AD8A99 /* NotificationManager.swift in Sources */,
@@ -8489,6 +8506,7 @@
 				6CC8E64B0988C22F8B65316F /* PreferenceSyncEngine.swift in Sources */,
 				A712DC65BE0AC9915111A216 /* PriorityManager.swift in Sources */,
 				BEF12E4593EFDB6B3E1B650F /* PrivacyControlsView.swift in Sources */,
+				AE39877E35FD7F7AC2D8146D /* PrivacyFirewallDashboardView.swift in Sources */,
 				7282A92C70235D2674106C80 /* PrivacyManager.swift in Sources */,
 				C0F098600365628733178A06 /* PrivacyModeService.swift in Sources */,
 				306FFEA121995FAFC85EE97E /* PrivacyPolicies.swift in Sources */,
