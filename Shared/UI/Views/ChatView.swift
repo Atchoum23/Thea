@@ -27,6 +27,10 @@ struct ChatView: View {
     /// Selected agent session (for inspector panel)
     @State var selectedAgentSession: TheaAgentSession?
 
+    /// Model comparison mode
+    @State var isComparisonMode = false
+    @State var comparisonResults: (Message, Message)?
+
     /// Tracks which branch index is selected for each parent message ID
     @State var selectedBranches: [UUID: Int] = [:]
 
@@ -177,6 +181,16 @@ struct ChatView: View {
                     .keyboardShortcut("f", modifiers: .command)
                     .help("Search in conversation (⌘F)")
                     .accessibilityLabel("Search messages")
+                }
+                #endif
+
+                #if os(macOS)
+                ToolbarItem {
+                    Toggle(isOn: $isComparisonMode) {
+                        Label("Compare", systemImage: "square.split.2x1")
+                    }
+                    .help("Compare models: send next message to two providers side-by-side")
+                    .accessibilityLabel("Toggle model comparison mode")
                 }
                 #endif
 

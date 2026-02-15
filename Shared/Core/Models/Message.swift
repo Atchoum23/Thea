@@ -200,6 +200,9 @@ struct MessageMetadata: Codable, Sendable {
     // Verification confidence score (0.0-1.0) from ConfidenceSystem
     var confidence: Double?
 
+    // Token usage (input tokens counted before send, output tokens from response)
+    var inputTokens: Int?
+
     init(
         finishReason: String? = nil,
         systemFingerprint: String? = nil,
@@ -208,7 +211,8 @@ struct MessageMetadata: Codable, Sendable {
         respondingDeviceID: String? = nil,
         respondingDeviceName: String? = nil,
         respondingDeviceType: String? = nil,
-        confidence: Double? = nil
+        confidence: Double? = nil,
+        inputTokens: Int? = nil
     ) {
         self.finishReason = finishReason
         self.systemFingerprint = systemFingerprint
@@ -218,6 +222,7 @@ struct MessageMetadata: Codable, Sendable {
         self.respondingDeviceName = respondingDeviceName
         self.respondingDeviceType = respondingDeviceType
         self.confidence = confidence
+        self.inputTokens = inputTokens
     }
 }
 

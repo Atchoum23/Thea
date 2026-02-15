@@ -242,6 +242,28 @@ final class ProviderRegistry {
         return nil
     }
 
+    /// Resolve a model ID (e.g., "gpt-4o", "claude-4-sonnet") to the provider that serves it.
+    func getProvider(for modelId: String) -> AIProvider? {
+        if modelId == "local" || modelId.hasPrefix("local:") {
+            return localProviders.values.first
+        }
+        // Match model prefix to provider
+        let providerMapping: [(prefix: String, providerId: String)] = [
+            ("gpt", "openai"), ("o1", "openai"), ("o3", "openai"),
+            ("claude", "anthropic"),
+            ("gemini", "google"),
+            ("llama", "groq"), ("mixtral", "groq"),
+            ("sonar", "perplexity"), ("pplx", "perplexity")
+        ]
+        for mapping in providerMapping {
+            if modelId.lowercased().contains(mapping.prefix) {
+                return getProvider(id: mapping.providerId)
+            }
+        }
+        // Fallback to OpenRouter (routes any model)
+        return getProvider(id: "openrouter") ?? getDefaultProvider()
+    }
+
     func getDefaultProvider() -> AIProvider? {
         // Check orchestrator configuration for local model preference
         let preference = orchestratorConfig.localModelPreference

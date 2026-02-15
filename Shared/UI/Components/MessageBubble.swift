@@ -140,6 +140,28 @@ struct MessageBubble: View {
                     .foregroundStyle(.secondary)
             }
 
+            // Token count display
+            if let tokenCount = message.tokenCount {
+                let inputTokens = message.metadata?.inputTokens
+                let tokenText = inputTokens != nil
+                    ? "\(Self.formatTokenCount(inputTokens!))→\(Self.formatTokenCount(tokenCount))"
+                    : "\(Self.formatTokenCount(tokenCount)) tokens"
+                Text(tokenText)
+                    .font(.theaCaption2)
+                    .foregroundStyle(.tertiary)
+            }
+
+            // Confidence badge
+            if let confidence = message.metadata?.confidence, confidence > 0 {
+                HStack(spacing: 2) {
+                    Image(systemName: confidence >= 0.8 ? "checkmark.shield.fill" : "shield")
+                        .font(.system(size: 8))
+                    Text("\(Int(confidence * 100))%")
+                        .font(.theaCaption2)
+                }
+                .foregroundStyle(confidence >= 0.8 ? .green : confidence >= 0.5 ? .orange : .red)
+            }
+
             // Respect timestampDisplay setting
             if settingsManager.timestampDisplay != "hidden" {
                 if settingsManager.timestampDisplay == "relative" {
@@ -411,6 +433,18 @@ extension MessageBubble {
         let content = message.content.textValue
         let truncated = content.count > 200 ? String(content.prefix(200)) + "..." : content
         return "\(role), \(time): \(truncated)"
+    }
+}
+
+// MARK: - MessageBubble + Helpers
+
+extension MessageBubble {
+    /// Format token counts compactly: 1234 → "1.2K", 500 → "500"
+    static func formatTokenCount(_ count: Int) -> String {
+        if count >= 1000 {
+            return String(format: "%.1fK", Double(count) / 1000.0)
+        }
+        return "\(count)"
     }
 }
 

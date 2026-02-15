@@ -80,6 +80,11 @@ extension ChatManager {
             for: conversation, model: model, taskType: taskType, device: currentDevice
         )
 
+        // Count input tokens for Anthropic models (free API, non-blocking)
+        let inputTokenCount = await countInputTokens(
+            messages: apiMessages, model: model, provider: provider
+        )
+
         // Stream AI response
         isStreaming = true
         streamingText = ""
@@ -89,6 +94,11 @@ extension ChatManager {
         }
 
         let assistantMessage = createAssistantMessage(in: conversation, model: model, device: currentDevice)
+        if let inputTokenCount {
+            var meta = assistantMessage.metadata ?? MessageMetadata()
+            meta.inputTokens = inputTokenCount
+            assistantMessage.metadataData = try? JSONEncoder().encode(meta)
+        }
         conversation.messages.append(assistantMessage)
         context.insert(assistantMessage)
 
@@ -523,6 +533,158 @@ extension ChatManager {
             } catch {
                 msgLogger.error("Failed to process queued message: \(error.localizedDescription)")
             }
+        }
+    }
+
+    // MARK: - Token Counting
+
+    /// Count input tokens using Anthropic's free token counting endpoint.
+    /// Falls back to heuristic (~4 chars per token) for non-Anthropic models.
+    private func countInputTokens(
+        messages: [AIMessage], model: String, provider: any AIProvider
+    ) async -> Int? {
+        let isAnthropicModel = model.contains("claude")
+        if isAnthropicModel, let apiKey = SecureStorage.shared.getAPIKey(for: "anthropic") {
+            let counter = AnthropicTokenCounter(apiKey: apiKey)
+            do {
+                let result = try await counter.countTokens(messages: messages, model: model)
+                return result.inputTokens
+            } catch {
+                msgLogger.debug("Token count API failed, using heuristic: \(error.localizedDescription)")
+            }
+        }
+        // Heuristic fallback: ~4 characters per token (industry average)
+        let totalChars = messages.reduce(0) { $0 + $1.content.textValue.count }
+        return totalChars / 4
+    }
+
+    // MARK: - Model Comparison Mode
+
+    /// Send the same prompt to two providers simultaneously and create branched responses.
+    /// Returns the two assistant messages for side-by-side display.
+    func compareModels(
+        _ text: String,
+        model1: String, provider1: any AIProvider,
+        model2: String, provider2: any AIProvider,
+        in conversation: Conversation
+    ) async throws -> (Message, Message) {
+        guard let context = modelContext else {
+            throw ChatError.noModelContext
+        }
+
+        let currentDevice = DeviceRegistry.shared.currentDevice
+        let userMessage = createUserMessage(text, in: conversation, device: currentDevice)
+        conversation.messages.append(userMessage)
+        context.insert(userMessage)
+        try context.save()
+
+        let apiMessages = await buildAPIMessages(
+            for: conversation, model: model1, taskType: nil, device: currentDevice
+        )
+
+        let baseOrderIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
+
+        // Create two assistant messages as branches (same orderIndex, different branchIndex)
+        let msg1 = Message(
+            conversationID: conversation.id,
+            role: .assistant,
+            content: .text(""),
+            orderIndex: baseOrderIndex,
+            branchIndex: 0,
+            deviceID: currentDevice.id,
+            deviceName: currentDevice.name,
+            deviceType: currentDevice.type.rawValue
+        )
+        msg1.model = model1
+
+        let msg2 = Message(
+            conversationID: conversation.id,
+            role: .assistant,
+            content: .text(""),
+            orderIndex: baseOrderIndex,
+            parentMessageId: msg1.id,
+            branchIndex: 1,
+            deviceID: currentDevice.id,
+            deviceName: currentDevice.name,
+            deviceType: currentDevice.type.rawValue
+        )
+        msg2.model = model2
+
+        conversation.messages.append(msg1)
+        conversation.messages.append(msg2)
+        context.insert(msg1)
+        context.insert(msg2)
+
+        isStreaming = true
+        streamingText = ""
+        defer {
+            isStreaming = false
+            streamingText = ""
+        }
+
+        // Run both providers in parallel
+        var sanitizedMessages = apiMessages
+        if SettingsManager.shared.cloudAPIPrivacyGuardEnabled {
+            sanitizedMessages = await OutboundPrivacyGuard.shared.sanitizeMessages(
+                apiMessages, channel: "cloud_api"
+            )
+        }
+
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { @MainActor [weak self] in
+                await self?.streamComparisonResponse(
+                    provider: provider1, model: model1,
+                    messages: sanitizedMessages, into: msg1
+                )
+            }
+            group.addTask { @MainActor [weak self] in
+                await self?.streamComparisonResponse(
+                    provider: provider2, model: model2,
+                    messages: sanitizedMessages, into: msg2
+                )
+            }
+        }
+
+        conversation.updatedAt = Date()
+        try context.save()
+
+        return (msg1, msg2)
+    }
+
+    /// Stream a response into a message without throwing (for parallel comparison).
+    private func streamComparisonResponse(
+        provider: any AIProvider,
+        model: String,
+        messages: [AIMessage],
+        into message: Message
+    ) async {
+        do {
+            var accumulated = ""
+            let responseStream = try await provider.chat(
+                messages: messages, model: model, stream: true
+            )
+            for try await chunk in responseStream {
+                switch chunk.type {
+                case let .delta(text):
+                    accumulated += text
+                    message.contentData = (try? JSONEncoder().encode(MessageContent.text(accumulated))) ?? Data()
+                case let .complete(finalMessage):
+                    message.contentData = (try? JSONEncoder().encode(finalMessage.content)) ?? Data()
+                    message.tokenCount = finalMessage.tokenCount
+                    if let meta = finalMessage.metadata {
+                        message.metadataData = try? JSONEncoder().encode(meta)
+                    }
+                case .error:
+                    break
+                }
+            }
+            if accumulated.isEmpty == false, message.content.textValue.isEmpty {
+                message.contentData = (try? JSONEncoder().encode(MessageContent.text(accumulated))) ?? Data()
+            }
+        } catch {
+            let errorText = "Error from \(model): \(error.localizedDescription)"
+            message.contentData = (try? JSONEncoder().encode(MessageContent.text(errorText))) ?? Data()
+            msgLogger.error("Comparison stream failed for \(model): \(error.localizedDescription)")
         }
     }
 
