@@ -192,7 +192,7 @@ struct SystemMonitorView: View {
         return .green
     }
 
-    private func thermalColor(_ state: ThermalState) -> Color {
+    private func thermalColor(_ state: SystemThermalState) -> Color {
         switch state {
         case .nominal: .green
         case .fair: .yellow
@@ -201,7 +201,7 @@ struct SystemMonitorView: View {
         }
     }
 
-    private func severityColor(_ severity: AnomalySeverity) -> Color {
+    private func severityColor(_ severity: SystemAnomalySeverity) -> Color {
         switch severity {
         case .info: .blue
         case .warning: .orange

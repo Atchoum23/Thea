@@ -185,6 +185,7 @@
 		14E55D254CA7F8160C077B67 /* CareerDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7210F0D8AF8B398D945828C2 /* CareerDashboardViewModel.swift */; };
 		1513518E67DCAB03D211FA48 /* TaskClassifier+Learning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1183AD8A62DE8D121EBCB9 /* TaskClassifier+Learning.swift */; };
 		1516B877413D37585E03BF7C /* ProactiveNotificationIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AE251446D24B99DC6D9EBC /* ProactiveNotificationIntelligence.swift */; };
+		1547D2F9B6D35D30BB70BFBE /* SystemMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CC161ACC0D29F3414E4C41 /* SystemMonitor.swift */; };
 		155448682A0EC16606920079 /* AssessmentDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC51B6288778CA41EB24B0C /* AssessmentDashboardView.swift */; };
 		15DB4F6EAA73E8844E42DA23 /* TransferableService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0F2B235FB63C4FFAD580D5 /* TransferableService.swift */; };
 		15E54CE211AB5770D7480420 /* ModelSelectionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D241B1C84B01CBB82F7FDD /* ModelSelectionConfiguration.swift */; };
@@ -212,6 +213,7 @@
 		1945C38AA43EB70B5B3F125D /* AutonomousImprovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C308B84D560FA8B4A711AD3 /* AutonomousImprovement.swift */; };
 		19955E79F55D2F59B65861F8 /* TheaContextMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC32135A936EA800810AEFA /* TheaContextMonitor.swift */; };
 		19F52566853C68A2A96BC705 /* UsageAnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68705E8735A486FC0B4DED6F /* UsageAnalyticsService.swift */; };
+		1A148822C618ED239E0934C2 /* SystemMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CC161ACC0D29F3414E4C41 /* SystemMonitor.swift */; };
 		1A2C86C5EA7FFB4C14F1BC33 /* APIBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9A602963894A83668CD0A8 /* APIBuilderView.swift */; };
 		1A67C73681A47301B29FDF5F /* SwiftKnowledgeLearner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44E33C1369165683B7D0A30E /* SwiftKnowledgeLearner.swift */; };
 		1AA535163B54CE202C0D80D3 /* PredictiveJourneyMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD143F72DBC69EBD427C138 /* PredictiveJourneyMapper.swift */; };
@@ -242,6 +244,7 @@
 		1D79C821BCFC0B28F06D31C9 /* PermissionsManagerRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C550157A4BDCB0B207470F /* PermissionsManagerRequests.swift */; };
 		1D8E313F5C9DA8F1ADF8179F /* TheaFinderSyncExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1D79A97822355D903F040A4D /* TheaFinderSyncExtension.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1DBA265B8CA5C3217E2BD241 /* THEAMCPServer+Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 755C333F3A71B0516446BD6A /* THEAMCPServer+Resources.swift */; };
+		1DD377AAB39A2F8A2AF59253 /* SystemMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5001C0BCAF072D1300D4BD8D /* SystemMonitorView.swift */; };
 		1DEE8754C3FF16BFC703EEA0 /* DeviceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AE015CDA0C3F95CE3FBB4F3 /* DeviceRegistry.swift */; };
 		1E5045343D2AA1D2BEEA114F /* ShortcutsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF9C9BFA1D482EC8D784F1E /* ShortcutsMonitor.swift */; };
 		1E594652C63C80BB9EE9BC97 /* FileAttachmentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79566CE26059D4FBFCD18233 /* FileAttachmentManager.swift */; };
@@ -1859,6 +1862,7 @@
 		F49E64550A92184F76E05E0A /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F02095E4726D071A1B0EC8A /* Project.swift */; };
 		F4B0509C959749260F0BCFEB /* SiriIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7853DB6959DC8D9D05D49042 /* SiriIntegration.swift */; };
 		F4DAF9DDEE8B849C36C8D159 /* AssessmentProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C317A416D1B86598194C7C7F /* AssessmentProtocols.swift */; };
+		F4E72B0EF9C7CF47097AF7F6 /* SystemMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5001C0BCAF072D1300D4BD8D /* SystemMonitorView.swift */; };
 		F4F6B4F51A74F6A890C4C75E /* ScreenshotPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC53BAD4FF4D60020E98F59 /* ScreenshotPreview.swift */; };
 		F518522D0E52F7E1B3579BC2 /* TheaClipModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE0F80561949E45736F96EC /* TheaClipModels.swift */; };
 		F5191CCE0CB386FA358BB02E /* PlanManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 954D1F5B8BA0920CC2DA1EAD /* PlanManager.swift */; };
@@ -2417,6 +2421,7 @@
 		4FA6C7A4F8E1CEE83639FB06 /* CalendarContextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarContextProvider.swift; sourceTree = "<group>"; };
 		4FB5C8EEF65B9FE928E53EDA /* OllamaAgentLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaAgentLoop.swift; sourceTree = "<group>"; };
 		4FD288E2F8C0F9E0BD8C5A90 /* FocusModeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModeModels.swift; sourceTree = "<group>"; };
+		5001C0BCAF072D1300D4BD8D /* SystemMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMonitorView.swift; sourceTree = "<group>"; };
 		50092464704D1A5143426EA5 /* AutonomousAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomousAgent.swift; sourceTree = "<group>"; };
 		5011E824D5AA897623BF1B5B /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		50207830375DF465B9FF47B2 /* StoreKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitService.swift; sourceTree = "<group>"; };
@@ -2992,6 +2997,7 @@
 		D916B95EC2BD7D0E40A1E1CC /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		D922289175C3C1E5C74D88BD /* TestGeneratorTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGeneratorTypes.swift; sourceTree = "<group>"; };
 		D9990FF8297FF11E970ED677 /* TheaClipRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipRowView.swift; sourceTree = "<group>"; };
+		D9CC161ACC0D29F3414E4C41 /* SystemMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMonitor.swift; sourceTree = "<group>"; };
 		D9D990D1848AECFEA69EF44B /* InputTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTrackingManager.swift; sourceTree = "<group>"; };
 		DA0D6BCD88807D1613A174A6 /* NetworkPrivacyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkPrivacyMonitor.swift; sourceTree = "<group>"; };
 		DA1A95AD763A8BE07399BC04 /* dark-mode-themes.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "dark-mode-themes.js"; sourceTree = "<group>"; };
@@ -3751,6 +3757,7 @@
 				170D6FC3243952374F0BE162 /* PrivacyControlsView.swift */,
 				8C01C4C607C750D6280C839D /* SettingsView.swift */,
 				59D01CB815FD0204BAF0FF30 /* SidebarView.swift */,
+				5001C0BCAF072D1300D4BD8D /* SystemMonitorView.swift */,
 				0AB7E6E9E240C963D1CD140B /* TranslationView.swift */,
 				FDA73D8A062838B6AFF06B6D /* UnifiedDashboardView.swift */,
 				5E91EEB1BBF14E9ECDD7995B /* WelcomeView.swift */,
@@ -6003,6 +6010,7 @@
 				66B989FB3678796320BD3C1C /* Scriptswatch-and-check.sh */,
 				5EAA778FEC684A74BA8DF784 /* Scriptsxcode-build-phase.sh */,
 				AB71964345B536041E4DCB29 /* setup.sh */,
+				D9CC161ACC0D29F3414E4C41 /* SystemMonitor.swift */,
 				E574911E64043E5E764786E2 /* TerminalService.swift */,
 				7DB879C3AB26803AC14A800C /* ThrottlingEngine.swift */,
 				3169B992BB1B3914CF3B9C63 /* VisionOCR.swift */,
@@ -7818,6 +7826,8 @@
 				20EA0D80679146D23D0D1776 /* SyncSettingsViewSections.swift in Sources */,
 				0B1497E85A8732E70B2CAC13 /* SyncStatusIndicator.swift in Sources */,
 				0F5191421DEDD840D27BC4CA /* SystemAudioMonitor.swift in Sources */,
+				1A148822C618ED239E0934C2 /* SystemMonitor.swift in Sources */,
+				1DD377AAB39A2F8A2AF59253 /* SystemMonitorView.swift in Sources */,
 				59A41822D1CEAE5A65000962 /* SystemPromptConfiguration.swift in Sources */,
 				F2783BDF3B9B490436699E4C /* SystemPromptSettingsView.swift in Sources */,
 				1DBA265B8CA5C3217E2BD241 /* THEAMCPServer+Resources.swift in Sources */,
@@ -8841,6 +8851,8 @@
 				4202D9C510D0F0744E7A9875 /* SystemAudioMonitor.swift in Sources */,
 				BAA6D5CC522D271EF3BAC316 /* SystemAutomationEngine.swift in Sources */,
 				8C32B3A63104F596567FE95E /* SystemIntegration.swift in Sources */,
+				1547D2F9B6D35D30BB70BFBE /* SystemMonitor.swift in Sources */,
+				F4E72B0EF9C7CF47097AF7F6 /* SystemMonitorView.swift in Sources */,
 				A68968CE519B969E6D948D88 /* SystemPromptConfiguration.swift in Sources */,
 				BFC31A6A566EC0E895347049 /* SystemPromptSettingsView.swift in Sources */,
 				F07DB8F2BA3DB62BE3E2248C /* THEAMCPServer+Resources.swift in Sources */,

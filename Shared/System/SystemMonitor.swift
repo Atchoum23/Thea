@@ -23,16 +23,16 @@ struct SystemSnapshot: Codable, Sendable, Identifiable {
     let cpu: CPUMetrics
     let memory: MemoryMetrics
     let disk: DiskMetrics
-    let network: NetworkMetrics
-    let thermal: ThermalState
+    let network: SystemNetworkMetrics
+    let thermal: SystemThermalState
     let uptime: TimeInterval
 
     init(
         cpu: CPUMetrics,
         memory: MemoryMetrics,
         disk: DiskMetrics,
-        network: NetworkMetrics,
-        thermal: ThermalState,
+        network: SystemNetworkMetrics,
+        thermal: SystemThermalState,
         uptime: TimeInterval
     ) {
         self.id = UUID()
@@ -109,7 +109,7 @@ struct DiskMetrics: Codable, Sendable {
     }
 }
 
-struct NetworkMetrics: Codable, Sendable {
+struct SystemNetworkMetrics: Codable, Sendable {
     let bytesIn: UInt64
     let bytesOut: UInt64
     let packetsIn: UInt64
@@ -128,7 +128,7 @@ struct NetworkMetrics: Codable, Sendable {
     }
 }
 
-enum ThermalState: String, Codable, Sendable {
+enum SystemThermalState: String, Codable, Sendable {
     case nominal = "Nominal"
     case fair = "Fair"
     case serious = "Serious"
@@ -161,10 +161,10 @@ struct SystemAnomaly: Codable, Sendable, Identifiable {
     let metric: String
     let currentValue: Double
     let threshold: Double
-    let severity: AnomalySeverity
+    let severity: SystemAnomalySeverity
     let message: String
 
-    init(metric: String, currentValue: Double, threshold: Double, severity: AnomalySeverity, message: String) {
+    init(metric: String, currentValue: Double, threshold: Double, severity: SystemAnomalySeverity, message: String) {
         self.id = UUID()
         self.timestamp = Date()
         self.metric = metric
@@ -175,7 +175,7 @@ struct SystemAnomaly: Codable, Sendable, Identifiable {
     }
 }
 
-enum AnomalySeverity: String, Codable, Sendable {
+enum SystemAnomalySeverity: String, Codable, Sendable {
     case info = "Info"
     case warning = "Warning"
     case critical = "Critical"
@@ -198,7 +198,7 @@ struct MonitorThresholds: Codable, Sendable {
     var memoryCritical: Double = 95
     var diskWarning: Double = 85
     var diskCritical: Double = 95
-    var thermalWarning: ThermalState = .serious
+    var thermalWarning: SystemThermalState = .serious
 }
 
 // MARK: - System Monitor
@@ -404,12 +404,12 @@ final class SystemMonitor: ObservableObject {
         }
     }
 
-    private func captureNetwork() -> NetworkMetrics {
+    private func captureNetwork() -> SystemNetworkMetrics {
         #if os(macOS)
         // Use netstat-style data from sysctl
         var ifaddrs: UnsafeMutablePointer<Darwin.ifaddrs>?
         guard getifaddrs(&ifaddrs) == 0, let first = ifaddrs else {
-            return NetworkMetrics(bytesIn: 0, bytesOut: 0, packetsIn: 0, packetsOut: 0)
+            return SystemNetworkMetrics(bytesIn: 0, bytesOut: 0, packetsIn: 0, packetsOut: 0)
         }
         defer { freeifaddrs(ifaddrs) }
 
@@ -430,18 +430,18 @@ final class SystemMonitor: ObservableObject {
             current = addr.pointee.ifa_next
         }
 
-        return NetworkMetrics(
+        return SystemNetworkMetrics(
             bytesIn: totalBytesIn,
             bytesOut: totalBytesOut,
             packetsIn: totalPacketsIn,
             packetsOut: totalPacketsOut
         )
         #else
-        return NetworkMetrics(bytesIn: 0, bytesOut: 0, packetsIn: 0, packetsOut: 0)
+        return SystemNetworkMetrics(bytesIn: 0, bytesOut: 0, packetsIn: 0, packetsOut: 0)
         #endif
     }
 
-    private func captureThermal() -> ThermalState {
+    private func captureThermal() -> SystemThermalState {
         switch ProcessInfo.processInfo.thermalState {
         case .nominal: return .nominal
         case .fair: return .fair
