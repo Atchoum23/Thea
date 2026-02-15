@@ -11,8 +11,8 @@ import SwiftUI
 /// benchmark overview data for OrchestratorSettingsView.
 @MainActor
 @Observable
-private final class BenchmarkServiceStub {
-    static let shared = BenchmarkServiceStub()
+private final class AIModelBenchmarkService {
+    static let shared = AIModelBenchmarkService()
 
     struct BenchmarkEntry {
         let isLocal: Bool
@@ -61,7 +61,7 @@ private final class BenchmarkServiceStub {
 
 struct OrchestratorSettingsView: View {
     @State var config = OrchestratorConfiguration.load()
-    @State private var benchmarkService = BenchmarkServiceStub.shared
+    @State private var benchmarkService = AIModelBenchmarkService.shared
     @State private var isRefreshingBenchmarks = false
     @State var showingRoutingRuleEditor = false
     @State var showingExecutionHistory = false
