@@ -228,22 +228,22 @@ actor NetworkPrivacyMonitor {
     func classifyDomain(_ hostname: String) -> TrafficCategory {
         let lowered = hostname.lowercased()
 
-        if Self.aiProviderDomains.contains(where: { lowered.contains($0) }) {
+        if Self.aiProviderDomains.contains(where: { lowered.matchesDomain($0) }) {
             return .aiProvider
         }
-        if Self.trackerDomains.contains(where: { lowered.contains($0) }) {
+        if Self.trackerDomains.contains(where: { lowered.matchesDomain($0) }) {
             return .tracker
         }
-        if Self.advertisingDomains.contains(where: { lowered.contains($0) }) {
+        if Self.advertisingDomains.contains(where: { lowered.matchesDomain($0) }) {
             return .advertising
         }
-        if Self.analyticsDomains.contains(where: { lowered.contains($0) }) {
+        if Self.analyticsDomains.contains(where: { lowered.matchesDomain($0) }) {
             return .analytics
         }
-        if Self.socialDomains.contains(where: { lowered.contains($0) }) {
+        if Self.socialDomains.contains(where: { lowered.matchesDomain($0) }) {
             return .social
         }
-        if Self.cloudSyncDomains.contains(where: { lowered.contains($0) }) {
+        if Self.cloudSyncDomains.contains(where: { lowered.matchesDomain($0) }) {
             return .cloudSync
         }
         if lowered.hasSuffix(".apple.com") || lowered.hasSuffix(".apple-dns.net") {
@@ -267,5 +267,19 @@ actor NetworkPrivacyMonitor {
             dailyTrafficBytes = 0
             lastResetDate = Date()
         }
+    }
+}
+
+// MARK: - Domain Matching Extension
+
+extension String {
+    /// Checks if this hostname matches the given domain exactly or as a subdomain.
+    /// e.g., "sub.tracker.com".matchesDomain("tracker.com") == true
+    ///        "tracker.com".matchesDomain("tracker.com") == true
+    ///        "nottracker.com".matchesDomain("tracker.com") == false
+    ///        "apple-cloudkit.com".matchesDomain("t.co") == false (fixes false positive)
+    func matchesDomain(_ domain: String) -> Bool {
+        if self == domain { return true }
+        return hasSuffix(".\(domain)")
     }
 }
