@@ -199,6 +199,17 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
+                    MediaServerView()
+                } label: {
+                    SettingsRow(
+                        icon: "network",
+                        iconColor: .blue,
+                        title: "Media Server",
+                        subtitle: "\(MediaServer.shared.items.count) items"
+                    )
+                }
+
+                NavigationLink {
                     LifeManagementDashboardView()
                 } label: {
                     SettingsRow(
