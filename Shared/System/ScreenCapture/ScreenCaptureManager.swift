@@ -13,6 +13,10 @@ import ScreenCaptureKit
 @Observable
 final class ScreenCaptureManager {
 
+    // MARK: - Singleton
+
+    static let shared = ScreenCaptureManager()
+
     // MARK: - State
 
     private(set) var isAuthorized: Bool = false

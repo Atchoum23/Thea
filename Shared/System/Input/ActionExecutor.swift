@@ -28,8 +28,8 @@ final class ActionExecutor {
     }
 
     /// Request Accessibility permission (opens System Settings)
-    func requestPermission() {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+    nonisolated func requestPermission() {
+        let options: [String: Bool] = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
 
         if !trusted {
