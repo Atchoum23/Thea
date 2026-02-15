@@ -5,6 +5,10 @@
 // recent messages, and configuration options.
 
 import SwiftUI
+import OSLog
+#if os(macOS)
+import UniformTypeIdentifiers
+#endif
 
 struct MessagingHubView: View {
     @ObservedObject private var hub = MessagingHub.shared
@@ -254,6 +258,16 @@ struct MessagingHubView: View {
 
     private func channelDetailView(_ type: MessagingChannelType) -> some View {
         List {
+            // Platform-specific stats
+            switch type {
+            case .whatsApp:
+                whatsAppDetailSection
+            case .telegram:
+                telegramDetailSection
+            default:
+                EmptyView()
+            }
+
             Section("Messages") {
                 let messages = hub.messages(for: type, limit: 50)
                 if messages.isEmpty {
@@ -284,11 +298,117 @@ struct MessagingHubView: View {
                 } else {
                     Text("Channel not configured")
                         .foregroundStyle(.secondary)
+                    if type.usesBridge {
+                        Text("Requires OpenClaw Gateway")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
             }
         }
         .navigationTitle(type.displayName)
     }
+
+    // MARK: - WhatsApp Detail
+
+    @ObservedObject private var whatsApp = WhatsAppChannel.shared
+
+    private var whatsAppDetailSection: some View {
+        Section("WhatsApp") {
+            LabeledContent("Connected", value: whatsApp.isConnected ? "Yes" : "No")
+            LabeledContent("Contacts", value: "\(whatsApp.totalContacts)")
+            LabeledContent("Groups", value: "\(whatsApp.totalGroups)")
+            LabeledContent("Total Messages", value: "\(whatsApp.totalMessages)")
+            LabeledContent("Conversations", value: "\(whatsApp.conversationCount)")
+
+            if let error = whatsApp.connectionError {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
+            Toggle("Voice Note Transcription", isOn: Binding(
+                get: { whatsApp.autoTranscribeVoiceNotes },
+                set: { whatsApp.autoTranscribeVoiceNotes = $0 }
+            ))
+
+            Button("Import Chat Export") {
+                importWhatsAppExport()
+            }
+        }
+    }
+
+    // MARK: - Telegram Detail
+
+    @ObservedObject private var telegram = TelegramChannel.shared
+
+    private var telegramDetailSection: some View {
+        Section("Telegram") {
+            LabeledContent("Connected", value: telegram.isConnected ? "Yes" : "No")
+            if let bot = telegram.botUsername {
+                LabeledContent("Bot", value: "@\(bot)")
+            }
+            LabeledContent("Contacts", value: "\(telegram.totalContacts)")
+            LabeledContent("Groups", value: "\(telegram.totalGroups)")
+            LabeledContent("Channels", value: "\(telegram.totalChannels)")
+            LabeledContent("Total Messages", value: "\(telegram.totalMessages)")
+
+            if let error = telegram.connectionError {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
+            Toggle("Monitor Subscribed Channels", isOn: Binding(
+                get: { telegram.monitorSubscribedChannels },
+                set: { telegram.monitorSubscribedChannels = $0 }
+            ))
+
+            Button("Import Desktop Export") {
+                importTelegramExport()
+            }
+        }
+    }
+
+    // MARK: - Import Actions
+
+    private func importWhatsAppExport() {
+        #if os(macOS)
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.plainText]
+        panel.title = "Import WhatsApp Chat Export"
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        if panel.runModal() == .OK, let url = panel.url {
+            let messages = WhatsAppChannel.shared.importChatExport(from: url)
+            logger.info("Imported \(messages.count) WhatsApp messages")
+        }
+        #endif
+    }
+
+    private func importTelegramExport() {
+        #if os(macOS)
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.title = "Import Telegram Desktop Export"
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        if panel.runModal() == .OK, let url = panel.url {
+            let messages = TelegramChannel.shared.importDesktopExport(from: url)
+            logger.info("Imported \(messages.count) Telegram messages")
+        }
+        #endif
+    }
+
+    private let logger = Logger(subsystem: "com.thea.app", category: "MessagingHubView")
     #endif
 
     // MARK: - Helpers

@@ -305,6 +305,11 @@ struct TheamacOSApp: App {
             }
             // Wire OpenClaw message routing
             OpenClawBridge.shared.setup()
+
+            // Connect messaging channels (WhatsApp + Telegram via OpenClaw)
+            await WhatsAppChannel.shared.connect()
+            await TelegramChannel.shared.connect()
+            logger.info("Messaging channels initialized")
         }
 
         // Background service health monitoring — deferred startup
