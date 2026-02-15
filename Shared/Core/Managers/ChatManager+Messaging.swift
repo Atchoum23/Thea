@@ -16,7 +16,10 @@ extension ChatManager {
     func sendMessage(_ text: String, in conversation: Conversation) async throws {
         msgLogger.debug("📤 sendMessage: Starting with text '\(text.prefix(50))...'")
 
-        handlePlanModificationIfNeeded(text)
+        // Inject foreground app context if pairing enabled (macOS only)
+        let enhancedText = injectForegroundAppContext(into: text)
+
+        handlePlanModificationIfNeeded(enhancedText)
 
         guard let context = modelContext else {
             msgLogger.error("❌ No model context!")
@@ -25,22 +28,22 @@ extension ChatManager {
 
         // Offline — queue for later
         if !OfflineQueueService.shared.isOnline {
-            try queueOfflineMessage(text, in: conversation, context: context)
+            try queueOfflineMessage(enhancedText, in: conversation, context: context)
             return
         }
 
         // Classify task → route to optimal provider/model
-        let (provider, model, taskType) = try await selectProviderAndModel(for: text)
+        let (provider, model, taskType) = try await selectProviderAndModel(for: enhancedText)
         msgLogger.debug("✅ Selected provider '\(provider.metadata.name)' with model '\(model)'")
 
         // Auto-delegate complex tasks to sub-agents if enabled
-        if shouldAutoDelegate(taskType: taskType, text: text) {
+        if shouldAutoDelegate(taskType: taskType, text: enhancedText) {
             if let session = await delegateToAgent(
-                text: text, conversationID: conversation.id, taskType: taskType
+                text: enhancedText, conversationID: conversation.id, taskType: taskType
             ) {
                 // Create a user message to record the delegation in the conversation
                 let currentDevice = DeviceRegistry.shared.currentDevice
-                let userMessage = createUserMessage(text, in: conversation, device: currentDevice)
+                let userMessage = createUserMessage(enhancedText, in: conversation, device: currentDevice)
                 conversation.messages.append(userMessage)
                 context.insert(userMessage)
 
@@ -66,11 +69,11 @@ extension ChatManager {
             }
         }
 
-        configureAgentMode(for: taskType, text: text)
+        configureAgentMode(for: taskType, text: enhancedText)
 
         // Create and persist user message
         let currentDevice = DeviceRegistry.shared.currentDevice
-        let userMessage = createUserMessage(text, in: conversation, device: currentDevice)
+        let userMessage = createUserMessage(enhancedText, in: conversation, device: currentDevice)
         conversation.messages.append(userMessage)
         context.insert(userMessage)
         try context.save()
@@ -113,7 +116,7 @@ extension ChatManager {
             try context.save()
 
             await runPostResponseActions(
-                text: text, taskType: taskType,
+                text: enhancedText, taskType: taskType,
                 assistantMessage: assistantMessage, conversation: conversation
             )
 
