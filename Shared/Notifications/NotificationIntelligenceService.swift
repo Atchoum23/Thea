@@ -363,7 +363,7 @@ public final class NotificationIntelligenceService: ObservableObject {
         // Mark as cleared
         if let index = classifiedNotifications.firstIndex(where: { $0.id == classified.id }) {
             classifiedNotifications[index].isCleared = true
-            classifiedNotifications[index].clearedBy = DeviceRegistry.shared.currentDevice?.name ?? "Unknown"
+            classifiedNotifications[index].clearedBy = DeviceRegistry.shared.currentDevice.name
             classifiedNotifications[index].clearedAt = Date()
         }
 
@@ -381,8 +381,8 @@ public final class NotificationIntelligenceService: ObservableObject {
             notificationID: classified.id,
             appIdentifier: classified.appIdentifier,
             clearedAt: Date(),
-            clearedBy: DeviceRegistry.shared.currentDevice?.name ?? "Unknown",
-            deviceID: DeviceRegistry.shared.currentDevice?.id ?? "unknown"
+            clearedBy: DeviceRegistry.shared.currentDevice.name,
+            deviceID: DeviceRegistry.shared.currentDevice.id
         )
 
         let record = CKRecord(recordType: "NotificationClearance")
