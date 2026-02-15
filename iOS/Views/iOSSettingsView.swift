@@ -207,6 +207,28 @@ struct iOSSettingsView: View {
                         subtitle: "Cross-device intelligence"
                     )
                 }
+
+                NavigationLink {
+                    WebClipperView()
+                } label: {
+                    SettingsRow(
+                        icon: "scissors",
+                        iconColor: .indigo,
+                        title: "Web Clipper",
+                        subtitle: "\(WebClipper.shared.articles.count) articles"
+                    )
+                }
+
+                NavigationLink {
+                    QRIntelligenceView()
+                } label: {
+                    SettingsRow(
+                        icon: "qrcode",
+                        iconColor: .teal,
+                        title: "QR Scanner",
+                        subtitle: "\(QRIntelligence.shared.scannedCodes.count) scanned"
+                    )
+                }
             } header: {
                 Text("Life")
             }
@@ -279,6 +301,28 @@ struct iOSSettingsView: View {
                         iconColor: .blue,
                         title: "System Monitor",
                         subtitle: SystemMonitor.shared.statusSummary
+                    )
+                }
+
+                NavigationLink {
+                    SystemCleanerView()
+                } label: {
+                    SettingsRow(
+                        icon: "trash.circle",
+                        iconColor: .orange,
+                        title: "System Cleaner",
+                        subtitle: "\(SystemCleaner.shared.formattedAvailableSpace) free"
+                    )
+                }
+
+                NavigationLink {
+                    BatteryIntelligenceView()
+                } label: {
+                    SettingsRow(
+                        icon: "battery.75",
+                        iconColor: .green,
+                        title: "Battery",
+                        subtitle: BatteryOptimizer.shared.optimizationMode.displayName
                     )
                 }
 

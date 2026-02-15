@@ -68,10 +68,14 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case habits = "Habits"
     case packages = "Packages"
     case documents = "Documents"
+    case webClipper = "Web Clipper"
+    case qrScanner = "QR Scanner"
     case notifications = "Notifications"
 
     // Group 3: System
     case systemMonitor = "System Monitor"
+    case systemCleaner = "System Cleaner"
+    case battery = "Battery"
     case permissions = "Permissions"
     case sync = "Sync"
     case privacy = "Privacy"
@@ -105,8 +109,12 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .habits: "repeat.circle"
         case .packages: "shippingbox"
         case .documents: "doc.viewfinder"
+        case .webClipper: "scissors"
+        case .qrScanner: "qrcode"
         case .notifications: "bell.badge"
         case .systemMonitor: "gauge.with.dots.needle.33percent"
+        case .systemCleaner: "trash.circle"
+        case .battery: "battery.75"
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
         case .privacy: "lock.shield"
@@ -121,8 +129,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .notifications: 2
-        case .systemMonitor, .permissions, .sync, .privacy: 3
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .webClipper, .qrScanner, .notifications: 2
+        case .systemMonitor, .systemCleaner, .battery, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
         }
@@ -255,10 +263,18 @@ struct MacSettingsView: View {
             PackageTrackerView()
         case .documents:
             DocumentScannerView()
+        case .webClipper:
+            WebClipperView()
+        case .qrScanner:
+            QRIntelligenceView()
         case .notifications:
             NotificationIntelligenceSettingsView()
         case .systemMonitor:
             SystemMonitorView()
+        case .systemCleaner:
+            SystemCleanerView()
+        case .battery:
+            BatteryIntelligenceView()
         case .permissions:
             PermissionsSettingsView()
         case .sync:
