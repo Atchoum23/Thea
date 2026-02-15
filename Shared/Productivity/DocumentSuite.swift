@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import CoreText
 #if canImport(PDFKit)
 import PDFKit
 #endif
@@ -532,30 +533,48 @@ actor DocumentSuiteService {
             (stripped as NSString).draw(in: bodyRect, withAttributes: bodyAttrs)
         }
         return data
-        #elseif canImport(AppKit)
-        // macOS PDF generation via NSAttributedString
-        let stripped = stripMarkdown(content)
-        let fullText = "\(title)\n\n\(stripped)"
-
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 12)
-        ]
-        let attrString = NSAttributedString(string: fullText, attributes: attrs)
-
-        let printInfo = NSPrintInfo()
-        printInfo.paperSize = NSSize(width: 612, height: 792)
-        printInfo.topMargin = 72
-        printInfo.bottomMargin = 72
-        printInfo.leftMargin = 72
-        printInfo.rightMargin = 72
-
-        let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 468, height: 648))
-        textView.textStorage?.setAttributedString(attrString)
-
-        guard let pdfData = textView.dataWithPDF(inside: textView.bounds) as Data? else {
+        #elseif canImport(AppKit) && canImport(PDFKit)
+        // macOS PDF generation via PDFDocument from HTML
+        let htmlContent = markdownToHTML(content, title: title)
+        guard let htmlData = htmlContent.data(using: .utf8) else {
             throw DocumentSuiteError.pdfGenerationFailed
         }
-        return pdfData
+
+        // Create attributed string from HTML
+        guard let attrString = NSAttributedString(html: htmlData, documentAttributes: nil) else {
+            throw DocumentSuiteError.pdfGenerationFailed
+        }
+
+        // Create a simple PDF with attributed string text
+        let pageWidth: CGFloat = 612
+        let pageHeight: CGFloat = 792
+        let margin: CGFloat = 72
+        let textWidth = pageWidth - margin * 2
+        let textHeight = pageHeight - margin * 2
+        let pdfData = NSMutableData()
+
+        var mediaBox = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        guard let consumer = CGDataConsumer(data: pdfData),
+              let context = CGContext(consumer: consumer, mediaBox: &mediaBox, nil) else {
+            throw DocumentSuiteError.pdfGenerationFailed
+        }
+
+        let framesetter = CTFramesetterCreateWithAttributedString(attrString)
+        var textRange = CFRangeMake(0, attrString.length)
+
+        while textRange.location < attrString.length {
+            context.beginPDFPage(nil)
+            let framePath = CGPath(rect: CGRect(x: margin, y: margin, width: textWidth, height: textHeight), transform: nil)
+            let frame = CTFramesetterCreateFrame(framesetter, textRange, framePath, nil)
+            CTFrameDraw(frame, context)
+            let visibleRange = CTFrameGetVisibleStringRange(frame)
+            textRange.location += visibleRange.length
+            if visibleRange.length == 0 { break }
+            context.endPDFPage()
+        }
+        context.endPDFPage()
+        context.closePDF()
+        return pdfData as Data
         #else
         throw DocumentSuiteError.pdfGenerationFailed
         #endif
