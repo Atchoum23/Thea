@@ -110,7 +110,7 @@ enum PackageStatus: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Tracking Event
 
-struct TrackingEvent: Codable, Sendable, Identifiable {
+struct PackageTrackingEvent: Codable, Sendable, Identifiable {
     let id: UUID
     let timestamp: Date
     let status: PackageStatus
@@ -134,7 +134,7 @@ struct TrackedPackage: Codable, Sendable, Identifiable {
     let carrier: PackageCarrier
     var label: String
     var status: PackageStatus
-    var events: [TrackingEvent]
+    var events: [PackageTrackingEvent]
     var estimatedDelivery: Date?
     var lastUpdated: Date
     let addedAt: Date
@@ -162,7 +162,7 @@ struct TrackedPackage: Codable, Sendable, Identifiable {
         self.notes = notes
     }
 
-    var latestEvent: TrackingEvent? {
+    var latestEvent: PackageTrackingEvent? {
         events.sorted { $0.timestamp > $1.timestamp }.first
     }
 
@@ -170,7 +170,7 @@ struct TrackedPackage: Codable, Sendable, Identifiable {
         carrier.trackingURL(for: trackingNumber)
     }
 
-    mutating func addEvent(_ event: TrackingEvent) {
+    mutating func addEvent(_ event: PackageTrackingEvent) {
         events.append(event)
         status = event.status
         lastUpdated = Date()
@@ -411,14 +411,14 @@ final class PackageTracker: ObservableObject {
         }
     }
 
-    private func parseCarrierResponse(data: Data, carrier: PackageCarrier) -> [TrackingEvent] {
+    private func parseCarrierResponse(data: Data, carrier: PackageCarrier) -> [PackageTrackingEvent] {
         // Generic JSON parsing — each carrier returns different formats
         // This handles the most common structure: array of events with timestamp, status, description
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return []
         }
 
-        var events: [TrackingEvent] = []
+        var events: [PackageTrackingEvent] = []
 
         // Try common response structures
         let eventsArray: [[String: Any]]?
@@ -451,7 +451,7 @@ final class PackageTracker: ObservableObject {
             }
 
             let status = inferStatus(from: description, carrier: carrier)
-            events.append(TrackingEvent(
+            events.append(PackageTrackingEvent(
                 timestamp: timestamp,
                 status: status,
                 description: description,
