@@ -18,12 +18,8 @@ final class SystemActionExecutor {
     }
 
     nonisolated func requestAuthorization() {
-        // kAXTrustedCheckOptionPrompt is a global constant - safe to access
-        let promptKey = unsafeBitCast(
-            kAXTrustedCheckOptionPrompt,
-            to: CFString.self
-        ) as String
-        let options: NSDictionary = [promptKey: true]
+        // Hardcoded string value of kAXTrustedCheckOptionPrompt to avoid concurrency warning
+        let options: NSDictionary = ["AXTrustedCheckOptionPrompt": true]
         AXIsProcessTrustedWithOptions(options)
     }
 
