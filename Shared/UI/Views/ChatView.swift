@@ -112,6 +112,7 @@ struct ChatView: View {
                     selectedAgentSession = session
                 }
             }
+            followUpSuggestionChips
             chatInput
         }
         .overlay(alignment: .bottomTrailing) {
@@ -386,6 +387,49 @@ struct ChatView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Follow-Up Suggestions
+
+    @ViewBuilder
+    private var followUpSuggestionChips: some View {
+        let suggestions = lastAssistantMessageSuggestions
+        if !suggestions.isEmpty && !chatManager.isStreaming {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: TheaSpacing.sm) {
+                    ForEach(suggestions) { suggestion in
+                        Button {
+                            inputText = suggestion.text
+                            FollowUpSuggestionService.shared.recordSelection(suggestion)
+                            sendMessage()
+                        } label: {
+                            HStack(spacing: TheaSpacing.xs) {
+                                Image(systemName: suggestion.icon)
+                                    .font(.caption)
+                                Text(suggestion.text)
+                                    .font(.caption)
+                                    .lineLimit(1)
+                            }
+                            .padding(.horizontal, TheaSpacing.md)
+                            .padding(.vertical, TheaSpacing.sm)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Follow-up: \(suggestion.text)")
+                    }
+                }
+                .padding(.horizontal, TheaSpacing.lg)
+                .padding(.vertical, TheaSpacing.xs)
+            }
+        }
+    }
+
+    private var lastAssistantMessageSuggestions: [FollowUpSuggestion] {
+        guard let lastAssistant = messages.last(where: { $0.messageRole == .assistant }) else {
+            return []
+        }
+        return lastAssistant.metadata?.followUpSuggestions ?? []
     }
 
     // MARK: - Chat Input

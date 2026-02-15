@@ -185,8 +185,16 @@ extension ChatView {
     func sendMessage() {
         guard !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
-        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        var text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         inputText = ""
+
+        // Follow-up suggestion selection via number (G1)
+        let suggestions = lastAssistantMessageSuggestions
+        if !suggestions.isEmpty, let num = Int(text), num >= 1, num <= suggestions.count {
+            let suggestion = suggestions[num - 1]
+            text = suggestion.text
+            FollowUpSuggestionService.shared.recordSelection(suggestion)
+        }
 
         // Parse @agent prefix — delegate to orchestrator instead of direct chat
         if text.hasPrefix("@agent "), SettingsManager.shared.agentDelegationEnabled {

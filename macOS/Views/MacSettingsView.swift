@@ -260,6 +260,7 @@ private struct TasksAndLifeView: View {
             Picker("", selection: $selectedTab) {
                 Text("Tasks").tag(0)
                 Text("Life Dashboard").tag(1)
+                Text("Briefing").tag(2)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -267,12 +268,17 @@ private struct TasksAndLifeView: View {
 
             Divider().padding(.top, 8)
 
-            if selectedTab == 0 {
+            switch selectedTab {
+            case 0:
                 TaskManagerView()
-            } else {
+            case 2:
+                MorningBriefingView()
+            default:
                 LifeManagementDashboardView()
             }
         }
-        .navigationTitle(selectedTab == 0 ? "Tasks" : "Life Dashboard")
+        .navigationTitle(
+            selectedTab == 0 ? "Tasks" : selectedTab == 2 ? "Morning Briefing" : "Life Dashboard"
+        )
     }
 }
