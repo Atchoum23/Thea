@@ -280,7 +280,7 @@ final class PhysicalMailChannel: ObservableObject {
 
         // 7. Route to MessagingHub as a UnifiedMessage
         let message = createUnifiedMessage(from: item)
-        await MessagingHub.shared.handleIncomingMessage(message)
+        await MessagingHub.shared.routeIncomingMessage(message)
 
         pmLogger.info("Processed physical mail: \(item.title) [\(category.rawValue)] — \(amounts.count) amounts found")
         return item
@@ -369,7 +369,7 @@ final class PhysicalMailChannel: ObservableObject {
         saveItems()
 
         let message = createUnifiedMessage(from: item)
-        await MessagingHub.shared.handleIncomingMessage(message)
+        await MessagingHub.shared.routeIncomingMessage(message)
 
         pmLogger.info("Processed PDF mail: \(item.title) [\(category.rawValue)]")
         return item

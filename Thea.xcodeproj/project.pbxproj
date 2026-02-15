@@ -55,6 +55,7 @@
 		053EB39C11A2FE1CD7AE5BCE /* FocusOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2B7D088340F1C762251C23 /* FocusOrchestrator.swift */; };
 		054257EA3542520FF464C37B /* ProactiveNotificationIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AE251446D24B99DC6D9EBC /* ProactiveNotificationIntelligence.swift */; };
 		0586056E20DFE4B592BA913F /* AgentEnhancements+MessageQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63326A9AC104F79EF7E8322 /* AgentEnhancements+MessageQueue.swift */; };
+		05A5D393230C2E9C084B6D5B /* PhysicalMailChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E9C14554173683DA0F6EF3 /* PhysicalMailChannel.swift */; };
 		06307F6995E25A2502558691 /* NotificationIntelligenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43576AABEEB195DB3EF9ACA /* NotificationIntelligenceService.swift */; };
 		063ADA397ECA847771F03CCA /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684629699F86D3CF574A670B /* ServiceContainer.swift */; };
 		066BE87B33D24AA27C55966B /* AgentFeedbackSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517D8BF2B0861EE3FBDBC58A /* AgentFeedbackSection.swift */; };
@@ -1481,6 +1482,7 @@
 		B8F704D7A1E25089C2010A4E /* MigrationEngineTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA8EEC178ECFD6336D93366 /* MigrationEngineTypes.swift */; };
 		B95848B2FDB92BFEFDFA4328 /* TerminalSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C485B7F1A5C11C81BC974B7 /* TerminalSettingsView.swift */; };
 		B95EF3055EBAE644732EFBBE /* PrivacySettingsViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653DFB5BA5A429E7EDB8765A /* PrivacySettingsViewSections.swift */; };
+		B96BDADCA04A04BD9407CBEF /* PhysicalMailChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E9C14554173683DA0F6EF3 /* PhysicalMailChannel.swift */; };
 		B9AD32F9F3DFA1334AC9E51F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 195908F24C579B94425A9585 /* HomeView.swift */; };
 		B9C3672E1BD24A43F9A60B2E /* SyncStatusIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8FC079FF01D3AA2C5EE9B5C /* SyncStatusIndicator.swift */; };
 		BA070FD54714B4AD30ED6A5A /* LifeIntelligenceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50671203559B8D1DBBEB01C6 /* LifeIntelligenceCoordinator.swift */; };
@@ -2619,6 +2621,7 @@
 		628671444664F57896E31880 /* RegressionDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegressionDetector.swift; sourceTree = "<group>"; };
 		62DBFE14A3CEF538322EFAB2 /* OnboardingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManager.swift; sourceTree = "<group>"; };
 		62DE0D31409DA5BB1ABB0B51 /* BlueprintExecutor+StepExecution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlueprintExecutor+StepExecution.swift"; sourceTree = "<group>"; };
+		62E9C14554173683DA0F6EF3 /* PhysicalMailChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicalMailChannel.swift; sourceTree = "<group>"; };
 		630998A9634171FB0782438A /* SecurityScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityScannerView.swift; sourceTree = "<group>"; };
 		637130673210A50F403CA48F /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		6404ED56E90ACC76AEE2CB42 /* MissionOrchestrator+Analysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MissionOrchestrator+Analysis.swift"; sourceTree = "<group>"; };
@@ -5291,6 +5294,7 @@
 			children = (
 				D960C636EBFC2F72A37A759F /* iMessageChannel.swift */,
 				254134E5AB558CA710A11B86 /* NotificationChannel.swift */,
+				62E9C14554173683DA0F6EF3 /* PhysicalMailChannel.swift */,
 			);
 			path = Channels;
 			sourceTree = "<group>";
@@ -7902,6 +7906,7 @@
 				683A7C2ED3E4048155019C9A /* PhotoIntelligenceProvider.swift in Sources */,
 				6A307BA17545251A5DBD676F /* PhotosIntegration.swift in Sources */,
 				7DBA2856BB9C754F46C4433C /* PhotosMonitor.swift in Sources */,
+				B96BDADCA04A04BD9407CBEF /* PhysicalMailChannel.swift in Sources */,
 				811C0A93484C4A09F9E96109 /* PlanManager.swift in Sources */,
 				0AFE676DAD0066791B639161 /* PlanState.swift in Sources */,
 				20EFB0DAA736DA59BCF46A5A /* PlanViews.swift in Sources */,
@@ -8956,6 +8961,7 @@
 				08AF7496FBA4D75C303FF0CD /* PersonalizedLearning.swift in Sources */,
 				4FB156D8EBE5FFECA73A3FE7 /* PhotosIntegration.swift in Sources */,
 				44FBDFC39B43ED30C7DC9BC4 /* PhotosMonitor.swift in Sources */,
+				05A5D393230C2E9C084B6D5B /* PhysicalMailChannel.swift in Sources */,
 				F5191CCE0CB386FA358BB02E /* PlanManager.swift in Sources */,
 				075F88D01AC7818F14E789AF /* PlanState.swift in Sources */,
 				7A2B137C146894B76E345D1E /* PlanViews.swift in Sources */,
