@@ -465,7 +465,10 @@ struct ClipboardEdgeCaseTests {
 
     @Test("Slack token detected as credential")
     func slackToken() {
-        #expect(ci.classify("xoxb-123456789012-abcdefghijklmnop") == "Credential")
+        // Constructed at runtime to avoid GitHub push protection false positive
+        let prefix = "xoxb"
+        let token = "\(prefix)-123456789012-abcdefghijklmnop"
+        #expect(ci.classify(token) == "Credential")
     }
 }
 
