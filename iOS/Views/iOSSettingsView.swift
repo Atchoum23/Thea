@@ -164,6 +164,16 @@ struct iOSSettingsView: View {
                         subtitle: "Transactions & budgets"
                     )
                 }
+                NavigationLink {
+                    NotificationIntelligenceSettingsView()
+                } label: {
+                    SettingsRow(
+                        icon: "bell.badge",
+                        iconColor: .purple,
+                        title: "Notifications",
+                        subtitle: "Cross-device intelligence"
+                    )
+                }
             } header: {
                 Text("Life")
             }

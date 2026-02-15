@@ -63,6 +63,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case health = "Health"
     case finance = "Finance"
     case tasks = "Tasks"
+    case notifications = "Notifications"
 
     // Group 3: System
     case permissions = "Permissions"
@@ -93,6 +94,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .health: "heart.fill"
         case .finance: "chart.line.uptrend.xyaxis"
         case .tasks: "checklist"
+        case .notifications: "bell.badge"
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
         case .privacy: "lock.shield"
@@ -107,7 +109,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .voiceInput, .codeIntelligence, .health, .finance, .tasks: 2
+        case .voiceInput, .codeIntelligence, .health, .finance, .tasks, .notifications: 2
         case .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -231,6 +233,8 @@ struct MacSettingsView: View {
             FinancialDashboardView()
         case .tasks:
             TasksAndLifeView()
+        case .notifications:
+            NotificationIntelligenceSettingsView()
         case .permissions:
             PermissionsSettingsView()
         case .sync:
