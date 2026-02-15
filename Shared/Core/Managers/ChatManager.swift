@@ -159,6 +159,41 @@ final class ChatManager: ObservableObject {
         conversation.title = title
         chatLogger.debug("📝 Auto-generated title: '\(title)'")
     }
+
+    // MARK: - Foreground App Context Injection
+
+    #if os(macOS)
+    /// Injects foreground app context into a user message if app pairing is enabled
+    /// Returns the modified message with context, or the original message if pairing disabled
+    func injectForegroundAppContext(into message: String) -> String {
+        guard ForegroundAppMonitor.shared.isPairingEnabled else {
+            return message
+        }
+
+        guard let context = ForegroundAppMonitor.shared.appContext else {
+            // No context available yet
+            return message
+        }
+
+        let contextBlock = """
+        <foreground_app_context>
+        \(context.formatForPrompt())
+        </foreground_app_context>
+
+        """
+
+        let enhancedMessage = contextBlock + message
+
+        chatLogger.debug("📱 Injected foreground app context for \(context.appName)")
+
+        return enhancedMessage
+    }
+    #else
+    /// No-op on non-macOS platforms (app pairing is macOS-only)
+    func injectForegroundAppContext(into message: String) -> String {
+        return message
+    }
+    #endif
 }
 
 // MARK: - AI Message (for provider communication)
