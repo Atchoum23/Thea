@@ -31,8 +31,8 @@ final class PointerTracker {
 
     func requestAuthorization() {
         // Trigger authorization prompt
-        nonisolated(unsafe) let promptKey = kAXTrustedCheckOptionPrompt.takeRetainedValue() as String
-        let options: NSDictionary = [promptKey: true]
+        // Hardcoded string value to avoid concurrency warning
+        let options: NSDictionary = ["AXTrustedCheckOptionPrompt": true]
         AXIsProcessTrustedWithOptions(options)
     }
 
@@ -108,15 +108,7 @@ final class PointerTracker {
         print("🛑 PointerTracker: Stopped tracking")
     }
 
-    deinit {
-        // Can't call @MainActor method from deinit, so we manually clean up
-        if let tap = eventTap {
-            CGEvent.tapEnable(tap: tap, enable: false)
-        }
-        if let source = runLoopSource {
-            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
-        }
-    }
+    // deinit removed - caller is responsible for calling stopTracking()
 }
 
 #endif
