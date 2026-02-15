@@ -61,6 +61,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case voiceInput = "Voice & Input"
     case codeIntelligence = "Code Intelligence"
     case health = "Health"
+    case finance = "Finance"
     case tasks = "Tasks"
 
     // Group 3: System
@@ -90,6 +91,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .voiceInput: "mic.fill"
         case .codeIntelligence: "chevron.left.forwardslash.chevron.right"
         case .health: "heart.fill"
+        case .finance: "chart.line.uptrend.xyaxis"
         case .tasks: "checklist"
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
@@ -105,7 +107,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .voiceInput, .codeIntelligence, .health, .tasks: 2
+        case .voiceInput, .codeIntelligence, .health, .finance, .tasks: 2
         case .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -225,6 +227,10 @@ struct MacSettingsView: View {
             CodeIntelligenceConfigurationView()
         case .health:
             HealthDashboardView()
+        case .finance:
+            FinancialDashboardView()
+        case .tasks:
+            TasksAndLifeView()
         case .permissions:
             PermissionsSettingsView()
         case .sync:
@@ -240,5 +246,33 @@ struct MacSettingsView: View {
         case .about:
             AboutView()
         }
+    }
+}
+
+// MARK: - Tasks & Life Management Composite View
+
+/// Combined view for Tasks tab — shows task manager with life dashboard tabs.
+private struct TasksAndLifeView: View {
+    @State private var selectedTab = 0
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Picker("", selection: $selectedTab) {
+                Text("Tasks").tag(0)
+                Text("Life Dashboard").tag(1)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .padding(.top, 8)
+
+            Divider().padding(.top, 8)
+
+            if selectedTab == 0 {
+                TaskManagerView()
+            } else {
+                LifeManagementDashboardView()
+            }
+        }
+        .navigationTitle(selectedTab == 0 ? "Tasks" : "Life Dashboard")
     }
 }
