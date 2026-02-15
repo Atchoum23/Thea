@@ -12,7 +12,9 @@ private let vehicleLogger = Logger(subsystem: "ai.thea.app", category: "VehicleM
 // MARK: - Models
 
 /// A vehicle with service history and fuel tracking.
-struct Vehicle: Codable, Sendable, Identifiable {
+struct Vehicle: Codable, Sendable, Identifiable, Hashable {
+    static func == (lhs: Vehicle, rhs: Vehicle) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
     let id: UUID
     var name: String
     var make: String

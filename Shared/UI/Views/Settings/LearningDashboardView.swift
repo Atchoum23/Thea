@@ -115,7 +115,7 @@ struct LearningDashboardView: View {
                         .foregroundStyle(.orange)
                 }
                 if let target = goal.targetDate {
-                    Label(target, format: .dateTime.month().day())
+                    Text(target, format: .dateTime.month().day())
                         .foregroundStyle(goal.isOverdue ? .red : .secondary)
                 }
             }
