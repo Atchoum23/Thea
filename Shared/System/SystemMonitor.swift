@@ -349,7 +349,7 @@ final class SystemMonitor: ObservableObject {
         }
 
         if result == KERN_SUCCESS {
-            let pageSize = UInt64(vm_kernel_page_size)
+            let pageSize = UInt64(getpagesize())
             let freePages = UInt64(vmStats.free_count)
             let activePages = UInt64(vmStats.active_count)
             let inactivePages = UInt64(vmStats.inactive_count)
