@@ -544,7 +544,7 @@ extension ChatManager {
         messages: [AIMessage], model: String, provider: any AIProvider
     ) async -> Int? {
         let isAnthropicModel = model.contains("claude")
-        if isAnthropicModel, let apiKey = SecureStorage.shared.getAPIKey(for: "anthropic") {
+        if isAnthropicModel, let apiKey = try? SecureStorage.shared.loadAPIKey(for: "anthropic") {
             let counter = AnthropicTokenCounter(apiKey: apiKey)
             do {
                 let result = try await counter.countTokens(messages: messages, model: model)
@@ -622,7 +622,7 @@ extension ChatManager {
             streamingText = ""
         }
 
-        // Run both providers in parallel
+        // Run both providers — first model, then second
         var sanitizedMessages = apiMessages
         if SettingsManager.shared.cloudAPIPrivacyGuardEnabled {
             sanitizedMessages = await OutboundPrivacyGuard.shared.sanitizeMessages(
@@ -630,20 +630,15 @@ extension ChatManager {
             )
         }
 
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask { @MainActor [weak self] in
-                await self?.streamComparisonResponse(
-                    provider: provider1, model: model1,
-                    messages: sanitizedMessages, into: msg1
-                )
-            }
-            group.addTask { @MainActor [weak self] in
-                await self?.streamComparisonResponse(
-                    provider: provider2, model: model2,
-                    messages: sanitizedMessages, into: msg2
-                )
-            }
-        }
+        // Stream both responses (sequential to satisfy MainActor isolation on Message)
+        await streamComparisonResponse(
+            provider: provider1, model: model1,
+            messages: sanitizedMessages, into: msg1
+        )
+        await streamComparisonResponse(
+            provider: provider2, model: model2,
+            messages: sanitizedMessages, into: msg2
+        )
 
         conversation.updatedAt = Date()
         try context.save()
