@@ -1,5 +1,6 @@
 import Charts
 import SwiftUI
+import UniformTypeIdentifiers
 
 // MARK: - Financial Dashboard View
 
@@ -19,31 +20,36 @@ struct FinancialDashboardView: View {
         case year = "Year"
     }
 
+    @State private var selectedTab: FinancialTab = .overview
+    @State private var showingImportSheet = false
+
+    enum FinancialTab: String, CaseIterable {
+        case overview = "Overview"
+        case investments = "Investments"
+        case tax = "Tax"
+    }
+
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Header with total balance
-                    totalBalanceCard
-
-                    // Time range picker
-                    timeRangePicker
-
-                    // Accounts grid
-                    if !financial.connectedAccounts.isEmpty {
-                        accountsGrid
+            VStack(spacing: 0) {
+                // Tab picker
+                Picker("Section", selection: $selectedTab) {
+                    ForEach(FinancialTab.allCases, id: \.self) { tab in
+                        Text(tab.rawValue).tag(tab)
                     }
-
-                    // Recent transactions
-                    recentTransactionsSection
-
-                    // Insights
-                    insightsSection
-
-                    // Budgets
-                    budgetsSection
                 }
-                .padding()
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.top, 8)
+
+                switch selectedTab {
+                case .overview:
+                    overviewContent
+                case .investments:
+                    InvestmentPortfolioView()
+                case .tax:
+                    TaxEstimatorView()
+                }
             }
             .navigationTitle("Financial Dashboard")
             .toolbar {
@@ -51,6 +57,10 @@ struct FinancialDashboardView: View {
                     Menu {
                         Button(action: { showingConnectSheet = true }) {
                             Label("Connect Account", systemImage: "plus.circle")
+                        }
+
+                        Button(action: { showingImportSheet = true }) {
+                            Label("Import Transactions", systemImage: "square.and.arrow.down")
                         }
 
                         Button(action: { refreshAll() }) {
@@ -62,14 +72,69 @@ struct FinancialDashboardView: View {
                     }
                 }
             }
-            .overlay {
-                if financial.connectedAccounts.isEmpty {
-                    emptyState
-                }
-            }
             .sheet(isPresented: $showingConnectSheet) {
                 ConnectAccountSheet()
             }
+            .fileImporter(
+                isPresented: $showingImportSheet,
+                allowedContentTypes: [.commaSeparatedText, .data],
+                allowsMultipleSelection: false
+            ) { result in
+                handleFileImport(result)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var overviewContent: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Header with total balance
+                totalBalanceCard
+
+                // Time range picker
+                timeRangePicker
+
+                // Accounts grid
+                if !financial.connectedAccounts.isEmpty {
+                    accountsGrid
+                }
+
+                // Recent transactions
+                recentTransactionsSection
+
+                // Insights
+                insightsSection
+
+                // Budgets
+                budgetsSection
+            }
+            .padding()
+        }
+        .overlay {
+            if financial.connectedAccounts.isEmpty {
+                emptyState
+            }
+        }
+    }
+
+    private func handleFileImport(_ result: Result<[URL], any Error>) {
+        guard case .success(let urls) = result, let url = urls.first else { return }
+        guard url.startAccessingSecurityScopedResource() else { return }
+        defer { url.stopAccessingSecurityScopedResource() }
+
+        let importer = TransactionImporter.shared
+        let accountId = financial.connectedAccounts.first?.id ?? UUID()
+
+        do {
+            let ext = url.pathExtension.lowercased()
+            if ext == "ofx" || ext == "qfx" {
+                _ = try importer.importOFX(from: url, accountId: accountId)
+            } else {
+                _ = try importer.importCSV(from: url, accountId: accountId)
+            }
+        } catch {
+            // Error logged by TransactionImporter
         }
     }
 
