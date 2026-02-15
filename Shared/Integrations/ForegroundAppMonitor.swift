@@ -6,6 +6,7 @@ import Foundation
 #if os(macOS)
 
 // Placeholder - not yet implemented
+@MainActor
 final class ForegroundAppMonitor {
     static let shared = ForegroundAppMonitor()
     private init() {}
