@@ -411,7 +411,7 @@ struct LifeManagementDashboardView: View {
         isLoadingSuggestions = true
         Task {
             // Query PersonalKnowledgeGraph for context-aware suggestions
-            let kgEntities = await PersonalKnowledgeGraph.shared.findEntities(matching: "")
+            let kgEntities = PersonalKnowledgeGraph.shared.searchEntities(query: "")
             var result: [KGSuggestion] = []
 
             // Suggest based on overdue tasks
