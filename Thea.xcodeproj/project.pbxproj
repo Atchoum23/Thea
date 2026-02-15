@@ -54,6 +54,7 @@
 		054257EA3542520FF464C37B /* ProactiveNotificationIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AE251446D24B99DC6D9EBC /* ProactiveNotificationIntelligence.swift */; };
 		0586056E20DFE4B592BA913F /* AgentEnhancements+MessageQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63326A9AC104F79EF7E8322 /* AgentEnhancements+MessageQueue.swift */; };
 		063ADA397ECA847771F03CCA /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 684629699F86D3CF574A670B /* ServiceContainer.swift */; };
+		066BE87B33D24AA27C55966B /* AgentFeedbackSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517D8BF2B0861EE3FBDBC58A /* AgentFeedbackSection.swift */; };
 		0684A129C16CD77A5B79C262 /* MessageAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B812F366C7646025DAA0F3B1 /* MessageAction.swift */; };
 		069ACC6343B982CBB0D9AFA6 /* SettingsConfigurationViewsExtras.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5FA8335414E75EACECA10D8 /* SettingsConfigurationViewsExtras.swift */; };
 		069FAA15A5AA8BC4F4EDF23F /* FileOperationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1542CBF91CCF05C9FC2C9C44 /* FileOperationsManager.swift */; };
@@ -182,6 +183,7 @@
 		155448682A0EC16606920079 /* AssessmentDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC51B6288778CA41EB24B0C /* AssessmentDashboardView.swift */; };
 		15DB4F6EAA73E8844E42DA23 /* TransferableService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0F2B235FB63C4FFAD580D5 /* TransferableService.swift */; };
 		15E54CE211AB5770D7480420 /* ModelSelectionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D241B1C84B01CBB82F7FDD /* ModelSelectionConfiguration.swift */; };
+		15E7B5FCDC061E4D867E2D3D /* AgentFeedbackSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517D8BF2B0861EE3FBDBC58A /* AgentFeedbackSection.swift */; };
 		15F771731DBA2C8D53ED665C /* AgentCommunicationBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8714BF79EB3CEF3694A28693 /* AgentCommunicationBus.swift */; };
 		16316D6A2AD25EEB22D5B58B /* ChatView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06E3F1D7127665046903780 /* ChatView+Extensions.swift */; };
 		1668EEF7C03AB11603DD2381 /* GitSavepoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DF88A0D9B3677236656455 /* GitSavepoint.swift */; };
@@ -2363,6 +2365,7 @@
 		50B6778A314349EEE2113CFB /* content-core.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "content-core.js"; sourceTree = "<group>"; };
 		50DB63898CAA005F46BE1F89 /* MemorySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorySettingsView.swift; sourceTree = "<group>"; };
 		5124AE6AF8345D2125711ED3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		517D8BF2B0861EE3FBDBC58A /* AgentFeedbackSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentFeedbackSection.swift; sourceTree = "<group>"; };
 		519CE0BC5419507FEC982361 /* TheaClipSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipSettingsView.swift; sourceTree = "<group>"; };
 		51EF80C59BC3C938B26B24C1 /* VoiceBackendProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceBackendProtocol.swift; sourceTree = "<group>"; };
 		520122204AB7C7FDB6DCE80B /* InterventionScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterventionScheduler.swift; sourceTree = "<group>"; };
@@ -4411,6 +4414,7 @@
 		57DDD00D5D10DC688AB0BA2A /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				517D8BF2B0861EE3FBDBC58A /* AgentFeedbackSection.swift */,
 				8DA22D1B018EDD72551C0A5A /* ConversationLanguagePickerView.swift */,
 				F5F04DD909E0AA7EF54A88D1 /* TheaAgentStatusBar.swift */,
 			);
@@ -7019,6 +7023,7 @@
 				0586056E20DFE4B592BA913F /* AgentEnhancements+MessageQueue.swift in Sources */,
 				BB6111265668F06DD83E800C /* AgentEnhancements+Visibility.swift in Sources */,
 				AD25D2CF0EDA7120F80FAD39 /* AgentEnhancements.swift in Sources */,
+				066BE87B33D24AA27C55966B /* AgentFeedbackSection.swift in Sources */,
 				400E025657750A674B2B7614 /* AgentMode.swift in Sources */,
 				E0DECBF4EDB720E173C90FA0 /* AgentObservability+Core.swift in Sources */,
 				76F1BA72DDBA0A0430F17262 /* AgentObservability.swift in Sources */,
@@ -7971,6 +7976,7 @@
 				2D298FB86AD305FADA371A4F /* AgentEnhancements+MessageQueue.swift in Sources */,
 				B8D575ADE3F955620BE5AA0F /* AgentEnhancements+Visibility.swift in Sources */,
 				A2B54B50828F14555F7B38E5 /* AgentEnhancements.swift in Sources */,
+				15E7B5FCDC061E4D867E2D3D /* AgentFeedbackSection.swift in Sources */,
 				0EC995DB88EE0AA9506AB953 /* AgentMode.swift in Sources */,
 				C7880A3E1BC97A9430589B17 /* AgentObservability+Core.swift in Sources */,
 				AEB1A0457E4B3A8DD25557FD /* AgentObservability.swift in Sources */,
