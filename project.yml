@@ -480,7 +480,8 @@ targets:
         CODE_SIGN_IDENTITY: "Apple Development"
 
       release:
-        CODE_SIGN_IDENTITY: "Apple Distribution"
+        # Developer ID for distribution outside Mac App Store
+        CODE_SIGN_IDENTITY: "Developer ID Application: Alexis Calevras (6B66PM4JLK)"
         SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
         GCC_TREAT_WARNINGS_AS_ERRORS: YES
 
@@ -978,7 +979,7 @@ targets:
           - "@executable_path/../Frameworks"
           - "@executable_path/../../../../Frameworks"
       release:
-        CODE_SIGN_IDENTITY: "Apple Distribution"
+        CODE_SIGN_IDENTITY: "Developer ID Application: Alexis Calevras (6B66PM4JLK)"
 
   # ============ Safari Extension (macOS) ============
   TheaSafariExtensionMac:
@@ -1005,7 +1006,7 @@ targets:
           - "@executable_path/../Frameworks"
           - "@executable_path/../../../../Frameworks"
       release:
-        CODE_SIGN_IDENTITY: "Apple Distribution"
+        CODE_SIGN_IDENTITY: "Developer ID Application: Alexis Calevras (6B66PM4JLK)"
 
   # ============================================
   # Additional iOS Extensions
