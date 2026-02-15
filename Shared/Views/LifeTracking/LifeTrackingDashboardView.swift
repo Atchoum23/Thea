@@ -494,39 +494,47 @@ class LifeTrackingDashboardViewModel: ObservableObject {
         totalEvents = stats.todayEventCount
         activeSources = stats.activeSources.count
 
-        // Derive screen time from tracked event count (~30s average per event)
-        let screenMinutes = max(0, stats.todayEventCount * 30 / 60)
-        let hours = screenMinutes / 60
-        let mins = screenMinutes % 60
-        formattedScreenTime = hours > 0 ? "\(hours)h \(mins)m" : "\(mins)m"
+        // Screen time from AppUsageMonitor (real app usage tracking via NSWorkspace/ProcessInfo)
+        let appUsageStats = AppUsageMonitor.shared.getStats(for: .today)
+        formattedScreenTime = appUsageStats.formattedScreenTime
 
-        // Media time from active media data source
-        let hasMedia = stats.activeSources.contains(.media)
-        let mediaMinutes = hasMedia ? max(0, stats.todayEventCount / 4) : 0
-        formattedMediaTime = mediaMinutes > 0 ? "\(mediaMinutes)m" : "0m"
+        // Media time from MediaMonitor (real MPNowPlayingInfoCenter tracking)
+        let mediaStats = MediaMonitor.shared.getStatistics(for: .today)
+        let totalMediaSeconds = mediaStats.totalMusicTime + mediaStats.totalVideoTime
+        let mediaHours = Int(totalMediaSeconds) / 3600
+        let mediaMinutes = (Int(totalMediaSeconds) % 3600) / 60
+        formattedMediaTime = mediaHours > 0 ? "\(mediaHours)h \(mediaMinutes)m" : "\(mediaMinutes)m"
 
-        // Build data source stats — distribute events proportionally among active sources
-        let activeSourceCount = stats.activeSources.count
-        let perSourceEvents = (stats.todayEventCount > 0 && activeSourceCount > 0)
-            ? stats.todayEventCount / activeSourceCount : 0
+        // Build data source stats from real per-source event counts
+        let topApps = AppUsageMonitor.shared.getTopApps(limit: 50, period: .today)
+        var eventsBySource: [DataSourceType: Int] = [:]
+        for record in topApps {
+            let source: DataSourceType = switch record.app.category {
+            case .browser: .browserExtension
+            case .social, .communication: .messages
+            case .entertainment, .games: .media
+            default: .appUsage
+            }
+            eventsBySource[source, default: 0] += 1
+        }
         dataSourceStats = DataSourceType.allCases.map { type in
             let isActive = stats.activeSources.contains(type)
             return DataSourceStat(
                 type: type,
                 displayName: type.displayName,
                 icon: type.icon,
-                eventCount: isActive ? perSourceEvents : 0,
+                eventCount: eventsBySource[type] ?? 0,
                 isActive: isActive
             )
         }
 
-        // Build category stats proportional to event total
-        let totalCategories = max(1, LifeActivityCategory.allCases.count)
+        // Build category stats from real app usage breakdown
+        let categoryBreakdown = appUsageStats.categoryBreakdown
+        let totalTime = max(1.0, appUsageStats.totalScreenTime)
         categoryStats = LifeActivityCategory.allCases.map { category in
-            let count = stats.todayEventCount > 0
-                ? max(1, stats.todayEventCount / totalCategories) : 0
-            let proportion = stats.todayEventCount > 0
-                ? Double(count) / Double(max(1, stats.todayEventCount)) : 0
+            let matchingTime = categoryTimeForLifeCategory(category, from: categoryBreakdown)
+            let count = Int(matchingTime / 60) // minutes
+            let proportion = matchingTime / totalTime
             return CategoryStat(
                 category: category,
                 count: count,
@@ -536,16 +544,35 @@ class LifeTrackingDashboardViewModel: ObservableObject {
             )
         }
 
-        // Build hourly activity — distribute events across elapsed hours
-        let currentHour = Calendar.current.component(.hour, from: Date())
+        // Build hourly activity from real app usage session history
+        let todayApps = AppUsageMonitor.shared.getTopApps(limit: 200, period: .today)
+        var hourCounts = [Int](repeating: 0, count: 24)
+        for record in todayApps {
+            let hour = Calendar.current.component(.hour, from: record.date)
+            hourCounts[hour] += 1
+        }
         hourlyActivity = (0..<24).map { hour in
-            let count: Int
-            if hour > currentHour || stats.todayEventCount == 0 {
-                count = 0
-            } else {
-                count = stats.todayEventCount / max(1, currentHour + 1)
-            }
-            return HourlyActivity(hour: hour, count: count)
+            HourlyActivity(hour: hour, count: hourCounts[hour])
+        }
+    }
+
+    private func categoryTimeForLifeCategory(
+        _ lifeCategory: LifeActivityCategory,
+        from breakdown: [AppCategory: TimeInterval]
+    ) -> TimeInterval {
+        switch lifeCategory {
+        case .productivity:
+            return (breakdown[.productivity] ?? 0) + (breakdown[.development] ?? 0) + (breakdown[.education] ?? 0)
+        case .communication:
+            return (breakdown[.communication] ?? 0)
+        case .entertainment:
+            return (breakdown[.entertainment] ?? 0) + (breakdown[.games] ?? 0)
+        case .health:
+            return breakdown[.health] ?? 0
+        case .social:
+            return breakdown[.social] ?? 0
+        case .home:
+            return (breakdown[.utility] ?? 0) + (breakdown[.other] ?? 0)
         }
     }
 

@@ -99,7 +99,14 @@ actor SelfBenchmark {
         let theaDir = appSupport.appendingPathComponent("Thea")
         try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
         storageURL = theaDir.appendingPathComponent("self_benchmark.json")
-        loadState()
+
+        // Inline load to avoid calling actor-isolated method from init
+        if let data = try? Data(contentsOf: storageURL),
+           let state = try? JSONDecoder().decode(BenchmarkState.self, from: data) {
+            snapshots = state.snapshots
+            responseLatencies = state.latencies
+            feedbackScores = state.feedbackScores
+        }
     }
 
     // MARK: - Recording
