@@ -25,6 +25,10 @@ func routes(_ app: Application) throws {
     // Chat/conversation routes (protected)
     let protected = api.grouped(UserAuthMiddleware())
     try protected.register(collection: ChatController())
+    try protected.register(collection: DashboardController())
+
+    // WebSocket endpoint (authenticates via query param)
+    WebSocketController.register(on: app)
 
     // MARK: - Static Files (for local development)
 

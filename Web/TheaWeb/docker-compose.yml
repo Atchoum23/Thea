@@ -1,0 +1,54 @@
+# Thea Web Companion — Docker Compose deployment
+# Usage: docker compose up -d
+
+services:
+  thea-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thea-web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - LOG_LEVEL=info
+      - THEA_BACKEND_URL=http://host.docker.internal:8081
+      - REDIS_URL=redis://redis:6379
+      - APPLE_TEAM_ID=${APPLE_TEAM_ID}
+      - APPLE_CLIENT_ID=${APPLE_CLIENT_ID}
+    volumes:
+      - thea-db:/app/data
+    depends_on:
+      - redis
+    networks:
+      - thea-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: thea-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - thea-net
+
+  # Cloudflare Tunnel — zero-trust access to api.theathe.app
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: thea-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - thea-web
+    networks:
+      - thea-net
+
+volumes:
+  thea-db:
+  redis-data:
+
+networks:
+  thea-net:
+    driver: bridge

@@ -355,6 +355,13 @@
         });
     });
 
+    // Service Worker Registration (PWA)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('SW registered:', reg.scope))
+            .catch(err => console.log('SW registration failed:', err));
+    }
+
     // Init
     if (state.token) {
         showChat();

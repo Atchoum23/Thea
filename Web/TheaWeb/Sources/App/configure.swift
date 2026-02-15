@@ -15,7 +15,7 @@ func configure(_ app: Application) async throws {
     if app.environment == .production {
         // Production: Use PostgreSQL via environment variable
         // DATABASE_URL should be set in the environment
-        guard let databaseURL = Environment.get("DATABASE_URL") else {
+        guard let _ = Environment.get("DATABASE_URL") else {
             app.logger.warning("DATABASE_URL not set, falling back to SQLite")
             app.databases.use(.sqlite(.file("thea.sqlite")), as: .sqlite)
             return
@@ -32,6 +32,8 @@ func configure(_ app: Application) async throws {
     app.migrations.add(CreateUser())
     app.migrations.add(CreateSession())
     app.migrations.add(CreateAPIKey())
+    app.migrations.add(CreateConversation())
+    app.migrations.add(CreateMessage())
     try await app.autoMigrate()
 
     // MARK: - JWT Configuration (Sign in with Apple)
