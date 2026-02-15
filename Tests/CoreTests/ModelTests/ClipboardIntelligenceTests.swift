@@ -1,6 +1,7 @@
 // ClipboardIntelligenceTests.swift
 // Tests for ClipboardIntelligence — AI categorization, classification, actions, tags
 
+import Foundation
 import Testing
 
 // MARK: - ClipCategory Tests
@@ -387,10 +388,13 @@ struct ClipboardLanguageTests {
         #expect(ci.detectLanguage(code) == "JavaScript")
     }
 
-    @Test("Detects HTML")
+    @Test("Detects HTML as code with language hint")
     func detectHTML() {
-        let code = "<html><head><title>Test</title></head><body><div>Hello</div></body></html>"
-        #expect(ci.detectLanguage(code) == "HTML")
+        // HTML with enough signals to be classified as code (contains <html, <div, <span, <body, <head)
+        let code = "<html>\n<head><title>Test</title></head>\n<body>\n<div><span>Hello</span></div>\n</body>\n</html>"
+        let result = ci.analyze(code)
+        // HTML is classified as code, with HTML language hint
+        #expect(result.languageHint == "HTML")
     }
 
     @Test("Returns nil for non-code")
@@ -467,7 +471,7 @@ struct ClipboardEdgeCaseTests {
 
 // MARK: - Test Helpers (standalone, no app dependency)
 
-private enum ClipCategoryTestMirror: String, CaseIterable {
+enum ClipCategoryTestMirror: String, CaseIterable {
     case code = "Code"
     case url = "URL"
     case email = "Email"
@@ -513,7 +517,7 @@ private enum ClipCategoryTestMirror: String, CaseIterable {
 
 /// Standalone test helper that mirrors ClipboardIntelligence logic
 /// (SPM tests can't import app target, so we replicate the classification logic)
-private struct ClipboardIntelligenceTestHelper {
+struct ClipboardIntelligenceTestHelper {
 
     struct AnalysisResult {
         let category: String
@@ -547,16 +551,16 @@ private struct ClipboardIntelligenceTestHelper {
         if isCredential(trimmed) { return "Credential" }
         if isURL(trimmed) { return "URL" }
         if isEmail(trimmed) { return "Email" }
-        if isPhone(trimmed) { return "Phone" }
         if isColorHex(trimmed) { return "Color" }
         if isFilePath(trimmed) { return "File Path" }
         if isJSON(trimmed) { return "JSON" }
-        if isCommand(trimmed, sourceApp: sourceApp) { return "Command" }
-        if isCode(trimmed, sourceApp: sourceApp) { return "Code" }
-        if isMarkdown(trimmed) { return "Markdown" }
-        if isAddress(trimmed) { return "Address" }
         if isNumber(trimmed) { return "Number" }
         if isDate(trimmed) { return "Date" }
+        if isPhone(trimmed) { return "Phone" }
+        if isMarkdown(trimmed) { return "Markdown" }
+        if isCode(trimmed, sourceApp: sourceApp) { return "Code" }
+        if isCommand(trimmed, sourceApp: sourceApp) { return "Command" }
+        if isAddress(trimmed) { return "Address" }
         if trimmed.count < 200, !trimmed.contains("\n") { return "Snippet" }
         return "Text"
     }
@@ -628,7 +632,8 @@ private struct ClipboardIntelligenceTestHelper {
                        "function ", "const ", "=>", "async ", "await ",
                        "public ", "private ", "static ", "void ", "int ",
                        "println", "printf", "console.log", "print(",
-                       "};", "});", "//", "/*", "*/", "#include", "#import"]
+                       "};", "});", "//", "/*", "*/", "#include", "#import",
+                       "<html", "<body", "<div", "<span", "<head", "<!DOCTYPE"]
         return signals.filter { text.contains($0) }.count >= 2
     }
 
@@ -662,6 +667,9 @@ private struct ClipboardIntelligenceTestHelper {
     private func isNumber(_ text: String) -> Bool {
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard t.count < 30 else { return false }
+        let dotCount = t.filter { $0 == "." }.count
+        let hyphenCount = t.filter { $0 == "-" }.count
+        if dotCount >= 2 || hyphenCount >= 2 { return false }
         return Double(t.replacingOccurrences(of: ",", with: "")) != nil
             || t.range(of: "^[$€£¥₽CHF]?\\s?[\\d,.]+\\s?[$€£¥₽CHF]?$", options: .regularExpression) != nil
     }

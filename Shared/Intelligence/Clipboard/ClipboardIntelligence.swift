@@ -135,9 +135,6 @@ final class ClipboardIntelligence {
         // Email
         if isEmail(trimmed) { return .email }
 
-        // Phone
-        if isPhone(trimmed) { return .phone }
-
         // Color hex
         if isColorHex(trimmed) { return .color }
 
@@ -147,23 +144,26 @@ final class ClipboardIntelligence {
         // JSON
         if isJSON(trimmed) { return .json }
 
+        // Number (before phone — currency like $1,234.56 could match phone)
+        if isNumber(trimmed) { return .number }
+
+        // Date (before phone — ISO dates like 2026-02-15 could match phone)
+        if isDate(trimmed) { return .date }
+
+        // Phone (after number/date to avoid false positives)
+        if isPhone(trimmed) { return .phone }
+
+        // Markdown (before command — # headings would match command prefix)
+        if isMarkdown(trimmed) { return .markdown }
+
+        // Code (before command — code with shell-like lines should be code)
+        if isCode(trimmed, sourceApp: sourceApp) { return .code }
+
         // Shell command
         if isCommand(trimmed, sourceApp: sourceApp) { return .command }
 
-        // Code
-        if isCode(trimmed, sourceApp: sourceApp) { return .code }
-
-        // Markdown
-        if isMarkdown(trimmed) { return .markdown }
-
         // Address
         if isAddress(trimmed) { return .address }
-
-        // Number
-        if isNumber(trimmed) { return .number }
-
-        // Date
-        if isDate(trimmed) { return .date }
 
         // Short text → snippet
         if trimmed.count < 200, !trimmed.contains("\n") {
@@ -249,7 +249,8 @@ final class ClipboardIntelligence {
             "function ", "const ", "=>", "async ", "await ",
             "public ", "private ", "static ", "void ", "int ",
             "println", "printf", "console.log", "print(",
-            "};", "});", "//", "/*", "*/", "#include", "#import"
+            "};", "});", "//", "/*", "*/", "#include", "#import",
+            "<html", "<body", "<div", "<span", "<head", "<!DOCTYPE"
         ]
 
         let matchCount = codeSignals.filter { text.contains($0) }.count
@@ -290,6 +291,10 @@ final class ClipboardIntelligence {
     private func isNumber(_ text: String) -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count < 30 else { return false }
+        // Reject date-like patterns (multiple dots/hyphens separating groups)
+        let dotCount = trimmed.filter { $0 == "." }.count
+        let hyphenCount = trimmed.filter { $0 == "-" }.count
+        if dotCount >= 2 || hyphenCount >= 2 { return false }
         return Double(trimmed.replacingOccurrences(of: ",", with: "")) != nil
             || trimmed.range(of: "^[$€£¥₽CHF]?\\s?[\\d,.]+\\s?[$€£¥₽CHF]?$", options: .regularExpression) != nil
     }
