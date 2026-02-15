@@ -188,6 +188,17 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
+                    MediaPlayerView()
+                } label: {
+                    SettingsRow(
+                        icon: "play.rectangle",
+                        iconColor: .indigo,
+                        title: "Media Player",
+                        subtitle: "\(MediaPlayer.shared.history.count) items"
+                    )
+                }
+
+                NavigationLink {
                     LifeManagementDashboardView()
                 } label: {
                     SettingsRow(

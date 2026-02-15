@@ -73,6 +73,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case downloads = "Downloads"
     case webClipper = "Web Clipper"
     case qrScanner = "QR Scanner"
+    case mediaPlayer = "Media Player"
     case notifications = "Notifications"
 
     // Group 3: System
@@ -118,6 +119,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .downloads: "arrow.down.circle"
         case .webClipper: "scissors"
         case .qrScanner: "qrcode"
+        case .mediaPlayer: "play.rectangle"
         case .notifications: "bell.badge"
         case .systemMonitor: "gauge.with.dots.needle.33percent"
         case .systemCleaner: "trash.circle"
@@ -137,7 +139,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .notifications: 2
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .notifications: 2
         case .systemMonitor, .systemCleaner, .battery, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -281,6 +283,8 @@ struct MacSettingsView: View {
             QRIntelligenceView()
         case .imageIntelligence:
             ImageIntelligenceView()
+        case .mediaPlayer:
+            MediaPlayerView()
         case .notifications:
             NotificationIntelligenceSettingsView()
         case .systemMonitor:
