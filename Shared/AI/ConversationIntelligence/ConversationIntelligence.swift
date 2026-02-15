@@ -428,8 +428,8 @@ public final class ConversationIntelligenceService: ObservableObject {
     // MARK: - Smart Suggestions
 
     /// Get smart follow-up suggestions
-    public func getFollowUpSuggestions(for conversation: AnalyzableConversation) -> [FollowUpSuggestion] {
-        var suggestions: [FollowUpSuggestion] = []
+    public func getConversationSuggestions(for conversation: AnalyzableConversation) -> [ConversationSuggestion] {
+        var suggestions: [ConversationSuggestion] = []
 
         guard let lastMessage = conversation.messages.last else {
             return suggestions
@@ -441,26 +441,26 @@ public final class ConversationIntelligenceService: ObservableObject {
         if lastMessage.role == .assistant {
             // Code-related suggestions
             if lastContent.contains("code") || lastContent.contains("```") {
-                suggestions.append(FollowUpSuggestion(text: "Can you explain this code?", type: .clarification))
-                suggestions.append(FollowUpSuggestion(text: "Can you make it more efficient?", type: .improvement))
-                suggestions.append(FollowUpSuggestion(text: "Add error handling", type: .enhancement))
+                suggestions.append(ConversationSuggestion(text: "Can you explain this code?", type: .clarification))
+                suggestions.append(ConversationSuggestion(text: "Can you make it more efficient?", type: .improvement))
+                suggestions.append(ConversationSuggestion(text: "Add error handling", type: .enhancement))
             }
 
             // Explanation suggestions
             if lastContent.contains("because") || lastContent.contains("reason") {
-                suggestions.append(FollowUpSuggestion(text: "Can you give an example?", type: .example))
-                suggestions.append(FollowUpSuggestion(text: "Tell me more about this", type: .deepDive))
+                suggestions.append(ConversationSuggestion(text: "Can you give an example?", type: .example))
+                suggestions.append(ConversationSuggestion(text: "Tell me more about this", type: .deepDive))
             }
 
             // List suggestions
             if lastContent.contains("1.") || lastContent.contains("- ") {
-                suggestions.append(FollowUpSuggestion(text: "Can you elaborate on the first point?", type: .deepDive))
-                suggestions.append(FollowUpSuggestion(text: "Which is most important?", type: .prioritization))
+                suggestions.append(ConversationSuggestion(text: "Can you elaborate on the first point?", type: .deepDive))
+                suggestions.append(ConversationSuggestion(text: "Which is most important?", type: .prioritization))
             }
         }
 
         // General suggestions
-        suggestions.append(FollowUpSuggestion(text: "Summarize our conversation", type: .summary))
+        suggestions.append(ConversationSuggestion(text: "Summarize our conversation", type: .summary))
 
         return Array(suggestions.prefix(5))
     }
@@ -621,7 +621,7 @@ public struct ConversationSearchResult: Identifiable {
     public let matchingExcerpts: [String]
 }
 
-public struct FollowUpSuggestion: Identifiable {
+public struct ConversationSuggestion: Identifiable {
     public let id = UUID()
     public let text: String
     public let type: SuggestionType

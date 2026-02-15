@@ -56,7 +56,7 @@ struct MorningBriefingView: View {
 
     // MARK: - Content
 
-    private func briefingContent(_ briefing: DailyBriefing) -> some View {
+    private func briefingContent(_ briefing: TheaDailyBriefing) -> some View {
         VStack(alignment: .leading, spacing: TheaSpacing.lg) {
             ForEach(briefing.sections) { section in
                 sectionView(section)
@@ -68,7 +68,7 @@ struct MorningBriefingView: View {
         VStack(alignment: .leading, spacing: TheaSpacing.sm) {
             HStack(spacing: TheaSpacing.sm) {
                 Image(systemName: section.icon)
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(Color.accentColor)
                 Text(section.title)
                     .font(.headline)
             }

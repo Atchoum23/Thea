@@ -425,7 +425,7 @@ struct ChatView: View {
         }
     }
 
-    private var lastAssistantMessageSuggestions: [FollowUpSuggestion] {
+    var lastAssistantMessageSuggestions: [FollowUpSuggestion] {
         guard let lastAssistant = messages.last(where: { $0.messageRole == .assistant }) else {
             return []
         }

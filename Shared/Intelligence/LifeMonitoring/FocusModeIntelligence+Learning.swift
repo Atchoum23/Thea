@@ -1030,10 +1030,10 @@ extension FocusModeIntelligence {
         let urgentContacts: [String]
         let pendingResponses: Int
         let topPriorityContacts: [String]
-        let suggestedFollowUps: [FollowUpSuggestion]
+        let suggestedFollowUps: [ContactFollowUpSuggestion]
     }
 
-    public struct FollowUpSuggestion: Sendable {
+    public struct ContactFollowUpSuggestion: Sendable {
         let contactId: String
         let reason: String
         let priority: Int // 1 = highest
@@ -1053,12 +1053,12 @@ extension FocusModeIntelligence {
             .map { $0.key }
     }
 
-    func generateFollowUpSuggestions() async -> [FollowUpSuggestion] {
-        var suggestions: [FollowUpSuggestion] = []
+    func generateFollowUpSuggestions() async -> [ContactFollowUpSuggestion] {
+        var suggestions: [ContactFollowUpSuggestion] = []
 
         // Suggest following up with urgent contacts
         for (contactKey, state) in getAllConversationStates() where state.markedAsUrgent {
-            suggestions.append(FollowUpSuggestion(
+            suggestions.append(ContactFollowUpSuggestion(
                 contactId: contactKey,
                 reason: "Marked as urgent during Focus",
                 priority: 1,
@@ -1069,7 +1069,7 @@ extension FocusModeIntelligence {
         // Suggest following up with high-frequency contacts
         for (contactKey, timestamps) in getAllMessageCountTracking() {
             if timestamps.count >= 3 {
-                suggestions.append(FollowUpSuggestion(
+                suggestions.append(ContactFollowUpSuggestion(
                     contactId: contactKey,
                     reason: "Sent \(timestamps.count) messages",
                     priority: 2,
