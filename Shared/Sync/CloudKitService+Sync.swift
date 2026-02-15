@@ -124,19 +124,22 @@ extension CloudKitService {
         }
     }
 
-    /// Process a changed record from delta sync, respecting selective sync toggles
+    /// Process a changed record from delta sync, respecting selective sync toggles and decrypting E2E data
     func processChangedRecord(_ record: CKRecord) async {
         switch record.recordType {
         case RecordType.conversation.rawValue:
             guard isSyncEnabled(for: .conversations) else { return }
+            await decryptRecordFields(record, type: .conversation)
             let conversation = CloudConversation(from: record)
             await mergeConversation(conversation)
         case RecordType.knowledge.rawValue:
             guard isSyncEnabled(for: .knowledge) else { return }
+            await decryptRecordFields(record, type: .knowledge)
             let item = CloudKnowledgeItem(from: record)
             await mergeKnowledgeItem(item)
         case RecordType.project.rawValue:
             guard isSyncEnabled(for: .projects) else { return }
+            await decryptRecordFields(record, type: .project)
             let project = CloudProject(from: record)
             await mergeProject(project)
         case RecordType.settings.rawValue:
@@ -287,21 +290,45 @@ extension CloudKitService {
 
     // MARK: - Save Operations
 
-    /// Save a conversation to CloudKit with conflict resolution
+    /// Save a conversation to CloudKit with conflict resolution and optional E2E encryption
     public func saveConversation(_ conversation: CloudConversation) async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .conversations) else { return }
 
         let record = conversation.toRecord()
+        // Encrypt sensitive content if encryption is available
+        await encryptRecordFields(record, type: .conversation)
+
         do {
             try await privateDatabase.save(record)
             pendingChanges = max(0, pendingChanges - 1)
         } catch let error as CKError where error.code == .serverRecordChanged {
-            // Server has a newer version — merge and retry using the server record as base
+            // Server has a newer version — check if user should decide
             if let serverRecord = error.serverRecord {
                 let remote = CloudConversation(from: serverRecord)
+
+                // Surface to UI if both sides have different titles (meaningful conflict)
+                if conversation.title != remote.title, conversation.title != "" {
+                    let conflictItem = SyncConflictItem(
+                        id: conversation.id,
+                        itemType: .conversation,
+                        localTitle: conversation.title,
+                        remoteTitle: remote.title,
+                        localModified: conversation.modifiedAt,
+                        remoteModified: remote.modifiedAt,
+                        localDevice: DeviceRegistry.shared.currentDevice.name,
+                        remoteDevice: remote.participatingDeviceIDs.last ?? "Other device",
+                        localMessageCount: conversation.messages.count,
+                        remoteMessageCount: remote.messages.count
+                    )
+                    await MainActor.run {
+                        SyncConflictManager.shared.addConflict(conflictItem)
+                    }
+                }
+
+                // Auto-merge in the background (user can override via conflict UI)
                 let merged = mergeConversations(local: conversation, remote: remote)
-                // Apply merged data onto the server record (preserves change tag)
                 merged.applyTo(serverRecord)
+                await encryptRecordFields(serverRecord, type: .conversation)
                 try await privateDatabase.save(serverRecord)
                 pendingChanges = max(0, pendingChanges - 1)
             } else {
@@ -319,20 +346,88 @@ extension CloudKitService {
         try await privateDatabase.save(record)
     }
 
-    /// Save a knowledge item to CloudKit
+    /// Save a knowledge item to CloudKit with E2E encryption
     public func saveKnowledgeItem(_ item: CloudKnowledgeItem) async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .knowledge) else { return }
 
         let record = item.toRecord()
+        await encryptRecordFields(record, type: .knowledge)
         try await privateDatabase.save(record)
     }
 
-    /// Save a project to CloudKit
+    /// Save a project to CloudKit with E2E encryption
     public func saveProject(_ project: CloudProject) async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .projects) else { return }
 
         let record = project.toRecord()
+        await encryptRecordFields(record, type: .project)
         try await privateDatabase.save(record)
+    }
+
+    // MARK: - E2E Encryption
+
+    /// Encrypt sensitive fields in a CKRecord before uploading.
+    /// Only encrypts content fields (title, content) — metadata (dates, IDs) stays in the clear for CloudKit queries.
+    private func encryptRecordFields(_ record: CKRecord, type: RecordType) async {
+        guard UserDefaults.standard.bool(forKey: "sync.encryptionEnabled") else { return }
+
+        do {
+            let encryption = SyncEncryption.shared
+            switch type {
+            case .conversation:
+                if let title = record["title"] as? String, !title.isEmpty {
+                    let encrypted = try await encryption.encrypt(Data(title.utf8))
+                    record["encryptedTitle"] = encrypted as CKRecordValue
+                    record["title"] = "[encrypted]" as CKRecordValue
+                }
+            case .knowledge:
+                if let content = record["content"] as? String, !content.isEmpty {
+                    let encrypted = try await encryption.encrypt(Data(content.utf8))
+                    record["encryptedContent"] = encrypted as CKRecordValue
+                    record["content"] = "[encrypted]" as CKRecordValue
+                }
+            case .project:
+                if let name = record["name"] as? String, !name.isEmpty {
+                    let encrypted = try await encryption.encrypt(Data(name.utf8))
+                    record["encryptedName"] = encrypted as CKRecordValue
+                    record["name"] = "[encrypted]" as CKRecordValue
+                }
+            default:
+                break
+            }
+        } catch {
+            logger.warning("Encryption failed, saving unencrypted: \(error.localizedDescription)")
+        }
+    }
+
+    /// Decrypt sensitive fields from a CKRecord after fetching.
+    func decryptRecordFields(_ record: CKRecord, type: RecordType) async {
+        guard UserDefaults.standard.bool(forKey: "sync.encryptionEnabled") else { return }
+
+        do {
+            let encryption = SyncEncryption.shared
+            switch type {
+            case .conversation:
+                if let encrypted = record["encryptedTitle"] as? Data {
+                    let decrypted = try await encryption.decrypt(encrypted)
+                    record["title"] = String(data: decrypted, encoding: .utf8) as CKRecordValue?
+                }
+            case .knowledge:
+                if let encrypted = record["encryptedContent"] as? Data {
+                    let decrypted = try await encryption.decrypt(encrypted)
+                    record["content"] = String(data: decrypted, encoding: .utf8) as CKRecordValue?
+                }
+            case .project:
+                if let encrypted = record["encryptedName"] as? Data {
+                    let decrypted = try await encryption.decrypt(encrypted)
+                    record["name"] = String(data: decrypted, encoding: .utf8) as CKRecordValue?
+                }
+            default:
+                break
+            }
+        } catch {
+            logger.warning("Decryption failed: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Delete Operations

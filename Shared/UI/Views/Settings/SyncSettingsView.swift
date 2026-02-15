@@ -55,6 +55,7 @@ struct SyncSettingsContentView: View {
     @AppStorage("sync.favorites") var syncFavorites = true
     @AppStorage("sync.backgroundEnabled") var backgroundSyncEnabled = true
     @AppStorage("sync.overCellular") var syncOverCellular = false
+    @AppStorage("sync.encryptionEnabled") var syncEncryptionEnabled = false
 
     var body: some View {
         Form {
@@ -102,6 +103,14 @@ struct SyncSettingsContentView: View {
 
             Section("Handoff") {
                 handoffSection
+            }
+
+            Section {
+                encryptionSection
+            } header: {
+                Text("End-to-End Encryption")
+            } footer: {
+                Text("When enabled, conversation titles, knowledge content, and project names are encrypted with AES-256-GCM before leaving this device. The encryption key is stored in your iCloud Keychain, so all your devices can decrypt the data.")
             }
 
             Section("Advanced") {

@@ -20,6 +20,7 @@ struct ChatView: View {
     @State var showingAPIKeySetup = false
     @State private var newTitle = ""
     @StateObject private var settingsManager = SettingsManager.shared
+    @StateObject private var syncConflictManager = SyncConflictManager.shared
 
     /// Message being edited (triggers edit sheet)
     @State var editingMessage: Message?
@@ -248,6 +249,11 @@ struct ChatView: View {
                 APIKeySetupView()
             }
             .alert(error: $showingError)
+            .sheet(item: $syncConflictManager.activeConflict) { conflict in
+                SyncConflictResolutionView(conflict: conflict) { resolution in
+                    syncConflictManager.resolveActiveConflict(with: resolution)
+                }
+            }
             .task {
                 await setupProvider()
             }

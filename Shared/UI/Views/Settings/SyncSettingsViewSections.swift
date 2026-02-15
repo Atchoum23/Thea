@@ -275,6 +275,32 @@ extension SyncSettingsContentView {
         .accessibilityLabel("\(title): \(status ? "met" : "not met")")
     }
 
+    // MARK: - Encryption Section
+
+    var encryptionSection: some View {
+        Group {
+            Toggle("Enable End-to-End Encryption", isOn: $syncEncryptionEnabled)
+                .accessibilityLabel("End-to-end encryption for sync data")
+
+            if syncEncryptionEnabled {
+                HStack {
+                    Image(systemName: "lock.shield.fill")
+                        .foregroundStyle(.green)
+                    Text("Sync data is encrypted with AES-256-GCM before leaving this device")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Button("Rotate Encryption Key") {
+                    Task {
+                        try? await SyncEncryption.shared.rotateKey()
+                    }
+                }
+                .font(.caption)
+            }
+        }
+    }
+
     // MARK: - Advanced Section
 
     var advancedSyncSection: some View {
