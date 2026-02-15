@@ -40,7 +40,7 @@ enum DocSuiteType: String, Codable, Sendable, CaseIterable {
     }
 }
 
-enum DocDocExportFormat: String, Codable, Sendable, CaseIterable {
+enum DocExportFormat: String, Codable, Sendable, CaseIterable {
     case markdown = "Markdown"
     case pdf = "PDF"
     case plainText = "Plain Text"
