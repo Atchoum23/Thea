@@ -77,6 +77,11 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case mediaServer = "Media Server"
     case notifications = "Notifications"
     case messaging = "Messaging Hub"
+    case travel = "Travel"
+    case vehicles = "Vehicles"
+    case extSubscriptions = "Subscriptions"
+    case passwords = "Passwords"
+    case learning = "Learning"
 
     // Group 3: System
     case systemMonitor = "System Monitor"
@@ -126,6 +131,11 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .mediaServer: "network"
         case .notifications: "bell.badge"
         case .messaging: "bubble.left.and.text.bubble.right.fill"
+        case .travel: "airplane"
+        case .vehicles: "car"
+        case .extSubscriptions: "creditcard.circle"
+        case .passwords: "lock.shield"
+        case .learning: "graduationcap"
         case .systemMonitor: "gauge.with.dots.needle.33percent"
         case .systemCleaner: "trash.circle"
         case .battery: "battery.75"
@@ -145,7 +155,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging: 2
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -297,6 +307,16 @@ struct MacSettingsView: View {
             NotificationIntelligenceSettingsView()
         case .messaging:
             MessagingHubView()
+        case .travel:
+            TravelPlanningView()
+        case .vehicles:
+            VehicleMaintenanceView()
+        case .extSubscriptions:
+            ExternalSubscriptionsView()
+        case .passwords:
+            PasswordVaultView()
+        case .learning:
+            LearningDashboardView()
         case .systemMonitor:
             SystemMonitorView()
         case .systemCleaner:
