@@ -327,3 +327,362 @@ struct AgentCostFormattingTests {
         #expect(formatCost(0.01) == "$0.01")
     }
 }
+
+// MARK: - Agent Memory (Knowledge Graph Persistence) Tests
+
+@Suite("Agent Memory KG Persistence")
+struct AgentMemoryKGTests {
+    /// Simulates the entity creation logic from persistSessionToKnowledgeGraph
+    private func buildAgentEntity(
+        agentType: String,
+        taskDescription: String,
+        resultSummary: String,
+        tokensUsed: Int,
+        confidence: Float,
+        model: String,
+        cost: String
+    ) -> [String: String] {
+        [
+            "agentType": agentType,
+            "taskDescription": taskDescription,
+            "resultSummary": String(resultSummary.prefix(500)),
+            "tokensUsed": "\(tokensUsed)",
+            "confidence": String(format: "%.2f", confidence),
+            "model": model,
+            "completedAt": ISO8601DateFormatter().string(from: Date()),
+            "cost": cost
+        ]
+    }
+
+    @Test("Entity includes all required attributes")
+    func entityAttributes() {
+        let attrs = buildAgentEntity(
+            agentType: "research",
+            taskDescription: "Find Swift concurrency patterns",
+            resultSummary: "Found 5 major patterns...",
+            tokensUsed: 5432,
+            confidence: 0.85,
+            model: "claude-sonnet-4-5",
+            cost: "$0.04"
+        )
+        #expect(attrs["agentType"] == "research")
+        #expect(attrs["taskDescription"] == "Find Swift concurrency patterns")
+        #expect(attrs["resultSummary"] == "Found 5 major patterns...")
+        #expect(attrs["tokensUsed"] == "5432")
+        #expect(attrs["confidence"] == "0.85")
+        #expect(attrs["model"] == "claude-sonnet-4-5")
+        #expect(attrs["cost"] == "$0.04")
+        #expect(attrs["completedAt"] != nil)
+    }
+
+    @Test("Result summary truncated to 500 chars")
+    func summaryTruncation() {
+        let longSummary = String(repeating: "A", count: 1000)
+        let attrs = buildAgentEntity(
+            agentType: "explore",
+            taskDescription: "Task",
+            resultSummary: longSummary,
+            tokensUsed: 100,
+            confidence: 0.5,
+            model: "haiku",
+            cost: "Free"
+        )
+        #expect(attrs["resultSummary"]!.count == 500)
+    }
+
+    @Test("Empty summary produces empty string")
+    func emptySummary() {
+        let attrs = buildAgentEntity(
+            agentType: "plan",
+            taskDescription: "Task",
+            resultSummary: "",
+            tokensUsed: 0,
+            confidence: 0.0,
+            model: "local",
+            cost: "Free"
+        )
+        #expect(attrs["resultSummary"] == "")
+    }
+
+    @Test("Entity name format matches convention")
+    func entityNameFormat() {
+        let agentType = "research"
+        let task = "Find Swift concurrency patterns for actor isolation"
+        let name = "Agent: \(agentType) — \(task.prefix(60))"
+        #expect(name.hasPrefix("Agent: research — "))
+        #expect(name.count <= 80) // reasonable length
+    }
+
+    @Test("CompletedAt is valid ISO8601")
+    func completedAtISO8601() {
+        let attrs = buildAgentEntity(
+            agentType: "debug",
+            taskDescription: "Fix bug",
+            resultSummary: "Fixed the issue",
+            tokensUsed: 200,
+            confidence: 0.9,
+            model: "claude-opus-4-6",
+            cost: "$0.15"
+        )
+        let dateStr = attrs["completedAt"]!
+        let formatter = ISO8601DateFormatter()
+        #expect(formatter.date(from: dateStr) != nil)
+    }
+}
+
+// MARK: - Budget Tracking Tests
+
+@Suite("Agent Budget Tracking")
+struct AgentBudgetTrackingTests {
+    @Test("No budget means never exceeded")
+    func noBudget() {
+        let budget = 0.0
+        let cost = 100.0
+        let exceeded = budget > 0 && cost >= budget
+        #expect(!exceeded)
+    }
+
+    @Test("Under budget not exceeded")
+    func underBudget() {
+        let budget = 10.0
+        let cost = 5.0
+        let exceeded = budget > 0 && cost >= budget
+        #expect(!exceeded)
+    }
+
+    @Test("At budget is exceeded")
+    func atBudget() {
+        let budget = 10.0
+        let cost = 10.0
+        let exceeded = budget > 0 && cost >= budget
+        #expect(exceeded)
+    }
+
+    @Test("Over budget is exceeded")
+    func overBudget() {
+        let budget = 10.0
+        let cost = 15.0
+        let exceeded = budget > 0 && cost >= budget
+        #expect(exceeded)
+    }
+
+    @Test("Cumulative cost tracks correctly")
+    func cumulativeCost() {
+        var cumulative = 0.0
+        let sessionCosts = [0.05, 0.12, 0.03, 0.0, 0.08]
+        for cost in sessionCosts {
+            cumulative += cost
+        }
+        #expect(abs(cumulative - 0.28) < 0.001)
+    }
+}
+
+// MARK: - Cost By Provider Aggregation Tests
+
+@Suite("Agent Cost By Provider")
+struct AgentCostByProviderTests {
+    private func aggregateByProvider(_ sessions: [(provider: String, cost: Double)]) -> [(provider: String, cost: Double)] {
+        var providerCosts: [String: Double] = [:]
+        for session in sessions {
+            providerCosts[session.provider, default: 0] += session.cost
+        }
+        return providerCosts.map { (provider: $0.key, cost: $0.value) }
+            .sorted { $0.cost > $1.cost }
+    }
+
+    @Test("Empty sessions gives empty breakdown")
+    func emptyBreakdown() {
+        let result = aggregateByProvider([])
+        #expect(result.isEmpty)
+    }
+
+    @Test("Single provider aggregation")
+    func singleProvider() {
+        let sessions: [(provider: String, cost: Double)] = [
+            ("anthropic", 0.05),
+            ("anthropic", 0.10),
+            ("anthropic", 0.03)
+        ]
+        let result = aggregateByProvider(sessions)
+        #expect(result.count == 1)
+        #expect(result[0].provider == "anthropic")
+        #expect(abs(result[0].cost - 0.18) < 0.001)
+    }
+
+    @Test("Multi-provider sorted by cost descending")
+    func multiProviderSorted() {
+        let sessions: [(provider: String, cost: Double)] = [
+            ("anthropic", 0.05),
+            ("openai", 0.20),
+            ("google", 0.02),
+            ("openai", 0.10)
+        ]
+        let result = aggregateByProvider(sessions)
+        #expect(result.count == 3)
+        #expect(result[0].provider == "openai") // $0.30 total
+        #expect(result[1].provider == "anthropic") // $0.05 total
+        #expect(result[2].provider == "google") // $0.02 total
+    }
+
+    @Test("Free local sessions show zero cost")
+    func freeLocalSessions() {
+        let sessions: [(provider: String, cost: Double)] = [
+            ("local", 0.0),
+            ("local", 0.0)
+        ]
+        let result = aggregateByProvider(sessions)
+        #expect(result.count == 1)
+        #expect(result[0].cost == 0.0)
+    }
+}
+
+// MARK: - Feedback With Comment Tests
+
+@Suite("Agent Feedback With Comments")
+struct AgentFeedbackCommentTests {
+    @Test("Feedback records comment")
+    func feedbackWithComment() {
+        var rating: TestFeedbackRating? = nil
+        var comment: String? = nil
+
+        rating = .positive
+        comment = "Very helpful analysis"
+
+        #expect(rating == .positive)
+        #expect(comment == "Very helpful analysis")
+    }
+
+    @Test("Feedback without comment")
+    func feedbackWithoutComment() {
+        var rating: TestFeedbackRating? = nil
+        var comment: String? = nil
+
+        rating = .negative
+        comment = nil
+
+        #expect(rating == .negative)
+        #expect(comment == nil)
+    }
+
+    @Test("Empty string comment treated as nil")
+    func emptyComment() {
+        let comment = ""
+        let effectiveComment = comment.isEmpty ? nil : comment
+        #expect(effectiveComment == nil)
+    }
+
+    @Test("Feedback updates stats and records comment")
+    func feedbackUpdatesStatsAndComment() {
+        var stats = TestFeedbackStats()
+        var comments: [String] = []
+
+        stats.record(positive: true)
+        comments.append("Great work")
+
+        stats.record(positive: false)
+        comments.append("Incomplete response")
+
+        #expect(stats.totalCount == 2)
+        #expect(stats.positiveCount == 1)
+        #expect(stats.negativeCount == 1)
+        #expect(comments.count == 2)
+        #expect(comments[0] == "Great work")
+    }
+}
+
+// MARK: - Agent Type Stats Aggregation Tests
+
+@Suite("Agent Type Stats Aggregation")
+struct AgentTypeStatsAggregationTests {
+    private struct TypeStat {
+        let type: String
+        let successRate: Double?
+        let total: Int
+    }
+
+    private func computeStats(sessions: [(type: String, rating: String?)]) -> [TypeStat] {
+        var stats: [String: (positive: Int, total: Int)] = [:]
+        for session in sessions where session.rating != nil {
+            var current = stats[session.type] ?? (positive: 0, total: 0)
+            current.total += 1
+            if session.rating == "positive" { current.positive += 1 }
+            stats[session.type] = current
+        }
+        return stats.map { type, counts in
+            TypeStat(
+                type: type,
+                successRate: counts.total > 0 ? Double(counts.positive) / Double(counts.total) : nil,
+                total: counts.total
+            )
+        }
+        .sorted { $0.total > $1.total }
+    }
+
+    @Test("No rated sessions gives empty stats")
+    func noRatedSessions() {
+        let sessions: [(type: String, rating: String?)] = [
+            ("research", nil),
+            ("explore", nil)
+        ]
+        let stats = computeStats(sessions: sessions)
+        #expect(stats.isEmpty)
+    }
+
+    @Test("Single type all positive")
+    func singleTypeAllPositive() {
+        let sessions: [(type: String, rating: String?)] = [
+            ("research", "positive"),
+            ("research", "positive"),
+            ("research", "positive")
+        ]
+        let stats = computeStats(sessions: sessions)
+        #expect(stats.count == 1)
+        #expect(stats[0].type == "research")
+        #expect(stats[0].successRate == 1.0)
+        #expect(stats[0].total == 3)
+    }
+
+    @Test("Multiple types sorted by total descending")
+    func multipleTypesSorted() {
+        let sessions: [(type: String, rating: String?)] = [
+            ("research", "positive"),
+            ("explore", "positive"),
+            ("explore", "negative"),
+            ("explore", "positive"),
+            ("debug", "negative"),
+            ("research", "positive")
+        ]
+        let stats = computeStats(sessions: sessions)
+        #expect(stats.count == 3)
+        #expect(stats[0].type == "explore") // 3 ratings
+        #expect(stats[1].type == "research") // 2 ratings
+        #expect(stats[2].type == "debug") // 1 rating
+    }
+
+    @Test("Unrated sessions excluded from stats")
+    func unratedExcluded() {
+        let sessions: [(type: String, rating: String?)] = [
+            ("research", "positive"),
+            ("research", nil),
+            ("research", nil),
+            ("explore", "negative")
+        ]
+        let stats = computeStats(sessions: sessions)
+        let researchStat = stats.first { $0.type == "research" }
+        #expect(researchStat?.total == 1) // only the rated one
+        #expect(researchStat?.successRate == 1.0)
+    }
+
+    @Test("Mixed feedback gives correct percentages")
+    func mixedFeedbackPercentages() {
+        let sessions: [(type: String, rating: String?)] = [
+            ("research", "positive"),
+            ("research", "negative"),
+            ("research", "positive"),
+            ("research", "positive")
+        ]
+        let stats = computeStats(sessions: sessions)
+        #expect(stats[0].successRate == 0.75)
+        #expect(stats[0].total == 4)
+    }
+}
