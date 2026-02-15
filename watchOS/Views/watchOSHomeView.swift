@@ -139,6 +139,13 @@ struct watchOSHomeView: View {
 
     private var quickActionsSection: some View {
         VStack(spacing: WatchSpacing.sm) {
+            NavigationLink {
+                WatchHealthView()
+            } label: {
+                WatchActionRowLabel(icon: "heart.fill", label: "Health", color: .red)
+            }
+            .buttonStyle(.plain)
+
             WatchActionRow(icon: "text.bubble", label: "Compose") {
                 sendQuickReply("Help me compose a message")
             }
@@ -238,6 +245,38 @@ private struct WatchActionRow: View {
         .clipShape(RoundedRectangle(cornerRadius: WatchCornerRadius.md))
         .accessibilityLabel(label)
         .accessibilityHint("Double tap to activate")
+    }
+}
+
+// MARK: - Action Row Label (for NavigationLink)
+
+/// Same visual style as WatchActionRow, but as a plain label for use inside NavigationLink.
+private struct WatchActionRowLabel: View {
+    let icon: String
+    let label: String
+    var color: Color = Color.watchPrimary
+
+    var body: some View {
+        HStack(spacing: WatchSpacing.sm) {
+            Image(systemName: icon)
+                .font(.body)
+                .foregroundStyle(color)
+                .frame(width: 28)
+
+            Text(label)
+                .font(.body)
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.vertical, WatchSpacing.sm)
+        .padding(.horizontal, WatchSpacing.md)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: WatchCornerRadius.md))
+        .accessibilityLabel(label)
     }
 }
 
