@@ -58,8 +58,8 @@ public final class NotificationIntelligenceService: ObservableObject {
 
     private init() {
         self.autoActionEnabled = UserDefaults.standard.bool(forKey: "thea.notif.autoAction")
-        self.autoActionConfidenceThreshold = UserDefaults.standard.double(forKey: "thea.notif.confidenceThreshold")
-        if autoActionConfidenceThreshold == 0 { autoActionConfidenceThreshold = 0.8 }
+        let savedThreshold = UserDefaults.standard.double(forKey: "thea.notif.confidenceThreshold")
+        self.autoActionConfidenceThreshold = savedThreshold > 0 ? savedThreshold : 0.8
         self.syncNotificationState = UserDefaults.standard.bool(forKey: "thea.notif.syncState")
         self.perAppSettings = Self.loadPerAppSettings()
     }
