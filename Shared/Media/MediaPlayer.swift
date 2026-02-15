@@ -631,7 +631,7 @@ final class MediaPlayer: ObservableObject {
     // MARK: - Format Duration
 
     /// Format seconds into HH:MM:SS or MM:SS string.
-    static func formatDuration(_ seconds: TimeInterval) -> String {
+    nonisolated static func formatDuration(_ seconds: TimeInterval) -> String {
         guard seconds.isFinite && seconds >= 0 else { return "0:00" }
         let totalSeconds = Int(seconds)
         let hours = totalSeconds / 3600
@@ -644,14 +644,14 @@ final class MediaPlayer: ObservableObject {
     }
 
     /// Get supported file extensions.
-    static var supportedExtensions: [String] {
+    nonisolated static var supportedExtensions: [String] {
         ["mp4", "mov", "mkv", "avi", "wmv", "flv", "webm", "m4v", "mpg", "mpeg",
          "mp3", "m4a", "aac", "wav", "flac", "ogg", "wma", "aiff", "opus",
          "m3u8", "ts"]
     }
 
     /// Get UTTypes for file picker.
-    static var supportedUTTypes: [UTType] {
+    nonisolated static var supportedUTTypes: [UTType] {
         [.movie, .audio, .mpeg4Movie, .quickTimeMovie, .avi, .mpeg, .mp3, .wav, .aiff]
     }
 }

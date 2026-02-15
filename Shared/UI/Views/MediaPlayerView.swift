@@ -121,7 +121,9 @@ struct MediaPlayerView: View {
                         favoritesSection
                     }
                 }
+                #if os(iOS)
                 .listStyle(.insetGrouped)
+                #endif
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
