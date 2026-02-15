@@ -400,7 +400,8 @@ extension TaskType {
 
     var isCodeRelated: Bool {
         switch self {
-        case .codeGeneration, .debugging, .appDevelopment:
+        case .codeGeneration, .codeAnalysis, .codeDebugging, .codeExplanation,
+             .codeRefactoring, .debugging, .appDevelopment:
             return true
         default:
             return false

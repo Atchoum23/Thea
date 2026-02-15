@@ -254,42 +254,11 @@ extension ChatManager {
     }
 
     private func buildFullSystemPrompt(for conversation: Conversation, taskType: TaskType?) -> String {
-        var parts: [String] = []
-
-        if let taskType {
-            let taskPrompt = Self.buildTaskSpecificPrompt(for: taskType)
-            if !taskPrompt.isEmpty { parts.append(taskPrompt) }
-
-            if taskType == .planning {
-                parts.append(
-                    """
-                    IMPORTANT: Structure your response as a numbered plan with clear steps.
-                    Start each step on its own line with a number and period (e.g., "1. Step description").
-                    Keep each step concise and actionable.
-                    """
-                )
-            }
-        }
-
-        if let customPrompt = conversation.metadata.systemPrompt, !customPrompt.isEmpty {
-            parts.append(customPrompt)
-        }
-
-        if let preferredLanguage = conversation.metadata.preferredLanguage,
-           !preferredLanguage.isEmpty,
-           preferredLanguage.count <= 10,
-           preferredLanguage.allSatisfy({ $0.isLetter || $0 == "-" }),
-           let languageName = Locale.current.localizedString(forLanguageCode: preferredLanguage)
-        {
-            parts.append(
-                "LANGUAGE: Respond entirely in \(languageName). " +
-                    "Maintain technical accuracy and use language-appropriate formatting. " +
-                    "If the user writes in a different language, still respond in \(languageName) unless asked otherwise."
-            )
-        }
-
-        parts.append(buildDeviceContextPrompt())
-        return parts.joined(separator: "\n\n")
+        TheaIdentityPrompt.build(
+            taskType: taskType,
+            conversationLanguage: conversation.metadata.preferredLanguage,
+            conversationSystemPrompt: conversation.metadata.systemPrompt
+        )
     }
 
     private func streamResponse(
