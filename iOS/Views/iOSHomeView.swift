@@ -17,6 +17,7 @@ struct iOSHomeView: View {
     enum Tab: String, CaseIterable, Identifiable {
         case chat = "Chat"
         case projects = "Projects"
+        case health = "Health"
         case knowledge = "Knowledge"
         case financial = "Financial"
         case settings = "Settings"
@@ -27,6 +28,7 @@ struct iOSHomeView: View {
             switch self {
             case .chat: "bubble.left.and.bubble.right.fill"
             case .projects: "folder.fill"
+            case .health: "heart.fill"
             case .knowledge: "books.vertical.fill"
             case .financial: "chart.pie.fill"
             case .settings: "gearshape"
@@ -70,6 +72,8 @@ struct iOSHomeView: View {
             iOSChatListView(showingNewConversation: $showingNewConversation)
         case .projects:
             iOSProjectsView()
+        case .health:
+            HealthDashboardView()
         case .knowledge:
             iOSKnowledgeView()
         case .financial:
@@ -104,7 +108,7 @@ struct iOSHomeView: View {
                     .foregroundStyle(voiceManager.isEnabled ? .theaPrimary : .secondary)
             }
             .accessibilityLabel(voiceManager.isEnabled ? "Voice enabled, tap to configure" : "Voice disabled, tap to configure")
-        case .financial, .settings:
+        case .health, .financial, .settings:
             EmptyView()
         }
     }

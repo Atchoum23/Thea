@@ -57,9 +57,10 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case moltbook = "Moltbook"
     case knowledge = "Knowledge"
 
-    // Group 2: Input / Output
+    // Group 2: Features
     case voiceInput = "Voice & Input"
     case codeIntelligence = "Code Intelligence"
+    case health = "Health"
 
     // Group 3: System
     case permissions = "Permissions"
@@ -86,6 +87,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .knowledge: "books.vertical"
         case .voiceInput: "mic.fill"
         case .codeIntelligence: "chevron.left.forwardslash.chevron.right"
+        case .health: "heart.fill"
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
         case .privacy: "lock.shield"
@@ -99,7 +101,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .voiceInput, .codeIntelligence: 2
+        case .voiceInput, .codeIntelligence, .health: 2
         case .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .about: 5
@@ -217,6 +219,8 @@ struct MacSettingsView: View {
             voiceInputSettings
         case .codeIntelligence:
             CodeIntelligenceConfigurationView()
+        case .health:
+            HealthDashboardView()
         case .permissions:
             PermissionsSettingsView()
         case .sync:
