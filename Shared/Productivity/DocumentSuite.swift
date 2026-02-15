@@ -15,7 +15,7 @@ private let dsLogger = Logger(subsystem: "ai.thea.app", category: "DocumentSuite
 
 // MARK: - Data Types
 
-enum DocumentType: String, Codable, Sendable, CaseIterable {
+enum DocSuiteType: String, Codable, Sendable, CaseIterable {
     case document = "Document"
     case spreadsheet = "Spreadsheet"
     case presentation = "Presentation"
@@ -40,7 +40,7 @@ enum DocumentType: String, Codable, Sendable, CaseIterable {
     }
 }
 
-enum ExportFormat: String, Codable, Sendable, CaseIterable {
+enum DocDocExportFormat: String, Codable, Sendable, CaseIterable {
     case markdown = "Markdown"
     case pdf = "PDF"
     case plainText = "Plain Text"
@@ -82,7 +82,7 @@ struct TheaDocument: Codable, Sendable, Identifiable {
     let id: UUID
     var title: String
     var content: String
-    var type: DocumentType
+    var type: DocSuiteType
     var tags: [String]
     var isFavorite: Bool
     let createdAt: Date
@@ -93,7 +93,7 @@ struct TheaDocument: Codable, Sendable, Identifiable {
     init(
         title: String = "Untitled",
         content: String = "",
-        type: DocumentType = .document,
+        type: DocSuiteType = .document,
         tags: [String] = [],
         templateName: String? = nil
     ) {
@@ -124,11 +124,11 @@ struct DocumentTemplate: Codable, Sendable, Identifiable {
     let id: UUID
     let name: String
     let description: String
-    let type: DocumentType
+    let type: DocSuiteType
     let content: String
     let icon: String
 
-    init(name: String, description: String, type: DocumentType, content: String, icon: String = "doc") {
+    init(name: String, description: String, type: DocSuiteType, content: String, icon: String = "doc") {
         self.id = UUID()
         self.name = name
         self.description = description
@@ -291,7 +291,7 @@ actor DocumentSuiteService {
 
     // MARK: - CRUD
 
-    func createDocument(title: String = "Untitled", content: String = "", type: DocumentType = .document) -> TheaDocument {
+    func createDocument(title: String = "Untitled", content: String = "", type: DocSuiteType = .document) -> TheaDocument {
         let doc = TheaDocument(title: title, content: content, type: type)
         documents.append(doc)
         save()
@@ -350,14 +350,14 @@ actor DocumentSuiteService {
 
     // MARK: - Export
 
-    func exportDocument(_ id: UUID, format: ExportFormat) throws -> Data {
+    func exportDocument(_ id: UUID, format: DocExportFormat) throws -> Data {
         guard let doc = documents.first(where: { $0.id == id }) else {
             throw DocumentSuiteError.invalidContent
         }
         return try exportContent(doc.content, title: doc.title, format: format)
     }
 
-    func exportContent(_ content: String, title: String, format: ExportFormat) throws -> Data {
+    func exportContent(_ content: String, title: String, format: DocExportFormat) throws -> Data {
         switch format {
         case .markdown:
             guard let data = content.data(using: .utf8) else {
@@ -392,6 +392,18 @@ actor DocumentSuiteService {
 
     // MARK: - Markdown Processing
 
+    private func multilineReplace(_ text: String, pattern: String, template: String) -> String {
+        guard let regex = try? NSRegularExpression(
+            pattern: pattern,
+            options: [.anchorsMatchLines]
+        ) else { return text }
+        return regex.stringByReplacingMatches(
+            in: text,
+            range: NSRange(text.startIndex..., in: text),
+            withTemplate: template
+        )
+    }
+
     func stripMarkdown(_ text: String) -> String {
         var result = text
 
@@ -415,11 +427,11 @@ actor DocumentSuiteService {
         result = result.replacingOccurrences(of: "`(.+?)`", with: "$1", options: .regularExpression)
 
         // Remove horizontal rules
-        result = result.replacingOccurrences(of: "^---+$", with: "", options: [.regularExpression, .anchorsMatchLines])
+        result = multilineReplace(result, pattern: "^---+$", template: "")
 
         // Remove list markers
-        result = result.replacingOccurrences(of: "^\\s*[-*+]\\s+", with: "", options: [.regularExpression, .anchorsMatchLines])
-        result = result.replacingOccurrences(of: "^\\s*\\d+\\.\\s+", with: "", options: [.regularExpression, .anchorsMatchLines])
+        result = multilineReplace(result, pattern: "^\\s*[-*+]\\s+", template: "")
+        result = multilineReplace(result, pattern: "^\\s*\\d+\\.\\s+", template: "")
 
         // Clean up extra whitespace
         result = result.replacingOccurrences(of: "\n{3,}", with: "\n\n", options: .regularExpression)
@@ -433,11 +445,7 @@ actor DocumentSuiteService {
         // Headers
         for level in (1...6).reversed() {
             let pattern = "^" + String(repeating: "#", count: level) + "\\s+(.+)$"
-            html = html.replacingOccurrences(
-                of: pattern,
-                with: "<h\(level)>$1</h\(level)>",
-                options: [.regularExpression, .anchorsMatchLines]
-            )
+            html = multilineReplace(html, pattern: pattern, template: "<h\(level)>$1</h\(level)>")
         }
 
         // Bold and italic
@@ -452,13 +460,13 @@ actor DocumentSuiteService {
         html = html.replacingOccurrences(of: "`(.+?)`", with: "<code>$1</code>", options: .regularExpression)
 
         // Lists
-        html = html.replacingOccurrences(of: "^\\s*[-*+]\\s+(.+)$", with: "<li>$1</li>", options: [.regularExpression, .anchorsMatchLines])
+        html = multilineReplace(html, pattern: "^\\s*[-*+]\\s+(.+)$", template: "<li>$1</li>")
 
         // Paragraphs — wrap loose text
         html = html.replacingOccurrences(of: "\n\n", with: "</p><p>")
 
         // Horizontal rules
-        html = html.replacingOccurrences(of: "^---+$", with: "<hr>", options: [.regularExpression, .anchorsMatchLines])
+        html = multilineReplace(html, pattern: "^---+$", template: "<hr>")
 
         return """
         <!DOCTYPE html>
@@ -555,7 +563,7 @@ actor DocumentSuiteService {
 
     // MARK: - Statistics
 
-    func getStats() -> (total: Int, favorites: Int, wordCount: Int, types: [DocumentType: Int]) {
+    func getStats() -> (total: Int, favorites: Int, wordCount: Int, types: [DocSuiteType: Int]) {
         let favorites = documents.filter(\.isFavorite).count
         let words = documents.reduce(0) { $0 + $1.wordCount }
         let types = Dictionary(grouping: documents, by: \.type).mapValues(\.count)

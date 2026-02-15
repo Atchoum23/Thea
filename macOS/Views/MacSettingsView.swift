@@ -69,6 +69,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case habits = "Habits"
     case packages = "Packages"
     case documents = "Documents"
+    case documentSuite = "Document Suite"
+    case downloads = "Downloads"
     case webClipper = "Web Clipper"
     case qrScanner = "QR Scanner"
     case notifications = "Notifications"
@@ -112,6 +114,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .habits: "repeat.circle"
         case .packages: "shippingbox"
         case .documents: "doc.viewfinder"
+        case .documentSuite: "doc.richtext"
+        case .downloads: "arrow.down.circle"
         case .webClipper: "scissors"
         case .qrScanner: "qrcode"
         case .notifications: "bell.badge"
@@ -133,7 +137,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .webClipper, .qrScanner, .notifications: 2
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .notifications: 2
         case .systemMonitor, .systemCleaner, .battery, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -267,6 +271,10 @@ struct MacSettingsView: View {
             PackageTrackerView()
         case .documents:
             DocumentScannerView()
+        case .documentSuite:
+            DocumentSuiteView()
+        case .downloads:
+            DownloadManagerView()
         case .webClipper:
             WebClipperView()
         case .qrScanner:

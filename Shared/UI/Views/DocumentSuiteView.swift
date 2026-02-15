@@ -14,7 +14,7 @@ struct DocumentSuiteView: View {
     @State private var showTemplates = false
     @State private var showExport = false
     @State private var searchText = ""
-    @State private var selectedType: DocumentType?
+    @State private var selectedType: DocSuiteType?
     @State private var errorMessage: String?
     @State private var showError = false
 
@@ -300,7 +300,7 @@ struct DocumentSuiteView: View {
     private func exportSheet(for doc: TheaDocument) -> some View {
         NavigationStack {
             List {
-                ForEach(ExportFormat.allCases, id: \.self) { format in
+                ForEach(DocExportFormat.allCases, id: \.self) { format in
                     Button {
                         exportDocument(doc, format: format)
                     } label: {
@@ -383,20 +383,22 @@ struct DocumentSuiteView: View {
         }
     }
 
-    private func exportDocument(_ doc: TheaDocument, format: ExportFormat) {
-        do {
-            let data = try DocumentSuiteService.shared.exportContent(doc.content, title: doc.title, format: format)
-            #if os(macOS)
-            let panel = NSSavePanel()
-            panel.nameFieldStringValue = "\(doc.title).\(format.fileExtension)"
-            if panel.runModal() == .OK, let url = panel.url {
-                try data.write(to: url)
+    private func exportDocument(_ doc: TheaDocument, format: DocExportFormat) {
+        Task {
+            do {
+                let data = try await DocumentSuiteService.shared.exportContent(doc.content, title: doc.title, format: format)
+                #if os(macOS)
+                let panel = NSSavePanel()
+                panel.nameFieldStringValue = "\(doc.title).\(format.fileExtension)"
+                if panel.runModal() == .OK, let url = panel.url {
+                    try data.write(to: url)
+                }
+                #endif
+                showExport = false
+            } catch {
+                errorMessage = error.localizedDescription
+                showError = true
             }
-            #endif
-            showExport = false
-        } catch {
-            errorMessage = error.localizedDescription
-            showError = true
         }
     }
 

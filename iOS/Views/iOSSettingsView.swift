@@ -166,6 +166,28 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
+                    DocumentSuiteView()
+                } label: {
+                    SettingsRow(
+                        icon: "doc.richtext",
+                        iconColor: .purple,
+                        title: "Document Suite",
+                        subtitle: "Create & export documents"
+                    )
+                }
+
+                NavigationLink {
+                    DownloadManagerView()
+                } label: {
+                    SettingsRow(
+                        icon: "arrow.down.circle",
+                        iconColor: .green,
+                        title: "Downloads",
+                        subtitle: "Manage downloads"
+                    )
+                }
+
+                NavigationLink {
                     LifeManagementDashboardView()
                 } label: {
                     SettingsRow(
