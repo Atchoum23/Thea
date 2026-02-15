@@ -473,6 +473,222 @@ private enum TestSyncDataType: String, CaseIterable {
     case favorites
 }
 
+// MARK: - TheaTransport Tests
+
+@Suite("TheaTransport — Selection & Priority")
+struct TheaTransportSelectionTests {
+    @Test("All transport cases exist")
+    func allCases() {
+        let cases: [TestTransport] = [.thunderbolt, .localNetwork, .tailscale, .cloudKit]
+        #expect(cases.count == 4)
+    }
+
+    @Test("Priority order: Thunderbolt < LAN < Tailscale < CloudKit")
+    func priorityOrder() {
+        #expect(TestTransport.thunderbolt.rawValue < TestTransport.localNetwork.rawValue)
+        #expect(TestTransport.localNetwork.rawValue < TestTransport.tailscale.rawValue)
+        #expect(TestTransport.tailscale.rawValue < TestTransport.cloudKit.rawValue)
+    }
+
+    @Test("Display names are human-readable")
+    func displayNames() {
+        #expect(TestTransport.thunderbolt.displayName == "Thunderbolt")
+        #expect(TestTransport.localNetwork.displayName == "Local Network")
+        #expect(TestTransport.tailscale.displayName == "Tailscale")
+        #expect(TestTransport.cloudKit.displayName == "iCloud")
+    }
+
+    @Test("SF Symbols are valid names")
+    func sfSymbols() {
+        #expect(TestTransport.thunderbolt.sfSymbol == "bolt.fill")
+        #expect(TestTransport.localNetwork.sfSymbol == "wifi")
+        #expect(TestTransport.tailscale.sfSymbol == "globe")
+        #expect(TestTransport.cloudKit.sfSymbol == "icloud.fill")
+    }
+
+    @Test("Estimated latencies are in ascending order")
+    func latencies() {
+        let latencies = TestTransport.allCases.map(\.estimatedLatencyMs)
+        for i in 0..<(latencies.count - 1) {
+            #expect(latencies[i] < latencies[i + 1])
+        }
+    }
+
+    @Test("Best transport selects minimum rawValue")
+    func bestTransport() {
+        let available: Set<TestTransport> = [.tailscale, .cloudKit]
+        let best = available.min()
+        #expect(best == .tailscale)
+
+        let all: Set<TestTransport> = [.thunderbolt, .localNetwork, .tailscale, .cloudKit]
+        #expect(all.min() == .thunderbolt)
+
+        let onlyCloud: Set<TestTransport> = [.cloudKit]
+        #expect(onlyCloud.min() == .cloudKit)
+    }
+}
+
+// MARK: - Transport Label Tests
+
+@Suite("Transport Labels — Status Indicator Display")
+struct TransportLabelTests {
+    @Test("Active transport shows '(active)' suffix")
+    func activeLabel() {
+        let label = testTransportLabel(transport: .thunderbolt, available: true, latency: 0.5, active: true)
+        #expect(label.contains("(active)"))
+        #expect(label.contains("Thunderbolt"))
+    }
+
+    @Test("Unavailable transport shows '— unavailable'")
+    func unavailableLabel() {
+        let label = testTransportLabel(transport: .localNetwork, available: false, latency: nil, active: false)
+        #expect(label.contains("unavailable"))
+        #expect(label.contains("Local Network"))
+    }
+
+    @Test("Latency shown in milliseconds")
+    func latencyLabel() {
+        let label = testTransportLabel(transport: .tailscale, available: true, latency: 20.3, active: false)
+        #expect(label.contains("20ms"))
+    }
+
+    @Test("All info combined")
+    func fullLabel() {
+        let label = testTransportLabel(transport: .thunderbolt, available: true, latency: 0.8, active: true)
+        #expect(label.contains("Thunderbolt"))
+        #expect(label.contains("(active)"))
+        #expect(label.contains("1ms")) // 0.8 rounds to 1
+    }
+}
+
+// MARK: - TransportProbeResult Tests
+
+@Suite("TransportProbeResult — Factory Construction")
+struct TransportProbeFactoryTests {
+    @Test("Unavailable result has correct state")
+    func unavailable() {
+        let result = TestTransportProbeResult.unavailable(.thunderbolt)
+        #expect(!result.isAvailable)
+        #expect(result.latencyMs == nil)
+        #expect(result.endpoint == nil)
+        #expect(result.transport == .thunderbolt)
+    }
+
+    @Test("Available result has correct state")
+    func available() {
+        let result = TestTransportProbeResult.available(.localNetwork, latency: 2.5, endpoint: "mbam2.local:18790")
+        #expect(result.isAvailable)
+        #expect(result.latencyMs == 2.5)
+        #expect(result.endpoint == "mbam2.local:18790")
+        #expect(result.transport == .localNetwork)
+    }
+}
+
+// MARK: - Transport Status Indicator State Tests
+
+@Suite("SyncStatusIndicator — Transport-aware icons")
+struct TransportAwareIconTests {
+    @Test("CloudKit transport uses icloud icon when idle")
+    func cloudKitIcon() {
+        let state = TestTransportSyncState(syncEnabled: true, iCloudAvailable: true, status: .idle, transport: .cloudKit)
+        #expect(state.statusIcon == "checkmark.icloud.fill")
+    }
+
+    @Test("Non-CloudKit transport uses generic checkmark when idle")
+    func nonCloudIcon() {
+        let state = TestTransportSyncState(syncEnabled: true, iCloudAvailable: true, status: .idle, transport: .thunderbolt)
+        #expect(state.statusIcon == "checkmark.circle.fill")
+    }
+
+    @Test("Syncing always uses icloud sync icon")
+    func syncingIcon() {
+        let state = TestTransportSyncState(syncEnabled: true, iCloudAvailable: true, status: .syncing, transport: .thunderbolt)
+        #expect(state.statusIcon == "arrow.triangle.2.circlepath.icloud.fill")
+    }
+}
+
+// MARK: - Additional Test Doubles
+
+private enum TestTransport: Int, Comparable, CaseIterable, Hashable {
+    case thunderbolt = 0
+    case localNetwork = 1
+    case tailscale = 2
+    case cloudKit = 3
+
+    static func < (lhs: TestTransport, rhs: TestTransport) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+
+    var displayName: String {
+        switch self {
+        case .thunderbolt: "Thunderbolt"
+        case .localNetwork: "Local Network"
+        case .tailscale: "Tailscale"
+        case .cloudKit: "iCloud"
+        }
+    }
+
+    var sfSymbol: String {
+        switch self {
+        case .thunderbolt: "bolt.fill"
+        case .localNetwork: "wifi"
+        case .tailscale: "globe"
+        case .cloudKit: "icloud.fill"
+        }
+    }
+
+    var estimatedLatencyMs: Double {
+        switch self {
+        case .thunderbolt: 0.5
+        case .localNetwork: 2.0
+        case .tailscale: 20.0
+        case .cloudKit: 200.0
+        }
+    }
+}
+
+private struct TestTransportProbeResult {
+    let transport: TestTransport
+    let isAvailable: Bool
+    let latencyMs: Double?
+    let endpoint: String?
+
+    static func unavailable(_ transport: TestTransport) -> TestTransportProbeResult {
+        TestTransportProbeResult(transport: transport, isAvailable: false, latencyMs: nil, endpoint: nil)
+    }
+
+    static func available(_ transport: TestTransport, latency: Double, endpoint: String) -> TestTransportProbeResult {
+        TestTransportProbeResult(transport: transport, isAvailable: true, latencyMs: latency, endpoint: endpoint)
+    }
+}
+
+private func testTransportLabel(transport: TestTransport, available: Bool, latency: Double?, active: Bool) -> String {
+    var label = transport.displayName
+    if active { label += " (active)" }
+    if let latency { label += " — \(String(format: "%.0f", latency))ms" }
+    if !available { label += " — unavailable" }
+    return label
+}
+
+/// Transport-aware sync state
+private struct TestTransportSyncState {
+    let syncEnabled: Bool
+    let iCloudAvailable: Bool
+    let status: TestSyncState.SyncStatus
+    let transport: TestTransport
+
+    var statusIcon: String {
+        guard syncEnabled else { return "icloud.slash" }
+        guard iCloudAvailable else { return "icloud.slash" }
+        switch status {
+        case .idle: return transport == .cloudKit ? "checkmark.icloud.fill" : "checkmark.circle.fill"
+        case .syncing: return "arrow.triangle.2.circlepath.icloud.fill"
+        case .error: return "exclamationmark.icloud.fill"
+        case .offline: return "icloud.slash"
+        }
+    }
+}
+
 /// Mirrors the status logic from SyncStatusIndicator
 private struct TestSyncState {
     let syncEnabled: Bool
