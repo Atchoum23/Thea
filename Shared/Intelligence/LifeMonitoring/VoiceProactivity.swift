@@ -12,6 +12,9 @@ import UserNotifications
 #if canImport(Speech)
 import Speech
 #endif
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // MARK: - Voice Context
 
@@ -907,7 +910,7 @@ public actor VoiceProactivity {
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                     let result = DeviceRelayResult(
                         success: true,
-                        sourceDevice: UIDevice.current.name,
+                        sourceDevice: ProcessInfo.processInfo.hostName,
                         targetDevice: hostname,
                         command: String(describing: command),
                         message: "Relayed via \(host)"
@@ -922,7 +925,7 @@ public actor VoiceProactivity {
 
         let result = DeviceRelayResult(
             success: false,
-            sourceDevice: UIDevice.current.name,
+            sourceDevice: ProcessInfo.processInfo.hostName,
             targetDevice: hostname,
             command: String(describing: command),
             message: "Mac relay failed — host unreachable"

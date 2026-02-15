@@ -524,26 +524,23 @@ public actor DeadlineIntelligence {
         }
 
         // Scan reminders with due dates
-        do {
-            let reminderCalendars = store.calendars(for: .reminder)
-            for calendar in reminderCalendars {
-                let reminderPredicate = store.predicateForIncompleteReminders(
-                    withDueDateStarting: now,
-                    ending: thirtyDaysLater,
-                    calendars: [calendar]
-                )
-                let reminders = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[EKReminder], Error>) in
-                    store.fetchReminders(matching: reminderPredicate) { reminders in
-                        continuation.resume(returning: reminders ?? [])
-                    }
-                }
-                for reminder in reminders {
-                    let content = "Reminder: \(reminder.title ?? "Untitled")"
-                    _ = await processContent(content, source: .reminders)
+        let reminderCalendars = store.calendars(for: .reminder)
+        for calendar in reminderCalendars {
+            let reminderPredicate = store.predicateForIncompleteReminders(
+                withDueDateStarting: now,
+                ending: thirtyDaysLater,
+                calendars: [calendar]
+            )
+            // Extract Sendable titles inside the callback to avoid sending EKReminder across isolation
+            let titles: [String] = await withCheckedContinuation { continuation in
+                store.fetchReminders(matching: reminderPredicate) { reminders in
+                    let extracted = (reminders ?? []).map { $0.title ?? "Untitled" }
+                    continuation.resume(returning: extracted)
                 }
             }
-        } catch {
-            // Reminders access may be denied
+            for title in titles {
+                _ = await processContent("Reminder: \(title)", source: .reminders)
+            }
         }
         #endif
     }
