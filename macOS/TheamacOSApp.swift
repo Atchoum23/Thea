@@ -232,6 +232,9 @@ struct TheamacOSApp: App {
             await DynamicModelRegistry.shared.refreshIfNeeded()
         }
 
+        // Pre-initialize StoreKit (starts transaction listener for in-app purchases)
+        _ = StoreKitService.shared
+
         // Pre-initialize sync singletons so Settings > Sync doesn't beachball.
         // Their inits now defer heavy work to Tasks, so this is non-blocking.
         _ = CloudKitService.shared

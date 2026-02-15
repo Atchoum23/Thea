@@ -71,7 +71,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case theme = "Theme"
     case advanced = "Advanced"
 
-    // Group 5: Info
+    // Group 5: Account & Info
+    case subscription = "Subscription"
     case about = "About"
 
     var id: String { rawValue }
@@ -93,6 +94,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .privacy: "lock.shield"
         case .theme: "paintpalette"
         case .advanced: "slider.horizontal.3"
+        case .subscription: "creditcard"
         case .about: "info.circle"
         }
     }
@@ -104,7 +106,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .voiceInput, .codeIntelligence, .health: 2
         case .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
-        case .about: 5
+        case .subscription, .about: 5
         }
     }
 
@@ -231,6 +233,8 @@ struct MacSettingsView: View {
             ThemeConfigurationView()
         case .advanced:
             advancedSettings
+        case .subscription:
+            SubscriptionSettingsView()
         case .about:
             AboutView()
         }

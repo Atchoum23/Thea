@@ -205,6 +205,22 @@ struct iOSSettingsView: View {
                 Text("Privacy & Security")
             }
 
+            // MARK: - Subscription Section
+            Section {
+                NavigationLink {
+                    SubscriptionSettingsView()
+                } label: {
+                    SettingsRow(
+                        icon: "creditcard.fill",
+                        iconColor: .purple,
+                        title: "Subscription",
+                        subtitle: StoreKitService.shared.subscriptionStatus.displayName
+                    )
+                }
+            } header: {
+                Text("Account")
+            }
+
             // MARK: - Advanced Section
             Section {
                 NavigationLink {

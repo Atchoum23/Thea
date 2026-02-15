@@ -1,0 +1,244 @@
+{
+  "identifier" : "F7A6B2C8-1D3E-4F5A-9B0C-2E8D7F1A3B5C",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "internalID" : "LIFETIME_PRO",
+      "localizations" : [
+        {
+          "description" : "Unlock all Pro features permanently",
+          "displayName" : "Lifetime Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.thea.pro.lifetime",
+      "referenceName" : "Lifetime Pro",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "PREMIUM_THEMES",
+      "localizations" : [
+        {
+          "description" : "Additional themes and visual customization",
+          "displayName" : "Premium Themes",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.thea.themes.premium",
+      "referenceName" : "Premium Themes",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "ADVANCED_AUTOMATION",
+      "localizations" : [
+        {
+          "description" : "Autonomous task execution and workflow automation",
+          "displayName" : "Advanced Automation",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.thea.automation.advanced",
+      "referenceName" : "Advanced Automation",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "THEA_PRO_GROUP",
+      "localizations" : [
+
+      ],
+      "name" : "Thea Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "MONTHLY_PRO",
+          "introductoryOffer" : {
+            "displayPrice" : "0.00",
+            "internalID" : "FREE_TRIAL_7D",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Full AI suite with all features",
+              "displayName" : "Pro Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.thea.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Pro Monthly",
+          "subscriptionGroupID" : "THEA_PRO_GROUP",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "99.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "YEARLY_PRO",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Full AI suite — save 17% with annual billing",
+              "displayName" : "Pro Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.thea.pro.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Pro Annual",
+          "subscriptionGroupID" : "THEA_PRO_GROUP",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    },
+    {
+      "id" : "THEA_TEAM_GROUP",
+      "localizations" : [
+
+      ],
+      "name" : "Thea Team",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "29.99",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "MONTHLY_TEAM",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Everything in Pro plus advanced agent delegation",
+              "displayName" : "Team Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.thea.team.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Team Monthly",
+          "subscriptionGroupID" : "THEA_TEAM_GROUP",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "299.99",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "YEARLY_TEAM",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Everything in Pro plus agents — save 17% annually",
+              "displayName" : "Team Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.thea.team.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Team Annual",
+          "subscriptionGroupID" : "THEA_TEAM_GROUP",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

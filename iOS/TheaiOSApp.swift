@@ -52,6 +52,9 @@ struct TheaiOSApp: App {
         MigrationEngine.shared.setModelContext(context)
         ClipboardHistoryManager.shared.setModelContext(context)
 
+        // Initialize StoreKit (starts transaction listener for in-app purchases)
+        _ = StoreKitService.shared
+
         // Initialize sync singletons (non-blocking, defers heavy work to Tasks)
         _ = CloudKitService.shared
         _ = PreferenceSyncEngine.shared
