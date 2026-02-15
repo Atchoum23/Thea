@@ -493,6 +493,7 @@ public final class TheaAgentOrchestrator {
     // MARK: - User Feedback
 
     /// Record user feedback for a completed session.
+    /// Also records to UserFeedbackLearner for cross-system learning.
     public func submitFeedback(
         for session: TheaAgentSession,
         rating: AgentFeedbackRating,
@@ -509,6 +510,16 @@ public final class TheaAgentOrchestrator {
 
         agentTypeFeedback[session.agentType, default: AgentTypeFeedbackStats()]
             .record(positive: rating == .positive)
+
+        // Wire to UserFeedbackLearner for cross-system confidence learning
+        Task {
+            await UserFeedbackLearner().recordFeedback(
+                responseId: session.id,
+                wasCorrect: rating == .positive,
+                userCorrection: comment,
+                taskType: .planning
+            )
+        }
 
         logger.info("Agent feedback: \(rating.rawValue) for \(session.agentType.rawValue)")
     }
