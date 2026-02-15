@@ -389,9 +389,9 @@ final class SystemMonitor: ObservableObject {
     }
 
     private func captureDisk() -> DiskMetrics {
-        let homeURL = FileManager.default.homeDirectoryForCurrentUser
+        let volumeURL = URL(filePath: NSHomeDirectory())
         do {
-            let values = try homeURL.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityForImportantUsageKey])
+            let values = try volumeURL.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityForImportantUsageKey])
             let total = UInt64(values.volumeTotalCapacity ?? 0)
             let available = UInt64(values.volumeAvailableCapacityForImportantUsage ?? 0)
             return DiskMetrics(
