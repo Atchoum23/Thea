@@ -16,11 +16,11 @@ final class LocalVisionGuidance {
 
     // MARK: - Dependencies
 
-    private let visionEngine = MLXVisionEngine.shared
-    private let voiceBackend = MLXVoiceBackend()
-    private let screenCapture = ScreenCaptureManager()
-    private let pointerTracker = PointerTracker()
-    private let actionExecutor = SystemActionExecutor()
+    let visionEngine = MLXVisionEngine.shared
+    let voiceBackend = MLXVoiceBackend()
+    let screenCapture = ScreenCaptureManager()
+    let pointerTracker = PointerTracker()
+    let actionExecutor = SystemActionExecutor()
 
     // MARK: - State
 
