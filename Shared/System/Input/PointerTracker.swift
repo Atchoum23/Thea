@@ -31,7 +31,8 @@ final class PointerTracker {
 
     func requestAuthorization() {
         // Trigger authorization prompt
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true]
+        nonisolated(unsafe) let promptKey = kAXTrustedCheckOptionPrompt.takeRetainedValue() as String
+        let options: NSDictionary = [promptKey: true]
         AXIsProcessTrustedWithOptions(options)
     }
 
@@ -108,7 +109,13 @@ final class PointerTracker {
     }
 
     deinit {
-        stopTracking()
+        // Can't call @MainActor method from deinit, so we manually clean up
+        if let tap = eventTap {
+            CGEvent.tapEnable(tap: tap, enable: false)
+        }
+        if let source = runLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
+        }
     }
 }
 
