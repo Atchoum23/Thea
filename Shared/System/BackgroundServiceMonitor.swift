@@ -254,7 +254,7 @@ final class BackgroundServiceMonitor: ObservableObject {
         checks.append(contentsOf: await checkIntegrations())
 
         // 5. Check privacy services
-        checks.append(contentsOf: checkPrivacyServices())
+        checks.append(contentsOf: await checkPrivacyServices())
 
         let snapshot = TheaHealthSnapshot(checks: checks)
         self.latestSnapshot = snapshot
@@ -327,22 +327,16 @@ final class BackgroundServiceMonitor: ObservableObject {
 
         #if os(macOS)
         // Smart transport status
-        let transport = SmartTransportManager.shared.activeTransport
+        let transport = await SmartTransportManager.shared.activeTransport
         let transportStatus: TheaServiceStatus
         let transportMsg: String
 
-        if let transport {
+        if transport != .cloudKit {
             transportStatus = .healthy
             transportMsg = "Active: \(transport.displayName)"
         } else {
-            let probing = SmartTransportManager.shared.isProbing
-            if probing {
-                transportStatus = .recovering
-                transportMsg = "Probing available transports..."
-            } else {
-                transportStatus = .degraded
-                transportMsg = "No active transport — CloudKit fallback only"
-            }
+            transportStatus = .degraded
+            transportMsg = "CloudKit fallback only — no direct transport"
         }
 
         results.append(TheaServiceCheckResult(
@@ -406,8 +400,8 @@ final class BackgroundServiceMonitor: ObservableObject {
 
         // Memory pressure
         let totalRAM = ProcessInfo.processInfo.physicalMemory
-        let availableRAM = os_proc_available_memory()
-        let usedPercent = 100.0 - (Double(availableRAM) / Double(totalRAM) * 100.0)
+        let availableRAM = getAvailableMemory()
+        let usedPercent = totalRAM > 0 ? 100.0 - (Double(availableRAM) / Double(totalRAM) * 100.0) : 0
 
         let memStatus: TheaServiceStatus
         let memMsg: String
@@ -431,7 +425,11 @@ final class BackgroundServiceMonitor: ObservableObject {
         ))
 
         // Disk space
+        #if os(macOS)
         let homeURL = FileManager.default.homeDirectoryForCurrentUser
+        #else
+        let homeURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first ?? URL(fileURLWithPath: "/")
+        #endif
         if let values = try? homeURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]),
            let available = values.volumeAvailableCapacityForImportantUsage {
             let availableGB = Double(available) / 1_073_741_824
@@ -497,18 +495,19 @@ final class BackgroundServiceMonitor: ObservableObject {
 
         #if os(macOS)
         // OpenClaw Gateway
-        let openClawConnected = OpenClawClient.shared.isConnected
+        let openClawState = OpenClawIntegration.shared.connectionState
+        let openClawHealthy = openClawState == .connected
         results.append(TheaServiceCheckResult(
             serviceID: "openclaw_gateway",
             serviceName: "OpenClaw Gateway",
             category: .integration,
-            status: openClawConnected ? .healthy : .degraded,
-            message: openClawConnected ? "Connected" : "Not connected — messaging features limited"
+            status: openClawHealthy ? .healthy : .degraded,
+            message: openClawHealthy ? "Connected" : "Not connected (\(openClawState.rawValue))"
         ))
         #endif
 
         // Notification intelligence
-        let notifEnabled = SettingsManager.shared.notificationIntelligenceEnabled
+        let notifEnabled = UserDefaults.standard.bool(forKey: "notificationIntelligenceEnabled")
         results.append(TheaServiceCheckResult(
             serviceID: "notification_intelligence",
             serviceName: "Notification Intelligence",
@@ -520,12 +519,12 @@ final class BackgroundServiceMonitor: ObservableObject {
         return results
     }
 
-    private func checkPrivacyServices() -> [TheaServiceCheckResult] {
+    private func checkPrivacyServices() async -> [TheaServiceCheckResult] {
         var results: [TheaServiceCheckResult] = []
 
         // Outbound Privacy Guard
-        let guardEnabled = OutboundPrivacyGuard.shared.isEnabled
-        let guardMode = OutboundPrivacyGuard.shared.currentMode
+        let guardEnabled = await OutboundPrivacyGuard.shared.isEnabled
+        let guardMode = await OutboundPrivacyGuard.shared.mode
         results.append(TheaServiceCheckResult(
             serviceID: "privacy_guard",
             serviceName: "Privacy Guard",
@@ -535,7 +534,7 @@ final class BackgroundServiceMonitor: ObservableObject {
         ))
 
         // Network Privacy Monitor
-        let networkMonitoring = NetworkPrivacyMonitor.shared.isMonitoring
+        let networkMonitoring = await NetworkPrivacyMonitor.shared.isMonitoring
         results.append(TheaServiceCheckResult(
             serviceID: "network_privacy",
             serviceName: "Network Monitor",
@@ -580,18 +579,19 @@ final class BackgroundServiceMonitor: ObservableObject {
 
         case "ai_providers":
             actionName = "refresh-registry"
-            await ProviderRegistry.shared.refreshProviders()
+            await ProviderRegistry.shared.refreshLocalProviders()
             succeeded = true
 
         #if os(macOS)
         case "smart_transport":
             actionName = "re-probe"
-            await SmartTransportManager.shared.probeAll()
+            _ = await SmartTransportManager.shared.probeAndSelect()
             succeeded = true
 
         case "openclaw_gateway":
             actionName = "reconnect"
-            await OpenClawClient.shared.connect()
+            OpenClawIntegration.shared.disable()
+            OpenClawIntegration.shared.enable()
             succeeded = true
         #endif
 
@@ -645,6 +645,22 @@ final class BackgroundServiceMonitor: ObservableObject {
             return "\(hours / 24)d \(hours % 24)h"
         }
         return "\(hours)h \(minutes)m"
+    }
+
+    // MARK: - Memory Helper
+
+    /// Cross-platform available memory query using Mach host_statistics
+    private func getAvailableMemory() -> UInt64 {
+        var stats = vm_statistics64()
+        var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
+        let result = withUnsafeMutablePointer(to: &stats) { ptr in
+            ptr.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { intPtr in
+                host_statistics64(mach_host_self(), HOST_VM_INFO64, intPtr, &count)
+            }
+        }
+        guard result == KERN_SUCCESS else { return 0 }
+        let pageSize: UInt64 = 16384 // Apple Silicon uses 16KB pages
+        return (UInt64(stats.free_count) + UInt64(stats.inactive_count)) * pageSize
     }
 
     // MARK: - iOS Background Task Registration

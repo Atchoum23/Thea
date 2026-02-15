@@ -306,6 +306,13 @@ struct TheamacOSApp: App {
             // Wire OpenClaw message routing
             OpenClawBridge.shared.setup()
         }
+
+        // Background service health monitoring — deferred startup
+        Task {
+            try? await Task.sleep(for: .seconds(3))
+            BackgroundServiceMonitor.shared.startMonitoring()
+            logger.info("BackgroundServiceMonitor started")
+        }
     }
 
     private func configureWindow() {

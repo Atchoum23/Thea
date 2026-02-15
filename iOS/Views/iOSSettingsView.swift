@@ -392,6 +392,19 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
+                    ServiceHealthDashboardView()
+                } label: {
+                    SettingsRow(
+                        icon: "stethoscope",
+                        iconColor: .teal,
+                        title: "Service Health",
+                        subtitle: BackgroundServiceMonitor.shared.latestSnapshot.map {
+                            "\($0.healthyCount)/\($0.checks.count) healthy"
+                        } ?? "Not checked"
+                    )
+                }
+
+                NavigationLink {
                     SecurityScannerView()
                 } label: {
                     SettingsRow(

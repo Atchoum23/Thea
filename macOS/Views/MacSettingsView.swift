@@ -81,6 +81,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case systemMonitor = "System Monitor"
     case systemCleaner = "System Cleaner"
     case battery = "Battery"
+    case serviceHealth = "Service Health"
     case securityScanner = "Security"
     case permissions = "Permissions"
     case sync = "Sync"
@@ -126,6 +127,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .systemMonitor: "gauge.with.dots.needle.33percent"
         case .systemCleaner: "trash.circle"
         case .battery: "battery.75"
+        case .serviceHealth: "stethoscope"
         case .securityScanner: "shield.lefthalf.filled"
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
@@ -142,7 +144,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications: 2
-        case .systemMonitor, .systemCleaner, .battery, .securityScanner, .permissions, .sync, .privacy: 3
+        case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
         }
@@ -297,6 +299,8 @@ struct MacSettingsView: View {
             SystemCleanerView()
         case .battery:
             BatteryIntelligenceView()
+        case .serviceHealth:
+            ServiceHealthDashboardView()
         case .securityScanner:
             SecurityScannerView()
         case .permissions:
