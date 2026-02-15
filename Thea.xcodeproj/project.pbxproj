@@ -562,6 +562,7 @@
 		48027726F40A7969C9E7AD15 /* OrchestratorSettingsViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25663A06DB0B6830B3824E4E /* OrchestratorSettingsViewSections.swift */; };
 		480FEB6FF6A248C35BCC9175 /* MediaAutomationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA3D49F73A0B0279BBB7B1 /* MediaAutomationService.swift */; };
 		483FE006ABE69291247B1405 /* print-friendly.css in Resources */ = {isa = PBXBuildFile; fileRef = F6CBA75876D112D3CDB04CD5 /* print-friendly.css */; };
+		4887FDF1A8EFA1DB5040A0EF /* WatchHealthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28647A709B79F8461968EB83 /* WatchHealthView.swift */; };
 		48C183CBC8262AB2B2935E71 /* MentionAutocompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826846983CA6501514B912D8 /* MentionAutocompleteView.swift */; };
 		48E0CA4E38A86C24CEB5D5B4 /* StoreKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50207830375DF465B9FF47B2 /* StoreKitService.swift */; };
 		490EECD6BD64328D8E3E2E9E /* OutboundPrivacyGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965F1FD10468FDC43C9488F4 /* OutboundPrivacyGuard.swift */; };
@@ -2167,6 +2168,7 @@
 		27F12B2A1D617DA383C60E5F /* AgentSecEnforcer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSecEnforcer.swift; sourceTree = "<group>"; };
 		28001EEF27A79D6523279DC7 /* RemoteScreenMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteScreenMessages.swift; sourceTree = "<group>"; };
 		2838721E82A3EA34D4C3C462 /* CoworkTaskQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkTaskQueue.swift; sourceTree = "<group>"; };
+		28647A709B79F8461968EB83 /* WatchHealthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHealthView.swift; sourceTree = "<group>"; };
 		28FA8A5312027FA2898354A1 /* ActivityLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLogger.swift; sourceTree = "<group>"; };
 		29330D84476AE8FBF3A37D6D /* AdaptiveLearningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLearningEngine.swift; sourceTree = "<group>"; };
 		29E259E3F43F52B61F698519 /* CodeIntelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeIntelligence.swift; sourceTree = "<group>"; };
@@ -4697,6 +4699,7 @@
 			isa = PBXGroup;
 			children = (
 				CB3A48BD755C3FFB7BDF1ECF /* TheaClipWatchView.swift */,
+				28647A709B79F8461968EB83 /* WatchHealthView.swift */,
 				766EBDC063EA2F5DB25B77EA /* watchOSHomeView.swift */,
 			);
 			path = Views;
@@ -8788,6 +8791,7 @@
 				5E52339C676E5F48DA1BBCF6 /* TheaClipWatchView.swift in Sources */,
 				3696749AE6293DB177926A90 /* TheawatchOSApp.swift in Sources */,
 				8420DB10936CD8DA1DDA82B9 /* WatchComplicationProvider.swift in Sources */,
+				4887FDF1A8EFA1DB5040A0EF /* WatchHealthView.swift in Sources */,
 				171072340773FDD83FF9C450 /* watchOSHomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

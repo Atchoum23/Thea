@@ -240,7 +240,7 @@ public final class HealthDashboardViewModel {
             sleep: sleepRecords.map { record in
                 HealthExportData.SleepEntry(
                     date: record.startDate,
-                    durationMinutes: Int(record.duration / 60),
+                    durationMinutes: record.totalMinutes,
                     quality: record.quality.rawValue
                 )
             },
@@ -256,7 +256,7 @@ public final class HealthDashboardViewModel {
                     date: summary.date,
                     steps: summary.steps,
                     activeCalories: summary.activeCalories,
-                    exerciseMinutes: summary.exerciseMinutes,
+                    exerciseMinutes: summary.activeMinutes,
                     distanceMeters: summary.distance,
                     activityScore: summary.activityScore
                 )
@@ -273,7 +273,7 @@ public final class HealthDashboardViewModel {
                 HealthExportData.VO2MaxEntry(
                     timestamp: record.timestamp,
                     value: record.value,
-                    fitnessLevel: record.fitnessLevel.rawValue
+                    fitnessLevel: VO2MaxFitnessLevel.classify(vo2Max: record.value, age: 30, isMale: true).rawValue
                 )
             },
             anomalies: cardiacAnomalies.map { anomaly in
