@@ -1,6 +1,7 @@
 // WebClipperTests.swift
 // Tests for WebClipper HTML extraction, article clipping, and export
 
+import Foundation
 import Testing
 
 // MARK: - Test Doubles
@@ -67,19 +68,19 @@ private func decodeHTMLEntities(_ text: String) -> String {
 
 private func extractTitle(from html: String) -> String {
     // og:title first
-    let ogPattern = #"<meta[^>]+property="og:title"[^>]+content="([^"]*)"#
+    let ogPattern = "<meta[^>]+property=\"og:title\"[^>]+content=\"([^\"]*)\""
     if let range = html.range(of: ogPattern, options: .regularExpression) {
         let match = String(html[range])
-        if let contentRange = match.range(of: #"content="([^"]*)"#, options: .regularExpression) {
+        if let contentRange = match.range(of: "content=\"([^\"]*)\"", options: .regularExpression) {
             let content = String(match[contentRange].dropFirst(9).dropLast())
             if !content.isEmpty { return decodeHTMLEntities(content) }
         }
     }
 
-    let titlePattern = #"<title[^>]*>([^<]+)</title>"#
+    let titlePattern = "<title[^>]*>([^<]+)</title>"
     if let range = html.range(of: titlePattern, options: .regularExpression) {
         let match = String(html[range])
-        if let contentRange = match.range(of: #">([^<]+)<"#, options: .regularExpression) {
+        if let contentRange = match.range(of: ">([^<]+)<", options: .regularExpression) {
             let content = String(match[contentRange].dropFirst().dropLast())
             return decodeHTMLEntities(content).trimmingCharacters(in: .whitespacesAndNewlines)
         }
@@ -240,7 +241,7 @@ struct ArticleModelTests {
 // MARK: - Export Format Tests
 
 @Suite("WebClipper — Export Formats")
-struct ExportFormatTests {
+struct WebClipperExportFormatTests {
     @Test("All 3 formats exist")
     func allFormats() {
         #expect(TestExportFormat.allCases.count == 3)

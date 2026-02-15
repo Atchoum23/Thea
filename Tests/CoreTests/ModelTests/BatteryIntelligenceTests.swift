@@ -1,6 +1,7 @@
 // BatteryIntelligenceTests.swift
 // Tests for battery optimization modes, settings, and feature impact
 
+import Foundation
 import Testing
 
 // MARK: - Test Doubles

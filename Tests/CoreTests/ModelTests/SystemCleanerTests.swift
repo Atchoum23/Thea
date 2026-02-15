@@ -1,6 +1,7 @@
 // SystemCleanerTests.swift
 // Tests for SystemCleaner service types and logic
 
+import Foundation
 import Testing
 
 // MARK: - Test Doubles

@@ -1,6 +1,7 @@
 // QRIntelligenceTests.swift
 // Tests for QR code content parsing, type detection, and action suggestions
 
+import Foundation
 import Testing
 
 // MARK: - Test Doubles
