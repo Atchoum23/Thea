@@ -23,14 +23,24 @@ public struct HealthDashboardView: View {
         .navigationTitle("Health Dashboard")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(action: {
-                    Task {
-                        await viewModel.refreshData()
+                HStack(spacing: 8) {
+                    if let exportURL = viewModel.exportHealthData() {
+                        ShareLink(item: exportURL) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .accessibilityLabel("Export health data")
                     }
-                }) {
-                    Image(systemName: "arrow.clockwise")
+
+                    Button(action: {
+                        Task {
+                            await viewModel.refreshData()
+                        }
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .disabled(viewModel.isLoading)
+                    .accessibilityLabel("Refresh health data")
                 }
-                .disabled(viewModel.isLoading)
             }
         }
         .task {

@@ -228,4 +228,130 @@ public final class HealthDashboardViewModel {
             return String(format: "%.2f mi", miles)
         }
     }
+
+    // MARK: - Health Data Export
+
+    /// Export health data to a structured JSON file.
+    /// Returns the URL of the exported file, or nil on failure.
+    public func exportHealthData() -> URL? {
+        let export = HealthExportData(
+            exportDate: Date(),
+            periodDays: 7,
+            sleep: sleepRecords.map { record in
+                HealthExportData.SleepEntry(
+                    date: record.startDate,
+                    durationMinutes: Int(record.duration / 60),
+                    quality: record.quality.rawValue
+                )
+            },
+            heartRate: heartRateRecords.prefix(50).map { record in
+                HealthExportData.HeartRateEntry(
+                    timestamp: record.timestamp,
+                    bpm: record.beatsPerMinute,
+                    context: record.context.rawValue
+                )
+            },
+            activity: activitySummaries.map { summary in
+                HealthExportData.ActivityEntry(
+                    date: summary.date,
+                    steps: summary.steps,
+                    activeCalories: summary.activeCalories,
+                    exerciseMinutes: summary.exerciseMinutes,
+                    distanceMeters: summary.distance,
+                    activityScore: summary.activityScore
+                )
+            },
+            bloodPressure: bloodPressureReadings.prefix(30).map { reading in
+                HealthExportData.BloodPressureEntry(
+                    timestamp: reading.timestamp,
+                    systolic: reading.systolic,
+                    diastolic: reading.diastolic,
+                    category: reading.category.rawValue
+                )
+            },
+            vo2Max: vo2MaxRecords.prefix(10).map { record in
+                HealthExportData.VO2MaxEntry(
+                    timestamp: record.timestamp,
+                    value: record.value,
+                    fitnessLevel: record.fitnessLevel.rawValue
+                )
+            },
+            anomalies: cardiacAnomalies.map { anomaly in
+                HealthExportData.AnomalyEntry(
+                    timestamp: anomaly.timestamp,
+                    type: anomaly.type.rawValue,
+                    heartRate: anomaly.heartRate
+                )
+            }
+        )
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+
+        guard let data = try? encoder.encode(export) else { return nil }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let dateString = dateFormatter.string(from: Date())
+        let filename = "Thea-Health-Export-\(dateString).json"
+
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+        guard (try? data.write(to: tempURL)) != nil else { return nil }
+        return tempURL
+    }
+}
+
+// MARK: - Health Export Data
+
+/// Codable structure for health data export
+struct HealthExportData: Codable, Sendable {
+    let exportDate: Date
+    let periodDays: Int
+    let sleep: [SleepEntry]
+    let heartRate: [HeartRateEntry]
+    let activity: [ActivityEntry]
+    let bloodPressure: [BloodPressureEntry]
+    let vo2Max: [VO2MaxEntry]
+    let anomalies: [AnomalyEntry]
+
+    struct SleepEntry: Codable, Sendable {
+        let date: Date
+        let durationMinutes: Int
+        let quality: String
+    }
+
+    struct HeartRateEntry: Codable, Sendable {
+        let timestamp: Date
+        let bpm: Int
+        let context: String
+    }
+
+    struct ActivityEntry: Codable, Sendable {
+        let date: Date
+        let steps: Int
+        let activeCalories: Int
+        let exerciseMinutes: Int
+        let distanceMeters: Double
+        let activityScore: Int
+    }
+
+    struct BloodPressureEntry: Codable, Sendable {
+        let timestamp: Date
+        let systolic: Int
+        let diastolic: Int
+        let category: String
+    }
+
+    struct VO2MaxEntry: Codable, Sendable {
+        let timestamp: Date
+        let value: Double
+        let fitnessLevel: String
+    }
+
+    struct AnomalyEntry: Codable, Sendable {
+        let timestamp: Date
+        let type: String
+        let heartRate: Int
+    }
 }
