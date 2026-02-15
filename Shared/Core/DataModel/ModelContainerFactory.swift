@@ -45,7 +45,11 @@ final class ModelContainerFactory {
             DailyInputStatistics.self,
             BrowsingRecord.self,
             LocationVisitRecord.self,
-            LifeInsight.self
+            LifeInsight.self,
+
+            // Habit Tracker models
+            TheaHabit.self,
+            TheaHabitEntry.self
         ])
 
         let configuration = ModelConfiguration(

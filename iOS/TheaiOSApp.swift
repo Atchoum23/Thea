@@ -51,6 +51,7 @@ struct TheaiOSApp: App {
         MigrationManager.shared.setModelContext(context)
         MigrationEngine.shared.setModelContext(context)
         ClipboardHistoryManager.shared.setModelContext(context)
+        HabitManager.shared.setModelContext(context)
 
         // Initialize StoreKit (starts transaction listener for in-app purchases)
         _ = StoreKitService.shared

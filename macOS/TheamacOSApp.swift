@@ -21,7 +21,8 @@ struct TheamacOSApp: App {
     init() {
         let schema = Schema([
             Conversation.self, Message.self, Project.self,
-            TheaClipEntry.self, TheaClipPinboard.self, TheaClipPinboardEntry.self
+            TheaClipEntry.self, TheaClipPinboard.self, TheaClipPinboardEntry.self,
+            TheaHabit.self, TheaHabitEntry.self
         ])
         let useInMemory = isUITesting || isUnitTesting
 
@@ -253,6 +254,7 @@ struct TheamacOSApp: App {
         MigrationEngine.shared.setModelContext(context)
         CodeIntelligenceManager.shared.setModelContext(context)
         ClipboardHistoryManager.shared.setModelContext(context)
+        HabitManager.shared.setModelContext(context)
         ClipboardObserver.shared.start()
 
         // TODO: Restore prompt engineering managers after Phase 5+

@@ -133,6 +133,17 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
+                    HabitTrackerView()
+                } label: {
+                    SettingsRow(
+                        icon: "repeat.circle",
+                        iconColor: .orange,
+                        title: "Habits",
+                        subtitle: "\(HabitManager.shared.activeHabits.count) active"
+                    )
+                }
+
+                NavigationLink {
                     PackageTrackerView()
                 } label: {
                     SettingsRow(
