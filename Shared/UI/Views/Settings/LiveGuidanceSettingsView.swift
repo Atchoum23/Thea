@@ -71,13 +71,15 @@ struct LiveGuidanceSettingsView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     // Screen Recording Permission
                     HStack {
-                        Image(systemName: screenCapture.hasPermission ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(screenCapture.hasPermission ? .green : .red)
+                        Image(systemName: screenCapture.isAuthorized ? "checkmark.circle.fill" : "xmark.circle.fill")
+                            .foregroundStyle(screenCapture.isAuthorized ? .green : .red)
                         Text("Screen Recording")
                         Spacer()
-                        if !screenCapture.hasPermission {
+                        if !screenCapture.isAuthorized {
                             Button("Grant Permission") {
-                                screenCapture.requestPermission()
+                                Task {
+                                    try? await screenCapture.requestAuthorization()
+                                }
                             }
                             .buttonStyle(.borderless)
                         }
@@ -119,9 +121,8 @@ struct LiveGuidanceSettingsView: View {
 
                     // Capture Mode Picker
                     Picker("Capture mode", selection: $selectedCaptureMode) {
-                        ForEach(ScreenCaptureManager.CaptureMode.allCases, id: \.self) { mode in
-                            Text(mode.rawValue).tag(mode)
-                        }
+                        Text("Full Screen").tag(ScreenCaptureManager.CaptureMode.fullScreen)
+                        Text("Active Window").tag(ScreenCaptureManager.CaptureMode.activeWindow)
                     }
                     .disabled(!isMonitoringEnabled)
 
@@ -286,7 +287,7 @@ struct LiveGuidanceSettingsView: View {
 
     private func startGuidance() async {
         // Check permissions
-        guard screenCapture.hasPermission else {
+        guard screenCapture.isAuthorized else {
             permissionAlertMessage = "Screen Recording permission is required. Please grant permission in System Settings → Privacy & Security → Screen Recording."
             showingPermissionAlert = true
             return

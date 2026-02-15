@@ -110,7 +110,7 @@ final class LocalVisionGuidance {
         }
 
         // Check permissions
-        guard screenCapture.hasPermission else {
+        guard screenCapture.isAuthorized else {
             throw LiveGuidanceError.screenCapturePermissionDenied
         }
 
@@ -213,8 +213,16 @@ final class LocalVisionGuidance {
     // MARK: - Screen Capture
 
     private func captureCurrentView() async throws -> CGImage {
-        screenCapture.currentMode = captureMode
-        return try await screenCapture.captureScreen()
+        switch captureMode {
+        case .fullScreen:
+            return try await screenCapture.captureScreen()
+        case .activeWindow:
+            return try await screenCapture.captureActiveWindow()
+        case .window(let bundleID):
+            return try await screenCapture.captureWindow(bundleID: bundleID)
+        case .region(let rect):
+            return try await screenCapture.captureRegion(rect)
+        }
     }
 
     // MARK: - Vision Analysis
