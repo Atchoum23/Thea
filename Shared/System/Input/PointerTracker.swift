@@ -74,16 +74,16 @@ final class PointerTracker {
             place: .headInsertEventTap,
             options: .listenOnly,  // Listen-only doesn't require sudo
             eventsOfInterest: CGEventMask(eventMask),
-            callback: { [weak self] (proxy, type, event, refcon) -> Unmanaged<CGEvent>? in
-                guard let self = refcon else { return Unmanaged.passUnretained(event) }
-                
-                let tracker = Unmanaged<PointerTracker>.fromOpaque(self).takeUnretainedValue()
-                
+            callback: { _, _, event, refcon -> Unmanaged<CGEvent>? in
+                guard let refcon else { return Unmanaged.passUnretained(event) }
+
+                let tracker = Unmanaged<PointerTracker>.fromOpaque(refcon).takeUnretainedValue()
+
                 Task { @MainActor in
                     let location = event.location
                     tracker.currentPosition = location
                 }
-                
+
                 return Unmanaged.passUnretained(event)
             },
             userInfo: Unmanaged.passUnretained(self).toOpaque()

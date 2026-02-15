@@ -283,7 +283,7 @@ final class LocalVisionGuidance {
         }
 
         // Fallback: return first non-empty line
-        return lines.first(where: { !$0.isEmpty }) ?? ""
+        return lines.first { !$0.isEmpty } ?? ""
     }
 
     // MARK: - Action Execution
