@@ -7,12 +7,12 @@
 import Foundation
 import OSLog
 
-private let learnLogger = Logger(subsystem: "ai.thea.app", category: "LearningManager")
+private let learnLogger = Logger(subsystem: "ai.thea.app", category: "LearningTracker")
 
 // MARK: - Models
 
 /// A learning goal with progress tracking.
-struct LearningGoal: Codable, Sendable, Identifiable {
+struct TrackedLearningGoal: Codable, Sendable, Identifiable {
     let id: UUID
     var title: String
     var description: String
@@ -20,7 +20,7 @@ struct LearningGoal: Codable, Sendable, Identifiable {
     var status: LearningStatus
     var targetDate: Date?
     var progressPercent: Double
-    var resources: [LearningResource]
+    var resources: [TrackedLearningResource]
     var studySessions: [StudySession]
     var tags: [String]
     var priority: LearningPriority
@@ -151,7 +151,7 @@ enum LearningPriority: String, Codable, Sendable, CaseIterable, Comparable {
 }
 
 /// A resource associated with a learning goal.
-struct LearningResource: Codable, Sendable, Identifiable {
+struct TrackedLearningResource: Codable, Sendable, Identifiable {
     let id: UUID
     var title: String
     var type: ResourceType
@@ -203,10 +203,10 @@ struct StudySession: Codable, Sendable, Identifiable {
 // MARK: - Manager
 
 @MainActor
-final class LearningManager: ObservableObject {
-    static let shared = LearningManager()
+final class LearningTracker: ObservableObject {
+    static let shared = LearningTracker()
 
-    @Published private(set) var goals: [LearningGoal] = []
+    @Published private(set) var goals: [TrackedLearningGoal] = []
 
     private let storageURL: URL
 
@@ -221,13 +221,13 @@ final class LearningManager: ObservableObject {
 
     // MARK: - CRUD
 
-    func addGoal(_ goal: LearningGoal) {
+    func addGoal(_ goal: TrackedLearningGoal) {
         goals.append(goal)
         save()
         learnLogger.info("Added learning goal: \(goal.title)")
     }
 
-    func updateGoal(_ goal: LearningGoal) {
+    func updateGoal(_ goal: TrackedLearningGoal) {
         if let idx = goals.firstIndex(where: { $0.id == goal.id }) {
             var updated = goal
             updated.updatedAt = Date()
@@ -252,7 +252,7 @@ final class LearningManager: ObservableObject {
         }
     }
 
-    func addResource(goalID: UUID, resource: LearningResource) {
+    func addResource(goalID: UUID, resource: TrackedLearningResource) {
         if let idx = goals.firstIndex(where: { $0.id == goalID }) {
             goals[idx].resources.append(resource)
             goals[idx].updatedAt = Date()
@@ -262,12 +262,12 @@ final class LearningManager: ObservableObject {
 
     // MARK: - Analytics
 
-    var activeGoals: [LearningGoal] {
+    var activeGoals: [TrackedLearningGoal] {
         goals.filter { $0.status == .inProgress || $0.status == .notStarted }
             .sorted { $0.priority > $1.priority }
     }
 
-    var completedGoals: [LearningGoal] {
+    var completedGoals: [TrackedLearningGoal] {
         goals.filter { $0.status == .completed }
     }
 
@@ -279,7 +279,7 @@ final class LearningManager: ObservableObject {
         goals.map(\.currentStreak).max() ?? 0
     }
 
-    var goalsByCategory: [LearningCategory: [LearningGoal]] {
+    var goalsByCategory: [LearningCategory: [TrackedLearningGoal]] {
         Dictionary(grouping: goals, by: \.category)
     }
 
@@ -297,7 +297,7 @@ final class LearningManager: ObservableObject {
         guard let data = try? Data(contentsOf: storageURL) else { return }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let loaded = try? decoder.decode([LearningGoal].self, from: data) {
+        if let loaded = try? decoder.decode([TrackedLearningGoal].self, from: data) {
             goals = loaded
         }
     }

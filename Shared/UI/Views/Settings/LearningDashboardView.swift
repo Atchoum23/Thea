@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct LearningDashboardView: View {
-    @ObservedObject private var manager = LearningManager.shared
+    @ObservedObject private var manager = LearningTracker.shared
     @State private var showingAddGoal = false
     @State private var selectedTab = 0
 
@@ -38,7 +38,7 @@ struct LearningDashboardView: View {
             }
         }
         .sheet(isPresented: $showingAddGoal) {
-            AddLearningGoalSheet { goal in
+            AddTrackedLearningGoalSheet { goal in
                 manager.addGoal(goal)
             }
         }
@@ -87,7 +87,7 @@ struct LearningDashboardView: View {
 
     // MARK: - Goal Row
 
-    private func goalRow(_ goal: LearningGoal) -> some View {
+    private func goalRow(_ goal: TrackedLearningGoal) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Image(systemName: goal.category.icon)
@@ -130,7 +130,7 @@ struct LearningDashboardView: View {
 
     // MARK: - Helpers
 
-    private var displayedGoals: [LearningGoal] {
+    private var displayedGoals: [TrackedLearningGoal] {
         switch selectedTab {
         case 0: return manager.activeGoals
         case 1: return manager.completedGoals
@@ -141,8 +141,8 @@ struct LearningDashboardView: View {
 
 // MARK: - Add Goal Sheet
 
-private struct AddLearningGoalSheet: View {
-    let onSave: (LearningGoal) -> Void
+private struct AddTrackedLearningGoalSheet: View {
+    let onSave: (TrackedLearningGoal) -> Void
     @Environment(\.dismiss) private var dismiss
 
     @State private var title = ""
@@ -187,7 +187,7 @@ private struct AddLearningGoalSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        let goal = LearningGoal(
+                        let goal = TrackedLearningGoal(
                             title: title, description: description, category: category,
                             targetDate: hasTargetDate ? targetDate : nil, priority: priority
                         )
