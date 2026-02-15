@@ -30,16 +30,16 @@ struct LiveGuidanceSettingsView: View {
                             .foregroundStyle(.blue)
                         VStack(alignment: .leading) {
                             Text("Live Screen Monitoring")
-                                .font(.theaTitle)
+                                .font(.title)
                             Text("Real-time visual guidance powered by on-device AI")
-                                .font(.theaCaption)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
 
                     if guidance.isVisionModelLoaded {
                         Label("Qwen2-VL 7B loaded", systemImage: "checkmark.circle.fill")
-                            .font(.theaCaption)
+                            .font(.caption)
                             .foregroundStyle(.green)
                     }
                 }
@@ -58,19 +58,19 @@ struct LiveGuidanceSettingsView: View {
                 if guidance.isGuiding {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Current Task")
-                            .font(.theaCaption)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                         Text(guidance.currentTask)
-                            .font(.theaBody)
+                            .font(.body)
                     }
 
                     if !guidance.currentInstruction.isEmpty {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Latest Instruction")
-                                .font(.theaCaption)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         Text(guidance.currentInstruction)
-                                .font(.theaBody)
+                                .font(.body)
                                 .padding(8)
                                 .background(Color.blue.opacity(0.1))
                                 .cornerRadius(8)
@@ -88,7 +88,7 @@ struct LiveGuidanceSettingsView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Capture Mode")
-                        .font(.theaCaption)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                     Picker("", selection: $selectedCaptureMode) {
                         Text("Full Screen").tag(0)
@@ -103,7 +103,7 @@ struct LiveGuidanceSettingsView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Analysis Interval: \(String(format: "%.1f", analyzeInterval))s")
-                        .font(.theaCaption)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                     Slider(value: $analyzeInterval, in: 1.0...10.0, step: 0.5)
                         .onChange(of: analyzeInterval) { _, newValue in
@@ -121,7 +121,7 @@ struct LiveGuidanceSettingsView: View {
             Section("Task") {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Describe the task you want guidance for")
-                        .font(.theaCaption)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
 
                     TextField("e.g., Clean up expired certificates in Apple Developer Portal", text: $currentTaskText, axis: .vertical)
@@ -149,7 +149,7 @@ struct LiveGuidanceSettingsView: View {
 
                         if isLoadingModel {
                             ProgressView("Loading Qwen2-VL model...")
-                                .font(.theaCaption)
+                                .font(.caption)
                         }
                     } else {
                         Button(action: stopGuidance) {
@@ -198,10 +198,10 @@ struct LiveGuidanceSettingsView: View {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("Privacy-First", systemImage: "lock.shield.fill")
-                        .font(.theaCaption)
+                        .font(.caption)
                         .foregroundStyle(.green)
                     Text("All vision processing runs on-device using Qwen2-VL. No screenshots are sent to cloud APIs.")
-                        .font(.theaCaption)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -226,7 +226,7 @@ struct LiveGuidanceSettingsView: View {
             Spacer()
             if granted {
                 Label("Granted", systemImage: "checkmark.circle.fill")
-                    .font(.theaCaption)
+                    .font(.caption)
                     .foregroundStyle(.green)
             } else {
                 Button("Grant") {
