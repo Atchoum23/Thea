@@ -23,7 +23,7 @@ import NaturalLanguage
 // MARK: - Task Model
 
 /// A THEA-managed task with full intelligence context
-public struct TheaTask: Identifiable, Codable, Sendable {
+public struct IntelligenceTask: Identifiable, Codable, Sendable {
     public var id: UUID
     public var title: String
     public var notes: String?
@@ -127,7 +127,7 @@ public actor TaskIntelligence {
 
     // MARK: - Properties
 
-    private var tasks: [UUID: TheaTask] = [:]
+    private var tasks: [UUID: IntelligenceTask] = [:]
     private var projects: [String: ProjectInfo] = [:]
     private var completionPatterns: [String: CompletionPattern] = [:]
     private let eventStore = EKEventStore()
@@ -135,9 +135,9 @@ public actor TaskIntelligence {
     private var hasRemindersAccess = false
 
     // Callbacks
-    private var onTaskDueSoon: ((TheaTask, TimeInterval) -> Void)?
-    private var onTaskOverdue: ((TheaTask) -> Void)?
-    private var onUrgentTaskDetected: ((TheaTask) -> Void)?
+    private var onTaskDueSoon: ((IntelligenceTask, TimeInterval) -> Void)?
+    private var onTaskOverdue: ((IntelligenceTask) -> Void)?
+    private var onUrgentTaskDetected: ((IntelligenceTask) -> Void)?
 
     // MARK: - Types
 
@@ -163,9 +163,9 @@ public actor TaskIntelligence {
     private init() {}
 
     public func configure(
-        onTaskDueSoon: @escaping @Sendable (TheaTask, TimeInterval) -> Void,
-        onTaskOverdue: @escaping @Sendable (TheaTask) -> Void,
-        onUrgentTaskDetected: @escaping @Sendable (TheaTask) -> Void
+        onTaskDueSoon: @escaping @Sendable (IntelligenceTask, TimeInterval) -> Void,
+        onTaskOverdue: @escaping @Sendable (IntelligenceTask) -> Void,
+        onUrgentTaskDetected: @escaping @Sendable (IntelligenceTask) -> Void
     ) {
         self.onTaskDueSoon = onTaskDueSoon
         self.onTaskOverdue = onTaskOverdue
@@ -194,8 +194,8 @@ public actor TaskIntelligence {
     /// - "Submit report by Friday high priority"
     /// - "Buy groceries @errands #shopping"
     /// - "Review PR every Monday"
-    public func parseNaturalLanguage(_ input: String) async -> TheaTask {
-        var task = TheaTask(title: input)
+    public func parseNaturalLanguage(_ input: String) async -> IntelligenceTask {
+        var task = IntelligenceTask(title: input)
 
         let lowercased = input.lowercased()
 
@@ -303,7 +303,7 @@ public actor TaskIntelligence {
         return nil
     }
 
-    private func extractPriority(from input: String) -> TheaTask.Priority {
+    private func extractPriority(from input: String) -> IntelligenceTask.Priority {
         if input.contains("critical") || input.contains("urgent") || input.contains("asap") || input.contains("!!!") {
             return .critical
         } else if input.contains("high priority") || input.contains("important") || input.contains("!!") {
@@ -361,27 +361,27 @@ public actor TaskIntelligence {
         return nil
     }
 
-    private func extractRecurrence(from input: String) -> TheaTask.Recurrence? {
+    private func extractRecurrence(from input: String) -> IntelligenceTask.Recurrence? {
         if input.contains("every day") || input.contains("daily") {
-            return TheaTask.Recurrence(frequency: .daily, interval: 1, daysOfWeek: nil, endDate: nil, maxOccurrences: nil)
+            return IntelligenceTask.Recurrence(frequency: .daily, interval: 1, daysOfWeek: nil, endDate: nil, maxOccurrences: nil)
         } else if input.contains("every week") || input.contains("weekly") {
-            return TheaTask.Recurrence(frequency: .weekly, interval: 1, daysOfWeek: nil, endDate: nil, maxOccurrences: nil)
+            return IntelligenceTask.Recurrence(frequency: .weekly, interval: 1, daysOfWeek: nil, endDate: nil, maxOccurrences: nil)
         } else if input.contains("every month") || input.contains("monthly") {
-            return TheaTask.Recurrence(frequency: .monthly, interval: 1, daysOfWeek: nil, endDate: nil, maxOccurrences: nil)
+            return IntelligenceTask.Recurrence(frequency: .monthly, interval: 1, daysOfWeek: nil, endDate: nil, maxOccurrences: nil)
         }
 
         // "every Monday"
         let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
         for (index, day) in days.enumerated() {
             if input.contains("every \(day)") {
-                return TheaTask.Recurrence(frequency: .weekly, interval: 1, daysOfWeek: [index + 1], endDate: nil, maxOccurrences: nil)
+                return IntelligenceTask.Recurrence(frequency: .weekly, interval: 1, daysOfWeek: [index + 1], endDate: nil, maxOccurrences: nil)
             }
         }
 
         return nil
     }
 
-    private func cleanTitle(_ input: String, task: TheaTask) -> String {
+    private func cleanTitle(_ input: String, task: IntelligenceTask) -> String {
         var title = input
 
         // Remove time expressions
@@ -416,7 +416,7 @@ public actor TaskIntelligence {
 
     // MARK: - Urgency Calculation
 
-    public func calculateUrgencyScore(for task: TheaTask) -> Double {
+    public func calculateUrgencyScore(for task: IntelligenceTask) -> Double {
         var score: Double = 0.0
 
         // Base priority score
@@ -455,7 +455,7 @@ public actor TaskIntelligence {
 
     // MARK: - Task CRUD
 
-    public func addTask(_ task: TheaTask) async -> TheaTask {
+    public func addTask(_ task: IntelligenceTask) async -> IntelligenceTask {
         var newTask = task
         newTask.urgencyScore = calculateUrgencyScore(for: task)
 
@@ -480,7 +480,7 @@ public actor TaskIntelligence {
         return newTask
     }
 
-    public func updateTask(_ task: TheaTask) async {
+    public func updateTask(_ task: IntelligenceTask) async {
         var updatedTask = task
         updatedTask.urgencyScore = calculateUrgencyScore(for: task)
         tasks[task.id] = updatedTask
@@ -532,7 +532,7 @@ public actor TaskIntelligence {
 
     // MARK: - Apple Reminders Sync
 
-    private func syncToReminders(_ task: TheaTask) async -> String? {
+    private func syncToReminders(_ task: IntelligenceTask) async -> String? {
         let reminder = EKReminder(eventStore: eventStore)
         reminder.title = task.title
         reminder.notes = task.notes
@@ -558,7 +558,7 @@ public actor TaskIntelligence {
         }
     }
 
-    private func updateReminder(_ identifier: String, with task: TheaTask) async {
+    private func updateReminder(_ identifier: String, with task: IntelligenceTask) async {
         guard let reminder = eventStore.calendarItem(withIdentifier: identifier) as? EKReminder else { return }
 
         reminder.title = task.title
@@ -598,7 +598,7 @@ public actor TaskIntelligence {
 
     // MARK: - Apple Calendar Sync
 
-    private func syncToCalendar(_ task: TheaTask) async -> String? {
+    private func syncToCalendar(_ task: IntelligenceTask) async -> String? {
         guard let dueDate = task.dueDate else { return nil }
 
         let event = EKEvent(eventStore: eventStore)
@@ -619,7 +619,7 @@ public actor TaskIntelligence {
 
     // MARK: - Recurrence Handling
 
-    private func createNextRecurrence(from task: TheaTask, recurrence: TheaTask.Recurrence) async -> TheaTask {
+    private func createNextRecurrence(from task: IntelligenceTask, recurrence: IntelligenceTask.Recurrence) async -> IntelligenceTask {
         var nextTask = task
         nextTask.id = UUID()
         nextTask.completedAt = nil
@@ -647,7 +647,7 @@ public actor TaskIntelligence {
 
     // MARK: - Completion Pattern Learning
 
-    private func updateCompletionPatterns(for task: TheaTask) async {
+    private func updateCompletionPatterns(for task: IntelligenceTask) async {
         let key = task.project ?? "default"
         var pattern = completionPatterns[key] ?? CompletionPattern(
             totalTasks: 0,
@@ -710,7 +710,7 @@ public actor TaskIntelligence {
 
     // MARK: - Queries
 
-    public func getTasksDueToday() -> [TheaTask] {
+    public func getTasksDueToday() -> [IntelligenceTask] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
@@ -721,7 +721,7 @@ public actor TaskIntelligence {
         }.sorted { $0.urgencyScore > $1.urgencyScore }
     }
 
-    public func getOverdueTasks() -> [TheaTask] {
+    public func getOverdueTasks() -> [IntelligenceTask] {
         let now = Date()
         return tasks.values.filter { task in
             guard let dueDate = task.dueDate, task.completedAt == nil else { return false }
@@ -729,17 +729,17 @@ public actor TaskIntelligence {
         }.sorted { $0.urgencyScore > $1.urgencyScore }
     }
 
-    public func getTasksByProject(_ project: String) -> [TheaTask] {
+    public func getTasksByProject(_ project: String) -> [IntelligenceTask] {
         tasks.values.filter { $0.project == project && $0.completedAt == nil }
             .sorted { $0.urgencyScore > $1.urgencyScore }
     }
 
-    public func getUrgentTasks(threshold: Double = 0.7) -> [TheaTask] {
+    public func getUrgentTasks(threshold: Double = 0.7) -> [IntelligenceTask] {
         tasks.values.filter { $0.urgencyScore >= threshold && $0.completedAt == nil }
             .sorted { $0.urgencyScore > $1.urgencyScore }
     }
 
-    public func getAllActiveTasks() -> [TheaTask] {
+    public func getAllActiveTasks() -> [IntelligenceTask] {
         tasks.values.filter { $0.completedAt == nil }
             .sorted { $0.urgencyScore > $1.urgencyScore }
     }
@@ -747,8 +747,8 @@ public actor TaskIntelligence {
     // MARK: - AI Task Extraction from Messages
 
     /// Extract potential tasks from incoming messages
-    public func extractTasksFromMessage(_ message: String, from contactId: String?) async -> [TheaTask] {
-        var extractedTasks: [TheaTask] = []
+    public func extractTasksFromMessage(_ message: String, from contactId: String?) async -> [IntelligenceTask] {
+        var extractedTasks: [IntelligenceTask] = []
 
         // Patterns that indicate task-like content
         let taskIndicators = [
@@ -795,7 +795,7 @@ public actor TaskIntelligence {
     public func loadTasks() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let data = defaults.data(forKey: "theaTasks"),
-           let loadedTasks = try? JSONDecoder().decode([TheaTask].self, from: data) {
+           let loadedTasks = try? JSONDecoder().decode([IntelligenceTask].self, from: data) {
             for task in loadedTasks {
                 tasks[task.id] = task
             }

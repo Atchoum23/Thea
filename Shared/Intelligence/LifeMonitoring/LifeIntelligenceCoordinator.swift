@@ -297,7 +297,7 @@ public actor LifeIntelligenceCoordinator {
 
     // MARK: - Cross-System Event Handlers
 
-    private func handleTaskDueSoon(_ task: TheaTask, timeRemaining: TimeInterval) async {
+    private func handleTaskDueSoon(_ task: IntelligenceTask, timeRemaining: TimeInterval) async {
         let minutes = Int(timeRemaining / 60)
         print("[LifeCoordinator] Task due soon: \(task.title) in \(minutes) minutes")
 
@@ -311,7 +311,7 @@ public actor LifeIntelligenceCoordinator {
         }
     }
 
-    private func handleTaskOverdue(_ task: TheaTask) async {
+    private func handleTaskOverdue(_ task: IntelligenceTask) async {
         print("[LifeCoordinator] Task overdue: \(task.title)")
 
         await sendNotification(
@@ -323,7 +323,7 @@ public actor LifeIntelligenceCoordinator {
         currentContext.overdueTasksCount += 1
     }
 
-    private func handleUrgentTask(_ task: TheaTask) async {
+    private func handleUrgentTask(_ task: IntelligenceTask) async {
         print("[LifeCoordinator] Urgent task detected: \(task.title)")
         currentContext.urgentTasksCount += 1
     }
@@ -507,8 +507,8 @@ public actor LifeIntelligenceCoordinator {
     }
 
     public struct UrgentItemsSummary: Sendable {
-        public let urgentTasks: [TheaTask]
-        public let overdueTasks: [TheaTask]
+        public let urgentTasks: [IntelligenceTask]
+        public let overdueTasks: [IntelligenceTask]
         public let urgentCommunications: [FocusModeIntelligence.IncomingCommunication]
         public let totalUrgentCount: Int
     }
@@ -516,7 +516,7 @@ public actor LifeIntelligenceCoordinator {
     // MARK: - Quick Actions
 
     /// Quick add a task from voice or text
-    public func quickAddTask(_ naturalLanguage: String) async -> TheaTask {
+    public func quickAddTask(_ naturalLanguage: String) async -> IntelligenceTask {
         let task = await taskIntelligence.parseNaturalLanguage(naturalLanguage)
         return await taskIntelligence.addTask(task)
     }
@@ -553,8 +553,8 @@ public actor LifeIntelligenceCoordinator {
     }
 
     public struct TodaysPriorities: Sendable {
-        public let tasksDueToday: [TheaTask]
-        public let overdueTasks: [TheaTask]
+        public let tasksDueToday: [IntelligenceTask]
+        public let overdueTasks: [IntelligenceTask]
         public let reconnectSuggestions: [ContactRelationship]
         public let focusSuggestion: FocusModeIntelligence.FocusPrediction?
     }
