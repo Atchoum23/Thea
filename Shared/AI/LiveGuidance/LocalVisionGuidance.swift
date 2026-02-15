@@ -21,7 +21,7 @@ final class LocalVisionGuidance {
     private let voiceBackend = MLXVoiceBackend()
     private let screenCapture = ScreenCaptureManager.shared
     private let pointerTracker = PointerTracker.shared
-    private let actionExecutor = ActionExecutor.shared
+    private let actionExecutor = CGActionExecutor.shared
 
     // MARK: - State
 
@@ -344,7 +344,7 @@ final class LocalVisionGuidance {
                     .lowercased()
 
                 // Map key names to KeyCode
-                let keyCode: ActionExecutor.KeyCode? = {
+                let keyCode: CGActionExecutor.KeyCode? = {
                     switch keyName {
                     case "return", "enter": return .returnKey
                     case "tab": return .tab

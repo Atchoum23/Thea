@@ -9,7 +9,7 @@ struct LiveGuidanceSettingsView: View {
     @State private var guidance = LocalVisionGuidance.shared
     @State private var screenCapture = ScreenCaptureManager.shared
     @State private var pointerTracker = PointerTracker.shared
-    @State private var actionExecutor = ActionExecutor.shared
+    @State private var actionExecutor = CGActionExecutor.shared
 
     @State private var isMonitoringEnabled = false
     @State private var isVoiceEnabled = true

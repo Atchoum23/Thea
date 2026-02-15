@@ -10,8 +10,8 @@ import AppKit
 // Requires Accessibility permission
 
 @MainActor
-final class ActionExecutor {
-    static let shared = ActionExecutor()
+final class CGActionExecutor {
+    static let shared = CGActionExecutor()
 
     // MARK: - State
 
@@ -33,9 +33,9 @@ final class ActionExecutor {
         let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
 
         if !trusted {
-            print("[ActionExecutor] Opening System Settings for Accessibility permission")
+            print("[CGActionExecutor] Opening System Settings for Accessibility permission")
         } else {
-            print("[ActionExecutor] Accessibility permission already granted")
+            print("[CGActionExecutor] Accessibility permission already granted")
         }
     }
 
@@ -57,7 +57,7 @@ final class ActionExecutor {
         }
 
         moveEvent.post(tap: .cghidEventTap)
-        print("[ActionExecutor] Moved pointer to (\(point.x), \(point.y))")
+        print("[CGActionExecutor] Moved pointer to (\(point.x), \(point.y))")
     }
 
     /// Click at specific coordinates
@@ -100,7 +100,7 @@ final class ActionExecutor {
         }
         upEvent.post(tap: .cghidEventTap)
 
-        print("[ActionExecutor] Clicked at (\(point.x), \(point.y)) with \(button == .left ? "left" : "right") button")
+        print("[CGActionExecutor] Clicked at (\(point.x), \(point.y)) with \(button == .left ? "left" : "right") button")
     }
 
     /// Double-click at specific coordinates
@@ -121,7 +121,7 @@ final class ActionExecutor {
         // Second click
         try await click(at: point)
 
-        print("[ActionExecutor] Double-clicked at (\(point.x), \(point.y))")
+        print("[CGActionExecutor] Double-clicked at (\(point.x), \(point.y))")
     }
 
     // MARK: - Keyboard Actions
@@ -141,7 +141,7 @@ final class ActionExecutor {
             try await Task.sleep(for: .milliseconds(20))
         }
 
-        print("[ActionExecutor] Typed text: '\(text)'")
+        print("[CGActionExecutor] Typed text: '\(text)'")
     }
 
     /// Type a single character
@@ -230,7 +230,7 @@ final class ActionExecutor {
         keyUpEvent.flags = flags
         keyUpEvent.post(tap: .cghidEventTap)
 
-        print("[ActionExecutor] Pressed key: \(key) with modifiers: \(modifiers)")
+        print("[CGActionExecutor] Pressed key: \(key) with modifiers: \(modifiers)")
     }
 
     // MARK: - Mouse Button
