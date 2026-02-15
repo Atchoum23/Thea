@@ -215,9 +215,8 @@ final class ForegroundAppMonitor: ObservableObject {
         }
     }
 
-    deinit {
-        stopMonitoring()
-    }
+    // Note: stopMonitoring() should be called explicitly before app termination
+    // deinit removed due to Swift 6 concurrency restrictions with @MainActor
 }
 
 // MARK: - AppContext Model
