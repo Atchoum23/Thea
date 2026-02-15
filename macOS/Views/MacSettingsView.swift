@@ -67,6 +67,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case tasks = "Tasks"
     case habits = "Habits"
     case packages = "Packages"
+    case documents = "Documents"
     case notifications = "Notifications"
 
     // Group 3: System
@@ -103,6 +104,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .tasks: "checklist"
         case .habits: "repeat.circle"
         case .packages: "shippingbox"
+        case .documents: "doc.viewfinder"
         case .notifications: "bell.badge"
         case .systemMonitor: "gauge.with.dots.needle.33percent"
         case .permissions: "hand.raised.fill"
@@ -119,7 +121,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .health, .finance, .tasks, .habits, .packages, .notifications: 2
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .notifications: 2
         case .systemMonitor, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -251,6 +253,8 @@ struct MacSettingsView: View {
             HabitTrackerView()
         case .packages:
             PackageTrackerView()
+        case .documents:
+            DocumentScannerView()
         case .notifications:
             NotificationIntelligenceSettingsView()
         case .systemMonitor:

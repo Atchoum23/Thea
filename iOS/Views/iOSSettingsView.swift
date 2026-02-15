@@ -155,6 +155,17 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
+                    DocumentScannerView()
+                } label: {
+                    SettingsRow(
+                        icon: "doc.viewfinder",
+                        iconColor: .teal,
+                        title: "Documents",
+                        subtitle: "\(DocumentScanner.shared.totalDocuments) scanned"
+                    )
+                }
+
+                NavigationLink {
                     LifeManagementDashboardView()
                 } label: {
                     SettingsRow(
