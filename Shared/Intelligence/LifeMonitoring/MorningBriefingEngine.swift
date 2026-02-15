@@ -18,7 +18,7 @@ import HealthKit
 final class MorningBriefingEngine: ObservableObject {
     static let shared = MorningBriefingEngine()
 
-    @Published var latestBriefing: DailyBriefing?
+    @Published var latestBriefing: TheaDailyBriefing?
     @Published var isGenerating = false
 
     private var lastGeneratedDate: Date?
@@ -113,7 +113,7 @@ final class MorningBriefingEngine: ObservableObject {
             ))
         }
 
-        let briefing = DailyBriefing(
+        let briefing = TheaDailyBriefing(
             id: UUID(),
             date: now,
             sections: sections,
@@ -311,7 +311,7 @@ final class MorningBriefingEngine: ObservableObject {
 
     // MARK: - Notification Delivery
 
-    private func deliverNotification(_ briefing: DailyBriefing) async {
+    private func deliverNotification(_ briefing: TheaDailyBriefing) async {
         #if canImport(UserNotifications)
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
@@ -333,7 +333,7 @@ final class MorningBriefingEngine: ObservableObject {
         #endif
     }
 
-    private func briefingSummaryText(_ briefing: DailyBriefing) -> String {
+    private func briefingSummaryText(_ briefing: TheaDailyBriefing) -> String {
         var parts: [String] = []
 
         for section in briefing.sections {
@@ -357,7 +357,7 @@ final class MorningBriefingEngine: ObservableObject {
         return dir.appendingPathComponent("latest_briefing.json")
     }
 
-    private func saveBriefing(_ briefing: DailyBriefing) {
+    private func saveBriefing(_ briefing: TheaDailyBriefing) {
         if let data = try? JSONEncoder().encode(briefing) {
             try? data.write(to: briefingURL)
         }
@@ -365,7 +365,7 @@ final class MorningBriefingEngine: ObservableObject {
 
     func loadSavedBriefing() {
         guard let data = try? Data(contentsOf: briefingURL),
-              let briefing = try? JSONDecoder().decode(DailyBriefing.self, from: data)
+              let briefing = try? JSONDecoder().decode(TheaDailyBriefing.self, from: data)
         else { return }
         latestBriefing = briefing
         lastGeneratedDate = briefing.generatedAt
@@ -374,7 +374,7 @@ final class MorningBriefingEngine: ObservableObject {
 
 // MARK: - Models
 
-struct DailyBriefing: Codable, Identifiable, Sendable {
+struct TheaDailyBriefing: Codable, Identifiable, Sendable {
     let id: UUID
     let date: Date
     let sections: [BriefingSection]
