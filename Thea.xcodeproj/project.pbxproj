@@ -291,7 +291,6 @@
 		21A1C8EC5460175602D944F2 /* CrossDeviceNotificationServiceTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C998585A29FB5A6E61DD5A3 /* CrossDeviceNotificationServiceTypes.swift */; };
 		21C133A42F1F3B92ECBE8A4C /* WebSearchVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D631DDFAC95F64E8E4DE5D1 /* WebSearchVerifier.swift */; };
 		21C7E28BBE64720519476917 /* WellnessProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD52ABAFEE47E581600F1E6B /* WellnessProtocols.swift */; };
-		21D01AB0607C945C88AE6D63 /* GenericContextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D719676000D43AC573EA4749 /* GenericContextExtractor.swift */; };
 		21EEEE1EB3B5398A8E98CEA1 /* TouchBarSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7649196BB0D02A1BC30277E5 /* TouchBarSupport.swift */; };
 		21F5F4EB75A35698E9542B54 /* StreamingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B101D7016CEFD023816AE6C /* StreamingService.swift */; };
 		21FE11DB889EB2D529BA0E26 /* SmartNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3AB8107B4E025CE6D370EB /* SmartNotificationScheduler.swift */; };
@@ -7756,7 +7755,6 @@
 				DFD839BB4570D22880392AA1 /* FunctionGemmaEngine.swift in Sources */,
 				1B8D3CE1226B484F2801D324 /* GDPRDataExporter.swift in Sources */,
 				33D313B321042A0B9B14CE88 /* GUIVerifier.swift in Sources */,
-				21D01AB0607C945C88AE6D63 /* GenericContextExtractor.swift in Sources */,
 				250373D85D182015BA566A76 /* GitSavepoint.swift in Sources */,
 				8F656D03B4EF178B74E86D04 /* GlobalQuickPrompt.swift in Sources */,
 				F3C379E00956E435F4E0E890 /* GlobalQuickPromptTypes.swift in Sources */,

@@ -688,6 +688,7 @@ targets:
           - "**/System/ScreenCapture/ScreenCaptureManager.swift"
           - "**/Integrations/ForegroundAppMonitor.swift"
           - "**/AI/LiveGuidance/LocalVisionGuidance.swift"
+          - "**/Integrations/ContextExtractors/GenericContextExtractor.swift"
           # TheaDesignSystem.swift KEPT for iOS - contains design tokens
           - "**/Design/LiquidGlassDesign.swift"
           # Exclude stubs since TheaDesignSystem is included
