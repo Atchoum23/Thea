@@ -12,7 +12,7 @@ private let dlLogger = Logger(subsystem: "ai.thea.app", category: "DownloadManag
 
 // MARK: - Data Types
 
-enum DownloadStatus: String, Codable, Sendable {
+enum DLStatus: String, Codable, Sendable {
     case queued = "Queued"
     case downloading = "Downloading"
     case paused = "Paused"
@@ -100,7 +100,7 @@ struct DownloadItem: Codable, Sendable, Identifiable {
     let url: String
     let fileName: String
     var category: DownloadCategory
-    var status: DownloadStatus
+    var status: DLStatus
     var priority: DownloadPriority
     var bytesDownloaded: Int64
     var totalBytes: Int64
@@ -412,7 +412,7 @@ actor TheaDownloadManager {
         downloads.filter { $0.category == category }
     }
 
-    func getDownloadsByStatus(_ status: DownloadStatus) -> [DownloadItem] {
+    func getDownloadsByStatus(_ status: DLStatus) -> [DownloadItem] {
         downloads.filter { $0.status == status }
     }
 

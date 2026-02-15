@@ -389,7 +389,7 @@ struct DownloadManagerView: View {
         }
     }
 
-    private func statusColor(_ status: DownloadStatus) -> Color {
+    private func statusColor(_ status: DLStatus) -> Color {
         switch status {
         case .queued: .gray
         case .downloading: .blue
