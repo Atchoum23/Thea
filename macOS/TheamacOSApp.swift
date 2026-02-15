@@ -253,6 +253,7 @@ struct TheamacOSApp: App {
         MigrationEngine.shared.setModelContext(context)
         CodeIntelligenceManager.shared.setModelContext(context)
         ClipboardHistoryManager.shared.setModelContext(context)
+        ClipboardObserver.shared.start()
 
         // TODO: Restore prompt engineering managers after Phase 5+
         // PromptOptimizer.shared.setModelContext(context)
