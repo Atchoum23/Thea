@@ -132,9 +132,9 @@ struct NotificationIntelligenceSettingsView: View {
             let stats = service.statistics
 
             HStack {
-                StatCard(title: "Classified", value: "\(stats.totalClassified)", icon: "tray.full.fill", color: .blue)
-                StatCard(title: "Cleared", value: "\(stats.totalCleared)", icon: "checkmark.circle.fill", color: .green)
-                StatCard(title: "Actioned", value: "\(stats.totalActioned)", icon: "bolt.fill", color: .orange)
+                NotifStatCard(title: "Classified", value: "\(stats.totalClassified)", icon: "tray.full.fill", color: .blue)
+                NotifStatCard(title: "Cleared", value: "\(stats.totalCleared)", icon: "checkmark.circle.fill", color: .green)
+                NotifStatCard(title: "Actioned", value: "\(stats.totalActioned)", icon: "bolt.fill", color: .orange)
             }
 
             if !stats.byUrgency.isEmpty {
@@ -272,7 +272,7 @@ struct NotificationIntelligenceSettingsView: View {
 
 // MARK: - Stat Card
 
-private struct StatCard: View {
+private struct NotifStatCard: View {
     let title: String
     let value: String
     let icon: String
