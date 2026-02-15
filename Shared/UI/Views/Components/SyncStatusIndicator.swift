@@ -9,9 +9,13 @@
 import SwiftUI
 
 /// Compact sync status indicator for use in toolbar or navigation bar.
-/// Shows current sync state with transport type info on hover/tap.
+/// Shows current sync state with transport type from SmartTransportManager.
 struct SyncStatusIndicator: View {
     @ObservedObject private var cloudKit = CloudKitService.shared
+
+    @State private var activeTransport: TheaTransport = .cloudKit
+    @State private var transportSummary: [(transport: TheaTransport, available: Bool, latency: Double?, active: Bool)] = []
+    @State private var isProbing = false
 
     var body: some View {
         Menu {
@@ -27,11 +31,28 @@ struct SyncStatusIndicator: View {
                 }
             }
 
-            Section("Transport") {
-                Label(transportText, systemImage: transportIcon)
+            Section("Transport: \(activeTransport.displayName)") {
+                ForEach(transportSummary, id: \.transport) { item in
+                    Label {
+                        Text(transportLabel(for: item))
+                    } icon: {
+                        Image(systemName: item.transport.sfSymbol)
+                    }
+                }
             }
 
             Divider()
+
+            Button {
+                Task {
+                    isProbing = true
+                    defer { isProbing = false }
+                    await refreshTransportInfo()
+                }
+            } label: {
+                Label(isProbing ? "Probing..." : "Probe Transports", systemImage: "antenna.radiowaves.left.and.right")
+            }
+            .disabled(isProbing)
 
             Button {
                 Task {
@@ -48,6 +69,34 @@ struct SyncStatusIndicator: View {
                 .font(.body)
                 .accessibilityLabel("Sync status: \(statusText)")
         }
+        .task {
+            await refreshTransportInfo()
+        }
+    }
+
+    // MARK: - Transport Refresh
+
+    private func refreshTransportInfo() async {
+        let transport = await SmartTransportManager.shared.probeAndSelect()
+        let summary = await SmartTransportManager.shared.transportSummary()
+        await MainActor.run {
+            activeTransport = transport
+            transportSummary = summary
+        }
+    }
+
+    private func transportLabel(for item: (transport: TheaTransport, available: Bool, latency: Double?, active: Bool)) -> String {
+        var label = item.transport.displayName
+        if item.active {
+            label += " (active)"
+        }
+        if let latency = item.latency {
+            label += " — \(String(format: "%.0f", latency))ms"
+        }
+        if !item.available {
+            label += " — unavailable"
+        }
+        return label
     }
 
     // MARK: - Status Properties
@@ -69,7 +118,7 @@ struct SyncStatusIndicator: View {
         guard cloudKit.iCloudAvailable else { return "icloud.slash" }
 
         switch cloudKit.syncStatus {
-        case .idle: return "checkmark.icloud.fill"
+        case .idle: return activeTransport == .cloudKit ? "checkmark.icloud.fill" : "checkmark.circle.fill"
         case .syncing: return "arrow.triangle.2.circlepath.icloud.fill"
         case .error: return "exclamationmark.icloud.fill"
         case .offline: return "icloud.slash"
@@ -85,19 +134,5 @@ struct SyncStatusIndicator: View {
         case .error: return .red
         case .offline: return .orange
         }
-    }
-
-    private var transportText: String {
-        if !cloudKit.syncEnabled || !cloudKit.iCloudAvailable {
-            return "Not connected"
-        }
-        return "iCloud (CloudKit)"
-    }
-
-    private var transportIcon: String {
-        if !cloudKit.syncEnabled || !cloudKit.iCloudAvailable {
-            return "wifi.slash"
-        }
-        return "icloud"
     }
 }
