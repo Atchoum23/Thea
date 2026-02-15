@@ -56,6 +56,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case agent = "Agent"
     case moltbook = "Moltbook"
     case knowledge = "Knowledge"
+    case liveGuidance = "Live Guidance"
 
     // Group 2: Features
     case clipboard = "Clipboard"
@@ -113,6 +114,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .agent: "person.2.circle"
         case .moltbook: "bubble.left.and.text.bubble.right"
         case .knowledge: "books.vertical"
+        case .liveGuidance: "eye.circle.fill"
         case .clipboard: "doc.on.clipboard"
         case .translation: "character.bubble"
         case .voiceInput: "mic.fill"
@@ -156,7 +158,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .moltbook, .knowledge: 1
+        case .providers, .memory, .agent, .moltbook, .knowledge, .liveGuidance: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
@@ -271,6 +273,8 @@ struct MacSettingsView: View {
             MoltbookSettingsView()
         case .knowledge:
             KnowledgeScannerConfigurationView()
+        case .liveGuidance:
+            LiveGuidanceSettingsView()
         case .clipboard:
             TheaClipSettingsView()
         case .translation:
