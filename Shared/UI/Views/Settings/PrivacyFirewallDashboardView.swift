@@ -435,6 +435,7 @@ struct PrivacyTransparencyReportView: View {
     @State private var trafficByCategory: [(category: NetworkPrivacyMonitor.TrafficCategory, count: Int)] = []
     @State private var serviceStats: [NetworkPrivacyMonitor.ServiceStats] = []
     @State private var dailySnapshots: [NetworkPrivacyMonitor.DailySnapshot] = []
+    @State private var monthlyReports: [NetworkPrivacyMonitor.MonthlyTransparencyReport] = []
     @State private var channelCount = 0
     @State private var firewallMode = ""
     @State private var showingExportSheet = false
@@ -447,6 +448,7 @@ struct PrivacyTransparencyReportView: View {
             firewallReportSection
             networkReportSection
             blocklistReportSection
+            monthlyReportsSection
             historySection
             recommendationsSection
             exportSection
@@ -668,6 +670,66 @@ struct PrivacyTransparencyReportView: View {
         }
     }
 
+    // MARK: - Monthly Reports
+
+    @ViewBuilder
+    private var monthlyReportsSection: some View {
+        Section("Monthly Reports") {
+            if monthlyReports.isEmpty {
+                Label("No monthly reports yet. Reports are auto-generated on the first app launch each month.",
+                      systemImage: "calendar.badge.clock")
+                    .font(.theaCaption1)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(monthlyReports.reversed(), id: \.id) { report in
+                    VStack(alignment: .leading, spacing: TheaSpacing.xs) {
+                        HStack {
+                            Text(report.generatedAt, style: .date)
+                                .font(.theaSubhead)
+                            Spacer()
+                            Text("Score: \(report.privacyScore)/100")
+                                .font(.system(.caption, design: .rounded, weight: .semibold))
+                                .foregroundStyle(report.privacyScore >= 80 ? .green : report.privacyScore >= 50 ? .orange : .red)
+                        }
+                        HStack(spacing: TheaSpacing.md) {
+                            Label("\(report.totalConnections)", systemImage: "arrow.up.forward")
+                                .font(.theaCaption2)
+                            Label("\(report.blockedConnections)", systemImage: "hand.raised.fill")
+                                .font(.theaCaption2)
+                                .foregroundStyle(.red)
+                            if report.privacyConcerns > 0 {
+                                Label("\(report.privacyConcerns)", systemImage: "exclamationmark.triangle")
+                                    .font(.theaCaption2)
+                                    .foregroundStyle(.orange)
+                            }
+                        }
+                        if !report.recommendations.isEmpty {
+                            Text(report.recommendations.first ?? "")
+                                .font(.theaCaption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+
+            Button {
+                Task {
+                    if let report = await NetworkPrivacyMonitor.shared.generateMonthlyReportIfDue() {
+                        monthlyReports.append(report)
+                    } else {
+                        // Force generate for manual trigger
+                        let reports = await NetworkPrivacyMonitor.shared.loadMonthlyReports()
+                        monthlyReports = reports
+                    }
+                }
+            } label: {
+                Label("Generate Report Now", systemImage: "doc.badge.plus")
+            }
+        }
+    }
+
     // MARK: - Export
 
     @ViewBuilder
@@ -800,6 +862,9 @@ struct PrivacyTransparencyReportView: View {
 
         // Blocklist stats
         blocklistStats = await DNSBlocklistService.shared.getStats()
+
+        // Monthly reports
+        monthlyReports = await NetworkPrivacyMonitor.shared.loadMonthlyReports()
     }
 }
 

@@ -261,6 +261,18 @@ struct TheamacOSApp: App {
         // TODO: Restore window management after implementation
         // WindowManager.shared.setModelContext(context)
 
+        // Privacy monitoring — auto-start network tracking and load daily snapshots
+        Task {
+            try? await Task.sleep(for: .milliseconds(300))
+            await NetworkPrivacyMonitor.shared.loadDailySnapshots()
+            await NetworkPrivacyMonitor.shared.startMonitoring()
+            // Generate monthly transparency report if due (once per calendar month)
+            if let report = await NetworkPrivacyMonitor.shared.generateMonthlyReportIfDue() {
+                logger.info("Monthly privacy report generated: score \(report.privacyScore)/100, \(report.totalConnections) connections")
+            }
+            logger.info("NetworkPrivacyMonitor auto-started")
+        }
+
         // Life Monitoring — deferred startup to avoid blocking app launch
         Task {
             try? await Task.sleep(for: .milliseconds(500))

@@ -340,8 +340,14 @@ extension ChatManager {
         messages: [AIMessage],
         assistantMessage: Message
     ) async throws {
-        // Record outbound connection for privacy monitoring
+        // Check domain against DNS blocklist before connecting
         let providerDomain = Self.domainForProvider(provider.metadata.name)
+        if let blockReason = await OutboundPrivacyGuard.shared.checkDomainBlocklist(providerDomain) {
+            msgLogger.warning("🚫 Provider domain blocked: \(blockReason)")
+            throw ChatError.providerNotAvailable
+        }
+
+        // Record outbound connection for privacy monitoring
         let estimatedBytes = messages.reduce(into: 0) { $0 += $1.content.textValue.utf8.count }
         await NetworkPrivacyMonitor.shared.recordConnection(
             hostname: providerDomain,

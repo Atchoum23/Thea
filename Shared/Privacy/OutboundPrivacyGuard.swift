@@ -139,6 +139,22 @@ actor OutboundPrivacyGuard {
 
     // MARK: - Public API
 
+    /// Check a hostname against the DNS blocklist before allowing outbound traffic.
+    /// Returns a block reason if the domain is blocklisted, or nil if allowed.
+    func checkDomainBlocklist(_ hostname: String) async -> String? {
+        let result = await DNSBlocklistService.shared.checkDomain(hostname)
+        if result.isBlocked {
+            let reason = "Blocked by DNS blocklist: \(result.matchedDomain ?? hostname) (\(result.category?.rawValue ?? "unknown"))"
+            await NetworkPrivacyMonitor.shared.recordConnection(
+                hostname: hostname,
+                wasBlocked: true,
+                blockReason: reason
+            )
+            return reason
+        }
+        return nil
+    }
+
     /// Sanitize content for a given channel.
     /// In strict mode, unregistered channels are blocked.
     func sanitize(_ content: String, channel: String) async -> SanitizationOutcome {

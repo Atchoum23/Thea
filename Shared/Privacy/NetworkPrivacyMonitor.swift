@@ -371,6 +371,132 @@ actor NetworkPrivacyMonitor {
         return csv
     }
 
+    // MARK: - Monthly Transparency Report
+
+    private let monthlyReportKey = "NetworkPrivacyMonitor.monthlyReports"
+    private let lastMonthlyReportKey = "NetworkPrivacyMonitor.lastMonthlyReport"
+
+    struct MonthlyTransparencyReport: Codable, Sendable {
+        let id: UUID
+        let generatedAt: Date
+        let periodStart: Date
+        let periodEnd: Date
+        let totalConnections: Int
+        let totalBytesEstimate: Int
+        let blockedConnections: Int
+        let privacyConcerns: Int
+        let privacyScore: Int
+        let serviceBreakdown: [ServiceStats]
+        let categoryBreakdown: [String: Int]
+        let topDomains: [String: Int]
+        let recommendations: [String]
+    }
+
+    /// Checks if a monthly report is due and generates one if so.
+    /// Call this on app launch — it will only generate once per calendar month.
+    func generateMonthlyReportIfDue() async -> MonthlyTransparencyReport? {
+        let calendar = Calendar.current
+        let now = Date()
+        let currentMonth = calendar.component(.month, from: now)
+        let currentYear = calendar.component(.year, from: now)
+
+        // Check last report date
+        if let lastReportDate = UserDefaults.standard.object(forKey: lastMonthlyReportKey) as? Date {
+            let lastMonth = calendar.component(.month, from: lastReportDate)
+            let lastYear = calendar.component(.year, from: lastReportDate)
+            if lastMonth == currentMonth && lastYear == currentYear {
+                return nil // Already generated this month
+            }
+        }
+
+        // Generate the report for the previous month's data
+        let report = await generateMonthlyReport()
+
+        // Persist the report
+        var existingReports = loadMonthlyReports()
+        existingReports.append(report)
+        // Keep last 12 months
+        if existingReports.count > 12 {
+            existingReports = Array(existingReports.suffix(12))
+        }
+        if let data = try? JSONEncoder().encode(existingReports) {
+            UserDefaults.standard.set(data, forKey: monthlyReportKey)
+        }
+        UserDefaults.standard.set(now, forKey: lastMonthlyReportKey)
+
+        logger.info("Monthly transparency report generated for \(currentYear)-\(currentMonth)")
+        return report
+    }
+
+    /// Generate a monthly report from accumulated data.
+    private func generateMonthlyReport() async -> MonthlyTransparencyReport {
+        let calendar = Calendar.current
+        let now = Date()
+        let periodStart = calendar.date(byAdding: .month, value: -1, to: now) ?? now
+
+        var categoryBreakdown: [String: Int] = [:]
+        for record in trafficLog {
+            categoryBreakdown[record.category.rawValue, default: 0] += 1
+        }
+
+        let blocked = trafficLog.filter(\.wasBlocked).count
+        let concerns = trafficLog.filter { $0.category.isPrivacyConcern && !$0.wasBlocked }.count
+        let total = trafficLog.count
+
+        // Compute privacy score (0-100)
+        var score = 70 // Base score
+        if total > 0 {
+            let blockedRatio = Double(blocked) / Double(total)
+            let concernRatio = Double(concerns) / Double(total)
+            score = max(0, min(100, Int(70.0 + blockedRatio * 20.0 - concernRatio * 30.0)))
+        }
+
+        // Generate recommendations
+        var recommendations: [String] = []
+        let firewallMode = await OutboundPrivacyGuard.shared.mode
+        if firewallMode != .strict {
+            recommendations.append("Enable strict firewall mode for maximum protection")
+        }
+        if concerns > 0 {
+            recommendations.append("Review \(concerns) privacy concern(s) — consider adding domains to blocklist")
+        }
+        let blocklistStats = await DNSBlocklistService.shared.getStats()
+        let disabledCount = blocklistStats.totalDomains - blocklistStats.enabledDomains
+        if disabledCount > 5 {
+            recommendations.append("Enable \(disabledCount) disabled blocklist entries for better coverage")
+        }
+        if total == 0 {
+            recommendations.append("No network activity recorded — ensure monitoring is enabled")
+        }
+        if score >= 80 {
+            recommendations.append("Privacy posture is strong — keep monitoring regularly")
+        }
+
+        return MonthlyTransparencyReport(
+            id: UUID(),
+            generatedAt: now,
+            periodStart: periodStart,
+            periodEnd: now,
+            totalConnections: total,
+            totalBytesEstimate: dailyTrafficBytes,
+            blockedConnections: blocked,
+            privacyConcerns: concerns,
+            privacyScore: score,
+            serviceBreakdown: getServiceStats(),
+            categoryBreakdown: categoryBreakdown,
+            topDomains: connectionCounts,
+            recommendations: recommendations
+        )
+    }
+
+    /// Load previously generated monthly reports.
+    func loadMonthlyReports() -> [MonthlyTransparencyReport] {
+        guard let data = UserDefaults.standard.data(forKey: monthlyReportKey),
+              let reports = try? JSONDecoder().decode([MonthlyTransparencyReport].self, from: data)
+        else { return [] }
+        return reports
+    }
+
     // MARK: - Domain Classification
 
     func classifyDomain(_ hostname: String) -> TrafficCategory {
