@@ -340,6 +340,14 @@ extension ChatManager {
         messages: [AIMessage],
         assistantMessage: Message
     ) async throws {
+        // Record outbound connection for privacy monitoring
+        let providerDomain = Self.domainForProvider(provider.metadata.name)
+        let estimatedBytes = messages.reduce(into: 0) { $0 += $1.content.textValue.utf8.count }
+        await NetworkPrivacyMonitor.shared.recordConnection(
+            hostname: providerDomain,
+            bytesEstimate: estimatedBytes
+        )
+
         let responseStream = try await provider.chat(
             messages: messages,
             model: model,
@@ -374,6 +382,20 @@ extension ChatManager {
         let base = min(pow(2.0, Double(attempt)), 10.0)
         let jitter = Double.random(in: 0...0.5)
         return base + jitter
+    }
+
+    /// Maps provider name to its API domain for network monitoring.
+    static func domainForProvider(_ name: String) -> String {
+        switch name.lowercased() {
+        case "anthropic": "api.anthropic.com"
+        case "openai": "api.openai.com"
+        case "google": "generativelanguage.googleapis.com"
+        case "groq": "api.groq.com"
+        case "openrouter": "openrouter.ai"
+        case "perplexity": "api.perplexity.ai"
+        case "deepseek": "api.deepseek.com"
+        default: "\(name.lowercased()).api"
+        }
     }
 
     /// Determines if an error is retryable (timeouts, server errors, rate limits).
