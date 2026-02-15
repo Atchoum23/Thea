@@ -192,7 +192,9 @@ struct DownloadManagerView: View {
     private var addSection: some View {
         Section("Add Download") {
             TextField("URL", text: $urlInput)
+                #if os(iOS)
                 .textInputAutocapitalization(.never)
+                #endif
                 .autocorrectionDisabled()
                 .onSubmit { Task { await addURL() } }
             Button {
