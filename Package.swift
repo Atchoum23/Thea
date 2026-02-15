@@ -69,6 +69,7 @@ let package = Package(
             exclude: [
                 "ChatService.swift",
                 "ConversationExporter.swift",
+                "FollowUpSuggestionService.swift",
                 "ProjectService.swift",
                 "ProjectPathManager.swift",
                 "QAToolsManager.swift",

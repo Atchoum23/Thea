@@ -1,26 +1,7 @@
 import Foundation
-
-// MARK: - Follow-Up Suggestion Model
-
-struct FollowUpSuggestion: Codable, Sendable, Identifiable {
-    let id: UUID
-    let text: String
-    let icon: String
-    let source: SuggestionGenerationSource
-
-    init(text: String, icon: String = "arrow.turn.down.right", source: SuggestionGenerationSource = .heuristic) {
-        self.id = UUID()
-        self.text = text
-        self.icon = icon
-        self.source = source
-    }
-}
-
-enum SuggestionGenerationSource: String, Codable, Sendable {
-    case heuristic
-    case ai
-    case learnedPattern
-}
+#if canImport(TheaModels)
+import TheaModels
+#endif
 
 // MARK: - Follow-Up Suggestion Service
 

@@ -469,6 +469,28 @@ extension ChatManager {
             AudioOutputRouter.shared.routeResponse(streamingText)
         }
 
+        // Follow-up suggestion generation (G1)
+        let responseForSuggestions = streamingText
+        let queryForSuggestions = text
+        let taskTypeRaw = taskType?.rawValue
+        Task { @MainActor in
+            let suggestions = FollowUpSuggestionService.shared.generate(
+                response: responseForSuggestions,
+                query: queryForSuggestions,
+                taskType: taskTypeRaw
+            )
+            if !suggestions.isEmpty {
+                var meta = assistantMessage.metadata ?? MessageMetadata()
+                meta.followUpSuggestions = suggestions
+                do {
+                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
+                    try assistantMessage.modelContext?.save()
+                } catch {
+                    msgLogger.error("Failed to save follow-up suggestions: \(error.localizedDescription)")
+                }
+            }
+        }
+
         // Response notifications
         let preview = streamingText
         Task {

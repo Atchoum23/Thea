@@ -203,6 +203,9 @@ struct MessageMetadata: Codable, Sendable {
     // Token usage (input tokens counted before send, output tokens from response)
     var inputTokens: Int?
 
+    // Follow-up suggestions generated after AI response
+    var followUpSuggestions: [FollowUpSuggestion]?
+
     init(
         finishReason: String? = nil,
         systemFingerprint: String? = nil,
@@ -212,7 +215,8 @@ struct MessageMetadata: Codable, Sendable {
         respondingDeviceName: String? = nil,
         respondingDeviceType: String? = nil,
         confidence: Double? = nil,
-        inputTokens: Int? = nil
+        inputTokens: Int? = nil,
+        followUpSuggestions: [FollowUpSuggestion]? = nil
     ) {
         self.finishReason = finishReason
         self.systemFingerprint = systemFingerprint
@@ -223,7 +227,30 @@ struct MessageMetadata: Codable, Sendable {
         self.respondingDeviceType = respondingDeviceType
         self.confidence = confidence
         self.inputTokens = inputTokens
+        self.followUpSuggestions = followUpSuggestions
     }
+}
+
+// MARK: - Follow-Up Suggestion Types
+
+struct FollowUpSuggestion: Codable, Sendable, Identifiable {
+    let id: UUID
+    let text: String
+    let icon: String
+    let source: SuggestionGenerationSource
+
+    init(text: String, icon: String = "arrow.turn.down.right", source: SuggestionGenerationSource = .heuristic) {
+        self.id = UUID()
+        self.text = text
+        self.icon = icon
+        self.source = source
+    }
+}
+
+enum SuggestionGenerationSource: String, Codable, Sendable {
+    case heuristic
+    case ai
+    case learnedPattern
 }
 
 // MARK: - Identifiable
