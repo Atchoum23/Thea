@@ -217,6 +217,9 @@ private func extractAmounts(from text: String) -> [TestExtractedAmount] {
                 .replacingOccurrences(of: " ", with: "")
             if currency == "EUR" || currency == "RUB" {
                 numStr = numStr.replacingOccurrences(of: ".", with: "").replacingOccurrences(of: ",", with: ".")
+            } else {
+                // USD, CHF, GBP: commas are thousands separators
+                numStr = numStr.replacingOccurrences(of: ",", with: "")
             }
             if let value = Double(numStr), value > 0.01 && value < 10_000_000 {
                 results.append(TestExtractedAmount(value: value, currency: currency))
@@ -256,6 +259,11 @@ private func extractDate(from text: String) -> Date? {
             fmt.dateFormat = format
             if let date = fmt.date(from: normalized) { return date }
         } else {
+            let cleanedDateStr = dateStr.replacingOccurrences(
+                of: #"(\d+)\."#,
+                with: "$1",
+                options: .regularExpression
+            )
             let fmt = DateFormatter()
             switch format {
             case "de": fmt.locale = Locale(identifier: "de_CH")
@@ -263,7 +271,7 @@ private func extractDate(from text: String) -> Date? {
             default: fmt.locale = Locale(identifier: "en_US")
             }
             fmt.dateFormat = "d MMMM yyyy"
-            if let date = fmt.date(from: dateStr) { return date }
+            if let date = fmt.date(from: cleanedDateStr) { return date }
         }
     }
     return nil
@@ -806,8 +814,8 @@ struct DocumentScannerErrorTests {
     }
 }
 
-@Suite("Classification — Edge Cases")
-struct ClassificationEdgeCaseTests {
+@Suite("Document Classification — Edge Cases")
+struct DocClassificationEdgeCaseTests {
     @Test("Mixed language document — Swiss German tax")
     func mixedLanguage() {
         let text = "Steuererklärung 2025\nTax return for fiscal year"

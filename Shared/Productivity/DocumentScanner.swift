@@ -441,9 +441,11 @@ final class DocumentScanner {
                 var numStr = String(text[range])
                     .replacingOccurrences(of: "'", with: "")
                     .replacingOccurrences(of: " ", with: "")
-                // Handle European decimal comma
+                // Handle European decimal comma vs thousands comma
                 if currency == "EUR" || currency == "RUB" {
                     numStr = numStr.replacingOccurrences(of: ".", with: "").replacingOccurrences(of: ",", with: ".")
+                } else {
+                    numStr = numStr.replacingOccurrences(of: ",", with: "")
                 }
                 if let value = Double(numStr), value > 0.01 && value < 10_000_000 {
                     // Extract context label (text around the amount)
@@ -497,7 +499,12 @@ final class DocumentScanner {
                 fmt.dateFormat = format
                 if let date = fmt.date(from: normalized) { return date }
             } else {
-                // Named month patterns
+                // Named month patterns — strip ordinal period (e.g., "5." → "5")
+                let cleanedDateStr = dateStr.replacingOccurrences(
+                    of: #"(\d+)\."#,
+                    with: "$1",
+                    options: .regularExpression
+                )
                 let fmt = DateFormatter()
                 switch format {
                 case "de": fmt.locale = Locale(identifier: "de_CH")
@@ -505,7 +512,7 @@ final class DocumentScanner {
                 default: fmt.locale = Locale(identifier: "en_US")
                 }
                 fmt.dateFormat = "d MMMM yyyy"
-                if let date = fmt.date(from: dateStr) { return date }
+                if let date = fmt.date(from: cleanedDateStr) { return date }
             }
         }
 
