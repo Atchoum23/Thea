@@ -61,3 +61,27 @@ public struct CachedTaskResult: Sendable {
         self.tokensUsed = tokensUsed
     }
 }
+
+// MARK: - Agent Feedback Statistics
+
+/// Tracks user feedback statistics for an agent type to improve future selection.
+public struct AgentTypeFeedbackStats: Sendable {
+    public var positiveCount: Int = 0
+    public var negativeCount: Int = 0
+
+    public var totalCount: Int { positiveCount + negativeCount }
+
+    /// Success rate based on user feedback (nil if no feedback yet)
+    public var successRate: Double? {
+        guard totalCount > 0 else { return nil }
+        return Double(positiveCount) / Double(totalCount)
+    }
+
+    public mutating func record(positive: Bool) {
+        if positive {
+            positiveCount += 1
+        } else {
+            negativeCount += 1
+        }
+    }
+}

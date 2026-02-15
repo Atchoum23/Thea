@@ -32,6 +32,9 @@ struct TheaAgentDetailView: View {
                         errorSection(error)
                     }
                     metricsSection
+                    if session.state == .completed {
+                        feedbackSection
+                    }
                 }
                 .padding(TheaSpacing.lg)
             }
@@ -199,9 +202,57 @@ struct TheaAgentDetailView: View {
             HStack(spacing: TheaSpacing.lg) {
                 metricItem("Tokens", value: "\(session.tokensUsed)")
                 metricItem("Budget", value: "\(session.tokenBudget)")
+                metricItem("Cost", value: session.formattedCost)
                 metricItem("Pressure", value: session.contextPressure.rawValue.capitalized)
                 if session.confidence > 0 {
                     metricItem("Confidence", value: String(format: "%.0f%%", session.confidence * 100))
+                }
+            }
+            if let model = session.modelId {
+                HStack(spacing: TheaSpacing.sm) {
+                    metricItem("Model", value: model)
+                    if let provider = session.providerId {
+                        metricItem("Provider", value: provider)
+                    }
+                }
+                .padding(.top, TheaSpacing.xs)
+            }
+        }
+    }
+
+    // MARK: - Feedback
+
+    private var feedbackSection: some View {
+        VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+            sectionTitle("Rate this result")
+
+            if let rating = session.userRating {
+                HStack(spacing: TheaSpacing.sm) {
+                    Image(systemName: rating.sfSymbol)
+                        .foregroundStyle(rating == .positive ? .green : .red)
+                    Text(rating == .positive ? "Helpful" : "Not helpful")
+                        .font(.theaCaption1)
+                    if let comment = session.userFeedbackComment, !comment.isEmpty {
+                        Text("— \(comment)")
+                            .font(.theaCaption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else {
+                HStack(spacing: TheaSpacing.md) {
+                    Button {
+                        TheaAgentOrchestrator.shared.submitFeedback(for: session, rating: .positive)
+                    } label: {
+                        Label("Helpful", systemImage: "hand.thumbsup")
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button {
+                        TheaAgentOrchestrator.shared.submitFeedback(for: session, rating: .negative)
+                    } label: {
+                        Label("Not helpful", systemImage: "hand.thumbsdown")
+                    }
+                    .buttonStyle(.bordered)
                 }
             }
         }

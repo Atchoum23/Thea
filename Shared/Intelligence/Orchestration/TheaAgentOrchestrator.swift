@@ -51,6 +51,24 @@ public final class TheaAgentOrchestrator {
     private var resultCache: [String: CachedTaskResult] = [:]
     private let cacheTTL: TimeInterval = 300  // 5 minutes
 
+    // MARK: - Cost Tracking
+
+    /// Cumulative cost across all sessions in this app lifecycle
+    public var cumulativeCost: Double = 0
+
+    /// Daily cost budget cap in USD (0 = no limit)
+    public var dailyCostBudget: Double = 0
+
+    /// Whether the daily budget has been exceeded
+    public var isBudgetExceeded: Bool {
+        dailyCostBudget > 0 && cumulativeCost >= dailyCostBudget
+    }
+
+    // MARK: - Feedback Stats
+
+    /// Tracks feedback statistics per agent type for improving selection
+    private var agentTypeFeedback: [SpecializedAgentType: AgentTypeFeedbackStats] = [:]
+
     // MARK: - Runner
 
     private let runner = TheaAgentRunner()
@@ -386,9 +404,21 @@ public final class TheaAgentOrchestrator {
     private func executeSession(_ session: TheaAgentSession) async {
         guard !session.state.isTerminal else { return }
 
+        // Check budget before executing
+        if isBudgetExceeded {
+            session.error = "Daily cost budget exceeded (\(String(format: "$%.2f", dailyCostBudget)))"
+            session.transition(to: .failed)
+            logActivity(sessionID: session.id, event: "budget-exceeded", detail: session.error ?? "")
+            return
+        }
+
         do {
             // Get provider and model from ChatManager's routing
             let (provider, model, _) = try await ChatManager.shared.selectProviderAndModel(for: session.taskDescription)
+
+            // Track provider/model for cost estimation
+            session.modelId = model
+            session.providerId = provider.metadata.name
 
             // Acquire API slot
             let allocation = try await AgentResourcePool.shared.acquire(
@@ -409,13 +439,101 @@ public final class TheaAgentOrchestrator {
 
             // Post-completion: distill and reallocate
             reallocateContextBudget()
-            logActivity(sessionID: session.id, event: "completed", detail: "Tokens: \(session.tokensUsed), confidence: \(session.confidence)")
+
+            // Persist session summary to knowledge graph for future agent context
+            await persistSessionToKnowledgeGraph(session)
+
+            // Track cumulative cost
+            cumulativeCost += session.estimatedCost
+
+            logActivity(
+                sessionID: session.id,
+                event: "completed",
+                detail: "Tokens: \(session.tokensUsed), confidence: \(session.confidence), cost: \(session.formattedCost)"
+            )
 
         } catch {
             session.error = error.localizedDescription
             session.transition(to: .failed)
             logActivity(sessionID: session.id, event: "failed", detail: error.localizedDescription)
         }
+    }
+
+    // MARK: - Agent Memory (Knowledge Graph Persistence)
+
+    /// Persist a completed session's summary to PersonalKnowledgeGraph
+    /// so future agents can learn from past results.
+    private func persistSessionToKnowledgeGraph(_ session: TheaAgentSession) async {
+        guard session.state == .completed else { return }
+
+        let agentOutput = session.messages
+            .filter { $0.role == .agent }
+            .map(\.content)
+            .joined(separator: "\n")
+
+        let summaryText = String(agentOutput.prefix(500))
+        guard !summaryText.isEmpty else { return }
+
+        let entityName = "Agent: \(session.agentType.rawValue) — \(session.taskDescription.prefix(60))"
+        let entity = KGEntity(name: entityName, type: .project, attributes: [
+            "agentType": session.agentType.rawValue,
+            "taskDescription": session.taskDescription,
+            "resultSummary": summaryText,
+            "tokensUsed": "\(session.tokensUsed)",
+            "confidence": String(format: "%.2f", session.confidence),
+            "model": session.modelId ?? "unknown",
+            "completedAt": ISO8601DateFormatter().string(from: session.completedAt ?? Date()),
+            "cost": session.formattedCost
+        ])
+        await PersonalKnowledgeGraph.shared.addEntity(entity)
+        await PersonalKnowledgeGraph.shared.save()
+        logger.info("Persisted agent session \(session.id.uuidString.prefix(8)) to knowledge graph")
+    }
+
+    // MARK: - User Feedback
+
+    /// Record user feedback for a completed session.
+    public func submitFeedback(
+        for session: TheaAgentSession,
+        rating: AgentFeedbackRating,
+        comment: String? = nil
+    ) {
+        session.userRating = rating
+        session.userFeedbackComment = comment
+
+        logActivity(
+            sessionID: session.id,
+            event: "feedback-\(rating.rawValue)",
+            detail: comment ?? "No comment"
+        )
+
+        agentTypeFeedback[session.agentType, default: AgentTypeFeedbackStats()]
+            .record(positive: rating == .positive)
+
+        logger.info("Agent feedback: \(rating.rawValue) for \(session.agentType.rawValue)")
+    }
+
+    /// Get the success rate for a given agent type based on user feedback.
+    public func feedbackSuccessRate(for agentType: SpecializedAgentType) -> Double? {
+        agentTypeFeedback[agentType]?.successRate
+    }
+
+    // MARK: - Cost Queries
+
+    /// Total cost across all completed sessions.
+    public var totalSessionCost: Double {
+        sessions.reduce(0) { $0 + $1.estimatedCost }
+    }
+
+    /// Cost breakdown by provider.
+    public var costByProvider: [(provider: String, cost: Double)] {
+        var providerCosts: [String: Double] = [:]
+        for session in sessions where session.state == .completed {
+            let provider = session.providerId ?? "unknown"
+            providerCosts[provider, default: 0] += session.estimatedCost
+        }
+        return providerCosts.map { (provider: $0.key, cost: $0.value) }
+            .sorted { $0.cost > $1.cost }
     }
 
     /// Token budget based on agent type, adjusted for delegation depth.

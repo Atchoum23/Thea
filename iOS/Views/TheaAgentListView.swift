@@ -241,9 +241,47 @@ private struct IOSAgentDetailView: View {
                     sectionHeader("Metrics")
                     HStack(spacing: TheaSpacing.lg) {
                         metricItem("Tokens", value: "\(session.tokensUsed)/\(session.tokenBudget)")
+                        metricItem("Cost", value: session.formattedCost)
                         metricItem("Pressure", value: session.contextPressure.rawValue.capitalized)
                         if session.confidence > 0 {
                             metricItem("Confidence", value: String(format: "%.0f%%", session.confidence * 100))
+                        }
+                    }
+                    if let model = session.modelId {
+                        HStack(spacing: TheaSpacing.sm) {
+                            metricItem("Model", value: model)
+                            if let provider = session.providerId {
+                                metricItem("Provider", value: provider)
+                            }
+                        }
+                    }
+
+                    // Feedback
+                    if session.state == .completed {
+                        sectionHeader("Rate this result")
+                        if let rating = session.userRating {
+                            HStack(spacing: TheaSpacing.sm) {
+                                Image(systemName: rating.sfSymbol)
+                                    .foregroundStyle(rating == .positive ? .green : .red)
+                                Text(rating == .positive ? "Helpful" : "Not helpful")
+                                    .font(.theaCaption1)
+                            }
+                        } else {
+                            HStack(spacing: TheaSpacing.md) {
+                                Button {
+                                    TheaAgentOrchestrator.shared.submitFeedback(for: session, rating: .positive)
+                                } label: {
+                                    Label("Helpful", systemImage: "hand.thumbsup")
+                                }
+                                .buttonStyle(.bordered)
+
+                                Button {
+                                    TheaAgentOrchestrator.shared.submitFeedback(for: session, rating: .negative)
+                                } label: {
+                                    Label("Not helpful", systemImage: "hand.thumbsdown")
+                                }
+                                .buttonStyle(.bordered)
+                            }
                         }
                     }
                 }

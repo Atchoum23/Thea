@@ -156,6 +156,57 @@ public enum TheaContextPressure: String, Comparable, Sendable {
     }
 }
 
+// MARK: - Agent Feedback
+
+/// User quality rating for a completed agent session
+public enum AgentFeedbackRating: String, Codable, Sendable {
+    case positive   // thumbs up
+    case negative   // thumbs down
+
+    public var sfSymbol: String {
+        switch self {
+        case .positive: "hand.thumbsup.fill"
+        case .negative: "hand.thumbsdown.fill"
+        }
+    }
+}
+
+// MARK: - Agent Cost Estimation
+
+/// Estimated cost per 1M tokens for known models (input, output)
+public enum AgentCostEstimator {
+    /// Returns (inputCostPer1M, outputCostPer1M) in USD for a model ID.
+    public static func costPerMillionTokens(modelId: String) -> (input: Double, output: Double) {
+        let lower = modelId.lowercased()
+        // Anthropic
+        if lower.contains("opus") { return (15.0, 75.0) }
+        if lower.contains("sonnet") { return (3.0, 15.0) }
+        if lower.contains("haiku") { return (0.25, 1.25) }
+        // OpenAI
+        if lower.contains("gpt-4o-mini") { return (0.15, 0.60) }
+        if lower.contains("gpt-4o") { return (2.50, 10.0) }
+        if lower.contains("o1") || lower.contains("o3") { return (15.0, 60.0) }
+        // Google
+        if lower.contains("gemini") { return (0.50, 1.50) }
+        // DeepSeek
+        if lower.contains("deepseek") { return (0.27, 1.10) }
+        // Local models (free)
+        if lower.contains("local") || lower.contains("mlx") { return (0.0, 0.0) }
+        // Default (assume mid-range)
+        return (1.0, 3.0)
+    }
+
+    /// Estimate total cost for a session based on token usage and model.
+    /// Assumes ~30% of tokens are output tokens (conservative estimate).
+    public static func estimateCost(tokensUsed: Int, modelId: String?) -> Double {
+        guard let modelId, tokensUsed > 0 else { return 0 }
+        let (inputCost, outputCost) = costPerMillionTokens(modelId: modelId)
+        let outputTokens = Double(tokensUsed) * 0.3
+        let inputTokens = Double(tokensUsed) * 0.7
+        return (inputTokens * inputCost + outputTokens * outputCost) / 1_000_000
+    }
+}
+
 // MARK: - TheaAgentSession
 
 /// Observable model for a sub-agent execution session.
@@ -210,6 +261,20 @@ public final class TheaAgentSession: Identifiable {
 
     public var autonomyLevel: THEAAutonomyLevel = .balanced
 
+    // MARK: - User Feedback
+
+    /// User's quality rating for this session (nil = not yet rated)
+    public var userRating: AgentFeedbackRating?
+    /// Optional user comment about the agent's performance
+    public var userFeedbackComment: String?
+
+    // MARK: - Cost Tracking
+
+    /// Model ID used for this session (for cost calculation)
+    public var modelId: String?
+    /// Provider ID used for this session
+    public var providerId: String?
+
     // MARK: - Computed
 
     public var elapsed: TimeInterval {
@@ -220,6 +285,19 @@ public final class TheaAgentSession: Identifiable {
     public var tokenUsageRatio: Double {
         guard tokenBudget > 0 else { return 0 }
         return Double(tokensUsed) / Double(tokenBudget)
+    }
+
+    /// Estimated USD cost based on tokens used and model pricing
+    public var estimatedCost: Double {
+        AgentCostEstimator.estimateCost(tokensUsed: tokensUsed, modelId: modelId)
+    }
+
+    /// Formatted cost string for display
+    public var formattedCost: String {
+        let cost = estimatedCost
+        if cost == 0 { return "Free" }
+        if cost < 0.01 { return "<$0.01" }
+        return String(format: "$%.2f", cost)
     }
 
     // MARK: - Init
