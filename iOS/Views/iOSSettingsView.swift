@@ -273,6 +273,16 @@ struct iOSSettingsView: View {
                         subtitle: "AI-powered image processing"
                     )
                 }
+                NavigationLink {
+                    CodeAssistantView()
+                } label: {
+                    SettingsRow(
+                        icon: "chevron.left.forwardslash.chevron.right",
+                        iconColor: .cyan,
+                        title: "Code Assistant",
+                        subtitle: "\(CodeAssistant.shared.projects.count) projects"
+                    )
+                }
             } header: {
                 Text("Life")
             }

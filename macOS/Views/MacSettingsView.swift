@@ -260,7 +260,7 @@ struct MacSettingsView: View {
         case .voiceInput:
             voiceInputSettings
         case .codeIntelligence:
-            CodeIntelligenceConfigurationView()
+            CodeAssistantView()
         case .health:
             HealthDashboardView()
         case .finance:
