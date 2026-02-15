@@ -20,7 +20,7 @@ final class LocalVisionGuidance {
     private let voiceBackend = MLXVoiceBackend()
     private let screenCapture = ScreenCaptureManager()
     private let pointerTracker = PointerTracker()
-    private let actionExecutor = ActionExecutor()
+    private let actionExecutor = SystemActionExecutor()
 
     // MARK: - State
 

@@ -9,7 +9,7 @@ import AppKit
 // Enables "control handoff" feature for automated UI interactions
 
 @MainActor
-final class ActionExecutor {
+final class SystemActionExecutor {
 
     // MARK: - Authorization
 
@@ -18,7 +18,8 @@ final class ActionExecutor {
     }
 
     func requestAuthorization() {
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true]
+        nonisolated(unsafe) let promptKey = kAXTrustedCheckOptionPrompt.takeRetainedValue() as String
+        let options: NSDictionary = [promptKey: true]
         AXIsProcessTrustedWithOptions(options)
     }
 
@@ -27,7 +28,7 @@ final class ActionExecutor {
     /// Click at a specific screen position
     func click(at point: CGPoint, button: MouseButton = .left) throws {
         guard isAuthorized() else {
-            throw ActionExecutorError.notAuthorized
+            throw SystemActionExecutorError.notAuthorized
         }
 
         let (downType, upType) = button.eventTypes
@@ -39,7 +40,7 @@ final class ActionExecutor {
             mouseCursorPosition: point,
             mouseButton: button.cgButton
         ) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
 
         // Mouse up
@@ -49,7 +50,7 @@ final class ActionExecutor {
             mouseCursorPosition: point,
             mouseButton: button.cgButton
         ) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
 
         // Post events
@@ -57,13 +58,13 @@ final class ActionExecutor {
         usleep(50_000) // 50ms delay
         mouseUp.post(tap: .cghidEventTap)
 
-        print("🖱️ ActionExecutor: Clicked \(button) at (\(point.x), \(point.y))")
+        print("🖱️ SystemActionExecutor: Clicked \(button) at (\(point.x), \(point.y))")
     }
 
     /// Double-click at a specific position
     func doubleClick(at point: CGPoint, button: MouseButton = .left) throws {
         guard isAuthorized() else {
-            throw ActionExecutorError.notAuthorized
+            throw SystemActionExecutorError.notAuthorized
         }
 
         let (downType, upType) = button.eventTypes
@@ -75,7 +76,7 @@ final class ActionExecutor {
             mouseCursorPosition: point,
             mouseButton: button.cgButton
         ) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
 
         guard let mouseUp1 = CGEvent(
@@ -84,7 +85,7 @@ final class ActionExecutor {
             mouseCursorPosition: point,
             mouseButton: button.cgButton
         ) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
 
         // Second click with clickCount = 2
@@ -94,7 +95,7 @@ final class ActionExecutor {
             mouseCursorPosition: point,
             mouseButton: button.cgButton
         ) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
         mouseDown2.setIntegerValueField(.mouseEventClickState, value: 2)
 
@@ -104,7 +105,7 @@ final class ActionExecutor {
             mouseCursorPosition: point,
             mouseButton: button.cgButton
         ) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
         mouseUp2.setIntegerValueField(.mouseEventClickState, value: 2)
 
@@ -115,13 +116,13 @@ final class ActionExecutor {
         mouseDown2.post(tap: .cghidEventTap)
         mouseUp2.post(tap: .cghidEventTap)
 
-        print("🖱️ ActionExecutor: Double-clicked at (\(point.x), \(point.y))")
+        print("🖱️ SystemActionExecutor: Double-clicked at (\(point.x), \(point.y))")
     }
 
     /// Move mouse pointer to a specific position
     func movePointer(to point: CGPoint, animated: Bool = false) throws {
         guard isAuthorized() else {
-            throw ActionExecutorError.notAuthorized
+            throw SystemActionExecutorError.notAuthorized
         }
 
         if animated {
@@ -145,7 +146,7 @@ final class ActionExecutor {
             CGWarpMouseCursorPosition(point)
         }
 
-        print("🖱️ ActionExecutor: Moved pointer to (\(point.x), \(point.y))")
+        print("🖱️ SystemActionExecutor: Moved pointer to (\(point.x), \(point.y))")
     }
 
     // MARK: - Keyboard Actions
@@ -153,7 +154,7 @@ final class ActionExecutor {
     /// Type text using keyboard events
     func type(_ text: String) throws {
         guard isAuthorized() else {
-            throw ActionExecutorError.notAuthorized
+            throw SystemActionExecutorError.notAuthorized
         }
 
         for char in text {
@@ -161,13 +162,13 @@ final class ActionExecutor {
             usleep(20_000) // 20ms delay between keystrokes
         }
 
-        print("⌨️ ActionExecutor: Typed text: \(text)")
+        print("⌨️ SystemActionExecutor: Typed text: \(text)")
     }
 
     /// Press a specific key
     func pressKey(_ keyCode: CGKeyCode, modifiers: CGEventFlags = []) throws {
         guard isAuthorized() else {
-            throw ActionExecutorError.notAuthorized
+            throw SystemActionExecutorError.notAuthorized
         }
 
         // Key down
@@ -176,7 +177,7 @@ final class ActionExecutor {
             virtualKey: keyCode,
             keyDown: true
         ) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
         keyDown.flags = modifiers
 
@@ -186,7 +187,7 @@ final class ActionExecutor {
             virtualKey: keyCode,
             keyDown: false
         ) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
         keyUp.flags = modifiers
 
@@ -194,7 +195,7 @@ final class ActionExecutor {
         usleep(50_000) // 50ms delay
         keyUp.post(tap: .cghidEventTap)
 
-        print("⌨️ ActionExecutor: Pressed key code \(keyCode)")
+        print("⌨️ SystemActionExecutor: Pressed key code \(keyCode)")
     }
 
     /// Press Return/Enter key
@@ -218,7 +219,7 @@ final class ActionExecutor {
         let string = String(char)
 
         guard let event = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: true) else {
-            throw ActionExecutorError.eventCreationFailed
+            throw SystemActionExecutorError.eventCreationFailed
         }
 
         event.keyboardSetUnicodeString(stringLength: string.utf16.count, unicodeString: Array(string.utf16))
@@ -251,7 +252,7 @@ enum MouseButton {
 
 // MARK: - Action Executor Errors
 
-enum ActionExecutorError: Error, LocalizedError {
+enum SystemActionExecutorError: Error, LocalizedError {
     case notAuthorized
     case eventCreationFailed
     case actionFailed(String)
