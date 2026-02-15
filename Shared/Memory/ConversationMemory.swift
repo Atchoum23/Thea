@@ -182,8 +182,8 @@ final class ConversationMemory {
             candidateSummaries = conversationSummaries.filter { $0.projectId == projectId }
         }
 
-        // Simple keyword matching for now
-        // In a full implementation, this would use embeddings for semantic search
+        // Keyword-based search — functional for topic matching
+        // Future enhancement: embedding-based semantic search for higher recall
         let queryTerms = query.lowercased().split(separator: " ").map(String.init)
 
         for summary in candidateSummaries {

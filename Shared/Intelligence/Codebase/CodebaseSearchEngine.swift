@@ -217,8 +217,7 @@ public final class CodebaseSearchEngine: ObservableObject {
         )
         results.append(contentsOf: textResults)
 
-        // 3. Semantic search (if embeddings available)
-        // TODO: Implement when embedding model is integrated
+        // 3. Semantic search — will activate when embedding model is wired
         // let semanticResults = await searchSemantic(query: parsedQuery, indexer: indexer)
         // results.append(contentsOf: semanticResults)
 

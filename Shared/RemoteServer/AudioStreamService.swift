@@ -130,11 +130,39 @@ public class AudioStreamService: ObservableObject {
 
     // MARK: - Playback (Client Side)
 
-    /// Play received audio frames
-    public func playAudioFrame(_: AudioFrame) {
+    /// Play received audio frames on the client side
+    public func playAudioFrame(_ frame: AudioFrame) {
         #if os(macOS)
-            // Client-side audio playback would use AVAudioEngine
-            // This is a placeholder for the receiving end
+        guard !isMuted else { return }
+        do {
+            let audioData = frame.data
+            guard !audioData.isEmpty else { return }
+            // Play raw PCM audio using AVAudioPlayer (WAV header prepended for compatibility)
+            var wavData = Data()
+            // WAV header for raw PCM: 44.1kHz, 16-bit, mono
+            let dataSize = UInt32(audioData.count)
+            let fileSize = dataSize + 36
+            wavData.append(contentsOf: [0x52, 0x49, 0x46, 0x46]) // "RIFF"
+            wavData.append(contentsOf: withUnsafeBytes(of: fileSize.littleEndian) { Array($0) })
+            wavData.append(contentsOf: [0x57, 0x41, 0x56, 0x45]) // "WAVE"
+            wavData.append(contentsOf: [0x66, 0x6D, 0x74, 0x20]) // "fmt "
+            wavData.append(contentsOf: withUnsafeBytes(of: UInt32(16).littleEndian) { Array($0) })
+            wavData.append(contentsOf: withUnsafeBytes(of: UInt16(1).littleEndian) { Array($0) }) // PCM
+            wavData.append(contentsOf: withUnsafeBytes(of: UInt16(1).littleEndian) { Array($0) }) // mono
+            wavData.append(contentsOf: withUnsafeBytes(of: UInt32(44100).littleEndian) { Array($0) })
+            wavData.append(contentsOf: withUnsafeBytes(of: UInt32(88200).littleEndian) { Array($0) })
+            wavData.append(contentsOf: withUnsafeBytes(of: UInt16(2).littleEndian) { Array($0) })
+            wavData.append(contentsOf: withUnsafeBytes(of: UInt16(16).littleEndian) { Array($0) })
+            wavData.append(contentsOf: [0x64, 0x61, 0x74, 0x61]) // "data"
+            wavData.append(contentsOf: withUnsafeBytes(of: dataSize.littleEndian) { Array($0) })
+            wavData.append(audioData)
+
+            let player = try AVAudioPlayer(data: wavData)
+            player.volume = volume
+            player.play()
+        } catch {
+            // Audio playback failed — non-critical for remote session
+        }
         #endif
     }
 }

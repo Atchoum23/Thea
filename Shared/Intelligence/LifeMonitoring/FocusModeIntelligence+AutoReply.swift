@@ -205,9 +205,30 @@ extension FocusModeIntelligence {
     }
 
     func sendViaTelegram(to chatId: String, message: String) async -> Bool {
-        // Telegram Bot API or desktop automation
-        // For personal account, use desktop automation similar to WhatsApp
-        false // Placeholder
+        #if os(macOS)
+        // Use AppleScript to send via Telegram Desktop
+        let escapedMessage = message.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
+        tell application "Telegram" to activate
+        delay 0.5
+        tell application "System Events"
+            tell process "Telegram"
+                keystroke "f" using command down
+                delay 0.3
+                keystroke "\(chatId)"
+                delay 0.5
+                key code 36
+                delay 0.3
+                keystroke "\(escapedMessage)"
+                delay 0.1
+                key code 36
+            end tell
+        end tell
+        """
+        return await runAppleScript(script)
+        #else
+        return false
+        #endif
     }
 
     func runAppleScript(_ script: String) async -> Bool {
@@ -277,30 +298,28 @@ extension FocusModeIntelligence {
     // MARK: - WhatsApp Status Management
 
     func updateWhatsAppStatus(_ status: String) async {
-        // Save current status first
         #if os(macOS)
-        // Read current status via AppleScript/automation
-        // This is complex as WhatsApp doesn't expose this easily
         setPreviousWhatsAppStatus(await getCurrentWhatsAppStatus())
 
-        // Update status
-        _ = """
+        let escapedStatus = status.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
         tell application "WhatsApp" to activate
         delay 0.5
         tell application "System Events"
             tell process "WhatsApp"
-                -- Navigate to Settings > Profile
                 keystroke "," using command down
+                delay 0.5
+                -- Click profile area to edit status
+                click static text 1 of group 1 of scroll area 1 of window 1
                 delay 0.3
-                -- This would need UI navigation to change status
-                -- Placeholder - actual implementation depends on WhatsApp UI
+                keystroke "a" using command down
+                keystroke "\(escapedStatus)"
+                delay 0.1
+                key code 36
             end tell
         end tell
         """
-
-        // Note: WhatsApp status change via automation is complex
-        // Alternative: Use WhatsApp Web automation or third-party APIs
-        print("[WhatsApp] Would update status to: \(status)")
+        _ = await runAppleScript(script)
         #endif
     }
 
@@ -312,8 +331,23 @@ extension FocusModeIntelligence {
     }
 
     func getCurrentWhatsAppStatus() async -> String? {
-        // Read current WhatsApp status
-        nil // Placeholder
+        #if os(macOS)
+        // Read WhatsApp status via AppleScript UI inspection
+        return await runAppleScriptReturning("""
+        tell application "System Events"
+            if exists (process "WhatsApp") then
+                tell process "WhatsApp"
+                    try
+                        return description of static text 1 of group 1 of toolbar 1 of window 1
+                    end try
+                end tell
+            end if
+        end tell
+        return ""
+        """)
+        #else
+        return nil
+        #endif
     }
 
     // MARK: - Telegram Status Management

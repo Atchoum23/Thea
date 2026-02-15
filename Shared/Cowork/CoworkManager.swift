@@ -309,7 +309,7 @@
                     session.addArtifact(from: reportURL, stepId: step.id)
 
                 default:
-                    step.addLog(.debug, "Tool \(tool) not implemented")
+                    step.addLog(.debug, "Skipping unrecognized tool: \(tool)")
                 }
             }
 

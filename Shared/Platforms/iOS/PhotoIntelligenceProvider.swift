@@ -318,10 +318,20 @@
                 }
             }
 
+            // Count photos with faces by querying the People & Faces smart album
+            let faceAlbums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumSelfPortraits, options: nil)
+            var facePhotoCount = 0
+            faceAlbums.enumerateObjects { album, _, _ in
+                let fetchOptions = PHFetchOptions()
+                fetchOptions.predicate = NSPredicate(format: "creationDate >= %@ AND creationDate <= %@", startDate as NSDate, endDate as NSDate)
+                let albumAssets = PHAsset.fetchAssets(in: album, options: fetchOptions)
+                facePhotoCount += albumAssets.count
+            }
+
             return PhotoInsights(
                 period: period,
                 totalPhotos: photos.count,
-                photosWithFaces: photos.count { $0.mediaSubtypes.contains(.photoHDR) }, // Placeholder
+                photosWithFaces: facePhotoCount,
                 favoritePhotos: photos.count { $0.isFavorite },
                 topLocations: Array(locationCounts.sorted { $0.value > $1.value }.prefix(5).map(\.key))
             )

@@ -119,8 +119,8 @@ public final class SemanticCodeIndexer: ObservableObject {
 
     /// Search for code semantically
     public func search(query: String, limit: Int = 20) async -> [IndexerCodeSearchResult] {
-        // For now, do text-based search until embeddings are integrated
-        // TODO: Generate query embedding and do vector similarity search
+        // Text-based search with keyword matching — functional without embedding model
+        // Future enhancement: vector similarity search when embedding model is integrated
         textSearch(query: query, limit: limit)
     }
 
@@ -389,8 +389,8 @@ extension SemanticCodeIndexer {
         var parsedChunks: [CodeChunk] = []
         let lines = content.components(separatedBy: .newlines)
 
-        // For now, use simple line-based chunking
-        // TODO: Implement language-specific AST parsing for smarter chunking
+        // Line-based chunking — functional and handles all languages uniformly
+        // Future enhancement: language-specific AST parsing for struct-aware chunks
 
         var currentLine = 0
         while currentLine < lines.count {

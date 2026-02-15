@@ -505,13 +505,47 @@ public actor DeadlineIntelligence {
     // MARK: - Private Methods
 
     private func performPeriodicScan() async {
-        // Scan calendar for upcoming events that might be deadlines
-        // Scan reminders
-        // Check email (if permitted)
-        // Check documents folder for new documents
+        #if canImport(EventKit)
+        let store = EKEventStore()
 
-        // This is a placeholder - actual implementation would integrate with
-        // LifeMonitoringCoordinator to get data from all sources
+        // Scan calendar events for upcoming deadlines (next 30 days)
+        let now = Date()
+        let thirtyDaysLater = Calendar.current.date(byAdding: .day, value: 30, to: now) ?? now
+        let predicate = store.predicateForEvents(withStart: now, end: thirtyDaysLater, calendars: nil)
+        let events = store.events(matching: predicate)
+
+        for event in events {
+            let content = "Calendar event: \(event.title ?? "Untitled") on \(event.startDate?.description ?? "unknown date")"
+            if let notes = event.notes {
+                _ = await processContent("\(content)\n\(notes)", source: .calendar)
+            } else {
+                _ = await processContent(content, source: .calendar)
+            }
+        }
+
+        // Scan reminders with due dates
+        do {
+            let reminderCalendars = store.calendars(for: .reminder)
+            for calendar in reminderCalendars {
+                let reminderPredicate = store.predicateForIncompleteReminders(
+                    withDueDateStarting: now,
+                    ending: thirtyDaysLater,
+                    calendars: [calendar]
+                )
+                let reminders = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[EKReminder], Error>) in
+                    store.fetchReminders(matching: reminderPredicate) { reminders in
+                        continuation.resume(returning: reminders ?? [])
+                    }
+                }
+                for reminder in reminders {
+                    let content = "Reminder: \(reminder.title ?? "Untitled")"
+                    _ = await processContent(content, source: .reminders)
+                }
+            }
+        } catch {
+            // Reminders access may be denied
+        }
+        #endif
     }
 
     private func checkReminders() async {

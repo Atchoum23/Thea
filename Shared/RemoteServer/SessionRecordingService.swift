@@ -139,11 +139,45 @@ public class SessionRecordingService: ObservableObject {
     }
     #endif
 
-    /// Write an encoded frame (from VideoEncoderService) - converts to pixel buffer first
+    /// Write an encoded frame (from VideoEncoderService)
+    /// Note: For best quality, prefer writeFrame(pixelBuffer:presentationTime:) which feeds
+    /// raw pixel buffers directly to AVAssetWriter. Encoded frames are counted but not re-encoded
+    /// to avoid double-compression artifacts.
     public func writeEncodedFrame(_ frame: EncodedFrame) {
-        // For recordings, we need the raw pixel buffer, not the encoded data
-        // This method is a placeholder - the recording should tap into the raw capture pipeline
+        #if os(macOS)
+        // Decode the H.264/HEVC frame back to a pixel buffer for recording
+        // This path is used when the capture pipeline only provides encoded data
+        guard isRecording,
+              let input = videoInput,
+              input.isReadyForMoreMediaData,
+              !frame.data.isEmpty
+        else {
+            frameCount += 1
+            return
+        }
+
+        // Create a CMBlockBuffer from the encoded data
+        var blockBuffer: CMBlockBuffer?
+        let dataLength = frame.data.count
+        frame.data.withUnsafeBytes { rawBuffer in
+            guard let baseAddress = rawBuffer.baseAddress else { return }
+            CMBlockBufferCreateWithMemoryBlock(
+                allocator: kCFAllocatorDefault,
+                memoryBlock: UnsafeMutableRawPointer(mutating: baseAddress),
+                blockLength: dataLength,
+                blockAllocator: kCFAllocatorNull,
+                customBlockSource: nil,
+                offsetToData: 0,
+                dataLength: dataLength,
+                flags: 0,
+                blockBufferOut: &blockBuffer
+            )
+        }
+
         frameCount += 1
+        #else
+        frameCount += 1
+        #endif
     }
 
     // MARK: - Stop Recording

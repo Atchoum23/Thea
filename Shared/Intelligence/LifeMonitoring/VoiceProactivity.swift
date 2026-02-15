@@ -840,11 +840,43 @@ public actor VoiceProactivity {
     }
 
     private func sendMessageDirectly(_ relay: MessageRelay) async -> Bool {
-        // Would use platform-specific APIs
-        // For iMessage: AppleScript on Mac, Messages framework on iOS
-        // For WhatsApp/Telegram: URL schemes or API
+        #if os(macOS)
+        // Use AppleScript to send iMessage on macOS
+        let escapedMessage = relay.message.replacingOccurrences(of: "\"", with: "\\\"")
+        let escapedRecipient = relay.recipient.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
+        tell application "Messages"
+            set targetService to 1st service whose service type = iMessage
+            set targetBuddy to buddy "\(escapedRecipient)" of targetService
+            send "\(escapedMessage)" to targetBuddy
+        end tell
+        """
 
-        false // Placeholder
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global().async {
+                var error: NSDictionary?
+                if let appleScript = NSAppleScript(source: script) {
+                    appleScript.executeAndReturnError(&error)
+                    continuation.resume(returning: error == nil)
+                } else {
+                    continuation.resume(returning: false)
+                }
+            }
+        }
+        #elseif os(iOS)
+        // On iOS, use URL scheme to open Messages with pre-filled content
+        let encodedBody = relay.message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedRecipient = relay.recipient.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        guard let url = URL(string: "sms:\(encodedRecipient)&body=\(encodedBody)") else {
+            return false
+        }
+        return await MainActor.run {
+            UIApplication.shared.open(url)
+            return true
+        }
+        #else
+        return false
+        #endif
     }
 
     private func relayThroughMac(_ command: DeviceRelayCommand) async -> Bool {
@@ -852,21 +884,51 @@ public actor VoiceProactivity {
             return false
         }
 
-        // Would communicate with Mac via:
-        // 1. Local network (Bonjour/mDNS)
-        // 2. iCloud relay
-        // 3. Custom protocol
+        let hostname = configuration.macRelayHostname
+        let commandData: Data
+        do {
+            commandData = try JSONEncoder().encode(["command": String(describing: command)])
+        } catch {
+            return false
+        }
+
+        // Try Tailscale hostname first, then .local mDNS
+        let hosts = [hostname, "\(hostname).local"]
+
+        for host in hosts {
+            guard let url = URL(string: "http://\(host):18789/relay") else { continue }
+            var request = URLRequest(url: url, timeoutInterval: 5)
+            request.httpMethod = "POST"
+            request.httpBody = commandData
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            do {
+                let (_, response) = try await URLSession.shared.data(for: request)
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                    let result = DeviceRelayResult(
+                        success: true,
+                        sourceDevice: UIDevice.current.name,
+                        targetDevice: hostname,
+                        command: String(describing: command),
+                        message: "Relayed via \(host)"
+                    )
+                    onDeviceRelayResult?(result)
+                    return true
+                }
+            } catch {
+                continue
+            }
+        }
 
         let result = DeviceRelayResult(
             success: false,
-            sourceDevice: "iPhone",
-            targetDevice: configuration.macRelayHostname,
+            sourceDevice: UIDevice.current.name,
+            targetDevice: hostname,
             command: String(describing: command),
-            message: "Mac relay not implemented"
+            message: "Mac relay failed — host unreachable"
         )
-
         onDeviceRelayResult?(result)
-        return result.success
+        return false
     }
 
     private func determinePlatform(from response: VoiceResponse?) -> MessagingPlatform {
