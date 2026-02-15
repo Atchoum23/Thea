@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, initial-scale=1.0">
+    <title>Thea</title>
+    <link rel="stylesheet" href="css/tv-theme.css">
+</head>
+<body>
+    <!-- Pairing Screen -->
+    <div id="pairing-screen" class="screen active">
+        <div class="pairing-container">
+            <div class="thea-logo">
+                <svg viewBox="0 0 80 80" width="120" height="120">
+                    <circle cx="40" cy="40" r="38" fill="#F5A623" opacity="0.15"/>
+                    <circle cx="40" cy="40" r="28" fill="#F5A623" opacity="0.3"/>
+                    <circle cx="40" cy="40" r="16" fill="#F5A623"/>
+                </svg>
+            </div>
+            <h1>Thea</h1>
+            <p class="subtitle">AI Assistant</p>
+            <div class="pairing-code-section">
+                <p class="instruction">Enter this code in Thea on your iPhone or Mac to pair:</p>
+                <div id="pairing-code" class="pairing-code">------</div>
+                <p class="hint">Code expires in <span id="pairing-timer">300</span>s</p>
+            </div>
+            <div class="manual-auth focusable" tabindex="0" data-action="manual-auth">
+                <span>Or sign in with API key</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Input Screen -->
+    <div id="apikey-screen" class="screen">
+        <div class="apikey-container">
+            <h2>Enter API Key</h2>
+            <p>Generate an API key in Thea Settings &gt; Web &amp; API</p>
+            <div class="input-row">
+                <input id="apikey-input" type="text" class="tv-input focusable" tabindex="0"
+                       placeholder="thea_..." autocomplete="off" spellcheck="false">
+            </div>
+            <div class="button-row">
+                <button id="apikey-submit" class="tv-button primary focusable" tabindex="0">Connect</button>
+                <button id="apikey-cancel" class="tv-button focusable" tabindex="0">Back</button>
+            </div>
+            <p id="apikey-error" class="error-text"></p>
+        </div>
+    </div>
+
+    <!-- Main Chat Screen -->
+    <div id="chat-screen" class="screen">
+        <div class="tv-layout">
+            <!-- Left Sidebar -->
+            <aside id="sidebar" class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo-small">
+                        <svg viewBox="0 0 32 32" width="32" height="32">
+                            <circle cx="16" cy="16" r="12" fill="#F5A623"/>
+                        </svg>
+                        <span>Thea</span>
+                    </div>
+                    <button id="new-chat-btn" class="icon-button focusable" tabindex="0" title="New Chat">+</button>
+                </div>
+                <div id="conversation-list" class="conversation-list"></div>
+                <div class="sidebar-footer">
+                    <button id="dashboard-btn" class="sidebar-item focusable" tabindex="0">
+                        <span class="icon">&#9632;</span> Dashboard
+                    </button>
+                    <button id="settings-btn" class="sidebar-item focusable" tabindex="0">
+                        <span class="icon">&#9881;</span> Settings
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Chat View -->
+                <div id="chat-view" class="content-view active">
+                    <div id="chat-header" class="chat-header">
+                        <h2 id="chat-title">New Conversation</h2>
+                        <span id="chat-model" class="model-badge">Claude Sonnet</span>
+                    </div>
+                    <div id="messages" class="messages-container"></div>
+                    <div class="input-area">
+                        <div class="suggestions" id="suggestions"></div>
+                        <div class="input-row">
+                            <input id="chat-input" type="text" class="tv-input chat-input focusable" tabindex="0"
+                                   placeholder="Ask Thea anything..." maxlength="8192">
+                            <button id="send-btn" class="tv-button primary focusable" tabindex="0">Send</button>
+                        </div>
+                        <div class="input-hint">
+                            Press <kbd>Enter</kbd> to send &middot; <kbd>&#9650;&#9660;</kbd> scroll &middot;
+                            <kbd>Back</kbd> sidebar
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard View -->
+                <div id="dashboard-view" class="content-view">
+                    <div class="dashboard-header">
+                        <h2>Dashboard</h2>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h3>Weather</h3>
+                            <div id="dash-weather" class="card-content">Loading...</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Calendar</h3>
+                            <div id="dash-calendar" class="card-content">Loading...</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Health Summary</h3>
+                            <div id="dash-health" class="card-content">Loading...</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Tasks</h3>
+                            <div id="dash-tasks" class="card-content">Loading...</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Financial</h3>
+                            <div id="dash-finance" class="card-content">Loading...</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Agent Status</h3>
+                            <div id="dash-agents" class="card-content">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="content-view">
+                    <div class="settings-header">
+                        <h2>Settings</h2>
+                    </div>
+                    <div class="settings-list">
+                        <div class="setting-item focusable" tabindex="0" data-setting="server">
+                            <span class="setting-label">Server URL</span>
+                            <span id="setting-server" class="setting-value">api.theathe.app</span>
+                        </div>
+                        <div class="setting-item focusable" tabindex="0" data-setting="model">
+                            <span class="setting-label">Default Model</span>
+                            <span id="setting-model" class="setting-value">Claude Sonnet</span>
+                        </div>
+                        <div class="setting-item focusable" tabindex="0" data-setting="voice">
+                            <span class="setting-label">Voice Input</span>
+                            <span id="setting-voice" class="setting-value">Enabled</span>
+                        </div>
+                        <div class="setting-item focusable" tabindex="0" data-setting="family">
+                            <span class="setting-label">Family Safe Mode</span>
+                            <span id="setting-family" class="setting-value">Off</span>
+                        </div>
+                        <div class="setting-item focusable" tabindex="0" data-setting="theme">
+                            <span class="setting-label">Theme</span>
+                            <span id="setting-theme" class="setting-value">Dark</span>
+                        </div>
+                        <div class="setting-item focusable" tabindex="0" data-setting="font-size">
+                            <span class="setting-label">Font Size</span>
+                            <span id="setting-font-size" class="setting-value">Large</span>
+                        </div>
+                        <div class="setting-item focusable" tabindex="0" data-setting="disconnect">
+                            <span class="setting-label disconnect-label">Disconnect &amp; Sign Out</span>
+                            <span class="setting-value"></span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/thea-client.js"></script>
+    <script src="js/tv-navigation.js"></script>
+</body>
+</html>

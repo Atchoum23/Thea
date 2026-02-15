@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://app.theathe.tv" version="1.0.0" viewmodes="maximized">
+    <name>Thea</name>
+    <icon src="images/icon.png"/>
+    <content src="index.html"/>
+    <feature name="http://tizen.org/feature/screen.size.all"/>
+    <feature name="http://tizen.org/feature/network.internet"/>
+    <feature name="http://tizen.org/feature/storage"/>
+    <feature name="http://tizen.org/feature/speech.recognition"/>
+    <tizen:application id="theaTVApp.Thea" package="theaTVApp" required_version="6.0"/>
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/filesystem.read"/>
+    <tizen:privilege name="http://tizen.org/privilege/filesystem.write"/>
+    <tizen:privilege name="http://tizen.org/privilege/mediastorage"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+    <tizen:profile name="tv"/>
+    <tizen:setting screen-orientation="landscape" context-menu="disable"
+                   background-support="enable" encryption="disable" install-location="auto"/>
+    <access origin="*" subdomains="true"/>
+    <tizen:metadata key="http://samsung.com/tv/metadata/multitasking" value="enable"/>
+    <description>Thea AI Assistant for Samsung TV</description>
+    <author>Alexis Calevras</author>
+    <license>Proprietary</license>
+</widget>
