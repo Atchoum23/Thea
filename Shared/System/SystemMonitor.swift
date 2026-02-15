@@ -553,6 +553,10 @@ final class SystemMonitor: ObservableObject {
         }
     }
 
+    func clearAnomalies() {
+        anomalies.removeAll()
+    }
+
     func clearHistory() {
         snapshots.removeAll()
         anomalies.removeAll()

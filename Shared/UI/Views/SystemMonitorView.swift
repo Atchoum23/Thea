@@ -122,7 +122,7 @@ struct SystemMonitorView: View {
                     .font(.headline)
                 Spacer()
                 Button("Clear") {
-                    monitor.anomalies.removeAll()
+                    monitor.clearAnomalies()
                 }
                 .font(.caption)
                 .buttonStyle(.plain)
