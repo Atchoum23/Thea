@@ -1473,7 +1473,6 @@
 		B56BFB0589196452BD4B850F /* BrowserAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312CDA1C3E942F50ACC3BFF2 /* BrowserAutomation.swift */; };
 		B5AF3D620B8B1E19B4F7AAA1 /* AnthropicProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5028FD03DD32838DE36130A7 /* AnthropicProvider.swift */; };
 		B5B130BA08C6B191D9405A09 /* TheaAgentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A69D52A26057121DAFE15E7A /* TheaAgentDetailView.swift */; };
-		B5D76BFFC7EB621CC172BB4C /* ForegroundAppMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1037E9CC13A3597A08FFBF /* ForegroundAppMonitor.swift */; };
 		B6133AAAB68E85373776F3D7 /* UnifiedContextEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9E575E743A3367C2D7BB93 /* UnifiedContextEngine.swift */; };
 		B63CE25EF534BA7B3D815B8B /* OpenClawClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43125E68DCE1C6C949F6FDA5 /* OpenClawClient.swift */; };
 		B68874DBF038CDC346E9C1B3 /* ContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE86E6C7C4A9B05B467349F5 /* ContextManager.swift */; };
@@ -1484,7 +1483,6 @@
 		B6F086FD28F35389C3379567 /* RemoteFileMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB67EA67420FBC43C68A26B /* RemoteFileMessages.swift */; };
 		B705E6FF1CEDE444BAE5E18A /* OnDeviceAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39037BEDEE29D1CE9E77BE5B /* OnDeviceAIService.swift */; };
 		B77AE12CB5480E53FD054524 /* HolisticPatternIntelligenceTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2A7EBE87BBA4038648BAAC /* HolisticPatternIntelligenceTypes.swift */; };
-		B785A1AC8F6030F9285A6BBD /* ForegroundAppMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1037E9CC13A3597A08FFBF /* ForegroundAppMonitor.swift */; };
 		B7DFC1251E11A88206A74D48 /* ConversationContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AC31159725D5E6CDD80F0A /* ConversationContextManager.swift */; };
 		B80979BB9B07B8D189762169 /* VoiceFirstModeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB66A72703EA94C865C8271 /* VoiceFirstModeManager.swift */; };
 		B83256CD37DD43919C0D4997 /* QRIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A02535CC4A64BD7B8CDD93 /* QRIntelligence.swift */; };
@@ -1529,7 +1527,6 @@
 		BD710FB3F20CEC590CE8D2E2 /* DocumentScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C1128238E45DD69559C3A5 /* DocumentScanner.swift */; };
 		BD7B75ABC1264ACE3D2ED8A1 /* AssessmentDataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E07B93655FF8AAA4E0965339 /* AssessmentDataExporter.swift */; };
 		BD83346CA4948F5B3ECA543F /* FunctionGemmaBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D8984E41BF27006D448CEA /* FunctionGemmaBridge.swift */; };
-		BDA73E9528161031FA111C1A /* AppPairingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 096957FED45C0CCD82BA3908 /* AppPairingSettingsView.swift */; };
 		BDC4D9C81BCE35AEAD1EF3AB /* ReliabilityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A68D29AF6D760B105C2608 /* ReliabilityMonitor.swift */; };
 		BDCACCC42F540E1DEE9D304C /* cosmetic-filter.js in Resources */ = {isa = PBXBuildFile; fileRef = 5F503B3196C42EA179CB74AD /* cosmetic-filter.js */; };
 		BDCAD18108E714006E11B24D /* PermissionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C3B04EEB9870ABC2B1ACFDD /* PermissionsManager.swift */; };
@@ -1617,7 +1614,6 @@
 		C8D3E25ED806601E714C7243 /* LongTermMemoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61C0A0D3C9AF52BE8DB85849 /* LongTermMemoryManager.swift */; };
 		C922FDA3F3844F6F48EAB8EF /* AgentSecKillSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30C4EA8445522942279912B /* AgentSecKillSwitch.swift */; };
 		C94925D9673BDD6F4DCFA67A /* TheaControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149B9875C9ADDA752ACB41B4 /* TheaControls.swift */; };
-		C94EC67131A044076D9E9D24 /* AppPairingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 096957FED45C0CCD82BA3908 /* AppPairingSettingsView.swift */; };
 		C95BFA4CDD1A35BDB46C9DF0 /* TVEnhancedHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6906CAD82DE615B16424B7 /* TVEnhancedHomeView.swift */; };
 		C98A54B9F6B9F631233FB158 /* AnnotationOverlayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319A195F298A8425CEB3FC43 /* AnnotationOverlayService.swift */; };
 		C997540E53E693E67BA6A7FC /* CoworkQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C96C18373CAC4FC5346195DA /* CoworkQueueView.swift */; };
@@ -2209,7 +2205,6 @@
 		092322EA857D666CA9BE6749 /* Context7Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Context7Client.swift; sourceTree = "<group>"; };
 		0936318FA09A7042DDAA2F2D /* HealthServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthServiceTests.swift; sourceTree = "<group>"; };
 		0952B592B1ECFF299AB8556B /* CoworkSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkSettingsView.swift; sourceTree = "<group>"; };
-		096957FED45C0CCD82BA3908 /* AppPairingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPairingSettingsView.swift; sourceTree = "<group>"; };
 		096F4C0E21989556605B3B74 /* ServicesHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesHandler.swift; sourceTree = "<group>"; };
 		09D49C60F9DECC3BBB65DFD1 /* iOSMemorySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSMemorySection.swift; sourceTree = "<group>"; };
 		09F08D2E595173F31EA2BE00 /* SettingsPrivacyAboutViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPrivacyAboutViews.swift; sourceTree = "<group>"; };
@@ -2765,7 +2760,6 @@
 		7D48E9922A88AD72F0B32ECF /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		7D86C3D85760378D66231943 /* ClaudeAppBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeAppBridge.swift; sourceTree = "<group>"; };
 		7DB879C3AB26803AC14A800C /* ThrottlingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThrottlingEngine.swift; sourceTree = "<group>"; };
-		7E1037E9CC13A3597A08FFBF /* ForegroundAppMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForegroundAppMonitor.swift; sourceTree = "<group>"; };
 		7E1D6EB42E995C87638173EE /* VerificationPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationPipelineTests.swift; sourceTree = "<group>"; };
 		7E3F0DE037BD3B5042EE6B75 /* LiveGuidanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveGuidanceSettingsView.swift; sourceTree = "<group>"; };
 		7E4D20B8CC5B942F10499D9C /* TestGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGenerator.swift; sourceTree = "<group>"; };
@@ -4050,7 +4044,6 @@
 				5BA95D9787CD4D6A70989821 /* AIFeaturesSettingsView.swift */,
 				1C9098F568BA3E6811318B4C /* AIProvidersSettingsView.swift */,
 				60C7AE83972814197C4DAFB2 /* AIProvidersSettingsViewSections.swift */,
-				096957FED45C0CCD82BA3908 /* AppPairingSettingsView.swift */,
 				8BA957B75D5617FCA5E0BE4F /* AutoCorrectSettingsView.swift */,
 				A2AB6EA7368FC3C706F224A7 /* AutomationSettingsView.swift */,
 				8FBCB154D3E64015E5E269C4 /* AutonomousSettingsView.swift */,
@@ -4487,7 +4480,6 @@
 				7D86C3D85760378D66231943 /* ClaudeAppBridge.swift */,
 				448A78CF8B99616DFED708D5 /* ContinuityService.swift */,
 				3227923FC04FCB3C88D90EBB /* FinderIntegration.swift */,
-				7E1037E9CC13A3597A08FFBF /* ForegroundAppMonitor.swift */,
 				4716380D345E63618BB0BAC9 /* HomeKitService.swift */,
 				4D872BAFDDE2885E56AB67AA /* IntegrationCoordinator.swift */,
 				58FB08F521CDE9F944C7836C /* IntegrationModule.swift */,
@@ -7475,7 +7467,6 @@
 				2170C0C8D9D4B9FE5AD65818 /* AppClipManager.swift in Sources */,
 				7862B668708AC484EA83878E /* AppConfiguration.swift in Sources */,
 				28B01C1D4679D5E05AC15BE0 /* AppConfigurationTypes.swift in Sources */,
-				BDA73E9528161031FA111C1A /* AppPairingSettingsView.swift in Sources */,
 				26D178AA8ECF1B93193FD926 /* AppUpdateService.swift in Sources */,
 				8004155A3A4CC67BA11D6444 /* AppUsageMonitor.swift in Sources */,
 				ED375DA6222D54A6DBD38A93 /* AppleFinanceKitProvider.swift in Sources */,
@@ -7723,7 +7714,6 @@
 				D9059C94F1D116E4757111FF /* FollowUpSuggestionService.swift in Sources */,
 				605BF925CD86715EA49177EF /* FontManager.swift in Sources */,
 				29DBF10440D8972988B0C67C /* Fonts.swift in Sources */,
-				B5D76BFFC7EB621CC172BB4C /* ForegroundAppMonitor.swift in Sources */,
 				BD83346CA4948F5B3ECA543F /* FunctionGemmaBridge.swift in Sources */,
 				DFD839BB4570D22880392AA1 /* FunctionGemmaEngine.swift in Sources */,
 				1B8D3CE1226B484F2801D324 /* GDPRDataExporter.swift in Sources */,
@@ -8511,7 +8501,6 @@
 				62239361DBFA765E86F6B465 /* AppConfiguration.swift in Sources */,
 				2A3E7CBB872CC5F44EE4B1CC /* AppConfigurationTypes.swift in Sources */,
 				E28FB1BE340EBD2F68255440 /* AppIntegrationFramework.swift in Sources */,
-				C94EC67131A044076D9E9D24 /* AppPairingSettingsView.swift in Sources */,
 				1767DA1AF1C5E7754D60055D /* AppStateMonitor.swift in Sources */,
 				E4304EE41DABB3093BBD08C5 /* AppUpdateService.swift in Sources */,
 				955D09776429208AF47BBAD9 /* AppUsageMonitor.swift in Sources */,
@@ -8776,7 +8765,6 @@
 				FC64C99D2273D80D6A6399FF /* FollowUpSuggestionService.swift in Sources */,
 				E8020D26CDC9AED37F5FD83B /* FontManager.swift in Sources */,
 				85393A6E17A6B11EC83CFA79 /* Fonts.swift in Sources */,
-				B785A1AC8F6030F9285A6BBD /* ForegroundAppMonitor.swift in Sources */,
 				86A6BFA5A58D72FC80EEAA46 /* FunctionGemmaBridge.swift in Sources */,
 				EA535D88FAA3AD96DB190526 /* FunctionGemmaEngine.swift in Sources */,
 				392CDE0A8C6AA248F94D7F8B /* GDPRDataExporter.swift in Sources */,
