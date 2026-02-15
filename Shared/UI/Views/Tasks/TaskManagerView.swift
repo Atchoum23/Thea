@@ -215,7 +215,7 @@ private struct TaskRow: View {
                         .foregroundStyle(.secondary)
 
                     if let dueDate = task.dueDate {
-                        Label(dueDate, format: .dateTime.month(.abbreviated).day())
+                        Text(dueDate, format: .dateTime.month(.abbreviated).day())
                             .font(.caption2)
                             .foregroundStyle(task.isOverdue ? .red : .secondary)
                     }
