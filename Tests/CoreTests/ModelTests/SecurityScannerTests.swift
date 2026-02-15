@@ -403,7 +403,7 @@ struct KnownPatternsTests {
         // Simulate content check
         let fileContent = "machine github.com\nlogin user\npassword secret123"
         let matched = patterns.filter { fileContent.localizedCaseInsensitiveContains($0.pattern) }
-        #expect(matched.count == 1) // matches "password"
+        #expect(matched.count == 2) // matches "password" in .netrc and .gitconfig entries
     }
 }
 

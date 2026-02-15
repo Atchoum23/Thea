@@ -759,8 +759,8 @@ struct IgnoredDirectoriesTests {
         #expect(!Self.ignoredDirs.contains("lib"))
     }
 
-    @Test("All 8 standard ignored dirs")
+    @Test("All 9 standard ignored dirs")
     func count() {
-        #expect(Self.ignoredDirs.count == 8)
+        #expect(Self.ignoredDirs.count == 9)
     }
 }
