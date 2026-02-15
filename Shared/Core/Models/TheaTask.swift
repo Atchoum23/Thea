@@ -7,6 +7,9 @@
 
 import Foundation
 import SwiftData
+#if canImport(UserNotifications)
+import UserNotifications
+#endif
 
 // MARK: - Task Priority
 
@@ -311,6 +314,7 @@ final class TheaTaskManager: ObservableObject {
 
     // MARK: - Reminders
 
+    #if canImport(UserNotifications)
     private func scheduleReminder(for task: TheaTask, at date: Date) {
         let content = UNMutableNotificationContent()
         content.title = "Task Reminder"
@@ -341,4 +345,8 @@ final class TheaTaskManager: ObservableObject {
             withIdentifiers: ["task-\(task.id.uuidString)"]
         )
     }
+    #else
+    private func scheduleReminder(for _: TheaTask, at _: Date) {}
+    private func cancelReminder(for _: TheaTask) {}
+    #endif
 }
