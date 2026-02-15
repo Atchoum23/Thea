@@ -82,6 +82,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case extSubscriptions = "Subscriptions"
     case passwords = "Passwords"
     case learning = "Learning"
+    case home = "Home"
 
     // Group 3: System
     case systemMonitor = "System Monitor"
@@ -136,6 +137,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .extSubscriptions: "creditcard.circle"
         case .passwords: "lock.shield"
         case .learning: "graduationcap"
+        case .home: "house.fill"
         case .systemMonitor: "gauge.with.dots.needle.33percent"
         case .systemCleaner: "trash.circle"
         case .battery: "battery.75"
@@ -155,7 +157,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning: 2
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -317,6 +319,8 @@ struct MacSettingsView: View {
             PasswordVaultView()
         case .learning:
             LearningDashboardView()
+        case .home:
+            HomeIntelligenceView()
         case .systemMonitor:
             SystemMonitorView()
         case .systemCleaner:

@@ -473,6 +473,7 @@
 		38367C4F3C76A1DDFF8F0DD1 /* MultiAgentCollaborationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69BB871466FFD38D9226F022 /* MultiAgentCollaborationView.swift */; };
 		3870F53C778EE394D5EA24C9 /* CoworkSkillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B03B6F03504CAAF475DA730 /* CoworkSkillsView.swift */; };
 		389DF1B7A0137F5135629091 /* UserPreferenceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7671DAA4A40F6CE6E80A3F /* UserPreferenceModel.swift */; };
+		38AE0E3F79272945A9970C86 /* HomeIntelligenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976571A1E01FB6D224CB2C99 /* HomeIntelligenceView.swift */; };
 		38B001034D6F24676A9627B1 /* WorkWithAppsService+AppActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 045C15A1EF156A9A05E261A8 /* WorkWithAppsService+AppActions.swift */; };
 		38BE919ABC91178F0C015359 /* CarPlayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3984ED5374CAD335E9CEB703 /* CarPlayService.swift */; };
 		38C76FF9D185B75E17C8DFE2 /* PowerObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D53F5F83B70EB65CF4FED7 /* PowerObserver.swift */; };
@@ -1229,6 +1230,7 @@
 		972C1A73511048BE461BEBF1 /* AAnticipatoryCommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19CD3B1C6BF1D449D68E2F41 /* AAnticipatoryCommonTypes.swift */; };
 		97A5DB401652DAE69123CA24 /* TestGenerator+SourceAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AF6AFFE38528A39C4F07E83 /* TestGenerator+SourceAnalysis.swift */; };
 		97D01B0E450405F102E2D6E6 /* FileSystemObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA10AE173BF28B5AAD1C84A /* FileSystemObserver.swift */; };
+		97EC881CD8D403107C5C270D /* HomeIntelligenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976571A1E01FB6D224CB2C99 /* HomeIntelligenceView.swift */; };
 		97F3E8CF808870664F73C4E2 /* ControlCenterWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B1747ABB1774066FA20DA61 /* ControlCenterWidget.swift */; };
 		97FCDDCDAD1F8F5A7F6A647F /* ContactsIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161F38E0994A9F6040AF9548 /* ContactsIntegration.swift */; };
 		9815AC78FCD9743D1C5A5401 /* AutonomyPolicyTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4AD04CD23415FAECDAC04B /* AutonomyPolicyTypes.swift */; };
@@ -2845,6 +2847,7 @@
 		96AFBB9AC687D12488660C7A /* TheaSpiralIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaSpiralIconView.swift; sourceTree = "<group>"; };
 		96CDBEC6A338814FAB8F9B80 /* TheaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TheaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		96EC4C26E421999E4B884CF0 /* HardwareShortcutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareShortcutManager.swift; sourceTree = "<group>"; };
+		976571A1E01FB6D224CB2C99 /* HomeIntelligenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeIntelligenceView.swift; sourceTree = "<group>"; };
 		97F7F949E955655D924D72F1 /* ToolComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolComposition.swift; sourceTree = "<group>"; };
 		98619978619098637F8B6449 /* LiquidGlassDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassDesign.swift; sourceTree = "<group>"; };
 		98769A549BA018A8C68A2913 /* AutomationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationEngine.swift; sourceTree = "<group>"; };
@@ -4018,6 +4021,7 @@
 				18D764A76640C98A6FDCA1E4 /* ConversationSettingsView.swift */,
 				0952B592B1ECFF299AB8556B /* CoworkSettingsView.swift */,
 				81CC8A0973FA3F2409CF3FE0 /* ExternalSubscriptionsView.swift */,
+				976571A1E01FB6D224CB2C99 /* HomeIntelligenceView.swift */,
 				CF5F8CA74F367A281DBAB2E3 /* IntegrationsSettingsView.swift */,
 				0BC1E2904D561D4182801D45 /* IntegrationsSettingsViewSections.swift */,
 				B4C5F97877D99A75F25FCF8C /* LearningDashboardView.swift */,
@@ -7686,6 +7690,7 @@
 				4EF34FD085656D93B23B66B4 /* HelpButton.swift in Sources */,
 				3CC65E3B1551ED894006CBFB /* HolisticPatternIntelligence.swift in Sources */,
 				03DBDEC21BC8A0B7F075FD00 /* HolisticPatternIntelligenceTypes.swift in Sources */,
+				97EC881CD8D403107C5C270D /* HomeIntelligenceView.swift in Sources */,
 				8935B271541579007CD3B651 /* HomeKitMonitor.swift in Sources */,
 				9D91FE53AE8A3A04806735DA /* HomeKitOrchestrator.swift in Sources */,
 				5299974BDCCC717FFD7AC8A6 /* HomeKitService.swift in Sources */,
@@ -8726,6 +8731,7 @@
 				D64679B2B86320B753E231EE /* HelpButton.swift in Sources */,
 				F57D270C11095E2AAAF387D5 /* HolisticPatternIntelligence.swift in Sources */,
 				B77AE12CB5480E53FD054524 /* HolisticPatternIntelligenceTypes.swift in Sources */,
+				38AE0E3F79272945A9970C86 /* HomeIntelligenceView.swift in Sources */,
 				D1B0F44CE1C2236004477BF0 /* HomeKitMonitor.swift in Sources */,
 				AF5E4C46EEC04363E68BBE31 /* HomeKitOrchestrator.swift in Sources */,
 				0B7D24082ACFF1DDACB3467A /* HomeKitService.swift in Sources */,

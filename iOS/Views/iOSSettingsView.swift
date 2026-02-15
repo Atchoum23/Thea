@@ -294,6 +294,72 @@ struct iOSSettingsView: View {
                         subtitle: "\(CodeAssistant.shared.projects.count) projects"
                     )
                 }
+
+                NavigationLink {
+                    TravelPlanningView()
+                } label: {
+                    SettingsRow(
+                        icon: "airplane",
+                        iconColor: .blue,
+                        title: "Travel",
+                        subtitle: "\(TravelManager.shared.upcomingTrips.count) upcoming"
+                    )
+                }
+
+                NavigationLink {
+                    VehicleMaintenanceView()
+                } label: {
+                    SettingsRow(
+                        icon: "car",
+                        iconColor: .gray,
+                        title: "Vehicles",
+                        subtitle: "\(VehicleManager.shared.vehicles.count) vehicles"
+                    )
+                }
+
+                NavigationLink {
+                    ExternalSubscriptionsView()
+                } label: {
+                    SettingsRow(
+                        icon: "creditcard.circle",
+                        iconColor: .orange,
+                        title: "Subscriptions",
+                        subtitle: "\(ExternalSubscriptionManager.shared.activeSubscriptions.count) active"
+                    )
+                }
+
+                NavigationLink {
+                    PasswordVaultView()
+                } label: {
+                    SettingsRow(
+                        icon: "lock.shield",
+                        iconColor: .red,
+                        title: "Passwords",
+                        subtitle: "\(PasswordManager.shared.entries.count) credentials"
+                    )
+                }
+
+                NavigationLink {
+                    LearningDashboardView()
+                } label: {
+                    SettingsRow(
+                        icon: "graduationcap",
+                        iconColor: .purple,
+                        title: "Learning",
+                        subtitle: "\(LearningTracker.shared.activeGoals.count) active goals"
+                    )
+                }
+
+                NavigationLink {
+                    HomeIntelligenceView()
+                } label: {
+                    SettingsRow(
+                        icon: "house.fill",
+                        iconColor: .cyan,
+                        title: "Home",
+                        subtitle: "\(HomeKitService.shared.accessories.count) devices"
+                    )
+                }
             } header: {
                 Text("Life")
             }
