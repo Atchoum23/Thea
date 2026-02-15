@@ -229,6 +229,17 @@ struct iOSSettingsView: View {
                         subtitle: "\(QRIntelligence.shared.scannedCodes.count) scanned"
                     )
                 }
+
+                NavigationLink {
+                    ImageIntelligenceView()
+                } label: {
+                    SettingsRow(
+                        icon: "photo.artframe",
+                        iconColor: .pink,
+                        title: "Image Intelligence",
+                        subtitle: "AI-powered image processing"
+                    )
+                }
             } header: {
                 Text("Life")
             }
@@ -323,6 +334,17 @@ struct iOSSettingsView: View {
                         iconColor: .green,
                         title: "Battery",
                         subtitle: BatteryOptimizer.shared.optimizationMode.displayName
+                    )
+                }
+
+                NavigationLink {
+                    SecurityScannerView()
+                } label: {
+                    SettingsRow(
+                        icon: "shield.lefthalf.filled",
+                        iconColor: .red,
+                        title: "Security",
+                        subtitle: "Scan for threats"
                     )
                 }
 

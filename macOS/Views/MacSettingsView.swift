@@ -62,6 +62,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case translation = "Translation"
     case voiceInput = "Voice & Input"
     case codeIntelligence = "Code Intelligence"
+    case imageIntelligence = "Image Intelligence"
     case health = "Health"
     case finance = "Finance"
     case tasks = "Tasks"
@@ -76,6 +77,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case systemMonitor = "System Monitor"
     case systemCleaner = "System Cleaner"
     case battery = "Battery"
+    case securityScanner = "Security"
     case permissions = "Permissions"
     case sync = "Sync"
     case privacy = "Privacy"
@@ -103,6 +105,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .translation: "character.bubble"
         case .voiceInput: "mic.fill"
         case .codeIntelligence: "chevron.left.forwardslash.chevron.right"
+        case .imageIntelligence: "photo.artframe"
         case .health: "heart.fill"
         case .finance: "chart.line.uptrend.xyaxis"
         case .tasks: "checklist"
@@ -115,6 +118,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .systemMonitor: "gauge.with.dots.needle.33percent"
         case .systemCleaner: "trash.circle"
         case .battery: "battery.75"
+        case .securityScanner: "shield.lefthalf.filled"
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
         case .privacy: "lock.shield"
@@ -129,8 +133,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .webClipper, .qrScanner, .notifications: 2
-        case .systemMonitor, .systemCleaner, .battery, .permissions, .sync, .privacy: 3
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .webClipper, .qrScanner, .notifications: 2
+        case .systemMonitor, .systemCleaner, .battery, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
         }
@@ -267,6 +271,8 @@ struct MacSettingsView: View {
             WebClipperView()
         case .qrScanner:
             QRIntelligenceView()
+        case .imageIntelligence:
+            ImageIntelligenceView()
         case .notifications:
             NotificationIntelligenceSettingsView()
         case .systemMonitor:
@@ -275,6 +281,8 @@ struct MacSettingsView: View {
             SystemCleanerView()
         case .battery:
             BatteryIntelligenceView()
+        case .securityScanner:
+            SecurityScannerView()
         case .permissions:
             PermissionsSettingsView()
         case .sync:

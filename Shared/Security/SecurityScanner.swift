@@ -73,7 +73,7 @@ enum ScanCategory: String, CaseIterable, Codable, Sendable {
     }
 }
 
-struct SecurityFinding: Codable, Sendable, Identifiable {
+struct SystemSecurityFinding: Codable, Sendable, Identifiable {
     let id: UUID
     let category: ScanCategory
     let threatLevel: ThreatLevel
@@ -104,7 +104,7 @@ struct SecurityFinding: Codable, Sendable, Identifiable {
 
 struct ScanReport: Codable, Sendable, Identifiable {
     let id: UUID
-    let findings: [SecurityFinding]
+    let findings: [SystemSecurityFinding]
     let scanDuration: TimeInterval
     let categoriesScanned: [ScanCategory]
     let filesScanned: Int
@@ -115,7 +115,7 @@ struct ScanReport: Codable, Sendable, Identifiable {
         findings.max(by: { $0.threatLevel < $1.threatLevel })?.threatLevel ?? .clean
     }
 
-    var findingsByCategory: [ScanCategory: [SecurityFinding]] {
+    var findingsByCategory: [ScanCategory: [SystemSecurityFinding]] {
         Dictionary(grouping: findings, by: \.category)
     }
 
@@ -136,8 +136,8 @@ private struct MalwareSignature: Sendable {
 
 // MARK: - SecurityScanner Service
 
-actor SecurityScanner {
-    static let shared = SecurityScanner()
+actor SystemSecurityScanner {
+    static let shared = SystemSecurityScanner()
 
     private var scanHistory: [ScanReport] = []
     private let historyFile: URL
@@ -169,8 +169,12 @@ actor SecurityScanner {
             ?? FileManager.default.temporaryDirectory
         let theaDir = appSupport.appendingPathComponent("Thea/SecurityScanner")
         try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
-        self.historyFile = theaDir.appendingPathComponent("scan_history.json")
-        loadHistory()
+        let file = theaDir.appendingPathComponent("scan_history.json")
+        self.historyFile = file
+        // Inline loadHistory to avoid calling actor-isolated method from init
+        if let data = try? Data(contentsOf: file) {
+            self.scanHistory = (try? JSONDecoder().decode([ScanReport].self, from: data)) ?? []
+        }
     }
 
     // MARK: - Full Scan
@@ -186,7 +190,7 @@ actor SecurityScanner {
 
         isScanning = true
         let startTime = Date()
-        var allFindings: [SecurityFinding] = []
+        var allFindings: [SystemSecurityFinding] = []
         var totalFiles = 0
 
         for category in categories {
@@ -219,7 +223,7 @@ actor SecurityScanner {
 
     // MARK: - Category Scans
 
-    private func scanCategory(_ category: ScanCategory) async -> ([SecurityFinding], Int) {
+    private func scanCategory(_ category: ScanCategory) async -> ([SystemSecurityFinding], Int) {
         switch category {
         case .malware: return await scanForMalware()
         case .adware: return await scanForAdware()
@@ -232,8 +236,8 @@ actor SecurityScanner {
         }
     }
 
-    private func scanForMalware() async -> ([SecurityFinding], Int) {
-        var findings: [SecurityFinding] = []
+    private func scanForMalware() async -> ([SystemSecurityFinding], Int) {
+        var findings: [SystemSecurityFinding] = []
         var filesChecked = 0
 
         // Check LaunchDaemons/LaunchAgents for suspicious items
@@ -254,7 +258,7 @@ actor SecurityScanner {
                    let content = String(data: data, encoding: .utf8) {
                     // Check for known malware patterns
                     if content.contains("curl") && content.contains("bash") {
-                        findings.append(SecurityFinding(
+                        findings.append(SystemSecurityFinding(
                             category: .malware,
                             threatLevel: .high,
                             title: "Suspicious Launch Agent: \(item)",
@@ -266,7 +270,7 @@ actor SecurityScanner {
 
                     // Check for obfuscated paths
                     if content.contains("/tmp/.") || content.contains("/var/tmp/.") {
-                        findings.append(SecurityFinding(
+                        findings.append(SystemSecurityFinding(
                             category: .malware,
                             threatLevel: .medium,
                             title: "Hidden File Reference: \(item)",
@@ -282,8 +286,8 @@ actor SecurityScanner {
         return (findings, filesChecked)
     }
 
-    private func scanForAdware() async -> ([SecurityFinding], Int) {
-        var findings: [SecurityFinding] = []
+    private func scanForAdware() async -> ([SystemSecurityFinding], Int) {
+        var findings: [SystemSecurityFinding] = []
         var filesChecked = 0
 
         let appsDir = "/Applications"
@@ -297,7 +301,7 @@ actor SecurityScanner {
                let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
                let bundleID = plist["CFBundleIdentifier"] as? String {
                 if knownAdware.contains(bundleID) {
-                    findings.append(SecurityFinding(
+                    findings.append(SystemSecurityFinding(
                         category: .adware,
                         threatLevel: .high,
                         title: "Known Adware: \(item)",
@@ -317,8 +321,8 @@ actor SecurityScanner {
         return (findings, filesChecked)
     }
 
-    private func scanForPUP() async -> ([SecurityFinding], Int) {
-        var findings: [SecurityFinding] = []
+    private func scanForPUP() async -> ([SystemSecurityFinding], Int) {
+        var findings: [SystemSecurityFinding] = []
         var filesChecked = 0
 
         let appsDir = "/Applications"
@@ -328,7 +332,7 @@ actor SecurityScanner {
             filesChecked += 1
             let appName = (item as NSString).deletingPathExtension
             if pupIndicators.contains(where: { appName.localizedCaseInsensitiveContains($0) }) {
-                findings.append(SecurityFinding(
+                findings.append(SystemSecurityFinding(
                     category: .pup,
                     threatLevel: .medium,
                     title: "Potentially Unwanted: \(item)",
@@ -342,8 +346,8 @@ actor SecurityScanner {
         return (findings, filesChecked)
     }
 
-    private func scanPrivacy() async -> ([SecurityFinding], Int) {
-        var findings: [SecurityFinding] = []
+    private func scanPrivacy() async -> ([SystemSecurityFinding], Int) {
+        var findings: [SystemSecurityFinding] = []
         var filesChecked = 0
 
         #if os(macOS)
@@ -372,11 +376,11 @@ actor SecurityScanner {
                 let attrs = try? FileManager.default.attributesOfItem(atPath: path)
                 let size = (attrs?[.size] as? Int64) ?? 0
                 if size > 10_000_000 { // > 10MB
-                    findings.append(SecurityFinding(
+                    findings.append(SystemSecurityFinding(
                         category: .privacy,
                         threatLevel: .low,
                         title: "Large Tracking Database",
-                        description: "Tracking/cookie database at \((path as NSString).lastPathComponent) is \(formatFileSize(size))",
+                        description: "Tracking/cookie database at \((path as NSString).lastPathComponent) is \(Self.formatFileSize(size))",
                         filePath: path,
                         recommendation: "Consider clearing browser cookies and history periodically to reduce tracking surface."
                     ))
@@ -388,8 +392,8 @@ actor SecurityScanner {
         return (findings, filesChecked)
     }
 
-    private func scanNetwork() async -> ([SecurityFinding], Int) {
-        var findings: [SecurityFinding] = []
+    private func scanNetwork() async -> ([SystemSecurityFinding], Int) {
+        var findings: [SystemSecurityFinding] = []
         var filesChecked = 0
 
         #if os(macOS)
@@ -399,7 +403,7 @@ actor SecurityScanner {
         if let data = FileManager.default.contents(atPath: firewallPlist),
            let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
            let enabled = plist["globalstate"] as? Int, enabled == 0 {
-            findings.append(SecurityFinding(
+            findings.append(SystemSecurityFinding(
                 category: .network,
                 threatLevel: .medium,
                 title: "macOS Firewall Disabled",
@@ -414,7 +418,7 @@ actor SecurityScanner {
         if let configData = FileManager.default.contents(atPath: sshConfig),
            let content = String(data: configData, encoding: .utf8) {
             if content.contains("StrictHostKeyChecking no") {
-                findings.append(SecurityFinding(
+                findings.append(SystemSecurityFinding(
                     category: .network,
                     threatLevel: .medium,
                     title: "Weak SSH Configuration",
@@ -430,7 +434,7 @@ actor SecurityScanner {
         let listenLines = lsofOutput.components(separatedBy: "\n").filter { $0.contains("LISTEN") }
         filesChecked += listenLines.count
         if listenLines.count > 20 {
-            findings.append(SecurityFinding(
+            findings.append(SystemSecurityFinding(
                 category: .network,
                 threatLevel: .low,
                 title: "Many Listening Ports (\(listenLines.count))",
@@ -443,8 +447,8 @@ actor SecurityScanner {
         return (findings, filesChecked)
     }
 
-    private func scanPermissions() async -> ([SecurityFinding], Int) {
-        var findings: [SecurityFinding] = []
+    private func scanPermissions() async -> ([SystemSecurityFinding], Int) {
+        var findings: [SystemSecurityFinding] = []
         var filesChecked = 0
 
         #if os(macOS)
@@ -460,7 +464,7 @@ actor SecurityScanner {
                    let permissions = attrs[.posixPermissions] as? Int {
                     // Check world-writable (o+w = 0o002)
                     if permissions & 0o002 != 0 {
-                        findings.append(SecurityFinding(
+                        findings.append(SystemSecurityFinding(
                             category: .permissions,
                             threatLevel: .high,
                             title: "World-Writable Binary: \(item)",
@@ -483,7 +487,7 @@ actor SecurityScanner {
                let attrs = try? FileManager.default.attributesOfItem(atPath: path),
                let permissions = attrs[.posixPermissions] as? Int,
                permissions & 0o077 != 0 {
-                findings.append(SecurityFinding(
+                findings.append(SystemSecurityFinding(
                     category: .permissions,
                     threatLevel: .high,
                     title: "Insecure SSH Key: \(item)",
@@ -498,8 +502,8 @@ actor SecurityScanner {
         return (findings, filesChecked)
     }
 
-    private func scanCredentials() async -> ([SecurityFinding], Int) {
-        var findings: [SecurityFinding] = []
+    private func scanCredentials() async -> ([SystemSecurityFinding], Int) {
+        var findings: [SystemSecurityFinding] = []
         var filesChecked = 0
 
         // Check common credential locations
@@ -515,7 +519,7 @@ actor SecurityScanner {
             if let data = FileManager.default.contents(atPath: check.path),
                let content = String(data: data, encoding: .utf8),
                content.localizedCaseInsensitiveContains(check.pattern) {
-                findings.append(SecurityFinding(
+                findings.append(SystemSecurityFinding(
                     category: .credentials,
                     threatLevel: .high,
                     title: "Exposed Credentials: \((check.path as NSString).lastPathComponent)",
@@ -537,7 +541,7 @@ actor SecurityScanner {
             if let items = try? FileManager.default.contentsOfDirectory(atPath: dir) {
                 for item in items where item == ".env" {
                     filesChecked += 1
-                    findings.append(SecurityFinding(
+                    findings.append(SystemSecurityFinding(
                         category: .credentials,
                         threatLevel: .medium,
                         title: "Environment File: \(dir)/\(item)",
@@ -552,8 +556,8 @@ actor SecurityScanner {
         return (findings, filesChecked)
     }
 
-    private func scanSystemIntegrity() async -> ([SecurityFinding], Int) {
-        var findings: [SecurityFinding] = []
+    private func scanSystemIntegrity() async -> ([SystemSecurityFinding], Int) {
+        var findings: [SystemSecurityFinding] = []
         var filesChecked = 0
 
         #if os(macOS)
@@ -561,7 +565,7 @@ actor SecurityScanner {
         let sipOutput = runProcess("/usr/bin/csrutil", arguments: ["status"])
         filesChecked += 1
         if sipOutput.contains("disabled") {
-            findings.append(SecurityFinding(
+            findings.append(SystemSecurityFinding(
                 category: .systemIntegrity,
                 threatLevel: .critical,
                 title: "System Integrity Protection Disabled",
@@ -574,7 +578,7 @@ actor SecurityScanner {
         let gkOutput = runProcess("/usr/sbin/spctl", arguments: ["--status"])
         filesChecked += 1
         if gkOutput.contains("disabled") {
-            findings.append(SecurityFinding(
+            findings.append(SystemSecurityFinding(
                 category: .systemIntegrity,
                 threatLevel: .high,
                 title: "Gatekeeper Disabled",
@@ -587,7 +591,7 @@ actor SecurityScanner {
         let fvOutput = runProcess("/usr/bin/fdesetup", arguments: ["status"])
         filesChecked += 1
         if fvOutput.contains("FileVault is Off") {
-            findings.append(SecurityFinding(
+            findings.append(SystemSecurityFinding(
                 category: .systemIntegrity,
                 threatLevel: .high,
                 title: "FileVault Disabled",
@@ -622,6 +626,19 @@ actor SecurityScanner {
         #else
         return ""
         #endif
+    }
+
+    // MARK: - Formatting
+
+    private nonisolated static func formatFileSize(_ bytes: Int64) -> String {
+        let units = ["B", "KB", "MB", "GB"]
+        var value = Double(bytes)
+        var unitIndex = 0
+        while value >= 1024 && unitIndex < units.count - 1 {
+            value /= 1024
+            unitIndex += 1
+        }
+        return unitIndex == 0 ? "\(bytes) B" : String(format: "%.1f %@", value, units[unitIndex])
     }
 
     // MARK: - History

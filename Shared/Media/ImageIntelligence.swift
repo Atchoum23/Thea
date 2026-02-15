@@ -96,7 +96,7 @@ struct ColorAdjustment: Codable, Sendable {
 
 struct ImageAnalysisResult: Codable, Sendable, Identifiable {
     let id: UUID
-    let detectedObjects: [DetectedObject]
+    let detectedObjects: [ImageDetectedObject]
     let dominantColors: [DominantColor]
     let textContent: String?
     let sceneClassification: String?
@@ -107,7 +107,7 @@ struct ImageAnalysisResult: Codable, Sendable, Identifiable {
     let analyzedAt: Date
 
     init(
-        detectedObjects: [DetectedObject] = [],
+        detectedObjects: [ImageDetectedObject] = [],
         dominantColors: [DominantColor] = [],
         textContent: String? = nil,
         sceneClassification: String? = nil,
@@ -129,7 +129,7 @@ struct ImageAnalysisResult: Codable, Sendable, Identifiable {
     }
 }
 
-struct DetectedObject: Codable, Sendable, Identifiable {
+struct ImageDetectedObject: Codable, Sendable, Identifiable {
     let id: UUID
     let label: String
     let confidence: Float
@@ -242,8 +242,12 @@ actor ImageIntelligence {
             ?? FileManager.default.temporaryDirectory
         let theaDir = appSupport.appendingPathComponent("Thea/ImageIntelligence")
         try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
-        self.historyFile = theaDir.appendingPathComponent("history.json")
-        loadHistory()
+        let file = theaDir.appendingPathComponent("history.json")
+        self.historyFile = file
+        // Inline loadHistory to avoid calling actor-isolated method from init
+        if let data = try? Data(contentsOf: file) {
+            self.processingHistory = (try? JSONDecoder().decode([ImageProcessingRecord].self, from: data)) ?? []
+        }
     }
 
     // MARK: - Core Operations
@@ -256,7 +260,7 @@ actor ImageIntelligence {
 
         var textContent: String?
         var faceCount = 0
-        var detectedObjects: [DetectedObject] = []
+        var detectedObjects: [ImageDetectedObject] = []
         var sceneClassification: String?
 
         #if canImport(Vision)
@@ -575,11 +579,11 @@ actor ImageIntelligence {
     }
 
     @available(macOS 14.0, iOS 17.0, *)
-    private func classifyObjects(in data: Data) async throws -> [DetectedObject] {
+    private func classifyObjects(in data: Data) async throws -> [ImageDetectedObject] {
         #if canImport(Vision)
         guard let ciImage = CIImage(data: data) else { return [] }
 
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[DetectedObject], Error>) in
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[ImageDetectedObject], Error>) in
             let request = VNClassifyImageRequest { request, error in
                 if let error {
                     continuation.resume(throwing: ImageIntelligenceError.visionRequestFailed(error.localizedDescription))
@@ -589,7 +593,7 @@ actor ImageIntelligence {
                 let objects = observations
                     .filter { $0.confidence > 0.3 }
                     .prefix(10)
-                    .map { DetectedObject(label: $0.identifier, confidence: $0.confidence) }
+                    .map { ImageDetectedObject(label: $0.identifier, confidence: $0.confidence) }
                 continuation.resume(returning: Array(objects))
             }
 
@@ -732,15 +736,15 @@ struct ImageProcessingRecord: Codable, Sendable, Identifiable {
     }
 
     var formattedInputSize: String {
-        formatFileSize(inputSize)
+        imageFormatFileSize(inputSize)
     }
 
     var formattedOutputSize: String {
-        formatFileSize(outputSize)
+        imageFormatFileSize(outputSize)
     }
 }
 
-func formatFileSize(_ bytes: Int64) -> String {
+func imageFormatFileSize(_ bytes: Int64) -> String {
     let units = ["B", "KB", "MB", "GB"]
     var value = Double(bytes)
     var unitIndex = 0
