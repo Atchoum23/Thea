@@ -435,7 +435,7 @@ final class PhysicalMailChannel: ObservableObject {
     func classifyMail(from text: String) -> MailCategory {
         let lower = text.lowercased()
 
-        // Priority order: tax > medical > insurance > legal > government > bank > employment > bill > invoice > warranty > personal > advertisement
+        // Priority order: tax > medical > insurance > employment > legal > government > bank > advertisement > bill > invoice > warranty > personal
 
         let taxKeywords = ["steuererklärung", "steuer", "tax return", "impôt", "taxe", "veranlagung",
                           "steuerverwaltung", "finanzamt", "lohnausweis", "déclaration fiscale",
@@ -452,6 +452,13 @@ final class PhysicalMailChannel: ObservableObject {
                                 "deckung", "coverage", "couverture", "franchise"]
         if insuranceKeywords.contains(where: { lower.contains($0) }) { return .insurance }
 
+        // Employment BEFORE legal — "contrat de travail" should not match legal's "contrat"
+        let employmentKeywords = ["arbeitsvertrag", "contrat de travail", "employment contract",
+                                 "lohnabrechnung", "fiche de paie", "pay slip", "kündigung",
+                                 "résiliation", "termination", "arbeitszeugnis", "certificat de travail",
+                                 "reference letter", "sozialversicherung", "avs", "ahv"]
+        if employmentKeywords.contains(where: { lower.contains($0) }) { return .employment }
+
         let legalKeywords = ["rechtsanwalt", "avocat", "attorney", "lawyer", "gericht", "tribunal",
                             "court", "vertrag", "contrat", "contract", "vollmacht", "procuration",
                             "notaire", "notar", "notary", "testament", "urteil", "jugement"]
@@ -467,11 +474,11 @@ final class PhysicalMailChannel: ObservableObject {
                            "credit card", "zinsen", "intérêts", "interest", "hypothek", "hypothèque", "mortgage"]
         if bankKeywords.contains(where: { lower.contains($0) }) { return .bankStatement }
 
-        let employmentKeywords = ["arbeitsvertrag", "contrat de travail", "employment contract",
-                                 "lohnabrechnung", "fiche de paie", "pay slip", "kündigung",
-                                 "résiliation", "termination", "arbeitszeugnis", "certificat de travail",
-                                 "reference letter", "sozialversicherung", "avs", "ahv"]
-        if employmentKeywords.contains(where: { lower.contains($0) }) { return .employment }
+        // Advertisement BEFORE invoice — "sonderangebot" contains "angebot"
+        let adKeywords = ["sonderangebot", "rabatt", "réduction", "discount",
+                         "gratis", "gratuit", "free", "aktion", "promotion",
+                         "werbung", "publicité", "advertisement"]
+        if adKeywords.contains(where: { lower.contains($0) }) { return .advertisement }
 
         let billKeywords = ["rechnung", "facture", "bill", "invoice", "zahlbar bis", "payable jusqu'au",
                            "due date", "fällig", "échéance", "einzahlungsschein", "bulletin de versement",
@@ -489,11 +496,6 @@ final class PhysicalMailChannel: ObservableObject {
         let personalKeywords = ["liebe", "dear", "cher", "herzlich", "cordialement", "sincerely",
                                "grüsse", "salutations", "greetings"]
         if personalKeywords.contains(where: { lower.contains($0) }) { return .personalLetter }
-
-        let adKeywords = ["angebot", "offre", "offer", "rabatt", "réduction", "discount",
-                         "gratis", "gratuit", "free", "aktion", "promotion", "sonderangebot",
-                         "werbung", "publicité", "advertisement"]
-        if adKeywords.contains(where: { lower.contains($0) }) { return .advertisement }
 
         return .other
     }
