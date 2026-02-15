@@ -433,16 +433,23 @@ struct PrivacyTransparencyReportView: View {
     @State private var blocklistStats: DNSBlocklistService.BlocklistStats?
     @State private var topDomains: [(domain: String, count: Int)] = []
     @State private var trafficByCategory: [(category: NetworkPrivacyMonitor.TrafficCategory, count: Int)] = []
+    @State private var serviceStats: [NetworkPrivacyMonitor.ServiceStats] = []
+    @State private var dailySnapshots: [NetworkPrivacyMonitor.DailySnapshot] = []
     @State private var channelCount = 0
     @State private var firewallMode = ""
+    @State private var showingExportSheet = false
+    @State private var exportJSON: Data?
 
     var body: some View {
         Form {
             summarySection
+            serviceBreakdownSection
             firewallReportSection
             networkReportSection
             blocklistReportSection
+            historySection
             recommendationsSection
+            exportSection
         }
         .formStyle(.grouped)
         .navigationTitle("Transparency Report")
@@ -600,6 +607,100 @@ struct PrivacyTransparencyReportView: View {
         }
     }
 
+    // MARK: - Service Breakdown
+
+    @ViewBuilder
+    private var serviceBreakdownSection: some View {
+        if !serviceStats.isEmpty {
+            Section("Data by Service") {
+                ForEach(serviceStats, id: \.service) { stats in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(stats.service)
+                                .font(.theaSubhead)
+                            Text("\(stats.connectionCount) connections")
+                                .font(.theaCaption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(formatBytes(stats.bytesEstimate))
+                                .font(.subheadline.monospacedDigit())
+                            if stats.blockedCount > 0 {
+                                Text("\(stats.blockedCount) blocked")
+                                    .font(.theaCaption2)
+                                    .foregroundStyle(.red)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - History
+
+    @ViewBuilder
+    private var historySection: some View {
+        if !dailySnapshots.isEmpty {
+            Section("Daily History (last \(dailySnapshots.count) days)") {
+                ForEach(dailySnapshots.suffix(7).reversed(), id: \.date) { snapshot in
+                    HStack {
+                        Text(snapshot.date)
+                            .font(.system(.caption, design: .monospaced))
+                        Spacer()
+                        Text("\(snapshot.totalConnections) conn")
+                            .font(.theaCaption1)
+                            .foregroundStyle(.secondary)
+                        Text(formatBytes(snapshot.totalBytes))
+                            .font(.theaCaption1)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 60, alignment: .trailing)
+                        if snapshot.blockedConnections > 0 {
+                            Text("\(snapshot.blockedConnections) blocked")
+                                .font(.theaCaption2)
+                                .foregroundStyle(.red)
+                                .frame(width: 70, alignment: .trailing)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Export
+
+    @ViewBuilder
+    private var exportSection: some View {
+        Section("Export Report") {
+            Button {
+                Task {
+                    exportJSON = await NetworkPrivacyMonitor.shared.exportReportAsJSON()
+                    showingExportSheet = true
+                }
+            } label: {
+                Label("Export as JSON", systemImage: "doc.text")
+            }
+
+            Button {
+                Task {
+                    let csv = await NetworkPrivacyMonitor.shared.exportReportAsCSV()
+                    if let data = csv.data(using: .utf8) {
+                        exportJSON = data
+                        showingExportSheet = true
+                    }
+                }
+            } label: {
+                Label("Export as CSV", systemImage: "tablecells")
+            }
+        }
+        .sheet(isPresented: $showingExportSheet) {
+            if let data = exportJSON {
+                ExportDataSheet(data: data)
+            }
+        }
+    }
+
     // MARK: - Recommendations
 
     @ViewBuilder
@@ -667,6 +768,12 @@ struct PrivacyTransparencyReportView: View {
         return min(score, 100)
     }
 
+    private func formatBytes(_ bytes: Int) -> String {
+        if bytes < 1024 { return "\(bytes) B" }
+        if bytes < 1_048_576 { return "\(bytes / 1024) KB" }
+        return String(format: "%.1f MB", Double(bytes) / 1_048_576)
+    }
+
     private func loadAllData() async {
         // Firewall stats
         let auditStats = await OutboundPrivacyGuard.shared.getPrivacyAuditStatistics()
@@ -684,8 +791,54 @@ struct PrivacyTransparencyReportView: View {
         topDomains = await NetworkPrivacyMonitor.shared.getTopDomains(limit: 5)
         trafficByCategory = await NetworkPrivacyMonitor.shared.getTrafficByCategory()
 
+        // Per-service stats
+        serviceStats = await NetworkPrivacyMonitor.shared.getServiceStats()
+
+        // Daily history
+        await NetworkPrivacyMonitor.shared.loadDailySnapshots()
+        dailySnapshots = await NetworkPrivacyMonitor.shared.getDailySnapshots()
+
         // Blocklist stats
         blocklistStats = await DNSBlocklistService.shared.getStats()
+    }
+}
+
+// MARK: - Export Data Sheet
+
+private struct ExportDataSheet: View {
+    let data: Data
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                if let text = String(data: data, encoding: .utf8) {
+                    Text(text)
+                        .font(.system(.caption, design: .monospaced))
+                        .textSelection(.enabled)
+                        .padding()
+                } else {
+                    Text("Binary data (\(data.count) bytes)")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Export Preview")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    ShareLink(item: dataAsTransferable, preview: SharePreview("Privacy Report")) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                }
+            }
+        }
+        .frame(minWidth: 500, minHeight: 400)
+    }
+
+    private var dataAsTransferable: String {
+        String(data: data, encoding: .utf8) ?? ""
     }
 }
 

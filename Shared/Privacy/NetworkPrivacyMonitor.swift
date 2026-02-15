@@ -67,6 +67,26 @@ actor NetworkPrivacyMonitor {
         }
     }
 
+    // MARK: - Per-Service Stats
+
+    struct ServiceStats: Sendable, Codable {
+        let service: String
+        var connectionCount: Int
+        var bytesEstimate: Int
+        var blockedCount: Int
+        var lastSeen: Date
+    }
+
+    struct DailySnapshot: Sendable, Codable {
+        let date: String
+        let totalConnections: Int
+        let totalBytes: Int
+        let blockedConnections: Int
+        let privacyConcerns: Int
+        let byService: [String: ServiceStats]
+        let byCategory: [String: Int]
+    }
+
     // MARK: - State
 
     private(set) var isMonitoring = false
@@ -74,9 +94,13 @@ actor NetworkPrivacyMonitor {
     private var pathMonitor: NWPathMonitor?
     private var connectionCounts: [String: Int] = [:]
     private var blockedCounts: [TrafficCategory: Int] = [:]
+    private var serviceStats: [String: ServiceStats] = [:]
+    private var dailySnapshots: [DailySnapshot] = []
     private var dailyTrafficBytes: Int = 0
     private var lastResetDate: Date = .distantPast
     private let maxLogEntries = 5000
+    private let maxSnapshots = 90
+    private let snapshotKey = "NetworkPrivacyMonitor.snapshots"
 
     // MARK: - Domain Classification
 
@@ -171,6 +195,17 @@ actor NetworkPrivacyMonitor {
             blockedCounts[category, default: 0] += 1
         }
 
+        // Per-service tracking
+        let serviceName = resolveServiceName(hostname)
+        var stats = serviceStats[serviceName] ?? ServiceStats(
+            service: serviceName, connectionCount: 0, bytesEstimate: 0, blockedCount: 0, lastSeen: Date()
+        )
+        stats.connectionCount += 1
+        stats.bytesEstimate += bytesEstimate
+        if wasBlocked { stats.blockedCount += 1 }
+        stats.lastSeen = Date()
+        serviceStats[serviceName] = stats
+
         if trafficLog.count > maxLogEntries {
             trafficLog = Array(trafficLog.suffix(maxLogEntries / 2))
         }
@@ -219,8 +254,121 @@ actor NetworkPrivacyMonitor {
         trafficLog.removeAll()
         connectionCounts.removeAll()
         blockedCounts.removeAll()
+        serviceStats.removeAll()
         dailyTrafficBytes = 0
         logger.info("Network privacy log cleared")
+    }
+
+    // MARK: - Per-Service Queries
+
+    func getServiceStats() -> [ServiceStats] {
+        serviceStats.values.sorted { $0.bytesEstimate > $1.bytesEstimate }
+    }
+
+    func getServiceStats(for service: String) -> ServiceStats? {
+        serviceStats[service]
+    }
+
+    // MARK: - Daily History
+
+    func getDailySnapshots(days: Int = 30) -> [DailySnapshot] {
+        Array(dailySnapshots.suffix(days))
+    }
+
+    func saveDailySnapshot() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dateKey = formatter.string(from: Date())
+
+        // Don't duplicate today's snapshot
+        dailySnapshots.removeAll { $0.date == dateKey }
+
+        var byCategory: [String: Int] = [:]
+        for record in trafficLog {
+            byCategory[record.category.rawValue, default: 0] += 1
+        }
+
+        let snapshot = DailySnapshot(
+            date: dateKey,
+            totalConnections: trafficLog.count,
+            totalBytes: dailyTrafficBytes,
+            blockedConnections: trafficLog.filter(\.wasBlocked).count,
+            privacyConcerns: trafficLog.filter { $0.category.isPrivacyConcern && !$0.wasBlocked }.count,
+            byService: serviceStats,
+            byCategory: byCategory
+        )
+        dailySnapshots.append(snapshot)
+
+        if dailySnapshots.count > maxSnapshots {
+            dailySnapshots = Array(dailySnapshots.suffix(maxSnapshots))
+        }
+
+        if let data = try? JSONEncoder().encode(dailySnapshots) {
+            UserDefaults.standard.set(data, forKey: snapshotKey)
+        }
+    }
+
+    func loadDailySnapshots() {
+        if let data = UserDefaults.standard.data(forKey: snapshotKey),
+           let loaded = try? JSONDecoder().decode([DailySnapshot].self, from: data) {
+            dailySnapshots = loaded
+        }
+    }
+
+    // MARK: - Export
+
+    struct TransparencyReportExport: Codable, Sendable {
+        let generatedAt: Date
+        let periodDays: Int
+        let totalConnections: Int
+        let totalBytesEstimate: Int
+        let blockedConnections: Int
+        let privacyConcerns: Int
+        let serviceBreakdown: [ServiceStats]
+        let categoryBreakdown: [String: Int]
+        let topDomains: [String: Int]
+        let dailyHistory: [DailySnapshot]
+    }
+
+    func generateExportReport(days: Int = 30) -> TransparencyReportExport {
+        var categoryBreakdown: [String: Int] = [:]
+        for record in trafficLog {
+            categoryBreakdown[record.category.rawValue, default: 0] += 1
+        }
+
+        return TransparencyReportExport(
+            generatedAt: Date(),
+            periodDays: days,
+            totalConnections: trafficLog.count,
+            totalBytesEstimate: dailyTrafficBytes,
+            blockedConnections: trafficLog.filter(\.wasBlocked).count,
+            privacyConcerns: trafficLog.filter { $0.category.isPrivacyConcern && !$0.wasBlocked }.count,
+            serviceBreakdown: getServiceStats(),
+            categoryBreakdown: categoryBreakdown,
+            topDomains: connectionCounts,
+            dailyHistory: getDailySnapshots(days: days)
+        )
+    }
+
+    func exportReportAsJSON(days: Int = 30) -> Data? {
+        let report = generateExportReport(days: days)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        return try? encoder.encode(report)
+    }
+
+    func exportReportAsCSV() -> String {
+        var csv = "Date,Service,Connections,Bytes,Blocked,Concerns\n"
+        for snapshot in dailySnapshots {
+            for (service, stats) in snapshot.byService.sorted(by: { $0.key < $1.key }) {
+                csv += "\(snapshot.date),\(service),\(stats.connectionCount),\(stats.bytesEstimate),\(stats.blockedCount),0\n"
+            }
+            if snapshot.byService.isEmpty {
+                csv += "\(snapshot.date),all,\(snapshot.totalConnections),\(snapshot.totalBytes),\(snapshot.blockedConnections),\(snapshot.privacyConcerns)\n"
+            }
+        }
+        return csv
     }
 
     // MARK: - Domain Classification
@@ -254,6 +402,29 @@ actor NetworkPrivacyMonitor {
     }
 
     // MARK: - Private
+
+    /// Maps a hostname to a human-readable service name.
+    private func resolveServiceName(_ hostname: String) -> String {
+        let lowered = hostname.lowercased()
+        if lowered.contains("anthropic") { return "Anthropic" }
+        if lowered.contains("openai") { return "OpenAI" }
+        if lowered.contains("googleapis") { return "Google" }
+        if lowered.contains("groq") { return "Groq" }
+        if lowered.contains("openrouter") { return "OpenRouter" }
+        if lowered.contains("perplexity") { return "Perplexity" }
+        if lowered.contains("deepseek") { return "DeepSeek" }
+        if lowered.contains("icloud") || lowered.contains("apple-cloudkit") { return "iCloud" }
+        if lowered.hasSuffix(".apple.com") { return "Apple" }
+        if lowered.contains("facebook") || lowered.contains("instagram") { return "Meta" }
+        if lowered.contains("google-analytics") || lowered.contains("googletagmanager") { return "Google Analytics" }
+        if lowered.contains("doubleclick") || lowered.contains("googlesyndication") { return "Google Ads" }
+        // Use the second-level domain as fallback
+        let parts = lowered.split(separator: ".")
+        if parts.count >= 2 {
+            return String(parts[parts.count - 2]).capitalized
+        }
+        return hostname
+    }
 
     private func handlePathUpdate(_ path: NWPath) {
         if path.status == .satisfied {
