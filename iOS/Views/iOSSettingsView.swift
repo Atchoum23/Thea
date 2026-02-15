@@ -133,6 +133,17 @@ struct iOSSettingsView: View {
                 }
 
                 NavigationLink {
+                    PackageTrackerView()
+                } label: {
+                    SettingsRow(
+                        icon: "shippingbox",
+                        iconColor: .brown,
+                        title: "Packages",
+                        subtitle: "Track deliveries"
+                    )
+                }
+
+                NavigationLink {
                     LifeManagementDashboardView()
                 } label: {
                     SettingsRow(
