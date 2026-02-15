@@ -108,12 +108,12 @@ struct InvestmentPortfolioView: View {
                     GridItem(.flexible()),
                     GridItem(.flexible())
                 ], spacing: 12) {
-                    metricCard("Cost Basis", "\(portfolio.currency) \(perf.totalCost, specifier: "%.0f")")
-                    metricCard("Unrealized P&L", "\(perf.totalGain >= 0 ? "+" : "")\(portfolio.currency) \(perf.totalGain, specifier: "%.0f")")
-                    metricCard("Dividends", "\(portfolio.currency) \(perf.totalDividends, specifier: "%.0f")")
-                    metricCard("Annualized", "\(perf.annualizedReturn * 100, specifier: "%.1f")%")
+                    metricCard("Cost Basis", "\(portfolio.currency) \(String(format: "%.0f", perf.totalCost))")
+                    metricCard("Unrealized P&L", "\(perf.totalGain >= 0 ? "+" : "")\(portfolio.currency) \(String(format: "%.0f", perf.totalGain))")
+                    metricCard("Dividends", "\(portfolio.currency) \(String(format: "%.0f", perf.totalDividends))")
+                    metricCard("Annualized", "\(String(format: "%.1f", perf.annualizedReturn * 100))%")
                     metricCard("Holdings", "\(perf.holdingCount)")
-                    metricCard("Total w/ Divs", "\(perf.totalReturnWithDividends * 100, specifier: "%.1f")%")
+                    metricCard("Total w/ Divs", "\(String(format: "%.1f", perf.totalReturnWithDividends * 100))%")
                 }
             }
             .padding(.vertical, 8)

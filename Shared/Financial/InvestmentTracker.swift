@@ -287,7 +287,7 @@ final class InvestmentTracker {
 
 // MARK: - Types
 
-struct InvestmentPortfolio: Identifiable, Codable, Sendable {
+struct InvestmentPortfolio: Identifiable, Codable, Sendable, Hashable {
     let id: UUID
     var name: String
     var currency: String
