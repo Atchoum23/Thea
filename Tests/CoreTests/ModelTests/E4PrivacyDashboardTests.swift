@@ -694,3 +694,271 @@ struct BlocklistStatsTests {
         #expect(catSum == stats.enabledDomains)
     }
 }
+
+// MARK: - DNS Blocklist Integration Tests
+
+private struct TestMonthlyReport: Codable {
+    let id: UUID
+    let generatedAt: Date
+    let periodStart: Date
+    let periodEnd: Date
+    let totalConnections: Int
+    let totalBytesEstimate: Int
+    let blockedConnections: Int
+    let privacyConcerns: Int
+    let privacyScore: Int
+    let recommendations: [String]
+}
+
+private func computeMonthlyPrivacyScore(
+    totalConnections: Int,
+    blockedConnections: Int,
+    privacyConcerns: Int,
+    firewallMode: String
+) -> Int {
+    var score = 70
+    if totalConnections > 0 {
+        let blockedRatio = Double(blockedConnections) / Double(totalConnections)
+        let concernRatio = Double(privacyConcerns) / Double(totalConnections)
+        score = max(0, min(100, Int(70.0 + blockedRatio * 20.0 - concernRatio * 30.0)))
+    }
+    return score
+}
+
+private func generateRecommendations(
+    firewallMode: String,
+    privacyConcerns: Int,
+    disabledBlocklistCount: Int,
+    totalConnections: Int,
+    score: Int
+) -> [String] {
+    var recommendations: [String] = []
+    if firewallMode != "strict" {
+        recommendations.append("Enable strict firewall mode for maximum protection")
+    }
+    if privacyConcerns > 0 {
+        recommendations.append("Review \(privacyConcerns) privacy concern(s) — consider adding domains to blocklist")
+    }
+    if disabledBlocklistCount > 5 {
+        recommendations.append("Enable \(disabledBlocklistCount) disabled blocklist entries for better coverage")
+    }
+    if totalConnections == 0 {
+        recommendations.append("No network activity recorded — ensure monitoring is enabled")
+    }
+    if score >= 80 {
+        recommendations.append("Privacy posture is strong — keep monitoring regularly")
+    }
+    return recommendations
+}
+
+@Suite("DNS Blocklist Integration")
+struct DNSBlocklistIntegrationTests {
+    @Test("Blocklist domain check blocks known tracker")
+    func blockKnownTracker() {
+        var entries: [String: TestBlocklistEntry] = [:]
+        let blockedDomains = ["doubleclick.net", "googlesyndication.com", "pixel.facebook.com"]
+        for domain in blockedDomains {
+            entries[domain] = TestBlocklistEntry(domain: domain, category: .advertising, source: .builtin)
+        }
+
+        let result = checkDomain("doubleclick.net", entries: entries)
+        #expect(result.isBlocked)
+    }
+
+    @Test("Blocklist allows AI provider domains")
+    func allowAIProviders() {
+        var entries: [String: TestBlocklistEntry] = [:]
+        entries["doubleclick.net"] = TestBlocklistEntry(domain: "doubleclick.net", category: .advertising, source: .builtin)
+
+        let result = checkDomain("api.anthropic.com", entries: entries)
+        #expect(!result.isBlocked)
+    }
+
+    @Test("Provider domain check before API call")
+    func providerDomainCheck() {
+        let domain = domainForProvider("Anthropic")
+        let category = classifyDomain(domain)
+        #expect(domain == "api.anthropic.com")
+        #expect(category == .aiProvider)
+    }
+
+    @Test("Blocked provider domain prevents API call")
+    func blockedProviderDomain() {
+        // Simulate a scenario where a provider domain is blocklisted
+        var entries: [String: TestBlocklistEntry] = [:]
+        entries["api.anthropic.com"] = TestBlocklistEntry(
+            domain: "api.anthropic.com", category: .custom, source: .user
+        )
+
+        let domain = domainForProvider("Anthropic")
+        let result = checkDomain(domain, entries: entries)
+        #expect(result.isBlocked)
+        #expect(result.category == .custom)
+    }
+
+    @Test("Subdomain of blocklisted domain also blocked")
+    func subdomainBlocking() {
+        var entries: [String: TestBlocklistEntry] = [:]
+        entries["facebook.com"] = TestBlocklistEntry(domain: "facebook.com", category: .tracker, source: .builtin)
+
+        let result = checkDomain("pixel.facebook.com", entries: entries)
+        #expect(result.isBlocked)
+        #expect(result.matchedDomain == "facebook.com")
+    }
+}
+
+@Suite("Monthly Transparency Report")
+struct MonthlyTransparencyReportTests {
+    @Test("Report generation with no traffic")
+    func emptyTraffic() {
+        let score = computeMonthlyPrivacyScore(
+            totalConnections: 0, blockedConnections: 0,
+            privacyConcerns: 0, firewallMode: "strict"
+        )
+        #expect(score == 70) // Base score with no data
+    }
+
+    @Test("Report score increases with blocked connections")
+    func blockedConnectionsImproveScore() {
+        let score = computeMonthlyPrivacyScore(
+            totalConnections: 100, blockedConnections: 50,
+            privacyConcerns: 0, firewallMode: "strict"
+        )
+        #expect(score > 70)
+        #expect(score == 80) // 70 + 0.5 * 20 = 80
+    }
+
+    @Test("Report score decreases with privacy concerns")
+    func privacyConcernsReduceScore() {
+        let score = computeMonthlyPrivacyScore(
+            totalConnections: 100, blockedConnections: 0,
+            privacyConcerns: 50, firewallMode: "strict"
+        )
+        #expect(score < 70)
+        #expect(score == 55) // 70 + 0 - 0.5 * 30 = 55
+    }
+
+    @Test("Score clamped to 0-100 range")
+    func scoreClamped() {
+        let highScore = computeMonthlyPrivacyScore(
+            totalConnections: 100, blockedConnections: 100,
+            privacyConcerns: 0, firewallMode: "strict"
+        )
+        #expect(highScore <= 100)
+
+        let lowScore = computeMonthlyPrivacyScore(
+            totalConnections: 100, blockedConnections: 0,
+            privacyConcerns: 100, firewallMode: "strict"
+        )
+        #expect(lowScore >= 0)
+    }
+
+    @Test("Report Codable roundtrip")
+    func codableRoundtrip() throws {
+        let report = TestMonthlyReport(
+            id: UUID(),
+            generatedAt: Date(),
+            periodStart: Date().addingTimeInterval(-86400 * 30),
+            periodEnd: Date(),
+            totalConnections: 150,
+            totalBytesEstimate: 2_048_000,
+            blockedConnections: 20,
+            privacyConcerns: 5,
+            privacyScore: 82,
+            recommendations: ["Enable strict mode", "Review 5 concerns"]
+        )
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(report)
+        #expect(!data.isEmpty)
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(TestMonthlyReport.self, from: data)
+        #expect(decoded.totalConnections == 150)
+        #expect(decoded.privacyScore == 82)
+        #expect(decoded.recommendations.count == 2)
+    }
+
+    @Test("Report has valid period")
+    func validPeriod() {
+        let now = Date()
+        let monthAgo = now.addingTimeInterval(-86400 * 30)
+        let report = TestMonthlyReport(
+            id: UUID(), generatedAt: now,
+            periodStart: monthAgo, periodEnd: now,
+            totalConnections: 0, totalBytesEstimate: 0,
+            blockedConnections: 0, privacyConcerns: 0,
+            privacyScore: 70, recommendations: []
+        )
+        #expect(report.periodStart < report.periodEnd)
+        #expect(report.periodEnd <= report.generatedAt)
+    }
+}
+
+@Suite("Recommendations Generation")
+struct RecommendationsTests {
+    @Test("Non-strict mode recommends enabling strict")
+    func nonStrictRecommendation() {
+        let recs = generateRecommendations(
+            firewallMode: "standard", privacyConcerns: 0,
+            disabledBlocklistCount: 0, totalConnections: 100, score: 85
+        )
+        #expect(recs.contains { $0.contains("strict") })
+    }
+
+    @Test("Strict mode does not recommend enabling strict")
+    func strictNoRecommendation() {
+        let recs = generateRecommendations(
+            firewallMode: "strict", privacyConcerns: 0,
+            disabledBlocklistCount: 0, totalConnections: 100, score: 95
+        )
+        #expect(!recs.contains { $0.contains("Enable strict") })
+    }
+
+    @Test("Privacy concerns generate review recommendation")
+    func concernsRecommendation() {
+        let recs = generateRecommendations(
+            firewallMode: "strict", privacyConcerns: 5,
+            disabledBlocklistCount: 0, totalConnections: 100, score: 70
+        )
+        #expect(recs.contains { $0.contains("5 privacy concern") })
+    }
+
+    @Test("Many disabled blocklist entries generate recommendation")
+    func disabledBlocklistRecommendation() {
+        let recs = generateRecommendations(
+            firewallMode: "strict", privacyConcerns: 0,
+            disabledBlocklistCount: 10, totalConnections: 100, score: 75
+        )
+        #expect(recs.contains { $0.contains("10 disabled") })
+    }
+
+    @Test("No activity generates monitoring recommendation")
+    func noActivityRecommendation() {
+        let recs = generateRecommendations(
+            firewallMode: "strict", privacyConcerns: 0,
+            disabledBlocklistCount: 0, totalConnections: 0, score: 70
+        )
+        #expect(recs.contains { $0.contains("No network activity") })
+    }
+
+    @Test("High score generates positive feedback")
+    func highScorePositive() {
+        let recs = generateRecommendations(
+            firewallMode: "strict", privacyConcerns: 0,
+            disabledBlocklistCount: 0, totalConnections: 100, score: 90
+        )
+        #expect(recs.contains { $0.contains("strong") })
+    }
+
+    @Test("Low score does not generate positive feedback")
+    func lowScoreNoPositive() {
+        let recs = generateRecommendations(
+            firewallMode: "permissive", privacyConcerns: 20,
+            disabledBlocklistCount: 0, totalConnections: 100, score: 40
+        )
+        #expect(!recs.contains { $0.contains("strong") })
+    }
+}
