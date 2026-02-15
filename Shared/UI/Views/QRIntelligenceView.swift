@@ -137,7 +137,7 @@ struct QRIntelligenceView: View {
     private func codeRow(_ code: ScannedQRCode) -> some View {
         HStack {
             Image(systemName: code.contentType.icon)
-                .foregroundStyle(.accentColor)
+                .foregroundStyle(Color.accentColor)
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
@@ -177,7 +177,7 @@ struct QRIntelligenceView: View {
                         HStack {
                             Image(systemName: code.contentType.icon)
                                 .font(.title)
-                                .foregroundStyle(.accentColor)
+                                .foregroundStyle(Color.accentColor)
                             VStack(alignment: .leading) {
                                 Text(code.displayTitle)
                                     .font(.title2.bold())

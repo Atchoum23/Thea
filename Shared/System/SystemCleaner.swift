@@ -147,7 +147,7 @@ struct CleanupResult: Codable, Sendable, Identifiable {
     }
 }
 
-struct ScanResult: Sendable {
+struct CleanerScanResult: Sendable {
     let items: [CleanableItem]
     let totalBytes: UInt64
     let categoryBreakdown: [CleanableCategory: UInt64]
@@ -166,7 +166,7 @@ final class SystemCleaner {
 
     private(set) var isScanning = false
     private(set) var isCleaning = false
-    private(set) var lastScanResult: ScanResult?
+    private(set) var lastCleanerScanResult: CleanerScanResult?
     private(set) var cleanupHistory: [CleanupResult] = []
     private(set) var scanProgress: Double = 0
     private(set) var totalBytesFreed: UInt64 = 0
@@ -204,7 +204,7 @@ final class SystemCleaner {
             .mapValues { $0.reduce(0 as UInt64) { $0 + $1.sizeBytes } }
         let total = allItems.reduce(0 as UInt64) { $0 + $1.sizeBytes }
 
-        lastScanResult = ScanResult(items: allItems, totalBytes: total, categoryBreakdown: breakdown)
+        lastCleanerScanResult = CleanerScanResult(items: allItems, totalBytes: total, categoryBreakdown: breakdown)
         isScanning = false
         scLogger.info("Scan complete: \(allItems.count) items, \(SystemCleaner.formatBytes(total))")
     }
@@ -332,7 +332,7 @@ final class SystemCleaner {
     // MARK: - Cleaning
 
     func clean(categories: Set<CleanableCategory>) async -> CleanupResult {
-        guard let scanResult = lastScanResult, !isCleaning else {
+        guard let scanResult = lastCleanerScanResult, !isCleaning else {
             return CleanupResult(bytesFreed: 0, filesDeleted: 0, categoriesCleared: [])
         }
 
@@ -372,7 +372,7 @@ final class SystemCleaner {
         totalBytesFreed += totalFreed
         saveHistory()
 
-        lastScanResult = nil
+        lastCleanerScanResult = nil
         isCleaning = false
 
         scLogger.info("Cleanup complete: \(SystemCleaner.formatBytes(totalFreed)) freed, \(totalDeleted) items deleted")
@@ -467,7 +467,7 @@ final class SystemCleaner {
         return totalSize
     }
 
-    static func formatBytes(_ bytes: UInt64) -> String {
+    nonisolated static func formatBytes(_ bytes: UInt64) -> String {
         let units = ["B", "KB", "MB", "GB", "TB"]
         var value = Double(bytes)
         var unitIndex = 0

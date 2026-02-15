@@ -232,32 +232,7 @@ struct BatteryIntelligenceView: View {
         case .fair: .yellow
         case .serious: .orange
         case .critical: .red
-        }
-    }
-}
-
-// MARK: - Power Source Extension
-
-extension PowerSource {
-    var displayName: String {
-        switch self {
-        case .ac: "AC Power"
-        case .battery: "Battery"
-        case .ups: "UPS"
-        case .unknown: "Unknown"
-        }
-    }
-}
-
-// MARK: - Thermal State Extension
-
-extension ThermalState {
-    var displayName: String {
-        switch self {
-        case .nominal: "Normal"
-        case .fair: "Fair"
-        case .serious: "Serious"
-        case .critical: "Critical"
+        case .unknown: .secondary
         }
     }
 }

@@ -15,7 +15,7 @@ struct SystemCleanerView: View {
             VStack(spacing: 16) {
                 diskOverview
                 scanSection
-                if let scanResult = cleaner.lastScanResult {
+                if let scanResult = cleaner.lastCleanerScanResult {
                     categoryList(scanResult)
                     cleanButton(scanResult)
                 }
@@ -89,7 +89,7 @@ struct SystemCleanerView: View {
                         .font(.caption)
                         .monospacedDigit()
                 } else {
-                    Text(cleaner.lastScanResult == nil ? "Scan your system to find cleanable files" : "Scan complete")
+                    Text(cleaner.lastCleanerScanResult == nil ? "Scan your system to find cleanable files" : "Scan complete")
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
@@ -106,7 +106,7 @@ struct SystemCleanerView: View {
 
     // MARK: - Category List
 
-    private func categoryList(_ scanResult: ScanResult) -> some View {
+    private func categoryList(_ scanResult: CleanerScanResult) -> some View {
         GroupBox("Found Items") {
             VStack(spacing: 0) {
                 ForEach(CleanableCategory.allCases) { category in
@@ -136,7 +136,9 @@ struct SystemCleanerView: View {
                                     }
                                 }
                             }
+                            #if os(macOS)
                             .toggleStyle(.checkbox)
+                            #endif
 
                             Spacer()
 
@@ -178,7 +180,7 @@ struct SystemCleanerView: View {
 
     // MARK: - Clean Button
 
-    private func cleanButton(_ scanResult: ScanResult) -> some View {
+    private func cleanButton(_ scanResult: CleanerScanResult) -> some View {
         let selectedSize = selectedCategories.reduce(0 as UInt64) { total, category in
             total + (scanResult.categoryBreakdown[category] ?? 0)
         }
