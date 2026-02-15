@@ -504,7 +504,7 @@ private struct DocumentDetailView: View {
             }
 
             // Tags
-            FlowLayout(spacing: 4) {
+            DocumentTagFlowLayout(spacing: 4) {
                 ForEach(document.tags, id: \.self) { tag in
                     Text(tag)
                         .font(.theaCaption2)
@@ -526,8 +526,6 @@ private struct DocumentDetailView: View {
             }
 
             if let date = document.documentDate {
-                let fmt = DateFormatter()
-                // Use a computed value to avoid mutating local
                 detailRow("Document Date", value: {
                     let f = DateFormatter()
                     f.dateStyle = .long
@@ -643,7 +641,7 @@ private struct DocumentDetailView: View {
 
 // MARK: - Flow Layout (for tags)
 
-private struct FlowLayout: Layout {
+private struct DocumentTagFlowLayout: Layout {
     var spacing: CGFloat = 4
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
