@@ -484,6 +484,8 @@ targets:
         CODE_SIGN_IDENTITY: "Developer ID Application: Alexis Calevras (6B66PM4JLK)"
         SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
         GCC_TREAT_WARNINGS_AS_ERRORS: YES
+        # TEMPORARY: Exclude MLXAudio files causing duplicate stringsdata error in Release
+        EXCLUDED_SOURCE_FILE_NAMES: "MLXAudioEngine.swift"
 
     dependencies:
       - package: OpenAI
