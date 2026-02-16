@@ -20,7 +20,7 @@ struct AppPairingSettingsView: View {
                             Text("App Pairing")
                                 .font(.theaTitle2)
                             Text("Context-aware assistance for your foreground apps")
-                                .font(.theaCaption)
+                                .font(.theaCaption1)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -31,7 +31,7 @@ struct AppPairingSettingsView: View {
                         .padding(.top, 8)
 
                     Text("Coming in G2 phase...")
-                        .font(.theaCaption)
+                        .font(.theaCaption1)
                         .foregroundStyle(.orange)
                         .padding(.top, 4)
                 }

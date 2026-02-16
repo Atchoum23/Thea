@@ -29,8 +29,9 @@ final class CGActionExecutor {
 
     /// Request Accessibility permission (opens System Settings)
     nonisolated func requestPermission() {
-        let options: [String: Bool] = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
-        let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
+        // Use string literal to avoid concurrency warning on kAXTrustedCheckOptionPrompt global
+        let options: NSDictionary = ["AXTrustedCheckOptionPrompt": true as CFBoolean]
+        let trusted = AXIsProcessTrustedWithOptions(options)
 
         if !trusted {
             print("[CGActionExecutor] Opening System Settings for Accessibility permission")
