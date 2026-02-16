@@ -238,4 +238,57 @@ final class TheaiOSUITests: XCTestCase {
         // Return to Chat
         tabBar.buttons["Chat"].tap()
     }
+
+    // MARK: - Accessibility Audit
+
+    func testAccessibilityAuditChatTab() throws {
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+
+        tabBar.buttons["Chat"].tap()
+        sleep(2)
+        app.tap() // dismiss any alerts
+        sleep(1)
+
+        // Perform accessibility audit (iOS 17+)
+        try app.performAccessibilityAudit()
+    }
+
+    func testAccessibilityAuditProjectsTab() throws {
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+
+        tabBar.buttons["Projects"].tap()
+        sleep(2)
+        app.tap()
+        sleep(1)
+
+        try app.performAccessibilityAudit()
+    }
+
+    func testTabBarButtonsHaveLabels() throws {
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+
+        let expectedTabs = ["Chat", "Projects", "Health", "Knowledge", "More"]
+        for tabName in expectedTabs {
+            let tab = tabBar.buttons[tabName]
+            XCTAssertTrue(tab.exists, "\(tabName) tab button should have accessibility label")
+            XCTAssertTrue(tab.isHittable, "\(tabName) tab button should be hittable (>=44pt)")
+        }
+    }
+
+    func testMinimumTapTargetSizes() throws {
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+
+        // Check tab bar buttons are large enough
+        for button in tabBar.buttons.allElementsBoundByIndex {
+            let frame = button.frame
+            XCTAssertGreaterThanOrEqual(frame.width, 44,
+                "Tab button '\(button.label)' width should be >= 44pt")
+            XCTAssertGreaterThanOrEqual(frame.height, 44,
+                "Tab button '\(button.label)' height should be >= 44pt")
+        }
+    }
 }
