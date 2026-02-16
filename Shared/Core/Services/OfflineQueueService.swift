@@ -20,6 +20,7 @@ public final class OfflineQueueService {
     private let logger = Logger(subsystem: "app.thea.offline", category: "OfflineQueue")
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "app.thea.network.monitor")
+    let userDefaults: UserDefaults
 
     // MARK: - State
 
@@ -42,8 +43,15 @@ public final class OfflineQueueService {
     // MARK: - Initialization
 
     private init() {
+        self.userDefaults = .standard
         loadPendingRequests()
         startNetworkMonitoring()
+    }
+
+    /// Internal init for testing — skips network monitoring and UserDefaults loading
+    init(forTesting: Bool, userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+        // Do not start network monitor or load from UserDefaults
     }
 
     deinit {
@@ -169,7 +177,7 @@ public final class OfflineQueueService {
         savePendingRequests()
     }
 
-    private func processRequest(_ request: OfflineQueuedRequest) async throws {
+    func processRequest(_ request: OfflineQueuedRequest) async throws {
         logger.info("Processing request: \(request.type.rawValue)")
 
         switch request.type {
@@ -228,11 +236,11 @@ public final class OfflineQueueService {
         }
     }
 
-    private func removeRequest(_ id: UUID) {
+    func removeRequest(_ id: UUID) {
         pendingRequests.removeAll { $0.id == id }
     }
 
-    private func updateRequest(_ request: OfflineQueuedRequest) {
+    func updateRequest(_ request: OfflineQueuedRequest) {
         if let index = pendingRequests.firstIndex(where: { $0.id == request.id }) {
             pendingRequests[index] = request
         }
@@ -240,8 +248,8 @@ public final class OfflineQueueService {
 
     // MARK: - Persistence
 
-    private func loadPendingRequests() {
-        guard let data = UserDefaults.standard.data(forKey: "offline.pendingRequests"),
+    func loadPendingRequests() {
+        guard let data = userDefaults.data(forKey: "offline.pendingRequests"),
               let requests = try? JSONDecoder().decode([OfflineQueuedRequest].self, from: data)
         else { return }
 
@@ -249,9 +257,9 @@ public final class OfflineQueueService {
         logger.info("Loaded \(requests.count) pending requests from storage")
     }
 
-    private func savePendingRequests() {
+    func savePendingRequests() {
         guard let data = try? JSONEncoder().encode(pendingRequests) else { return }
-        UserDefaults.standard.set(data, forKey: "offline.pendingRequests")
+        userDefaults.set(data, forKey: "offline.pendingRequests")
     }
 
     // MARK: - Queue Status
