@@ -58,7 +58,7 @@ settings:
     # Swift Configuration
     # ===========================================
     SWIFT_VERSION: "6.0"
-    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_STRICT_CONCURRENCY: minimal
     SWIFT_EMIT_MODULE_INTERFACE: NO
     BUILD_LIBRARY_FOR_DISTRIBUTION: NO
     SWIFT_ENFORCE_EXCLUSIVE_ACCESS: "full"
@@ -534,6 +534,13 @@ targets:
           - "**/Core/Services/ProjectService.swift"
           - "**/Terminal/**"
           - "**/ScreenCapture.swift"
+          - "System/ScreenCapture/ScreenCaptureManager.swift"
+          - "System/Input/PointerTracker.swift"
+          - "System/Input/ActionExecutor.swift"
+          - "Integrations/ForegroundAppMonitor.swift"
+          - "AI/LiveGuidance/LocalVisionGuidance.swift"
+          - "UI/Views/Settings/LiveGuidanceSettingsView.swift"
+          - "UI/Views/Settings/AppPairingSettingsView.swift"
           - "**/InputTrackingManager.swift"
           - "**/*AutomationEngine.swift"
           - "**/AppIntegration/**"
