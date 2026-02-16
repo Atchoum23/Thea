@@ -388,3 +388,143 @@ struct FlagDictionarySerializationTests {
         #expect(decoded["e.f"]?.source == .abTest)
     }
 }
+
+// MARK: - Tests: AI Task Category Temperature
+
+@Suite("AI Task Category Temperature")
+struct AITaskCategoryTemperatureTests {
+    @Test("Code tasks use low temperature")
+    func codeTemperature() {
+        #expect(testTemperature(for: .codeGeneration) == 0.1)
+        #expect(testTemperature(for: .codeReview) == 0.1)
+        #expect(testTemperature(for: .bugFix) == 0.1)
+    }
+
+    @Test("Creative tasks use high temperature")
+    func creativeTemperature() {
+        #expect(testTemperature(for: .creative) == 0.9)
+        #expect(testTemperature(for: .brainstorming) == 0.9)
+    }
+
+    @Test("Conversation tasks use medium temperature")
+    func conversationTemperature() {
+        #expect(testTemperature(for: .conversation) == 0.7)
+        #expect(testTemperature(for: .assistance) == 0.7)
+    }
+
+    @Test("Analysis tasks use low-medium temperature")
+    func analysisTemperature() {
+        #expect(testTemperature(for: .analysis) == 0.3)
+        #expect(testTemperature(for: .classification) == 0.3)
+    }
+
+    @Test("Translation tasks use low temperature")
+    func translationTemperature() {
+        #expect(testTemperature(for: .translation) == 0.2)
+        #expect(testTemperature(for: .correction) == 0.2)
+    }
+}
+
+// MARK: - Tests: AI Task Category Max Tokens
+
+@Suite("AI Task Category Max Tokens")
+struct AITaskCategoryMaxTokensTests {
+    @Test("Code generation has highest tokens")
+    func codeGeneration() {
+        #expect(testMaxTokens(for: .codeGeneration) == 4000)
+    }
+
+    @Test("Code review and bug fix share limit")
+    func codeReview() {
+        #expect(testMaxTokens(for: .codeReview) == 2000)
+        #expect(testMaxTokens(for: .bugFix) == 2000)
+    }
+
+    @Test("Conversation has lower limit")
+    func conversation() {
+        #expect(testMaxTokens(for: .conversation) == 1000)
+    }
+
+    @Test("Analysis limit")
+    func analysis() {
+        #expect(testMaxTokens(for: .analysis) == 1500)
+    }
+
+    @Test("Creative tasks have high limit")
+    func creative() {
+        #expect(testMaxTokens(for: .creative) == 3000)
+        #expect(testMaxTokens(for: .brainstorming) == 3000)
+    }
+
+    @Test("Translation uses input-based limit")
+    func translation() {
+        #expect(testMaxTokens(for: .translation, inputLength: 0) == 500)
+        #expect(testMaxTokens(for: .translation, inputLength: 1000) == 2000)
+        #expect(testMaxTokens(for: .correction, inputLength: 100) == 500)
+        #expect(testMaxTokens(for: .correction, inputLength: 300) == 600)
+    }
+
+    @Test("Assistance limit")
+    func assistance() {
+        #expect(testMaxTokens(for: .assistance) == 2000)
+    }
+
+    @Test("Classification has minimal limit")
+    func classification() {
+        #expect(testMaxTokens(for: .classification) == 100)
+    }
+}
+
+// MARK: - Tests: AI Task Category Default Model
+
+@Suite("AI Task Category Default Model")
+struct AITaskCategoryDefaultModelTests {
+    @Test("Complex tasks use gpt-4o")
+    func complexTasks() {
+        #expect(testDefaultModel(for: .codeGeneration) == "gpt-4o")
+        #expect(testDefaultModel(for: .codeReview) == "gpt-4o")
+        #expect(testDefaultModel(for: .bugFix) == "gpt-4o")
+        #expect(testDefaultModel(for: .creative) == "gpt-4o")
+        #expect(testDefaultModel(for: .analysis) == "gpt-4o")
+    }
+
+    @Test("Simple tasks use gpt-4o-mini")
+    func simpleTasks() {
+        #expect(testDefaultModel(for: .conversation) == "gpt-4o-mini")
+        #expect(testDefaultModel(for: .assistance) == "gpt-4o-mini")
+        #expect(testDefaultModel(for: .brainstorming) == "gpt-4o-mini")
+        #expect(testDefaultModel(for: .classification) == "gpt-4o-mini")
+        #expect(testDefaultModel(for: .translation) == "gpt-4o-mini")
+        #expect(testDefaultModel(for: .correction) == "gpt-4o-mini")
+    }
+}
+
+// MARK: - Tests: Periodic Task Default Intervals
+
+@Suite("Periodic Task Default Intervals")
+struct PeriodicTaskDefaultIntervalTests {
+    @Test("All tasks have positive intervals")
+    func allPositive() {
+        for task in TestPeriodicTask.allCases {
+            #expect(testDefaultInterval(for: task) > 0)
+        }
+    }
+
+    @Test("Specific interval values")
+    func specificIntervals() {
+        #expect(testDefaultInterval(for: .contextUpdate) == 900)
+        #expect(testDefaultInterval(for: .insightGeneration) == 3600)
+        #expect(testDefaultInterval(for: .healthCheck) == 300)
+        #expect(testDefaultInterval(for: .cacheCleanup) == 7200)
+        #expect(testDefaultInterval(for: .modelOptimization) == 86400)
+        #expect(testDefaultInterval(for: .selfImprovement) == 43200)
+    }
+
+    @Test("Health check is most frequent")
+    func healthCheckMostFrequent() {
+        let healthInterval = testDefaultInterval(for: .healthCheck)
+        for task in TestPeriodicTask.allCases where task != .healthCheck {
+            #expect(healthInterval < testDefaultInterval(for: task))
+        }
+    }
+}

@@ -25,16 +25,16 @@ public final class OfflineQueueService {
     // MARK: - State
 
     /// Current network status
-    public private(set) var isOnline: Bool = true
+    public internal(set) var isOnline: Bool = true
 
     /// Queue of pending requests
-    public private(set) var pendingRequests: [OfflineQueuedRequest] = []
+    public internal(set) var pendingRequests: [OfflineQueuedRequest] = []
 
     /// Whether the queue is currently being processed
-    public private(set) var isProcessing: Bool = false
+    public internal(set) var isProcessing: Bool = false
 
     /// Statistics
-    public private(set) var stats = OfflineQueueStats()
+    public internal(set) var stats = OfflineQueueStats()
 
     // MARK: - Configuration
 
