@@ -620,6 +620,7 @@ targets:
           # LifeMonitoring — ACTIVATED (all files including TaskIntelligence)
           - "**/Integrations/MusicIntegration.swift"
           - "**/Integrations/SystemIntegration.swift"
+          - "**/Integrations/ContextExtractors/**"  # macOS-only (uses ApplicationServices)
           # AI/Adaptive/AdaptivePromptEngine — ACTIVATED (AI/Adaptive now active)
           # LocalModels governance — ACTIVATED (all governance files enabled for iOS)
           # ProactiveModelManager, LocalModelRecommendationEngine (+extensions),
