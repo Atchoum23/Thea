@@ -215,9 +215,8 @@ final class ForegroundAppMonitor: ObservableObject {
         }
     }
 
-    deinit {
-        stopMonitoring()
-    }
+    // Note: deinit cannot call @MainActor methods
+    // Observers will be automatically removed when the object is deallocated
 }
 
 // MARK: - AppContext Model
