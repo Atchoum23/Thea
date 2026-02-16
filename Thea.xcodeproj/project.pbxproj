@@ -138,6 +138,7 @@
 		0EC995DB88EE0AA9506AB953 /* AgentMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5807C5003A441D28BB9689F8 /* AgentMode.swift */; };
 		0ECBA536348633B1827AA79C /* FeatureGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FBCF36FA3D7E4D6D77FFAC /* FeatureGate.swift */; };
 		0EDC3529F3844E29B742EDCE /* TheaConfigSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40408F55B8B52907D2779C7 /* TheaConfigSections.swift */; };
+		0F01156ACF0A62DC77D1937E /* TheaiOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8030F403C71A0630288DACB /* TheaiOSUITests.swift */; };
 		0F03E62482080C257BE4BB3F /* ProjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBF9B29745B3455B7EB0D745 /* ProjectManager.swift */; };
 		0F284749F1169065B93A0FBC /* AnthropicFilesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D775C9ABE402AA785CDF7C8 /* AnthropicFilesAPI.swift */; };
 		0F5191421DEDD840D27BC4CA /* SystemAudioMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF7F4F780CD58452A7E38BC /* SystemAudioMonitor.swift */; };
@@ -2109,6 +2110,13 @@
 			remoteGlobalIDString = D6DED4C63E00019AC3DB66FF;
 			remoteInfo = TheaSafariExtension;
 		};
+		BAB36A88979819C711BA49ED /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7AAB7B53A6E9222B2B67219C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 811660DEAC235163677871EC;
+			remoteInfo = "Thea-iOS";
+		};
 		BFDF6BC047B0F184C3FA5A06 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7AAB7B53A6E9222B2B67219C /* Project object */;
@@ -2793,6 +2801,7 @@
 		826846983CA6501514B912D8 /* MentionAutocompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionAutocompleteView.swift; sourceTree = "<group>"; };
 		826AC9D7AE3F12A7C81ECD23 /* AgentResourcePool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentResourcePool.swift; sourceTree = "<group>"; };
 		829A25CE7667073FBEB5A6B4 /* ProjectMemoryTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectMemoryTypes.swift; sourceTree = "<group>"; };
+		82FB36DF2DF093DC88944D72 /* TheaiOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TheaiOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		830A8824378DAFA673E5A02A /* RemoteInferenceClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteInferenceClient.swift; sourceTree = "<group>"; };
 		83701F2E56268076A9E7B89D /* MemoryManagerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryManagerTypes.swift; sourceTree = "<group>"; };
 		837CB8A90B228894E2BED118 /* OpenClawTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawTypes.swift; sourceTree = "<group>"; };
@@ -3298,6 +3307,7 @@
 		F6CBA75876D112D3CDB04CD5 /* print-friendly.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = "print-friendly.css"; sourceTree = "<group>"; };
 		F74F450B2F44A98E1CE88C84 /* GoogleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleProvider.swift; sourceTree = "<group>"; };
 		F7D263A49EDCC79B973E539D /* TheaSharePlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaSharePlay.swift; sourceTree = "<group>"; };
+		F8030F403C71A0630288DACB /* TheaiOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaiOSUITests.swift; sourceTree = "<group>"; };
 		F804EEDA7F3B3DFEA138BABD /* COPY-PASTE-COMMANDS.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "COPY-PASTE-COMMANDS.sh"; sourceTree = "<group>"; };
 		F818AA92AC0A6993C7B7F954 /* FocusModeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModeSettings.swift; sourceTree = "<group>"; };
 		F846091AD67C1A9C70CE3A74 /* CognitiveProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitiveProtocols.swift; sourceTree = "<group>"; };
@@ -4195,6 +4205,14 @@
 				42E38CA55E7F4FD63FF4AE8E /* DisplayProtocols.swift */,
 			);
 			path = Protocols;
+			sourceTree = "<group>";
+		};
+		373C4818B0F2C1B84C311FEF /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				F8030F403C71A0630288DACB /* TheaiOSUITests.swift */,
+			);
+			path = UITests;
 			sourceTree = "<group>";
 		};
 		383ED4181D66788DFA08E435 /* Speech */ = {
@@ -5766,6 +5784,7 @@
 				1D79A97822355D903F040A4D /* TheaFinderSyncExtension.appex */,
 				DF41D7B50ADAD52B6CB74541 /* TheaFocusFilterExtension.appex */,
 				46301D4D320FB0E7A06C13B4 /* TheaIntentsExtension.appex */,
+				82FB36DF2DF093DC88944D72 /* TheaiOSUITests.xctest */,
 				E4148F65BF0E8FB961A88A6E /* TheaKeyboardExtension.appex */,
 				9C1192AD4066E806EED1771B /* TheaNotificationServiceExtension.appex */,
 				C9C0E39E4F2B5E7B91E927AD /* TheaQuickLookExtension.appex */,
@@ -6008,6 +6027,7 @@
 				DFE4F4CF5519692CAB13BC8C /* Shared */,
 				82C0661D292211A9B381DFF1 /* Tests */,
 				A217802E92C4347AEC180FEC /* tvOS */,
+				373C4818B0F2C1B84C311FEF /* UITests */,
 				C2BD5598EF3CF2519C87BBA3 /* watchOS */,
 				B2A3EDCBA5BFD6670FA8302A /* Products */,
 			);
@@ -7021,6 +7041,24 @@
 			productReference = 16DD6A3E402BE847CA3BEBC0 /* TheaSafariExtensionMac.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		BDCF02D71BE975CE2F1ACAFA /* TheaiOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 42E76F980865029F33A1716A /* Build configuration list for PBXNativeTarget "TheaiOSUITests" */;
+			buildPhases = (
+				2F92ADCA8274E27F56531D94 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				420F2D73DC4DC0CBBE56FE96 /* PBXTargetDependency */,
+			);
+			name = TheaiOSUITests;
+			packageProductDependencies = (
+			);
+			productName = TheaiOSUITests;
+			productReference = 82FB36DF2DF093DC88944D72 /* TheaiOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		C57C4798CA2D2D0D39A41927 /* TheaCredentialsExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = EB507FADF168861377D264E3 /* Build configuration list for PBXNativeTarget "TheaCredentialsExtension" */;
@@ -7178,6 +7216,11 @@
 						DevelopmentTeam = 6B66PM4JLK;
 						ProvisioningStyle = Automatic;
 					};
+					BDCF02D71BE975CE2F1ACAFA = {
+						DevelopmentTeam = 6B66PM4JLK;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 811660DEAC235163677871EC;
+					};
 					C57C4798CA2D2D0D39A41927 = {
 						DevelopmentTeam = 6B66PM4JLK;
 						ProvisioningStyle = Automatic;
@@ -7243,6 +7286,7 @@
 				CA67BDF98EAD77720292540F /* TheaShareExtension */,
 				FB9434F9F36955A38E5A8C91 /* TheaTests */,
 				A0E268414FCBA9402CE75908 /* TheaWidgetExtension */,
+				BDCF02D71BE975CE2F1ACAFA /* TheaiOSUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -7427,6 +7471,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				799891533B390A1EF07E3F95 /* TheaWidgetBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2F92ADCA8274E27F56531D94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0F01156ACF0A62DC77D1937E /* TheaiOSUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9435,6 +9487,11 @@
 			target = 2B79C9134A9EF216BFE85869 /* TheaKeyboardExtension */;
 			targetProxy = 0A4B8BC815AF7FA86FE5FA1E /* PBXContainerItemProxy */;
 		};
+		420F2D73DC4DC0CBBE56FE96 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 811660DEAC235163677871EC /* Thea-iOS */;
+			targetProxy = BAB36A88979819C711BA49ED /* PBXContainerItemProxy */;
+		};
 		6AD9A32A60D4220CB35FEB1C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CA67BDF98EAD77720292540F /* TheaShareExtension */;
@@ -9704,6 +9761,24 @@
 			};
 			name = Debug;
 		};
+		674002A4CA8FFF1B3114390B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.thea.ios.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Thea-iOS";
+			};
+			name = Release;
+		};
 		772258CCE06847B6CAB78918 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -9806,6 +9881,24 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		839D5DCA6094A3AC6E3966DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.thea.ios.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Thea-iOS";
+			};
+			name = Debug;
 		};
 		846ADD2AAFCDE8B4762F712A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -10416,6 +10509,15 @@
 			buildConfigurations = (
 				D2AFED12A3051843A2AB4CB0 /* Debug */,
 				D47DC231AC3ECEC486DF29A6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		42E76F980865029F33A1716A /* Build configuration list for PBXNativeTarget "TheaiOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				839D5DCA6094A3AC6E3966DE /* Debug */,
+				674002A4CA8FFF1B3114390B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

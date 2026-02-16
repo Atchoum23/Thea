@@ -1146,6 +1146,24 @@ targets:
       - package: OpenAI
       - package: KeychainAccess
 
+  TheaiOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: UITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.uitests
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+          - "@loader_path/Frameworks"
+    dependencies:
+      - target: Thea-iOS
+
 # ============================================
 # Schemes
 # ============================================
@@ -1185,6 +1203,7 @@ schemes:
     build:
       targets:
         Thea-iOS: all
+        TheaiOSUITests: [test]
       parallelizeBuild: true
       buildImplicitDependencies: true
     run:
@@ -1196,6 +1215,10 @@ schemes:
       gatherCoverageData: true
       coverageTargets:
         - Thea-iOS
+      targets:
+        - name: TheaiOSUITests
+          parallelizable: true
+          randomExecutionOrder: true
     profile:
       config: Release
     analyze:

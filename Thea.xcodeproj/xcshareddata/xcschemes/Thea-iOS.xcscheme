@@ -21,6 +21,20 @@
                ReferencedContainer = "container:Thea.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BDCF02D71BE975CE2F1ACAFA"
+               BuildableName = "TheaiOSUITests.xctest"
+               BlueprintName = "TheaiOSUITests"
+               ReferencedContainer = "container:Thea.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -40,6 +54,18 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES"
+            testExecutionOrdering = "random">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BDCF02D71BE975CE2F1ACAFA"
+               BuildableName = "TheaiOSUITests.xctest"
+               BlueprintName = "TheaiOSUITests"
+               ReferencedContainer = "container:Thea.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
