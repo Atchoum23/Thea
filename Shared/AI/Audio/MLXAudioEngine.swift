@@ -1,4 +1,5 @@
 import Foundation
+import os.log
 
 #if os(macOS)
 import MLX
@@ -11,6 +12,7 @@ import MLXAudioCore
 // Enables private voice interaction without API calls
 
 /// Sendable wrapper for ML model references that are only accessed from @MainActor
+
 private struct SendableModelBox<T>: @unchecked Sendable {
     let model: T
 }
@@ -19,6 +21,8 @@ private struct SendableModelBox<T>: @unchecked Sendable {
 @Observable
 final class MLXAudioEngine {
     static let shared = MLXAudioEngine()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "mlx-audio-engine")
 
     // MARK: - State
 
@@ -47,10 +51,10 @@ final class MLXAudioEngine {
             let model = try await TTSModelUtils.loadModel(modelRepo: modelID)
             _ttsModel = SendableModelBox(model: model)
             ttsModelID = modelID
-            print("MLXAudioEngine: Loaded TTS model \(modelID)")
+            logger.info("MLXAudioEngine: Loaded TTS model \(modelID)")
         } catch {
             lastError = error
-            print("MLXAudioEngine: Failed to load TTS \(modelID): \(error)")
+            logger.error("MLXAudioEngine: Failed to load TTS \(modelID): \(error)")
             throw error
         }
     }
@@ -73,10 +77,10 @@ final class MLXAudioEngine {
             let model = try await GLMASRModel.fromPretrained(modelID)
             _sttModel = SendableModelBox(model: model)
             sttModelID = modelID
-            print("MLXAudioEngine: Loaded STT model \(modelID)")
+            logger.info("MLXAudioEngine: Loaded STT model \(modelID)")
         } catch {
             lastError = error
-            print("MLXAudioEngine: Failed to load STT \(modelID): \(error)")
+            logger.error("MLXAudioEngine: Failed to load STT \(modelID): \(error)")
             throw error
         }
     }
