@@ -1157,6 +1157,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.thea.ios.uitests
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         CODE_SIGN_IDENTITY: "iPhone Developer"
+        GENERATE_INFOPLIST_FILE: YES
         LD_RUNPATH_SEARCH_PATHS:
           - "$(inherited)"
           - "@executable_path/Frameworks"
