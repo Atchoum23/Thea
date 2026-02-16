@@ -295,7 +295,7 @@ targets:
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
           # TEMPORARY: Exclude MLXAudioEngine causing Release build issues
-          - "AI/Audio/MLXAudioEngine.swift"
+          - "**/AI/Audio/MLXAudioEngine.swift"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
           # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
           # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
