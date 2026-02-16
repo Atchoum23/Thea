@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class TheaiOSUITests: XCTestCase {
     let app = XCUIApplication()
 
