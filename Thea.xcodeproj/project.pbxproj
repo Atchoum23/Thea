@@ -651,6 +651,7 @@
 		4C7A529A2667F6364D656395 /* RemoteServerSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9D43FD55B86BF84B401B5C /* RemoteServerSettingsView.swift */; };
 		4C8A51D6BEE6347D6F696FC3 /* LocalModelRecommendationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E53CCBB36EACEEDD52CBC17B /* LocalModelRecommendationTypes.swift */; };
 		4C9DAD361C93706421E9A89D /* LifeTrackingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60B75DBB338713F2D295F771 /* LifeTrackingSettingsView.swift */; };
+		4CF0E351511AC67878F4F8C6 /* SchemaVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A26B67B1AB9F3025FEE1FCD /* SchemaVersions.swift */; };
 		4CFAE957B2DF2FE6662EC62E /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2911664A56A58207367D3FC /* SecureStorage.swift */; };
 		4D1E2AB720250EC5F586D113 /* BlueprintExecutor+StepExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DE0D31409DA5BB1ABB0B51 /* BlueprintExecutor+StepExecution.swift */; };
 		4D3AEB8ABCE7393A94C9EC1B /* AccessibilityObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E744DA1369765DAD7FF4EC9 /* AccessibilityObserver.swift */; };
@@ -1751,6 +1752,7 @@
 		D93A9CDD94ED792FCEBBA5CE /* BrowserAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312CDA1C3E942F50ACC3BFF2 /* BrowserAutomation.swift */; };
 		D9470477AE4E8BCE6D33A2E4 /* Context7Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 092322EA857D666CA9BE6749 /* Context7Client.swift */; };
 		D954CBECD1ABE33724198EBD /* PIISanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806230C49B50DFD0E5F66CB4 /* PIISanitizer.swift */; };
+		D957EC55830F66C63F5C0A93 /* SchemaVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A26B67B1AB9F3025FEE1FCD /* SchemaVersions.swift */; };
 		D9628FA6CC0F8BCDE0EA9B32 /* TheaSafariExtensionMac.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 16DD6A3E402BE847CA3BEBC0 /* TheaSafariExtensionMac.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D9638B7C118FA7C2C7FB1F1E /* ServicesHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 096F4C0E21989556605B3B74 /* ServicesHandler.swift */; };
 		D96C44694ED1F09242486128 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = 6A7A3FB90573D2EAB0FA237E /* popup.css */; };
@@ -2528,6 +2530,7 @@
 		4923E812F3E20D70C880215A /* Thea-tvOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Thea-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		49D499A589C3857E38CA7051 /* iOSMigrationSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSMigrationSection.swift; sourceTree = "<group>"; };
 		49FDC6C8A8A5F046F6B3A1E9 /* ContextAggregatorTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextAggregatorTypes.swift; sourceTree = "<group>"; };
+		4A26B67B1AB9F3025FEE1FCD /* SchemaVersions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaVersions.swift; sourceTree = "<group>"; };
 		4A5A7CB7118963A4213512A1 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		4A7BFA8C92DD54C1D3015684 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4AB52A8EEE4C9B4152809DC0 /* DraftSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftSyncManager.swift; sourceTree = "<group>"; };
@@ -3799,6 +3802,7 @@
 			isa = PBXGroup;
 			children = (
 				538948A0C16FADA31D85D821 /* ModelContainerFactory.swift */,
+				4A26B67B1AB9F3025FEE1FCD /* SchemaVersions.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -8095,6 +8099,7 @@
 				A8BCC1872FA0FDAABBF7CB5D /* SafariContextExtractor.swift in Sources */,
 				FBD197765019C520294C1E0E /* SafetyGuardrails+Core.swift in Sources */,
 				E0032DFFA099174B6BB2F3AC /* SafetyGuardrails.swift in Sources */,
+				D957EC55830F66C63F5C0A93 /* SchemaVersions.swift in Sources */,
 				ADAE33D4C34DD08488DEA183 /* ScreenCaptureManager.swift in Sources */,
 				3ABB2D4C589F8CC5432709BD /* ScreenTimeObserver.swift in Sources */,
 				E8CFEF5A909EC24C20F0F766 /* ScreenTimeTracker.swift in Sources */,
@@ -9173,6 +9178,7 @@
 				7D5EFE3F3054E52053A780BB /* SafariIntegration.swift in Sources */,
 				8CA5170B9D635EB4D02751A7 /* SafetyGuardrails+Core.swift in Sources */,
 				20B85FD38BACD436DF81FCB8 /* SafetyGuardrails.swift in Sources */,
+				4CF0E351511AC67878F4F8C6 /* SchemaVersions.swift in Sources */,
 				50B94B2DFB918C9528C5C25B /* ScreenAnalyzer.swift in Sources */,
 				E5A60409D2E8868B59F269B1 /* ScreenCapture.swift in Sources */,
 				B03C8B7B7F48995814C4177F /* ScreenCaptureManager.swift in Sources */,
