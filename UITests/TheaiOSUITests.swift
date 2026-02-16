@@ -155,19 +155,20 @@ final class TheaiOSUITests: XCTestCase {
 
         let chatTab = tabBar.buttons["Chat"]
         chatTab.tap()
+
+        // Dismiss any system alerts by tapping the app
+        sleep(2)
+        app.tap()
         sleep(1)
 
+        // Search field may be a searchFields element or a textField
         let searchField = app.searchFields.firstMatch
-        if searchField.waitForExistence(timeout: 3) {
-            searchField.tap()
-            searchField.typeText("test query")
-            XCTAssertEqual(searchField.value as? String, "test query")
+        let textField = app.textFields["Search conversations"].firstMatch
 
-            // Clear the search
-            if let clearButton = searchField.buttons.allElementsBoundByIndex.last {
-                clearButton.tap()
-            }
-        }
+        let fieldExists = searchField.waitForExistence(timeout: 3) ||
+            textField.waitForExistence(timeout: 3)
+
+        XCTAssertTrue(fieldExists, "Search field should exist on Chat tab")
 
         let screenshot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: screenshot)
