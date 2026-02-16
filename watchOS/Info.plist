@@ -31,6 +31,8 @@
 	<true/>
 	<key>WKRunsIndependentlyOfCompanionApp</key>
 	<true/>
+	<key>WKCompanionAppBundleIdentifier</key>
+	<string>app.thea.ios</string>
 	<key>WKWatchOnly</key>
 	<false/>
 	<key>UIUserInterfaceStyle</key>
