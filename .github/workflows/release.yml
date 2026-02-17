@@ -178,18 +178,8 @@ jobs:
               MARKETING_VERSION="$VERSION" \
               ARCHS=arm64 \
               2>&1 | tee build-macOS.log
-            # Export signed .app
-            cat > /tmp/ExportOptions.plist << 'PLIST'
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0"><dict>
-              <key>method</key><string>developer-id</string>
-              <key>teamID</key><string>6B66PM4JLK</string>
-              <key>signingStyle</key><string>manual</string>
-              <key>stripSwiftSymbols</key><true/>
-              <key>signingCertificate</key><string>Developer ID Application</string>
-            </dict></plist>
-            PLIST
+            # Export signed .app — write ExportOptions.plist via printf (no heredoc — heredocs break YAML)
+            printf '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>method</key><string>developer-id</string><key>teamID</key><string>6B66PM4JLK</string><key>signingStyle</key><string>manual</string><key>stripSwiftSymbols</key><true/><key>signingCertificate</key><string>Developer ID Application</string></dict></plist>' > /tmp/ExportOptions.plist
             xcodebuild -exportArchive \
               -archivePath $RUNNER_TEMP/Thea.xcarchive \
               -exportPath $RUNNER_TEMP/export \
