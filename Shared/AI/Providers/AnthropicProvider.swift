@@ -249,11 +249,23 @@ final class AnthropicProvider: AIProvider, Sendable {
 
     func listModels() async throws -> [ProviderAIModel] {
         [
-            // Claude 4.5 models (latest generation)
+            // Claude 4.6 models (latest generation — adaptive thinking, interleaved tool use)
+            ProviderAIModel(
+                id: "claude-opus-4-6",
+                name: "Claude Opus 4.6",
+                description: "Most capable model — adaptive thinking, 1M context, interleaved tool use",
+                contextWindow: 1_000_000,
+                maxOutputTokens: 32_000,
+                inputPricePerMillion: 15.00,
+                outputPricePerMillion: 75.00,
+                supportsVision: true,
+                supportsFunctionCalling: true
+            ),
+            // Claude 4.5 models
             ProviderAIModel(
                 id: "claude-opus-4-5-20251101",
                 name: "Claude Opus 4.5",
-                description: "Most capable Claude model with effort control",
+                description: "Previous gen flagship with effort control",
                 contextWindow: 200_000,
                 maxOutputTokens: 32_000,
                 inputPricePerMillion: 15.00,
@@ -476,6 +488,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                     }
 
                     var accumulatedText = ""
+                    var accumulatedThinking = ""
                     for try await line in asyncBytes.lines {
                         guard line.hasPrefix("data: ") else { continue }
                         let jsonString = String(line.dropFirst(6))
@@ -532,16 +545,29 @@ final class AnthropicProvider: AIProvider, Sendable {
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let content = json["content"] as? [[String: Any]],
-              let firstContent = content.first,
-              let text = firstContent["text"] as? String
+              let content = json["content"] as? [[String: Any]]
         else {
             throw AnthropicError.noResponse
         }
 
+        // Parse thinking blocks and text blocks from response
+        var text = ""
+        var thinking = ""
+        for block in content {
+            let blockType = block["type"] as? String ?? ""
+            if blockType == "thinking", let t = block["thinking"] as? String {
+                thinking += t
+            } else if blockType == "text", let t = block["text"] as? String {
+                text += t
+            }
+        }
+
+        guard !text.isEmpty else { throw AnthropicError.noResponse }
+
         let finalMessage = AIMessage(
             id: UUID(), conversationID: messages.first?.conversationID ?? UUID(),
-            role: .assistant, content: .text(text), timestamp: Date(), model: model
+            role: .assistant, content: .text(text), timestamp: Date(), model: model,
+            thinkingTrace: thinking.isEmpty ? nil : thinking
         )
         return AsyncThrowingStream { continuation in
             continuation.yield(.complete(finalMessage))
