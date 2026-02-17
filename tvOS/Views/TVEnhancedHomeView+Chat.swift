@@ -340,7 +340,7 @@ struct TVChatMessageRow: View {
                         }
                     }
                     .padding(20)
-                    .background(message.isUser ? Color.theaUserBubble : Color.theaAssistantBubble)
+                    .background(message.isUser ? Color(hex: "0066FF") : Color.gray.opacity(0.2))
                     .foregroundStyle(message.isUser ? Color(white: 1.0) : .primary)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                 }
