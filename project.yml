@@ -213,6 +213,8 @@ settings:
     Release:
       # Optimization
       ONLY_ACTIVE_ARCH: NO
+      # Exclude x86_64 — MLX/Float16 requires arm64; no Intel Mac support
+      EXCLUDED_ARCHS: x86_64
       SWIFT_OPTIMIZATION_LEVEL: "-O"
       SWIFT_COMPILATION_MODE: wholemodule
       GCC_OPTIMIZATION_LEVEL: "s"
