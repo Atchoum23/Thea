@@ -239,6 +239,9 @@ struct MacSettingsView: View {
                 ForEach(group) { category in
                     Label(category.rawValue, systemImage: category.icon)
                         .tag(category)
+                        .accessibilityLabel(category.rawValue)
+                        .accessibilityHint("Opens \(category.rawValue) settings")
+                        .accessibilityAddTraits(selectedCategory == category ? .isSelected : [])
                 }
             }
         }

@@ -9,6 +9,7 @@
         @State private var showingPlanPreview = false
         @State private var showingInlinePlan = false
         @State private var selectedTab: CoworkTab = .progress
+        @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
         enum CoworkTab: String, CaseIterable {
             case progress = "Progress"
@@ -63,7 +64,7 @@
                                 manager.currentSession?.reset()
                             }
                         )
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
                         Divider()
                     }
 
@@ -337,8 +338,12 @@
 
                     if manager.previewPlanBeforeExecution {
                         // Show inline plan checklist instead of a modal sheet
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        if reduceMotion {
                             showingInlinePlan = true
+                        } else {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                showingInlinePlan = true
+                            }
                         }
                     } else {
                         try await manager.executePlan()

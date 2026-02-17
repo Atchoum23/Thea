@@ -221,6 +221,7 @@ private struct StyleRow: View {
     let onDelete: (() -> Void)?
 
     @State private var isHovering = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -312,7 +313,7 @@ private struct StyleRow: View {
         .contentShape(Rectangle())
         .onTapGesture { onSelect() }
         .onHover { isHovering = $0 }
-        .animation(.easeInOut(duration: 0.15), value: isHovering)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.15), value: isHovering)
     }
 }
 

@@ -34,6 +34,7 @@ struct MessageBubble: View {
     @State private var showCopiedFeedback = false
     @State private var isThinkingExpanded = false
     @StateObject private var settingsManager = SettingsManager.shared
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Info about branches for this message position
     struct BranchInfo {
@@ -76,7 +77,7 @@ struct MessageBubble: View {
                 #if os(macOS)
                     if isHovering {
                         hoverActionBar
-                            .transition(.opacity.combined(with: .move(edge: .top)))
+                            .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top)))
                     }
                 #endif
 
@@ -92,8 +93,12 @@ struct MessageBubble: View {
         .accessibilityLabel(messageAccessibilityLabel)
         .accessibilityHint(message.messageRole == .assistant ? "AI response" : "Your message")
         .onHover { hovering in
-            withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
+            if reduceMotion {
                 isHovering = hovering
+            } else {
+                withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
+                    isHovering = hovering
+                }
             }
         }
         // Context menu for full action set
