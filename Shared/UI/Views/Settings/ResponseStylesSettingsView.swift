@@ -3,6 +3,20 @@
 
 import SwiftUI
 
+// MARK: - Platform Color Helpers
+
+private extension Color {
+    /// Cross-platform neutral background color (window background on macOS, grouped background on iOS).
+    static var theaWindowBackground: Color {
+        #if os(macOS)
+        Color(nsColor: .windowBackgroundColor)
+        #else
+        Color(uiColor: .systemGroupedBackground)
+        #endif
+    }
+}
+
+
 // MARK: - Response Styles Settings View
 
 struct ResponseStylesSettingsView: View {
@@ -121,7 +135,7 @@ struct ResponseStylesSettingsView: View {
         let isNoneSelected: Bool = settings.selectedResponseStyleID == nil
         let checkImage: String = isNoneSelected ? "checkmark.circle.fill" : "circle"
         let checkColor: Color = isNoneSelected ? .accentColor : .secondary
-        let bgColor: Color = isNoneSelected ? Color.accentColor.opacity(0.1) : Color(.systemBackground).opacity(0.5)
+        let bgColor: Color = isNoneSelected ? Color.accentColor.opacity(0.1) : Color.theaWindowBackground.opacity(0.5)
         let strokeColor: Color = isNoneSelected ? .accentColor : Color.secondary.opacity(0.3)
         let strokeWidth: CGFloat = isNoneSelected ? 1.5 : 0.5
         return Button {
@@ -223,7 +237,7 @@ private struct StyleRow: View {
     // Extracted to help the type checker on iOS
     private var selectionImage: String { isSelected ? "checkmark.circle.fill" : "circle" }
     private var selectionColor: Color { isSelected ? .accentColor : .secondary }
-    private var rowBackground: Color { isSelected ? Color.accentColor.opacity(0.08) : Color(.systemBackground).opacity(0.5) }
+    private var rowBackground: Color { isSelected ? Color.accentColor.opacity(0.08) : Color.theaWindowBackground.opacity(0.5) }
     private var strokeColor: Color { isSelected ? .accentColor : Color.secondary.opacity(0.3) }
     private var strokeWidth: CGFloat { isSelected ? 1.5 : 0.5 }
 
