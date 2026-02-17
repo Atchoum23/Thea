@@ -35,6 +35,9 @@ options:
   defaultConfig: Release
   createIntermediateGroups: true
   transitivelyLinkDependencies: true
+  knownRegions:
+    - en
+    - fr
 
 # ============================================
 # Build Configurations
