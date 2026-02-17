@@ -121,12 +121,11 @@ jobs:
           echo "Building version: $VERSION"
 
       - name: Import Code Signing Certificate
-        if: env.APPLE_CERTIFICATE_BASE64 != ''
+        if: secrets.APPLE_CERTIFICATE_BASE64 != ''
         env:
           CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
         run: |
           KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
@@ -134,44 +133,113 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           echo "$CERTIFICATE_BASE64" | base64 --decode > /tmp/cert.p12
           security import /tmp/cert.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
-          echo "CODE_SIGN_IDENTITY=Apple Development" >> $GITHUB_ENV
+          echo "SIGNING_KEYCHAIN=$KEYCHAIN_PATH" >> $GITHUB_ENV
+          echo "SIGNING_ENABLED=true" >> $GITHUB_ENV
+
+      - name: Install macOS Provisioning Profiles
+        if: matrix.platform == 'macOS' && secrets.PROVISIONING_PROFILE_MACOS != ''
+        env:
+          PP_MACOS: ${{ secrets.PROVISIONING_PROFILE_MACOS }}
+          PP_FINDER: ${{ secrets.PROVISIONING_PROFILE_FINDER_EXT }}
+          PP_MAIL: ${{ secrets.PROVISIONING_PROFILE_MAIL_EXT }}
+          PP_NETWORK: ${{ secrets.PROVISIONING_PROFILE_NETWORK_EXT }}
+          PP_QUICKLOOK: ${{ secrets.PROVISIONING_PROFILE_QUICKLOOK_EXT }}
+          PP_SPOTLIGHT: ${{ secrets.PROVISIONING_PROFILE_SPOTLIGHT_EXT }}
+          PP_VPN: ${{ secrets.PROVISIONING_PROFILE_VPN_EXT }}
+        run: |
+          PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PP_DIR"
+          echo "$PP_MACOS"     | base64 --decode > "$PP_DIR/Thea_macOS.provisionprofile"
+          echo "$PP_FINDER"    | base64 --decode > "$PP_DIR/Thea_Finder.provisionprofile"
+          echo "$PP_MAIL"      | base64 --decode > "$PP_DIR/Thea_Mail.provisionprofile"
+          echo "$PP_NETWORK"   | base64 --decode > "$PP_DIR/Thea_Network.provisionprofile"
+          echo "$PP_QUICKLOOK" | base64 --decode > "$PP_DIR/Thea_QuickLook.provisionprofile"
+          echo "$PP_SPOTLIGHT" | base64 --decode > "$PP_DIR/Thea_Spotlight.provisionprofile"
+          echo "$PP_VPN"       | base64 --decode > "$PP_DIR/Thea_VPN.provisionprofile"
+          echo "Installed $(ls "$PP_DIR" | wc -l) provisioning profiles"
 
       - name: Build ${{ matrix.scheme }} Release
         run: |
-          # macOS needs ARCHS=arm64 to prevent SPM packages building x86_64
-          # (mlx-audio-swift uses Float16 which requires arm64)
-          EXTRA_ARGS=""
-          if [ "${{ matrix.platform }}" = "macOS" ]; then
-            EXTRA_ARGS="ARCHS=arm64"
+          VERSION="${{ steps.version.outputs.version }}"
+          if [ "${{ matrix.platform }}" = "macOS" ] && [ "${SIGNING_ENABLED:-}" = "true" ]; then
+            # Signed archive build for Developer ID distribution
+            xcodebuild archive \
+              -project Thea.xcodeproj \
+              -scheme Thea-macOS \
+              -destination 'platform=macOS' \
+              -configuration Release \
+              -archivePath $RUNNER_TEMP/Thea.xcarchive \
+              OTHER_CODE_SIGN_FLAGS="--keychain '$SIGNING_KEYCHAIN'" \
+              CODE_SIGN_IDENTITY="Developer ID Application: Alexis Calevras (6B66PM4JLK)" \
+              CODE_SIGN_STYLE=Manual \
+              DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" \
+              MARKETING_VERSION="$VERSION" \
+              ARCHS=arm64 \
+              2>&1 | tee build-macOS.log
+            # Export signed .app
+            cat > /tmp/ExportOptions.plist << 'PLIST'
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0"><dict>
+              <key>method</key><string>developer-id</string>
+              <key>teamID</key><string>6B66PM4JLK</string>
+              <key>signingStyle</key><string>manual</string>
+              <key>stripSwiftSymbols</key><true/>
+              <key>signingCertificate</key><string>Developer ID Application</string>
+            </dict></plist>
+            PLIST
+            xcodebuild -exportArchive \
+              -archivePath $RUNNER_TEMP/Thea.xcarchive \
+              -exportPath $RUNNER_TEMP/export \
+              -exportOptionsPlist /tmp/ExportOptions.plist \
+              2>&1 | tee -a build-macOS.log
+            # Notarize
+            echo "${{ secrets.APP_STORE_CONNECT_API_KEY }}" > /tmp/AuthKey.p8
+            ditto -c -k --keepParent "$RUNNER_TEMP/export/Thea.app" /tmp/Thea-notarize.zip
+            xcrun notarytool submit /tmp/Thea-notarize.zip \
+              --key /tmp/AuthKey.p8 \
+              --key-id "${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}" \
+              --issuer "${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}" \
+              --wait 2>&1
+            xcrun stapler staple "$RUNNER_TEMP/export/Thea.app"
+            rm -f /tmp/AuthKey.p8 /tmp/Thea-notarize.zip
+            echo "SIGNED_APP_PATH=$RUNNER_TEMP/export/Thea.app" >> $GITHUB_ENV
+          else
+            # Unsigned build (non-macOS or no signing cert — CI validation only)
+            xcodebuild build \
+              -project Thea.xcodeproj \
+              -scheme ${{ matrix.scheme }} \
+              -destination '${{ matrix.destination }}' \
+              -configuration Release \
+              -derivedDataPath build \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGNING_ALLOWED=NO \
+              MARKETING_VERSION="$VERSION" \
+              2>&1 | tee build-${{ matrix.platform }}.log
           fi
-          xcodebuild build \
-            -project Thea.xcodeproj \
-            -scheme ${{ matrix.scheme }} \
-            -destination '${{ matrix.destination }}' \
-            -configuration Release \
-            -derivedDataPath build \
-            CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:-}" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            MARKETING_VERSION=${{ steps.version.outputs.version }} \
-            $EXTRA_ARGS \
-            2>&1 | tee build-${{ matrix.platform }}.log
 
       - name: Verify Build Success
         run: |
-          if [ ! -d "${{ matrix.artifact_path }}" ]; then
-            echo "::error::Build artifact not found at ${{ matrix.artifact_path }}"
-            echo "Available artifacts:"
-            find build/Build/Products -name "*.app" -type d || echo "No .app found"
+          if [ "${{ matrix.platform }}" = "macOS" ] && [ "${SIGNING_ENABLED:-}" = "true" ]; then
+            APP_PATH="${SIGNED_APP_PATH:-$RUNNER_TEMP/export/Thea.app}"
+          else
+            APP_PATH="${{ matrix.artifact_path }}"
+          fi
+          if [ ! -d "$APP_PATH" ]; then
+            echo "::error::Build artifact not found at $APP_PATH"
+            find /tmp $RUNNER_TEMP build/Build/Products -name "*.app" -type d 2>/dev/null | head -10 || true
             exit 1
           fi
-          echo "Build successful: ${{ matrix.artifact_path }}"
+          echo "Build successful: $APP_PATH"
+          echo "ARTIFACT_PATH=$APP_PATH" >> $GITHUB_ENV
 
       - name: Create Archive
         run: |
           mkdir -p release
-          cp -R "${{ matrix.artifact_path }}" release/
+          APP_PATH="${ARTIFACT_PATH:-${{ matrix.artifact_path }}}"
+          cp -R "$APP_PATH" release/
           cd release
           zip -r ../Thea-${{ steps.version.outputs.version }}-${{ matrix.platform }}.zip .
 
