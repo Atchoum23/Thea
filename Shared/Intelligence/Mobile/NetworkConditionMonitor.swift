@@ -246,7 +246,8 @@ public final class NetworkConditionMonitor {
         let probeQueue = DispatchQueue(label: "ai.thea.latency-probe")
 
         return await withCheckedContinuation { continuation in
-            var hasResumed = false
+            // nonisolated(unsafe): safe because probeQueue is serial and all accesses happen on it
+            nonisolated(unsafe) var hasResumed = false
 
             connection.stateUpdateHandler = { state in
                 guard !hasResumed else { return }
