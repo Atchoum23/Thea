@@ -257,12 +257,8 @@ struct TheamacOSApp: App {
         HabitManager.shared.setModelContext(context)
         ClipboardObserver.shared.start()
 
-        // TODO: Restore prompt engineering managers after Phase 5+
-        // PromptOptimizer.shared.setModelContext(context)
-        // ErrorKnowledgeBaseManager.shared.setModelContext(context)
-
-        // TODO: Restore window management after implementation
-        // WindowManager.shared.setModelContext(context)
+        PromptOptimizer.shared.setModelContext(context)
+        WindowManager.shared.setModelContext(context)
 
         // Privacy monitoring — auto-start network tracking and load daily snapshots
         Task {
