@@ -477,7 +477,7 @@ public final class PredictiveLifeEngine: ObservableObject {
                             confidence: 0.95,
                             timeframe: .shortTerm,
                             relevance: 0.9,
-                            actionability: .actionRequired,
+                            actionability: .recommended,
                             basedOn: [
                                 "\(a.title): \(a.startDate.formatted()) – \(a.endDate.formatted())",
                                 "\(b.title): \(b.startDate.formatted()) – \(b.endDate.formatted())"
