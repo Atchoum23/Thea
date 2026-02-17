@@ -106,7 +106,6 @@ extension CloudKitService {
     func getLocalConversation(_ id: UUID) async -> CloudConversation? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-            nonisolated(unsafe) var observerRef: NSObjectProtocol?
 
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalConversationResponse,
@@ -118,11 +117,9 @@ extension CloudKitService {
                       responseID == id
                 else { return }
                 hasResumed = true
-                if let obs = observerRef { NotificationCenter.default.removeObserver(obs) }
                 let conversation = notification.userInfo?["conversation"] as? CloudConversation
                 continuation.resume(returning: conversation)
             }
-            observerRef = observer
 
             NotificationCenter.default.post(
                 name: .cloudKitRequestLocalConversation,
@@ -151,7 +148,6 @@ extension CloudKitService {
     func getLocalKnowledgeItem(_ id: UUID) async -> CloudKnowledgeItem? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-            nonisolated(unsafe) var observerRef: NSObjectProtocol?
 
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalKnowledgeItemResponse,
@@ -163,11 +159,9 @@ extension CloudKitService {
                       responseID == id
                 else { return }
                 hasResumed = true
-                if let obs = observerRef { NotificationCenter.default.removeObserver(obs) }
                 let item = notification.userInfo?["item"] as? CloudKnowledgeItem
                 continuation.resume(returning: item)
             }
-            observerRef = observer
 
             NotificationCenter.default.post(
                 name: .cloudKitRequestLocalKnowledgeItem,
@@ -195,7 +189,6 @@ extension CloudKitService {
     func getLocalProject(_ id: UUID) async -> CloudProject? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-            nonisolated(unsafe) var observerRef: NSObjectProtocol?
 
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalProjectResponse,
@@ -207,11 +200,9 @@ extension CloudKitService {
                       responseID == id
                 else { return }
                 hasResumed = true
-                if let obs = observerRef { NotificationCenter.default.removeObserver(obs) }
                 let project = notification.userInfo?["project"] as? CloudProject
                 continuation.resume(returning: project)
             }
-            observerRef = observer
 
             NotificationCenter.default.post(
                 name: .cloudKitRequestLocalProject,
