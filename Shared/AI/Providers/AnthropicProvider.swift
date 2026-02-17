@@ -128,7 +128,7 @@ final class AnthropicProvider: AIProvider, Sendable {
 
                         var accumulatedText = ""
                         var accumulatedThinking = ""
-                        var currentBlockType = ""
+                        var _currentBlockType = ""
 
                         for try await line in asyncBytes.lines {
                             guard line.hasPrefix("data: ") else { continue }
@@ -143,7 +143,7 @@ final class AnthropicProvider: AIProvider, Sendable {
                                 if let block = json["content_block"] as? [String: Any],
                                    let blockType = block["type"] as? String
                                 {
-                                    currentBlockType = blockType
+                                    _currentBlockType = blockType
                                 }
 
                             case "content_block_delta":
