@@ -178,7 +178,7 @@ extension ModelRouter {
         // Adjust weights based on user's current behavioral state
         let behavioralContext = BehavioralFingerprint.shared.currentContext()
         var adjustedQualityWeight = qualityWeight
-        var adjustedCostWeight = costWeight
+        let adjustedCostWeight = costWeight
         var adjustedSpeedWeight = speedWeight
 
         // When user is in deep work (low receptivity), favor speed over quality
