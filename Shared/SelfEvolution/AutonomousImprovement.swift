@@ -409,6 +409,7 @@ public final class AutonomousImprovementEngine {
         for try await chunk in stream {
             switch chunk.type {
             case let .delta(text):
+            case .thinkingDelta: break
                 result += text
             case let .complete(msg):
                 result = msg.content.textValue

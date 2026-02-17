@@ -467,6 +467,7 @@ public final class SquadOrchestrator {
         for try await chunk in stream {
             switch chunk.type {
             case .delta(let text): response += text
+            case .thinkingDelta: break
             case .complete(let msg): response = msg.content.textValue
             case .error(let error): throw error
             }

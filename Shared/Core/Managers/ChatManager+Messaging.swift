@@ -227,7 +227,20 @@ extension ChatManager {
         device: DeviceInfo
     ) async -> [AIMessage] {
         var apiMessages: [AIMessage] = []
-        let systemPrompt = buildFullSystemPrompt(for: conversation, taskType: taskType)
+        var systemPrompt = buildFullSystemPrompt(for: conversation, taskType: taskType)
+
+        // Proactive memory injection: retrieve relevant context from all memory tiers
+        let lastUserText = conversation.messages.last(where: { $0.messageRole == .user })?.content.textValue ?? ""
+        if !lastUserText.isEmpty {
+            let memoryResult = await ActiveMemoryRetrieval.shared.retrieveContext(
+                for: lastUserText,
+                conversationId: conversation.id,
+                taskType: taskType
+            )
+            if !memoryResult.sources.isEmpty, memoryResult.confidence > 0.4 {
+                systemPrompt += "\n\n<memory_context>\n\(memoryResult.contextPrompt)\n</memory_context>"
+            }
+        }
 
         apiMessages.append(AIMessage(
             id: UUID(),
@@ -238,6 +251,8 @@ extension ChatManager {
             model: model
         ))
 
+        // Build all conversation messages
+        var conversationMessages: [AIMessage] = []
         for msg in conversation.messages {
             var content = msg.content
 
@@ -257,7 +272,7 @@ extension ChatManager {
                 content = .text("[Sent from \(msgDeviceName)] \(content.textValue)")
             }
 
-            apiMessages.append(AIMessage(
+            conversationMessages.append(AIMessage(
                 id: msg.id,
                 conversationID: msg.conversationID,
                 role: msg.messageRole,
@@ -266,6 +281,33 @@ extension ChatManager {
                 model: msg.model ?? model
             ))
         }
+
+        // Context window management: trim old messages if approaching limit
+        // Reserve ~25% for system prompt + response; heuristic: ~4 chars per token
+        let maxContextTokens = model.contains("opus-4-6") ? 800_000 : 160_000
+        let systemTokensEstimate = systemPrompt.count / 4
+        let availableTokens = maxContextTokens - systemTokensEstimate - 16_000 // 16K reserved for response
+        var totalTokensEstimate = 0
+        var trimmedMessages: [AIMessage] = []
+
+        // Keep messages from newest to oldest, respecting token budget
+        for msg in conversationMessages.reversed() {
+            let msgTokens = msg.content.textValue.count / 4
+            if totalTokensEstimate + msgTokens > availableTokens && trimmedMessages.count >= 4 {
+                // Insert a truncation notice at the beginning
+                let notice = AIMessage(
+                    id: UUID(), conversationID: conversation.id,
+                    role: .system, content: .text("[Earlier messages in this conversation were trimmed to fit context window. \(conversationMessages.count - trimmedMessages.count) older messages omitted.]"),
+                    timestamp: Date.distantPast, model: model
+                )
+                trimmedMessages.append(notice)
+                break
+            }
+            totalTokensEstimate += msgTokens
+            trimmedMessages.append(msg)
+        }
+
+        apiMessages.append(contentsOf: trimmedMessages.reversed())
         return apiMessages
     }
 
@@ -749,6 +791,8 @@ extension ChatManager {
                 case let .delta(text):
                     accumulated += text
                     message.contentData = (try? JSONEncoder().encode(MessageContent.text(accumulated))) ?? Data()
+                case .thinkingDelta:
+                    break
                 case let .complete(finalMessage):
                     message.contentData = (try? JSONEncoder().encode(finalMessage.content)) ?? Data()
                     message.tokenCount = finalMessage.tokenCount

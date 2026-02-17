@@ -6,8 +6,9 @@
 // speech synthesis, speech recognition, interaction delivery, and device relay.
 //
 // Related files:
-//   VoiceProactivityModels.swift       — Model types (VoiceContext, VoiceInteraction, etc.)
+//   VoiceProactivityModels.swift        — Model types (VoiceContext, VoiceInteraction, etc.)
 //   VoiceProactivity+Interactions.swift — Public interaction API & driving-mode helpers
+//   VoiceProactivity+Relay.swift        — Cross-device relay & direct messaging
 //   VoiceProactivity+Convenience.swift  — High-level convenience methods & SpeechDelegate
 
 import Foundation
@@ -116,7 +117,7 @@ public actor VoiceProactivity {
         self.configuration = config
     }
 
-    /// Register event callbacks.
+    /// Register event callbacks for voice interaction lifecycle events.
     /// - Parameters:
     ///   - onContextChanged: Called when the voice context changes.
     ///   - onInteractionDelivered: Called after an interaction is spoken.
@@ -454,139 +455,5 @@ public actor VoiceProactivity {
         // Timed out
         activeInteraction = nil
         return nil
-    }
-
-    // MARK: - Messaging & Device Relay (Internal)
-
-    /// Check whether the current device can send a message directly.
-    /// - Parameter platform: The target messaging platform.
-    /// - Returns: `true` if direct send is available.
-    func canSendDirectly(platform: MessagingPlatform) async -> Bool {
-        // Check if we can send directly (e.g., device unlocked, app available)
-        #if os(iOS)
-        // On iOS, might need to check if unlocked
-        return false // Conservative - always relay or confirm
-        #else
-        return true
-        #endif
-    }
-
-    /// Send a message directly on the current device.
-    ///
-    /// On macOS, uses AppleScript to send via Messages.app.
-    /// On iOS, opens the SMS URL scheme.
-    /// - Parameter relay: The message to send.
-    /// - Returns: `true` if the message was sent.
-    func sendMessageDirectly(_ relay: MessageRelay) async -> Bool {
-        #if os(macOS)
-        // Use AppleScript to send iMessage on macOS
-        let escapedMessage = relay.message.replacingOccurrences(of: "\"", with: "\\\"")
-        let escapedRecipient = relay.recipient.replacingOccurrences(of: "\"", with: "\\\"")
-        let script = """
-        tell application "Messages"
-            set targetService to 1st service whose service type = iMessage
-            set targetBuddy to buddy "\(escapedRecipient)" of targetService
-            send "\(escapedMessage)" to targetBuddy
-        end tell
-        """
-
-        return await withCheckedContinuation { continuation in
-            DispatchQueue.global().async {
-                var error: NSDictionary?
-                if let appleScript = NSAppleScript(source: script) {
-                    appleScript.executeAndReturnError(&error)
-                    continuation.resume(returning: error == nil)
-                } else {
-                    continuation.resume(returning: false)
-                }
-            }
-        }
-        #elseif os(iOS)
-        // On iOS, use URL scheme to open Messages with pre-filled content
-        let encodedBody = relay.message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let encodedRecipient = relay.recipient.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        guard let url = URL(string: "sms:\(encodedRecipient)&body=\(encodedBody)") else {
-            return false
-        }
-        return await MainActor.run {
-            UIApplication.shared.open(url)
-            return true
-        }
-        #else
-        return false
-        #endif
-    }
-
-    /// Relay a command to the Mac via HTTP.
-    ///
-    /// Tries the Tailscale hostname first, then `.local` mDNS fallback.
-    /// - Parameter command: The device relay command to send.
-    /// - Returns: `true` if the relay succeeded.
-    func relayThroughMac(_ command: DeviceRelayCommand) async -> Bool {
-        guard configuration.macRelayEnabled, !configuration.macRelayHostname.isEmpty else {
-            return false
-        }
-
-        let hostname = configuration.macRelayHostname
-        let commandData: Data
-        do {
-            commandData = try JSONEncoder().encode(["command": String(describing: command)])
-        } catch {
-            return false
-        }
-
-        // Try Tailscale hostname first, then .local mDNS
-        let hosts = [hostname, "\(hostname).local"]
-
-        for host in hosts {
-            guard let url = URL(string: "http://\(host):18789/relay") else { continue }
-            var request = URLRequest(url: url, timeoutInterval: 5)
-            request.httpMethod = "POST"
-            request.httpBody = commandData
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            do {
-                let (_, response) = try await URLSession.shared.data(for: request)
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                    let result = DeviceRelayResult(
-                        success: true,
-                        sourceDevice: ProcessInfo.processInfo.hostName,
-                        targetDevice: hostname,
-                        command: String(describing: command),
-                        message: "Relayed via \(host)"
-                    )
-                    onDeviceRelayResult?(result)
-                    return true
-                }
-            } catch {
-                continue
-            }
-        }
-
-        let result = DeviceRelayResult(
-            success: false,
-            sourceDevice: ProcessInfo.processInfo.hostName,
-            targetDevice: hostname,
-            command: String(describing: command),
-            message: "Mac relay failed — host unreachable"
-        )
-        onDeviceRelayResult?(result)
-        return false
-    }
-
-    /// Determine the messaging platform from a voice response.
-    /// - Parameter response: The user's voice response.
-    /// - Returns: The matched platform, defaulting to `.iMessage`.
-    func determinePlatform(from response: VoiceResponse?) -> MessagingPlatform {
-        guard let action = response?.matchedExpectation?.action else {
-            return .iMessage // Default
-        }
-
-        switch action {
-        case "imessage": return .iMessage
-        case "whatsapp": return .whatsApp
-        case "telegram": return .telegram
-        default: return .iMessage
-        }
     }
 }

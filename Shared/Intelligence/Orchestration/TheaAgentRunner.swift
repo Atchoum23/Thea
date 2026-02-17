@@ -83,6 +83,7 @@ actor TheaAgentRunner {
 
             switch chunk.type {
             case let .delta(text):
+            case .thinkingDelta: break
                 fullResponse += text
             case let .complete(msg):
                 if case let .text(completeText) = msg.content { fullResponse = completeText }
@@ -171,6 +172,7 @@ actor TheaAgentRunner {
             for try await chunk in stream {
                 switch chunk.type {
                 case let .delta(text): summaryText += text
+            case .thinkingDelta: break
                 case let .complete(msg):
                     if case let .text(text) = msg.content { summaryText = text }
                 default: break

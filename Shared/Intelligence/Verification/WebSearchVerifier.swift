@@ -149,6 +149,7 @@ public final class WebSearchVerifier {
             for try await chunk in stream {
                 switch chunk.type {
                 case let .delta(text):
+            case .thinkingDelta: break
                     responseText += text
                 case let .complete(msg):
                     responseText = msg.content.textValue
@@ -253,6 +254,7 @@ public final class WebSearchVerifier {
             for try await chunk in stream {
                 switch chunk.type {
                 case let .delta(text):
+            case .thinkingDelta: break
                     responseText += text
                 case let .complete(msg):
                     responseText = msg.content.textValue

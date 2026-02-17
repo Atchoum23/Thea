@@ -69,6 +69,7 @@ public final class InferenceRelayHandler {
             for try await chunk in stream {
                 switch chunk.type {
                 case let .delta(text):
+            case .thinkingDelta: break
                     fullText += text
                     try await sendChunk(.streamDelta(
                         InferenceStreamDelta(

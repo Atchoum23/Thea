@@ -432,6 +432,7 @@ final class TranslationEngine: ObservableObject {
         for try await chunk in responseStream {
             switch chunk.type {
             case .delta(let delta):
+            case .thinkingDelta: break
                 translatedText += delta
             case .complete(let message):
                 if translatedText.isEmpty {

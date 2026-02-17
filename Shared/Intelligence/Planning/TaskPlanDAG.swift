@@ -194,6 +194,7 @@ final class TaskPlanDAG {
         for try await response in stream {
             switch response.type {
             case let .delta(text): result += text
+            case .thinkingDelta: break
             case let .complete(msg): result = msg.content.textValue
             case .error: break
             }

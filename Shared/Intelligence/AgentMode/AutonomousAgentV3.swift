@@ -645,6 +645,7 @@ extension AutonomousAgentV3 {
         for try await response in stream {
             switch response.type {
             case .delta(let text):
+            case .thinkingDelta: break
                 result += text
             case .complete:
                 break
