@@ -46,6 +46,15 @@ final class OpenClawBridge {
             await MoltbookAgent.shared.processInboundMessage(message)
         }
 
+        // Security: validate inbound message for prompt injection and blocked content
+        let securityResult = await OpenClawSecurityGuard.shared.validate(message)
+        guard securityResult.isAllowed else {
+            if case let .blocked(reason) = securityResult {
+                logger.warning("Message blocked by security guard: \(reason)")
+            }
+            return
+        }
+
         // Check sender allowlist
         if !allowedSenders.isEmpty, !allowedSenders.contains(message.senderID) {
             logger.debug("Ignoring message from non-allowed sender: \(message.senderID)")

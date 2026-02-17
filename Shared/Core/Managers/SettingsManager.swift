@@ -353,7 +353,7 @@ final class SettingsManager: ObservableObject {
         iCloudSyncEnabled = d.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
         analyticsEnabled = d.bool(forKey: "analyticsEnabled")
         handoffEnabled = d.object(forKey: "handoffEnabled") as? Bool ?? true
-        cloudAPIPrivacyGuardEnabled = d.bool(forKey: "cloudAPIPrivacyGuardEnabled")
+        cloudAPIPrivacyGuardEnabled = d.object(forKey: "cloudAPIPrivacyGuardEnabled") as? Bool ?? true
         launchAtLogin = d.bool(forKey: "launchAtLogin")
         showInMenuBar = d.object(forKey: "showInMenuBar") as? Bool ?? true
         notificationsEnabled = d.object(forKey: "notificationsEnabled") as? Bool ?? true
@@ -464,7 +464,7 @@ extension SettingsManager {
         iCloudSyncEnabled = d.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
         analyticsEnabled = d.bool(forKey: "analyticsEnabled")
         handoffEnabled = d.object(forKey: "handoffEnabled") as? Bool ?? true
-        cloudAPIPrivacyGuardEnabled = d.bool(forKey: "cloudAPIPrivacyGuardEnabled")
+        cloudAPIPrivacyGuardEnabled = d.object(forKey: "cloudAPIPrivacyGuardEnabled") as? Bool ?? true
         launchAtLogin = d.bool(forKey: "launchAtLogin")
         showInMenuBar = d.object(forKey: "showInMenuBar") as? Bool ?? true
         notificationsEnabled = d.object(forKey: "notificationsEnabled") as? Bool ?? true

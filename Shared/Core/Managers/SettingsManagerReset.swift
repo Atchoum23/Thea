@@ -9,7 +9,7 @@ extension SettingsManager {
         iCloudSyncEnabled = false
         analyticsEnabled = false
         handoffEnabled = true
-        cloudAPIPrivacyGuardEnabled = false
+        cloudAPIPrivacyGuardEnabled = true
 
         launchAtLogin = false
         showInMenuBar = true

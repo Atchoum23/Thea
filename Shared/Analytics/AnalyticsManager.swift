@@ -49,9 +49,7 @@ public final class AnalyticsManager: ObservableObject {
 
     private func loadSettings() {
         isEnabled = UserDefaults.standard.bool(forKey: "analytics.enabled")
-        if UserDefaults.standard.object(forKey: "analytics.enabled") == nil {
-            isEnabled = true // Default to enabled
-        }
+        // Default to disabled (opt-in, not opt-out) for privacy
     }
 
     // MARK: - Configuration
