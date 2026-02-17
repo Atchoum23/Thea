@@ -12,6 +12,7 @@ import os.log
 
 // MARK: - Mail Monitor Protocol
 
+/// Delegate that receives notifications when new emails are detected in Mail.app.
 public protocol MailMonitorDelegate: AnyObject, Sendable {
     nonisolated func mailMonitor(_ _monitor: MailMonitor, didReceive email: MailEvent)
 }
