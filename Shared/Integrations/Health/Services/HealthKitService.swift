@@ -65,37 +65,24 @@ import Foundation
                 throw HealthError.invalidDateRange
             }
 
-            let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!
+            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let sleepType = HKCategoryType(.sleepAnalysis)
             let predicate = HKQuery.predicateForSamples(
                 withStart: dateRange.start,
                 end: dateRange.end,
                 options: .strictStartDate
             )
+            let descriptor = HKSampleQueryDescriptor(
+                predicates: [.categorySample(type: sleepType, predicate: predicate)],
+                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
+                limit: nil
+            )
 
-            return try await withCheckedThrowingContinuation { continuation in
-                let query = HKSampleQuery(
-                    sampleType: sleepType,
-                    predicate: predicate,
-                    limit: HKObjectQueryNoLimit,
-                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
-                ) { [weak self] _, samples, error in
-                    if let error {
-                        continuation.resume(throwing: HealthError.fetchFailed(error.localizedDescription))
-                        return
-                    }
-
-                    guard let samples = samples as? [HKCategorySample], let self else {
-                        continuation.resume(returning: [])
-                        return
-                    }
-
-                    Task {
-                        let records = await self.processSleepSamples(samples)
-                        continuation.resume(returning: records)
-                    }
-                }
-
-                healthStore.execute(query)
+            do {
+                let samples = try await descriptor.result(for: healthStore)
+                return processSleepSamples(samples)
+            } catch {
+                throw HealthError.fetchFailed(error.localizedDescription)
             }
         }
 
@@ -185,48 +172,33 @@ import Foundation
                 throw HealthError.invalidDateRange
             }
 
-            let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
+            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let heartRateType = HKQuantityType(.heartRate)
             let predicate = HKQuery.predicateForSamples(
                 withStart: dateRange.start,
                 end: dateRange.end,
                 options: .strictStartDate
             )
+            let descriptor = HKSampleQueryDescriptor(
+                predicates: [.quantitySample(type: heartRateType, predicate: predicate)],
+                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
+                limit: nil
+            )
 
-            return try await withCheckedThrowingContinuation { continuation in
-                let query = HKSampleQuery(
-                    sampleType: heartRateType,
-                    predicate: predicate,
-                    limit: HKObjectQueryNoLimit,
-                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
-                ) { [weak self] _, samples, error in
-                    if let error {
-                        continuation.resume(throwing: HealthError.fetchFailed(error.localizedDescription))
-                        return
-                    }
-
-                    guard let samples = samples as? [HKQuantitySample], let self else {
-                        continuation.resume(returning: [])
-                        return
-                    }
-
-                    Task {
-                        let records = await samples.asyncMap { sample -> HeartRateRecord in
-                            let bpm = Int(sample.quantity.doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute())))
-                            let context = await self.determineHeartRateContext(bpm: bpm, date: sample.startDate)
-
-                            return HeartRateRecord(
-                                timestamp: sample.startDate,
-                                beatsPerMinute: bpm,
-                                context: context,
-                                source: .healthKit
-                            )
-                        }
-
-                        continuation.resume(returning: records)
-                    }
+            do {
+                let samples = try await descriptor.result(for: healthStore)
+                return samples.map { sample -> HeartRateRecord in
+                    let bpm = Int(sample.quantity.doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute())))
+                    let context = self.determineHeartRateContext(bpm: bpm, date: sample.startDate)
+                    return HeartRateRecord(
+                        timestamp: sample.startDate,
+                        beatsPerMinute: bpm,
+                        context: context,
+                        source: .healthKit
+                    )
                 }
-
-                healthStore.execute(query)
+            } catch {
+                throw HealthError.fetchFailed(error.localizedDescription)
             }
         }
 
@@ -311,42 +283,31 @@ import Foundation
             start: Date,
             end: Date
         ) async throws -> Double {
-            guard let quantityType = HKQuantityType.quantityType(forIdentifier: identifier) else {
-                return 0
-            }
-
+            // Modern HKStatisticsQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let quantityType = HKQuantityType(identifier)
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
 
-            return try await withCheckedThrowingContinuation { continuation in
-                let query = HKStatisticsQuery(
-                    quantityType: quantityType,
-                    quantitySamplePredicate: predicate,
-                    options: .cumulativeSum
-                ) { _, statistics, error in
-                    if let error {
-                        continuation.resume(throwing: error)
-                        return
-                    }
+            let descriptor = HKStatisticsQueryDescriptor(
+                predicate: .quantitySample(type: quantityType, predicate: predicate),
+                options: .cumulativeSum
+            )
 
-                    let unit = switch identifier {
-                    case .stepCount, .flightsClimbed:
-                        HKUnit.count()
-                    case .activeEnergyBurned, .basalEnergyBurned:
-                        HKUnit.kilocalorie()
-                    case .distanceWalkingRunning:
-                        HKUnit.meter()
-                    case .appleExerciseTime:
-                        HKUnit.minute()
-                    default:
-                        HKUnit.count()
-                    }
+            let statistics = try await descriptor.result(for: healthStore)
 
-                    let sum = statistics?.sumQuantity()?.doubleValue(for: unit) ?? 0
-                    continuation.resume(returning: sum)
-                }
-
-                healthStore.execute(query)
+            let unit: HKUnit = switch identifier {
+            case .stepCount, .flightsClimbed:
+                HKUnit.count()
+            case .activeEnergyBurned, .basalEnergyBurned:
+                HKUnit.kilocalorie()
+            case .distanceWalkingRunning:
+                HKUnit.meter()
+            case .appleExerciseTime:
+                HKUnit.minute()
+            default:
+                HKUnit.count()
             }
+
+            return statistics?.sumQuantity()?.doubleValue(for: unit) ?? 0
         }
 
         // MARK: - Blood Pressure Data
@@ -396,23 +357,13 @@ import Foundation
             type: HKQuantityType,
             predicate: NSPredicate
         ) async throws -> [HKQuantitySample] {
-            try await withCheckedThrowingContinuation { continuation in
-                let query = HKSampleQuery(
-                    sampleType: type,
-                    predicate: predicate,
-                    limit: HKObjectQueryNoLimit,
-                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
-                ) { _, samples, error in
-                    if let error {
-                        continuation.resume(throwing: error)
-                        return
-                    }
-
-                    continuation.resume(returning: samples as? [HKQuantitySample] ?? [])
-                }
-
-                healthStore.execute(query)
-            }
+            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let descriptor = HKSampleQueryDescriptor(
+                predicates: [.quantitySample(type: type, predicate: predicate)],
+                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
+                limit: nil
+            )
+            return try await descriptor.result(for: healthStore)
         }
 
         // MARK: - Anomaly Detection
@@ -462,43 +413,31 @@ import Foundation
                 throw HealthError.invalidDateRange
             }
 
-            let vo2MaxType = HKObjectType.quantityType(forIdentifier: .vo2Max)!
+            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let vo2MaxType = HKQuantityType(.vo2Max)
             let predicate = HKQuery.predicateForSamples(
                 withStart: dateRange.start,
                 end: dateRange.end,
                 options: .strictStartDate
             )
+            let descriptor = HKSampleQueryDescriptor(
+                predicates: [.quantitySample(type: vo2MaxType, predicate: predicate)],
+                sortDescriptors: [SortDescriptor(\.startDate, order: .reverse)],
+                limit: nil
+            )
 
-            return try await withCheckedThrowingContinuation { continuation in
-                let query = HKSampleQuery(
-                    sampleType: vo2MaxType,
-                    predicate: predicate,
-                    limit: HKObjectQueryNoLimit,
-                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]
-                ) { _, samples, error in
-                    if let error {
-                        continuation.resume(throwing: HealthError.fetchFailed(error.localizedDescription))
-                        return
-                    }
-
-                    guard let samples = samples as? [HKQuantitySample] else {
-                        continuation.resume(returning: [])
-                        return
-                    }
-
-                    let unit = HKUnit(from: "mL/kg*min")
-                    let records = samples.map { sample -> VO2MaxRecord in
-                        VO2MaxRecord(
-                            timestamp: sample.startDate,
-                            value: sample.quantity.doubleValue(for: unit),
-                            source: .healthKit
-                        )
-                    }
-
-                    continuation.resume(returning: records)
+            do {
+                let samples = try await descriptor.result(for: healthStore)
+                let unit = HKUnit(from: "mL/kg*min")
+                return samples.map { sample -> VO2MaxRecord in
+                    VO2MaxRecord(
+                        timestamp: sample.startDate,
+                        value: sample.quantity.doubleValue(for: unit),
+                        source: .healthKit
+                    )
                 }
-
-                healthStore.execute(query)
+            } catch {
+                throw HealthError.fetchFailed(error.localizedDescription)
             }
         }
     }

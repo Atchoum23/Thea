@@ -69,7 +69,7 @@ final class LocalVisionGuidance {
             print("[LocalVisionGuidance] ✅ Loaded Qwen2-VL vision model")
 
             // Load Soprano-80M TTS model
-            let ttsEngine = await MLXAudioEngine.shared
+            let ttsEngine = MLXAudioEngine.shared
             try await ttsEngine.loadTTSModel()
             voiceModelLoaded = true
             print("[LocalVisionGuidance] ✅ Loaded Soprano-80M TTS model")
