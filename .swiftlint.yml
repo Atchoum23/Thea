@@ -220,12 +220,12 @@ function_parameter_count:
   error: 10
   ignores_default_parameters: true
 
-# Cyclomatic Complexity - aspirational: 15, error at current max + buffer
-# Worst active function: AnthropicProvider (25)
+# Cyclomatic Complexity - aspirational: 10, error at current max + buffer
+# Worst active function: TelegramChannel (18 as of Feb 2026)
 # Ratchet down error threshold as functions are simplified
 cyclomatic_complexity:
   warning: 15
-  error: 26
+  error: 20
   ignores_case_statements: true
 
 # Nesting - relaxed
@@ -356,12 +356,12 @@ warning_threshold: 200
 # CUSTOM RULES (Quality Focused)
 # ============================================
 custom_rules:
-  # Prevent force try in production code
+  # Prevent force try in production code — promoted to error (Feb 2026 hardening)
   force_try_usage:
     name: "Force Try Usage"
     regex: 'try!'
     message: "Avoid try! - use do/catch for proper error handling."
-    severity: warning
+    severity: error
 
 # ============================================
 # REPORTER
