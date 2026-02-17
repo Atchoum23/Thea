@@ -54,13 +54,13 @@
                     if showingInlinePlan, let session = manager.currentSession, !session.steps.isEmpty {
                         InlinePlanChecklist(
                             session: session,
-                            onApprove: { [session] in
+                            onApprove: {
                                 showingInlinePlan = false
                                 Task { try? await manager.executePlan() }
                             },
-                            onCancel: { [session] in
+                            onCancel: {
                                 showingInlinePlan = false
-                                session.reset()
+                                manager.currentSession?.reset()
                             }
                         )
                         .transition(.move(edge: .bottom).combined(with: .opacity))
