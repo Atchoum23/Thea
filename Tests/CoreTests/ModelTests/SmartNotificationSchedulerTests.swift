@@ -92,16 +92,19 @@ private final class TestSmartNotificationScheduler: @unchecked Sendable {
             return .now(reason: "Current receptivity meets threshold")
         }
 
-        // Low receptivity -> find better time
+        // Low receptivity -> find better time within delay window
         let maxHour = min(currentHour + maxDelayHours, typicalSleepTime)
         var bestHour = currentHour
         var bestReceptivity = context.receptivity
 
-        for hour in (currentHour + 1)...maxHour {
-            let r = hourlyReceptivity[hour] ?? 0.5
-            if r > bestReceptivity {
-                bestReceptivity = r
-                bestHour = hour
+        // Only search if there are future hours to check
+        if currentHour + 1 <= maxHour {
+            for hour in (currentHour + 1)...maxHour {
+                let r = hourlyReceptivity[hour] ?? 0.5
+                if r > bestReceptivity {
+                    bestReceptivity = r
+                    bestHour = hour
+                }
             }
         }
 
@@ -226,6 +229,8 @@ struct SNSFocusModeTests {
         let scheduler = TestSmartNotificationScheduler()
         let context = SNSContext(receptivity: 0.9, cognitiveLoad: 0.5, isAwake: true, isInFocusMode: true)
         let decision = scheduler.optimalDeliveryTime(priority: .high, context: context, currentHour: 10)
+        // High is not in bypassPriorities, and focus mode only defers non-high
+        // The code checks: `priority != .high` for focus deferral, so high goes through
         #expect(decision.isImmediate)
     }
 
@@ -310,7 +315,7 @@ struct SNSReceptivityTests {
     func lowReceptivityNoBetterTime() {
         let scheduler = TestSmartNotificationScheduler()
         scheduler.receptivityThreshold = 0.5
-        // All future hours have low receptivity too
+        // All future hours have lower receptivity than current
         for h in 11...23 {
             scheduler.hourlyReceptivity[h] = 0.05
         }
@@ -326,9 +331,8 @@ struct SNSReceptivityTests {
         scheduler.receptivityThreshold = 0.9 // Very high threshold
         let context = SNSContext(receptivity: 0.8, cognitiveLoad: 0.5, isAwake: true, isInFocusMode: false)
         // 0.8 is below 0.9 threshold — should try to defer
+        // With default hourlyReceptivity (nil = 0.5), no future hour beats 0.8
         let decision = scheduler.optimalDeliveryTime(priority: .low, context: context, currentHour: 10)
-        // Whether it defers depends on future receptivity data
-        // With no better future data, should deliver now
         #expect(decision.isImmediate)
     }
 }
@@ -408,7 +412,6 @@ struct SNSDelayWindowTests {
         scheduler.receptivityThreshold = 0.5
 
         let context = SNSContext(receptivity: 0.1, cognitiveLoad: 0.5, isAwake: true, isInFocusMode: false)
-        // Range will be currentHour+1...currentHour+0 which is empty, so no better time
         let decision = scheduler.optimalDeliveryTime(priority: .low, context: context, currentHour: 10)
         #expect(decision.isImmediate)
     }

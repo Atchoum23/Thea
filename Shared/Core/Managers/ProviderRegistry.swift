@@ -6,7 +6,7 @@ private let registryLogger = Logger(subsystem: "ai.thea.app", category: "Provide
 
 @MainActor
 @Observable
-final class ProviderRegistry {
+final class ProviderRegistry: ProviderRegistryProtocol {
     static let shared = ProviderRegistry()
 
     private(set) var availableProviders: [ProviderInfo] = []
@@ -226,6 +226,20 @@ final class ProviderRegistry {
         default:
             return nil
         }
+    }
+
+
+    /// Register an external provider at runtime (plugin support).
+    /// New providers can be added without modifying the built-in switch statement.
+    func registerProvider(_ provider: AIProvider, id: String) {
+        providers[id] = provider
+        let info = ProviderInfo(provider: provider, isConfigured: true)
+        if let index = availableProviders.firstIndex(where: { $0.id == id }) {
+            availableProviders[index] = info
+        } else {
+            availableProviders.append(info)
+        }
+        debugLog("Registered external provider: \(id)")
     }
 
     // MARK: - Provider Access
