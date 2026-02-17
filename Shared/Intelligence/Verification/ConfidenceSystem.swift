@@ -213,57 +213,67 @@ public final class ConfidenceSystem {
         var factors: [ConfidenceDecomposition.DecompositionFactor] = []
         var conflicts: [ConfidenceDecomposition.ConflictInfo] = []
 
+        // Capture verifiers and config into local lets for Sendable closure use
+        let timeout = self.verifierTimeout
+        let consensus = self.multiModelConsensus
+        let webVfy = self.webVerifier
+        let codeExec = self.codeExecutor
+        let staticAn = self.staticAnalyzer
+        let fbLearner = self.feedbackLearner
+        let doMultiModel = enableMultiModel && context.allowMultiModel
+        let doWebVerify = enableWebVerification && context.allowWebSearch && taskType.requiresFactualVerification
+        let doCodeExec = enableCodeExecution && context.allowCodeExecution && taskType.isCodeRelated
+        let doStaticAnalysis = enableStaticAnalysis && taskType.isCodeRelated
+        let doFeedback = enableFeedbackLearning
+        let lang = context.language
+
         // Run enabled verifiers in parallel with per-verifier timeout
         await withTaskGroup(of: VerifierOutput?.self) { group in
-            let timeout = self.verifierTimeout
-
             // 1. Multi-model consensus
-            if enableMultiModel && context.allowMultiModel {
+            if doMultiModel {
                 group.addTask {
-                    await Self.withTimeout(seconds: timeout) { [multiModelConsensus] in
-                        let r = await multiModelConsensus.validate(query: query, response: response, taskType: taskType)
+                    await Self.withTimeout(seconds: timeout) {
+                        let r = await consensus.validate(query: query, response: response, taskType: taskType)
                         return VerifierOutput(source: r.source, factors: r.factors, conflicts: r.conflicts)
                     }
                 }
             }
 
             // 2. Web verification (for factual claims)
-            if enableWebVerification && context.allowWebSearch && taskType.requiresFactualVerification {
+            if doWebVerify {
                 group.addTask {
-                    await Self.withTimeout(seconds: timeout) { [webVerifier] in
-                        let r = await webVerifier.verify(response: response, query: query)
+                    await Self.withTimeout(seconds: timeout) {
+                        let r = await webVfy.verify(response: response, query: query)
                         return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
                     }
                 }
             }
 
             // 3. Code execution (for code responses)
-            if enableCodeExecution && context.allowCodeExecution && taskType.isCodeRelated {
-                let lang = context.language
+            if doCodeExec {
                 group.addTask {
-                    await Self.withTimeout(seconds: timeout) { [codeExecutor] in
-                        let r = await codeExecutor.verify(response: response, language: lang)
+                    await Self.withTimeout(seconds: timeout) {
+                        let r = await codeExec.verify(response: response, language: lang)
                         return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
                     }
                 }
             }
 
             // 4. Static analysis (for code)
-            if enableStaticAnalysis && taskType.isCodeRelated {
-                let lang = context.language
+            if doStaticAnalysis {
                 group.addTask {
-                    await Self.withTimeout(seconds: timeout) { [staticAnalyzer] in
-                        let r = await staticAnalyzer.analyze(response: response, language: lang)
+                    await Self.withTimeout(seconds: timeout) {
+                        let r = await staticAn.analyze(response: response, language: lang)
                         return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
                     }
                 }
             }
 
             // 5. User feedback history
-            if enableFeedbackLearning {
+            if doFeedback {
                 group.addTask {
-                    await Self.withTimeout(seconds: timeout) { [feedbackLearner] in
-                        let r = await feedbackLearner.assessFromHistory(taskType: taskType, responsePattern: response)
+                    await Self.withTimeout(seconds: timeout) {
+                        let r = await fbLearner.assessFromHistory(taskType: taskType, responsePattern: response)
                         return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
                     }
                 }

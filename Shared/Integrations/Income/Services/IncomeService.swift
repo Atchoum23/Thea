@@ -173,7 +173,7 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
         // Route to platform-specific sync
         // Each method attempts the real API call; falls back to demo data on failure
         let entries: [IncomeEntry]
-        switch platform.type {
+        switch platform.category {
         case .upwork:
             entries = try await syncUpwork(apiKey: apiKey, streamID: platform.id)
         case .fiverr:
