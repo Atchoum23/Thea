@@ -175,14 +175,31 @@ extension ModelRouter {
     ) -> [(model: AIModel, score: Double)] {
         var scored: [(model: AIModel, score: Double)] = []
 
+        // Adjust weights based on user's current behavioral state
+        let behavioralContext = BehavioralFingerprint.shared.currentContext()
+        var adjustedQualityWeight = qualityWeight
+        var adjustedCostWeight = costWeight
+        var adjustedSpeedWeight = speedWeight
+
+        // When user is in deep work (low receptivity), favor speed over quality
+        if behavioralContext.receptivity < 0.3 {
+            adjustedSpeedWeight += 0.1
+            adjustedQualityWeight -= 0.1
+        }
+        // When user is idle/receptive, favor quality
+        if behavioralContext.receptivity > 0.7 {
+            adjustedQualityWeight += 0.1
+            adjustedSpeedWeight -= 0.1
+        }
+
         for model in models {
             let qualityScore = calculateQualityScore(model, for: taskType)
             let costScore = calculateCostScore(model, context: context)
             let speedScore = calculateSpeedScore(model, for: taskType)
 
-            let totalScore = (qualityWeight * qualityScore) +
-                            (costWeight * costScore) +
-                            (speedWeight * speedScore)
+            let totalScore = (adjustedQualityWeight * qualityScore) +
+                            (adjustedCostWeight * costScore) +
+                            (adjustedSpeedWeight * speedScore)
 
             scored.append((model, totalScore))
         }
