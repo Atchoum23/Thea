@@ -316,19 +316,19 @@ extension ModelRouter {
             )
         }
 
-        // Last resort: create a placeholder
-        let placeholder = AIModel(
+        // Last resort: create a minimal model reference from user defaults
+        let fallbackModel = AIModel(
             id: defaultModel,
             name: "Default Model",
             provider: defaultProvider
         )
 
         return RoutingDecision(
-            model: placeholder,
+            model: fallbackModel,
             provider: defaultProvider,
             taskType: classification.taskType,
             confidence: 0.3,
-            reason: "Fallback - no models available",
+            reason: "Fallback to default configured model — no registered models matched",
             alternatives: [],
             timestamp: Date()
         )

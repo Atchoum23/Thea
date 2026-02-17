@@ -81,7 +81,7 @@ public final class SmartModelRouter: ObservableObject {
         guard !candidates.isEmpty else {
             // Fallback to cheapest available
             guard let fallbackModel = availableModels.min(by: { $0.costPerInputToken < $1.costPerInputToken }) ?? availableModels.first else {
-                // No models at all — return a placeholder decision
+                // No models configured — return empty decision with zero confidence
                 return SmartRoutingDecision(
                     taskType: complexity,
                     selectedModel: RouterModelCapability(modelId: "none", provider: "none", contextWindow: 0, maxOutputTokens: 0, capabilities: [], costPerInputToken: 0, costPerOutputToken: 0, averageLatency: 0, qualityScore: 0),
