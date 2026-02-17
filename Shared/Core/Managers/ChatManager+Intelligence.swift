@@ -106,7 +106,14 @@ extension ChatManager {
             intLogger.debug("⚠️ Orchestrator fallback: \(error.localizedDescription)")
         }
         #else
-        _ = query
+        // Lightweight classification on iOS (no model routing, just task type for prompt engineering)
+        do {
+            let classification = try await TaskClassifier.shared.quickClassify(query)
+            let (provider, model) = try getDefaultProviderAndModel()
+            return (provider, model, classification.taskType)
+        } catch {
+            intLogger.debug("⚠️ Quick classification fallback: \(error.localizedDescription)")
+        }
         #endif
         let (provider, model) = try getDefaultProviderAndModel()
         return (provider, model, nil)

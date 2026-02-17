@@ -61,6 +61,9 @@ enum PostResponsePipeline {
 
         // 9. Send response notifications
         notifyResponseComplete(context)
+
+        // 10. Record classification for TaskClassifier learning feedback loop
+        recordClassificationLearning(context)
     }
 
     // MARK: - Individual Pipeline Stages
@@ -134,6 +137,15 @@ enum PostResponsePipeline {
         )
         PlanManager.shared.startExecution()
         PlanManager.shared.showPanel()
+
+        // Also register in TaskPlanDAG for DAG-based execution tracking
+        Task { @MainActor in
+            _ = try? await TaskPlanDAG.shared.createPlan(
+                goal: context.userQuery,
+                context: context.responseText.prefix(2000).description
+            )
+        }
+
         pipelineLogger.debug("Auto-created plan with \(planSteps.count) steps")
     }
 
@@ -172,6 +184,21 @@ enum PostResponsePipeline {
         Task { @MainActor in
             await ConversationMemoryExtractor.shared.extractFromConversation(conversation)
         }
+    }
+
+    private static func recordClassificationLearning(_ context: ResponseContext) {
+        #if os(macOS)
+        guard let taskType = context.taskType else { return }
+        let result = ClassificationResult(
+            taskType: taskType,
+            confidence: 1.0,
+            reasoning: "Post-response recording"
+        )
+        TaskClassifier.shared.recordClassification(
+            query: context.userQuery,
+            result: result
+        )
+        #endif
     }
 
     private static func notifyResponseComplete(_ context: ResponseContext) {

@@ -281,7 +281,14 @@ struct MacSettingsView: View {
         case .memory:
             MemoryConfigurationView()
         case .agent:
-            AgentConfigurationView()
+            ScrollView {
+                VStack(spacing: 20) {
+                    AgentConfigurationView()
+                    THEAAutonomySettingsView()
+                    THEAPendingActionsView()
+                }
+                .padding()
+            }
         case .moltbook:
             MoltbookSettingsView()
         case .knowledge:
