@@ -248,7 +248,7 @@ public struct SleepQualityView: View {
                     label: "Efficiency",
                     value: "\(Int(sleep.efficiency))%",
                     icon: "chart.line.uptrend.xyaxis",
-                    color: .blue,
+                    color: .theaInfo,
                     target: 85,
                     current: sleep.efficiency
                 )
@@ -257,7 +257,7 @@ public struct SleepQualityView: View {
                     label: "Latency",
                     value: "\(sleep.sleepLatency)m",
                     icon: "clock.fill",
-                    color: .orange,
+                    color: .theaWarning,
                     target: 20,
                     current: Double(sleep.sleepLatency),
                     inverse: true
@@ -267,7 +267,7 @@ public struct SleepQualityView: View {
                     label: "Interruptions",
                     value: "\(sleep.interruptions)",
                     icon: "waveform.path.ecg",
-                    color: .red,
+                    color: .theaError,
                     target: 5,
                     current: Double(sleep.interruptions),
                     inverse: true
@@ -277,7 +277,7 @@ public struct SleepQualityView: View {
                     label: "Restfulness",
                     value: "\(Int(sleep.restfulness))%",
                     icon: "heart.fill",
-                    color: .green,
+                    color: .theaSuccess,
                     target: 80,
                     current: sleep.restfulness
                 )
@@ -338,10 +338,10 @@ public struct SleepQualityView: View {
         }
         .chartYAxisLabel("Hours")
         .chartForegroundStyleScale([
-            "Excellent": Color.green,
-            "Good": Color.blue,
-            "Fair": Color.yellow,
-            "Poor": Color.red
+            "Excellent": Color.theaSuccess,
+            "Good": Color.theaInfo,
+            "Fair": Color.theaWarning,
+            "Poor": Color.theaError
         ])
     }
 
@@ -371,10 +371,10 @@ public struct SleepQualityView: View {
     // MARK: - Helper Functions
 
     private func sleepQualityColor(_ score: Double) -> Color {
-        if score >= 85 { return .green }
-        if score >= 70 { return .blue }
-        if score >= 50 { return .yellow }
-        return .red
+        if score >= 85 { return .theaSuccess }
+        if score >= 70 { return .theaInfo }
+        if score >= 50 { return .theaWarning }
+        return .theaError
     }
 
     private func sleepQualityRating(_ score: Double) -> String {
@@ -459,7 +459,7 @@ private struct MetricCard: View {
             HStack(spacing: 4) {
                 Image(systemName: isOnTarget ? "checkmark.circle.fill" : "circle")
                     .font(.caption)
-                    .foregroundStyle(isOnTarget ? .green : .secondary)
+                    .foregroundStyle(isOnTarget ? Color.theaSuccess : .secondary)
 
                 Text(isOnTarget ? "On target" : "Below target")
                     .font(.caption)
@@ -620,9 +620,9 @@ public enum FactorImpact: Sendable {
 
     var color: Color {
         switch self {
-        case .positive: .green
-        case .neutral: .blue
-        case .negative: .red
+        case .positive: .theaSuccess
+        case .neutral: .theaInfo
+        case .negative: .theaError
         }
     }
 }

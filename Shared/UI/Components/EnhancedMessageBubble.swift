@@ -250,25 +250,25 @@ public struct EnhancedMessageBubble: View {
     private func warningBlock(_ block: ParsedBlock) -> some View {
         HStack(spacing: TheaSpacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
+                .foregroundStyle(.theaWarning)
             Text(block.content)
                 .font(.theaBody)
         }
         .padding(.horizontal, TheaSpacing.lg)
         .padding(.vertical, TheaSpacing.md)
-        .frostedGlass(cornerRadius: TheaRadius.lg, tint: .orange)
+        .frostedGlass(cornerRadius: TheaRadius.lg, tint: .theaWarning)
     }
 
     private func successBlock(_ block: ParsedBlock) -> some View {
         HStack(spacing: TheaSpacing.sm) {
             Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.green)
+                .foregroundStyle(.theaSuccess)
             Text(block.content)
                 .font(.theaBody)
         }
         .padding(.horizontal, TheaSpacing.lg)
         .padding(.vertical, TheaSpacing.md)
-        .frostedGlass(cornerRadius: TheaRadius.lg, tint: .green)
+        .frostedGlass(cornerRadius: TheaRadius.lg, tint: .theaSuccess)
     }
 
     // MARK: - Quick Actions
@@ -301,7 +301,7 @@ public struct EnhancedMessageBubble: View {
 
     private var hoverActions: some View {
         HStack(spacing: TheaSpacing.xs) {
-            IconActionButton(icon: showCopiedFeedback ? "checkmark" : "doc.on.doc", color: showCopiedFeedback ? .green : .secondary) {
+            IconActionButton(icon: showCopiedFeedback ? "checkmark" : "doc.on.doc", color: showCopiedFeedback ? .theaSuccess : .secondary) {
                 copyToClipboard()
             }
 
@@ -427,10 +427,10 @@ public struct EnhancedMessageBubble: View {
 
     private func confidenceColor(for confidence: Double) -> Color {
         switch confidence {
-        case 0.9...: return .green
-        case 0.7..<0.9: return .blue
-        case 0.5..<0.7: return .orange
-        default: return .red
+        case 0.9...: return .theaSuccess
+        case 0.7..<0.9: return .theaInfo
+        case 0.5..<0.7: return .theaWarning
+        default: return .theaError
         }
     }
 }

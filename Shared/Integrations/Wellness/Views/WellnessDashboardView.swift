@@ -228,7 +228,7 @@ public struct WellnessDashboardView: View {
                         }
                     }) {
                         Image(systemName: "stop.fill")
-                            .foregroundColor(.red)
+                            .foregroundColor(.theaError)
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -237,7 +237,7 @@ public struct WellnessDashboardView: View {
             if viewModel.isPlayingAudio, let audio = viewModel.currentAudio {
                 HStack {
                     Image(systemName: audio.icon)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.theaInfo)
 
                     Text(audio.displayName)
                         .font(.subheadline)
@@ -245,10 +245,10 @@ public struct WellnessDashboardView: View {
                     Spacer()
 
                     Image(systemName: "waveform")
-                        .foregroundColor(.blue)
+                        .foregroundColor(.theaInfo)
                 }
                 .padding()
-                .background(Color.blue.opacity(0.1))
+                .background(Color.theaInfo.opacity(0.1))
                 .cornerRadius(12)
 
                 VStack(alignment: .leading, spacing: 4) {

@@ -223,7 +223,7 @@ extension MacSettingsView {
                                 Button("Stop") {
                                     voiceManager.stopWakeWordDetection()
                                 }
-                                .foregroundStyle(.red)
+                                .foregroundStyle(.theaError)
                             }
                         }
 

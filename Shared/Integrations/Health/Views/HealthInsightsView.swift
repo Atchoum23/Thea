@@ -103,10 +103,10 @@ public struct HealthInsightsView: View {
 
             // Score Breakdown
             VStack(spacing: 8) {
-                ScoreComponentRow(label: "Sleep Quality", score: viewModel.sleepScore, color: .blue)
-                ScoreComponentRow(label: "Activity Level", score: viewModel.activityScore, color: .green)
-                ScoreComponentRow(label: "Heart Health", score: viewModel.heartScore, color: .red)
-                ScoreComponentRow(label: "Nutrition", score: viewModel.nutritionScore, color: .orange)
+                ScoreComponentRow(label: "Sleep Quality", score: viewModel.sleepScore, color: .theaInfo)
+                ScoreComponentRow(label: "Activity Level", score: viewModel.activityScore, color: .theaSuccess)
+                ScoreComponentRow(label: "Heart Health", score: viewModel.heartScore, color: .theaError)
+                ScoreComponentRow(label: "Nutrition", score: viewModel.nutritionScore, color: .theaWarning)
             }
             .padding(.horizontal)
         }
@@ -117,10 +117,10 @@ public struct HealthInsightsView: View {
     }
 
     private var healthScoreColor: Color {
-        if viewModel.healthScore >= 80 { return .green }
-        if viewModel.healthScore >= 60 { return .yellow }
-        if viewModel.healthScore >= 40 { return .orange }
-        return .red
+        if viewModel.healthScore >= 80 { return .theaSuccess }
+        if viewModel.healthScore >= 60 { return .theaWarning }
+        if viewModel.healthScore >= 40 { return .theaWarning }
+        return .theaError
     }
 
     private var healthScoreInterpretation: String {
@@ -147,7 +147,7 @@ public struct HealthInsightsView: View {
                     label: "Avg Sleep",
                     value: formatDuration(viewModel.averageSleepDuration),
                     trend: viewModel.sleepTrend,
-                    color: .blue
+                    color: .theaInfo
                 )
 
                 MetricCard(
@@ -155,7 +155,7 @@ public struct HealthInsightsView: View {
                     label: "Daily Steps",
                     value: "\(viewModel.averageSteps)",
                     trend: viewModel.activityTrend,
-                    color: .green
+                    color: .theaSuccess
                 )
 
                 MetricCard(
@@ -163,7 +163,7 @@ public struct HealthInsightsView: View {
                     label: "Resting HR",
                     value: "\(viewModel.averageRestingHR) BPM",
                     trend: viewModel.heartRateTrend,
-                    color: .red
+                    color: .theaError
                 )
 
                 MetricCard(
@@ -171,7 +171,7 @@ public struct HealthInsightsView: View {
                     label: "Active Cal",
                     value: "\(viewModel.averageActiveCalories)",
                     trend: viewModel.caloriesTrend,
-                    color: .orange
+                    color: .theaWarning
                 )
             }
             .padding(.horizontal)
@@ -211,7 +211,7 @@ public struct HealthInsightsView: View {
             TrendChartView(
                 title: "Sleep Duration",
                 data: viewModel.sleepTrendData,
-                color: .blue,
+                color: .theaInfo,
                 unit: "hours"
             )
 
@@ -219,7 +219,7 @@ public struct HealthInsightsView: View {
             TrendChartView(
                 title: "Daily Steps",
                 data: viewModel.activityTrendData,
-                color: .green,
+                color: .theaSuccess,
                 unit: "steps"
             )
 
@@ -227,7 +227,7 @@ public struct HealthInsightsView: View {
             TrendChartView(
                 title: "Resting Heart Rate",
                 data: viewModel.heartRateTrendData,
-                color: .red,
+                color: .theaError,
                 unit: "BPM"
             )
         }
@@ -380,7 +380,7 @@ private struct HealthInsightCard: View {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.caption)
-                                .foregroundStyle(.green)
+                                .foregroundStyle(Color.theaSuccess)
 
                             Text(recommendation)
                                 .font(.caption)
@@ -595,10 +595,10 @@ public enum InsightSeverity: Sendable {
 
     var color: Color {
         switch self {
-        case .positive: .green
-        case .neutral: .blue
-        case .warning: .orange
-        case .critical: .red
+        case .positive: .theaSuccess
+        case .neutral: .theaInfo
+        case .warning: .theaWarning
+        case .critical: .theaError
         }
     }
 
@@ -611,16 +611,16 @@ public enum InsightSeverity: Sendable {
             switch self {
             case .positive:
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Color.theaSuccess)
             case .neutral:
                 Image(systemName: "info.circle.fill")
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.theaInfo)
             case .warning:
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.theaWarning)
             case .critical:
                 Image(systemName: "exclamationmark.circle.fill")
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Color.theaError)
             }
         }
     }
@@ -667,9 +667,9 @@ public enum CorrelationStrength: Sendable {
 
     var color: Color {
         switch self {
-        case .strong: .green
-        case .moderate: .yellow
-        case .weak: .orange
+        case .strong: .theaSuccess
+        case .moderate: .theaWarning
+        case .weak: .theaWarning
         }
     }
 }

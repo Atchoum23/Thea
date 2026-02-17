@@ -53,7 +53,7 @@ public struct HealthGoalsView: View {
                 VStack(spacing: 4) {
                     Text("\(viewModel.totalGoals)")
                         .font(.system(size: 36, weight: .bold))
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.theaInfo)
 
                     Text("Total Goals")
                         .font(.caption)
@@ -66,7 +66,7 @@ public struct HealthGoalsView: View {
                 VStack(spacing: 4) {
                     Text("\(viewModel.activeGoals.count)")
                         .font(.system(size: 36, weight: .bold))
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.theaSuccess)
 
                     Text("Active")
                         .font(.caption)
@@ -79,7 +79,7 @@ public struct HealthGoalsView: View {
                 VStack(spacing: 4) {
                     Text("\(Int(viewModel.completionRate))%")
                         .font(.system(size: 36, weight: .bold))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Color.theaWarning)
 
                     Text("Completion")
                         .font(.caption)
@@ -110,7 +110,7 @@ public struct HealthGoalsView: View {
                         RoundedRectangle(cornerRadius: 4)
                             .fill(
                                 LinearGradient(
-                                    colors: [.blue, .green],
+                                    colors: [Color.theaInfo, Color.theaSuccess],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
@@ -168,7 +168,7 @@ public struct HealthGoalsView: View {
                     // Would navigate to full list
                 }
                 .font(.caption)
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.theaInfo)
                 .padding(.horizontal)
             }
         }
@@ -308,7 +308,7 @@ private struct GoalCard: View {
                             systemImage: deadline.timeIntervalSinceNow > 0 ? "calendar" : "exclamationmark.triangle"
                         )
                         .font(.caption)
-                        .foregroundStyle(deadline.timeIntervalSinceNow > 0 ? Color.secondary : Color.red)
+                        .foregroundStyle(deadline.timeIntervalSinceNow > 0 ? Color.secondary : Color.theaError)
                     }
                 }
             }
@@ -353,7 +353,7 @@ private struct MilestoneRow: View {
         HStack(spacing: 8) {
             Image(systemName: milestone.isCompleted ? "checkmark.circle.fill" : "circle")
                 .font(.caption)
-                .foregroundStyle(milestone.isCompleted ? .green : .secondary)
+                .foregroundStyle(milestone.isCompleted ? Color.theaSuccess : .secondary)
 
             Text(milestone.title)
                 .font(.caption)
@@ -380,7 +380,7 @@ private struct CompletedGoalCard: View {
         HStack(spacing: 12) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.title2)
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.theaSuccess)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(goal.title)
@@ -442,7 +442,7 @@ private struct SuggestionCard: View {
             } label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.theaInfo)
             }
         }
         .padding()
@@ -557,10 +557,10 @@ public struct HealthGoal: Identifiable, Sendable, Codable {
     }
 
     public var progressColor: Color {
-        if progress >= 1.0 { return .green }
-        if progress >= 0.75 { return .blue }
-        if progress >= 0.5 { return .yellow }
-        return .orange
+        if progress >= 1.0 { return .theaSuccess }
+        if progress >= 0.75 { return .theaInfo }
+        if progress >= 0.5 { return .theaWarning }
+        return .theaWarning
     }
 
     public init(
@@ -619,11 +619,11 @@ public enum GoalCategory: String, CaseIterable, Sendable, Codable {
 
     public var color: Color {
         switch self {
-        case .sleep: .blue
-        case .activity: .green
-        case .nutrition: .orange
+        case .sleep: .theaInfo
+        case .activity: .theaSuccess
+        case .nutrition: .theaWarning
         case .weight: .purple
-        case .heart: .red
+        case .heart: .theaError
         case .mindfulness: .indigo
         case .general: .pink
         }

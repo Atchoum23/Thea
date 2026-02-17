@@ -49,7 +49,7 @@ struct WatchHealthView: View {
         VStack(spacing: 12) {
             Image(systemName: "heart.text.square.fill")
                 .font(.system(size: 40))
-                .foregroundStyle(.red)
+                .foregroundStyle(.theaError)
 
             Text("Health Access")
                 .font(.headline)
@@ -63,7 +63,7 @@ struct WatchHealthView: View {
                 Task { await viewModel.requestAuthorization() }
             }
             .buttonStyle(.borderedProminent)
-            .tint(.red)
+            .tint(.theaError)
         }
         .padding()
     }
@@ -77,13 +77,13 @@ struct WatchHealthView: View {
                     icon: "figure.walk",
                     value: viewModel.formattedSteps,
                     label: "Steps",
-                    color: .green
+                    color: .theaSuccess
                 )
                 metricCard(
                     icon: "heart.fill",
                     value: viewModel.formattedHeartRate,
                     label: "BPM",
-                    color: .red
+                    color: .theaError
                 )
             }
 
@@ -92,7 +92,7 @@ struct WatchHealthView: View {
                     icon: "flame.fill",
                     value: viewModel.formattedActiveEnergy,
                     label: "kcal",
-                    color: .orange
+                    color: .theaWarning
                 )
                 metricCard(
                     icon: "bed.double.fill",
@@ -157,7 +157,7 @@ struct WatchHealthView: View {
             if let calories = workout.caloriesBurned {
                 Text("\(Int(calories)) kcal")
                     .font(.caption2.bold())
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.theaWarning)
             }
         }
         .padding(8)

@@ -54,7 +54,7 @@ public struct HealthDashboardView: View {
         VStack(spacing: 20) {
             Image(systemName: "heart.text.square.fill")
                 .font(.system(size: 60))
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.theaError)
 
             Text("Health Data Access")
                 .font(.title)
@@ -78,7 +78,7 @@ public struct HealthDashboardView: View {
             if let error = viewModel.errorMessage {
                 Text(error)
                     .font(.caption)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Color.theaError)
                     .multilineTextAlignment(.center)
             }
         }
@@ -169,7 +169,7 @@ public struct HealthDashboardView: View {
             icon: "figure.walk",
             title: "Activity",
             value: viewModel.todayActivitySummary.map { "\($0.activityScore)%" } ?? "No data",
-            color: .blue,
+            color: .theaInfo,
             trend: viewModel.getActivityTrend()
         )
     }
@@ -220,7 +220,7 @@ public struct HealthDashboardView: View {
             if let latest = viewModel.heartRateRecords.first {
                 HStack {
                     Image(systemName: "heart.fill")
-                        .foregroundColor(.red)
+                        .foregroundColor(.theaError)
 
                     Text("\(latest.beatsPerMinute) bpm")
                         .font(.title2)
@@ -322,7 +322,7 @@ private struct SleepRecordRow: View {
                 MetricPill(
                     icon: "bed.double.fill",
                     value: viewModel.formatDuration(record.totalMinutes),
-                    color: .blue
+                    color: .theaInfo
                 )
 
                 MetricPill(
@@ -370,19 +370,19 @@ private struct ActivitySummaryRow: View {
                 MetricPill(
                     icon: "figure.walk",
                     value: "\(summary.steps)",
-                    color: .green
+                    color: .theaSuccess
                 )
 
                 MetricPill(
                     icon: "flame.fill",
                     value: "\(summary.activeCalories) cal",
-                    color: .orange
+                    color: .theaWarning
                 )
 
                 MetricPill(
                     icon: "timer",
                     value: viewModel.formatDuration(summary.activeMinutes),
-                    color: .blue
+                    color: .theaInfo
                 )
 
                 Spacer()

@@ -257,8 +257,8 @@ struct OnboardingPermissionRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.red.opacity(0.2))
-                            .foregroundStyle(.red)
+                            .background(Color.theaError.opacity(0.2))
+                            .foregroundStyle(.theaError)
                             .clipShape(Capsule())
                     }
                 }
@@ -278,15 +278,15 @@ struct OnboardingPermissionRow: View {
     private var statusColor: Color {
         switch status {
         case .authorized:
-            .green
+            .theaSuccess
         case .denied:
-            .red
+            .theaError
         case .restricted:
-            .orange
+            .theaWarning
         case .limited:
-            .yellow
+            .theaWarning
         case .provisional:
-            .blue
+            .theaInfo
         case .notDetermined, .notAvailable, .unknown:
             .gray
         }
@@ -297,19 +297,19 @@ struct OnboardingPermissionRow: View {
         switch status {
         case .authorized:
             Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.green)
+                .foregroundStyle(.theaSuccess)
         case .denied:
             Image(systemName: "xmark.circle.fill")
-                .foregroundStyle(.red)
+                .foregroundStyle(.theaError)
         case .restricted:
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
+                .foregroundStyle(.theaWarning)
         case .limited:
             Image(systemName: "checkmark.circle.badge.questionmark")
-                .foregroundStyle(.yellow)
+                .foregroundStyle(.theaWarning)
         case .provisional:
             Image(systemName: "checkmark.circle")
-                .foregroundStyle(.blue)
+                .foregroundStyle(.theaInfo)
         case .notDetermined, .notAvailable, .unknown:
             Image(systemName: "circle")
                 .foregroundStyle(.gray)

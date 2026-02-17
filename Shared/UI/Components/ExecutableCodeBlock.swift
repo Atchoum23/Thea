@@ -129,7 +129,7 @@ public struct ExecutableCodeBlock: View {
                         Text(showCopied ? "Copied" : "Copy")
                     }
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(showCopied ? .green : .secondary)
+                    .foregroundStyle(showCopied ? .theaSuccess : .secondary)
                 }
                 .buttonStyle(.plain)
             }
@@ -159,11 +159,11 @@ public struct ExecutableCodeBlock: View {
             // Result header
             HStack {
                 Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(result.success ? .green : .red)
+                    .foregroundStyle(result.success ? .theaSuccess : .theaError)
 
                 Text(result.success ? "Success" : "Failed")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(result.success ? .green : .red)
+                    .foregroundStyle(result.success ? .theaSuccess : .theaError)
 
                 Spacer()
 
@@ -203,11 +203,11 @@ public struct ExecutableCodeBlock: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Error:")
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.red)
+                        .foregroundStyle(.theaError)
 
                     Text(error)
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(.red.opacity(0.8))
+                        .foregroundStyle(.theaError.opacity(0.8))
                         .textSelection(.enabled)
                 }
             }
@@ -286,12 +286,12 @@ public struct ExecutableCodeBlock: View {
     private func resultBackground(_ success: Bool) -> Color {
         if success {
             return colorScheme == .dark
-                ? Color.green.opacity(0.1)
-                : Color.green.opacity(0.05)
+                ? Color.theaSuccess.opacity(0.1)
+                : Color.theaSuccess.opacity(0.05)
         } else {
             return colorScheme == .dark
-                ? Color.red.opacity(0.1)
-                : Color.red.opacity(0.05)
+                ? Color.theaError.opacity(0.1)
+                : Color.theaError.opacity(0.05)
         }
     }
 }

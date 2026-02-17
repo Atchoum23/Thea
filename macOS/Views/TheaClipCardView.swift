@@ -44,12 +44,12 @@ struct TheaClipCardView: View {
             HStack(spacing: 4) {
                 Image(systemName: "link")
                     .font(.caption2)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.theaInfo)
                     .accessibilityHidden(true)
                 Text(entry.urlString ?? entry.previewText)
                     .font(.caption)
                     .lineLimit(2)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.theaInfo)
             }
 
         case .image:
@@ -115,21 +115,21 @@ struct TheaClipCardView: View {
             if entry.isFavorite {
                 Image(systemName: "star.fill")
                     .font(.system(size: 9))
-                    .foregroundStyle(.yellow)
+                    .foregroundStyle(.theaWarning)
                     .accessibilityHidden(true)
             }
 
             if entry.isPinned {
                 Image(systemName: "pin.fill")
                     .font(.system(size: 9))
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.theaWarning)
                     .accessibilityHidden(true)
             }
 
             if entry.isSensitive {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 9))
-                    .foregroundStyle(.red)
+                    .foregroundStyle(.theaError)
                     .accessibilityHidden(true)
             }
 

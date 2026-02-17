@@ -62,11 +62,14 @@
                     } label: {
                         HStack {
                             Image(systemName: "folder")
+                                .accessibilityHidden(true)
                             Text(manager.currentSession?.workingDirectory.lastPathComponent ?? "Select Folder")
                                 .lineLimit(1)
                         }
                     }
                     .help("Change working directory")
+                    .accessibilityLabel("Working directory")
+                    .accessibilityHint("Opens folder picker to change working directory")
 
                     Divider()
 
@@ -77,18 +80,24 @@
                         } label: {
                             Label("Pause", systemImage: "pause.fill")
                         }
+                        .accessibilityLabel("Pause")
+                        .accessibilityHint("Pauses the current task execution")
 
                         Button {
                             manager.cancel()
                         } label: {
                             Label("Cancel", systemImage: "xmark.circle")
                         }
+                        .accessibilityLabel("Cancel")
+                        .accessibilityHint("Cancels the current task execution")
                     } else if manager.currentSession?.status == .paused {
                         Button {
                             Task { try? await manager.resume() }
                         } label: {
                             Label("Resume", systemImage: "play.fill")
                         }
+                        .accessibilityLabel("Resume")
+                        .accessibilityHint("Resumes the paused task execution")
                     }
 
                     // New session
@@ -97,6 +106,8 @@
                     } label: {
                         Label("New Session", systemImage: "plus")
                     }
+                    .accessibilityLabel("New Session")
+                    .accessibilityHint("Creates a new cowork session")
                 }
             }
             .fileImporter(
@@ -139,6 +150,8 @@
                         .cornerRadius(6)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(tab.rawValue) tab")
+                    .accessibilityHint("Switches to the \(tab.rawValue) tab")
                     .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
                 }
                 Spacer()
@@ -182,6 +195,8 @@
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
                         )
+                        .accessibilityLabel("Task instruction")
+                        .accessibilityHint("Describe the task you want Thea to work on")
 
                     VStack(spacing: 8) {
                         Button {
@@ -192,6 +207,8 @@
                         }
                         .buttonStyle(.borderedProminent)
                         .disabled(instructionText.isEmpty || manager.isProcessing)
+                        .accessibilityLabel("Start task")
+                        .accessibilityHint("Begins executing the task immediately")
 
                         Button {
                             queueTask()
@@ -201,6 +218,8 @@
                         }
                         .buttonStyle(.bordered)
                         .disabled(instructionText.isEmpty)
+                        .accessibilityLabel("Queue task")
+                        .accessibilityHint("Adds the task to the execution queue")
                     }
                 }
 
@@ -271,6 +290,8 @@
                             showingPlanPreview = false
                             manager.currentSession?.reset()
                         }
+                        .accessibilityLabel("Cancel plan")
+                        .accessibilityHint("Cancels the plan and resets the session")
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Execute") {
@@ -280,6 +301,8 @@
                             }
                         }
                         .buttonStyle(.borderedProminent)
+                        .accessibilityLabel("Execute plan")
+                        .accessibilityHint("Starts executing the planned steps")
                     }
                 }
             }
@@ -357,6 +380,7 @@
             Button(action: action) {
                 HStack(spacing: 4) {
                     Image(systemName: icon)
+                        .accessibilityHidden(true)
                     Text(title)
                 }
                 .font(.caption)
@@ -366,6 +390,8 @@
                 .cornerRadius(4)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(title)
+            .accessibilityHint("Sets the task instruction to \(title)")
         }
     }
 

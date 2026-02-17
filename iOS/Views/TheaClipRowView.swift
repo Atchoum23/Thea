@@ -71,17 +71,17 @@ struct TheaClipRowView: View {
             if entry.isFavorite {
                 Image(systemName: "star.fill")
                     .font(.caption2)
-                    .foregroundStyle(.yellow)
+                    .foregroundStyle(.theaWarning)
             }
             if entry.isPinned {
                 Image(systemName: "pin.fill")
                     .font(.caption2)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.theaWarning)
             }
             if entry.isSensitive {
                 Image(systemName: "lock.fill")
                     .font(.caption2)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(.theaError)
             }
         }
     }

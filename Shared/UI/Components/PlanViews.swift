@@ -207,15 +207,15 @@ private struct StepRow: View {
                 .accessibilityLabel("Completed")
         case .failed:
             Image(systemName: "xmark.circle.fill")
-                .foregroundStyle(.red)
+                .foregroundStyle(.theaError)
                 .accessibilityLabel("Failed")
         case .skipped:
             Image(systemName: "arrow.turn.up.right")
-                .foregroundStyle(.orange)
+                .foregroundStyle(.theaWarning)
                 .accessibilityLabel("Skipped")
         case .modified:
             Image(systemName: "pencil.circle.fill")
-                .foregroundStyle(.blue)
+                .foregroundStyle(.theaInfo)
                 .accessibilityLabel("Modified")
         }
     }
