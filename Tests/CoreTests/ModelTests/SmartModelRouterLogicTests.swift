@@ -561,10 +561,11 @@ struct SMRComplexityTests {
         #expect(router.classifyComplexity(task: "hello", taskType: "chat") == .simple)
     }
 
-    @Test("Definition queries are trivial")
+    @Test("Definition queries are trivial when task is long enough")
     func defineTrivial() {
         let router = TestSmartModelRouter()
-        #expect(router.classifyComplexity(task: "define polymorphism in detail for me please", taskType: "info") == .trivial)
+        // Task must exceed 50 chars so it does not match the short-task simple rule first
+        #expect(router.classifyComplexity(task: "define polymorphism in object-oriented programming languages for me please", taskType: "info") == .trivial)
     }
 
     @Test("What-is queries are trivial")

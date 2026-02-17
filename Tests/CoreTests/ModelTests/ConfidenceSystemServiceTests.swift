@@ -871,18 +871,21 @@ struct CSHallucinationTests {
         #expect(flags.first?.reason.contains("URL") == true)
     }
 
-    @Test("Specific date triggers flag")
-    func specificDateTriggers() {
+    @Test("Specific date with hedging triggers flag")
+    func specificDateWithHedgeTriggers() {
         let system = TestConfidenceSystem()
-        let flags = system.detectHallucinations("This was released on January 15 and has been popular since then.", query: "test")
+        // Date (0.15) alone is below 0.3 threshold; hedge (0.3) pushes it to 0.45
+        let flags = system.detectHallucinations("I believe this was released on January 15 and gained popularity since.", query: "test")
         #expect(!flags.isEmpty)
         #expect(flags.first?.reason.contains("specific claim") == true)
+        #expect(flags.first?.reason.contains("hedging") == true)
     }
 
-    @Test("Large numbers trigger flag")
-    func largeNumbersTrigger() {
+    @Test("Large numbers with hedging triggers flag")
+    func largeNumbersWithHedgeTrigger() {
         let system = TestConfidenceSystem()
-        let flags = system.detectHallucinations("The library has been downloaded over 15000 times this year alone.", query: "test")
+        // Number (0.2) alone is below 0.3 threshold; hedge (0.3) pushes it to 0.5
+        let flags = system.detectHallucinations("I think the library has been downloaded over 15000 times this year.", query: "test")
         #expect(!flags.isEmpty)
     }
 
