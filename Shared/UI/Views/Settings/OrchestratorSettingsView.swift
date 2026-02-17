@@ -131,21 +131,21 @@ struct OrchestratorSettingsView: View {
                     title: "Status",
                     value: config.orchestratorEnabled ? "Active" : "Disabled",
                     icon: config.orchestratorEnabled ? "checkmark.circle.fill" : "xmark.circle.fill",
-                    color: config.orchestratorEnabled ? .green : .red
+                    color: config.orchestratorEnabled ? .theaSuccess : .theaError
                 )
 
                 overviewCard(
                     title: "Mode",
                     value: config.localModelPreference.rawValue,
                     icon: modeIcon(for: config.localModelPreference),
-                    color: .blue
+                    color: .theaInfo
                 )
 
                 overviewCard(
                     title: "Routing Rules",
                     value: "\(config.taskRoutingRules.count)",
                     icon: "arrow.triangle.branch",
-                    color: .orange
+                    color: .theaWarning
                 )
 
                 overviewCard(
@@ -161,21 +161,21 @@ struct OrchestratorSettingsView: View {
                     title: "Status",
                     value: config.orchestratorEnabled ? "Active" : "Disabled",
                     icon: config.orchestratorEnabled ? "checkmark.circle.fill" : "xmark.circle.fill",
-                    color: config.orchestratorEnabled ? .green : .red
+                    color: config.orchestratorEnabled ? .theaSuccess : .theaError
                 )
 
                 overviewCard(
                     title: "Mode",
                     value: config.localModelPreference.rawValue,
                     icon: modeIcon(for: config.localModelPreference),
-                    color: .blue
+                    color: .theaInfo
                 )
 
                 overviewCard(
                     title: "Routing Rules",
                     value: "\(config.taskRoutingRules.count)",
                     icon: "arrow.triangle.branch",
-                    color: .orange
+                    color: .theaWarning
                 )
 
                 overviewCard(
@@ -317,7 +317,7 @@ struct OrchestratorSettingsView: View {
                         } else {
                             Text("Never updated")
                                 .font(.caption)
-                                .foregroundStyle(.orange)
+                                .foregroundStyle(.theaWarning)
                         }
                     }
 
@@ -369,7 +369,7 @@ struct OrchestratorSettingsView: View {
                 if let error = benchmarkService.updateError {
                     HStack {
                         Image(systemName: "exclamationmark.triangle")
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(.theaWarning)
                         Text("Update failed: \(error.localizedDescription)")
                             .font(.caption)
                             .foregroundStyle(.secondary)

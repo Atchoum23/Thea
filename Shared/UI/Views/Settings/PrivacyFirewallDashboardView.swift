@@ -783,14 +783,14 @@ struct PrivacyTransparencyReportView: View {
             if (blocklistStats?.enabledDomains ?? 0) < 20 {
                 Label("Consider enabling more blocklist entries for better tracker protection", systemImage: "hand.raised")
                     .font(.theaCaption1)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.theaWarning)
             }
 
             let score = computePrivacyScore()
             if score >= 80 {
                 Label("Your privacy posture is strong. Keep it up!", systemImage: "checkmark.seal.fill")
                     .font(.theaCaption1)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Color.theaSuccess)
             }
         }
     }
