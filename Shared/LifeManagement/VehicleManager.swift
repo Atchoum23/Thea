@@ -73,8 +73,7 @@ struct Vehicle: Codable, Sendable, Identifiable, Hashable {
         MaintenanceSchedule.defaults(for: fuelType).filter { schedule in
             guard let lastService = serviceRecords
                 .filter({ $0.type == schedule.serviceType })
-                .sorted(by: { $0.date > $1.date })
-                .first else {
+                .max(by: { $0.date < $1.date }) else {
                 return true // Never serviced — overdue
             }
 

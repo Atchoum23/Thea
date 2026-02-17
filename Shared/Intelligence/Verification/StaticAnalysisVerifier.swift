@@ -95,7 +95,7 @@ public final class StaticAnalysisVerifier {
             factors.append(ConfidenceDecomposition.DecompositionFactor(
                 name: "Critical Issues",
                 contribution: -0.3 * Double(min(3, errorCount)),
-                explanation: "\(errorCount) error(s) found: \(issues.filter { $0.severity == .error }.first?.message ?? "")"
+                explanation: "\(errorCount) error(s) found: \(issues.first { $0.severity == .error }?.message ?? "")"
             ))
         }
 

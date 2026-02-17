@@ -163,7 +163,7 @@ struct TrackedPackage: Codable, Sendable, Identifiable {
     }
 
     var latestEvent: PackageTrackingEvent? {
-        events.sorted { $0.timestamp > $1.timestamp }.first
+        events.max { $0.timestamp < $1.timestamp }
     }
 
     var trackingURL: URL? {
