@@ -90,6 +90,7 @@
 		0A1011F8FAFFBDAE8E1F2FEB /* thea_icon_master_1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 0455AA0DA254DBC4CF1E78C9 /* thea_icon_master_1024.png */; };
 		0A1F24F3D12F84277D0E2200 /* OrchestratorConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2F0B5C0C342B237690D603 /* OrchestratorConfiguration.swift */; };
 		0A3B37BDC31CDAEAFF44458A /* ExtensionSyncBridge+SyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475430365812249964991ABD /* ExtensionSyncBridge+SyncAPI.swift */; };
+		0A66CFB1E4C58F0932095BD0 /* AsanaIntegration+Users.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0449E7316B40DD1F500F5544 /* AsanaIntegration+Users.swift */; };
 		0A7C15B3057316F5087D35B1 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A39A485B529A1FB622C9D3F4 /* CommandPalette.swift */; };
 		0AA0287CE6C3623474FB94A5 /* TodoistIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8D699C51A337162D4453E6 /* TodoistIntegration.swift */; };
 		0AAC90B5DEB00DA5E4BE155F /* IntentDisambiguation+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15B2FC6144AA39BBDC12EC5E /* IntentDisambiguation+Core.swift */; };
@@ -545,7 +546,6 @@
 		3C7DDA275F7A66287876FB2C /* Scriptsauto-build-check.sh in Resources */ = {isa = PBXBuildFile; fileRef = BF2FC2452F4073DE14D592B3 /* Scriptsauto-build-check.sh */; };
 		3C853DEEE4CF44AB1ED7C07D /* ProactivityEngine+Suggestions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0AC8D553251C3CA3B7DE69E /* ProactivityEngine+Suggestions.swift */; };
 		3CB65A76F79E19A6CD446333 /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2911664A56A58207367D3FC /* SecureStorage.swift */; };
-		3CC0900F9E5F3B978A5D2FDC /* HealthInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79557C9EFB7AA956DAFB5675 /* HealthInsightsView.swift */; };
 		3CC65E3B1551ED894006CBFB /* HolisticPatternIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A8A95327B2A4EB28FB4D10 /* HolisticPatternIntelligence.swift */; };
 		3CD843C7325EB74F47024FE2 /* EndpointSecurityObserver+EventHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50637D271844BF9E2C597842 /* EndpointSecurityObserver+EventHandling.swift */; };
 		3CF66128200027D38FAC588D /* Highlightr in Frameworks */ = {isa = PBXBuildFile; productRef = D423498831C5861F5C038909 /* Highlightr */; };
@@ -664,7 +664,6 @@
 		49ED81D1BB07E3B5C2B50B70 /* MediaMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF81E960712B2416AD931985 /* MediaMonitor.swift */; };
 		4A2EFD210AC80EC99CCDB3F5 /* IntegrationModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2ABEACF5247936B5C241F15 /* IntegrationModuleTests.swift */; };
 		4A2F9B8D31284A1EA313D2D6 /* iMessageChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D960C636EBFC2F72A37A759F /* iMessageChannel.swift */; };
-		4A2FE46C25A754C19EC1A4BA /* HealthInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE9A221A8692389679B0A9B /* HealthInsightsView.swift */; };
 		4A3FF7602652514EF031A48C /* TraktService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5A1765C297CB988B0FCE32 /* TraktService.swift */; };
 		4A4596CEDB2766199671D82C /* SafariContextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5941ECCEC8461B87C56F0D /* SafariContextExtractor.swift */; };
 		4A484892EB962D2E43291565 /* TheamacOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB81CB84E6077D3E27356DB /* TheamacOSApp.swift */; };
@@ -705,6 +704,7 @@
 		4EA034DA51B79DC3B36F32CF /* XcodeBuildRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A929EC8E304E78BBAF968AD /* XcodeBuildRunner.swift */; };
 		4ED37CD41AF685E360C59591 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C70E3E87D9CAD29709F642A1 /* LiveActivityManager.swift */; };
 		4EDAB512EFB0C45B25B8B41E /* TheaSharePlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D263A49EDCC79B973E539D /* TheaSharePlay.swift */; };
+		4EE3DB5CECE6162A48390F49 /* HealthInsightsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603B8DF9F782167078972E1F /* HealthInsightsDetailView.swift */; };
 		4EF05F89B87750C2EF03D43C /* TheaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F6973CAA1DBD2E9BC0F53E /* TheaConfig.swift */; };
 		4EF34FD085656D93B23B66B4 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89ADBB04DD5856B19A5115C3 /* HelpButton.swift */; };
 		4EF99C7A278DEFE1E0DB38FB /* CoreMLInferenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FEAE1F35A07990D5E09CC0F /* CoreMLInferenceEngine.swift */; };
@@ -1086,7 +1086,6 @@
 		7C08878A7E79D4FB14E7B1B1 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 637130673210A50F403CA48F /* SafariWebExtensionHandler.swift */; };
 		7C0FF2F299F7E2889C9911C7 /* ErrorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B73D4B47836A3252300979 /* ErrorLogger.swift */; };
 		7C1B8FFC9C3FA7DFFACE3B37 /* SecurityScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2264CCC94604B19500B9BD83 /* SecurityScanner.swift */; };
-		7C2D203E151C2A1576447CCB /* HealthInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE9A221A8692389679B0A9B /* HealthInsightsView.swift */; };
 		7C89EAAAD01EF7C678AF0594 /* PlatformFeaturesHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F920B459B19605A0B81579E /* PlatformFeaturesHub.swift */; };
 		7C8E29B62068328C89C7C49E /* AgentSecAuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E8C9279803BFF26AF774C4 /* AgentSecAuditLog.swift */; };
 		7CA70B80ED1CD5A593BE7ECE /* CognitiveModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62D1AE6F6053576C4D4D182 /* CognitiveModels.swift */; };
@@ -1462,6 +1461,7 @@
 		A86FD793C554CAC46003B683 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 11E5AC4907463FDE7AB36F48 /* manifest.json */; };
 		A8789BEA098CD506AD47E062 /* UniversalNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A74D3D8CF3D0113B136682 /* UniversalNotificationService.swift */; };
 		A8883309D2D61286F9FC9067 /* ContextualMultiArmedBandit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFDB048804A6C8CC1D372B /* ContextualMultiArmedBandit.swift */; };
+		A89A7CAAEDC371FF526C5E09 /* AsanaIntegration+Users.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0449E7316B40DD1F500F5544 /* AsanaIntegration+Users.swift */; };
 		A8DBD04BAF577EA23A8BFFBC /* DeviceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE3F4288C165F9736A02094 /* DeviceDiscovery.swift */; };
 		A8DE689CF74C5DF871B75F61 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89C8E729F7046437DDE9E5C /* Colors.swift */; };
 		A93E47DABEA388FB43D49DD0 /* TheaAssistantSchemas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE69A60F2269AD914531B4A /* TheaAssistantSchemas.swift */; };
@@ -1733,6 +1733,7 @@
 		CB995D60680C7FACB98C1CBE /* iOSPrivacySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C25737F70508AB60484A8BE /* iOSPrivacySection.swift */; };
 		CBD4783813EE2693035CD0FF /* IntelligentAutoComplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E7C84858BC690020A141A0E /* IntelligentAutoComplete.swift */; };
 		CBE6F8227DE9D803D10F619E /* ServiceHealthDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DE6F87559C5BEB02B4E6D55 /* ServiceHealthDashboardView.swift */; };
+		CBEB707B4FFDF39CD3F406A6 /* AsanaIntegration+Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47350C29948D3A5E6F9F1CD5 /* AsanaIntegration+Coordinator.swift */; };
 		CC0E35A1AF7A6B4358FD1C89 /* MediaObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1100BFB5662F465B5EA76513 /* MediaObserver.swift */; };
 		CC2BB95E766BDADD54B629A4 /* WorkflowEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EDFB2508E0925D4D0FBAF7 /* WorkflowEngine.swift */; };
 		CC327483EBA3160E77171A5A /* NotificationPayloadTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AABB4A30E8D88394B584502 /* NotificationPayloadTypes.swift */; };
@@ -1904,6 +1905,7 @@
 		E01E544021ACD9578921F81E /* CrossDeviceNotificationService+DeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDCFAFBEEF335A4335762542 /* CrossDeviceNotificationService+DeviceInfo.swift */; };
 		E041BB61282D31195FFC5CD0 /* HealthMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044B524336BE4030659DA0D4 /* HealthMonitorService.swift */; };
 		E04A1DD86C36D326A638E2EE /* DynamicResourceAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A370F41AF3D13C8686F664 /* DynamicResourceAllocator.swift */; };
+		E06DE0FCCAE66081AD7E7C42 /* AsanaIntegration+Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47350C29948D3A5E6F9F1CD5 /* AsanaIntegration+Coordinator.swift */; };
 		E07338613283928BF24B9460 /* blocking-rules.json in Resources */ = {isa = PBXBuildFile; fileRef = E7AB1E478B64D738B19D2451 /* blocking-rules.json */; };
 		E0B4BDAF43AB66C96BB8AB9E /* video-controller-ui.js in Resources */ = {isa = PBXBuildFile; fileRef = 27E2329D66E4889E871E8E1B /* video-controller-ui.js */; };
 		E0DECBF4EDB720E173C90FA0 /* AgentObservability+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B382CFC87CAA34AC2B5C964 /* AgentObservability+Core.swift */; };
@@ -2115,6 +2117,7 @@
 		F9DBF7DABC5E677098FA154B /* AudioStreamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D04BF0E825E6993412C0B64 /* AudioStreamService.swift */; };
 		F9DF531129B91E764D69F42E /* AutonomousAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50092464704D1A5143426EA5 /* AutonomousAgent.swift */; };
 		F9E68F2DA2256855D00240E9 /* HealthServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0936318FA09A7042DDAA2F2D /* HealthServiceTests.swift */; };
+		F9F4340E0CB504E660132406 /* HealthInsightsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603B8DF9F782167078972E1F /* HealthInsightsDetailView.swift */; };
 		FA12ABFF784731DEEE338E89 /* HealthKitProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C885038825C07F25971753 /* HealthKitProvider.swift */; };
 		FA130D998B768F192FC87C57 /* PersonalizedLearning.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3643723C429FDBB6739AB0 /* PersonalizedLearning.swift */; };
 		FA2D6706566DAE9AD6C56A80 /* IntegrationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1942158A31A4A96EC101D1 /* IntegrationTypes.swift */; };
@@ -2312,6 +2315,7 @@
 		032583C9676A546C5ACBF2C4 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
 		0366352DF3B20EF963F814F3 /* MailMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailMonitor.swift; sourceTree = "<group>"; };
 		03D3F49FEE86A434FDA477C8 /* TheaAgentSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaAgentSession.swift; sourceTree = "<group>"; };
+		0449E7316B40DD1F500F5544 /* AsanaIntegration+Users.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AsanaIntegration+Users.swift"; sourceTree = "<group>"; };
 		044B524336BE4030659DA0D4 /* HealthMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthMonitorService.swift; sourceTree = "<group>"; };
 		0455AA0DA254DBC4CF1E78C9 /* thea_icon_master_1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = thea_icon_master_1024.png; sourceTree = "<group>"; };
 		045C15A1EF156A9A05E261A8 /* WorkWithAppsService+AppActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WorkWithAppsService+AppActions.swift"; sourceTree = "<group>"; };
@@ -2641,6 +2645,7 @@
 		470431AA074BE7A96CA0C146 /* SkillDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillDefinition.swift; sourceTree = "<group>"; };
 		4716380D345E63618BB0BAC9 /* HomeKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeKitService.swift; sourceTree = "<group>"; };
 		472A158D2095B59FF87D7C64 /* BackupManagerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupManagerTypes.swift; sourceTree = "<group>"; };
+		47350C29948D3A5E6F9F1CD5 /* AsanaIntegration+Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AsanaIntegration+Coordinator.swift"; sourceTree = "<group>"; };
 		475430365812249964991ABD /* ExtensionSyncBridge+SyncAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionSyncBridge+SyncAPI.swift"; sourceTree = "<group>"; };
 		4774C2AF97CFA36451C01EF7 /* iOSHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSHomeView.swift; sourceTree = "<group>"; };
 		47A07DB3FD30E3BF63305DC7 /* CodebaseSearchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodebaseSearchEngine.swift; sourceTree = "<group>"; };
@@ -2772,6 +2777,7 @@
 		5F9A661C64BA0987A7008E46 /* SmartDeviceIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartDeviceIntegration.swift; sourceTree = "<group>"; };
 		5FE37BC8456F19E66D06219D /* ShortcutsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsManager.swift; sourceTree = "<group>"; };
 		5FE5A49A68758127D8A64E42 /* LifeInsightsAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeInsightsAnalyzer.swift; sourceTree = "<group>"; };
+		603B8DF9F782167078972E1F /* HealthInsightsDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthInsightsDetailView.swift; sourceTree = "<group>"; };
 		60B75DBB338713F2D295F771 /* LifeTrackingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeTrackingSettingsView.swift; sourceTree = "<group>"; };
 		60C44ABEFD8CB34555BAA336 /* DynamicConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicConfig.swift; sourceTree = "<group>"; };
 		60C7AE83972814197C4DAFB2 /* AIProvidersSettingsViewSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProvidersSettingsViewSections.swift; sourceTree = "<group>"; };
@@ -3274,7 +3280,6 @@
 		CC3643723C429FDBB6739AB0 /* PersonalizedLearning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizedLearning.swift; sourceTree = "<group>"; };
 		CC5E9A02DF4C87912DC6C5BB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CC9F73ABB3B0496CF8955E08 /* CommunicationAssistantTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunicationAssistantTypes.swift; sourceTree = "<group>"; };
-		CCE9A221A8692389679B0A9B /* HealthInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthInsightsView.swift; sourceTree = "<group>"; };
 		CD9540A4A409E4FA8B12308B /* SafariExtensionHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariExtensionHelpers.swift; sourceTree = "<group>"; };
 		CDCFAFBEEF335A4335762542 /* CrossDeviceNotificationService+DeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CrossDeviceNotificationService+DeviceInfo.swift"; sourceTree = "<group>"; };
 		CE37B157900B154338598C8C /* InsightEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightEngine.swift; sourceTree = "<group>"; };
@@ -5932,10 +5937,12 @@
 			isa = PBXGroup;
 			children = (
 				78E5C88083E415FCCBBF131E /* AsanaIntegration.swift */,
+				47350C29948D3A5E6F9F1CD5 /* AsanaIntegration+Coordinator.swift */,
 				7D7B51D6D46AB1A1F68036A2 /* AsanaIntegration+Goals.swift */,
 				C390654C99157B44435DA8D7 /* AsanaIntegration+Portfolios.swift */,
 				4373224D9195A33736A0F025 /* AsanaIntegration+Projects.swift */,
 				4AFFC80971C07635635D441E /* AsanaIntegration+Tasks.swift */,
+				0449E7316B40DD1F500F5544 /* AsanaIntegration+Users.swift */,
 				90A7B9A7BFB38B0DBD7764DB /* AsanaIntegration+Webhooks.swift */,
 				6DBA15108113B06F408639E7 /* AsanaMCPClient.swift */,
 				E5AC68B5201BE0B6EBF2E4C7 /* AsanaModels.swift */,
@@ -6491,7 +6498,7 @@
 				FAF14D014A8C53ADF0933911 /* BloodPressureView.swift */,
 				2E3E7AFD94734EB96337782B /* HealthDashboardView.swift */,
 				2E6D40E987DF7034C450F9F8 /* HealthGoalsView.swift */,
-				CCE9A221A8692389679B0A9B /* HealthInsightsView.swift */,
+				603B8DF9F782167078972E1F /* HealthInsightsDetailView.swift */,
 				DE93EA152443637809ABFF63 /* SleepQualityView.swift */,
 			);
 			path = Views;
@@ -7760,10 +7767,12 @@
 				49D3A05F14B8E61515E716CA /* ArtifactManager.swift in Sources */,
 				8FA0DD62EB8BEA78D6D3493B /* ArtifactManagerTypes.swift in Sources */,
 				14572CFD145AC1EC53DBE195 /* ArtifactPanel.swift in Sources */,
+				E06DE0FCCAE66081AD7E7C42 /* AsanaIntegration+Coordinator.swift in Sources */,
 				DEFEB34776C553B1DCB7616D /* AsanaIntegration+Goals.swift in Sources */,
 				3DBFB6FD40561FCBECC1F06D /* AsanaIntegration+Portfolios.swift in Sources */,
 				72A43AA7B4991CE95E039CDD /* AsanaIntegration+Projects.swift in Sources */,
 				9D0BD88ABC2B1F24548F9EA9 /* AsanaIntegration+Tasks.swift in Sources */,
+				0A66CFB1E4C58F0932095BD0 /* AsanaIntegration+Users.swift in Sources */,
 				C5709A2D62C04507E6B5E47C /* AsanaIntegration+Webhooks.swift in Sources */,
 				8EC6E93EB6FE53008BFA6F2E /* AsanaIntegration.swift in Sources */,
 				B838BF976D9F41A0362FB583 /* AsanaMCPClient.swift in Sources */,
@@ -8048,8 +8057,8 @@
 				E628363826AB34C7BA7FEB9B /* HealthDashboardViewModel.swift in Sources */,
 				3909730AC944BEC0CC8E276F /* HealthDataSync.swift in Sources */,
 				22F948972CCC9F60F29E9C9C /* HealthGoalsView.swift in Sources */,
+				4EE3DB5CECE6162A48390F49 /* HealthInsightsDetailView.swift in Sources */,
 				36F640E675BB1B2E954094F1 /* HealthInsightsView.swift in Sources */,
-				4A2FE46C25A754C19EC1A4BA /* HealthInsightsView.swift in Sources */,
 				04C238B9F78E766B2437718E /* HealthIntelligence.swift in Sources */,
 				FA12ABFF784731DEEE338E89 /* HealthKitProvider.swift in Sources */,
 				6BDF4223ABEEB51283B6C90F /* HealthKitProviderTypes.swift in Sources */,
@@ -8853,10 +8862,12 @@
 				81B5E6C085720212E93EED23 /* ArtifactManager.swift in Sources */,
 				2E473A3ED47B3E18A1184A29 /* ArtifactManagerTypes.swift in Sources */,
 				D2ADF36031F463C45E94FE93 /* ArtifactPanel.swift in Sources */,
+				CBEB707B4FFDF39CD3F406A6 /* AsanaIntegration+Coordinator.swift in Sources */,
 				E7AB263180783C4D37C6CB7B /* AsanaIntegration+Goals.swift in Sources */,
 				DAB4AD907AF720EE53C57B2D /* AsanaIntegration+Portfolios.swift in Sources */,
 				A1282882B1F0EA1D22CCC0CE /* AsanaIntegration+Projects.swift in Sources */,
 				2C4E3493828FBF5EF04B9665 /* AsanaIntegration+Tasks.swift in Sources */,
+				A89A7CAAEDC371FF526C5E09 /* AsanaIntegration+Users.swift in Sources */,
 				8000FEAC45725DA197E7E5B4 /* AsanaIntegration+Webhooks.swift in Sources */,
 				84FC1992676D92002C19BC50 /* AsanaIntegration.swift in Sources */,
 				1D4712482A7AF8192BF7DE70 /* AsanaMCPClient.swift in Sources */,
@@ -9159,8 +9170,7 @@
 				4156D923CA6AF966CC679604 /* HealthDashboardViewModel.swift in Sources */,
 				188D6B2F3AA94642C8CE2017 /* HealthDataSync.swift in Sources */,
 				E50F22AC53D05E7A7F499B2C /* HealthGoalsView.swift in Sources */,
-				3CC0900F9E5F3B978A5D2FDC /* HealthInsightsView.swift in Sources */,
-				7C2D203E151C2A1576447CCB /* HealthInsightsView.swift in Sources */,
+				F9F4340E0CB504E660132406 /* HealthInsightsDetailView.swift in Sources */,
 				3A508EED3AC7AF163574829B /* HealthIntelligence.swift in Sources */,
 				7E9AF99ACC84DF7E7DA073F5 /* HealthKitService.swift in Sources */,
 				EE4E4E84B075C3A8A480DE62 /* HealthModels.swift in Sources */,

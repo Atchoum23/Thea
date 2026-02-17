@@ -3,7 +3,16 @@
 // Created by Claude - February 2026
 //
 // Listens to ALL calls (any app), transcribes in real-time,
-// extracts actionable information, commitments, and follow-ups
+// extracts actionable information, commitments, and follow-ups.
+//
+// Split into focused modules:
+//   CallMonitor.swift                         — Core actor, lifecycle, call management
+//   CallMonitor+Queries.swift                 — Query/search methods
+//   CallMonitor+DeadlineIntegration.swift      — Real-time analysis & deadline forwarding
+//   CallMonitor+TranscriptionEngine.swift      — Speech-to-text engine
+//   CallMonitor+AnalysisEngine.swift           — Post-call analysis engine
+//   CallMonitor+AnalysisHelpers.swift          — Date parsing, assignee, context helpers
+//   CallMonitorTypes.swift                     — Data model types (pre-existing)
 
 import Foundation
 import AVFoundation
@@ -13,26 +22,59 @@ import Speech
 
 // MARK: - Call Monitor
 
-/// Main engine for monitoring, transcribing, and analyzing calls
+/// Main engine for monitoring, transcribing, and analyzing voice calls.
+///
+/// `CallMonitor` is an actor-isolated singleton that:
+/// - Tracks active calls from any source (phone, FaceTime, Zoom, Teams, etc.)
+/// - Transcribes audio in real time via `TranscriptionEngine`
+/// - Performs post-call analysis via `CallAnalysisEngine`
+/// - Integrates extracted deadlines, action items, and commitments with `DeadlineIntelligence`
+///
+/// Usage:
+/// ```swift
+/// await CallMonitor.shared.start()
+/// let callId = await CallMonitor.shared.startCall(
+///     source: .zoom, type: .incoming,
+///     participants: [participant],
+///     metadata: metadata
+/// )
+/// // ... feed audio buffers ...
+/// await CallMonitor.shared.endCall(callId)
+/// ```
 public actor CallMonitor {
+
     // MARK: - Singleton
 
+    /// The shared `CallMonitor` instance.
     public static let shared = CallMonitor()
 
     // MARK: - Configuration
 
+    /// Configuration options controlling transcription, analysis, and integration behavior.
     public struct Configuration: Sendable {
+        /// Whether to transcribe call audio in real time.
         public var enableTranscription: Bool = true
+        /// Whether to run lightweight pattern matching on each new transcript segment.
         public var enableRealTimeAnalysis: Bool = true
+        /// Whether to save raw audio recordings to disk.
         public var saveAudioRecordings: Bool = false
+        /// File-system path for saved audio recordings.
         public var audioRecordingsPath: String = ""
+        /// BCP-47 language code for the speech recognizer (e.g., "en-US").
         public var transcriptionLanguage: String = "en-US"
+        /// Whether to auto-detect the spoken language.
         public var autoDetectLanguage: Bool = true
+        /// The set of call sources to monitor.
         public var monitoredApps: Set<CallSource> = Set(CallSource.allCases)
-        public var minCallDurationToAnalyze: TimeInterval = 30 // Only analyze calls > 30s
+        /// Minimum call duration (in seconds) required before post-call analysis runs.
+        public var minCallDurationToAnalyze: TimeInterval = 30
+        /// Whether to notify the user when commitments are detected.
         public var notifyOnCommitments: Bool = true
+        /// Whether to notify the user when action items are detected.
         public var notifyOnActionItems: Bool = true
+        /// Whether to forward extracted deadlines to `DeadlineIntelligence`.
         public var integrateWithDeadlineIntelligence: Bool = true
+        /// Whether to create reminders from extracted action items.
         public var integrateWithReminders: Bool = true
 
         public init() {}
@@ -40,19 +82,32 @@ public actor CallMonitor {
 
     // MARK: - Properties
 
-    private var configuration: Configuration
-    private var activeCalls: [UUID: CallRecord] = [:]
-    private var callHistory: [CallRecord] = []
+    /// The current configuration.
+    var configuration: Configuration
+    /// Active (in-progress) calls keyed by UUID.
+    var activeCalls: [UUID: CallRecord] = [:]
+    /// Completed calls stored in chronological order (capped at 1000).
+    var callHistory: [CallRecord] = []
+    /// Whether the monitor is currently running.
     private var isRunning = false
-    private var transcriptionEngine: TranscriptionEngine?
-    private var analysisEngine: CallAnalysisEngine?
+    /// The speech transcription engine.
+    var transcriptionEngine: TranscriptionEngine?
+    /// The post-call analysis engine.
+    var analysisEngine: CallAnalysisEngine?
 
-    // Callbacks
+    // MARK: - Callbacks
+
+    /// Called when a new call begins.
     private var onCallStarted: ((CallRecord) -> Void)?
+    /// Called when a call ends.
     private var onCallEnded: ((CallRecord) -> Void)?
+    /// Called when a new transcript segment is produced.
     private var onTranscriptUpdated: ((CallRecord, CallTranscriptSegment) -> Void)?
+    /// Called when post-call analysis completes.
     private var onAnalysisComplete: ((CallRecord, CallAnalysis) -> Void)?
+    /// Called for each action item extracted from a call.
     private var onActionItemDetected: ((CallAnalysis.ActionItem, CallRecord) -> Void)?
+    /// Called for each commitment extracted from a call.
     private var onCommitmentDetected: ((CallAnalysis.Commitment, CallRecord) -> Void)?
 
     // MARK: - Initialization
@@ -65,10 +120,21 @@ public actor CallMonitor {
 
     // MARK: - Configuration
 
+    /// Replaces the current configuration with the provided one.
+    /// - Parameter config: The new `Configuration` to apply.
     public func configure(_ config: Configuration) {
         self.configuration = config
     }
 
+    /// Registers callbacks for call lifecycle and analysis events.
+    ///
+    /// - Parameters:
+    ///   - onCallStarted: Invoked when a call begins.
+    ///   - onCallEnded: Invoked when a call ends.
+    ///   - onTranscriptUpdated: Invoked when a new transcript segment arrives.
+    ///   - onAnalysisComplete: Invoked when post-call analysis finishes.
+    ///   - onActionItemDetected: Invoked for each extracted action item.
+    ///   - onCommitmentDetected: Invoked for each extracted commitment.
     public func configure(
         onCallStarted: @escaping @Sendable (CallRecord) -> Void,
         onCallEnded: @escaping @Sendable (CallRecord) -> Void,
@@ -87,6 +153,7 @@ public actor CallMonitor {
 
     // MARK: - Lifecycle
 
+    /// Starts the call monitor: begins listening for calls and initializes the transcription engine.
     public func start() async {
         guard !isRunning else { return }
         isRunning = true
@@ -98,6 +165,7 @@ public actor CallMonitor {
         await transcriptionEngine?.initialize(language: configuration.transcriptionLanguage)
     }
 
+    /// Stops the call monitor: ends all active calls and shuts down transcription.
     public func stop() async {
         isRunning = false
 
@@ -112,7 +180,14 @@ public actor CallMonitor {
 
     // MARK: - Call Management
 
-    /// Start tracking a new call
+    /// Begins tracking a new call and starts transcription if enabled.
+    ///
+    /// - Parameters:
+    ///   - source: The application or service the call originates from.
+    ///   - type: Whether the call is incoming, outgoing, or a conference.
+    ///   - participants: The list of call participants.
+    ///   - metadata: Additional metadata about the call.
+    /// - Returns: The UUID assigned to this call, for use in subsequent calls to `endCall(_:)` and `processAudio(_:forCall:)`.
     public func startCall(
         source: CallSource,
         type: CallType,
@@ -137,7 +212,13 @@ public actor CallMonitor {
         return call.id
     }
 
-    /// End an active call
+    /// Ends an active call, triggers post-call analysis, and moves it to history.
+    ///
+    /// If the call's duration exceeds `configuration.minCallDurationToAnalyze`, full
+    /// analysis is performed and results are forwarded to callbacks and, optionally,
+    /// to `DeadlineIntelligence`.
+    ///
+    /// - Parameter callId: The UUID of the call to end.
     public func endCall(_ callId: UUID) async {
         guard var call = activeCalls[callId] else { return }
 
@@ -180,9 +261,14 @@ public actor CallMonitor {
         onCallEnded?(call)
     }
 
-    /// Update call with new audio for transcription
-    /// Update call with new audio for transcription
-    /// Note: This must be called from the main thread/queue where the buffer is valid
+    /// Feeds a new audio buffer to the transcription engine for an active call.
+    ///
+    /// Must be called from the main thread/queue where the buffer is valid.
+    /// The buffer is wrapped in a `SendableAudioBuffer` before crossing the actor boundary.
+    ///
+    /// - Parameters:
+    ///   - buffer: The `AVAudioPCMBuffer` containing new audio data.
+    ///   - callId: The UUID of the active call the audio belongs to.
     public func processAudio(_ buffer: AVAudioPCMBuffer, forCall callId: UUID) async {
         guard activeCalls[callId] != nil else { return }
 
@@ -205,62 +291,12 @@ public actor CallMonitor {
         }
     }
 
-    // MARK: - Query
-
-    /// Get active calls
-    public func getActiveCalls() -> [CallRecord] {
-        Array(activeCalls.values)
-    }
-
-    /// Get call history
-    public func getCallHistory(limit: Int = 100) -> [CallRecord] {
-        Array(callHistory.suffix(limit))
-    }
-
-    /// Get calls with a specific contact
-    public func getCalls(with identifier: String) -> [CallRecord] {
-        callHistory.filter { call in
-            call.participants.contains { $0.identifier == identifier }
-        }
-    }
-
-    /// Search transcripts
-    public func searchTranscripts(query: String) -> [(CallRecord, [CallTranscriptSegment])] {
-        let lowercasedQuery = query.lowercased()
-        var results: [(CallRecord, [CallTranscriptSegment])] = []
-
-        for call in callHistory {
-            let matchingSegments = call.transcript.segments.filter {
-                $0.text.lowercased().contains(lowercasedQuery)
-            }
-            if !matchingSegments.isEmpty {
-                results.append((call, matchingSegments))
-            }
-        }
-
-        return results
-    }
-
-    /// Get all action items from recent calls
-    public func getRecentActionItems(days: Int = 7) -> [CallAnalysis.ActionItem] {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
-        return callHistory
-            .filter { $0.startTime >= cutoff }
-            .compactMap { $0.analysis?.actionItems }
-            .flatMap { $0 }
-    }
-
-    /// Get all commitments from recent calls
-    public func getRecentCommitments(days: Int = 7) -> [CallAnalysis.Commitment] {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
-        return callHistory
-            .filter { $0.startTime >= cutoff }
-            .compactMap { $0.analysis?.commitments }
-            .flatMap { $0 }
-    }
-
     // MARK: - Private Methods
 
+    /// Sets up system-level call monitoring integrations.
+    ///
+    /// Would integrate with CallKit, app-specific SDKs (Zoom, Teams),
+    /// audio session monitoring, and Accessibility APIs.
     private func startCallMonitoring() async {
         // This would integrate with:
         // 1. CallKit for phone calls
@@ -272,665 +308,22 @@ public actor CallMonitor {
         // may vary by platform and app
     }
 
+    /// Starts a transcription session for the given call.
+    /// - Parameter callId: The UUID of the call to transcribe.
     private func startTranscription(for callId: UUID) async {
         await transcriptionEngine?.startSession(callId: callId)
     }
 
+    /// Stops the transcription session for the given call.
+    /// - Parameter callId: The UUID of the call whose transcription should stop.
     private func stopTranscription(for callId: UUID) async {
         await transcriptionEngine?.stopSession(callId: callId)
     }
 
+    /// Runs the analysis engine on a completed call.
+    /// - Parameter call: The `CallRecord` to analyze.
+    /// - Returns: A `CallAnalysis` if the transcript was non-empty, otherwise `nil`.
     private func analyzeCall(_ call: CallRecord) async -> CallAnalysis? {
         await analysisEngine?.analyze(call)
-    }
-
-    private func performRealTimeAnalysis(_ segment: CallTranscriptSegment, callId: UUID) async {
-        // Quick check for urgent patterns
-        let text = segment.text.lowercased()
-
-        // Check for commitment language
-        let commitmentPatterns = [
-            "i will", "i'll", "i promise", "i commit",
-            "you can count on me", "consider it done",
-            "i guarantee", "absolutely", "definitely"
-        ]
-
-        for pattern in commitmentPatterns {
-            if text.contains(pattern) {
-                // Flag this segment for detailed analysis
-                // Could trigger immediate notification
-                break
-            }
-        }
-
-        // Check for deadline mentions
-        let deadlinePatterns = [
-            "by tomorrow", "by friday", "end of day",
-            "by the end of", "deadline is", "due on"
-        ]
-
-        for pattern in deadlinePatterns {
-            if text.contains(pattern) {
-                // Flag for deadline extraction
-                break
-            }
-        }
-    }
-
-    private func integrateWithDeadlines(_ analysis: CallAnalysis, call: CallRecord) async {
-        // Send deadlines to DeadlineIntelligence
-        for deadline in analysis.deadlinesMentioned {
-            let extractedDeadline = Deadline(
-                title: deadline.description,
-                description: "Mentioned in call with \(call.participants.compactMap { $0.name }.joined(separator: ", "))",
-                dueDate: deadline.date,
-                source: .voiceCall,
-                category: .work,
-                extractedFrom: Deadline.ExtractionContext(
-                    sourceText: deadline.context,
-                    sourceURL: nil,
-                    sourceFile: nil,
-                    extractionMethod: "CallMonitor",
-                    timestamp: Date()
-                ),
-                confidence: 0.7
-            )
-            await DeadlineIntelligence.shared.addDeadline(extractedDeadline)
-        }
-
-        // Convert action items with due dates to deadlines
-        for item in analysis.actionItems where item.dueDate != nil {
-            let deadline = Deadline(
-                title: item.description,
-                description: "Action item from call",
-                dueDate: item.dueDate!,
-                source: .voiceCall,
-                category: .work,
-                priority: item.priority == .urgent ? 9 : (item.priority == .high ? 7 : 5),
-                extractedFrom: Deadline.ExtractionContext(
-                    sourceText: item.extractedFrom,
-                    sourceURL: nil,
-                    sourceFile: nil,
-                    extractionMethod: "CallMonitor.ActionItem",
-                    timestamp: Date()
-                ),
-                confidence: 0.75
-            )
-            await DeadlineIntelligence.shared.addDeadline(deadline)
-        }
-
-        // Convert commitments with deadlines
-        for commitment in analysis.commitments where commitment.deadline != nil {
-            let deadline = Deadline(
-                title: "Commitment: \(commitment.description)",
-                description: "Made by \(commitment.madeBy)",
-                dueDate: commitment.deadline!,
-                source: .voiceCall,
-                category: .work,
-                extractedFrom: Deadline.ExtractionContext(
-                    sourceText: commitment.extractedFrom,
-                    sourceURL: nil,
-                    sourceFile: nil,
-                    extractionMethod: "CallMonitor.Commitment",
-                    timestamp: Date()
-                ),
-                confidence: 0.8
-            )
-            await DeadlineIntelligence.shared.addDeadline(deadline)
-        }
-    }
-}
-
-// MARK: - Transcription Engine
-
-/// Engine for real-time speech transcription
-actor TranscriptionEngine {
-    #if canImport(Speech)
-    private var recognizer: SFSpeechRecognizer?
-    private var sessions: [UUID: SFSpeechAudioBufferRecognitionRequest] = [:]
-    private var tasks: [UUID: SFSpeechRecognitionTask] = [:]
-    #endif
-    private var currentSpeaker: String = "Unknown"
-    private var segmentStartTime: Date?
-
-    func initialize(language: String) async {
-        #if canImport(Speech)
-        recognizer = SFSpeechRecognizer(locale: Locale(identifier: language))
-        #endif
-    }
-
-    func startSession(callId: UUID) async {
-        #if canImport(Speech)
-        guard recognizer != nil else { return }
-
-        let request = SFSpeechAudioBufferRecognitionRequest()
-        request.shouldReportPartialResults = true
-        request.requiresOnDeviceRecognition = true // Privacy: on-device only
-
-        sessions[callId] = request
-        segmentStartTime = Date()
-        #endif
-    }
-
-    func stopSession(callId: UUID) async {
-        #if canImport(Speech)
-        sessions[callId]?.endAudio()
-        sessions.removeValue(forKey: callId)
-        tasks[callId]?.cancel()
-        tasks.removeValue(forKey: callId)
-        #endif
-    }
-
-    /// Transcribe audio buffer using Sendable wrapper
-    func transcribe(buffer: SendableAudioBuffer, callId: UUID) async -> CallTranscriptSegment? {
-        #if canImport(Speech)
-        guard let request = sessions[callId], let recognizer = recognizer else {
-            return nil
-        }
-
-        // Append audio from the wrapped buffer
-        request.append(buffer.buffer)
-
-        // If no active task, start one
-        if tasks[callId] == nil {
-            let task = recognizer.recognitionTask(with: request) { _, _ in
-                // Handle results
-                // This is simplified - actual implementation would be more complex
-            }
-            tasks[callId] = task
-        }
-
-        // Return a segment (simplified - actual implementation uses delegate pattern)
-        return nil
-        #else
-        return nil
-        #endif
-    }
-
-    func stop() async {
-        #if canImport(Speech)
-        for (_, request) in sessions {
-            request.endAudio()
-        }
-        for (_, task) in tasks {
-            task.cancel()
-        }
-        sessions.removeAll()
-        tasks.removeAll()
-        #endif
-    }
-}
-
-// MARK: - Call Analysis Engine
-
-/// Engine for analyzing call content
-actor CallAnalysisEngine {
-
-    func analyze(_ call: CallRecord) async -> CallAnalysis? {
-        guard !call.transcript.segments.isEmpty else { return nil }
-
-        let fullText = call.transcript.fullText
-
-        // Extract various elements
-        let summary = generateSummary(call)
-        let keyPoints = extractKeyPoints(fullText)
-        let actionItems = extractActionItems(fullText, call: call)
-        let commitments = extractCommitments(fullText, call: call)
-        let followUps = extractFollowUps(fullText)
-        let deadlines = extractDeadlines(fullText)
-        let sentiment = analyzeSentiment(call)
-        let topics = extractTopics(fullText)
-        let decisions = extractDecisions(fullText)
-        let questions = extractQuestions(call)
-
-        return CallAnalysis(
-            callId: call.id,
-            summary: summary,
-            keyPoints: keyPoints,
-            actionItems: actionItems,
-            commitments: commitments,
-            followUps: followUps,
-            deadlinesMentioned: deadlines,
-            sentiment: sentiment,
-            topics: topics,
-            decisions: decisions,
-            questions: questions
-        )
-    }
-
-    private func generateSummary(_ call: CallRecord) -> String {
-        let duration = Int(call.duration / 60)
-        let participantNames = call.participants.compactMap { $0.name ?? $0.identifier }.joined(separator: ", ")
-        let topics = extractTopics(call.transcript.fullText).prefix(3).map { $0.name }.joined(separator: ", ")
-
-        return "\(duration)-minute call with \(participantNames). Main topics: \(topics.isEmpty ? "General discussion" : topics)"
-    }
-
-    private func extractKeyPoints(_ text: String) -> [String] {
-        var keyPoints: [String] = []
-
-        // Look for patterns that indicate key points
-        let patterns = [
-            #"(?i)the (main|key|important) (point|thing|takeaway) is[:\s]+([^.]+)"#,
-            #"(?i)(most importantly|importantly|critically)[,:\s]+([^.]+)"#,
-            #"(?i)to summarize[,:\s]+([^.]+)"#,
-            #"(?i)in conclusion[,:\s]+([^.]+)"#
-        ]
-
-        for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
-                let nsText = text as NSString
-                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
-
-                for match in matches {
-                    let pointRange = match.range(at: match.numberOfRanges - 1)
-                    if pointRange.location != NSNotFound {
-                        let point = nsText.substring(with: pointRange).trimmingCharacters(in: .whitespaces)
-                        if !point.isEmpty {
-                            keyPoints.append(point)
-                        }
-                    }
-                }
-            }
-        }
-
-        return Array(Set(keyPoints)).prefix(10).map { $0 }
-    }
-
-    private func extractActionItems(_ text: String, call: CallRecord) -> [CallAnalysis.ActionItem] {
-        var items: [CallAnalysis.ActionItem] = []
-
-        // Patterns that indicate action items
-        let patterns: [(String, CallAnalysis.ActionItem.Priority)] = [
-            (#"(?i)(I need to|I have to|I must|I should|I will|I'll)\s+([^.!?]+)"#, .medium),
-            (#"(?i)(you need to|you have to|you must|you should)\s+([^.!?]+)"#, .medium),
-            (#"(?i)(can you|could you|would you)\s+([^.!?]+)\?"#, .low),
-            (#"(?i)(urgent|urgently|asap|immediately)\s*[:\s]+([^.!?]+)"#, .urgent),
-            (#"(?i)action item[:\s]+([^.!?]+)"#, .high),
-            (#"(?i)(todo|to-do|to do)[:\s]+([^.!?]+)"#, .medium)
-        ]
-
-        for (pattern, priority) in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
-                let nsText = text as NSString
-                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
-
-                for match in matches {
-                    let actionRange = match.range(at: match.numberOfRanges - 1)
-                    if actionRange.location != NSNotFound {
-                        let action = nsText.substring(with: actionRange).trimmingCharacters(in: .whitespaces)
-                        if !action.isEmpty && action.count > 5 {
-                            let fullMatch = nsText.substring(with: match.range)
-
-                            // Try to extract due date
-                            let dueDate = extractDateFromContext(fullMatch)
-
-                            // Try to extract assignee
-                            let assignee = extractAssignee(fullMatch, participants: call.participants)
-
-                            items.append(CallAnalysis.ActionItem(
-                                description: action,
-                                assignee: assignee,
-                                dueDate: dueDate,
-                                priority: priority,
-                                extractedFrom: fullMatch
-                            ))
-                        }
-                    }
-                }
-            }
-        }
-
-        return items
-    }
-
-    private func extractCommitments(_ text: String, call: CallRecord) -> [CallAnalysis.Commitment] {
-        var commitments: [CallAnalysis.Commitment] = []
-
-        let patterns = [
-            #"(?i)(I promise|I commit|I guarantee|I'll make sure|you can count on me)[:\s]+([^.!?]+)"#,
-            #"(?i)(I will|I'll)\s+(definitely|certainly|absolutely)\s+([^.!?]+)"#,
-            #"(?i)consider it done[.!]?\s*([^.!?]*)"#
-        ]
-
-        for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
-                let nsText = text as NSString
-                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
-
-                for match in matches {
-                    let commitmentRange = match.range(at: match.numberOfRanges - 1)
-                    if commitmentRange.location != NSNotFound {
-                        let commitment = nsText.substring(with: commitmentRange).trimmingCharacters(in: .whitespaces)
-                        let fullMatch = nsText.substring(with: match.range)
-
-                        if !commitment.isEmpty {
-                            let deadline = extractDateFromContext(fullMatch)
-
-                            commitments.append(CallAnalysis.Commitment(
-                                description: commitment,
-                                madeBy: "User", // Would need speaker diarization
-                                madeAt: Date(),
-                                deadline: deadline,
-                                extractedFrom: fullMatch
-                            ))
-                        }
-                    }
-                }
-            }
-        }
-
-        return commitments
-    }
-
-    private func extractFollowUps(_ text: String) -> [CallAnalysis.FollowUp] {
-        var followUps: [CallAnalysis.FollowUp] = []
-
-        let patterns = [
-            (#"(?i)let's (schedule|set up|arrange) (a|another) (call|meeting|follow-up)"#, CallAnalysis.FollowUp.FollowUpType.meeting),
-            (#"(?i)I'll (send|forward|email) you"#, .email),
-            (#"(?i)let's (touch base|reconnect|talk again)"#, .call),
-            (#"(?i)follow up (on|with|about)"#, .other)
-        ]
-
-        for (pattern, type) in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
-                let nsText = text as NSString
-                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
-
-                for match in matches {
-                    let context = expandContext(text, range: match.range, chars: 50)
-                    let scheduledDate = extractDateFromContext(context)
-
-                    followUps.append(CallAnalysis.FollowUp(
-                        description: context,
-                        scheduledFor: scheduledDate,
-                        participants: [],
-                        type: type
-                    ))
-                }
-            }
-        }
-
-        return followUps
-    }
-
-    private func extractDeadlines(_ text: String) -> [CallAnalysis.MentionedDeadline] {
-        var deadlines: [CallAnalysis.MentionedDeadline] = []
-
-        let patterns = [
-            #"(?i)(due|deadline|by|before|until)\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?,?\s*\d{0,4})"#,
-            #"(?i)(due|deadline|by|before|until)\s+(tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next week|end of (?:day|week|month))"#
-        ]
-
-        for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
-                let nsText = text as NSString
-                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
-
-                for match in matches {
-                    let dateRange = match.range(at: 2)
-                    if dateRange.location != NSNotFound {
-                        let dateStr = nsText.substring(with: dateRange)
-                        if let date = parseDate(dateStr) {
-                            let context = expandContext(text, range: match.range, chars: 50)
-                            deadlines.append(CallAnalysis.MentionedDeadline(
-                                description: context,
-                                date: date,
-                                context: nsText.substring(with: match.range)
-                            ))
-                        }
-                    }
-                }
-            }
-        }
-
-        return deadlines
-    }
-
-    private func analyzeSentiment(_ call: CallRecord) -> CallAnalysis.CallSentiment {
-        // Simplified sentiment analysis
-        // Real implementation would use ML model
-
-        let positiveWords = Set(["great", "excellent", "wonderful", "happy", "pleased", "good", "fantastic", "perfect", "love", "amazing"])
-        let negativeWords = Set(["bad", "terrible", "awful", "disappointed", "frustrated", "angry", "upset", "problem", "issue", "concerned"])
-
-        var positiveCount = 0
-        var negativeCount = 0
-
-        for segment in call.transcript.segments {
-            let words = segment.text.lowercased().split(separator: " ").map { String($0) }
-            positiveCount += words.filter { positiveWords.contains($0) }.count
-            negativeCount += words.filter { negativeWords.contains($0) }.count
-        }
-
-        let overall: CallAnalysis.CallSentiment.SentimentLevel
-        let ratio = Double(positiveCount) / max(Double(negativeCount + positiveCount), 1)
-
-        if ratio > 0.7 {
-            overall = .veryPositive
-        } else if ratio > 0.55 {
-            overall = .positive
-        } else if ratio > 0.45 {
-            overall = .neutral
-        } else if ratio > 0.3 {
-            overall = .negative
-        } else {
-            overall = .veryNegative
-        }
-
-        return CallAnalysis.CallSentiment(
-            overall: overall,
-            byParticipant: [:],
-            trend: []
-        )
-    }
-
-    private func extractTopics(_ text: String) -> [CallAnalysis.Topic] {
-        // Simplified topic extraction
-        // Real implementation would use NLP/ML
-
-        var topicCounts: [String: Int] = [:]
-
-        // Common topic keywords
-        let topicKeywords: [String: [String]] = [
-            "Budget": ["budget", "cost", "price", "money", "funding", "expense", "financial"],
-            "Timeline": ["timeline", "schedule", "deadline", "milestone", "date", "week", "month"],
-            "Design": ["design", "ui", "ux", "interface", "layout", "visual", "mockup"],
-            "Development": ["code", "develop", "build", "implement", "feature", "bug", "fix"],
-            "Meeting": ["meeting", "call", "discussion", "sync", "standup", "review"],
-            "Customer": ["customer", "client", "user", "feedback", "support", "request"],
-            "Strategy": ["strategy", "plan", "goal", "objective", "target", "initiative"]
-        ]
-
-        let lowercasedText = text.lowercased()
-
-        for (topic, keywords) in topicKeywords {
-            let count = keywords.reduce(0) { count, keyword in
-                count + lowercasedText.components(separatedBy: keyword).count - 1
-            }
-            if count > 0 {
-                topicCounts[topic] = count
-            }
-        }
-
-        return topicCounts
-            .sorted { $0.value > $1.value }
-            .prefix(5)
-            .map { CallAnalysis.Topic(name: $0.key, duration: 0, keywords: topicKeywords[$0.key] ?? []) }
-    }
-
-    private func extractDecisions(_ text: String) -> [CallAnalysis.Decision] {
-        var decisions: [CallAnalysis.Decision] = []
-
-        let patterns = [
-            #"(?i)(we decided|we've decided|the decision is|we agreed|let's go with)\s+([^.!?]+)"#,
-            #"(?i)(final decision|our decision)[:\s]+([^.!?]+)"#
-        ]
-
-        for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
-                let nsText = text as NSString
-                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
-
-                for match in matches {
-                    let decisionRange = match.range(at: 2)
-                    if decisionRange.location != NSNotFound {
-                        let decision = nsText.substring(with: decisionRange).trimmingCharacters(in: .whitespaces)
-                        if !decision.isEmpty {
-                            decisions.append(CallAnalysis.Decision(
-                                description: decision,
-                                madeBy: nil,
-                                alternatives: []
-                            ))
-                        }
-                    }
-                }
-            }
-        }
-
-        return decisions
-    }
-
-    private func extractQuestions(_ call: CallRecord) -> [CallAnalysis.Question] {
-        var questions: [CallAnalysis.Question] = []
-
-        for segment in call.transcript.segments {
-            if segment.text.contains("?") {
-                // Find the question
-                let sentences = segment.text.components(separatedBy: CharacterSet(charactersIn: ".!?"))
-                for sentence in sentences {
-                    let trimmed = sentence.trimmingCharacters(in: .whitespaces)
-                    if trimmed.lowercased().starts(with: "what") ||
-                       trimmed.lowercased().starts(with: "how") ||
-                       trimmed.lowercased().starts(with: "why") ||
-                       trimmed.lowercased().starts(with: "when") ||
-                       trimmed.lowercased().starts(with: "where") ||
-                       trimmed.lowercased().starts(with: "who") ||
-                       trimmed.lowercased().starts(with: "can") ||
-                       trimmed.lowercased().starts(with: "could") ||
-                       trimmed.lowercased().starts(with: "would") ||
-                       trimmed.lowercased().starts(with: "should") ||
-                       trimmed.lowercased().starts(with: "is") ||
-                       trimmed.lowercased().starts(with: "are") ||
-                       trimmed.lowercased().starts(with: "do") ||
-                       trimmed.lowercased().starts(with: "does") {
-                        questions.append(CallAnalysis.Question(
-                            text: trimmed + "?",
-                            askedBy: segment.speaker,
-                            wasAnswered: false, // Would need more analysis
-                            answer: nil
-                        ))
-                    }
-                }
-            }
-        }
-
-        return questions
-    }
-
-    // MARK: - Helper Methods
-
-    private func extractDateFromContext(_ text: String) -> Date? {
-        let lowercased = text.lowercased()
-        let calendar = Calendar.current
-        let now = Date()
-
-        // Tomorrow
-        if lowercased.contains("tomorrow") {
-            return calendar.date(byAdding: .day, value: 1, to: now)
-        }
-
-        // Day names
-        let days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
-        for (index, day) in days.enumerated() {
-            if lowercased.contains("next \(day)") {
-                let currentWeekday = calendar.component(.weekday, from: now)
-                var daysToAdd = index + 1 - currentWeekday
-                if daysToAdd <= 0 { daysToAdd += 7 }
-                daysToAdd += 7 // "next" means following week
-                return calendar.date(byAdding: .day, value: daysToAdd, to: now)
-            } else if lowercased.contains(day) {
-                let currentWeekday = calendar.component(.weekday, from: now)
-                var daysToAdd = index + 1 - currentWeekday
-                if daysToAdd <= 0 { daysToAdd += 7 }
-                return calendar.date(byAdding: .day, value: daysToAdd, to: now)
-            }
-        }
-
-        // End of day/week/month
-        if lowercased.contains("end of day") || lowercased.contains("eod") {
-            return calendar.date(bySettingHour: 17, minute: 0, second: 0, of: now)
-        } else if lowercased.contains("end of week") || lowercased.contains("eow") {
-            let weekday = calendar.component(.weekday, from: now)
-            let daysToFriday = (6 - weekday + 7) % 7
-            return calendar.date(byAdding: .day, value: daysToFriday, to: now)
-        } else if lowercased.contains("end of month") || lowercased.contains("eom") {
-            let range = calendar.range(of: .day, in: .month, for: now)!
-            let daysInMonth = range.count
-            let currentDay = calendar.component(.day, from: now)
-            return calendar.date(byAdding: .day, value: daysInMonth - currentDay, to: now)
-        }
-
-        return nil
-    }
-
-    private func parseDate(_ text: String) -> Date? {
-        // Try various date formats
-        let formatters: [DateFormatter] = [
-            {
-                let f = DateFormatter()
-                f.dateFormat = "MMMM d, yyyy"
-                return f
-            }(),
-            {
-                let f = DateFormatter()
-                f.dateFormat = "MMMM d"
-                return f
-            }(),
-            {
-                let f = DateFormatter()
-                f.dateFormat = "MM/dd/yyyy"
-                return f
-            }()
-        ]
-
-        for formatter in formatters {
-            if let date = formatter.date(from: text) {
-                return date
-            }
-        }
-
-        return extractDateFromContext(text)
-    }
-
-    private func extractAssignee(_ text: String, participants: [CallParticipant]) -> String? {
-        let lowercased = text.lowercased()
-
-        // Check for explicit assignment
-        if lowercased.contains("i will") || lowercased.contains("i'll") {
-            return "Me"
-        }
-
-        // Check for "you" patterns
-        if lowercased.contains("you need to") || lowercased.contains("you should") || lowercased.contains("can you") {
-            // Try to identify which participant
-            for participant in participants where !participant.isLocalUser {
-                if let name = participant.name {
-                    return name
-                }
-            }
-            return "Other party"
-        }
-
-        return nil
-    }
-
-    private func expandContext(_ text: String, range: NSRange, chars: Int) -> String {
-        let nsText = text as NSString
-        let start = max(0, range.location - chars)
-        let end = min(nsText.length, range.location + range.length + chars)
-        return nsText.substring(with: NSRange(location: start, length: end - start))
-            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
