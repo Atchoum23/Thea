@@ -69,6 +69,8 @@ struct OnboardingView: View {
                         }
                     }
                     .buttonStyle(.bordered)
+                    .accessibilityLabel("Back")
+                    .accessibilityHint("Goes to the previous onboarding page")
                 }
 
                 Spacer()
@@ -81,6 +83,8 @@ struct OnboardingView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.theaPrimary)
+                    .accessibilityLabel("Next")
+                    .accessibilityHint("Goes to the next onboarding page")
                 } else {
                     Button {
                         completeOnboarding()
@@ -96,6 +100,8 @@ struct OnboardingView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(.theaPrimary)
                     .disabled(isRequestingPermissions)
+                    .accessibilityLabel(isRequestingPermissions ? "Requesting permissions" : "Get Started")
+                    .accessibilityHint("Requests permissions and completes onboarding setup")
                 }
             }
             .padding()
@@ -211,6 +217,7 @@ struct OnboardingPageView: View {
                 .font(.system(size: 100))
                 .foregroundStyle(page.color)
                 .symbolEffect(.bounce, value: page.icon)
+                .accessibilityHidden(true)
 
             VStack(spacing: 16) {
                 Text(page.title)
@@ -245,6 +252,7 @@ struct OnboardingPermissionRow: View {
                 .font(.title2)
                 .foregroundStyle(statusColor)
                 .frame(width: 32)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -271,8 +279,24 @@ struct OnboardingPermissionRow: View {
             Spacer()
 
             statusIndicator
+                .accessibilityHidden(true)
         }
         .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title), \(description)\(isRequired ? ", required" : ""), \(statusText)")
+    }
+
+    private var statusText: String {
+        switch status {
+        case .authorized: "granted"
+        case .denied: "denied"
+        case .restricted: "restricted"
+        case .limited: "limited access"
+        case .provisional: "provisional"
+        case .notDetermined: "not yet requested"
+        case .notAvailable: "not available"
+        case .unknown: "unknown"
+        }
     }
 
     private var statusColor: Color {

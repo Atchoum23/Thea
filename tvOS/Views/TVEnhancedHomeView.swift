@@ -281,13 +281,13 @@ struct QualityProfileCard: View {
                         .foregroundStyle(.secondary)
 
                     HStack(spacing: 12) {
-                        Badge(text: profile.preferredResolution.rawValue, color: .blue)
+                        Badge(text: profile.preferredResolution.rawValue, color: .theaInfo)
                         Badge(text: profile.minSource.rawValue, color: .purple)
                         if profile.preferHDR {
-                            Badge(text: "HDR", color: .orange)
+                            Badge(text: "HDR", color: .theaWarning)
                         }
                         if profile.preferAtmos {
-                            Badge(text: "Atmos", color: .green)
+                            Badge(text: "Atmos", color: .theaSuccess)
                         }
                     }
                 }

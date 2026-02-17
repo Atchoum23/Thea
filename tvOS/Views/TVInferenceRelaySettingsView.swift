@@ -77,16 +77,16 @@ struct TVInferenceRelaySettingsView: View {
         switch client.connectionState {
         case .connected:
             Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.green)
+                .foregroundStyle(.theaSuccess)
         case .connecting:
             ProgressView()
         case .discovering:
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(.blue)
+                .foregroundStyle(.theaInfo)
                 .symbolEffect(.pulse)
         case .error:
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
+                .foregroundStyle(.theaError)
         case .disconnected:
             Image(systemName: "circle.dotted")
                 .foregroundStyle(.secondary)
@@ -118,9 +118,9 @@ struct TVInferenceRelaySettingsView: View {
                         HStack(spacing: 16) {
                             Image(systemName: "desktopcomputer")
                                 .font(.title2)
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.theaInfo)
                                 .frame(width: 44, height: 44)
-                                .background(.blue.opacity(0.1))
+                                .background(Color.theaInfo.opacity(0.1))
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
                             VStack(alignment: .leading, spacing: 4) {
@@ -134,7 +134,7 @@ struct TVInferenceRelaySettingsView: View {
                             Spacer()
 
                             Image(systemName: "arrow.right.circle")
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.theaInfo)
                         }
                     }
                     .buttonStyle(.plain)
@@ -160,9 +160,9 @@ struct TVInferenceRelaySettingsView: View {
                 HStack(spacing: 16) {
                     Image(systemName: "desktopcomputer")
                         .font(.title2)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.theaSuccess)
                         .frame(width: 44, height: 44)
-                        .background(.green.opacity(0.1))
+                        .background(Color.theaSuccess.opacity(0.1))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -208,7 +208,7 @@ struct TVInferenceRelaySettingsView: View {
                             .foregroundStyle(.white)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
-                            .background(.blue)
+                            .background(Color.theaInfo)
                             .clipShape(Capsule())
                     }
                 }

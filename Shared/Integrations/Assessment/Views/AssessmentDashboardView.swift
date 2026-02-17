@@ -89,7 +89,7 @@ private struct AssessmentTypeCard: View {
             HStack {
                 Image(systemName: type.icon)
                     .font(.title2)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.theaInfo)
 
                 VStack(alignment: .leading) {
                     Text(type.displayName)
@@ -200,11 +200,11 @@ private struct AssessmentTakingView: View {
 
                                     if selectedValue == index + 1 {
                                         Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.blue)
+                                            .foregroundStyle(Color.theaInfo)
                                     }
                                 }
                                 .padding()
-                                .background(selectedValue == index + 1 ? Color.blue.opacity(0.1) : Color.gray.opacity(0.1))
+                                .background(selectedValue == index + 1 ? Color.theaInfo.opacity(0.1) : Color.gray.opacity(0.1))
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                             }
                             .buttonStyle(.plain)
@@ -234,7 +234,7 @@ private struct AssessmentTakingView: View {
                         Text("Next")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(selectedValue != nil ? Color.blue : Color.gray)
+                            .background(selectedValue != nil ? Color.theaInfo : Color.gray)
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
@@ -248,7 +248,7 @@ private struct AssessmentTakingView: View {
             Button("Cancel Assessment") {
                 viewModel.cancelAssessment()
             }
-            .foregroundStyle(.red)
+            .foregroundStyle(Color.theaError)
         }
     }
 }

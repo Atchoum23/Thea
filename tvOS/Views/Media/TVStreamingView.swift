@@ -45,7 +45,7 @@ struct TVStreamingView: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
                 Image(systemName: "star.fill")
-                    .foregroundStyle(.yellow)
+                    .foregroundStyle(.theaWarning)
                 Text("Your Swiss Streaming Bundle")
                     .font(.title3)
                     .fontWeight(.bold)
@@ -69,7 +69,7 @@ struct TVStreamingView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             LinearGradient(
-                colors: [.blue.opacity(0.3), .purple.opacity(0.2)],
+                colors: [Color.theaInfo.opacity(0.3), .purple.opacity(0.2)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -192,7 +192,7 @@ struct AccountCard: View {
 
                     if account.isActive {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+                            .foregroundStyle(.theaSuccess)
                     }
                 }
 
@@ -208,7 +208,7 @@ struct AccountCard: View {
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(.blue.opacity(0.2))
+                        .background(Color.theaInfo.opacity(0.2))
                         .clipShape(Capsule())
 
                     Text(account.features.maxQuality.rawValue)
@@ -229,12 +229,12 @@ struct AccountCard: View {
 
     private var appColor: Color {
         switch account.appID {
-        case .netflix: .red
-        case .prime: .blue
+        case .netflix: .theaError
+        case .prime: .theaInfo
         case .disney: .indigo
         case .apple: .gray
         case .hbo: .purple
-        case .paramount: .blue
+        case .paramount: .theaInfo
         case .canalCH, .canal: .black
         default: .secondary
         }
@@ -268,19 +268,19 @@ struct StreamingAppButton: View {
 
     private var appColor: Color {
         switch app {
-        case .netflix: .red
-        case .prime: .blue
+        case .netflix: .theaError
+        case .prime: .theaInfo
         case .disney: .indigo
         case .apple: .gray
         case .hbo: .purple
-        case .paramount: .blue
-        case .peacock: .green
-        case .hulu: .green
+        case .paramount: .theaInfo
+        case .peacock: .theaSuccess
+        case .hulu: .theaSuccess
         case .canalCH, .canal: .black
-        case .plex: .orange
-        case .youtube: .red
-        case .crunchyroll: .orange
-        case .swisscom: .blue
+        case .plex: .theaWarning
+        case .youtube: .theaError
+        case .crunchyroll: .theaWarning
+        case .swisscom: .theaInfo
         case .other: .secondary
         }
     }

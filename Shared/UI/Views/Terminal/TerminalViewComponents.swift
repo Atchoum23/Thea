@@ -149,6 +149,7 @@
                 Text("$")
                     .foregroundStyle(.green)
                     .fontWeight(.bold)
+                    .accessibilityHidden(true)
 
                 TextField("Enter command...", text: $commandInput)
                     .textFieldStyle(.plain)
@@ -173,6 +174,7 @@
                 .buttonStyle(.borderedProminent)
                 .disabled(commandInput.isEmpty || isExecuting || !manager.isEnabled)
                 .accessibilityLabel("Execute command")
+                .accessibilityHint("Runs the entered command in the terminal")
 
                 Menu {
                     ForEach(TerminalIntegrationManager.ExecutionMode.allCases, id: \.self) { mode in

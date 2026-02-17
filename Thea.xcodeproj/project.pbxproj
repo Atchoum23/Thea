@@ -566,6 +566,7 @@
 		4343FEF9347232401D051F95 /* ResponseNotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72FA6DB594497FD8B397F1CE /* ResponseNotificationHandler.swift */; };
 		434BBADFAB15FFDD03D5E834 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 74925CC1319728AD55A5F849 /* PrivacyInfo.xcprivacy */; };
 		43882260101411CD35CF5960 /* DeadlineIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D704C439FD792570821E7386 /* DeadlineIntelligence.swift */; };
+		44C0DAE8291AF7A5E2F5EDEE /* WatchColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A617801627AD64AFA5F609B /* WatchColors.swift */; };
 		44D0DDE170F160B56A6A0E58 /* DeviceCapabilityRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010A46FB9A7C5C68902D3A47 /* DeviceCapabilityRouter.swift */; };
 		44FBDFC39B43ED30C7DC9BC4 /* PhotosMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D08008696D9C86E40E2A018 /* PhotosMonitor.swift */; };
 		4513BCC13FFD016A85D178EE /* ActiveMemoryRetrieval+Ranking.swift in Sources */ = {isa = PBXBuildFile; fileRef = B246E5246A5E7E56B1262F28 /* ActiveMemoryRetrieval+Ranking.swift */; };
@@ -2290,6 +2291,7 @@
 		1A2462375E2C0637F6F13B2C /* CoworkContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkContext.swift; sourceTree = "<group>"; };
 		1A24D6197DF75C5AC9B0BB20 /* CustomAgentBuilderTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAgentBuilderTypes.swift; sourceTree = "<group>"; };
 		1A373BF922E2CE1A1F95EFE1 /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
+		1A617801627AD64AFA5F609B /* WatchColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchColors.swift; sourceTree = "<group>"; };
 		1AE015CDA0C3F95CE3FBB4F3 /* DeviceRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRegistry.swift; sourceTree = "<group>"; };
 		1B2F4F5A562803EDD6070443 /* BatteryIntelligenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryIntelligenceView.swift; sourceTree = "<group>"; };
 		1B43145D9FF360B8B0F00977 /* TheaWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TheaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -5040,6 +5042,14 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		72D83DEA866F0EEB9EE12D0C /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				1A617801627AD64AFA5F609B /* WatchColors.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
 		72F1EED3840BD182A4750188 /* MultiModal */ = {
 			isa = PBXGroup;
 			children = (
@@ -5920,6 +5930,7 @@
 		C2BD5598EF3CF2519C87BBA3 /* watchOS */ = {
 			isa = PBXGroup;
 			children = (
+				72D83DEA866F0EEB9EE12D0C /* Theme */,
 				719EF77CF5D85692DCF3A14D /* Views */,
 				1763778ACB10B8734D462049 /* WatchFeatures */,
 				D2FF8294C05009224D49F8C1 /* Info.plist */,
@@ -9410,6 +9421,7 @@
 			files = (
 				5E52339C676E5F48DA1BBCF6 /* TheaClipWatchView.swift in Sources */,
 				3696749AE6293DB177926A90 /* TheawatchOSApp.swift in Sources */,
+				44C0DAE8291AF7A5E2F5EDEE /* WatchColors.swift in Sources */,
 				8420DB10936CD8DA1DDA82B9 /* WatchComplicationProvider.swift in Sources */,
 				4887FDF1A8EFA1DB5040A0EF /* WatchHealthView.swift in Sources */,
 				171072340773FDD83FF9C450 /* watchOSHomeView.swift in Sources */,

@@ -460,11 +460,11 @@ struct DownloadQueueRow: View {
     private var statusColor: Color {
         switch item.status {
         case .queued: .secondary
-        case .downloading: .blue
-        case .paused: .orange
-        case .seeding: .green
-        case .completed: .green
-        case .failed: .red
+        case .downloading: .theaInfo
+        case .paused: .theaWarning
+        case .seeding: .theaSuccess
+        case .completed: .theaSuccess
+        case .failed: .theaError
         case .importing: .purple
         }
     }
@@ -502,7 +502,7 @@ struct CalendarRow: View {
                 HStack {
                     Text("S\(entry.episode.season)E\(entry.episode.number)")
                         .font(.subheadline)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.theaInfo)
 
                     if let title = entry.episode.title {
                         Text("• \(title)")
@@ -554,7 +554,7 @@ struct WantedItemRow: View {
             // Type icon
             Image(systemName: item.type == .movie ? "film" : "tv")
                 .font(.title2)
-                .foregroundStyle(.blue)
+                .foregroundStyle(.theaInfo)
                 .frame(width: 40)
 
             // Info
@@ -601,7 +601,7 @@ struct StatCard: View {
         VStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title)
-                .foregroundStyle(.blue)
+                .foregroundStyle(.theaInfo)
 
             Text(value)
                 .font(.system(size: 36, weight: .bold, design: .rounded))

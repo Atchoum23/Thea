@@ -81,14 +81,14 @@ public enum CircadianPhase: String, CaseIterable, Sendable, Codable {
 
     public var themeColors: [Color] {
         switch self {
-        case .earlyMorning: [Color.orange, Color.yellow.opacity(0.5)]
-        case .morning: [Color.yellow, Color.orange.opacity(0.5)]
-        case .midday: [Color.orange, Color.yellow.opacity(0.6)]
-        case .afternoon: [Color.orange, Color.red.opacity(0.4)]
+        case .earlyMorning: [Color.theaWarning, Color.theaWarning.opacity(0.5)]
+        case .morning: [Color.theaWarning, Color.theaWarning.opacity(0.5)]
+        case .midday: [Color.theaWarning, Color.theaWarning.opacity(0.6)]
+        case .afternoon: [Color.theaWarning, Color.theaError.opacity(0.4)]
         case .evening: [Color.purple, Color.pink.opacity(0.5)]
         case .night: [Color.indigo, Color.purple.opacity(0.6)]
-        case .lateNight: [Color.blue, Color.indigo.opacity(0.5)]
-        case .deepNight: [Color.blue.opacity(0.6), Color.black.opacity(0.3)]
+        case .lateNight: [Color.theaInfo, Color.indigo.opacity(0.5)]
+        case .deepNight: [Color.theaInfo.opacity(0.6), Color.black.opacity(0.3)]
         }
     }
 

@@ -12,19 +12,19 @@ struct TVEnhancedSettingsView: View {
                     NavigationLink {
                         TVTraktSettingsView()
                     } label: {
-                        SettingsRow(icon: "play.tv", color: .red, title: "Trakt", subtitle: "Calendar, watchlist, scrobbling")
+                        SettingsRow(icon: "play.tv", color: .theaError, title: "Trakt", subtitle: "Calendar, watchlist, scrobbling")
                     }
 
                     NavigationLink {
                         Text("Plex Settings")
                     } label: {
-                        SettingsRow(icon: "server.rack", color: .orange, title: "Plex", subtitle: "Media server connection")
+                        SettingsRow(icon: "server.rack", color: .theaWarning, title: "Plex", subtitle: "Media server connection")
                     }
 
                     NavigationLink {
                         Text("qBittorrent Settings")
                     } label: {
-                        SettingsRow(icon: "arrow.down.circle", color: .blue, title: "qBittorrent", subtitle: "Download client")
+                        SettingsRow(icon: "arrow.down.circle", color: .theaInfo, title: "qBittorrent", subtitle: "Download client")
                     }
                 }
 
@@ -53,7 +53,7 @@ struct TVEnhancedSettingsView: View {
                     } label: {
                         SettingsRow(
                             icon: "slider.horizontal.3",
-                            color: .green,
+                            color: .theaSuccess,
                             title: "Quality Profiles",
                             subtitle: "TRaSH Guides presets"
                         )
