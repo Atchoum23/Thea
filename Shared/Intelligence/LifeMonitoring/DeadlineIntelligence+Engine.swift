@@ -2,8 +2,8 @@
 // THEA - Proactive Deadline & Timeline Tracking
 // Created by Claude - February 2026
 //
-// Core DeadlineIntelligence actor: lifecycle, configuration,
-// deadline management, content processing, and internal scanning/reminder logic
+// Lifecycle, configuration, deadline management,
+// content processing, and internal scanning/reminder logic
 
 import Foundation
 #if canImport(EventKit)
@@ -12,57 +12,7 @@ import EventKit
 
 // MARK: - Deadline Intelligence Engine
 
-/// AI engine for detecting, tracking, and reminding about deadlines.
-///
-/// `DeadlineIntelligence` monitors calendars, emails, documents, and other
-/// sources for deadlines. It deduplicates discoveries, manages recurrence,
-/// and triggers reminders via configurable callbacks.
-///
-/// Usage:
-/// ```swift
-/// let engine = DeadlineIntelligence.shared
-/// await engine.configure(
-///     onDeadlineDiscovered: { deadline in ... },
-///     onReminderTriggered: { deadline, urgency in ... },
-///     onDeadlineMissed: { deadline in ... }
-/// )
-/// await engine.start()
-/// ```
-public actor DeadlineIntelligence {
-    // MARK: - Singleton
-
-    public static let shared = DeadlineIntelligence()
-
-    // MARK: - Properties
-
-    private var deadlines: [UUID: Deadline] = [:]
-    private var reminderSchedules: [DeadlineCategory: ReminderSchedule] = [:]
-    private var extractors: [DeadlineExtractor] = [
-        DatePatternExtractor(),
-        KeywordExtractor(),
-        FinancialExtractor(),
-        LegalExtractor(),
-        MedicalExtractor(),
-        WorkExtractor()
-    ]
-    private var isRunning = false
-    private var scanTask: Task<Void, Never>?
-    private var reminderTask: Task<Void, Never>?
-
-    // Callbacks
-    private var onDeadlineDiscovered: ((Deadline) -> Void)?
-    private var onReminderTriggered: ((Deadline, DeadlineUrgency) -> Void)?
-    private var onDeadlineMissed: ((Deadline) -> Void)?
-
-    // MARK: - Initialization
-
-    private init() {
-        // Set up default reminder schedules
-        for category in DeadlineCategory.allCases {
-            reminderSchedules[category] = ReminderSchedule.defaultSchedule(for: category)
-        }
-        // Extractors are initialized in property declaration
-    }
+extension DeadlineIntelligence {
 
     // MARK: - Configuration
 
@@ -227,7 +177,6 @@ public actor DeadlineIntelligence {
             )
 
             for deadline in results {
-                // Check if we already have this deadline
                 if !isDuplicate(deadline) {
                     extractedDeadlines.append(deadline)
                     deadlines[deadline.id] = deadline
@@ -289,9 +238,9 @@ public actor DeadlineIntelligence {
         await processContent(transcript, source: .voiceCall)
     }
 
-    // MARK: - Private Methods
+    // MARK: - Internal Methods
 
-    private func performPeriodicScan() async {
+    func performPeriodicScan() async {
         #if canImport(EventKit)
         let store = EKEventStore()
 
@@ -332,7 +281,7 @@ public actor DeadlineIntelligence {
         #endif
     }
 
-    private func checkReminders() async {
+    func checkReminders() async {
         let now = Date()
 
         for (id, deadline) in deadlines {
@@ -377,7 +326,7 @@ public actor DeadlineIntelligence {
         }
     }
 
-    private func isDuplicate(_ newDeadline: Deadline) -> Bool {
+    func isDuplicate(_ newDeadline: Deadline) -> Bool {
         for existing in deadlines.values {
             // Same title and due date within 1 hour
             if existing.title.lowercased() == newDeadline.title.lowercased() &&
@@ -388,7 +337,7 @@ public actor DeadlineIntelligence {
         return false
     }
 
-    private func createNextOccurrence(_ deadline: Deadline, pattern: Deadline.RecurrencePattern) {
+    func createNextOccurrence(_ deadline: Deadline, pattern: Deadline.RecurrencePattern) {
         var nextDate = deadline.dueDate
 
         switch pattern.frequency {
