@@ -26,6 +26,7 @@ struct BranchNavigator: View {
             .buttonStyle(.plain)
             .disabled(currentBranchIndex <= 0)
             .opacity(currentBranchIndex > 0 ? 1 : 0.3)
+            .accessibilityLabel("Previous branch")
 
             Text("\(currentBranchIndex + 1)/\(totalBranches)")
                 .font(.system(size: 11, weight: .medium, design: .rounded))
@@ -39,6 +40,7 @@ struct BranchNavigator: View {
             .buttonStyle(.plain)
             .disabled(currentBranchIndex >= totalBranches - 1)
             .opacity(currentBranchIndex < totalBranches - 1 ? 1 : 0.3)
+            .accessibilityLabel("Next branch")
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)

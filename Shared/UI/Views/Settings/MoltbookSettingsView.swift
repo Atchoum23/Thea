@@ -87,7 +87,7 @@ struct MoltbookSettingsView: View {
                             Task {
                                 let posts = await MoltbookAgent.shared.pendingPosts
                                 for post in posts {
-                                    await MoltbookAgent.shared.approvePendingPost(id: post.id)
+                                    _ = await MoltbookAgent.shared.approvePendingPost(id: post.id)
                                 }
                                 await refreshStatus()
                             }
