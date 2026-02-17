@@ -159,7 +159,7 @@
                 // Modification indicator
                 if access.wasModified {
                     Image(systemName: "pencil.circle.fill")
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.theaWarning)
                 }
 
                 // Time
@@ -188,10 +188,10 @@
         @ViewBuilder
         private func accessTypeIcon(_ type: CoworkContext.FileAccess.AccessType) -> some View {
             let config: (icon: String, color: Color) = switch type {
-            case .read: ("eye", .blue)
-            case .write: ("pencil", .green)
+            case .read: ("eye", .theaInfo)
+            case .write: ("pencil", .theaSuccess)
             case .execute: ("play", .purple)
-            case .delete: ("trash", .red)
+            case .delete: ("trash", .theaError)
             }
 
             Image(systemName: config.icon)
@@ -216,7 +216,7 @@
                     List(session.context.accessedURLs) { access in
                         HStack {
                             Image(systemName: access.wasCached ? "arrow.clockwise.circle" : "globe")
-                                .foregroundStyle(access.wasCached ? .orange : .blue)
+                                .foregroundStyle(access.wasCached ? .theaWarning : .theaInfo)
 
                             VStack(alignment: .leading) {
                                 if let title = access.title {
@@ -273,7 +273,7 @@
                             Text(connector)
                             Spacer()
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
+                                .foregroundStyle(.theaSuccess)
                         }
                     }
                     .listStyle(.inset)

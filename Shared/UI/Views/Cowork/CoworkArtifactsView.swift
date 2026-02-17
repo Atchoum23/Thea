@@ -220,8 +220,8 @@
                                 .font(.caption2)
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 2)
-                                .background(Color.orange.opacity(0.2))
-                                .foregroundStyle(.orange)
+                                .background(Color.theaWarning.opacity(0.2))
+                                .foregroundStyle(.theaWarning)
                                 .cornerRadius(2)
                         }
                     }

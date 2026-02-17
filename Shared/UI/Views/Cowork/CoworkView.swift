@@ -362,11 +362,11 @@
             switch status {
             case .idle: .secondary
             case .planning: .purple
-            case .awaitingApproval: .yellow
-            case .executing: .blue
-            case .paused: .orange
-            case .completed: .green
-            case .failed: .red
+            case .awaitingApproval: .theaWarning
+            case .executing: .theaInfo
+            case .paused: .theaWarning
+            case .completed: .theaSuccess
+            case .failed: .theaError
             }
         }
     }

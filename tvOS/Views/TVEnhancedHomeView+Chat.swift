@@ -41,7 +41,7 @@ struct TVEnhancedChatView: View {
         if !inferenceClient.connectionState.isConnected {
             HStack(spacing: 12) {
                 Image(systemName: "desktopcomputer.trianglebadge.exclamationmark")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.theaWarning)
                 Text("Not connected to Mac -- responses are simulated")
                     .font(.caption)
                     .foregroundStyle(.secondary)

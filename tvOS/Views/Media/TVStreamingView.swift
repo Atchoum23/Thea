@@ -58,7 +58,7 @@ struct TVStreamingView: View {
             HStack(spacing: 30) {
                 BundledServiceBadge(name: "Canal+", icon: "tv.fill", color: .black)
                 BundledServiceBadge(name: "HBO Max", icon: "film.fill", color: .purple)
-                BundledServiceBadge(name: "Paramount+", icon: "mountain.2.fill", color: .blue)
+                BundledServiceBadge(name: "Paramount+", icon: "mountain.2.fill", color: .theaInfo)
             }
 
             Text("All content accessible through the Canal+ app")
