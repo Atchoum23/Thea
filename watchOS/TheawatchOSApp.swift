@@ -29,7 +29,7 @@ final class TheaWatchDelegate: NSObject, WKApplicationDelegate {
 
             case let snapshotTask as WKSnapshotRefreshBackgroundTask:
                 snapshotTask.setTaskCompleted(
-                    restoringDefaultState: true,
+                    restoredDefaultState: true,
                     estimatedSnapshotExpiration: .distantFuture,
                     userInfo: nil
                 )
