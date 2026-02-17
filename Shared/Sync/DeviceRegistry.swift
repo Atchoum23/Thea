@@ -18,7 +18,7 @@ import Foundation
 /// Manages registered devices for cross-device sync
 @MainActor
 @Observable
-public final class DeviceRegistry {
+public final class DeviceRegistry: DeviceRegistryProtocol {
     public static let shared = DeviceRegistry()
 
     // MARK: - State
