@@ -279,7 +279,7 @@ struct MacSettingsView: View {
         case .appPairing:
             AppPairingSettingsView()
         case .liveGuidance:
-            LiveGuidanceSettingsView()
+            liveGuidancePlaceholder
         case .clipboard:
             TheaClipSettingsView()
         case .translation:
@@ -355,6 +355,26 @@ struct MacSettingsView: View {
         case .about:
             AboutView()
         }
+    }
+
+    // MARK: - Live Guidance Placeholder
+
+    /// Placeholder for Live Guidance settings (dependencies excluded from current build).
+    private var liveGuidancePlaceholder: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "eye.circle.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(.secondary)
+            Text("Live Guidance")
+                .font(.theaTitle2)
+            Text("Screen monitoring and voice guidance settings will appear here when the Live Guidance module is enabled.")
+                .font(.theaBody)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 400)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationTitle("Live Guidance")
     }
 }
 
