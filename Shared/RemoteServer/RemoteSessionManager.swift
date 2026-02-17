@@ -191,6 +191,7 @@ public class RemoteSessionManager: ObservableObject {
 
 // MARK: - Remote Session
 
+// @unchecked Sendable: contains NWConnection (non-Sendable); managed by @MainActor RemoteSessionManager
 public struct RemoteSession: Identifiable, @unchecked Sendable {
     public let id: String
     public let connection: NWConnection
