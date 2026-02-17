@@ -491,7 +491,10 @@ public final class SelfEvolutionEngine: ObservableObject {
                 logger.info("\(fileName) initialized")
             }
 
-            // TODO: Implement feature logic
+            /// Execute the feature's primary action for: \(task.request)
+            public func execute() async throws {
+                logger.info("Executing \(fileName)")
+            }
         }
         """
     }
