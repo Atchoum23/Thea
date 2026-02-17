@@ -1,10 +1,7 @@
-# Gitleaks Configuration for Thea Project
-# This file defines rules and exclusions for secret detection scanning
+title = "Thea Gitleaks Config"
+[extend]
+useDefault = true
 
-title = "Thea Project Gitleaks Configuration"
-
-# Paths to exclude from scanning
-# These are build artifacts and external dependencies
 [allowlist]
 paths = [
     '''\.build/''',
@@ -13,9 +10,23 @@ paths = [
     '''node_modules/''',
 ]
 
-# Files to completely ignore
-# sonar-project.properties only contains public project identifiers
-regexTarget = "match"
-regexes = [
-    '''sonar\.projectKey=Atchoum23_Thea''',
+[[allowlist.rules]]
+id = "test-fixtures"
+description = "Ignore test fixtures and ML model hashes"
+paths = [
+  '''Tests/.*''',
+  '''.*\.mlmodelc/.*''',
+  '''.*Package\.resolved''',
 ]
+
+[[allowlist.rules]]
+id = "sample-data"
+description = "Ignore sample/example data files"
+regexTarget = "line"
+regexes = ['''example.*key''', '''sample.*token''', '''placeholder''']
+
+[[allowlist.rules]]
+id = "sonar-project-id"
+description = "SonarCloud public project identifiers"
+regexTarget = "match"
+regexes = ['''sonar\.projectKey=Atchoum23_Thea''']

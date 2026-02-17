@@ -1,12 +1,16 @@
 # Thea CI/CD Pipeline
-# Version: 4.1.0 - Added swift package resolve, increased build timeout, SPM test step
-# Last Updated: February 10, 2026
+# Version: 5.0.0 - Fixed 10 issues (P0: swiftlint exit 2, test caching, SPM paths; P1: permissions, cache keys, config passthrough, sonarcloud; P2: paths-ignore, spm resolve, coverage threshold)
+# Last Updated: February 17, 2026
 
 name: CI
 
 on:
   push:
     branches: [main, develop, 'feature/**', 'release/**']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/*.md'
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
@@ -17,6 +21,8 @@ on:
         default: 'Release'
         type: choice
         options: [Debug, Release]
+
+permissions: read-all
 
 env:
   XCODE_VERSION: '26.2'
@@ -58,10 +64,8 @@ jobs:
           swiftlint lint --reporter github-actions-logging || {
             EXIT_CODE=$?
             if [ $EXIT_CODE -eq 2 ]; then
-              echo "::warning::SwiftLint warning threshold exceeded (non-fatal)"
-              # Exit code 2 = warnings exceeded threshold, not a real error
-              # This can happen if the CI SwiftLint version differs from local
-              exit 0
+              echo "::error::SwiftLint warning threshold exceeded — fix warnings before merging"
+              exit 2
             else
               exit $EXIT_CODE
             fi
@@ -109,55 +113,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Select Xcode ${{ env.XCODE_VERSION }}
-        run: |
-          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
-          else
-            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
-            xcodebuild -version
-          fi
-
-      - name: Cache XcodeGen
-        id: xcodegen-cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      - name: Setup Xcode and XcodeGen
+        uses: ./.github/actions/setup-xcode
         with:
-          path: /opt/homebrew/Cellar/xcodegen
-          key: ${{ runner.os }}-xcodegen-2.42.0
-
-      - name: Install XcodeGen
-        run: |
-          if [ "${{ steps.xcodegen-cache.outputs.cache-hit }}" == "true" ]; then
-            brew link xcodegen 2>/dev/null || true
-          fi
-          command -v xcodegen || brew install xcodegen
-
-      - name: Cache SPM Dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        with:
-          path: |
-            ~/Library/Caches/org.swift.swiftpm
-            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
-          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-spm-
+          xcode-version: '26.2'
+          scheme: ${{ matrix.scheme }}
 
       - name: Cache DerivedData
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: build
-          key: ${{ runner.os }}-derived-${{ matrix.platform }}-${{ hashFiles('**/*.swift') }}
+          key: ${{ runner.os }}-${{ matrix.scheme }}-deriveddata-${{ hashFiles('project.yml', 'Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-derived-${{ matrix.platform }}-
-
-      - name: Generate Xcode Project
-        run: xcodegen generate
+            ${{ runner.os }}-${{ matrix.scheme }}-deriveddata-
 
       - name: Resolve SPM Dependencies
-        run: |
-          swift package resolve 2>&1 || {
-            echo "::warning::swift package resolve failed, xcodebuild will handle resolution"
-          }
+        run: swift package resolve
 
       - name: Validate Package.swift
         run: |
@@ -229,41 +200,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Select Xcode ${{ env.XCODE_VERSION }}
-        run: |
-          if [ -d "/Applications/Xcode_${{ env.XCODE_VERSION }}.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
-          else
-            echo "Xcode ${{ env.XCODE_VERSION }} not found, using default"
-            xcodebuild -version
-          fi
+      - name: Setup Xcode and XcodeGen
+        uses: ./.github/actions/setup-xcode
+        with:
+          xcode-version: '26.2'
+          scheme: Thea-macOS
 
-      - name: Cache XcodeGen
-        id: xcodegen-cache
+      - name: Cache DerivedData
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: /opt/homebrew/Cellar/xcodegen
-          key: ${{ runner.os }}-xcodegen-2.42.0
-
-      - name: Install XcodeGen
-        run: |
-          if [ "${{ steps.xcodegen-cache.outputs.cache-hit }}" == "true" ]; then
-            brew link xcodegen 2>/dev/null || true
-          fi
-          command -v xcodegen || brew install xcodegen
-
-      - name: Cache SPM Dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        with:
-          path: |
-            ~/Library/Caches/org.swift.swiftpm
-            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
-          key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+          path: build
+          key: ${{ runner.os }}-Thea-macOS-deriveddata-${{ hashFiles('project.yml', 'Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-spm-
-
-      - name: Generate Xcode Project
-        run: xcodegen generate
+            ${{ runner.os }}-Thea-macOS-deriveddata-
 
       - name: Run SPM Tests (Fast)
         run: |
@@ -276,7 +225,7 @@ jobs:
             -project Thea.xcodeproj \
             -scheme Thea-macOS \
             -destination 'platform=macOS' \
-            -configuration Debug \
+            -configuration ${{ inputs.configuration || 'Debug' }} \
             -derivedDataPath build \
             -resultBundlePath build/test-results-macos.xcresult \
             -enableCodeCoverage YES \
@@ -298,7 +247,7 @@ jobs:
             -project Thea.xcodeproj \
             -scheme Thea-iOS \
             -destination "platform=iOS Simulator,id=$SIMULATOR" \
-            -configuration Debug \
+            -configuration ${{ inputs.configuration || 'Debug' }} \
             -derivedDataPath build \
             -resultBundlePath build/test-results-ios.xcresult \
             -enableCodeCoverage YES \
@@ -312,6 +261,22 @@ jobs:
         run: |
           xcrun xccov view --report --json build/test-results-macos.xcresult > coverage-macos.json 2>/dev/null || true
           xcrun xccov view --report --json build/test-results-ios.xcresult > coverage-ios.json 2>/dev/null || true
+
+      - name: Check Coverage Threshold
+        if: always()
+        run: |
+          for PLATFORM in macos ios; do
+            FILE="coverage-${PLATFORM}.json"
+            if [ -f "$FILE" ]; then
+              python3 -c "
+          import json, sys
+          d = json.load(open('$FILE'))
+          cov = d.get('lineCoverage', 0)
+          print(f'${PLATFORM} coverage: {cov:.1%}')
+          sys.exit(0 if cov >= 0.40 else 1)
+          " || echo "::warning::${PLATFORM} coverage below 40% threshold"
+            fi
+          done
 
       - name: Upload Test Results
         if: always()
@@ -332,6 +297,9 @@ jobs:
     name: CodeCov Upload
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: read
+      checks: write
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout
@@ -358,6 +326,9 @@ jobs:
     name: SonarCloud
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: read
+      checks: write
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout
@@ -374,7 +345,8 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
-        continue-on-error: true  # Allow CI to pass while SonarCloud Automatic Analysis is being disabled
+        # TODO: Remove continue-on-error once SonarCloud Automatic Analysis is disabled in project settings
+        continue-on-error: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -386,6 +358,9 @@ jobs:
     name: Quality Gate
     runs-on: ubuntu-latest
     needs: [swiftlint, build, test]
+    permissions:
+      contents: read
+      checks: write
     if: always()
     steps:
       - name: Check Results
