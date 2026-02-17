@@ -1,6 +1,0 @@
-project: Thea.xcodeproj
-schemes:
-  - "Thea-macOS"
-targets:
-  - "Thea-macOS"
-quiet: true
