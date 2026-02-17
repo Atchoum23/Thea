@@ -444,10 +444,12 @@ import Foundation
 
         private init() {}
 
+        /// Launches Claude.app (not supported on this platform).
         public func launchClaude() async throws {
             throw ClaudeBridgeError.notSupported
         }
 
+        /// Sends a prompt to Claude.app (not supported on this platform).
         public func sendPrompt(_: String) async throws -> String {
             throw ClaudeBridgeError.notSupported
         }

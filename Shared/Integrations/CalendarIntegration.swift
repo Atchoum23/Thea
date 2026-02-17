@@ -34,8 +34,10 @@ public actor CalendarIntegration: AppIntegrationModule {
         isConnected = true
     }
 
+    /// Disconnects from the Calendar integration.
     public func disconnect() async { isConnected = false }
 
+    /// Returns whether the Calendar integration is available on this device.
     public func isAvailable() async -> Bool {
         EKEventStore.authorizationStatus(for: .event) != .restricted
     }

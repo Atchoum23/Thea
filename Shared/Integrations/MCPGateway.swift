@@ -106,6 +106,7 @@ public struct RateLimitState: Sendable {
         self.lastDayReset = Date()
     }
 
+    /// Resets request counters whose time windows have elapsed.
     public mutating func resetIfNeeded() {
         let now = Date()
 
@@ -125,6 +126,7 @@ public struct RateLimitState: Sendable {
         }
     }
 
+    /// Returns whether a new request is permitted under the given rate limit configuration.
     public func canMakeRequest(config: MCPRateLimitConfig) -> Bool {
         minuteRequests < config.requestsPerMinute + config.burstAllowance &&
         hourRequests < config.requestsPerHour &&
@@ -430,6 +432,7 @@ public struct MCPRequest: Identifiable, Sendable {
             self.backoffMultiplier = backoffMultiplier
         }
 
+        /// Computes the exponential backoff delay for the given retry attempt.
         public func delay(forAttempt attempt: Int) -> TimeInterval {
             let delay = initialDelay * pow(backoffMultiplier, Double(attempt))
             return min(delay, maxDelay)
@@ -733,6 +736,7 @@ public final class MCPGateway: ObservableObject {
 
     // MARK: - Statistics
 
+    /// Returns aggregate gateway statistics including connection, pool, and request counts.
     public func statistics() async -> GatewayStatistics {
         let poolStats = await connectionPool.statistics()
         let unhealthy = await healthMonitor.unhealthyServers()

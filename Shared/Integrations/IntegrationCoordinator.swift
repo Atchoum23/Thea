@@ -35,6 +35,7 @@ public final class IntegrationCoordinator {
 
     // MARK: - Initialization
 
+    /// Initializes all feature-flag-enabled integration modules.
     public func initialize(context: ModelContext) async {
         guard !isInitialized else { return }
 
@@ -185,6 +186,7 @@ public final class IntegrationCoordinator {
 
     // MARK: - Module Control
 
+    /// Enables and initializes the given integration module.
     public func enableModule(_ module: IntegrationModule) async {
         guard !activeModules.contains(module) else { return }
 
@@ -221,6 +223,7 @@ public final class IntegrationCoordinator {
         }
     }
 
+    /// Disables the given integration module and releases its resources.
     public func disableModule(_ module: IntegrationModule) async {
         guard activeModules.contains(module) else { return }
 
@@ -259,24 +262,29 @@ public final class IntegrationCoordinator {
 
     // MARK: - Status Queries
 
+    /// Returns whether the given module is currently active.
     public func isModuleActive(_ module: IntegrationModule) -> Bool {
         activeModules.contains(module)
     }
 
+    /// Returns the current status of the given module.
     public func getModuleStatus(_ module: IntegrationModule) -> ModuleStatus {
         moduleStatus[module] ?? .disabled
     }
 
+    /// Returns the number of currently active modules.
     public func getActiveModuleCount() -> Int {
         activeModules.count
     }
 
+    /// Returns all available integration module types.
     public func getAllModules() -> [IntegrationModule] {
         IntegrationModule.allCases
     }
 
     // MARK: - Health Check
 
+    /// Runs a health check on all active modules and returns a report.
     public func performHealthCheck() async -> HealthCheckReport {
         var reports: [IntegrationModule: String] = [:]
 
