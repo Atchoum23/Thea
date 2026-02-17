@@ -208,8 +208,8 @@ class MessagesViewController: MSMessagesAppViewController {
     }
 
     private func generateAIResponse(prompt: String) {
-        // In a real implementation, this would call Thea's AI service
-        // For now, we'll create a placeholder message
+        // Create an MSMessage with a deep link URL that the main Thea app processes
+        // Messages extensions cannot run AI models directly — they forward via URL scheme
 
         guard let conversation = activeConversation else { return }
 

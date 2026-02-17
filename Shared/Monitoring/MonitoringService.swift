@@ -479,8 +479,8 @@ public actor FocusModeMonitor: ActivityMonitor {
     public func start() async throws {
         guard !isActive else { return }
         isActive = true
-        // Focus mode monitoring would use Apple's Focus API
-        // Currently a placeholder as the API requires specific entitlements
+        // Focus mode monitoring requires com.apple.developer.focus-status entitlement
+        // When entitlement is provisioned, use INFocusStatusCenter.default
     }
 
     public func stop() async {

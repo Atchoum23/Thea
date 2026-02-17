@@ -132,6 +132,7 @@ export function VoiceTorrentSearch({ onDownload, onClose, initialQuery }: VoiceT
     return () => {
       recognitionRef.current?.abort();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
   // Start/stop voice input

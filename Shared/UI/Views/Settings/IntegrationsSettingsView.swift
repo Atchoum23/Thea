@@ -157,7 +157,7 @@ struct IntegrationsSettingsView: View {
                     count: enabledModulesCount,
                     total: IntegrationModuleType.allCases.count,
                     icon: "checkmark.circle.fill",
-                    color: .green
+                    color: .theaSuccess
                 )
 
                 overviewCard(
@@ -165,7 +165,7 @@ struct IntegrationsSettingsView: View {
                     count: IntegrationModuleType.allCases.count,
                     total: IntegrationModuleType.allCases.count,
                     icon: "square.grid.2x2.fill",
-                    color: .blue
+                    color: .theaInfo
                 )
 
                 overviewCard(
@@ -183,7 +183,7 @@ struct IntegrationsSettingsView: View {
                     count: enabledModulesCount,
                     total: IntegrationModuleType.allCases.count,
                     icon: "checkmark.circle.fill",
-                    color: .green
+                    color: .theaSuccess
                 )
 
                 overviewCard(
@@ -269,8 +269,8 @@ struct IntegrationsSettingsView: View {
                     .font(.caption2)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Color.green.opacity(0.2))
-                    .foregroundStyle(.green)
+                    .background(Color.theaSuccess.opacity(0.2))
+                    .foregroundStyle(.theaSuccess)
                     .cornerRadius(4)
             }
 
@@ -356,7 +356,7 @@ struct IntegrationsSettingsView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(isEnabled ? .blue : .secondary)
+                .foregroundStyle(isEnabled ? .theaInfo : .secondary)
                 .frame(width: 28)
                 .accessibilityHidden(true)
 
@@ -372,7 +372,7 @@ struct IntegrationsSettingsView: View {
             Spacer()
 
             Image(systemName: isEnabled ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(isEnabled ? .green : .secondary)
+                .foregroundStyle(isEnabled ? .theaSuccess : .secondary)
                 .accessibilityHidden(true)
         }
         .accessibilityElement(children: .combine)
@@ -450,7 +450,7 @@ extension IntegrationsSettingsView {
 
                                 Text(integrationsManager.isModuleEnabled(module) ? "Active" : "Inactive")
                                     .font(.caption)
-                                    .foregroundStyle(integrationsManager.isModuleEnabled(module) ? .green : .secondary)
+                                    .foregroundStyle(integrationsManager.isModuleEnabled(module) ? .theaSuccess : .secondary)
                             }
                         }
 

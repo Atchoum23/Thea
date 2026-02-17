@@ -430,8 +430,9 @@ public actor MapsIntegration {
             guard let request = MKReverseGeocodingRequest(location: clLocation) else {
                 throw MapsError.geocodingFailed("Could not create reverse geocoding request")
             }
-            let mapItems = try await request.mapItems
-            guard let mapItem = mapItems.first else {
+            // MKReverseGeocodingRequest is not Sendable — extract data at nonisolated boundary
+            nonisolated(unsafe) let items = try await request.mapItems
+            guard let mapItem = items.first else {
                 return nil
             }
             return TheaLocation(
@@ -441,7 +442,6 @@ public actor MapsIntegration {
                 timeZone: mapItem.timeZone?.identifier
             )
         } else {
-            #if canImport(CoreLocation)
             let geocoder = CLGeocoder()
             let placemarks = try await geocoder.reverseGeocodeLocation(clLocation)
             guard let placemark = placemarks.first else {
@@ -453,9 +453,6 @@ public actor MapsIntegration {
                 coordinate: coordinate,
                 timeZone: placemark.timeZone?.identifier
             )
-            #else
-            throw MapsError.unavailable
-            #endif
         }
         #else
         throw MapsError.unavailable

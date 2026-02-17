@@ -735,7 +735,7 @@ private struct StatBadge: View {
 
 #if os(iOS)
 struct DocumentCameraScannerView: UIViewControllerRepresentable {
-    var onCapture: ([Data]) -> Void
+    var onCapture: @Sendable ([Data]) -> Void
 
     func makeUIViewController(context: Context) -> UINavigationController {
         // Check if VNDocumentCameraViewController is available

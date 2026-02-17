@@ -89,14 +89,14 @@ public final class GDPRDataExporter {
     }
 
     private func exportLocationHistory(context _: ModelContext) async throws -> [[String: Any]] {
-        // Note: LocationRecord model would need to exist
-        // This is a placeholder for the expected structure
+        // LocationRecord is not persisted via SwiftData — location data is ephemeral
+        // Returns empty until location history persistence is added
         []
     }
 
     private func exportScreenTimeData(context _: ModelContext) async throws -> [[String: Any]] {
-        // Note: ScreenTimeRecord model would need to exist
-        // This is a placeholder for the expected structure
+        // ScreenTimeRecord is not persisted via SwiftData — screen time uses ScreenTimeTracker in-memory
+        // Returns empty until screen time persistence is added
         []
     }
 

@@ -40,7 +40,7 @@ extension OrchestratorSettingsView {
                     title: "Success Rate",
                     value: String(format: "%.0f%%", executionStats.successRate * 100),
                     icon: "chart.line.uptrend.xyaxis",
-                    color: .orange
+                    color: .theaWarning
                 )
             }
         }
@@ -96,7 +96,7 @@ extension OrchestratorSettingsView {
                 HStack(spacing: 4) {
                     ForEach(0..<config.maxParallelAgents, id: \.self) { index in
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(index < executionStats.activeAgents ? Color.green : Color.gray.opacity(0.3))
+                            .fill(index < executionStats.activeAgents ? Color.theaSuccess : Color.gray.opacity(0.3))
                             .frame(height: 24)
                     }
                 }
@@ -120,7 +120,7 @@ extension OrchestratorSettingsView {
                     // Queue status indicator
                     HStack(spacing: 4) {
                         Circle()
-                            .fill(executionStats.queuedTasks > 5 ? Color.orange : Color.green)
+                            .fill(executionStats.queuedTasks > 5 ? Color.theaWarning : Color.theaSuccess)
                             .frame(width: 8, height: 8)
 
                         Text(executionStats.queuedTasks > 5 ? "Busy" : "Normal")
@@ -153,7 +153,7 @@ extension OrchestratorSettingsView {
                                     .font(.caption2)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
-                                    .background(Color.blue.opacity(0.2))
+                                    .background(Color.theaInfo.opacity(0.2))
                                     .cornerRadius(4)
                             }
                         }

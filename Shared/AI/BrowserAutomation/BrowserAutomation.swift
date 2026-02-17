@@ -461,7 +461,7 @@ public final class BrowserAutomationEngine: ObservableObject {
 
         // Handle simple tag extraction
         if selector.hasPrefix("//") {
-            // XPath - not implemented in this simple version
+            // XPath selectors require a full XML parser — use CSS tag selectors instead
             return results
         }
 

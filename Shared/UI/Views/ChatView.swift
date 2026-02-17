@@ -1,5 +1,6 @@
 @preconcurrency import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 
 // MARK: - Unified Chat View
 
@@ -140,8 +141,8 @@ struct ChatView: View {
         .navigationTitle(conversation.title)
         #if os(macOS)
             .navigationSubtitle("\(messages.count) messages")
-        #endif
             .glassToolbar()
+        #endif
             .toolbar {
                 ToolbarItem {
                     // Plan toggle — only visible when a plan exists
