@@ -492,8 +492,8 @@ public final class LearningManager: ObservableObject {
     // MARK: - Adaptive Response
 
     /// Get response style based on user profile
-    public func getResponseStyle() -> ResponseStyle {
-        ResponseStyle(
+    public func getResponseStyle() -> PersonalizedResponseStyle {
+        PersonalizedResponseStyle(
             verbosity: userProfile.experienceLevel == .novice ? .detailed : .concise,
             codeExamples: userProfile.preferredLearningStyle == .handson,
             visualAids: userProfile.preferredLearningStyle == .visual,
@@ -535,10 +535,11 @@ public struct DailyProgress: Sendable {
     public var skillsPracticed: [UUID]
 }
 
-// MARK: - Response Style
+// MARK: - Personalized Response Style
 
-/// Style configuration for AI responses based on user profile
-public struct ResponseStyle: Sendable {
+/// Style configuration for AI responses based on user profile.
+/// Prefixed to avoid conflict with the ResponseStyle preset struct in Core/Models/ResponseStyle.swift.
+public struct PersonalizedResponseStyle: Sendable {
     public let verbosity: Verbosity
     public let codeExamples: Bool
     public let visualAids: Bool
@@ -551,3 +552,6 @@ public struct ResponseStyle: Sendable {
         case detailed
     }
 }
+
+/// V1 compatibility typealias — prefer `PersonalizedResponseStyle` for new code.
+public typealias ResponseStyle_Personalized = PersonalizedResponseStyle

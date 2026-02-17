@@ -7,6 +7,7 @@
         @State private var instructionText = ""
         @State private var showingFolderPicker = false
         @State private var showingPlanPreview = false
+        @State private var showingInlinePlan = false
         @State private var selectedTab: CoworkTab = .progress
 
         enum CoworkTab: String, CaseIterable {
@@ -48,6 +49,23 @@
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                     Divider()
+
+                    // Inline plan checklist (shown when plan is ready for review)
+                    if showingInlinePlan, let session = manager.currentSession, !session.steps.isEmpty {
+                        InlinePlanChecklist(
+                            session: session,
+                            onApprove: {
+                                showingInlinePlan = false
+                                Task { try? await manager.executePlan() }
+                            },
+                            onCancel: {
+                                showingInlinePlan = false
+                                session.reset()
+                            }
+                        )
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        Divider()
+                    }
 
                     // Instruction input area
                     instructionInputArea
@@ -318,14 +336,17 @@
                     _ = try await manager.createPlan(for: instructionText)
 
                     if manager.previewPlanBeforeExecution {
-                        showingPlanPreview = true
+                        // Show inline plan checklist instead of a modal sheet
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            showingInlinePlan = true
+                        }
                     } else {
                         try await manager.executePlan()
                     }
 
                     instructionText = ""
                 } catch {
-                    // Error handling
+                    // Error handling — session stays in idle state
                 }
             }
         }
