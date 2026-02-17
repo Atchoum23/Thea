@@ -1,6 +1,6 @@
 # Thea Security Audit Workflow (Full)
-# Version: 2.1.0 - Added path filters, graceful Xcode selection
-# Last Updated: February 10, 2026
+# Version: 3.0.0 - Fixed 7 issues (P0: remove || true, python3 severity counting, issue if-condition; P1: xcode-select, path filters, truncate report, concurrency)
+# Last Updated: February 17, 2026
 
 name: Security Audit (Full)
 
@@ -16,6 +16,8 @@ on:
       - 'Tools/**'
       - 'Package.swift'
       - 'Package.resolved'
+      - '.github/workflows/thea-audit-main.yml'
+      - 'thea-policy.json'
   schedule:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -34,7 +36,7 @@ on:
         type: boolean
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -52,6 +54,9 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 1
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
 
       - name: Setup Swift
         uses: swift-actions/setup-swift@7ca6abe6b3b0e8b5421b88be48feee39cbf52c6a # v2.4.0
@@ -88,29 +93,56 @@ jobs:
             --output audit-results.yaml \
             --severity "$SEVERITY" \
             --policy thea-policy.json \
-            $VERBOSE_FLAG || true
+            $VERBOSE_FLAG
 
           $THEA_AUDIT scan \
             --path . \
             --format json \
             --output audit-results.json \
             --severity "$SEVERITY" \
-            --policy thea-policy.json || true
+            --policy thea-policy.json
 
           $THEA_AUDIT scan \
             --path . \
             --format markdown \
             --output audit-report.md \
             --severity "$SEVERITY" \
-            --policy thea-policy.json || true
+            --policy thea-policy.json
 
-          # Count findings by severity
-          # Note: grep -c outputs "0" AND exits 1 when no matches, so || echo 0
-          # inside $() would produce "0\n0" (double output). Move || outside $().
-          CRITICAL_COUNT=$(grep -c '"severity": "critical"' audit-results.json 2>/dev/null) || CRITICAL_COUNT=0
-          HIGH_COUNT=$(grep -c '"severity": "high"' audit-results.json 2>/dev/null) || HIGH_COUNT=0
-          MEDIUM_COUNT=$(grep -c '"severity": "medium"' audit-results.json 2>/dev/null) || MEDIUM_COUNT=0
-          LOW_COUNT=$(grep -c '"severity": "low"' audit-results.json 2>/dev/null) || LOW_COUNT=0
+          # Count findings by severity using python3 JSON parsing
+          CRITICAL_COUNT=$(python3 -c "
+          import json, sys
+          try:
+            d = json.load(open('audit-results.json'))
+            findings = d if isinstance(d, list) else d.get('findings', d.get('results', []))
+            print(sum(1 for f in findings if isinstance(f, dict) and f.get('severity','').lower() == 'critical'))
+          except Exception as e:
+            print(0)
+          " 2>/dev/null)
+          HIGH_COUNT=$(python3 -c "
+          import json, sys
+          try:
+            d = json.load(open('audit-results.json'))
+            findings = d if isinstance(d, list) else d.get('findings', d.get('results', []))
+            print(sum(1 for f in findings if isinstance(f, dict) and f.get('severity','').lower() == 'high'))
+          except: print(0)
+          " 2>/dev/null)
+          MEDIUM_COUNT=$(python3 -c "
+          import json, sys
+          try:
+            d = json.load(open('audit-results.json'))
+            findings = d if isinstance(d, list) else d.get('findings', d.get('results', []))
+            print(sum(1 for f in findings if isinstance(f, dict) and f.get('severity','').lower() == 'medium'))
+          except: print(0)
+          " 2>/dev/null)
+          LOW_COUNT=$(python3 -c "
+          import json, sys
+          try:
+            d = json.load(open('audit-results.json'))
+            findings = d if isinstance(d, list) else d.get('findings', d.get('results', []))
+            print(sum(1 for f in findings if isinstance(f, dict) and f.get('severity','').lower() == 'low'))
+          except: print(0)
+          " 2>/dev/null)
 
           echo "critical_count=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
           echo "high_count=$HIGH_COUNT" >> $GITHUB_OUTPUT
@@ -146,7 +178,7 @@ jobs:
           retention-days: 90
 
       - name: Create Issue on Critical Findings
-        if: steps.audit.outputs.critical_count > 0
+        if: steps.audit.outputs.critical_count != '' && steps.audit.outputs.critical_count > 0
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
@@ -158,6 +190,12 @@ jobs:
             let reportContent = '';
             if (fs.existsSync('audit-report.md')) {
               reportContent = fs.readFileSync('audit-report.md', 'utf8');
+            }
+
+            // Truncate to stay under GitHub's 65,536 char issue body limit
+            const MAX_BODY = 60000;
+            if (reportContent.length > MAX_BODY) {
+              reportContent = reportContent.substring(0, MAX_BODY) + '\n\n... (truncated — see full artifact)';
             }
 
             const title = `Security Audit: ${criticalCount} Critical Finding(s) Detected`;
