@@ -439,6 +439,10 @@ extension Notification.Name {
     static let showKeyboardShortcuts = Notification.Name("commandPalette.showKeyboardShortcuts")
     static let showCommandPalette = Notification.Name("commandPalette.show")
     static let selectNewConversation = Notification.Name("thea.selectNewConversation")
+    // Spotlight navigation
+    static let spotlightNavigateToConversation = Notification.Name("thea.spotlight.conversation")
+    static let spotlightNavigateToProject = Notification.Name("thea.spotlight.project")
+    static let spotlightNavigateToKnowledge = Notification.Name("thea.spotlight.knowledge")
 }
 
 // MARK: - Array Extension

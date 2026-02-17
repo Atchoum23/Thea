@@ -299,6 +299,44 @@ struct TheamacOSApp: App {
     /// Retained memory pressure DispatchSource — must stay alive for handler to fire.
     nonisolated(unsafe) private static var memoryPressureSource: DispatchSourceMemoryPressure?
 
+    // MARK: - Spotlight Navigation
+
+    /// Handles a CSSearchableItem activation from Spotlight.
+    /// Parses the uniqueIdentifier prefix to route to the correct view.
+    private func handleSpotlightActivity(_ activity: NSUserActivity) {
+        guard let identifier = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String else {
+            logger.warning("Spotlight activity missing uniqueIdentifier")
+            return
+        }
+
+        logger.info("Spotlight navigation: \(identifier, privacy: .public)")
+
+        if identifier.hasPrefix("conversation-") {
+            let idString = String(identifier.dropFirst("conversation-".count))
+            guard let conversationID = UUID(uuidString: idString) else { return }
+            NotificationCenter.default.post(
+                name: .spotlightNavigateToConversation,
+                object: conversationID
+            )
+        } else if identifier.hasPrefix("project-") {
+            let idString = String(identifier.dropFirst("project-".count))
+            guard let projectID = UUID(uuidString: idString) else { return }
+            NotificationCenter.default.post(
+                name: .spotlightNavigateToProject,
+                object: projectID
+            )
+        } else if identifier.hasPrefix("knowledge-") {
+            let idString = String(identifier.dropFirst("knowledge-".count))
+            guard let knowledgeID = UUID(uuidString: idString) else { return }
+            NotificationCenter.default.post(
+                name: .spotlightNavigateToKnowledge,
+                object: knowledgeID
+            )
+        } else {
+            logger.warning("Spotlight: unrecognised identifier prefix: \(identifier, privacy: .public)")
+        }
+    }
+
     private func configureWindow() {
         guard let window = NSApp.windows.first else { return }
 
