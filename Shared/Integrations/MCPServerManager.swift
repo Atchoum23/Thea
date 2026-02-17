@@ -343,9 +343,15 @@ import Foundation
 
         private func discoverToolsFromInstalledServers() async {
             for server in installedServers where server.isEnabled {
-                // For now, add mock tools based on server type
-                let tools = getDefaultTools(for: server)
-                availableTools.append(contentsOf: tools)
+                // Try real MCP tool discovery via JSON-RPC first
+                let toolCountBefore = availableTools.count
+                await discoverTools(from: server.id)
+
+                // Fall back to defaults if discovery returned nothing
+                if availableTools.count == toolCountBefore {
+                    let tools = getDefaultTools(for: server)
+                    availableTools.append(contentsOf: tools)
+                }
             }
         }
 
