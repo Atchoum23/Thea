@@ -215,7 +215,6 @@ extension THEAMCPServer {
         return [.text("Created note: \(title)")]
     }
 
-    // TODO: Migrate to MKMapItem coordinate API when available
     func searchLocation(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let query = args["query"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("query")
@@ -229,12 +228,12 @@ extension THEAMCPServer {
             if !location.address.isEmpty {
                 result += ", \(location.address)"
             }
+            result += " (\(String(format: "%.5f", location.coordinate.latitude)), \(String(format: "%.5f", location.coordinate.longitude)))"
             result += "\n"
         }
         return [.text(result)]
     }
 
-    // TODO: Migrate to MKMapItem coordinate API when available
     func getDirections(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let from = args["from"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("from")
