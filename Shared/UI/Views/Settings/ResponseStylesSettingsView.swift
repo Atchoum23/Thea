@@ -118,14 +118,19 @@ struct ResponseStylesSettingsView: View {
     }
 
     private var noneStyleRow: some View {
-        Button {
+        let isNoneSelected: Bool = settings.selectedResponseStyleID == nil
+        let checkImage: String = isNoneSelected ? "checkmark.circle.fill" : "circle"
+        let checkColor: Color = isNoneSelected ? .accentColor : .secondary
+        let bgColor: Color = isNoneSelected ? Color.accentColor.opacity(0.1) : Color(.systemBackground).opacity(0.5)
+        let strokeColor: Color = isNoneSelected ? .accentColor : Color.secondary.opacity(0.3)
+        let strokeWidth: CGFloat = isNoneSelected ? 1.5 : 0.5
+        return Button {
             settings.selectedResponseStyleID = nil
         } label: {
             HStack {
-                Image(systemName: settings.selectedResponseStyleID == nil ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(settings.selectedResponseStyleID == nil ? Color.accentColor : .secondary)
+                Image(systemName: checkImage)
+                    .foregroundStyle(checkColor)
                     .imageScale(.medium)
-
                 VStack(alignment: .leading, spacing: 2) {
                     Text("None")
                         .font(.body.bold())
@@ -133,28 +138,20 @@ struct ResponseStylesSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
                 Spacer()
             }
             .padding(12)
-            .background(
-                settings.selectedResponseStyleID == nil
-                    ? Color.accentColor.opacity(0.1)
-                    : Color(.systemBackground).opacity(0.5)
-            )
+            .background(bgColor)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(
-                        settings.selectedResponseStyleID == nil ? Color.accentColor : Color.secondary.opacity(0.3),
-                        lineWidth: settings.selectedResponseStyleID == nil ? 1.5 : 0.5
-                    )
+                    .stroke(strokeColor, lineWidth: strokeWidth)
             )
         }
         .buttonStyle(.plain)
         .accessibilityLabel("No style")
         .accessibilityHint("Removes the active response style")
-        .accessibilityAddTraits(settings.selectedResponseStyleID == nil ? .isSelected : [])
+        .accessibilityAddTraits(isNoneSelected ? .isSelected : [])
     }
 
     private func sectionHeader(_ title: String) -> some View {
@@ -223,97 +220,79 @@ private struct StyleRow: View {
     @State private var isHovering = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    // Extracted to help the type checker on iOS
+    private var selectionImage: String { isSelected ? "checkmark.circle.fill" : "circle" }
+    private var selectionColor: Color { isSelected ? .accentColor : .secondary }
+    private var rowBackground: Color { isSelected ? Color.accentColor.opacity(0.08) : Color(.systemBackground).opacity(0.5) }
+    private var strokeColor: Color { isSelected ? .accentColor : Color.secondary.opacity(0.3) }
+    private var strokeWidth: CGFloat { isSelected ? 1.5 : 0.5 }
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // Selection indicator
-            Button {
-                onSelect()
-            } label: {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? Color.accentColor : .secondary)
-                    .imageScale(.medium)
-                    .frame(width: 20, height: 20)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("\(style.name), \(isSelected ? "selected" : "not selected")")
-            .accessibilityHint("Select this style")
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
-
-            // Content
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(style.name)
-                        .font(.body.bold())
-
-                    if style.isBuiltIn {
-                        Text("Built-in")
-                            .font(.caption2.uppercaseSmallCaps())
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Color.secondary.opacity(0.15))
-                            .clipShape(Capsule())
-                    }
-
-                    Spacer()
-
-                    // Edit/Delete buttons for custom styles (visible on hover)
-                    if isHovering, !style.isBuiltIn {
-                        HStack(spacing: 6) {
-                            if let onEdit {
-                                Button {
-                                    onEdit()
-                                } label: {
-                                    Image(systemName: "pencil")
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Edit \(style.name)")
-                            }
-
-                            if let onDelete {
-                                Button {
-                                    onDelete()
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .foregroundStyle(.red)
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Delete \(style.name)")
-                            }
-                        }
-                        .transition(.opacity)
-                    }
-                }
-
-                Text(style.description)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-
-                // Preview suffix (collapsed to 2 lines)
-                Text(style.systemPromptSuffix)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(2)
-                    .padding(.top, 2)
-            }
+            selectionButton
+            contentStack
         }
         .padding(12)
-        .background(
-            isSelected
-                ? Color.accentColor.opacity(0.08)
-                : Color(.systemBackground).opacity(0.5)
-        )
+        .background(rowBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(
-                    isSelected ? Color.accentColor : Color.secondary.opacity(0.3),
-                    lineWidth: isSelected ? 1.5 : 0.5
-                )
-        )
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(strokeColor, lineWidth: strokeWidth))
         .contentShape(Rectangle())
         .onTapGesture { onSelect() }
         .onHover { isHovering = $0 }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.15), value: isHovering)
+    }
+
+    @ViewBuilder private var selectionButton: some View {
+        Button { onSelect() } label: {
+            Image(systemName: selectionImage)
+                .foregroundStyle(selectionColor)
+                .imageScale(.medium)
+                .frame(width: 20, height: 20)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(style.name), \(isSelected ? "selected" : "not selected")")
+        .accessibilityHint("Select this style")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    @ViewBuilder private var contentStack: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(style.name).font(.body.bold())
+                if style.isBuiltIn {
+                    Text("Built-in")
+                        .font(.caption2.uppercaseSmallCaps())
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(Color.secondary.opacity(0.15))
+                        .clipShape(Capsule())
+                }
+                Spacer()
+                if isHovering, !style.isBuiltIn {
+                    editDeleteButtons
+                }
+            }
+            Text(style.description).font(.callout).foregroundStyle(.secondary)
+            Text(style.systemPromptSuffix)
+                .font(.caption).foregroundStyle(.tertiary)
+                .lineLimit(2).padding(.top, 2)
+        }
+    }
+
+    @ViewBuilder private var editDeleteButtons: some View {
+        HStack(spacing: 6) {
+            if let onEdit {
+                Button { onEdit() } label: { Image(systemName: "pencil") }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Edit \(style.name)")
+            }
+            if let onDelete {
+                Button { onDelete() } label: { Image(systemName: "trash").foregroundStyle(.red) }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Delete \(style.name)")
+            }
+        }
+        .transition(.opacity)
     }
 }
 
