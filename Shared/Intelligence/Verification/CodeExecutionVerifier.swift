@@ -224,6 +224,7 @@ public final class CodeExecutionVerifier {
 // MARK: - JavaScript Engine (JavaScriptCore)
 
 /// JavaScript execution using built-in JavaScriptCore
+// @unchecked Sendable: stateless — only stored property is immutable `let logger`
 final class JavaScriptEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "JavaScriptEngine")
 
@@ -300,6 +301,7 @@ final class JavaScriptEngine: @unchecked Sendable {
 
 #if os(macOS)
 /// Swift execution using swift command
+// @unchecked Sendable: stateless — only stored property is immutable `let logger`
 final class SwiftExecutionEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "SwiftExecutionEngine")
 
@@ -400,6 +402,7 @@ final class SwiftExecutionEngine: @unchecked Sendable {
 // MARK: - Python Execution Engine (macOS only)
 
 /// Python execution using python3 command
+// @unchecked Sendable: stateless — only stored property is immutable `let logger`
 final class PythonExecutionEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "PythonExecutionEngine")
 
