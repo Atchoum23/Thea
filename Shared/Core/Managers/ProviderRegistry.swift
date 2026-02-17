@@ -199,7 +199,14 @@ final class ProviderRegistry {
     // MARK: - Provider Creation
 
     func createProvider(id: String) -> AIProvider? {
-        guard let apiKey = try? SecureStorage.shared.loadAPIKey(for: id) else {
+        let apiKey: String?
+        do {
+            apiKey = try SecureStorage.shared.loadAPIKey(for: id)
+        } catch {
+            registryLogger.error("Failed to load API key for provider '\(id)': \(error.localizedDescription)")
+            return nil
+        }
+        guard let apiKey, !apiKey.isEmpty else {
             return nil
         }
 
