@@ -394,7 +394,7 @@ public struct CognitiveDashboardView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.green)
+            .tint(.theaSuccess)
         }
         .padding()
         .background(Color.gray.opacity(0.1))

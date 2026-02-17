@@ -164,7 +164,7 @@ public struct WellnessDashboardView: View {
                             .fontWeight(.semibold)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.red)
+                    .tint(.theaError)
                 }
 
                 // Progress bar
