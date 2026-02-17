@@ -94,8 +94,9 @@ struct ValidationResult: Sendable {
 
 struct ChatResponse: Sendable {
     enum ResponseType: Sendable {
-        case delta(String) // Streaming chunk
-        case complete(AIMessage) // Final message
+        case delta(String)           // Streaming text chunk
+        case thinkingDelta(String)   // Streaming thinking/reasoning chunk (extended thinking)
+        case complete(AIMessage)     // Final message
         case error(Error)
     }
 
@@ -103,6 +104,10 @@ struct ChatResponse: Sendable {
 
     static func delta(_ text: String) -> ChatResponse {
         ChatResponse(type: .delta(text))
+    }
+
+    static func thinkingDelta(_ text: String) -> ChatResponse {
+        ChatResponse(type: .thinkingDelta(text))
     }
 
     static func complete(_ message: AIMessage) -> ChatResponse {

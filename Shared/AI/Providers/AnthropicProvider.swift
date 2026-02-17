@@ -16,8 +16,8 @@ final class AnthropicProvider: AIProvider, Sendable {
         supportsVision: true,
         supportsFunctionCalling: true,
         supportsWebSearch: true,  // Web search now supported via server tools
-        maxContextTokens: 200_000,
-        maxOutputTokens: 32_000,  // Claude 4.5 supports up to 32K output
+        maxContextTokens: 1_000_000,  // Claude 4.6 supports up to 1M context
+        maxOutputTokens: 32_000,  // Claude 4.5+ supports up to 32K output
         supportedModalities: [.text, .image]
     )
 
@@ -88,19 +88,19 @@ final class AnthropicProvider: AIProvider, Sendable {
         model: String,
         stream: Bool
     ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
-        let anthropicMessages = messages.map { msg in
-            [
-                "role": msg.role == .user ? "user" : "assistant",
-                "content": msg.content.textValue
-            ]
-        }
+        let anthropicMessages = buildMessages(from: messages)
 
-        let requestBody: [String: Any] = [
+        var requestBody: [String: Any] = [
             "model": model,
             "max_tokens": maxTokens,
             "messages": anthropicMessages,
             "stream": stream
         ]
+
+        // Opus 4.6: use adaptive thinking (recommended over budget_tokens)
+        if model.contains("opus-4-6") {
+            requestBody["thinking"] = ["type": "adaptive"]
+        }
 
         guard let url = URL(string: "\(baseURL)/messages") else {
             throw AnthropicError.invalidResponse
@@ -116,7 +116,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         if stream {
             let requestCopy = request
             return AsyncThrowingStream { continuation in
-                Task { @Sendable in
+                Task { @Sendable [model, messages] in
                     do {
                         let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
 
@@ -127,36 +127,56 @@ final class AnthropicProvider: AIProvider, Sendable {
                         }
 
                         var accumulatedText = ""
+                        var accumulatedThinking = ""
+                        var currentBlockType = ""
 
                         for try await line in asyncBytes.lines {
-                            if line.hasPrefix("data: ") {
-                                let jsonString = String(line.dropFirst(6))
-                                guard let data = jsonString.data(using: .utf8),
-                                      // try? OK: SSE line may be malformed; skip and continue
-                                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-                                else {
-                                    continue
+                            guard line.hasPrefix("data: ") else { continue }
+                            let jsonString = String(line.dropFirst(6))
+                            guard let data = jsonString.data(using: .utf8),
+                                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                                  let type = json["type"] as? String
+                            else { continue }
+
+                            switch type {
+                            case "content_block_start":
+                                if let block = json["content_block"] as? [String: Any],
+                                   let blockType = block["type"] as? String
+                                {
+                                    currentBlockType = blockType
                                 }
 
-                                if let type = json["type"] as? String {
-                                    if type == "content_block_delta",
-                                       let delta = json["delta"] as? [String: Any],
-                                       let text = delta["text"] as? String
+                            case "content_block_delta":
+                                if let delta = json["delta"] as? [String: Any] {
+                                    let deltaType = delta["type"] as? String ?? ""
+
+                                    if deltaType == "thinking_delta",
+                                       let thinking = delta["thinking"] as? String
+                                    {
+                                        accumulatedThinking += thinking
+                                        continuation.yield(.thinkingDelta(thinking))
+                                    } else if deltaType == "text_delta",
+                                              let text = delta["text"] as? String
                                     {
                                         accumulatedText += text
                                         continuation.yield(.delta(text))
-                                    } else if type == "message_stop" {
-                                        let finalMessage = AIMessage(
-                                            id: UUID(),
-                                            conversationID: messages.first?.conversationID ?? UUID(),
-                                            role: .assistant,
-                                            content: .text(accumulatedText),
-                                            timestamp: Date(),
-                                            model: model
-                                        )
-                                        continuation.yield(.complete(finalMessage))
                                     }
                                 }
+
+                            case "message_stop":
+                                let finalMessage = AIMessage(
+                                    id: UUID(),
+                                    conversationID: messages.first?.conversationID ?? UUID(),
+                                    role: .assistant,
+                                    content: .text(accumulatedText),
+                                    timestamp: Date(),
+                                    model: model,
+                                    thinkingTrace: accumulatedThinking.isEmpty ? nil : accumulatedThinking
+                                )
+                                continuation.yield(.complete(finalMessage))
+
+                            default:
+                                break
                             }
                         }
 
@@ -178,12 +198,24 @@ final class AnthropicProvider: AIProvider, Sendable {
             }
 
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let content = json["content"] as? [[String: Any]],
-                  let firstContent = content.first,
-                  let text = firstContent["text"] as? String
+                  let content = json["content"] as? [[String: Any]]
             else {
                 throw AnthropicError.noResponse
             }
+
+            // Parse thinking blocks and text blocks from response
+            var text = ""
+            var thinking = ""
+            for block in content {
+                let blockType = block["type"] as? String ?? ""
+                if blockType == "thinking", let t = block["thinking"] as? String {
+                    thinking += t
+                } else if blockType == "text", let t = block["text"] as? String {
+                    text += t
+                }
+            }
+
+            guard !text.isEmpty else { throw AnthropicError.noResponse }
 
             let finalMessage = AIMessage(
                 id: UUID(),
@@ -191,13 +223,25 @@ final class AnthropicProvider: AIProvider, Sendable {
                 role: .assistant,
                 content: .text(text),
                 timestamp: Date(),
-                model: model
+                model: model,
+                thinkingTrace: thinking.isEmpty ? nil : thinking
             )
 
             return AsyncThrowingStream { continuation in
                 continuation.yield(.complete(finalMessage))
                 continuation.finish()
             }
+        }
+    }
+
+    /// Build Anthropic API messages, filtering system messages into the system field
+    private func buildMessages(from messages: [AIMessage]) -> [[String: Any]] {
+        messages.compactMap { msg -> [String: Any]? in
+            guard msg.role != .system else { return nil }
+            return [
+                "role": msg.role == .user ? "user" : "assistant",
+                "content": msg.content.textValue
+            ]
         }
     }
 
