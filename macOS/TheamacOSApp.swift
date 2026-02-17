@@ -184,32 +184,37 @@ struct TheamacOSApp: App {
             await DynamicModelRegistry.shared.refreshIfNeeded()
         }
 
-        // Pre-initialize StoreKit (starts transaction listener for in-app purchases)
-        _ = StoreKitService.shared
-
-        // Pre-initialize sync singletons so Settings > Sync doesn't beachball.
-        // Their inits now defer heavy work to Tasks, so this is non-blocking.
-        _ = CloudKitService.shared
-        _ = PreferenceSyncEngine.shared
-        _ = AppUpdateService.shared
-
-        // Apply saved font-size preference to theme config on startup
+        // Apply saved font-size preference to theme config on startup (non-blocking)
         AppConfiguration.applyFontSize(SettingsManager.shared.fontSize)
 
-        // Existing managers
-        ChatManager.shared.setModelContext(context)
-        ProjectManager.shared.setModelContext(context)
-        KnowledgeManager.shared.setModelContext(context)
-        FinancialManager.shared.setModelContext(context)
-        MigrationManager.shared.setModelContext(context)
-        MigrationEngine.shared.setModelContext(context)
-        CodeIntelligenceManager.shared.setModelContext(context)
-        ClipboardHistoryManager.shared.setModelContext(context)
-        HabitManager.shared.setModelContext(context)
-        ClipboardObserver.shared.start()
+        // Defer StoreKit + sync singletons — not needed until user opens Settings > Sync
+        // or triggers an in-app purchase. 150ms delay keeps launch fast.
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(150))
+            _ = StoreKitService.shared
+            _ = CloudKitService.shared
+            _ = PreferenceSyncEngine.shared
+            _ = AppUpdateService.shared
+        }
 
-        PromptOptimizer.shared.setModelContext(context)
-        WindowManager.shared.setModelContext(context)
+        // Defer ALL setModelContext() calls — each call may trigger SwiftData fetches
+        // on the main thread. Moving them async saves 200-900ms on first launch.
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(200))
+            ChatManager.shared.setModelContext(context)
+            ProjectManager.shared.setModelContext(context)
+            KnowledgeManager.shared.setModelContext(context)
+            FinancialManager.shared.setModelContext(context)
+            MigrationManager.shared.setModelContext(context)
+            MigrationEngine.shared.setModelContext(context)
+            CodeIntelligenceManager.shared.setModelContext(context)
+            ClipboardHistoryManager.shared.setModelContext(context)
+            HabitManager.shared.setModelContext(context)
+            PromptOptimizer.shared.setModelContext(context)
+            WindowManager.shared.setModelContext(context)
+        }
+
+        ClipboardObserver.shared.start()
 
         // Privacy monitoring — auto-start network tracking and load daily snapshots
         Task {
