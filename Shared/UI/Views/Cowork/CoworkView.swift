@@ -54,11 +54,11 @@
                     if showingInlinePlan, let session = manager.currentSession, !session.steps.isEmpty {
                         InlinePlanChecklist(
                             session: session,
-                            onApprove: {
+                            onApprove: { [session] in
                                 showingInlinePlan = false
                                 Task { try? await manager.executePlan() }
                             },
-                            onCancel: {
+                            onCancel: { [session] in
                                 showingInlinePlan = false
                                 session.reset()
                             }
