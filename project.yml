@@ -292,8 +292,6 @@ targets:
           - "**/Core/Services/Mock*.swift"
           - "**/Core/Services/ChatService.swift"
           - "**/Core/Services/ProjectService.swift"
-          # Exclude duplicate FeatureFlags (use Core/Features/FeatureFlags.swift)
-          - "**/Core/FeatureFlags.swift"
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
           # TEMPORARY: Exclude MLXAudioEngine + dependents causing Release build issues
