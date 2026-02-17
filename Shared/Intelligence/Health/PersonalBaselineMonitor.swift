@@ -19,7 +19,7 @@ enum AnomalyDeviation: String, Codable, Sendable {
     case sustained7Day
 }
 
-enum AnomalySeverity: String, Codable, Sendable, Comparable {
+enum HealthAnomalySeverity: String, Codable, Sendable, Comparable {
     case mild
     case moderate
     case significant
@@ -34,7 +34,7 @@ enum AnomalySeverity: String, Codable, Sendable, Comparable {
         }
     }
 
-    static func < (lhs: AnomalySeverity, rhs: AnomalySeverity) -> Bool {
+    static func < (lhs: HealthAnomalySeverity, rhs: HealthAnomalySeverity) -> Bool {
         lhs.rank < rhs.rank
     }
 }
@@ -57,7 +57,7 @@ struct AnomalyAlert: Codable, Sendable, Identifiable {
     let baselineMean: Double
     let zScore: Double
     let deviation: AnomalyDeviation
-    let severity: AnomalySeverity
+    let severity: HealthAnomalySeverity
     let message: String
     let timestamp: Date
 }
@@ -270,7 +270,7 @@ final class PersonalBaselineMonitor: Sendable {
 
     // MARK: - Severity Classification
 
-    private func severityForZScore(_ absZ: Double) -> AnomalySeverity {
+    private func severityForZScore(_ absZ: Double) -> HealthAnomalySeverity {
         switch absZ {
         case 3.0...: .critical
         case 2.5..<3.0: .significant
