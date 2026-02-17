@@ -130,15 +130,15 @@ final class ProviderRegistry: ProviderRegistryProtocol {
                 let provider = LocalModelProvider(modelName: model.name, instance: instance)
                 localProviders["local:\(model.name)"] = provider
                 debugLog("✅ Registered local model: \(model.name)")
-                print("✅ Registered local model: \(model.name)")
+                registryLogger.info("Registered local model: \(model.name)")
             } catch {
                 debugLog("⚠️ Failed to load local model \(model.name): \(error)")
-                print("⚠️ Failed to load local model \(model.name): \(error)")
+                registryLogger.warning("Failed to load local model \(model.name): \(error.localizedDescription)")
             }
         }
 
         debugLog("📊 Total local models registered: \(localProviders.count)")
-        print("📊 Total local models registered: \(localProviders.count)")
+        registryLogger.info("Total local models registered: \(localProviders.count)")
         #else
         // Local models not available on watchOS/tvOS
         debugLog("📱 Skipping local model refresh - not available on this platform")
