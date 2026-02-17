@@ -1,0 +1,86 @@
+# THEA P3 DOCUMENTATION MISSION (runs in parallel with gui-final)
+# ══════════════════════════════════════════════════════════════════
+# SAFE TO RUN CONCURRENTLY: only adds /// doc comments, zero logic changes.
+# ══════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Complete Item 15 from the P3 Quality mission: Documentation Consolidation.
+Find every undocumented public API and add proper Swift doc comments.
+
+## NON-NEGOTIABLE RULES
+- NEVER remove, refactor, or restructure code — only ADD /// doc comments
+- NEVER change logic, signatures, or access control
+- Only touch files that need doc comments
+- Commit after every 10–15 files to keep changes reviewable
+
+## TASK
+
+### Step 1: Audit undocumented public APIs
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+grep -rn "public func\|public var\|public class\|public struct\|public protocol\|public enum\|public actor" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "^ *///" | head -80
+```
+
+For each undocumented public declaration, add a doc comment immediately above it:
+```swift
+/// Brief one-line summary of what this does.
+///
+/// Extended description if non-obvious.
+/// - Parameter name: What this parameter controls
+/// - Returns: What is returned
+/// - Throws: What errors are thrown and why
+public func example(...)
+```
+
+### Priority order (process in this sequence):
+1. All `public protocol` declarations — they define contracts
+2. All `public actor` / `public class` / `public struct` / `public enum` declarations
+3. Key `public func` in services (AI providers, health, sync, security, voice)
+4. `public var` and `public let` that aren't self-explanatory
+
+### Step 2: For each undocumented file, read it fully first
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# Find files with undocumented public APIs
+grep -rln "public func\|public class\|public struct\|public protocol\|public enum\|public actor" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  while read f; do
+    # Check if file has any undocumented publics
+    if grep -n "public func\|public class\|public struct\|public protocol\|public enum\|public actor" "$f" | \
+       grep -qv "^[^:]*:[[:space:]]*/"; then
+      echo "$f"
+    fi
+  done | head -50
+```
+
+### Step 3: Commit after each batch
+
+After documenting each file or group of related files:
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+git add -A && git commit -m "Auto-save: Add /// doc comments to public APIs in <file/module>"
+```
+
+### Step 4: Final verification
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# Count remaining undocumented publics
+BEFORE=$(grep -rn "public func\|public var\|public class\|public struct\|public protocol\|public enum\|public actor" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -cv "^[^:]*:///" || true)
+echo "Remaining undocumented public APIs: $BEFORE"
+# Run swift test to confirm nothing broken
+swift test 2>&1 | tail -3
+```
+
+## SUCCESS CRITERIA
+- All public protocols have doc comments
+- All public service/manager classes have doc comments
+- Public functions with non-obvious purpose have doc comments
+- swift test still passes (4063 tests, 825 suites)
+- 0 build errors

@@ -1,0 +1,161 @@
+# THEA P3 SWIFTLINT + ACCESSIBILITY MISSION (runs after gui-final completes)
+# ══════════════════════════════════════════════════════════════════════════════
+# WAIT: only start AFTER gui-final (GUI build validation) is complete.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Complete Items 11 + 14 from the P3 Quality mission:
+- Item 11: SwiftLint strictness increase
+- Item 14: Accessibility audit
+
+## NON-NEGOTIABLE RULES
+- NEVER remove existing code — only fix to comply with new rules, only add accessibility attributes
+- Build after every batch of changes
+- Commit after each item
+
+## ITEM 11: SwiftLint Strictness Increase
+
+### Step 1: Check current .swiftlint.yml
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+cat .swiftlint.yml
+swiftlint lint 2>&1 | tail -5  # confirm 0 violations at current ruleset
+```
+
+### Step 2: Add stricter opt-in rules one batch at a time
+
+Add these to the `opt_in_rules` section of `.swiftlint.yml`:
+
+**Batch 1** (purely additive, no code changes usually needed):
+- `empty_collection_literal`
+- `empty_count`
+- `empty_string`
+- `first_where`
+- `last_where`
+- `sorted_first_last`
+- `toggle_bool`
+- `contains_over_filter_count`
+- `contains_over_filter_is_empty`
+- `contains_over_first_not_nil`
+- `redundant_nil_coalescing`
+- `identical_operands`
+
+**Batch 2** (may require minor code fixes):
+- `explicit_init`
+- `prefer_zero_over_explicit_init`
+- `legacy_multiple`
+- `fallthrough`
+- `fatal_error_message`
+- `overridden_super_call`
+- `unavailable_function`
+- `lower_acl_than_parent`
+- `discouraged_optional_boolean`
+
+**Batch 3** (formatting-level):
+- `closure_end_indentation`
+- `collection_alignment`
+- `literal_expression_end_indentation`
+- `multiline_arguments`
+- `multiline_parameters`
+- `operator_usage_whitespace`
+- `vertical_parameter_alignment_on_call`
+- `unneeded_parentheses_in_closure_argument`
+- `yoda_condition`
+- `modifier_order`
+
+After each batch:
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+swiftlint lint 2>&1 | grep -c "violation" || true
+swiftlint lint --fix 2>&1 | tail -5  # auto-fix where possible
+swiftlint lint 2>&1 | grep "violation" | head -20  # review remaining
+```
+
+Fix ALL violations before moving to the next batch. Never use `// swiftlint:disable` to silence — fix the code.
+
+After all batches pass:
+```bash
+swift test 2>&1 | tail -3  # confirm tests still pass
+git add -A && git commit -m "Auto-save: Increase SwiftLint strictness — all opt-in rules passing"
+```
+
+## ITEM 14: Accessibility Audit
+
+### Step 1: Find interactive elements missing accessibility labels
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# Find Button, onTapGesture without accessibilityLabel nearby
+grep -rn "Button {" --include="*.swift" \
+  --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  head -40
+```
+
+### Step 2: For each SwiftUI view file, read it and add:
+
+For every `Button`, `onTapGesture`, `Toggle`, `Slider`, `Picker`, `Link`:
+```swift
+Button("Send") { ... }
+    .accessibilityLabel("Send message")
+    .accessibilityHint("Sends your message to the AI")
+    .accessibilityIdentifier("send_message_button")
+```
+
+For non-decorative `Image`:
+```swift
+Image(systemName: "heart.fill")
+    .accessibilityLabel("Favorite")
+    .accessibilityHidden(false)
+```
+
+For decorative images:
+```swift
+Image("background_art")
+    .accessibilityHidden(true)
+```
+
+### Step 3: Verify Dynamic Type support
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# Find hardcoded font sizes (not system styles)
+grep -rn "\.font(.system(size:" --include="*.swift" \
+  --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "//\|test\|Test" | head -20
+```
+
+Replace hardcoded font sizes with system styles:
+```swift
+// Before
+.font(.system(size: 16))
+// After
+.font(.body)
+```
+
+### Step 4: Check key user flows for VoiceOver correctness
+
+Mentally trace these flows and ensure every element is reachable and labelled:
+1. Start new conversation
+2. Type and send a message
+3. Open Settings
+4. Enable/disable a feature in Settings
+5. Switch AI provider
+
+### Step 5: Build and test
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+swift test 2>&1 | tail -3
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" -derivedDataPath /tmp/TheaBuildAccess \
+  CODE_SIGNING_ALLOWED=NO ARCHS=arm64 build 2>&1 | grep "BUILD\|error:" | tail -5
+git add -A && git commit -m "Auto-save: Accessibility audit — labels, hints, identifiers, Dynamic Type"
+```
+
+## SUCCESS CRITERIA
+- swiftlint lint: 0 violations at increased strictness
+- Every interactive SwiftUI element has .accessibilityLabel + .accessibilityIdentifier
+- No hardcoded font sizes — all use system semantic styles
+- swift test: 4063+ tests passing
+- BUILD SUCCEEDED macOS Debug

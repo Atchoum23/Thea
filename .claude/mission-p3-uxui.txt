@@ -1,0 +1,136 @@
+# THEA P3 UI/UX IMPROVEMENTS MISSION (runs after lint+accessibility completes)
+# ══════════════════════════════════════════════════════════════════════════════
+# WAIT: only start AFTER mission-p3-lint-access completes to avoid merge conflicts.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Complete Item 12 from the P3 Quality mission: UI/UX Improvements.
+
+## NON-NEGOTIABLE RULES
+- NEVER remove existing views, features, or navigation paths
+- Only ADD and IMPROVE existing UI — new states, transitions, polish
+- Build after every change
+- Commit after each meaningful improvement
+
+## TASK
+
+### Step 1: Read the UI/UX implementation plan
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+cat .claude/UI_UX_IMPLEMENTATION_PLAN.md
+```
+
+Read every section. Identify items marked as:
+- ❌ Not implemented
+- ⚠️ Partially implemented
+- TODO: or FIXME:
+
+### Step 2: Verify design system consistency
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# Find hardcoded Color values (should use TheaDesignSystem tokens)
+grep -rn "Color(\.red\|Color(\.blue\|Color(hex:\|Color(red:\|#[0-9A-F]" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "//\|test\|Test\|gitleaks" | head -20
+
+# Find hardcoded corner radii / padding values (should use design tokens)
+grep -rn "\.cornerRadius([0-9]\|\.padding([0-9]" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "//\|test\|Test" | head -20
+```
+
+For each hardcoded value, replace with the appropriate `TheaDesignSystem` token:
+```swift
+// Before
+.cornerRadius(12)
+// After
+.cornerRadius(TheaDesignSystem.Radius.card)
+```
+
+### Step 3: Verify Liquid Glass materials are used correctly
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+grep -rn "\.background\|\.overlay" --include="*.swift" \
+  --exclude-dir=".build" --exclude-dir="MetaAI" macOS/ | \
+  grep -v "//\|test\|\.clear\|.color\|Color\.\|material\|Material" | head -20
+```
+
+Surfaces that should use Liquid Glass materials:
+- Chat message bubbles → `.ultraThinMaterial`
+- Sidebar panels → `.regularMaterial`
+- Floating overlays / popovers → `.thinMaterial`
+- Settings panes → `.regularMaterial`
+
+### Step 4: Add empty states where missing
+
+Every list or grid that can be empty MUST show an illustrated empty state:
+```swift
+if items.isEmpty {
+    ContentUnavailableView(
+        "No Conversations",
+        systemImage: "bubble.left.and.bubble.right",
+        description: Text("Start a conversation to see it here.")
+    )
+}
+```
+
+Find lists/grids without empty states:
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+grep -rn "List\|LazyVGrid\|LazyHGrid\|ForEach" --include="*.swift" \
+  --exclude-dir=".build" --exclude-dir="MetaAI" macOS/ iOS/ | \
+  grep -v "//\|test\|ContentUnavailable\|empty\|isEmpty" | head -20
+```
+
+### Step 5: Add loading states where missing
+
+Every async operation must show a `ProgressView` or skeleton while loading:
+```swift
+if isLoading {
+    ProgressView("Loading...")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+} else {
+    // content
+}
+```
+
+### Step 6: Verify spring animations on interactive elements
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+grep -rn "withAnimation\|\.animation(" --include="*.swift" \
+  --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "//\|.spring\|spring\|.bouncy\|bounce" | head -20
+```
+
+Replace `.easeInOut` and `.linear` on interactive elements with spring:
+```swift
+// Before
+withAnimation(.easeInOut(duration: 0.3)) { ... }
+// After
+withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) { ... }
+```
+
+### Step 7: Build and commit
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+swift test 2>&1 | tail -3
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" -derivedDataPath /tmp/TheaBuildUX \
+  CODE_SIGNING_ALLOWED=NO ARCHS=arm64 build 2>&1 | grep "BUILD\|error:" | tail -5
+git add -A && git commit -m "Auto-save: P3 UI/UX — design tokens, Liquid Glass, empty/loading states, spring animations"
+git pushsync origin main
+```
+
+## SUCCESS CRITERIA
+- No hardcoded Color values — all use TheaDesignSystem tokens
+- No hardcoded corner radii or padding — all use TheaDesignSystem tokens
+- All list/grid views have ContentUnavailableView empty states
+- All async operations show ProgressView while loading
+- Spring animations on all interactive elements
+- swift test: 4063+ tests passing
+- BUILD SUCCEEDED all platforms
