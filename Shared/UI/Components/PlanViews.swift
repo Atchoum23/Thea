@@ -158,7 +158,7 @@ private struct PhaseSection: View {
             .font(.caption)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(completedCount == totalCount ? Color.green.opacity(0.2) : Color.secondary.opacity(0.2))
+            .background(completedCount == totalCount ? Color.theaSuccess.opacity(0.2) : Color.secondary.opacity(0.2))
             .clipShape(Capsule())
     }
 }
@@ -203,7 +203,7 @@ private struct StepRow: View {
                 .accessibilityLabel("In progress")
         case .completed:
             Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.green)
+                .foregroundStyle(.theaSuccess)
                 .accessibilityLabel("Completed")
         case .failed:
             Image(systemName: "xmark.circle.fill")

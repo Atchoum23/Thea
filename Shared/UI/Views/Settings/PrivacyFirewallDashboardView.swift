@@ -88,7 +88,7 @@ struct NetworkActivityMonitorView: View {
                 ForEach(trafficByCategory, id: \.category) { item in
                     HStack {
                         Image(systemName: item.category.sfSymbol)
-                            .foregroundStyle(item.category.isPrivacyConcern ? .red : Color.theaPrimaryDefault)
+                            .foregroundStyle(item.category.isPrivacyConcern ? Color.theaError : Color.theaPrimaryDefault)
                             .frame(width: 24)
                         Text(item.category.rawValue)
                             .font(.theaBody)
