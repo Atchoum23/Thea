@@ -182,8 +182,8 @@ struct MessageBubble: View {
 
             // Confidence badge with hallucination warning
             if let confidence = message.metadata?.confidence, confidence > 0 {
+                let hasHallucinationFlags = !(message.metadata?.hallucinationFlags ?? []).isEmpty
                 HStack(spacing: 2) {
-                    let hasHallucinationFlags = !(message.metadata?.hallucinationFlags ?? []).isEmpty
                     Image(systemName: hasHallucinationFlags
                         ? "exclamationmark.triangle.fill"
                         : confidence >= 0.8 ? "checkmark.shield.fill" : "shield")

@@ -416,6 +416,235 @@
         }
     }
 
+    // MARK: - Inline Plan Checklist
+
+    /// Shows the task plan inline (replacing the old sheet) as an expandable
+    /// DisclosureGroup checklist. High-risk steps require acknowledgement before
+    /// the "Approve and Execute" button becomes active.
+    struct InlinePlanChecklist: View {
+        @Bindable var session: CoworkSession
+        let onApprove: () -> Void
+        let onCancel: () -> Void
+
+        @State private var expandedStepID: UUID?
+
+        private var highRiskSteps: [CoworkStep] {
+            session.steps.filter(\.isHighRisk)
+        }
+
+        private var allHighRiskAcknowledged: Bool {
+            highRiskSteps.allSatisfy(\.riskAcknowledged)
+        }
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                // Header
+                HStack {
+                    Image(systemName: "checklist")
+                        .accessibilityHidden(true)
+                    Text("Review Plan — \(session.steps.count) step\(session.steps.count == 1 ? "" : "s")")
+                        .font(.headline)
+                    Spacer()
+
+                    if !highRiskSteps.isEmpty {
+                        Label("\(highRiskSteps.count) high-risk", systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.orange.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Plan review. \(session.steps.count) steps.")
+
+                Divider()
+
+                // Steps checklist
+                ScrollView {
+                    LazyVStack(spacing: 8) {
+                        ForEach(session.steps.indices, id: \.self) { index in
+                            PlanStepRow(
+                                step: $session.steps[index],
+                                isExpanded: expandedStepID == session.steps[index].id,
+                                onToggleExpand: {
+                                    let stepID = session.steps[index].id
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        expandedStepID = expandedStepID == stepID ? nil : stepID
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                .frame(maxHeight: 300)
+
+                Divider()
+
+                // Approve / Cancel bar
+                HStack(spacing: 12) {
+                    Button("Cancel Plan") {
+                        onCancel()
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityLabel("Cancel plan")
+                    .accessibilityHint("Cancels the plan and resets the session")
+
+                    Spacer()
+
+                    if !highRiskSteps.isEmpty && !allHighRiskAcknowledged {
+                        Text("Acknowledge all high-risk steps to proceed")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Button {
+                        onApprove()
+                    } label: {
+                        Label("Approve and Execute", systemImage: "play.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!allHighRiskAcknowledged)
+                    .accessibilityLabel("Approve and execute plan")
+                    .accessibilityHint(
+                        allHighRiskAcknowledged
+                            ? "Starts executing all planned steps"
+                            : "Acknowledge all high-risk steps first"
+                    )
+                }
+            }
+            .padding(16)
+            .background(Color(nsColor: .windowBackgroundColor))
+        }
+    }
+
+    // MARK: - Plan Step Row
+
+    /// A single row in the inline plan checklist.
+    private struct PlanStepRow: View {
+        @Binding var step: CoworkStep
+        let isExpanded: Bool
+        let onToggleExpand: () -> Void
+
+        @State private var notesText: String = ""
+
+        var body: some View {
+            DisclosureGroup(isExpanded: Binding(get: { isExpanded }, set: { _ in onToggleExpand() })) {
+                // Expanded detail content
+                VStack(alignment: .leading, spacing: 8) {
+                    if !step.toolsUsed.isEmpty {
+                        HStack(alignment: .top, spacing: 4) {
+                            Text("Tools:")
+                                .font(.caption.bold())
+                            Text(step.toolsUsed.joined(separator: ", "))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    // Optional notes field
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Notes:")
+                            .font(.caption.bold())
+                        TextField("Add notes for this step…", text: $notesText, axis: .vertical)
+                            .font(.caption)
+                            .lineLimit(2...4)
+                            .padding(6)
+                            .background(Color(nsColor: .textBackgroundColor))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                            .onChange(of: notesText) { _, newValue in
+                                step.notes = newValue.isEmpty ? nil : newValue
+                            }
+                            .accessibilityLabel("Notes for step \(step.stepNumber)")
+                    }
+
+                    // High-risk acknowledgement
+                    if step.isHighRisk {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+                                .accessibilityHidden(true)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("High-risk step")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(.orange)
+                                Text("This step may modify system state, delete files, or make irreversible changes.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer()
+
+                            Toggle("Acknowledge", isOn: $step.riskAcknowledged)
+                                .toggleStyle(.checkbox)
+                                .accessibilityLabel("Acknowledge risk for step \(step.stepNumber)")
+                                .accessibilityHint("Check to acknowledge you understand the risk of this step")
+                        }
+                        .padding(8)
+                        .background(Color.orange.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                }
+                .padding(.leading, 28)
+                .padding(.top, 6)
+                .padding(.bottom, 4)
+            } label: {
+                HStack(spacing: 8) {
+                    // Step status icon (pending = checkbox outline)
+                    Image(systemName: step.status == .completed ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(step.status == .completed ? .green : .secondary)
+                        .imageScale(.medium)
+                        .accessibilityHidden(true)
+
+                    // Step number badge
+                    Text("\(step.stepNumber)")
+                        .font(.caption.bold())
+                        .frame(width: 20, height: 20)
+                        .background(Color.accentColor.opacity(0.15))
+                        .clipShape(Circle())
+                        .accessibilityHidden(true)
+
+                    // Step description
+                    Text(step.description)
+                        .font(.body)
+                        .lineLimit(2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // High-risk badge
+                    if step.isHighRisk {
+                        Image(systemName: step.riskAcknowledged ? "checkmark.shield.fill" : "exclamationmark.triangle.fill")
+                            .foregroundStyle(step.riskAcknowledged ? .green : .orange)
+                            .imageScale(.small)
+                            .accessibilityLabel(step.riskAcknowledged ? "Risk acknowledged" : "High risk - acknowledgement required")
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                step.isHighRisk && !step.riskAcknowledged
+                    ? Color.orange.opacity(0.04)
+                    : Color(nsColor: .controlBackgroundColor)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(
+                        step.isHighRisk && !step.riskAcknowledged ? Color.orange.opacity(0.3) : Color(nsColor: .separatorColor),
+                        lineWidth: 0.5
+                    )
+            )
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Step \(step.stepNumber): \(step.description)\(step.isHighRisk ? ", high risk" : "")")
+            .onAppear {
+                notesText = step.notes ?? ""
+            }
+        }
+    }
+
     #Preview {
         CoworkView()
             .frame(width: 1000, height: 700)

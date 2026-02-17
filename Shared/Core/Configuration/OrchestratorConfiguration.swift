@@ -74,6 +74,7 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
 
     /// Get preferred models for a task type.
     /// Returns user-defined routing rules first, falls back to catalog-computed preferences.
+    @MainActor
     public func preferredModels(for taskType: TaskType) -> [String] {
         let rules = taskRoutingRules[taskType.rawValue] ?? []
         if !rules.isEmpty { return rules }
@@ -84,6 +85,7 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
     /// Used when no user-defined routing rule exists for the given task type.
     /// - Parameter taskType: The task to route.
     /// - Returns: Ordered list of models (best first) from the catalog.
+    @MainActor
     public func computePreferredModels(for taskType: TaskType) -> [AIModel] {
         let required = taskType.preferredCapabilities
         let capabilityService = SystemCapabilityService.shared

@@ -133,7 +133,8 @@ public actor MessagesMonitor {
     private func monitorLoop() async {
         while isRunning && !Task.isCancelled {
             await checkForNewMessages()
-            let interval = baseIntervalSeconds * EnergyAdaptiveThrottler.shared.intervalMultiplier
+            let multiplier = await MainActor.run { EnergyAdaptiveThrottler.shared.intervalMultiplier }
+            let interval = baseIntervalSeconds * multiplier
             try? await Task.sleep(for: .seconds(interval))
         }
     }
