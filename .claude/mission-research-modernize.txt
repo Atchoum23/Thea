@@ -1,0 +1,118 @@
+# THEA RESEARCH & MODERNIZATION MISSION
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND IMPROVE.
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Goal: Research the LATEST (2026) releases, APIs, patterns, and best practices
+# for every technology Thea uses, then apply those improvements to the codebase.
+# Add capabilities. Modernize APIs. Fix deprecated usages. Never remove features.
+
+## PHASE 1: Research Latest APIs and Patterns
+
+Web-search and apply findings for each technology Thea uses:
+
+### Swift 6.0 / Swift Concurrency 2026
+- Search: "Swift 6.0 strict concurrency best practices 2026"
+- Search: "Swift Observation framework vs Combine 2026"
+- Search: "Swift actors sendable patterns 2026"
+Apply: Replace any remaining Combine publishers with Observation where appropriate.
+Apply: Fix any remaining data-race-prone patterns.
+
+### SwiftUI 6 / macOS 26 / iOS 26
+- Search: "SwiftUI 6 new features macOS 26 Sequoia 2026"
+- Search: "Liquid Glass SwiftUI implementation macOS 26"
+- Search: "SwiftUI 6 NavigationStack best practices 2026"
+- Search: "iOS 26 SwiftUI new APIs 2026"
+Apply: Use new SwiftUI 6 modifiers where they improve code.
+Apply: NavigationStack (not NavigationView — deprecated in iOS 16).
+Apply: @Observable macro (Observation framework) where appropriate.
+
+### SwiftData 2026
+- Search: "SwiftData macOS 26 iOS 26 new features 2026"
+- Search: "SwiftData vs CoreData 2026 migration"
+Apply: Ensure @Model definitions use latest SwiftData patterns.
+Apply: Verify CloudKit integration with SwiftData.
+
+### HealthKit 2026
+- Search: "HealthKit new APIs iOS 26 2026"
+- Search: "HealthKit HKQueryDescriptor Swift 2026"
+Apply: Use latest HealthKit query patterns, new data types.
+
+### CoreML / On-device AI 2026
+- Search: "CoreML new features macOS 26 2026"
+- Search: "Apple Intelligence on-device models Swift 2026"
+- Search: "MLX Swift latest updates 2026"
+Apply: Update MLX Swift usage to latest APIs.
+Apply: Use Apple Intelligence APIs if available and relevant.
+
+### Maestro / XCTest 2026
+- Search: "Maestro mobile testing best practices 2026"
+- Search: "XCTest Swift 6 async testing 2026"
+Apply: Update E2E test flows with latest Maestro patterns.
+Apply: Use async/await in test cases properly.
+
+### App Intents / AssistantSchema 2026
+- Search: "App Intents AssistantSchema iOS 26 macOS 26 2026"
+Apply: Complete AssistantSchema conformance for all App Intents.
+
+### Tizen 2026
+- Search: "Samsung Tizen TV app development 2026 best practices"
+- Search: "Tizen Web App APIs 2026"
+Apply: Update thea-tizen to use latest Tizen TV APIs.
+
+## PHASE 2: Apply Modernizations
+
+For each research finding:
+1. Identify which files in Thea use the old API
+2. Update to the new API pattern
+3. Verify it builds: `swift build` or `xcodebuild ... build | grep error:`
+4. Commit: `git add -A && git commit -m "Auto-save: Modernize [component] to [new API] — 2026 best practices"`
+
+## PHASE 3: UI/UX_IMPLEMENTATION_PLAN.md Enhancements
+
+Read the full plan:
+```bash
+cat "/Users/alexis/Documents/IT & Tech/MyApps/Thea/.claude/UI_UX_IMPLEMENTATION_PLAN.md"
+```
+
+Implement the high-priority items not yet done:
+- Artifacts panel (4th column for generated content) in ContentView
+- Cmd+K command palette (like Claude Desktop) — global keyboard shortcut
+- Conversation branching (fork/edit messages)
+- @ mentions in input field
+- "Focus mode" that hides sidebar/list
+- Quick Entry (Option+Option global shortcut)
+- Rich markdown rendering improvements
+- Code syntax highlighting improvements
+- Task/plan visualization for multi-step operations
+
+## PHASE 4: Inter-Component Integration Review
+
+Verify these critical pipelines work end-to-end:
+1. User message → TaskClassifier → ModelRouter → AI provider → response → ConfidenceSystem → UI
+2. BehavioralFingerprint accumulates data as user interacts
+3. SmartNotificationScheduler uses BehavioralFingerprint for timing
+4. HealthCoachingPipeline reads HealthKit → generates insights → shown in UI
+5. PersonalKnowledgeGraph builds entities from conversations
+6. AmbientIntelligence triggers driving mode correctly
+7. AgentMode transitions through phases correctly
+8. AutonomyController approves/rejects correctly based on risk
+
+For each pipeline: trace the code, identify gaps, wire any missing connections.
+Commit fixes.
+
+## PHASE 5: Documentation Update
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# Update CLAUDE.md project facts with current state
+# Update THEA_MASTER_IMPROVEMENT_PLAN.md with completed items
+# Update APRIL_2026_COMPLIANCE.md with status
+```
+
+## SUCCESS CRITERIA
+- At least 5 meaningful API modernizations applied and committed
+- UI_UX_IMPLEMENTATION_PLAN high-priority items implemented
+- All inter-component pipelines verified working end-to-end
+- 0 deprecated API usages remaining
+- 0 build errors/warnings after all changes

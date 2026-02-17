@@ -1,0 +1,137 @@
+# THEA GUI BUILDS + SANITIZERS + RUNTIME VERIFICATION MISSION
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Phase 5.5 from COMPREHENSIVE_QA_PLAN.md: GUI Builds (MANDATORY)
+# Phase 3: Sanitizers (ASan + TSan)
+# Phase 6: Memory & Runtime Verification
+#
+# Reference: .claude/XCODE_BUILD_FIX_MODUS_OPERANDI.md
+# Reference: .claude/COMPREHENSIVE_QA_PLAN.md sections 3, 5.5, 6
+
+## CRITICAL: Why GUI Builds Are Mandatory
+# CLI xcodebuild success does NOT guarantee GUI success.
+# Xcode's build system has GUI-only paths (plugins, extensions, asset catalogs).
+# BOTH phases must pass for a build to be considered clean.
+
+## PHASE 1: Read Required References
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+cat .claude/XCODE_BUILD_FIX_MODUS_OPERANDI.md
+cat .claude/COMPREHENSIVE_QA_PLAN.md | head -400
+```
+
+## PHASE 2: GUI Build Verification via xcodebuild -workspace
+
+Since we cannot use AppleScript interactively, use xcodebuild with the workspace:
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+# Check for workspace
+ls *.xcworkspace 2>/dev/null || echo "No workspace, using project"
+
+# GUI-equivalent build: use full xcodebuild with all checks enabled
+for scheme in Thea-macOS Thea-iOS Thea-watchOS Thea-tvOS; do
+  echo "=== GUI-equivalent build: $scheme ==="
+  xcodebuild \
+    -project Thea.xcodeproj \
+    -scheme "$scheme" \
+    -configuration Debug \
+    -derivedDataPath /tmp/TheaBuild \
+    CODE_SIGNING_ALLOWED=NO \
+    CLANG_ANALYZER_EXEC_ENABLE=YES \
+    ENABLE_PREVIEWS=YES \
+    build 2>&1 | grep -E "(error:|warning:|SUCCEEDED|FAILED)" | tail -10
+  echo ""
+done
+```
+
+Fix every error and warning. Commit after each.
+
+## PHASE 3: Static Analyzer (Clang)
+```bash
+# Run Clang static analyzer on macOS scheme
+xcodebuild analyze \
+  -project Thea.xcodeproj \
+  -scheme Thea-macOS \
+  -configuration Debug \
+  -derivedDataPath /tmp/TheaBuildAnalyze \
+  CODE_SIGNING_ALLOWED=NO \
+  build 2>&1 | grep -E "(analyzer|warning:|error:)" | head -50
+```
+
+Fix all analyzer warnings. These catch real bugs:
+- Memory leaks
+- Null pointer dereferences
+- Use-after-free
+- Uninitialized variables
+
+## PHASE 4: Address Sanitizer (ASan)
+```bash
+# Build with ASan for macOS
+xcodebuild \
+  -project Thea.xcodeproj \
+  -scheme Thea-macOS \
+  -configuration Debug \
+  -derivedDataPath /tmp/TheaBuildASan \
+  CODE_SIGNING_ALLOWED=NO \
+  ENABLE_ADDRESS_SANITIZER=YES \
+  OTHER_SWIFT_FLAGS="-sanitize=address" \
+  build 2>&1 | grep -E "(error:|warning:|SUCCEEDED|FAILED)" | tail -5
+```
+
+## PHASE 5: Thread Sanitizer (TSan)
+```bash
+# Build with TSan — critical for Swift concurrency verification
+xcodebuild \
+  -project Thea.xcodeproj \
+  -scheme Thea-macOS \
+  -configuration Debug \
+  -derivedDataPath /tmp/TheaBuildTSan \
+  CODE_SIGNING_ALLOWED=NO \
+  ENABLE_THREAD_SANITIZER=YES \
+  OTHER_SWIFT_FLAGS="-sanitize=thread" \
+  build 2>&1 | grep -E "(error:|warning:|SUCCEEDED|FAILED)" | tail -5
+```
+
+Fix any concurrency issues found. Common Swift 6 actor isolation problems:
+- Sending non-Sendable values across actor boundaries
+- Data races in shared mutable state
+- Unprotected access to main-actor-isolated properties from background
+
+## PHASE 6: Swift Package Tests with Coverage
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+swift test --enable-code-coverage 2>&1 | tail -30
+
+# Generate coverage report
+swift test --enable-code-coverage && \
+  xcrun llvm-cov export \
+    .build/debug/TheaPackageTests.xctest/Contents/MacOS/TheaPackageTests \
+    -instr-profile .build/debug/codecov/default.profdata \
+    --format=text 2>/dev/null | head -50
+```
+
+## PHASE 7: Leak Checks
+```bash
+# Run leaks tool on the test binary
+swift build 2>/dev/null
+leaks --atExit -- swift test 2>&1 | grep -E "(leak|LEAK|error|Error)" | head -20
+```
+
+## PHASE 8: SwiftLint Strict Mode
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+swiftlint lint --strict 2>&1 | grep -E "(warning|error)" | wc -l
+swiftlint lint --strict 2>&1 | tail -5
+```
+Must be 0 violations.
+
+## SUCCESS CRITERIA
+- All 4 schemes build clean (GUI-equivalent, with CLANG_ANALYZER_EXEC_ENABLE=YES)
+- Clang static analyzer: 0 warnings
+- ASan build: succeeds (0 address sanitizer errors)
+- TSan build: succeeds (0 thread sanitizer errors)
+- swift test --enable-code-coverage: all tests pass
+- swiftlint --strict: 0 violations

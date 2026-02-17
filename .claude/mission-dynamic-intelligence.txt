@@ -1,0 +1,171 @@
+# THEA DYNAMIC INTELLIGENCE MISSION
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND IMPROVE.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Replace hardcoded constants throughout Thea with intelligent, system-aware,
+dynamically computed values. Thea runs on MSM3U (256GB RAM, M3 Ultra) and
+MBAM2 (24GB RAM, M2). Static limits designed for one machine cripple the other.
+
+## PHASE 1: Discover All Hardcoded Values
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+# Hardcoded model names (should be discovered/selected dynamically)
+grep -rn '"claude-\|"gpt-\|"llama\|"qwen\|"gemma\|"deepseek\|"mistral' \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "//\|test\|Test\|mock\|Mock" | head -40
+
+# Hardcoded numeric limits (token caps, timeouts, buffer sizes, retry counts)
+grep -rn "maxTokens\|maxToken\|contextLength\|bufferSize\|maxRetries\|timeout\|\.limit\|= 1000\|= 2000\|= 4096\|= 8192\|= 16384\|= 32768\|= 128000\|= 200000" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "//\|test\|Test" | head -40
+
+# Hardcoded temperatures (should be task-adaptive)
+grep -rn "temperature.*=.*0\.\|temperature:.*0\." \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | head -20
+
+# Hardcoded RAM/system assumptions
+grep -rn "192\|256\|24.*GB\|GB.*RAM\|\.available\|ProcessInfo.*physicalMemory" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | head -20
+```
+
+## PHASE 2: System Capability Introspection Service
+
+Create `Shared/Intelligence/SystemCapability/SystemCapabilityService.swift`:
+
+```swift
+/// Introspects the current device to determine available resources.
+/// Used by ModelRouter, SmartModelRouter, and all subsystems to make
+/// capacity-appropriate decisions at runtime rather than compile time.
+@MainActor
+final class SystemCapabilityService: ObservableObject {
+    static let shared = SystemCapabilityService()
+
+    /// Total physical RAM in bytes (from ProcessInfo)
+    var totalRAMBytes: UInt64
+    /// Available RAM estimate (heuristic: total - typically used)
+    var availableRAMBytes: UInt64
+    /// CPU core count (performance cores)
+    var performanceCoreCount: Int
+    /// Is this Apple Silicon?
+    var isAppleSilicon: Bool
+    /// Chip generation (M1=1, M2=2, M3=3, M4=4 — from sysctl)
+    var chipGeneration: Int
+    /// Max safe local model size in GB that can be loaded
+    var maxLocalModelGB: Double { Double(availableRAMBytes) / 1_073_741_824 * 0.6 }
+    /// Recommended context length based on available RAM
+    var recommendedContextLength: Int
+    /// Recommended max tokens for generation
+    var recommendedMaxTokens: Int
+    /// Optimal embedding batch size
+    var embeddingBatchSize: Int
+}
+```
+
+## PHASE 3: Dynamic Model Selection
+
+Currently SmartModelRouter and ModelRouter have hardcoded model names.
+Fix them to use discovered models from `CoreMLInferenceEngine.discoverLLMModels()`
+and `SystemCapabilityService` to choose the best available model at runtime:
+
+```swift
+// BEFORE (bad):
+let model = "claude-opus-4-6"  // hardcoded
+
+// AFTER (dynamic):
+let model = await SmartModelRouter.shared.selectOptimalModel(
+    for: taskType,
+    maxCostTier: userPreference,
+    requiredCapabilities: [.reasoning, .toolUse]
+)
+```
+
+For each AI provider:
+- AnthropicProvider: select between claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-6 based on task complexity + user settings
+- LocalMLX: load largest model that fits in SystemCapabilityService.maxLocalModelGB
+- CoreML: select Gemma 1B vs 4B based on available RAM and task type
+
+## PHASE 4: Dynamic Token/Context Limits
+
+Replace ALL hardcoded token limits with dynamic computation:
+
+```swift
+// Compute from model's actual context window, not hardcoded value
+let contextLimit = AnthropicProvider.contextWindow(for: selectedModel)
+let reserveForOutput = min(4096, contextLimit / 4)
+let availableForContext = contextLimit - reserveForOutput
+```
+
+Find every `maxTokens = 4096` or similar hardcoded value in:
+- ChatManager.swift
+- AnthropicProvider.swift
+- ModelRouter.swift
+- Any streaming or completion callers
+
+Replace with model-capability-aware computation.
+
+## PHASE 5: Dynamic Retry and Timeout
+
+Replace hardcoded timeouts and retry counts with adaptive values:
+- Base timeout: 30s for fast models, 120s for large local models
+- Retry count: 3 base, increase if error rate > 20% in last 10 calls
+- Backoff: exponential (1s, 2s, 4s) with jitter
+
+Track rolling error rates in `SmartModelRouter` and adjust dynamically.
+
+## PHASE 6: Dynamic Temperature (Task-Adaptive)
+
+```swift
+extension TaskType {
+    /// Optimal temperature for this task type
+    var recommendedTemperature: Double {
+        switch self {
+        case .codeGeneration: return 0.1    // Deterministic
+        case .factualQuery:   return 0.2    // Near-deterministic
+        case .creative:       return 0.8    // Creative
+        case .reasoning:      return 0.3    // Thoughtful but consistent
+        case .casual:         return 0.7    // Natural conversation
+        default:              return 0.5
+        }
+    }
+}
+```
+
+Replace all `temperature: 0.7` or similar hardcoded values with `taskType.recommendedTemperature`.
+
+## PHASE 7: Dynamic Embedding Configuration
+
+The embedding model dimensions, batch sizes, and similarity thresholds in
+SemanticSearchService should adapt to:
+- Available RAM (larger batches if more RAM)
+- Model in use (dimension matches model output)
+- Query load (smaller batches under high load)
+
+## PHASE 8: Update AIModelCatalog
+
+In `Core/Models/AIModel.swift` or `AIModelCatalog.swift`:
+- Every model entry should have: contextWindow, maxOutputTokens, costTier, capabilities[]
+- ModelRouter picks models using these properties, not hardcoded strings
+- When Anthropic/OpenAI releases a new model, adding it to the catalog automatically
+  makes it available to routing decisions — no other code changes needed
+
+## PHASE 9: Build and Verify
+
+```bash
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO build 2>&1 | grep "error:\|warning:" | head -20
+```
+
+0 errors, 0 warnings. Commit every change.
+
+## SUCCESS CRITERIA
+- SystemCapabilityService exists and is used by ModelRouter and SmartModelRouter
+- No hardcoded model names in routing or provider logic (use catalog)
+- No hardcoded token/context limits (use model capability from catalog)
+- Temperature is task-adaptive via TaskType extension
+- Retry/timeout is adaptive based on error rates and model type
+- 0 build errors, 0 warnings

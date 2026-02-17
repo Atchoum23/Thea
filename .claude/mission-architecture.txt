@@ -1,0 +1,122 @@
+# THEA ARCHITECTURE AND CODE QUALITY MISSION
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND IMPROVE.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Make Thea's codebase maximally clean, robust, well-documented, and architecturally
+sound — ready for constant additions and improvements without degradation.
+SOLID principles. Dependency injection. Protocol-oriented. Zero technical debt.
+
+## PHASE 1: Architecture Audit
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# Count total lines of code
+find . -name "*.swift" -not -path "*/.build/*" -not -path "*/MetaAI/*" | \
+  xargs wc -l 2>/dev/null | tail -1
+
+# Files over 500 lines (need splitting per CLAUDE.md preference)
+find . -name "*.swift" -not -path "*/.build/*" | while read f; do
+  lines=$(wc -l < "$f")
+  if [ "$lines" -gt 500 ]; then echo "$lines $f"; fi
+done | sort -rn | head -20
+```
+
+For each file over 500 lines:
+- Identify logical sections
+- Extract into focused, single-responsibility files
+- Maintain all existing functionality (NEVER remove)
+- Update project.yml if new files created, run xcodegen generate
+
+## PHASE 2: SOLID Principles Audit
+
+### Single Responsibility
+- Each class/struct/actor should do ONE thing
+- Managers should not also be views
+- Services should not also be stores
+
+### Open/Closed
+- Core protocols should be extensible without modification
+- New AI providers should be addable by conforming to AIProvider protocol
+
+### Liskov Substitution
+- All protocol implementations must be fully compatible
+
+### Interface Segregation
+- Large protocols should be split into focused ones
+
+### Dependency Injection
+- Singletons should have injectable alternatives for testing
+- Views should receive dependencies via init, not access singletons directly
+
+## PHASE 3: Swift 6 Strict Concurrency Audit
+
+```bash
+# Check for any remaining concurrency warnings
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO \
+  SWIFT_STRICT_CONCURRENCY=complete \
+  build 2>&1 | grep "warning:.*actor\|warning:.*Sendable\|warning:.*async\|warning:.*isolation" | head -30
+```
+
+Fix ALL concurrency warnings. They are real bugs waiting to happen.
+
+## PHASE 4: Error Handling Completeness
+
+```bash
+# Find try without do-catch or proper propagation
+grep -rn "try " --include="*.swift" --exclude-dir=".build" . 2>/dev/null | \
+  grep -v "try await\|try!\|try?\|// " | grep -v "do {" | head -30
+```
+
+Every `try` must have:
+- Proper `do { } catch { }` with user-facing error handling, OR
+- `try?` with explicit handling of the nil case, OR  
+- `throws` propagation to a caller that handles it
+
+## PHASE 5: Test Coverage Improvement
+
+```bash
+swift test --enable-code-coverage 2>&1 | tail -5
+
+# Which services/managers have ZERO test coverage?
+find Tests/ -name "*.swift" | xargs grep -l "XCTest" 2>/dev/null | sort
+```
+
+For each major service without tests, add at minimum:
+- Init test (verifies it initializes cleanly)
+- Happy path test (verifies core functionality)
+- Error path test (verifies error handling)
+
+## PHASE 6: Documentation Quality
+
+All public APIs must have:
+- `/// Summary line` (one line)
+- `/// - Parameter name: description` for each param
+- `/// - Returns: description` if non-void
+- `/// - Throws: description` if throwing
+
+```bash
+# Find public declarations without doc comments
+grep -rn "public func\|public var\|public class\|public struct\|public protocol" \
+  --include="*.swift" --exclude-dir=".build" . 2>/dev/null | \
+  grep -v "// MARK:\|///\|//" | head -30
+```
+
+## PHASE 7: Extensibility Improvements
+
+For constant future improvements:
+1. Every major subsystem should have a protocol at its boundary
+2. New capabilities should be addable via protocol conformance
+3. Feature flags in FeatureFlags.swift for safe rollouts (verify iCloud KVS sync works)
+4. All platform differences handled via #if os() guards, not separate files
+
+## SUCCESS CRITERIA
+- No files over 500 lines (or well-documented exceptions)
+- All concurrency warnings resolved
+- Every public API documented
+- All major services have tests
+- SOLID principles applied throughout
+- 0 build errors, 0 warnings

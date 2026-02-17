@@ -1,0 +1,156 @@
+# THEA FINAL GUI BUILDS WAVE — PHASE 5.5
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND IMPROVE.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Execute the final "GUI builds" validation — sequential Release builds for all
+4 Apple platforms with Clang Analyzer, full warnings-as-errors, and a final
+swift test run. This is Phase 5.5 from COMPREHENSIVE_QA_PLAN.md.
+
+## MACHINE CONTEXT
+- MSM3U: Apple M3 Ultra, 256GB RAM
+- DerivedData: /tmp/TheaBuild (always use this — avoids iCloud codesign issues)
+- arm64 only for Release builds (mlx-audio-swift requires arm64)
+- CODE_SIGNING_ALLOWED=NO (personal use, no distribution signing needed)
+
+## PHASE 1: Pre-flight
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+# Ensure project is up to date
+git pull --ff-only 2>/dev/null || true
+xcodegen generate 2>&1 | tail -3
+
+# Run swift tests first — must all pass
+swift test 2>&1 | tail -5
+```
+
+If swift test fails: fix all failures before proceeding to builds.
+
+## PHASE 2: macOS Release Build (with Clang Analyzer)
+
+```bash
+xcodebuild \
+  -project Thea.xcodeproj \
+  -scheme Thea-macOS \
+  -configuration Release \
+  -destination "platform=macOS" \
+  -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO \
+  ARCHS=arm64 \
+  ONLY_ACTIVE_ARCH=YES \
+  CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED=YES \
+  CLANG_STATIC_ANALYZER_MODE=deep \
+  RUN_CLANG_STATIC_ANALYZER=YES \
+  SWIFT_TREAT_WARNINGS_AS_ERRORS=NO \
+  build 2>&1 | grep -E "error:|warning:.*Thea|BUILD SUCCEEDED|BUILD FAILED|Analyze" | head -50
+```
+
+Fix every `error:`. Document any `warning:` that cannot be fixed (with reason).
+Target: BUILD SUCCEEDED, 0 errors.
+
+## PHASE 3: iOS Release Build
+
+```bash
+xcodebuild \
+  -project Thea.xcodeproj \
+  -scheme Thea-iOS \
+  -configuration Release \
+  -destination "generic/platform=iOS" \
+  -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO \
+  ARCHS=arm64 \
+  ONLY_ACTIVE_ARCH=YES \
+  ENABLE_DEBUG_DYLIB=NO \
+  build 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | head -30
+```
+
+## PHASE 4: watchOS Release Build
+
+```bash
+xcodebuild \
+  -project Thea.xcodeproj \
+  -scheme Thea-watchOS \
+  -configuration Release \
+  -destination "generic/platform=watchOS" \
+  -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO \
+  ARCHS=arm64 \
+  build 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | head -30
+```
+
+## PHASE 5: tvOS Release Build
+
+```bash
+xcodebuild \
+  -project Thea.xcodeproj \
+  -scheme Thea-tvOS \
+  -configuration Release \
+  -destination "generic/platform=tvOS" \
+  -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO \
+  ARCHS=arm64 \
+  build 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | head -30
+```
+
+## PHASE 6: Address Sanitizer Build (macOS Debug)
+
+```bash
+xcodebuild \
+  -project Thea.xcodeproj \
+  -scheme Thea-macOS \
+  -configuration Debug \
+  -destination "platform=macOS" \
+  -derivedDataPath /tmp/TheaBuildASan \
+  CODE_SIGNING_ALLOWED=NO \
+  ENABLE_ADDRESS_SANITIZER=YES \
+  build 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | head -20
+```
+
+## PHASE 7: Thread Sanitizer Build (macOS Debug)
+
+```bash
+xcodebuild \
+  -project Thea.xcodeproj \
+  -scheme Thea-macOS \
+  -configuration Debug \
+  -destination "platform=macOS" \
+  -derivedDataPath /tmp/TheaBuildTSan \
+  CODE_SIGNING_ALLOWED=NO \
+  ENABLE_THREAD_SANITIZER=YES \
+  build 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | head -20
+```
+
+## PHASE 8: Final swift test + coverage
+
+```bash
+swift test --enable-code-coverage 2>&1 | tail -10
+
+# Coverage report
+xcrun llvm-cov report \
+  .build/debug/TheaPackageTests.xctest/Contents/MacOS/TheaPackageTests \
+  -instr-profile .build/debug/codecov/default.profdata \
+  --ignore-filename-regex="Tests|test|Mock|Stub" 2>/dev/null | tail -5
+```
+
+## PHASE 9: Final git status and push
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+git add -A && git status
+# Commit any remaining fixes
+git add -A && git commit -m "Auto-save: Final GUI builds wave — all 4 platforms Release + ASan + TSan clean" || true
+git pushsync origin main
+```
+
+## SUCCESS CRITERIA
+- macOS Release: BUILD SUCCEEDED, 0 errors
+- iOS Release: BUILD SUCCEEDED, 0 errors
+- watchOS Release: BUILD SUCCEEDED, 0 errors
+- tvOS Release: BUILD SUCCEEDED, 0 errors
+- ASan build: BUILD SUCCEEDED (no address sanitizer errors at build time)
+- TSan build: BUILD SUCCEEDED (no thread sanitizer errors at build time)
+- swift test: all tests pass
+- git pushsync: complete
