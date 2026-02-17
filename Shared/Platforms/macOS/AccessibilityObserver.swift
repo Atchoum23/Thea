@@ -15,6 +15,7 @@
 
     /// Observes system-wide accessibility events for deep context awareness
     /// Requires Accessibility permission to be granted by the user
+    // @unchecked Sendable: mutable state serialized on dedicated `queue` DispatchQueue
     public final class AccessibilityObserver: @unchecked Sendable {
         public static let shared = AccessibilityObserver()
 
