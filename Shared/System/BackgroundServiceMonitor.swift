@@ -147,7 +147,11 @@ final class BackgroundServiceMonitor: ObservableObject {
         if syncEnabled {
             let lastSync = CloudKitService.shared.lastSyncDate
             let interval = lastSync.map { Date().timeIntervalSince($0) } ?? .infinity
-            if interval < 600 { // Within 10 minutes
+            // Guard against infinity/NaN before Int conversion — crashes if lastSyncDate is nil
+            if !interval.isFinite {
+                cloudKitStatus = .unknown
+                cloudKitMsg = "Never synced"
+            } else if interval < 600 { // Within 10 minutes
                 cloudKitStatus = .healthy
                 cloudKitMsg = "Last sync \(Int(interval))s ago"
             } else if interval < 3600 { // Within 1 hour
