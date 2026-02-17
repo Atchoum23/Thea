@@ -58,7 +58,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Run OSV Scanner
+      - name: Run OSV Scanner (JSON)
         uses: google/osv-scanner-action@v2
         with:
           scan-args: |-
@@ -67,19 +67,30 @@ jobs:
             ./
         continue-on-error: true
 
+      - name: Run OSV Scanner (SARIF)
+        uses: google/osv-scanner-action@v2
+        with:
+          scan-args: |-
+            --output=results.sarif
+            --format=sarif
+            ./
+        continue-on-error: true
+
       - name: Upload OSV Results
         if: always()
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: osv-scan-results-${{ github.sha }}
-          path: results.json
+          path: |
+            results.json
+            results.sarif
           retention-days: 30
 
       - name: Upload SARIF to GitHub Security
-        if: always() && hashFiles('results.json') != ''
+        if: always() && hashFiles('results.sarif') != ''
         uses: github/codeql-action/upload-sarif@4f3212b61783c3c68e8309a0f18a699764811cda # v3.27.1
         with:
-          sarif_file: results.json
+          sarif_file: results.sarif
           category: osv-scanner
 
       - name: Check for Critical Vulnerabilities
