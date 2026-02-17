@@ -315,16 +315,15 @@ public final class PredictiveEngine: ObservableObject {
 
         let dataURL = containerURL.appendingPathComponent("predictive_data.json")
 
-        guard let data = try? Data(contentsOf: dataURL),
-              let decoded = try? JSONDecoder().decode(PredictiveData.self, from: data)
-        else {
-            return
+        do {
+            let data = try Data(contentsOf: dataURL)
+            let decoded = try JSONDecoder().decode(PredictiveData.self, from: data)
+            transitionMatrix = decoded.transitionMatrix
+            timeBasedPatterns = decoded.timeBasedPatterns
+            logger.info("Loaded predictive data")
+        } catch {
+            logger.error("Failed to load predictive data: \(error.localizedDescription)")
         }
-
-        transitionMatrix = decoded.transitionMatrix
-        timeBasedPatterns = decoded.timeBasedPatterns
-
-        logger.info("Loaded predictive data")
     }
 
     private func saveHistoricalData() {
@@ -340,9 +339,12 @@ public final class PredictiveEngine: ObservableObject {
             timeBasedPatterns: timeBasedPatterns
         )
 
-        if let encoded = try? JSONEncoder().encode(data) {
-            try? encoded.write(to: dataURL)
+        do {
+            let encoded = try JSONEncoder().encode(data)
+            try encoded.write(to: dataURL)
             logger.info("Saved predictive data")
+        } catch {
+            logger.error("Failed to save predictive data: \(error.localizedDescription)")
         }
     }
 
