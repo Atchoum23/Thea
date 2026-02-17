@@ -336,19 +336,20 @@ public final class EventBus: ObservableObject {
     private func persistEvent(_ event: any TheaEvent) async {
         // Store last N events to UserDefaults
         // In production, would use EventStore with file-based storage
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+
+        var storedEvents = loadPersistedEventData()
+
         do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-
-            var storedEvents = loadPersistedEventData()
-
-            if let eventData = try? encoder.encode(AnyTheaEvent(event)) {
-                storedEvents.append(eventData)
-                if storedEvents.count > maxHistorySize {
-                    storedEvents.removeFirst()
-                }
-                UserDefaults.standard.set(storedEvents, forKey: "EventBus.events")
+            let eventData = try encoder.encode(AnyTheaEvent(event))
+            storedEvents.append(eventData)
+            if storedEvents.count > maxHistorySize {
+                storedEvents.removeFirst()
             }
+            UserDefaults.standard.set(storedEvents, forKey: "EventBus.events")
+        } catch {
+            logger.warning("Failed to persist event \(event.id): \(error.localizedDescription)")
         }
     }
 
@@ -424,6 +425,13 @@ private struct AnyTheaEvent: Codable {
         self.timestamp = event.timestamp
         self.source = event.source
         self.category = event.category
-        self.data = (try? JSONEncoder().encode(event)) ?? Data()
+        do {
+            self.data = try JSONEncoder().encode(event)
+        } catch {
+            // Fallback: store empty data but log the encoding failure
+            Logger(subsystem: "com.thea.v2", category: "EventBus")
+                .warning("Failed to encode event \(event.id) data: \(error.localizedDescription)")
+            self.data = Data()
+        }
     }
 }
