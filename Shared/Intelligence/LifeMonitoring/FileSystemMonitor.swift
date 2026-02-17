@@ -19,6 +19,7 @@ public protocol FileSystemMonitorDelegate: AnyObject, Sendable {
 // MARK: - File System Monitor
 
 /// Monitors file system changes on macOS
+// @unchecked Sendable: mutable state serialized on dedicated `eventQueue` DispatchQueue + FSEvents callback
 public final class FileSystemMonitor: @unchecked Sendable {
     private let logger = Logger(subsystem: "ai.thea.app", category: "FileSystemMonitor")
 
