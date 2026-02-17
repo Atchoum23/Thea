@@ -129,6 +129,9 @@ public struct LifeMonitoringConfiguration: Codable, Sendable {
     public var behaviorPatternAnalysisEnabled: Bool = true
     public var efficiencySuggestionsEnabled: Bool = true
 
+    // V2.2 Environment Monitoring toggles
+    public var weatherMonitoringEnabled: Bool = true
+
     // V2.2 AI-Powered Intelligence toggles
     public var holisticPatternIntelligenceEnabled: Bool = true
     public var predictiveEngineEnabled: Bool = true

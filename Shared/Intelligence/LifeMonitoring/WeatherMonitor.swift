@@ -66,6 +66,7 @@ public final class WeatherMonitor: NSObject, Sendable {
 
     private override init() {
         super.init()
+        locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
         loadPersistedSnapshot()
     }

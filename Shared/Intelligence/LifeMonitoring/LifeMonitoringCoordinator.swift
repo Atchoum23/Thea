@@ -66,6 +66,9 @@ public final class LifeMonitoringCoordinator: ObservableObject {
     private var behaviorPatternAnalyzer: BehaviorPatternAnalyzer?
     private var efficiencySuggestionEngine: EfficiencySuggestionEngine?
 
+    // V2.2 Environment monitors
+    private var weatherMonitor: WeatherMonitor?
+
     // V2.2 AI-Powered Intelligence (these are singletons, we just reference them)
     // - HolisticPatternIntelligence: Deep pattern recognition across all life aspects
     // - PredictiveLifeEngine: Anticipatory intelligence and proactive suggestions
@@ -178,6 +181,9 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         inputActivityMonitor?.stopMonitoring()
         behaviorPatternAnalyzer?.stop()
         efficiencySuggestionEngine?.stop()
+
+        // Stop V2.2 environment monitors
+        weatherMonitor?.stop()
 
         // Stop V2.2 AI intelligence systems
         HolisticPatternIntelligence.shared.stop()
@@ -373,6 +379,14 @@ public final class LifeMonitoringCoordinator: ObservableObject {
             logger.info("Efficiency suggestion engine started")
         }
 
+        // Weather Monitoring (V2.2)
+        if configuration.weatherMonitoringEnabled {
+            weatherMonitor = WeatherMonitor.shared
+            weatherMonitor?.start()
+            activeDataSources.insert(.weather)
+            logger.info("Weather monitoring started")
+        }
+
         // V2.2 AI-Powered Intelligence Systems
         // These are singletons that subscribe to our event stream automatically
         if configuration.holisticPatternIntelligenceEnabled {
@@ -454,6 +468,9 @@ public final class LifeMonitoringCoordinator: ObservableObject {
              .tvWatching, .tvAppLaunch, .tvChannelChange, .tvPowerState, .tvVolumeChange,
              .photoTaken, .screenshotTaken, .photoEdited, .photoFavorited, .photoDeleted:
             .leisure
+        // Weather — environmental, no direct user activity
+        case .weatherChange:
+            .idle
         // App switch — categorize by app data
         case .appSwitch:
             mapAppToActivity(event.data)
