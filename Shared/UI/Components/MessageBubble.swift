@@ -137,6 +137,7 @@ struct MessageBubble: View {
             HStack(spacing: 4) {
                 Image(systemName: "brain.head.profile")
                     .font(.system(size: 10))
+                    .accessibilityHidden(true)
                 Text("Thinking")
                     .font(.theaCaption2.weight(.medium))
             }
@@ -187,11 +188,13 @@ struct MessageBubble: View {
                         ? "exclamationmark.triangle.fill"
                         : confidence >= 0.8 ? "checkmark.shield.fill" : "shield")
                         .font(.system(size: 8))
+                        .accessibilityHidden(true)
                     Text("\(Int(confidence * 100))%")
                         .font(.theaCaption2)
                 }
                 .foregroundStyle(confidence >= 0.8 ? Color.theaSuccess : confidence >= 0.5 ? Color.theaWarning : Color.theaError)
                 .help(confidenceHelpText)
+                .accessibilityLabel(hasHallucinationFlags ? "Confidence \(Int(confidence * 100))% — hallucination flags detected" : "Confidence \(Int(confidence * 100))%")
             }
 
             // Respect timestampDisplay setting

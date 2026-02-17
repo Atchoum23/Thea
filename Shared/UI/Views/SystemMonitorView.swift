@@ -45,6 +45,7 @@ struct SystemMonitorView: View {
                     HStack(spacing: 8) {
                         Image(systemName: snap.thermal.icon)
                             .foregroundStyle(thermalColor(snap.thermal))
+                            .accessibilityHidden(true)
                         Text(snap.thermal.rawValue)
                             .font(.caption)
                             .foregroundStyle(.secondary)
