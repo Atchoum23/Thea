@@ -10550,8 +10550,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Blaizzy/mlx-audio-swift";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = revision;
+				revision = a59f149;
 			};
 		};
 		9EA8AC1A7D7F3D93EC97ED2F /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
