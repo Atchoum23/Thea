@@ -138,7 +138,7 @@ final class ProviderRegistry: ProviderRegistryProtocol {
         }
 
         debugLog("📊 Total local models registered: \(localProviders.count)")
-        registryLogger.info("Total local models registered: \(localProviders.count)")
+        registryLogger.info("Total local models registered: \(self.localProviders.count)")
         #else
         // Local models not available on watchOS/tvOS
         debugLog("📱 Skipping local model refresh - not available on this platform")
