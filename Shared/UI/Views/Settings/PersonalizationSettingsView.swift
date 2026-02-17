@@ -7,6 +7,7 @@ import SwiftUI
 
 struct PersonalizationSettingsView: View {
     @StateObject private var settings = SettingsManager.shared
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var contextDraft: String = ""
     @State private var responsePrefDraft: String = ""
@@ -213,7 +214,7 @@ struct PersonalizationSettingsView: View {
                 .padding(.top, 12)
             }
         }
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: showSavedBanner)
+        .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7), value: showSavedBanner)
     }
 
     // MARK: - Helpers
