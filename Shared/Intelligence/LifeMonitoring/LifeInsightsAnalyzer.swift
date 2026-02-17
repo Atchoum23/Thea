@@ -61,7 +61,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
                     await runAnalysisBatch()
                 }
 
-                try? await Task.sleep(nanoseconds: UInt64(analysisIntervalSeconds) * 1_000_000_000)
+                try? await Task.sleep(for: .seconds(analysisIntervalSeconds))
             }
         }
 

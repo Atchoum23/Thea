@@ -34,7 +34,7 @@ public final class SmartDeviceManager: ObservableObject {
 
         // Discovery would use mDNS/Bonjour, SSDP, or manufacturer-specific protocols
         // Simulated for now
-        try? await Task.sleep(nanoseconds: 2_000_000_000)
+        try? await Task.sleep(for: .seconds(2))
 
         discoveryStatus = .completed
         logger.info("Device discovery completed")

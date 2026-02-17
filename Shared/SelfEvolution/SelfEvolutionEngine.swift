@@ -365,7 +365,7 @@ public final class SelfEvolutionEngine: ObservableObject {
         }
 
         // Simulate implementation time
-        try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        try await Task.sleep(for: .milliseconds(100)) // 0.1 seconds
     }
 
     private func createFile(at path: String, for task: EvolutionTask) async throws {
@@ -631,7 +631,7 @@ public final class SelfEvolutionEngine: ObservableObject {
 
             // Simulate build progress
             for i in 0 ... 10 {
-                try await Task.sleep(nanoseconds: 50_000_000)
+                try await Task.sleep(for: .milliseconds(50))
                 buildProgress = BuildProgress(phase: phase, progress: Double(i) / 10.0)
             }
         }

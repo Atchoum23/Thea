@@ -341,7 +341,7 @@ public class RemoteScreenService: ObservableObject {
                     let elapsed = Date().timeIntervalSince(startTime)
                     let sleepTime = max(0, frameInterval - elapsed)
                     if sleepTime > 0 {
-                        try await Task.sleep(nanoseconds: UInt64(sleepTime * 1_000_000_000))
+                        try await Task.sleep(for: .seconds(sleepTime))
                     }
 
                     await MainActor.run {
@@ -350,7 +350,7 @@ public class RemoteScreenService: ObservableObject {
 
                 } catch {
                     if !Task.isCancelled {
-                        try? await Task.sleep(nanoseconds: 100_000_000) // 100ms retry delay
+                        try? await Task.sleep(for: .milliseconds(100)) // 100ms retry delay
                     }
                 }
             }

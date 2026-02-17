@@ -304,7 +304,7 @@ public final class AutonomousAgent: ObservableObject {
 
     private func runTests() async -> TestResult {
         // Simulated test run - in production, would execute actual tests
-        try? await Task.sleep(nanoseconds: 500_000_000)
+        try? await Task.sleep(for: .milliseconds(500))
         return TestResult(
             id: UUID(),
             timestamp: Date(),

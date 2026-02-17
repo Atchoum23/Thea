@@ -114,7 +114,7 @@
 
                 // Timeout task
                 group.addTask {
-                    try await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                    try await Task.sleep(for: .seconds(timeoutSeconds))
                     throw ExecutorError.timeout
                 }
 

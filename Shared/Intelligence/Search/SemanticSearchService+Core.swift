@@ -272,7 +272,7 @@ public final class SemanticSearchService: ObservableObject {
             indexingProgress = Double(batchIndex + 1) / Double(totalBatches)
 
             // Allow UI updates
-            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            try? await Task.sleep(for: .milliseconds(10)) // 10ms
         }
 
         // Save to disk
@@ -625,7 +625,7 @@ extension SemanticSearchService {
     private func schedulePeriodicSave() {
         saveTask = Task.detached { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 60_000_000_000) // 60 seconds
+                try? await Task.sleep(for: .seconds(60)) // 60 seconds
                 await self?.embeddingIndex.saveIfNeeded()
             }
         }

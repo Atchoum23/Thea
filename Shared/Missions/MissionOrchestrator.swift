@@ -68,7 +68,7 @@ public final class MissionOrchestrator: ObservableObject {
         for (phaseIndex, phase) in mission.phases.enumerated() {
             try Task.checkCancellation()
             while isPaused {
-                try await Task.sleep(nanoseconds: 100_000_000)
+                try await Task.sleep(for: .milliseconds(100))
             }
 
             currentPhase = phase
@@ -80,7 +80,7 @@ public final class MissionOrchestrator: ObservableObject {
             for step in phase.steps {
                 try Task.checkCancellation()
                 while isPaused {
-                    try await Task.sleep(nanoseconds: 100_000_000)
+                    try await Task.sleep(for: .milliseconds(100))
                 }
 
                 currentStep = step

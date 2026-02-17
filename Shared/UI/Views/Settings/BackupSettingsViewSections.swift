@@ -288,7 +288,7 @@ extension BackupSettingsView {
 
         Task {
             for i in 1...10 {
-                try? await Task.sleep(nanoseconds: 300_000_000)
+                try? await Task.sleep(for: .milliseconds(300))
                 await MainActor.run {
                     backupProgress = Double(i) / 10.0
                 }
@@ -325,7 +325,7 @@ extension BackupSettingsView {
 
         Task {
             for i in 1...10 {
-                try? await Task.sleep(nanoseconds: 400_000_000)
+                try? await Task.sleep(for: .milliseconds(400))
                 await MainActor.run {
                     restoreProgress = Double(i) / 10.0
                 }

@@ -598,7 +598,7 @@ public actor HealthIntelligence {
         Task { [weak self] in
             while await (self?.checkIsRunning() ?? false) {
                 await self?.checkMedicationReminders()
-                try? await Task.sleep(nanoseconds: 60_000_000_000) // Check every minute
+                try? await Task.sleep(for: .seconds(60)) // Check every minute
             }
         }
 
@@ -606,7 +606,7 @@ public actor HealthIntelligence {
         Task { [weak self] in
             while await (self?.checkIsRunning() ?? false) {
                 await self?.checkAssessmentReminders()
-                try? await Task.sleep(nanoseconds: 3600_000_000_000) // Check every hour
+                try? await Task.sleep(for: .seconds(3600)) // Check every hour
             }
         }
 
@@ -614,7 +614,7 @@ public actor HealthIntelligence {
         Task { [weak self] in
             while await (self?.checkIsRunning() ?? false) {
                 await self?.syncHealthData()
-                try? await Task.sleep(nanoseconds: 1800_000_000_000) // Sync every 30 min
+                try? await Task.sleep(for: .seconds(1800)) // Sync every 30 min
             }
         }
     }

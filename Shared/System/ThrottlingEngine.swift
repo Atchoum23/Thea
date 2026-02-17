@@ -213,7 +213,7 @@ public final class ThrottlingEngine {
         // Apply delay if needed
         let delay = getOperationDelay(for: category)
         if delay > 0 {
-            try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            try await Task.sleep(for: .seconds(delay))
         }
 
         return try await operation()
@@ -238,7 +238,7 @@ public final class ThrottlingEngine {
         configuration.enabled = false
 
         Task {
-            try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(duration))
             await MainActor.run {
                 self.configuration = previousConfig
             }

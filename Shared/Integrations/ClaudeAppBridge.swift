@@ -98,7 +98,7 @@ import Foundation
             try await workspace.openApplication(at: claudeURL, configuration: configuration)
 
             // Wait for app to be ready
-            try await Task.sleep(nanoseconds: 1_000_000_000)
+            try await Task.sleep(for: .seconds(1))
             isClaudeRunning = true
         }
 
@@ -127,7 +127,7 @@ import Foundation
 
             // Activate Claude
             try activateClaude()
-            try await Task.sleep(nanoseconds: 500_000_000)
+            try await Task.sleep(for: .milliseconds(500))
 
             // Use AppleScript to interact with Claude
             let script = """
@@ -159,7 +159,7 @@ import Foundation
             }
 
             // Wait for response (this is a simplified version - real implementation would monitor for response)
-            try await Task.sleep(nanoseconds: 2_000_000_000)
+            try await Task.sleep(for: .seconds(2))
 
             return "Prompt sent to Claude.app"
         }
@@ -268,7 +268,7 @@ import Foundation
             currentConversationId = UUID().uuidString
 
             if let prompt {
-                try await Task.sleep(nanoseconds: 500_000_000)
+                try await Task.sleep(for: .milliseconds(500))
                 _ = try await sendPrompt(prompt)
             }
         }

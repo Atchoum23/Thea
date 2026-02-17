@@ -116,7 +116,7 @@ public actor DistributedTaskExecutor {
     private func startMonitoringTask(_ taskId: String) {
         let monitorTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                try? await Task.sleep(for: .seconds(1)) // 1 second
 
                 if let updatedTask = await fetchTaskStatus(taskId) {
                     if updatedTask.status == .completed {
@@ -369,39 +369,39 @@ public struct DistributedTask: Identifiable, Sendable {
     private func executeAIQuery(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.2, "Processing query...")
         // Simulated AI processing
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         progressHandler(0.8, "Generating response...")
-        try await Task.sleep(nanoseconds: 500_000_000)
+        try await Task.sleep(for: .milliseconds(500))
         return TaskResult(success: true, data: ["response": "AI response"])
     }
 
     private func executeSummarization(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.3, "Analyzing text...")
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         progressHandler(0.7, "Generating summary...")
-        try await Task.sleep(nanoseconds: 500_000_000)
+        try await Task.sleep(for: .milliseconds(500))
         return TaskResult(success: true, data: ["summary": "Text summary"])
     }
 
     private func executeImageAnalysis(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.2, "Loading image...")
-        try await Task.sleep(nanoseconds: 500_000_000)
+        try await Task.sleep(for: .milliseconds(500))
         progressHandler(0.5, "Analyzing...")
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         return TaskResult(success: true, data: ["analysis": "Image analysis result"])
     }
 
     private func executeCodeGeneration(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.1, "Parsing requirements...")
-        try await Task.sleep(nanoseconds: 500_000_000)
+        try await Task.sleep(for: .milliseconds(500))
         progressHandler(0.5, "Generating code...")
-        try await Task.sleep(nanoseconds: 2_000_000_000)
+        try await Task.sleep(for: .seconds(2))
         return TaskResult(success: true, data: ["code": "Generated code"])
     }
 
     private func executeGeneric(progressHandler: @escaping @Sendable (Double, String?) -> Void) async throws -> TaskResult {
         progressHandler(0.5, "Processing...")
-        try await Task.sleep(nanoseconds: 1_000_000_000)
+        try await Task.sleep(for: .seconds(1))
         return TaskResult(success: true, data: [:])
     }
 }

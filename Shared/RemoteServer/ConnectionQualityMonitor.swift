@@ -78,7 +78,7 @@ public class ConnectionQualityMonitor: ObservableObject {
         windowStartTime = Date()
         monitorTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: UInt64(qualityUpdateInterval * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(qualityUpdateInterval))
                 await MainActor.run {
                     self.updateQuality()
                     self.updateBandwidth()

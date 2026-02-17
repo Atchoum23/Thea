@@ -151,7 +151,7 @@ actor NetworkRateLimiter {
             let elapsed = Date().timeIntervalSince(lastTime)
             if elapsed < minInterval {
                 let delay = minInterval - elapsed
-                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                try await Task.sleep(for: .seconds(delay))
             }
         }
         lastRequestTime = Date()

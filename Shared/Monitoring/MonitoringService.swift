@@ -422,7 +422,7 @@ public actor IdleTimeMonitor: ActivityMonitor {
         checkTask = Task {
             while !Task.isCancelled, isActive {
                 await checkIdleState()
-                try? await Task.sleep(nanoseconds: 30_000_000_000) // 30 seconds
+                try? await Task.sleep(for: .seconds(30)) // 30 seconds
             }
         }
     }
@@ -542,7 +542,7 @@ public actor SystemInputActivityMonitor: ActivityMonitor {
         checkTask = Task {
             while !Task.isCancelled, isActive {
                 await sampleActivity()
-                try? await Task.sleep(nanoseconds: 60_000_000_000) // 1 minute
+                try? await Task.sleep(for: .seconds(60)) // 1 minute
             }
         }
     }

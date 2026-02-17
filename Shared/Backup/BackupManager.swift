@@ -83,7 +83,7 @@ public final class BackupManager: ObservableObject {
 
         Task {
             while true {
-                try? await Task.sleep(nanoseconds: UInt64(autoBackupInterval * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(autoBackupInterval))
 
                 if autoBackupEnabled {
                     if let lastDate = lastBackupDate {

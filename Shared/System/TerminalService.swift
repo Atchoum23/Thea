@@ -101,7 +101,7 @@ public actor TerminalService {
 
         // Set up timeout
         let timeoutTask = Task {
-            try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+            try await Task.sleep(for: .seconds(timeout))
             if process.isRunning {
                 logger.warning("Command timeout reached, terminating process")
                 process.terminate()
@@ -171,7 +171,7 @@ public actor TerminalService {
 
         // Set up timeout
         let timeoutTask = Task {
-            try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+            try await Task.sleep(for: .seconds(timeout))
             if process.isRunning {
                 logger.warning("Shell script timeout reached, terminating process")
                 process.terminate()

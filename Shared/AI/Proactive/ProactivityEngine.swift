@@ -89,7 +89,7 @@ public final class ProactivityEngine: ObservableObject {
                 }
 
                 // Wait for next check interval
-                try? await Task.sleep(nanoseconds: UInt64(agent.checkIntervalSeconds) * 1_000_000_000)
+                try? await Task.sleep(for: .seconds(agent.checkIntervalSeconds))
             }
         }
 

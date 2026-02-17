@@ -326,7 +326,7 @@ actor TheaDownloadManager {
         var lastBytes: Int64 = 0
 
         while !Task.isCancelled {
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
+            try? await Task.sleep(for: .milliseconds(500)) // 0.5s
 
             guard var item = downloads.first(where: { $0.id == id }) else { break }
             guard item.status == .downloading else { break }

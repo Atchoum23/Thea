@@ -136,7 +136,7 @@
             // Auto-stop after timeout
             if !continuousListening {
                 Task {
-                    try? await Task.sleep(nanoseconds: UInt64(listeningTimeout * 1_000_000_000))
+                    try? await Task.sleep(for: .seconds(listeningTimeout))
                     if self.isListening {
                         self.stopListening()
                     }

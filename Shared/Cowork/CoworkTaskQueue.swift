@@ -58,7 +58,7 @@
                 // Get next tasks up to concurrent limit
                 let availableSlots = maxConcurrentTasks - activeTasks.count
                 guard availableSlots > 0 else {
-                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+                    try? await Task.sleep(for: .milliseconds(100)) // 0.1s
                     continue
                 }
 
@@ -69,7 +69,7 @@
                     if activeTasks.isEmpty {
                         break // All done
                     }
-                    try? await Task.sleep(nanoseconds: 100_000_000)
+                    try? await Task.sleep(for: .milliseconds(100))
                     continue
                 }
 

@@ -130,7 +130,7 @@ public class PhotosMonitor: NSObject, ObservableObject {
         pollingTask = Task {
             while !Task.isCancelled {
                 await checkForNewPhotos()
-                try? await Task.sleep(nanoseconds: 5 * 1_000_000_000) // 5 seconds
+                try? await Task.sleep(for: .seconds(5)) // 5 seconds
             }
         }
     }

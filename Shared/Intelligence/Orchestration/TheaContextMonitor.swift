@@ -26,7 +26,7 @@ actor TheaContextMonitor {
         monitorTask = Task {
             logger.info("Context monitor started")
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: UInt64(checkInterval * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(checkInterval))
                 await checkAllSessions()
             }
         }

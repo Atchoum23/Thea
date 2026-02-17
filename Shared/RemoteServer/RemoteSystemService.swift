@@ -367,7 +367,7 @@ extension RemoteSystemService {
             try task.run()
 
             let timeoutTask = Task {
-                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                try await Task.sleep(for: .seconds(timeout))
                 if task.isRunning {
                     task.terminate()
                 }
@@ -548,7 +548,7 @@ extension RemoteSystemService {
         }
 
         // Auto-timeout after 60 seconds
-        try? await Task.sleep(nanoseconds: 60_000_000_000)
+        try? await Task.sleep(for: .seconds(60))
         pendingConfirmations.removeAll { $0.id == confirmationId }
         return false
     }

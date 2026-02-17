@@ -114,7 +114,7 @@ public class RemoteSessionManager: ObservableObject {
             }
 
             // Wait for heartbeat interval
-            try? await Task.sleep(nanoseconds: UInt64(heartbeatInterval * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(heartbeatInterval))
 
             // Update activity timestamp if connection is alive
             if sessions[session.id] != nil {
@@ -275,7 +275,7 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
             }
 
             group.addTask {
-                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                try await Task.sleep(for: .seconds(timeout))
                 throw RemoteServerError.timeout
             }
 

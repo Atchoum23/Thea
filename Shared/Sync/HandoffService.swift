@@ -364,7 +364,7 @@ public actor PresenceMonitor {
         presenceTask = Task {
             while !Task.isCancelled, isMonitoring {
                 await updatePresence()
-                try? await Task.sleep(nanoseconds: UInt64(updateInterval * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(updateInterval))
             }
         }
     }

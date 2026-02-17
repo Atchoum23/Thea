@@ -679,7 +679,7 @@ public final class ResourceDiscoveryEngine: ObservableObject {
         backgroundDiscoveryTask?.cancel()
         backgroundDiscoveryTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: UInt64((self?.discoveryInterval ?? 3600) * 1_000_000_000))
+                try? await Task.sleep(for: .seconds((self?.discoveryInterval ?? 3600)))
 
                 if !Task.isCancelled {
                     await self?.discoverNow()

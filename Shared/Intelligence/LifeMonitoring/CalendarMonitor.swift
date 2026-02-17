@@ -189,7 +189,7 @@ public actor CalendarMonitor {
 
             // Schedule notification when event starts - using Sendable eventData
             let task = Task { [eventData] in
-                try? await Task.sleep(nanoseconds: UInt64(timeUntilStart * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(timeUntilStart))
                 guard !Task.isCancelled else { return }
                 await self.eventStartedFromData(eventData)
             }

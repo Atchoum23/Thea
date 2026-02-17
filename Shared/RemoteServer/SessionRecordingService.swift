@@ -111,7 +111,7 @@ public class SessionRecordingService: ObservableObject {
         // Start duration timer
         durationTimer = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                try? await Task.sleep(for: .seconds(1))
                 await MainActor.run {
                     if let start = self.recordingStartTime {
                         self.recordingDuration = Date().timeIntervalSince(start)

@@ -157,7 +157,7 @@ public final class TaskScheduler: ObservableObject {
     private func executeTask(_ task: ScheduledTask) async {
         // Check concurrent limit
         while runningTasks.count >= maxConcurrentTasks {
-            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+            try? await Task.sleep(for: .milliseconds(100)) // 100ms
         }
 
         guard let index = tasks.firstIndex(where: { $0.id == task.id }) else { return }
@@ -212,7 +212,7 @@ public final class TaskScheduler: ObservableObject {
                             self.tasks[taskIndex].status = .scheduled
                             // Schedule retry with delay
                             Task {
-                                try? await Task.sleep(nanoseconds: UInt64((task.retryDelay ?? self.defaultRetryDelay) * 1_000_000_000))
+                                try? await Task.sleep(for: .seconds((task.retryDelay ?? self.defaultRetryDelay)))
                                 self.scheduleTask(self.tasks[taskIndex])
                             }
                         } else {

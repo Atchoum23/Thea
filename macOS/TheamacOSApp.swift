@@ -220,7 +220,7 @@ struct TheamacOSApp: App {
 
         // PRIORITY: Initialize local model discovery FIRST (no Keychain required)
         Task {
-            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            try? await Task.sleep(for: .milliseconds(100)) // 0.1 seconds
 
             _ = LocalModelManager.shared
             _ = MLXModelManager.shared

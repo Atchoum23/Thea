@@ -327,7 +327,7 @@ public final class DraftSyncManager: ObservableObject {
         let delay = liveSyncEnabled ? 0.5 : syncDelaySeconds
 
         syncDebounceTask = Task {
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(delay))
 
             if !Task.isCancelled {
                 await syncToCloud()

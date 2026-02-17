@@ -77,7 +77,7 @@ public final class HolisticPatternIntelligence: ObservableObject {
         periodicAnalysisTask = Task {
             while !Task.isCancelled {
                 // Run deep analysis every configured interval
-                try? await Task.sleep(nanoseconds: UInt64(configuration.deepAnalysisInterval) * 1_000_000_000)
+                try? await Task.sleep(for: .seconds(configuration.deepAnalysisInterval))
                 guard !Task.isCancelled else { break }
                 await runDeepAnalysis()
             }

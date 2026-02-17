@@ -204,7 +204,7 @@
                     postKeyEvent(keyCode: CGKeyCode(kVK_Shift), keyDown: false)
                 }
 
-                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                try await Task.sleep(for: .seconds(delay))
             }
 
             logger.info("Typed \(text.count) characters")

@@ -324,7 +324,7 @@ public final class AnalyticsManager: ObservableObject {
     private func setupPeriodicSync() {
         Task {
             while true {
-                try? await Task.sleep(nanoseconds: 60_000_000_000) // Every minute
+                try? await Task.sleep(for: .seconds(60)) // Every minute
                 await syncEvents()
             }
         }

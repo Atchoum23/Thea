@@ -379,7 +379,7 @@ public actor YouTubeIntelligence {
         Task { [weak self] in
             while await (self?.checkIsRunning() ?? false) {
                 await self?.generatePeriodicInsights()
-                try? await Task.sleep(nanoseconds: 3600_000_000_000) // Every hour
+                try? await Task.sleep(for: .seconds(3600)) // Every hour
             }
         }
     }

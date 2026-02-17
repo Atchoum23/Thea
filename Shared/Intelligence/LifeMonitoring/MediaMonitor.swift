@@ -138,7 +138,7 @@ public class MediaMonitor: ObservableObject {
         pollingTask = Task {
             while !Task.isCancelled {
                 await pollMediaPlaybackState()
-                try? await Task.sleep(nanoseconds: 2 * 1_000_000_000) // 2 seconds
+                try? await Task.sleep(for: .seconds(2)) // 2 seconds
             }
         }
     }

@@ -406,7 +406,7 @@ struct RemoteAccessSettingsView: View {
         #if os(macOS)
             Task {
                 await server.networkDiscovery.startDiscovery()
-                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                try? await Task.sleep(for: .seconds(3))
                 isScanning = false
             }
         #else

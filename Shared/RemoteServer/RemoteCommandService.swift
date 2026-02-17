@@ -97,7 +97,7 @@ public actor RemoteCommandService {
                 logger.error("Failed to poll commands: \(error)")
             }
 
-            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+            try? await Task.sleep(for: .seconds(5)) // 5 seconds
         }
     }
 
@@ -125,7 +125,7 @@ public actor RemoteCommandService {
             if let result = try await fetchRemoteCommandResult(commandId) {
                 return result
             }
-            try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            try await Task.sleep(for: .milliseconds(500)) // 0.5 seconds
         }
 
         throw RemoteCommandError.timeout

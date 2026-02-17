@@ -150,7 +150,7 @@ public actor XcodeIntegration: AppIntegrationModule {
             // The user can navigate manually or we could use AppleScript to go to line
             if let targetLine = line {
                 // Give Xcode time to open the file
-                try await Task.sleep(nanoseconds: 500_000_000)
+                try await Task.sleep(for: .milliseconds(500))
                 try await goToLine(targetLine)
             }
         #else

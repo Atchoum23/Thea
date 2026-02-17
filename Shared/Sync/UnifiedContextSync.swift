@@ -104,7 +104,7 @@ public actor UnifiedContextSync {
         syncTimer?.cancel()
         syncTimer = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: UInt64(syncInterval * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(syncInterval))
                 await performDeltaSync()
             }
         }

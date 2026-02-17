@@ -184,7 +184,7 @@
 
             // Set up timeout
             let timeoutTask = Task {
-                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                try await Task.sleep(for: .seconds(timeout))
                 if process.isRunning {
                     logger.warning("Build timeout reached, terminating process")
                     process.terminate()

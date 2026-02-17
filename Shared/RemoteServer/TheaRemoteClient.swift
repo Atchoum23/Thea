@@ -149,7 +149,7 @@ public class TheaRemoteClient: ObservableObject {
     private func waitForConnection() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             let timeoutTask = Task {
-                try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+                try await Task.sleep(for: .seconds(10)) // 10 seconds
                 continuation.resume(throwing: ClientError.connectionTimeout)
             }
 
@@ -344,7 +344,7 @@ public class TheaRemoteClient: ObservableObject {
                     // Ping timeout - connection may be dead
                 }
 
-                try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                try? await Task.sleep(for: .seconds(5)) // 5 seconds
             }
         }
     }
@@ -391,7 +391,7 @@ public class TheaRemoteClient: ObservableObject {
             }
 
             group.addTask {
-                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                try await Task.sleep(for: .seconds(timeout))
                 throw ClientError.timeout
             }
 

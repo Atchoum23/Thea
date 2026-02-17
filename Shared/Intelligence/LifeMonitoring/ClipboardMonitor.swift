@@ -96,7 +96,7 @@ public actor ClipboardMonitor {
                 await captureMonitoredClipboardContent()
             }
 
-            try? await Task.sleep(nanoseconds: pollIntervalMs * 1_000_000)
+            try? await Task.sleep(for: .milliseconds(pollIntervalMs))
         }
     }
 

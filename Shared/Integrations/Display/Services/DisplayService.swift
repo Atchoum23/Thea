@@ -380,7 +380,7 @@ import Foundation
             // Poll ambient light sensor every 5 seconds
             monitoringTask = Task.detached { [weak self] in
                 while !Task.isCancelled {
-                    try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                    try? await Task.sleep(for: .seconds(5)) // 5 seconds
                     guard let self, await self.isMonitoring else { break }
                     if let level = try? await self.getCurrentLightLevel(),
                        let cb = await self.currentCallback {

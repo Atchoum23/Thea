@@ -58,7 +58,7 @@ public final class PredictiveEngine: ObservableObject {
         predictionTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.generatePredictions()
-                try? await Task.sleep(nanoseconds: 60_000_000_000) // Every minute
+                try? await Task.sleep(for: .seconds(60)) // Every minute
             }
         }
     }

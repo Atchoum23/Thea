@@ -248,7 +248,7 @@ public final class PredictiveLifeEngine: ObservableObject {
 
         predictionTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: UInt64(configuration.predictionInterval) * 1_000_000_000)
+                try? await Task.sleep(for: .seconds(configuration.predictionInterval))
                 guard !Task.isCancelled else { break }
                 await runPredictionCycle()
             }

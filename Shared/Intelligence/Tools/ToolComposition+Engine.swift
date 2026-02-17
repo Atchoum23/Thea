@@ -242,7 +242,7 @@ public final class ToolCompositionEngine: ObservableObject {
 
                 if retryCount <= step.retryPolicy.maxRetries {
                     let delay = step.retryPolicy.delaySeconds * pow(step.retryPolicy.backoffMultiplier, Double(retryCount - 1))
-                    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    try? await Task.sleep(for: .seconds(delay))
                     logger.debug("Retrying step \(step.name) (attempt \(retryCount))")
                 } else {
                     let duration = Date().timeIntervalSince(startTime)
@@ -305,7 +305,7 @@ public final class ToolCompositionEngine: ObservableObject {
     private func executeTool(_ toolId: String, inputs: [String: String]) async throws -> [String: String] {
         // Simulate tool execution
         // In production, this would call actual tool implementations
-        try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
+        try await Task.sleep(for: .milliseconds(100))  // 0.1 seconds
 
         return ["result": "Executed \(toolId) with inputs: \(inputs)"]
     }

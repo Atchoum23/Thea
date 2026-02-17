@@ -146,7 +146,7 @@ import Foundation
 
             // Check again after a delay
             Task {
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                try? await Task.sleep(for: .seconds(2))
                 checkAccessibilityPermissions()
             }
         }
@@ -310,7 +310,7 @@ import Foundation
             try await workspace.openApplication(at: url, configuration: configuration)
 
             // Wait for app to start
-            try await Task.sleep(nanoseconds: 1_000_000_000)
+            try await Task.sleep(for: .seconds(1))
             discoverConnectedApps()
         }
 

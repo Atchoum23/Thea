@@ -213,7 +213,7 @@ public actor AgentResourcePool {
                 // Wait for cooldown
                 let waitTime = cooldownUntil.timeIntervalSinceNow
                 if waitTime < timeout {
-                    try await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
+                    try await Task.sleep(for: .seconds(waitTime))
                 } else {
                     return nil
                 }
@@ -278,7 +278,7 @@ public actor AgentResourcePool {
         // Wait with polling
         let startTime = Date()
         while Date().timeIntervalSince(startTime) < timeout {
-            try await Task.sleep(nanoseconds: 100_000_000)  // 100ms
+            try await Task.sleep(for: .milliseconds(100))  // 100ms
 
             // Check if we can allocate now
             if let resource = resources[resourceId], resource.available >= quantity {

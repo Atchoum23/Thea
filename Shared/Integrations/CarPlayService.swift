@@ -239,7 +239,7 @@ import SwiftUI
             // Execute prompt
             Task {
                 // This would integrate with the AI service
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                try? await Task.sleep(for: .seconds(2))
 
                 await MainActor.run {
                     interfaceController?.dismissTemplate(animated: true) { _, _ in }

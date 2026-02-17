@@ -79,7 +79,7 @@ public actor THEAMCPServer {
         while isRunning {
             let byte = handle.readData(ofLength: 1)
             if byte.isEmpty {
-                try await Task.sleep(nanoseconds: 10_000_000)  // 10ms
+                try await Task.sleep(for: .milliseconds(10))  // 10ms
                 continue
             }
             if byte[0] == 0x0A {  // newline

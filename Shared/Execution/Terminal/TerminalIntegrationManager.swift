@@ -264,7 +264,7 @@
                             }
                             lastContent = content
                         }
-                        try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+                        try await Task.sleep(for: .seconds(interval))
                     } catch {
                         if !Task.isCancelled {
                             await MainActor.run {
@@ -291,7 +291,7 @@
                 if try await !isTerminalBusy() {
                     return
                 }
-                try await Task.sleep(nanoseconds: UInt64(pollInterval * 1_000_000_000))
+                try await Task.sleep(for: .seconds(pollInterval))
             }
             throw TerminalCommandExecutor.ExecutorError.timeout
         }

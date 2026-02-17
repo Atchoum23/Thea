@@ -536,7 +536,7 @@ public final class MCPGateway: ObservableObject {
         updateConnectionStatus(at: index, status: .connecting)
 
         // Simulate connection (in production, actual connection logic)
-        try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 seconds
+        try await Task.sleep(for: .milliseconds(500))  // 0.5 seconds
 
         // Update status to connected
         updateConnectionStatus(at: index, status: .connected)
@@ -617,7 +617,7 @@ public final class MCPGateway: ObservableObject {
 
                 // Wait before retry
                 let delay = request.retryPolicy.delay(forAttempt: retryCount)
-                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(delay))
                 retryCount += 1
 
                 logger.debug("Retrying request \(request.id) (attempt \(retryCount))")
@@ -773,7 +773,7 @@ public final class MCPGateway: ObservableObject {
 
     private func executeRequest(_ request: MCPRequest) async throws -> [String: String] {
         // Simulate request execution
-        try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
+        try await Task.sleep(for: .milliseconds(100))  // 0.1 seconds
 
         // In production, actual MCP protocol implementation
         return ["status": "ok", "method": request.method]

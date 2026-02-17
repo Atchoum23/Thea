@@ -406,7 +406,7 @@ struct AskView: View {
         isProcessing = true
         // Simulate AI response
         Task {
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            try? await Task.sleep(for: .seconds(2))
             response = "This is a response from Thea AI to your question: '\(inputText)'. The full implementation would connect to the AI backend."
             isProcessing = false
         }

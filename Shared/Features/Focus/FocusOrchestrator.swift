@@ -238,12 +238,12 @@ public final class FocusOrchestrator: ObservableObject {
         guard delay > 0 else { return }
 
         Task {
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(delay))
             try? await setFocus(transition.targetFocus)
 
             // If duration specified, schedule end
             if let duration = transition.duration {
-                try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(duration))
                 try? await setFocus(nil)
             }
 

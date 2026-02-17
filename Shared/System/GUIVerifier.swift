@@ -65,7 +65,7 @@
 
             // Wait for UI to settle
             if waitSeconds > 0 {
-                try await Task.sleep(nanoseconds: UInt64(waitSeconds * 1_000_000_000))
+                try await Task.sleep(for: .seconds(waitSeconds))
             }
 
             // Capture screenshot
@@ -131,7 +131,7 @@
 
             // Wait for UI to settle
             if waitSeconds > 0 {
-                try await Task.sleep(nanoseconds: UInt64(waitSeconds * 1_000_000_000))
+                try await Task.sleep(for: .seconds(waitSeconds))
             }
 
             // Capture screenshot (top portion where title usually is)
@@ -177,7 +177,7 @@
 
             // Wait for build to complete
             if waitSeconds > 0 {
-                try await Task.sleep(nanoseconds: UInt64(waitSeconds * 1_000_000_000))
+                try await Task.sleep(for: .seconds(waitSeconds))
             }
 
             // Capture screenshot
@@ -214,7 +214,7 @@
             logger.info("Running custom verification")
 
             if waitSeconds > 0 {
-                try await Task.sleep(nanoseconds: UInt64(waitSeconds * 1_000_000_000))
+                try await Task.sleep(for: .seconds(waitSeconds))
             }
 
             let screenshot = try await ScreenCapture.shared.captureScreen()

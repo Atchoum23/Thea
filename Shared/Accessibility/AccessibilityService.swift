@@ -203,7 +203,7 @@ public class AccessibilityService: ObservableObject {
         announce(message)
 
         Task {
-            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 second delay
+            try? await Task.sleep(for: .seconds(2)) // 2 second delay
             isProcessingAnnouncements = false
             processAnnouncementQueue()
         }

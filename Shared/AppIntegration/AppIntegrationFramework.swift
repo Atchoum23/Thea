@@ -188,7 +188,7 @@ public actor AppIntegrationFramework {
             )
 
             mouseDown?.post(tap: .cghidEventTap)
-            try await Task.sleep(nanoseconds: 50_000_000) // 50ms delay
+            try await Task.sleep(for: .milliseconds(50)) // 50ms delay
             mouseUp?.post(tap: .cghidEventTap)
         #else
             throw IntegrationError.notSupported
@@ -212,9 +212,9 @@ public actor AppIntegrationFramework {
                 }
 
                 keyDown?.post(tap: .cghidEventTap)
-                try await Task.sleep(nanoseconds: 10_000_000) // 10ms delay
+                try await Task.sleep(for: .milliseconds(10)) // 10ms delay
                 keyUp?.post(tap: .cghidEventTap)
-                try await Task.sleep(nanoseconds: 10_000_000)
+                try await Task.sleep(for: .milliseconds(10))
             }
         #else
             throw IntegrationError.notSupported
@@ -255,7 +255,7 @@ public actor AppIntegrationFramework {
             keyUp?.flags = flags
 
             keyDown?.post(tap: .cghidEventTap)
-            try await Task.sleep(nanoseconds: 50_000_000)
+            try await Task.sleep(for: .milliseconds(50))
             keyUp?.post(tap: .cghidEventTap)
         #else
             throw IntegrationError.notSupported

@@ -314,7 +314,7 @@
             }
 
             // Simulate some work
-            try await Task.sleep(nanoseconds: 500_000_000)
+            try await Task.sleep(for: .milliseconds(500))
         }
 
         /// Generate a summary report for a session

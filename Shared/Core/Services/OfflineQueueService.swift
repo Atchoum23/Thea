@@ -171,7 +171,7 @@ public final class OfflineQueueService {
             }
 
             // Small delay between requests
-            try? await Task.sleep(nanoseconds: 100_000_000)
+            try? await Task.sleep(for: .milliseconds(100))
         }
 
         savePendingRequests()

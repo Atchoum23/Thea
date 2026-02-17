@@ -216,7 +216,7 @@ public class SecureConnectionManager: ObservableObject {
 
         // Schedule cleanup
         Task {
-            try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(duration))
             await MainActor.run {
                 self.pairingCodes.removeValue(forKey: code)
                 if self.activePairingCode == code {
@@ -237,7 +237,7 @@ public class SecureConnectionManager: ObservableObject {
         guard let code = response.pairingCode else {
             logEvent(.authenticationFailed, "No pairing code provided")
             // SECURITY: Add delay to prevent timing attacks
-            try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
+            try? await Task.sleep(for: .milliseconds(500)) // 500ms
             return false
         }
 
@@ -245,7 +245,7 @@ public class SecureConnectionManager: ObservableObject {
         // First, get the session and verify it exists
         guard let session = pairingCodes[code] else {
             logEvent(.authenticationFailed, "Invalid pairing code")
-            try? await Task.sleep(nanoseconds: 500_000_000) // 500ms delay for timing attacks
+            try? await Task.sleep(for: .milliseconds(500)) // 500ms delay for timing attacks
             return false
         }
 

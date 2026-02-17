@@ -256,7 +256,7 @@ extension IntegratedTestRunner {
 
             // Timeout handling
             let timeoutTask = Task {
-                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                try await Task.sleep(for: .seconds(timeout))
                 if process.isRunning {
                     process.terminate()
                 }

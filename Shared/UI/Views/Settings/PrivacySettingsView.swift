@@ -421,7 +421,7 @@ extension PrivacySettingsView {
                 #endif
 
                 exportProgress = 1.0
-                try? await Task.sleep(nanoseconds: 300_000_000)
+                try? await Task.sleep(for: .milliseconds(300))
 
                 isExporting = false
                 privacyConfig.auditLogEntries.append(

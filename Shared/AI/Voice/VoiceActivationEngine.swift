@@ -283,7 +283,7 @@ final class VoiceActivationEngine {
 
         Task {
             while conversationMode {
-                try? await Task.sleep(nanoseconds: UInt64(silenceThreshold * 1_000_000_000))
+                try? await Task.sleep(for: .seconds(silenceThreshold))
 
                 if let lastSpeech = lastSpeechTime,
                    Date().timeIntervalSince(lastSpeech) >= silenceThreshold

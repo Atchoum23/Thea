@@ -154,14 +154,14 @@ public class RemoteInputService: ObservableObject {
                 downEvent?.setIntegerValueField(.mouseEventClickState, value: Int64(clickCount))
                 downEvent?.post(tap: .cghidEventTap)
 
-                try await Task.sleep(nanoseconds: 50_000_000) // 50ms
+                try await Task.sleep(for: .milliseconds(50)) // 50ms
 
                 let upEvent = CGEvent(mouseEventSource: nil, mouseType: upType, mouseCursorPosition: point, mouseButton: cgButton)
                 upEvent?.setIntegerValueField(.mouseEventClickState, value: Int64(clickCount))
                 upEvent?.post(tap: .cghidEventTap)
 
                 if clickCount > 1 {
-                    try await Task.sleep(nanoseconds: 100_000_000) // 100ms between clicks
+                    try await Task.sleep(for: .milliseconds(100)) // 100ms between clicks
                 }
             }
         }
@@ -191,7 +191,7 @@ public class RemoteInputService: ObservableObject {
             let downEvent = CGEvent(mouseEventSource: nil, mouseType: downType, mouseCursorPosition: fromPoint, mouseButton: cgButton)
             downEvent?.post(tap: .cghidEventTap)
 
-            try await Task.sleep(nanoseconds: 50_000_000)
+            try await Task.sleep(for: .milliseconds(50))
 
             // Drag to destination
             let dragType: CGEventType = button == .left ? .leftMouseDragged : button == .right ? .rightMouseDragged : .otherMouseDragged
@@ -205,7 +205,7 @@ public class RemoteInputService: ObservableObject {
                 let dragEvent = CGEvent(mouseEventSource: nil, mouseType: dragType, mouseCursorPosition: CGPoint(x: x, y: y), mouseButton: cgButton)
                 dragEvent?.post(tap: .cghidEventTap)
 
-                try await Task.sleep(nanoseconds: 10_000_000) // 10ms between drag points
+                try await Task.sleep(for: .milliseconds(10)) // 10ms between drag points
             }
 
             // Mouse up at end
@@ -239,7 +239,7 @@ public class RemoteInputService: ObservableObject {
     #if os(macOS)
         private func keyPress(keyCode: UInt16, modifiers: KeyModifiers) async throws {
             try await keyDown(keyCode: keyCode, modifiers: modifiers)
-            try await Task.sleep(nanoseconds: UInt64(keyboardDelay * 1_000_000_000))
+            try await Task.sleep(for: .seconds(keyboardDelay))
             try await keyUp(keyCode: keyCode, modifiers: modifiers)
         }
 
@@ -262,7 +262,7 @@ public class RemoteInputService: ObservableObject {
                     let modifiers: KeyModifiers = needsShift ? .shift : []
 
                     try await keyPress(keyCode: keyCode, modifiers: modifiers)
-                    try await Task.sleep(nanoseconds: UInt64(keyboardDelay * 1_000_000_000))
+                    try await Task.sleep(for: .seconds(keyboardDelay))
                 } else {
                     // For special characters, use Unicode input
                     try await typeUnicode(character)

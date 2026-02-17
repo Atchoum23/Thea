@@ -268,7 +268,7 @@ public actor IncrementalIndexer {
 
         // Schedule new debounce task
         debounceTask = Task {
-            try? await Task.sleep(nanoseconds: UInt64(debounceInterval * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(debounceInterval))
 
             guard !Task.isCancelled else { return }
 

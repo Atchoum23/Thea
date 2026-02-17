@@ -56,7 +56,7 @@ public final class InsightEngine: ObservableObject {
         analysisTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.generateInsights()
-                try? await Task.sleep(nanoseconds: UInt64(self?.insightGenerationInterval ?? 300) * 1_000_000_000)
+                try? await Task.sleep(for: .seconds(self?.insightGenerationInterval ?? 300))
             }
         }
     }

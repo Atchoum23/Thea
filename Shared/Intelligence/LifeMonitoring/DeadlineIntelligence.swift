@@ -356,7 +356,7 @@ public actor DeadlineIntelligence {
         scanTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.performPeriodicScan()
-                try? await Task.sleep(nanoseconds: 3600_000_000_000) // Every hour
+                try? await Task.sleep(for: .seconds(3600)) // Every hour
             }
         }
 
@@ -364,7 +364,7 @@ public actor DeadlineIntelligence {
         reminderTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.checkReminders()
-                try? await Task.sleep(nanoseconds: 900_000_000_000) // Every 15 minutes
+                try? await Task.sleep(for: .seconds(900)) // Every 15 minutes
             }
         }
     }

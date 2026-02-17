@@ -180,7 +180,7 @@ extension MemoryManager {
     func scheduleDecayApplication() {
         Task {
             while true {
-                try? await Task.sleep(nanoseconds: 3600_000_000_000)
+                try? await Task.sleep(for: .seconds(3600))
                 applyTimeDecay()
             }
         }

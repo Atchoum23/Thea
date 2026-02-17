@@ -246,7 +246,7 @@ public final class SpeechIntelligence: ObservableObject {
             await withCheckedContinuation { continuation in
                 Task {
                     while synthesizer.isSpeaking {
-                        try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                        try? await Task.sleep(for: .milliseconds(100)) // 100ms
                     }
                     await MainActor.run {
                         self.isSpeaking = false

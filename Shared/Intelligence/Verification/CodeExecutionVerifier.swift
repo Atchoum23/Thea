@@ -329,7 +329,7 @@ final class SwiftExecutionEngine: @unchecked Sendable {
 
             // Timeout handling
             let timeoutTask = Task {
-                try await Task.sleep(nanoseconds: 10_000_000_000)  // 10 seconds
+                try await Task.sleep(for: .seconds(10))  // 10 seconds
                 if process.isRunning {
                     process.terminate()
                 }
@@ -426,7 +426,7 @@ final class PythonExecutionEngine: @unchecked Sendable {
 
             // Timeout handling
             let timeoutTask = Task {
-                try await Task.sleep(nanoseconds: 10_000_000_000)  // 10 seconds
+                try await Task.sleep(for: .seconds(10))  // 10 seconds
                 if process.isRunning {
                     process.terminate()
                 }
