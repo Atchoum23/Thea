@@ -316,7 +316,7 @@ public final class ConfidenceSystem {
     /// - Hedging language patterns (uncertain claims presented as facts)
     /// - Specific quantitative claims (dates, numbers, URLs)
     /// - Claims contradicting known knowledge graph entities
-    public func detectHallucinations(
+    func detectHallucinations(
         _ response: String,
         query: String,
         knowledgeContext: [String] = []
