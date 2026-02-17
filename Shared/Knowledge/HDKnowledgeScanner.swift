@@ -231,26 +231,64 @@ final class HDKnowledgeScanner {
     // MARK: - Embedding Generation
 
     private func generateEmbedding(_ text: String) async throws -> [Float] {
-        // Use default AI provider for embeddings
-        guard let _ = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw KnowledgeError.noProvider
+        // Try OpenAI embedding API first (high-quality semantic vectors)
+        if let apiEmbedding = await fetchOpenAIEmbedding(for: text) {
+            return apiEmbedding
         }
 
-        // For now, generate simple hash-based embedding
-        // In production, use actual embedding API
-        return generateSimpleEmbedding(text)
+        // Fallback: hash-based embedding when API is unavailable
+        return generateHashEmbedding(text)
     }
 
-    private func generateSimpleEmbedding(_ text: String) -> [Float] {
+    private func fetchOpenAIEmbedding(for text: String) async -> [Float]? {
+        guard let apiKey = SettingsManager.shared.getAPIKey(for: "openai"), !apiKey.isEmpty else {
+            return nil
+        }
+
+        let url = URL(string: "https://api.openai.com/v1/embeddings")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 15
+
+        let body: [String: Any] = [
+            "model": "text-embedding-3-small",
+            "input": String(text.prefix(8000)),
+        ]
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                return nil
+            }
+
+            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let dataArray = json["data"] as? [[String: Any]],
+               let first = dataArray.first,
+               let embedding = first["embedding"] as? [Double] {
+                return embedding.map { Float($0) }
+            }
+        } catch {
+            // Silently fall through to hash-based fallback
+        }
+
+        return nil
+    }
+
+    /// Hash-based embedding fallback when no embedding API is available.
+    /// Not semantically meaningful, but allows cosine distance ranking by term overlap.
+    private func generateHashEmbedding(_ text: String) -> [Float] {
         let dimension = config.embeddingDimension
         var embedding = [Float](repeating: 0, count: dimension)
 
-        // Simple hash-based embedding
         let words = text.lowercased().components(separatedBy: .whitespacesAndNewlines)
-
-        for (index, word) in words.prefix(dimension).enumerated() {
+        for word in words where !word.isEmpty {
             let hash = abs(word.hashValue)
-            embedding[index] = Float(hash % 1000) / 1000.0
+            let idx = hash % dimension
+            embedding[idx] += 1.0
         }
 
         // Normalize
