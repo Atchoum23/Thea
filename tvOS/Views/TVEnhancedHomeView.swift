@@ -33,6 +33,7 @@ struct TVEnhancedHomeView: View {
                         Label(tab.rawValue, systemImage: tab.icon)
                     }
                     .tag(tab)
+                    .accessibilityLabel(tab.rawValue)
             }
         }
         .overlay(alignment: .topTrailing) {
@@ -63,11 +64,12 @@ struct TVEnhancedHomeView: View {
             Text("\(unacknowledged.count)")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(white: 1.0))
                 .padding(8)
-                .background(.red)
+                .background(Color.theaError)
                 .clipShape(Circle())
                 .padding()
+                .accessibilityLabel("\(unacknowledged.count) unacknowledged health alerts")
         }
     }
 }
@@ -183,6 +185,7 @@ struct TVMediaAutomationView: View {
             Image(systemName: icon)
                 .font(.system(size: 60))
                 .foregroundStyle(.secondary)
+                .symbolEffect(.pulse, options: .repeating.speed(0.5))
             Text(title)
                 .font(.title3)
                 .fontWeight(.medium)
@@ -192,6 +195,8 @@ struct TVMediaAutomationView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 80)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title). \(subtitle)")
     }
 }
 
@@ -239,12 +244,12 @@ struct ActivityRow: View {
 
     private var colorForType: Color {
         switch entry.type {
-        case .grabbed: .blue
-        case .imported: .green
-        case .upgraded: .purple
-        case .failed: .red
-        case .searched: .orange
-        case .added: .green
+        case .grabbed: Color.theaInfo
+        case .imported: Color.theaSuccess
+        case .upgraded: Color.theaPurpleDefault
+        case .failed: Color.theaError
+        case .searched: Color.theaWarning
+        case .added: Color.theaSuccess
         case .removed: .secondary
         }
     }
@@ -267,7 +272,7 @@ struct QualityProfileCard: View {
 
                         if isSelected {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
+                                .foregroundStyle(Color.theaSuccess)
                         }
                     }
 
@@ -294,15 +299,18 @@ struct QualityProfileCard: View {
                     .foregroundStyle(.secondary)
             }
             .padding()
-            .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+            .background(isSelected ? Color.theaPrimaryDefault.opacity(0.1) : Color.clear)
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? Color.theaPrimaryDefault : Color.clear, lineWidth: 2)
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(profile.name) quality profile")
+        .accessibilityHint(isSelected ? "Currently selected" : "Double tap to select")
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
     }
 }
 

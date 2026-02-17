@@ -142,7 +142,7 @@ struct TVTraktSettingsView: View {
                 if traktService.isAuthenticated {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+                            .foregroundStyle(Color.theaSuccess)
                         Text("Connected to Trakt")
                     }
 
@@ -201,7 +201,7 @@ struct TVStreamingSettingsView: View {
                         Spacer()
                         if account.isActive {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
+                                .foregroundStyle(Color.theaSuccess)
                         }
                     }
                 }
@@ -257,7 +257,7 @@ struct TVHealthSettingsView: View {
                         ForEach(healthService.alerts.filter { !$0.isAcknowledged }) { alert in
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(alert.severity == .critical ? .red : .orange)
+                                    .foregroundStyle(alert.severity == .critical ? Color.theaError : Color.theaWarning)
                                 VStack(alignment: .leading) {
                                     Text(alert.title)
                                     Text(alert.message)
@@ -283,10 +283,10 @@ struct TVHealthSettingsView: View {
 
     private func statusColor(_ status: HealthStatus) -> Color {
         switch status {
-        case .healthy: .green
-        case .degraded: .yellow
-        case .unhealthy: .red
-        case .unknown: .gray
+        case .healthy: Color.theaSuccess
+        case .degraded: Color.theaWarning
+        case .unhealthy: Color.theaError
+        case .unknown: .secondary
         }
     }
 }

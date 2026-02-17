@@ -39,7 +39,7 @@ export const TRAKT_CONFIG = {
 
 // API Versions
 export const API_VERSIONS = {
-  ANTHROPIC: '2024-01-01',
+  ANTHROPIC: '2025-01-01',
   TRAKT: '2',
 } as const;
 

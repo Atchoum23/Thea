@@ -59,13 +59,8 @@ struct TVEnhancedChatView: View {
 
             Image(systemName: "brain.head.profile")
                 .font(.system(size: 120))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.blue, .purple],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .foregroundStyle(Color.theaHeroGradientDefault)
+                .accessibilityHidden(true)
 
             VStack(spacing: 12) {
                 Text("Welcome to THEA")
@@ -96,6 +91,7 @@ struct TVEnhancedChatView: View {
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Suggested: \(prompt)")
                     }
                 }
             }
@@ -103,6 +99,7 @@ struct TVEnhancedChatView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .contain)
     }
 
     private var messagesList: some View {
@@ -149,6 +146,8 @@ struct TVEnhancedChatView: View {
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Voice input")
+            .accessibilityHint("Activate microphone for voice input")
 
             TextField("Ask Thea anything...", text: $inputText)
                 .font(.title3)
@@ -161,10 +160,12 @@ struct TVEnhancedChatView: View {
             Button(action: sendMessage) {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 50))
-                    .foregroundStyle(inputText.isEmpty ? Color.secondary : Color.blue)
+                    .foregroundStyle(inputText.isEmpty ? Color.secondary : Color.theaPrimaryDefault)
             }
             .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
             .buttonStyle(.plain)
+            .accessibilityLabel("Send message")
+            .accessibilityHint("Sends your message to Thea")
         }
         .padding(20)
         .background(.ultraThinMaterial)
@@ -306,12 +307,13 @@ struct TVChatMessageRow: View {
             if message.isUser { Spacer(minLength: 200) }
 
             if !message.isUser {
-                Image(systemName: "brain.head.profile")
+                Image(systemName: "sparkles")
                     .font(.title2)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.theaPrimaryDefault)
                     .frame(width: 44, height: 44)
-                    .background(.blue.opacity(0.1))
+                    .background(Color.theaPrimaryDefault.opacity(0.1))
                     .clipShape(Circle())
+                    .accessibilityHidden(true)
             }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
@@ -333,13 +335,13 @@ struct TVChatMessageRow: View {
 
                         if message.isStreaming {
                             Text("\u{2588}")
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(Color.theaPrimaryDefault)
                                 .opacity(0.8)
                         }
                     }
                     .padding(20)
-                    .background(message.isUser ? Color.blue : Color.secondary.opacity(0.2))
-                    .foregroundStyle(message.isUser ? .white : .primary)
+                    .background(message.isUser ? Color.theaUserBubble : Color.theaAssistantBubble)
+                    .foregroundStyle(message.isUser ? Color(white: 1.0) : .primary)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                 }
 

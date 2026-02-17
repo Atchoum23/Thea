@@ -393,10 +393,18 @@ public actor MapsIntegration {
             return nil
         }
 
-        let coordinate = TheaCoordinate(
-            latitude: mapItem.placemark.coordinate.latitude,
-            longitude: mapItem.placemark.coordinate.longitude
-        )
+        let coordinate: TheaCoordinate
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            coordinate = TheaCoordinate(
+                latitude: mapItem.location.coordinate.latitude,
+                longitude: mapItem.location.coordinate.longitude
+            )
+        } else {
+            coordinate = TheaCoordinate(
+                latitude: mapItem.placemark.coordinate.latitude,
+                longitude: mapItem.placemark.coordinate.longitude
+            )
+        }
 
         return TheaLocation(
             name: mapItem.name ?? address,
@@ -412,25 +420,43 @@ public actor MapsIntegration {
     /// Reverse geocode coordinates to an address
 
     public func reverseGeocode(coordinate: TheaCoordinate) async throws -> TheaLocation? {
-        #if canImport(CoreLocation)
-        let geocoder = CLGeocoder()
+        #if canImport(MapKit)
         let clLocation = CLLocation(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
 
-        let placemarks = try await geocoder.reverseGeocodeLocation(clLocation)
-
-        guard let placemark = placemarks.first else {
-            return nil
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            guard let request = MKReverseGeocodingRequest(location: clLocation) else {
+                throw MapsError.geocodingFailed("Could not create reverse geocoding request")
+            }
+            let mapItems = try await request.mapItems
+            guard let mapItem = mapItems.first else {
+                return nil
+            }
+            return TheaLocation(
+                name: mapItem.name ?? "Unknown Location",
+                address: formatAddress(from: mapItem),
+                coordinate: coordinate,
+                timeZone: mapItem.timeZone?.identifier
+            )
+        } else {
+            #if canImport(CoreLocation)
+            let geocoder = CLGeocoder()
+            let placemarks = try await geocoder.reverseGeocodeLocation(clLocation)
+            guard let placemark = placemarks.first else {
+                return nil
+            }
+            return TheaLocation(
+                name: placemark.name ?? "Unknown Location",
+                address: formatAddress(from: placemark),
+                coordinate: coordinate,
+                timeZone: placemark.timeZone?.identifier
+            )
+            #else
+            throw MapsError.unavailable
+            #endif
         }
-
-        return TheaLocation(
-            name: placemark.name ?? "Unknown Location",
-            address: formatAddress(from: placemark),
-            coordinate: coordinate,
-            timeZone: placemark.timeZone?.identifier
-        )
         #else
         throw MapsError.unavailable
         #endif

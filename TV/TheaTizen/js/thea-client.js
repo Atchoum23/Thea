@@ -258,7 +258,7 @@ var TheaClient = (function () {
     function scheduleReconnect() {
         if (!state.token) return;
         if (state.wsReconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-            showToast('Connection lost. Pull down to reconnect.');
+            showToast('Connection lost. Press GREEN to reconnect.');
             return;
         }
         state.wsReconnectAttempts++;
@@ -780,6 +780,7 @@ var TheaClient = (function () {
         createConversation: createConversation,
         disconnect: disconnect,
         switchView: switchView,
+        connectWebSocket: connectWebSocket,
         state: state
     };
 })();
