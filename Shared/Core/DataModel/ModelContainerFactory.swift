@@ -15,45 +15,12 @@ final class ModelContainerFactory {
     /// - Returns: A configured ModelContainer
     /// - Throws: ModelContainerError if both persistent and in-memory initialization fail
     func createContainer() throws -> ModelContainer {
-        let schema = Schema([
-            // Core models
-            Conversation.self,
-            Message.self,
-            Project.self,
-            FinancialAccount.self,
-            FinancialTransaction.self,
-            IndexedFile.self,
-
-            // Clipboard History models
-            TheaClipEntry.self,
-            TheaClipPinboard.self,
-            TheaClipPinboardEntry.self,
-
-            // Prompt Engineering models
-            UserPromptPreference.self,
-            CodeErrorRecord.self,
-            CodeCorrection.self,
-            PromptTemplate.self,
-            CodeFewShotExample.self,
-
-            // Window Management models
-            WindowState.self,
-
-            // Life Tracking models
-            HealthSnapshot.self,
-            DailyScreenTimeRecord.self,
-            DailyInputStatistics.self,
-            BrowsingRecord.self,
-            LocationVisitRecord.self,
-            LifeInsight.self,
-
-            // Habit Tracker models
-            TheaHabit.self,
-            TheaHabitEntry.self
-        ])
+        // Use TheaSchemaMigrationPlan so SwiftData migrates data in-place
+        // rather than deleting the store on schema changes. This preserves
+        // all user data across app updates. Matches macOS TheamacOSApp init.
+        let schema = TheaSchemaMigrationPlan.currentSchema
 
         let configuration = ModelConfiguration(
-            schema: schema,
             isStoredInMemoryOnly: false,
             cloudKitDatabase: .none
         )
@@ -61,6 +28,7 @@ final class ModelContainerFactory {
         do {
             let container = try ModelContainer(
                 for: schema,
+                migrationPlan: TheaSchemaMigrationPlan.self,
                 configurations: [configuration]
             )
             self.container = container
@@ -81,13 +49,13 @@ final class ModelContainerFactory {
         print("🔄 Attempting in-memory fallback...")
 
         let memoryConfig = ModelConfiguration(
-            schema: schema,
             isStoredInMemoryOnly: true
         )
 
         do {
             let fallbackContainer = try ModelContainer(
                 for: schema,
+                migrationPlan: TheaSchemaMigrationPlan.self,
                 configurations: [memoryConfig]
             )
 
