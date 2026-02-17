@@ -17,7 +17,7 @@ public final class FeatureFlags: ObservableObject {
 
     // MARK: - Published Flags
 
-    @Published public private(set) var flags: [String: FeatureFlag] = [:]
+    @Published public private(set) var flags: [String: FeatureFlagEntry] = [:]
     @Published public private(set) var lastSyncDate: Date?
 
     // MARK: - Core Feature Flags
@@ -205,7 +205,7 @@ public final class FeatureFlags: ObservableObject {
     }
 
     public func setFlag(_ key: String, enabled: Bool, source: FeatureFlagSource = .local) {
-        flags[key] = FeatureFlag(
+        flags[key] = FeatureFlagEntry(
             key: key,
             isEnabled: enabled,
             source: source,
@@ -224,7 +224,7 @@ public final class FeatureFlags: ObservableObject {
 
     private func loadFlags() {
         guard let data = defaults.data(forKey: flagsKey),
-              let savedFlags = try? JSONDecoder().decode([String: FeatureFlag].self, from: data)
+              let savedFlags = try? JSONDecoder().decode([String: FeatureFlagEntry].self, from: data)
         else {
             return
         }
@@ -246,7 +246,7 @@ public final class FeatureFlags: ObservableObject {
         // Pull remote overrides from iCloud KVS
         store.synchronize()
         if let remoteData = store.data(forKey: iCloudFlagsKey),
-           let remoteFlags = try? JSONDecoder().decode([String: FeatureFlag].self, from: remoteData)
+           let remoteFlags = try? JSONDecoder().decode([String: FeatureFlagEntry].self, from: remoteData)
         {
             // Merge: remote flags override local only if they're newer
             for (key, remoteFlag) in remoteFlags {
@@ -274,7 +274,7 @@ public final class FeatureFlags: ObservableObject {
 
 // MARK: - Feature Flag Model
 
-public struct FeatureFlag: Codable, Sendable {
+public struct FeatureFlagEntry: Codable, Sendable {
     public let key: String
     public var isEnabled: Bool
     public let source: FeatureFlagSource
