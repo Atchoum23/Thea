@@ -140,13 +140,13 @@ struct ResponseStylesSettingsView: View {
             .background(
                 settings.selectedResponseStyleID == nil
                     ? Color.accentColor.opacity(0.1)
-                    : Color(nsColor: .controlBackgroundColor)
+                    : Color(.systemBackground).opacity(0.5)
             )
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(
-                        settings.selectedResponseStyleID == nil ? Color.accentColor : Color(nsColor: .separatorColor),
+                        settings.selectedResponseStyleID == nil ? Color.accentColor : Color.secondary.opacity(0.3),
                         lineWidth: settings.selectedResponseStyleID == nil ? 1.5 : 0.5
                     )
             )
@@ -300,13 +300,13 @@ private struct StyleRow: View {
         .background(
             isSelected
                 ? Color.accentColor.opacity(0.08)
-                : Color(nsColor: .controlBackgroundColor)
+                : Color(.systemBackground).opacity(0.5)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(
-                    isSelected ? Color.accentColor : Color(nsColor: .separatorColor),
+                    isSelected ? Color.accentColor : Color.secondary.opacity(0.3),
                     lineWidth: isSelected ? 1.5 : 0.5
                 )
         )
