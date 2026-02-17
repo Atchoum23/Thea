@@ -26,7 +26,7 @@ extension CloudKitService {
             }
             if hasLocalOnlyMessages || local.modifiedAt > remote.modifiedAt {
                 do {
-                    try await saveConversation(merged)
+                    try await saveConversation(merged, retryCount: 0)
                 } catch {
                     logger.error("Failed to push merged conversation \(merged.id): \(error.localizedDescription)")
                 }
@@ -103,10 +103,11 @@ extension CloudKitService {
     // MARK: - Local Storage Helpers
 
     /// Thread-safe local conversation fetch via notification.
-    /// Uses nonisolated(unsafe) flag to track whether the continuation has already resumed.
     func getLocalConversation(_ id: UUID) async -> CloudConversation? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
+            var observerRef: NSObjectProtocol?
+
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalConversationResponse,
                 object: nil,
@@ -117,9 +118,11 @@ extension CloudKitService {
                       responseID == id
                 else { return }
                 hasResumed = true
+                if let obs = observerRef { NotificationCenter.default.removeObserver(obs) }
                 let conversation = notification.userInfo?["conversation"] as? CloudConversation
                 continuation.resume(returning: conversation)
             }
+            observerRef = observer
 
             NotificationCenter.default.post(
                 name: .cloudKitRequestLocalConversation,
@@ -148,6 +151,8 @@ extension CloudKitService {
     func getLocalKnowledgeItem(_ id: UUID) async -> CloudKnowledgeItem? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
+            var observerRef: NSObjectProtocol?
+
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalKnowledgeItemResponse,
                 object: nil,
@@ -158,9 +163,11 @@ extension CloudKitService {
                       responseID == id
                 else { return }
                 hasResumed = true
+                if let obs = observerRef { NotificationCenter.default.removeObserver(obs) }
                 let item = notification.userInfo?["item"] as? CloudKnowledgeItem
                 continuation.resume(returning: item)
             }
+            observerRef = observer
 
             NotificationCenter.default.post(
                 name: .cloudKitRequestLocalKnowledgeItem,
@@ -188,6 +195,8 @@ extension CloudKitService {
     func getLocalProject(_ id: UUID) async -> CloudProject? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
+            var observerRef: NSObjectProtocol?
+
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalProjectResponse,
                 object: nil,
@@ -198,9 +207,11 @@ extension CloudKitService {
                       responseID == id
                 else { return }
                 hasResumed = true
+                if let obs = observerRef { NotificationCenter.default.removeObserver(obs) }
                 let project = notification.userInfo?["project"] as? CloudProject
                 continuation.resume(returning: project)
             }
+            observerRef = observer
 
             NotificationCenter.default.post(
                 name: .cloudKitRequestLocalProject,
@@ -296,7 +307,7 @@ extension CloudKitService {
     /// Share a conversation with another user
     public func shareConversation(_ conversationId: UUID, with participants: [CKShare.Participant]) async throws -> CKShare {
         guard let privateDatabase else { throw CloudKitError.notAuthenticated }
-        let recordID = CKRecord.ID(recordName: "conversation-\(conversationId.uuidString)")
+        let recordID = CKRecord.ID(recordName: "conversation-\(conversationId.uuidString)", zoneID: Self.theaZoneID)
         let record = try await privateDatabase.record(for: recordID)
 
         let share = CKShare(rootRecord: record)

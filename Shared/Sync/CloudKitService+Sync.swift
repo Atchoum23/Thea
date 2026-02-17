@@ -16,30 +16,32 @@ extension CloudKitService {
         guard syncEnabled, iCloudAvailable, privateDatabase != nil else { return }
 
         syncStatus = .syncing
-        defer { syncStatus = .idle }
 
-        // Use delta sync for efficiency (only fetches changes since last token)
-        try await performDeltaSync()
-
-        lastSyncDate = Date()
+        do {
+            // Use delta sync for efficiency (only fetches changes since last token)
+            try await performDeltaSync()
+            lastSyncDate = Date()
+            syncStatus = .idle
+        } catch {
+            syncStatus = .error(error.localizedDescription)
+            throw error
+        }
     }
 
     /// Perform delta sync using CKServerChangeToken
     /// This only fetches records that have changed since the last sync
     func performDeltaSync() async throws {
         guard let privateDatabase else { return }
-        let zoneID = CKRecordZone.ID(zoneName: "TheaZone", ownerName: CKCurrentUserDefaultName)
+        let zoneID = Self.theaZoneID
 
         // Ensure the zone exists
         try await ensureZoneExists(zoneID)
 
         // Configure the fetch with our saved change token
-        let previousToken = getChangeToken(for: zoneID)
+        var previousToken = getChangeToken(for: zoneID)
 
-        // Collect changed and deleted records
-        var changedRecords: [CKRecord] = []
-        var deletedRecordIDs: [CKRecord.ID] = []
-        var newToken: CKServerChangeToken?
+        // Collect changed and deleted records using actor-isolated storage
+        let collector = RecordCollector()
 
         // Use CKFetchRecordZoneChangesOperation for delta sync
         let operation = CKFetchRecordZoneChangesOperation()
@@ -53,24 +55,24 @@ extension CloudKitService {
         operation.recordWasChangedBlock = { _, result in
             switch result {
             case let .success(record):
-                changedRecords.append(record)
+                collector.addChanged(record)
             case .failure:
                 break
             }
         }
 
         operation.recordWithIDWasDeletedBlock = { recordID, _ in
-            deletedRecordIDs.append(recordID)
+            collector.addDeleted(recordID)
         }
 
         operation.recordZoneChangeTokensUpdatedBlock = { _, token, _ in
-            newToken = token
+            collector.setToken(token)
         }
 
         operation.recordZoneFetchResultBlock = { _, result in
             switch result {
             case let .success((serverToken, _, _)):
-                newToken = serverToken
+                collector.setToken(serverToken)
             case .failure:
                 break
             }
@@ -83,8 +85,9 @@ extension CloudKitService {
                 case .success:
                     continuation.resume()
                 case let .failure(error):
-                    // If token expired, we'll handle it after
+                    // If token expired, clear it and retry with full fetch
                     if let ckError = error as? CKError, ckError.code == .changeTokenExpired {
+                        collector.setTokenExpired()
                         continuation.resume()
                     } else {
                         continuation.resume(throwing: error)
@@ -94,20 +97,28 @@ extension CloudKitService {
             privateDatabase.add(operation)
         }
 
+        // Handle token expiry: clear stale token and the results
+        if collector.tokenExpired {
+            setChangeToken(nil, for: zoneID)
+            logger.info("Change token expired, cleared. Next sync will do full fetch.")
+            return
+        }
+
         // Save the new token
-        if let token = newToken {
+        let results = collector.results()
+        if let token = results.token {
             setChangeToken(token, for: zoneID)
         }
 
         // Process changes
-        pendingChanges = changedRecords.count + deletedRecordIDs.count
+        pendingChanges = results.changed.count + results.deleted.count
 
-        for record in changedRecords {
+        for record in results.changed {
             await processChangedRecord(record)
             pendingChanges = max(0, pendingChanges - 1)
         }
 
-        for recordID in deletedRecordIDs {
+        for recordID in results.deleted {
             await processDeletedRecord(recordID)
             pendingChanges = max(0, pendingChanges - 1)
         }
@@ -119,8 +130,8 @@ extension CloudKitService {
         let zone = CKRecordZone(zoneID: zoneID)
         do {
             _ = try await privateDatabase.save(zone)
-        } catch let error as CKError where error.code == .serverRecordChanged {
-            // Zone already exists, this is fine
+        } catch let error as CKError where error.code == .zoneNotFound || error.code == .serverRejectedRequest {
+            // Zone already exists or server rejected duplicate — this is fine
         }
     }
 
@@ -192,7 +203,6 @@ extension CloudKitService {
 
     /// Delete a local conversation that was deleted remotely
     func deleteLocalConversation(_ id: UUID) async {
-        // Notify the app to remove this conversation from local storage
         NotificationCenter.default.post(
             name: .cloudKitConversationDeleted,
             object: nil,
@@ -232,7 +242,6 @@ extension CloudKitService {
         for (_, result) in results.matchResults {
             if case let .success(record) = result {
                 let conversation = CloudConversation(from: record)
-                // Merge with local data
                 await mergeConversation(conversation)
             }
         }
@@ -242,14 +251,14 @@ extension CloudKitService {
     public func syncSettings() async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
-        let recordID = CKRecord.ID(recordName: "userSettings")
+        let recordID = CKRecord.ID(recordName: "userSettings", zoneID: Self.theaZoneID)
 
         do {
             let record = try await privateDatabase.record(for: recordID)
             let settings = CloudSettings(from: record)
             await applySettings(settings)
-        } catch {
-            // Record doesn't exist, create it
+        } catch let error as CKError where error.code == .unknownItem {
+            // Record doesn't exist yet, create it
             try await saveSettings()
         }
     }
@@ -291,11 +300,10 @@ extension CloudKitService {
     // MARK: - Save Operations
 
     /// Save a conversation to CloudKit with conflict resolution and optional E2E encryption
-    public func saveConversation(_ conversation: CloudConversation) async throws {
+    public func saveConversation(_ conversation: CloudConversation, retryCount: Int = 0) async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .conversations) else { return }
 
-        let record = conversation.toRecord()
-        // Encrypt sensitive content if encryption is available
+        let record = conversation.toRecord(in: Self.theaZoneID)
         await encryptRecordFields(record, type: .conversation)
 
         do {
@@ -326,6 +334,11 @@ extension CloudKitService {
                 }
 
                 // Auto-merge in the background (user can override via conflict UI)
+                // Guard against infinite merge loops with a retry limit
+                guard retryCount < 3 else {
+                    logger.warning("Merge retry limit reached for conversation \(conversation.id)")
+                    throw error
+                }
                 let merged = mergeConversations(local: conversation, remote: remote)
                 merged.applyTo(serverRecord)
                 await encryptRecordFields(serverRecord, type: .conversation)
@@ -337,20 +350,36 @@ extension CloudKitService {
         }
     }
 
-    /// Save settings to CloudKit
+    /// Save settings to CloudKit with conflict handling
     public func saveSettings() async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase else { return }
 
         let settings = CloudSettings.current()
-        let record = settings.toRecord()
-        try await privateDatabase.save(record)
+        let zoneID = Self.theaZoneID
+        let recordID = CKRecord.ID(recordName: "userSettings", zoneID: zoneID)
+
+        // Try to fetch existing record first to preserve change tag
+        do {
+            let existingRecord = try await privateDatabase.record(for: recordID)
+            existingRecord["theme"] = settings.theme as CKRecordValue
+            existingRecord["aiModel"] = settings.aiModel as CKRecordValue
+            existingRecord["autoSave"] = settings.autoSave as CKRecordValue
+            existingRecord["syncEnabled"] = settings.syncEnabled as CKRecordValue
+            existingRecord["notificationsEnabled"] = settings.notificationsEnabled as CKRecordValue
+            existingRecord["modifiedAt"] = settings.modifiedAt as CKRecordValue
+            try await privateDatabase.save(existingRecord)
+        } catch let error as CKError where error.code == .unknownItem {
+            // Record doesn't exist yet, create new
+            let record = settings.toRecord(in: zoneID)
+            try await privateDatabase.save(record)
+        }
     }
 
     /// Save a knowledge item to CloudKit with E2E encryption
     public func saveKnowledgeItem(_ item: CloudKnowledgeItem) async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .knowledge) else { return }
 
-        let record = item.toRecord()
+        let record = item.toRecord(in: Self.theaZoneID)
         await encryptRecordFields(record, type: .knowledge)
         try await privateDatabase.save(record)
     }
@@ -359,7 +388,7 @@ extension CloudKitService {
     public func saveProject(_ project: CloudProject) async throws {
         guard syncEnabled, iCloudAvailable, let privateDatabase, isSyncEnabled(for: .projects) else { return }
 
-        let record = project.toRecord()
+        let record = project.toRecord(in: Self.theaZoneID)
         await encryptRecordFields(record, type: .project)
         try await privateDatabase.save(record)
     }
@@ -401,9 +430,8 @@ extension CloudKitService {
     }
 
     /// Decrypt sensitive fields from a CKRecord after fetching.
+    /// Always attempts decryption if encrypted fields exist, regardless of current encryption toggle.
     func decryptRecordFields(_ record: CKRecord, type: RecordType) async {
-        guard UserDefaults.standard.bool(forKey: "sync.encryptionEnabled") else { return }
-
         do {
             let encryption = SyncEncryption.shared
             switch type {
@@ -435,14 +463,14 @@ extension CloudKitService {
     /// Delete a conversation from CloudKit
     public func deleteConversation(_ id: UUID) async throws {
         guard let privateDatabase else { return }
-        let recordID = CKRecord.ID(recordName: "conversation-\(id.uuidString)")
+        let recordID = CKRecord.ID(recordName: "conversation-\(id.uuidString)", zoneID: Self.theaZoneID)
         try await privateDatabase.deleteRecord(withID: recordID)
     }
 
     /// Delete a knowledge item from CloudKit
     public func deleteKnowledgeItem(_ id: UUID) async throws {
         guard let privateDatabase else { return }
-        let recordID = CKRecord.ID(recordName: "knowledge-\(id.uuidString)")
+        let recordID = CKRecord.ID(recordName: "knowledge-\(id.uuidString)", zoneID: Self.theaZoneID)
         try await privateDatabase.deleteRecord(withID: recordID)
     }
 
@@ -451,34 +479,21 @@ extension CloudKitService {
     func setupSubscriptions() async {
         guard let privateDatabase else { return }
         do {
-            // Subscribe to conversation changes
-            let conversationSubscription = CKQuerySubscription(
-                recordType: RecordType.conversation.rawValue,
-                predicate: NSPredicate(value: true),
-                subscriptionID: "conversation-changes",
-                options: [.firesOnRecordCreation, .firesOnRecordUpdate, .firesOnRecordDeletion]
+            // Use CKRecordZoneSubscription for custom zone (CKQuerySubscription only works in default zone)
+            let zoneSubscription = CKRecordZoneSubscription(
+                zoneID: Self.theaZoneID,
+                subscriptionID: "thea-zone-changes"
             )
 
             let notificationInfo = CKSubscription.NotificationInfo()
             notificationInfo.shouldSendContentAvailable = true
-            conversationSubscription.notificationInfo = notificationInfo
+            zoneSubscription.notificationInfo = notificationInfo
 
-            try await privateDatabase.save(conversationSubscription)
-            subscriptions.insert(conversationSubscription.subscriptionID)
-
-            // Subscribe to settings changes
-            let settingsSubscription = CKQuerySubscription(
-                recordType: RecordType.settings.rawValue,
-                predicate: NSPredicate(value: true),
-                subscriptionID: "settings-changes",
-                options: [.firesOnRecordUpdate]
-            )
-            settingsSubscription.notificationInfo = notificationInfo
-
-            try await privateDatabase.save(settingsSubscription)
-            subscriptions.insert(settingsSubscription.subscriptionID)
+            try await privateDatabase.save(zoneSubscription)
+            subscriptions.insert(zoneSubscription.subscriptionID)
         } catch {
-            // Subscription failed - might already exist
+            // Subscription failed - might already exist, which is fine
+            logger.info("Subscription setup: \(error.localizedDescription)")
         }
     }
 
@@ -486,6 +501,19 @@ extension CloudKitService {
     public func handleNotification(_ userInfo: [AnyHashable: Any]) async {
         let notification = CKNotification(fromRemoteNotificationDictionary: userInfo)
 
+        if let zoneNotification = notification as? CKRecordZoneNotification,
+           zoneNotification.subscriptionID == "thea-zone-changes" {
+            // Zone changed — run delta sync to fetch only changes
+            do {
+                try await performDeltaSync()
+                lastSyncDate = Date()
+            } catch {
+                logger.error("Failed to delta sync from notification: \(error.localizedDescription)")
+            }
+            return
+        }
+
+        // Legacy: handle old-style query notifications during migration
         guard let queryNotification = notification as? CKQueryNotification else { return }
 
         switch queryNotification.subscriptionID {
@@ -504,5 +532,53 @@ extension CloudKitService {
         default:
             break
         }
+    }
+}
+
+// MARK: - Thread-Safe Record Collector
+
+/// Collects records from CKFetchRecordZoneChangesOperation callbacks safely.
+/// Callbacks are invoked serially by CloudKit, but this ensures safety regardless.
+private final class RecordCollector: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _changed: [CKRecord] = []
+    private var _deleted: [CKRecord.ID] = []
+    private var _token: CKServerChangeToken?
+    private var _tokenExpired = false
+
+    var tokenExpired: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return _tokenExpired
+    }
+
+    func addChanged(_ record: CKRecord) {
+        lock.lock()
+        _changed.append(record)
+        lock.unlock()
+    }
+
+    func addDeleted(_ recordID: CKRecord.ID) {
+        lock.lock()
+        _deleted.append(recordID)
+        lock.unlock()
+    }
+
+    func setToken(_ token: CKServerChangeToken?) {
+        lock.lock()
+        _token = token
+        lock.unlock()
+    }
+
+    func setTokenExpired() {
+        lock.lock()
+        _tokenExpired = true
+        lock.unlock()
+    }
+
+    func results() -> (changed: [CKRecord], deleted: [CKRecord.ID], token: CKServerChangeToken?) {
+        lock.lock()
+        defer { lock.unlock() }
+        return (_changed, _deleted, _token)
     }
 }

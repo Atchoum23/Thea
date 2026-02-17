@@ -35,6 +35,11 @@ public class CloudKitService: ObservableObject {
     private var sharedDatabase: CKDatabase?
     private var publicDatabase: CKDatabase?
 
+    // MARK: - Zone
+
+    /// All Thea records live in a custom zone for delta sync support
+    static let theaZoneID = CKRecordZone.ID(zoneName: "TheaZone", ownerName: CKCurrentUserDefaultName)
+
     // MARK: - Record Types
 
     enum RecordType: String {
@@ -63,6 +68,9 @@ public class CloudKitService: ObservableObject {
 
         // Observe settings changes (lightweight, non-blocking)
         setupSettingsObserver()
+
+        // Observe conflict resolution from UI
+        setupConflictResolutionObserver()
 
         // Defer all heavy CloudKit operations to avoid blocking view layout.
         // Container creation, change token loading, and subscription setup
@@ -138,6 +146,22 @@ public class CloudKitService: ObservableObject {
     func setChangeToken(_ token: CKServerChangeToken?, for zoneID: CKRecordZone.ID) {
         changeTokens[zoneID.zoneName] = token
         saveChangeTokens()
+    }
+
+    private func setupConflictResolutionObserver() {
+        NotificationCenter.default.addObserver(
+            forName: .syncConflictResolved,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let resolution = notification.userInfo?["resolution"] as? ConflictResolution,
+                  let conflictId = notification.userInfo?["conflictId"] as? UUID
+            else { return }
+            Task { @MainActor [weak self] in
+                self?.logger.info("Conflict \(conflictId) resolved with \(String(describing: resolution))")
+                // The conflict was already auto-merged; user resolution is logged for audit
+            }
+        }
     }
 
     private func setupSettingsObserver() {
