@@ -162,6 +162,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
         case .privacy: "lock.shield"
+        case .responseStyles: "text.badge.star"
+        case .personalization: "person.text.rectangle"
         case .theme: "paintpalette"
         case .advanced: "slider.horizontal.3"
         case .subscription: "creditcard"
