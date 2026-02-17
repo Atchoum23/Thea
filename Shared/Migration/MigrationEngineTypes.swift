@@ -90,6 +90,7 @@ struct MigrationSourceInfo {
     let isInstalled: Bool
 }
 
+// @unchecked Sendable: mutable state only accessed from single migration Task context
 class MigrationJob: Identifiable, @unchecked Sendable {
     let id: UUID
     let source: String
