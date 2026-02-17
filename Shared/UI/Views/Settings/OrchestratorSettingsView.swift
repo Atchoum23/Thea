@@ -493,8 +493,8 @@ struct OrchestratorSettingsView: View {
                         .font(.caption2)
                         .padding(.horizontal, 4)
                         .padding(.vertical, 2)
-                        .background(model.hasPrefix("local-") ? Color.green.opacity(0.2) : Color.blue.opacity(0.2))
-                        .foregroundStyle(model.hasPrefix("local-") ? .green : .blue)
+                        .background(model.hasPrefix("local-") ? Color.theaSuccess.opacity(0.2) : Color.theaInfo.opacity(0.2))
+                        .foregroundStyle(model.hasPrefix("local-") ? .theaSuccess : .theaInfo)
                         .cornerRadius(4)
                 }
                 if models.count > 2 {

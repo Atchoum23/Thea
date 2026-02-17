@@ -1734,6 +1734,7 @@
 		D87D4FB24B97B8662DD06676 /* RemoteSystemMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442322928422F5CD0D77BA8 /* RemoteSystemMessages.swift */; };
 		D8B662E4B901779518FF87D0 /* AccessibilityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DAB14BF6E3D9FAD067E9259 /* AccessibilityService.swift */; };
 		D9059C94F1D116E4757111FF /* FollowUpSuggestionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256213D9495D21DC25A9C23D /* FollowUpSuggestionService.swift */; };
+		D90DA8ABCF0CFDD8449C9BFC /* TVColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155B45E37820DE8B013FB73D /* TVColors.swift */; };
 		D93A9CDD94ED792FCEBBA5CE /* BrowserAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312CDA1C3E942F50ACC3BFF2 /* BrowserAutomation.swift */; };
 		D9470477AE4E8BCE6D33A2E4 /* Context7Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 092322EA857D666CA9BE6749 /* Context7Client.swift */; };
 		D954CBECD1ABE33724198EBD /* PIISanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806230C49B50DFD0E5F66CB4 /* PIISanitizer.swift */; };
@@ -2263,6 +2264,7 @@
 		1504C8298B2DD6FC344E3519 /* ConnectionQualityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQualityMonitor.swift; sourceTree = "<group>"; };
 		15232BD8D9E81B18A70E72E4 /* AdvancedPromptSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPromptSettingsView.swift; sourceTree = "<group>"; };
 		1542CBF91CCF05C9FC2C9C44 /* FileOperationsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOperationsManager.swift; sourceTree = "<group>"; };
+		155B45E37820DE8B013FB73D /* TVColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVColors.swift; sourceTree = "<group>"; };
 		15B2FC6144AA39BBDC12EC5E /* IntentDisambiguation+Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IntentDisambiguation+Core.swift"; sourceTree = "<group>"; };
 		15DCBDE6FF4F50345CBCED36 /* ProactiveEngagementEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProactiveEngagementEngine.swift; sourceTree = "<group>"; };
 		161F38E0994A9F6040AF9548 /* ContactsIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsIntegration.swift; sourceTree = "<group>"; };
@@ -5400,6 +5402,14 @@
 			path = Protocols;
 			sourceTree = "<group>";
 		};
+		8DC77BAE2D14CED5710BF764 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				155B45E37820DE8B013FB73D /* TVColors.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
 		8DD049D5FE188C44BE104A79 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -5575,6 +5585,7 @@
 			isa = PBXGroup;
 			children = (
 				356DDACF5D2008082D667AF3 /* Services */,
+				8DC77BAE2D14CED5710BF764 /* Theme */,
 				E7CD3641F1F1D61C2EA311AF /* Views */,
 				36AF7DA27F3CB1E987D640DC /* Info.plist */,
 				4A7BFA8C92DD54C1D3015684 /* PrivacyInfo.xcprivacy */,
@@ -8351,6 +8362,7 @@
 				480FEB6FF6A248C35BCC9175 /* MediaAutomationService.swift in Sources */,
 				75B8FF75A58C97760721F4F9 /* RemoteInferenceClient.swift in Sources */,
 				21F5F4EB75A35698E9542B54 /* StreamingService.swift in Sources */,
+				D90DA8ABCF0CFDD8449C9BFC /* TVColors.swift in Sources */,
 				498D2E7B18E49D6C77C23875 /* TVDashboardView.swift in Sources */,
 				2ABC5E71BDE857C3FF61CCCA /* TVEnhancedHomeView+Chat.swift in Sources */,
 				1B6D7C5F0B6BFCCD7791D6B0 /* TVEnhancedHomeView+Settings.swift in Sources */,
