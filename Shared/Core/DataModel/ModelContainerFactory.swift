@@ -33,6 +33,11 @@ final class ModelContainerFactory {
             )
             self.container = container
             isInMemoryFallback = false
+
+            // Validate migration integrity after successful container creation
+            let validationContext = ModelContext(container)
+            try? TheaSchemaMigrationPlan.validateMigration(context: validationContext)
+
             return container
         } catch {
             // Log error for debugging
