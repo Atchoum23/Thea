@@ -141,6 +141,7 @@ struct ChatView: View {
         #if os(macOS)
             .navigationSubtitle("\(messages.count) messages")
         #endif
+            .glassToolbar()
             .toolbar {
                 ToolbarItem {
                     // Plan toggle — only visible when a plan exists
@@ -451,7 +452,7 @@ struct ChatView: View {
         #else
             HStack(spacing: TheaSpacing.md) {
                 TextField("Message Thea...", text: $inputText, axis: .vertical)
-                    .textFieldStyle(.plain)
+                    .textFieldStyle(.roundedBorder)
                     .lineLimit(1 ... 6)
                     .disabled(chatManager.isStreaming)
                     .onSubmit {
@@ -459,10 +460,8 @@ struct ChatView: View {
                             sendMessage()
                         }
                     }
-                    .padding(.horizontal, TheaSpacing.lg)
-                    .padding(.vertical, TheaSpacing.md)
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
+                    .padding(.horizontal, TheaSpacing.sm)
+                    .padding(.vertical, TheaSpacing.xs)
 
                 Button {
                     if chatManager.isStreaming {
