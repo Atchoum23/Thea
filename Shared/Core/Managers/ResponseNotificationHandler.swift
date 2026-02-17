@@ -297,6 +297,8 @@ final class ResponseNotificationHandler: ObservableObject {
 
 // MARK: - Response Notification Delegate
 
+// @unchecked Sendable: @MainActor isolates all mutable state; NSObject superclass requires
+// @unchecked because NSObject itself is not Sendable
 @MainActor
 final class ResponseNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     static let shared = ResponseNotificationDelegate()

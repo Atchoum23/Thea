@@ -451,6 +451,7 @@
         }
     }
 
-    // Extension for Sendable conformance
+    // @unchecked Sendable: UIDevice.BatteryState is an ObjC enum; retroactive conformance needed
+    // for use across async boundaries. UIKit ensures values are only written on main thread.
     extension UIDevice.BatteryState: @retroactive @unchecked Sendable {}
 #endif

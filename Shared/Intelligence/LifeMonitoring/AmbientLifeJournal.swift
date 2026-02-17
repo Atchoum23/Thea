@@ -57,6 +57,8 @@ struct JournalEntry: Codable, Sendable, Identifiable {
 
 // MARK: - Ambient Life Journal
 
+// @unchecked Sendable: @MainActor provides isolation for all mutable state; NSObject
+// bridging requires explicit @unchecked Sendable to cross actor boundaries in callbacks
 @MainActor
 @Observable
 final class AmbientLifeJournal: @unchecked Sendable {

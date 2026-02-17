@@ -13,6 +13,7 @@ struct ChatView: View {
     @State var chatManager = ChatManager.shared
     @State private var planManager = PlanManager.shared
     @State var orchestrator = TheaAgentOrchestrator.shared
+    @State private var offlineQueue = OfflineQueueService.shared
     @State var inputText = ""
     @State var selectedProvider: AIProvider?
     @State var showingError: Error?
@@ -100,6 +101,24 @@ struct ChatView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Offline banner — shown when device has no network connectivity
+            if !offlineQueue.isOnline {
+                HStack(spacing: 8) {
+                    Image(systemName: "wifi.slash")
+                        .foregroundStyle(.orange)
+                    Text("Offline — messages will be sent when connected")
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .background(.orange.opacity(0.15))
+                .cornerRadius(8)
+                .padding(.horizontal, 12)
+                .padding(.top, 4)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
             #if os(macOS)
             if isSearching {
                 chatSearchBar
