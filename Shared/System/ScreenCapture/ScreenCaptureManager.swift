@@ -24,7 +24,7 @@ final class ScreenCaptureManager {
 
     // MARK: - Capture Mode
 
-    enum CaptureMode {
+    enum CaptureMode: Hashable {
         case fullScreen
         case activeWindow
         case window(bundleID: String)

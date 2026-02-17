@@ -276,7 +276,9 @@ struct MacSettingsView: View {
         case .knowledge:
             KnowledgeScannerConfigurationView()
         case .liveGuidance:
-            LiveGuidanceSettingsView()
+            Text("Live Guidance settings require MLX Audio engine")
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .appPairing:
             AppPairingSettingsView()
         case .clipboard:

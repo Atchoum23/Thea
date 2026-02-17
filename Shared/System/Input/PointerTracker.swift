@@ -34,8 +34,9 @@ final class PointerTracker {
     /// Request Accessibility permission (opens System Settings)
     func requestPermission() {
         // Prompt for accessibility permission
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
-        let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
+        // Use string literal to avoid concurrency warning on kAXTrustedCheckOptionPrompt global
+        let options: NSDictionary = ["AXTrustedCheckOptionPrompt": true as CFBoolean]
+        let trusted = AXIsProcessTrustedWithOptions(options)
 
         if !trusted {
             print("[PointerTracker] Opening System Settings for Accessibility permission")
@@ -138,7 +139,14 @@ final class PointerTracker {
     }
 
     deinit {
-        stopTracking()
+        // Clean up event tap directly (avoid calling @MainActor method from nonisolated deinit)
+        if let tap = eventTap {
+            CGEvent.tapEnable(tap: tap, enable: false)
+            CFMachPortInvalidate(tap)
+        }
+        if let source = runLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
+        }
     }
 }
 
