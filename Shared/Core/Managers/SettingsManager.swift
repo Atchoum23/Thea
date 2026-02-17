@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import OSLog
 #if os(macOS)
 import ServiceManagement
 #endif
@@ -7,6 +8,7 @@ import ServiceManagement
 @MainActor
 final class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
+    private let logger = Logger(subsystem: "ai.thea.app", category: "SettingsManager")
 
     // MARK: - Sync Engine
 
@@ -75,7 +77,7 @@ final class SettingsManager: ObservableObject {
                 }
             } catch {
                 // Registration can fail if not properly entitled; log but don't crash
-                print("Login item registration failed: \(error.localizedDescription)")
+                logger.error("Login item registration failed: \(error.localizedDescription)")
             }
             #endif
         }
@@ -548,19 +550,31 @@ extension SettingsManager {
 
 extension SettingsManager {
     func getAPIKey(for provider: String) -> String? {
-        if let key = try? SecureStorage.shared.loadAPIKey(for: provider), !key.isEmpty {
-            return key
+        do {
+            let key = try SecureStorage.shared.loadAPIKey(for: provider)
+            if !key.isEmpty { return key }
+        } catch {
+            logger.error("Failed to load API key for \(provider) from Keychain: \(error.localizedDescription)")
         }
 
+        // Migrate from legacy UserDefaults storage
         if let oldKey = UserDefaults.standard.string(forKey: "\(provider)_api_key"), !oldKey.isEmpty {
-            try? SecureStorage.shared.saveAPIKey(oldKey, for: provider)
-            UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
+            do {
+                try SecureStorage.shared.saveAPIKey(oldKey, for: provider)
+                UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
+            } catch {
+                logger.error("Failed to migrate API key for \(provider) to Keychain: \(error.localizedDescription)")
+            }
             return oldKey
         }
 
         if let legacyKey = UserDefaults.standard.string(forKey: "apiKey_\(provider)"), !legacyKey.isEmpty {
-            try? SecureStorage.shared.saveAPIKey(legacyKey, for: provider)
-            UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
+            do {
+                try SecureStorage.shared.saveAPIKey(legacyKey, for: provider)
+                UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
+            } catch {
+                logger.error("Failed to migrate legacy API key for \(provider) to Keychain: \(error.localizedDescription)")
+            }
             return legacyKey
         }
 
@@ -573,7 +587,7 @@ extension SettingsManager {
             UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
             UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
         } catch {
-            print("Failed to save API key for \(provider): \(error)")
+            logger.error("Failed to save API key for \(provider): \(error.localizedDescription)")
         }
     }
 
@@ -583,7 +597,7 @@ extension SettingsManager {
             UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
             UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
         } catch {
-            print("Failed to delete API key for \(provider): \(error)")
+            logger.error("Failed to delete API key for \(provider): \(error.localizedDescription)")
         }
     }
 
