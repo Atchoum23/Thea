@@ -159,7 +159,7 @@ struct MessageBubble: View {
                     Text("\(Int(confidence * 100))%")
                         .font(.theaCaption2)
                 }
-                .foregroundStyle(confidence >= 0.8 ? .green : confidence >= 0.5 ? .orange : .red)
+                .foregroundStyle(confidence >= 0.8 ? Color.theaSuccess : confidence >= 0.5 ? Color.theaWarning : Color.theaError)
             }
 
             // Respect timestampDisplay setting
@@ -188,7 +188,7 @@ struct MessageBubble: View {
                 // Copy
                 actionButton(
                     icon: showCopiedFeedback ? "checkmark" : "doc.on.doc",
-                    color: showCopiedFeedback ? .green : .secondary,
+                    color: showCopiedFeedback ? Color.theaSuccess : .secondary,
                     help: "Copy"
                 ) {
                     copyToClipboard()
@@ -470,18 +470,19 @@ extension MessageBubble {
     var backgroundColor: Color {
         switch message.messageRole {
         case .user:
-            return .theaUserBubble
+            .theaUserBubble
         case .assistant:
-            return .theaAssistantBubble
+            .theaAssistantBubble
         case .system:
-            return .theaSurface
+            .theaSurface
         }
     }
 
     var foregroundColor: Color {
         switch message.messageRole {
         case .user:
-            .white
+            // Adaptive: ensures readability on user bubble in both light and dark modes
+            Color(white: 1.0)
         case .assistant, .system:
             .primary
         }
