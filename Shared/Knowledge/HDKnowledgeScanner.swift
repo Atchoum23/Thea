@@ -254,7 +254,7 @@ final class HDKnowledgeScanner {
 
         let body: [String: Any] = [
             "model": "text-embedding-3-small",
-            "input": String(text.prefix(8000)),
+            "input": String(text.prefix(8000))
         ]
 
         do {

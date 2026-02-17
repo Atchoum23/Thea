@@ -368,7 +368,7 @@ struct RollbackPointTests {
     func withSnapshots() {
         let items = [
             TestSnapshotItem(resourceType: "file", resourcePath: "/a"),
-            TestSnapshotItem(resourceType: "file", resourcePath: "/b"),
+            TestSnapshotItem(resourceType: "file", resourcePath: "/b")
         ]
         let point = TestRollbackPoint(description: "Multi-file edit", actionId: UUID(), snapshotData: items)
         #expect(point.snapshotData.count == 2)

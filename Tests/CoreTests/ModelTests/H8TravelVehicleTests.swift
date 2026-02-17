@@ -322,7 +322,7 @@ struct TravelTripTests {
     func allPacked() {
         let items = [
             TestPackingItem(name: "Shirt", isPacked: true),
-            TestPackingItem(name: "Pants", isPacked: true),
+            TestPackingItem(name: "Pants", isPacked: true)
         ]
         let trip = TestTravelTrip(name: "T", destination: "D",
                                    startDate: Date(), endDate: Date(),
@@ -334,7 +334,7 @@ struct TravelTripTests {
     func nonePacked() {
         let items = [
             TestPackingItem(name: "Shirt", isPacked: false),
-            TestPackingItem(name: "Pants", isPacked: false),
+            TestPackingItem(name: "Pants", isPacked: false)
         ]
         let trip = TestTravelTrip(name: "T", destination: "D",
                                    startDate: Date(), endDate: Date(),
@@ -353,7 +353,7 @@ struct TravelTripTests {
     func halfPacked() {
         let items = [
             TestPackingItem(name: "A", isPacked: true),
-            TestPackingItem(name: "B", isPacked: false),
+            TestPackingItem(name: "B", isPacked: false)
         ]
         let trip = TestTravelTrip(name: "T", destination: "D",
                                    startDate: Date(), endDate: Date(),
@@ -543,7 +543,7 @@ struct FuelEconomyTests {
     func averageEconomy() {
         let logs = [
             TestFuelLog(liters: 45.0, cost: 85, distance: 500),
-            TestFuelLog(liters: 50.0, cost: 95, distance: 550),
+            TestFuelLog(liters: 50.0, cost: 95, distance: 550)
         ]
         let totalLiters = logs.reduce(0.0) { $0 + $1.liters }
         let totalKm = logs.reduce(0.0) { $0 + $1.distance }

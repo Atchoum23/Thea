@@ -381,7 +381,7 @@ final class PhysicalMailChannel: ObservableObject {
     // MARK: - OCR
 
     private func performOCR(on imageData: Data) async -> String {
-        return await withCheckedContinuation { continuation in
+        await withCheckedContinuation { continuation in
             #if os(macOS)
             guard let nsImage = NSImage(data: imageData),
                   let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil)
@@ -575,7 +575,7 @@ final class PhysicalMailChannel: ObservableObject {
             (#"€\s*([\d.]+,?\d*)"#, "EUR"),
             (#"([\d.]+,?\d*)\s*€"#, "EUR"),
             // USD patterns
-            (#"\$\s*([\d,]+\.?\d*)"#, "USD"),
+            (#"\$\s*([\d,]+\.?\d*)"#, "USD")
         ]
 
         for (pattern, currency) in patterns {
@@ -615,7 +615,7 @@ final class PhysicalMailChannel: ObservableObject {
 
         let dateFormats = [
             "dd.MM.yyyy", "dd/MM/yyyy", "yyyy-MM-dd",
-            "d. MMMM yyyy", "d MMMM yyyy", "dd MMMM yyyy",
+            "d. MMMM yyyy", "d MMMM yyyy", "dd MMMM yyyy"
         ]
         let locales = ["de_CH", "fr_CH", "en_US"]
 
@@ -662,7 +662,7 @@ final class PhysicalMailChannel: ObservableObject {
         }
 
         let firstLine = text.components(separatedBy: .newlines)
-            .first(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty })
+            .first { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
             ?? "Scanned Mail"
 
         let truncated = firstLine.count > 60 ? String(firstLine.prefix(57)) + "..." : firstLine
@@ -766,7 +766,7 @@ final class PhysicalMailChannel: ObservableObject {
             metadata: [
                 "category": item.category.rawValue,
                 "urgency": item.urgency.rawValue,
-                "actionRequired": item.actionRequired ? "true" : "false",
+                "actionRequired": item.actionRequired ? "true" : "false"
             ]
         )
     }
@@ -806,7 +806,7 @@ final class PhysicalMailChannel: ObservableObject {
             $0.title.lowercased().contains(lower) ||
             $0.ocrText.lowercased().contains(lower) ||
             ($0.sender?.lowercased().contains(lower) ?? false) ||
-            $0.tags.contains(where: { $0.lowercased().contains(lower) })
+            $0.tags.contains { $0.lowercased().contains(lower) }
         }
     }
 

@@ -584,7 +584,7 @@ actor SmartTransportManager {
                                    &hostname, socklen_t(hostname.count),
                                    nil, 0, NI_NUMERICHOST) == 0 {
                         let ip = hostname.withUnsafeBufferPointer { buf in
-                            String(decoding: buf.prefix(while: { $0 != 0 }).map { UInt8(bitPattern: $0) }, as: UTF8.self)
+                            String(decoding: buf.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self)
                         }
                         address = ip
                         isLinkLocal = ip.hasPrefix("169.254.")

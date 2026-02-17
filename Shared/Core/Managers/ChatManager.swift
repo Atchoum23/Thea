@@ -210,7 +210,7 @@ final class ChatManager: ObservableObject {
     #else
     /// No-op on non-macOS platforms (app pairing is macOS-only)
     func injectForegroundAppContext(into message: String) -> String {
-        return message
+        message
     }
     #endif
 }

@@ -215,7 +215,7 @@ public final class DocumentationGroundingService: ObservableObject {
             "\(name)/\(name)",
             "\(name)js/\(name)",
             "\(name)-team/\(name)",
-            "apple/\(name)",
+            "apple/\(name)"
         ]
 
         // Try GitHub API to find the real repo

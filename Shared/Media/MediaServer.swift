@@ -286,7 +286,7 @@ final class MediaServer: ObservableObject {
         receiveRequest(on: connection)
     }
 
-    private nonisolated func receiveRequest(on connection: NWConnection) {
+    nonisolated private func receiveRequest(on connection: NWConnection) {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, _, error in
             guard let data, error == nil else {
                 connection.cancel()
@@ -428,14 +428,14 @@ final class MediaServer: ObservableObject {
         })
     }
 
-    private nonisolated func escapeHTML(_ string: String) -> String {
+    nonisolated private func escapeHTML(_ string: String) -> String {
         string
             .replacingOccurrences(of: "&", with: "&amp;")
             .replacingOccurrences(of: "<", with: "&lt;")
             .replacingOccurrences(of: ">", with: "&gt;")
     }
 
-    private nonisolated func mimeType(for ext: String) -> String {
+    nonisolated private func mimeType(for ext: String) -> String {
         switch ext.lowercased() {
         case "mp4", "m4v": "video/mp4"
         case "mov": "video/quicktime"
@@ -472,7 +472,7 @@ final class MediaServer: ObservableObject {
 
     /// Remove a folder from the library.
     func removeFolder(id: UUID) {
-        let folderPath = folders.first(where: { $0.id == id })?.path
+        let folderPath = folders.first { $0.id == id }?.path
         folders.removeAll { $0.id == id }
         if let folderPath {
             items.removeAll { $0.path.hasPrefix(folderPath) }
@@ -575,7 +575,7 @@ final class MediaServer: ObservableObject {
         if !search.isEmpty {
             result = result.filter {
                 $0.name.localizedCaseInsensitiveContains(search) ||
-                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(search) })
+                $0.tags.contains { $0.localizedCaseInsensitiveContains(search) }
             }
         }
         return result

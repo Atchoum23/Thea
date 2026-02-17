@@ -18,7 +18,7 @@ struct AppPairingSettingsView: View {
         ("Warp", "dev.warp.Warp-Stable", "terminal.fill"),
         ("Notes", "com.apple.Notes", "note.text"),
         ("TextEdit", "com.apple.TextEdit", "doc.text"),
-        ("Safari", "com.apple.Safari", "safari"),
+        ("Safari", "com.apple.Safari", "safari")
     ]
 
     var body: some View {

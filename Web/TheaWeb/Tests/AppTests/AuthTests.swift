@@ -20,7 +20,7 @@ final class AuthTests: XCTestCase {
     // MARK: - Health Check
 
     func testHealthEndpoint() async throws {
-        try await app.test(.GET, "health") { res async in
+        try await app.test(.GET, "health") { res async throws in
             XCTAssertEqual(res.status, .ok)
 
             let health = try res.content.decode(HealthResponse.self)

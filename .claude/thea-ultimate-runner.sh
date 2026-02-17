@@ -13,6 +13,8 @@ MISSIONS_DIR="/tmp/thea-qa-missions"
 SESSION="thea-qa"
 MODEL="claude-opus-4-6"
 MAX_TURNS=200
+# Mission files are in the project's .claude/ directory (readable by claude)
+CLAUDE_MISSIONS="$THEA_DIR/.claude"
 
 mkdir -p "$LOG_DIR"
 

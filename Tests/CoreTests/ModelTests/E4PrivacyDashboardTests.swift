@@ -219,9 +219,7 @@ private func computePrivacyScore(
 
     if totalConnections > 0 {
         let concernRatio = Double(privacyConcerns) / Double(totalConnections)
-        if concernRatio < 0.05 { score += 15 }
-        else if concernRatio < 0.15 { score += 10 }
-        else if concernRatio < 0.30 { score += 5 }
+        if concernRatio < 0.05 { score += 15 } else if concernRatio < 0.15 { score += 10 } else if concernRatio < 0.30 { score += 5 }
     } else {
         score += 10
     }

@@ -175,7 +175,7 @@ public struct QuerySuggestionOverlay: View {
     private func fetchMemorySuggestions() async -> [QuerySuggestion] {
         // Get recent entities from PersonalKnowledgeGraph as topic suggestions
         let recentEntities = await PersonalKnowledgeGraph.shared.searchEntities(query: "")
-            .sorted(by: { $0.lastUpdatedAt > $1.lastUpdatedAt })
+            .sorted { $0.lastUpdatedAt > $1.lastUpdatedAt }
             .prefix(3)
 
         return recentEntities.map { entity in

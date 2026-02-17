@@ -91,7 +91,7 @@ final class OfflineQueueServiceTests: XCTestCase {
 
         XCTAssertEqual(sut.pendingRequests.count, 2)
         XCTAssertEqual(sut.stats.droppedRequests, 1)
-        XCTAssertFalse(sut.pendingRequests.contains(where: { $0.id == dropped.id }))
+        XCTAssertFalse(sut.pendingRequests.contains { $0.id == dropped.id })
     }
 
     func testQueueFullEvictsLowPriorityRequest() {
@@ -106,8 +106,8 @@ final class OfflineQueueServiceTests: XCTestCase {
 
         XCTAssertEqual(sut.pendingRequests.count, 2)
         XCTAssertEqual(sut.stats.droppedRequests, 1)
-        XCTAssertFalse(sut.pendingRequests.contains(where: { $0.id == lowReq.id }))
-        XCTAssertTrue(sut.pendingRequests.contains(where: { $0.id == newReq.id }))
+        XCTAssertFalse(sut.pendingRequests.contains { $0.id == lowReq.id })
+        XCTAssertTrue(sut.pendingRequests.contains { $0.id == newReq.id })
     }
 
     // MARK: - Execute

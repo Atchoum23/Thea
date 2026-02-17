@@ -332,7 +332,7 @@ struct OpenClawGatewayCommandTests {
             TestOpenClawGatewayCommand.sendReply(channelID: "", text: "", replyToID: "").method,
             TestOpenClawGatewayCommand.getHistory(channelID: "", limit: 0).method,
             TestOpenClawGatewayCommand.markRead(channelID: "", messageID: "").method,
-            TestOpenClawGatewayCommand.ping.method,
+            TestOpenClawGatewayCommand.ping.method
         ]
         #expect(Set(methods).count == 7)
     }

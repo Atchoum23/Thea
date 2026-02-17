@@ -275,8 +275,8 @@ public final class MemoryConsolidator: ObservableObject {
                     // Merge the lower-confidence group into the higher
                     let groupA = groupsByNormalized[a] ?? []
                     let groupB = groupsByNormalized[b] ?? []
-                    let maxConfA = groupA.max(by: { $0.confidence < $1.confidence })?.confidence ?? 0
-                    let maxConfB = groupB.max(by: { $0.confidence < $1.confidence })?.confidence ?? 0
+                    let maxConfA = groupA.max { $0.confidence < $1.confidence }?.confidence ?? 0
+                    let maxConfB = groupB.max { $0.confidence < $1.confidence }?.confidence ?? 0
                     let toRemove = maxConfA >= maxConfB ? groupB : groupA
                     for entry in toRemove {
                         merged.insert(entry.id)

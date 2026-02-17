@@ -112,7 +112,7 @@ struct ScanReport: Codable, Sendable, Identifiable {
     let completedAt: Date
 
     var overallThreatLevel: ThreatLevel {
-        findings.max(by: { $0.threatLevel < $1.threatLevel })?.threatLevel ?? .clean
+        findings.max { $0.threatLevel < $1.threatLevel }?.threatLevel ?? .clean
     }
 
     var findingsByCategory: [ScanCategory: [SystemSecurityFinding]] {
@@ -606,7 +606,7 @@ actor SystemSecurityScanner {
 
     // MARK: - Helper
 
-    private nonisolated func runProcess(_ path: String, arguments: [String]) -> String {
+    nonisolated private func runProcess(_ path: String, arguments: [String]) -> String {
         #if os(macOS)
         let process = Process()
         process.executableURL = URL(fileURLWithPath: path)
@@ -630,7 +630,7 @@ actor SystemSecurityScanner {
 
     // MARK: - Formatting
 
-    private nonisolated static func formatFileSize(_ bytes: Int64) -> String {
+    nonisolated private static func formatFileSize(_ bytes: Int64) -> String {
         let units = ["B", "KB", "MB", "GB"]
         var value = Double(bytes)
         var unitIndex = 0

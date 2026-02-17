@@ -188,7 +188,7 @@ final class TheaTaskManager: ObservableObject {
             sortBy: [
                 SortDescriptor(\.priorityRaw, order: .reverse),
                 SortDescriptor(\.dueDate, order: .forward),
-                SortDescriptor(\.createdDate, order: .reverse),
+                SortDescriptor(\.createdDate, order: .reverse)
             ]
         )
         tasks = (try? modelContext.fetch(descriptor)) ?? []

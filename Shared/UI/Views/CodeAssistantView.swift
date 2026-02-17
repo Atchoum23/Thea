@@ -268,7 +268,7 @@ struct CodeAssistantView: View {
                 // Language breakdown
                 if !project.languages.isEmpty {
                     GroupBox("Language Breakdown") {
-                        ForEach(project.languages.sorted(by: { $0.value > $1.value }), id: \.key) { lang, lines in
+                        ForEach(project.languages.sorted { $0.value > $1.value }, id: \.key) { lang, lines in
                             HStack {
                                 Image(systemName: lang.icon)
                                     .frame(width: 20)

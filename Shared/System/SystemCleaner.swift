@@ -200,7 +200,7 @@ final class SystemCleaner {
             scanProgress = Double(index + 1) * step
         }
 
-        let breakdown = Dictionary(grouping: allItems, by: { $0.category })
+        let breakdown = Dictionary(grouping: allItems) { $0.category }
             .mapValues { $0.reduce(0 as UInt64) { $0 + $1.sizeBytes } }
         let total = allItems.reduce(0 as UInt64) { $0 + $1.sizeBytes }
 
