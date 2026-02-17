@@ -308,6 +308,11 @@ public final class EpisodicMemoryManager: ObservableObject {
             .uniqued())
     }
 
+    public func removeEpisode(id: UUID) {
+        episodes.removeAll { $0.id == id }
+        saveEpisodes()
+    }
+
     public func startNewSession() {
         currentSessionId = UUID()
         logger.info("Started new session: \(self.currentSessionId)")
@@ -464,6 +469,11 @@ public final class SemanticMemoryManager: ObservableObject {
 
     public func codingPatterns() -> [SemanticMemoryEntry] {
         concepts(for: .codingStyle) + concepts(for: .projectPattern)
+    }
+
+    public func removeConcept(id: UUID) {
+        entries.removeAll { $0.id == id }
+        saveEntries()
     }
 
     // MARK: - Persistence

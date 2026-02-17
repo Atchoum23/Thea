@@ -246,37 +246,102 @@ public final class MemoryConsolidator: ObservableObject {
     }
 
     private func mergeSimilarConcepts() async {
-        // TODO: Implement embedding-based similarity merging
-        // For now, merge exact duplicates
         let semanticManager = SemanticMemoryManager.shared
-        var seen: Set<String> = []
-        var toRemove: [UUID] = []
+        let entries = semanticManager.entries
+        var merged: Set<UUID> = []
 
-        for entry in semanticManager.entries {
+        // Group entries by normalized concept for exact-match merging
+        var groupsByNormalized: [String: [SemanticMemoryEntry]] = [:]
+        for entry in entries {
             let normalized = entry.concept.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-            if seen.contains(normalized) {
-                toRemove.append(entry.id)
-            } else {
-                seen.insert(normalized)
+            groupsByNormalized[normalized, default: []].append(entry)
+        }
+
+        // Merge exact duplicates: keep highest confidence, remove rest
+        for (_, group) in groupsByNormalized where group.count > 1 {
+            let sorted = group.sorted { $0.confidence > $1.confidence }
+            for entry in sorted.dropFirst() {
+                merged.insert(entry.id)
             }
         }
 
-        // Remove duplicates (keeping highest confidence)
-        // This is simplified - real implementation would merge
+        // Fuzzy similarity merging: merge entries with high string similarity
+        let allNormalized = Array(groupsByNormalized.keys)
+        for i in 0..<allNormalized.count {
+            for j in (i + 1)..<allNormalized.count {
+                let a = allNormalized[i]
+                let b = allNormalized[j]
+                if stringSimilarity(a, b) > 0.85 {
+                    // Merge the lower-confidence group into the higher
+                    let groupA = groupsByNormalized[a] ?? []
+                    let groupB = groupsByNormalized[b] ?? []
+                    let maxConfA = groupA.max(by: { $0.confidence < $1.confidence })?.confidence ?? 0
+                    let maxConfB = groupB.max(by: { $0.confidence < $1.confidence })?.confidence ?? 0
+                    let toRemove = maxConfA >= maxConfB ? groupB : groupA
+                    for entry in toRemove {
+                        merged.insert(entry.id)
+                    }
+                }
+            }
+        }
+
+        if !merged.isEmpty {
+            for id in merged {
+                semanticManager.removeConcept(id: id)
+            }
+            logger.info("Merged \(merged.count) similar/duplicate concepts")
+        }
+    }
+
+    /// Bigram-based string similarity (Sørensen-Dice coefficient)
+    private func stringSimilarity(_ a: String, _ b: String) -> Double {
+        guard a.count > 1, b.count > 1 else { return a == b ? 1.0 : 0.0 }
+        let bigramsA = Set(zip(a, a.dropFirst()).map { "\($0)\($1)" })
+        let bigramsB = Set(zip(b, b.dropFirst()).map { "\($0)\($1)" })
+        let intersection = bigramsA.intersection(bigramsB).count
+        return 2.0 * Double(intersection) / Double(bigramsA.count + bigramsB.count)
     }
 
     private func archiveOldEpisodes() async {
-        // Keep last 30 days of full episodes
-        // Older episodes get summarized and archived
         let thirtyDaysAgo = Date().addingTimeInterval(-30 * 24 * 60 * 60)
-
-        // For now, just log - full implementation would create summaries
         let episodicManager = EpisodicMemoryManager.shared
-        let oldCount = episodicManager.episodes.filter { $0.timestamp < thirtyDaysAgo }.count
+        let oldEpisodes = episodicManager.episodes.filter { $0.timestamp < thirtyDaysAgo }
 
-        if oldCount > 0 {
-            logger.info("Would archive \(oldCount) episodes older than 30 days")
+        guard !oldEpisodes.isEmpty else { return }
+
+        // Summarize old episodes into semantic memory entries
+        let successCount = oldEpisodes.filter { $0.outcome == .success }.count
+        let failCount = oldEpisodes.filter { $0.outcome == .failure }.count
+        let taskTypes = Set(oldEpisodes.map(\.taskType))
+
+        let summary = "Archived \(oldEpisodes.count) episodes (\(successCount) success, \(failCount) failure) across task types: \(taskTypes.joined(separator: ", "))"
+
+        let semanticManager = SemanticMemoryManager.shared
+        semanticManager.learnConcept(
+            concept: "Episode archive: \(DateFormatter.localizedString(from: thirtyDaysAgo, dateStyle: .short, timeStyle: .none))",
+            description: summary,
+            category: .successPattern,
+            confidence: 0.8
+        )
+
+        // Extract lessons from archived episodes
+        for episode in oldEpisodes {
+            for lesson in episode.lessonsLearned {
+                semanticManager.learnConcept(
+                    concept: "Archived lesson: \(lesson)",
+                    description: "From \(episode.taskType) task on \(DateFormatter.localizedString(from: episode.timestamp, dateStyle: .short, timeStyle: .none))",
+                    category: .successPattern,
+                    confidence: 0.5
+                )
+            }
         }
+
+        // Remove archived episodes
+        for episode in oldEpisodes {
+            episodicManager.removeEpisode(id: episode.id)
+        }
+
+        logger.info("Archived \(oldEpisodes.count) episodes older than 30 days, extracted lessons into semantic memory")
     }
 }
 
