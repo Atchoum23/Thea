@@ -8,6 +8,7 @@
 
 import CloudKit
 import Foundation
+import OSLog
 
 // MARK: - Memory Service
 
@@ -15,6 +16,7 @@ import Foundation
 /// Stores user preferences, facts, and context across sessions with iCloud sync
 public actor MemoryService {
     public static let shared = MemoryService()
+    private let logger = Logger(subsystem: "ai.thea.app", category: "MemoryService")
 
     // MARK: - CloudKit
 
@@ -47,25 +49,34 @@ public actor MemoryService {
         await loadFromLocalStorage()
 
         // Then sync with iCloud (background)
-        Task {
-            try? await syncWithCloud()
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.syncWithCloud()
+            } catch {
+                self.logger.error("iCloud sync failed during load: \(error.localizedDescription)")
+            }
         }
 
         isLoaded = true
     }
 
     private func loadFromLocalStorage() async {
-        if let data = UserDefaults.standard.data(forKey: localStorageKey),
-           let decoded = try? JSONDecoder().decode([TheaMemory].self, from: data)
-        {
-            memories = decoded
+        guard let data = UserDefaults.standard.data(forKey: localStorageKey) else { return }
+        do {
+            memories = try JSONDecoder().decode([TheaMemory].self, from: data)
             rebuildIndex()
+        } catch {
+            logger.error("Failed to decode memories from local storage: \(error.localizedDescription)")
         }
     }
 
     private func saveToLocalStorage() {
-        if let data = try? JSONEncoder().encode(memories) {
+        do {
+            let data = try JSONEncoder().encode(memories)
             UserDefaults.standard.set(data, forKey: localStorageKey)
+        } catch {
+            logger.error("Failed to encode memories for local storage: \(error.localizedDescription)")
         }
     }
 
@@ -163,8 +174,13 @@ public actor MemoryService {
         saveToLocalStorage()
 
         // Sync to cloud
-        Task {
-            try? await saveToCloud(memory)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.saveToCloud(memory)
+            } catch {
+                self.logger.error("Failed to sync memory to iCloud: \(error.localizedDescription)")
+            }
         }
 
         return memory
@@ -326,8 +342,14 @@ public actor MemoryService {
         memories[index].modifiedAt = Date()
         saveToLocalStorage()
 
-        Task {
-            try? await saveToCloud(memories[index])
+        let updatedMemory = memories[index]
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.saveToCloud(updatedMemory)
+            } catch {
+                self.logger.error("Failed to sync updated memory to iCloud: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -341,8 +363,13 @@ public actor MemoryService {
 
         saveToLocalStorage()
 
-        Task {
-            try? await deleteFromCloud(memory)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.deleteFromCloud(memory)
+            } catch {
+                self.logger.error("Failed to delete memory from iCloud: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -367,8 +394,13 @@ public actor MemoryService {
         saveToLocalStorage()
 
         // Delete all from cloud
-        Task {
-            try? await deleteAllFromCloud()
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.deleteAllFromCloud()
+            } catch {
+                self.logger.error("Failed to delete all memories from iCloud: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -389,7 +421,11 @@ public actor MemoryService {
         let results = try await privateDatabase.records(matching: query)
 
         for (id, _) in results.matchResults {
-            _ = try? await privateDatabase.deleteRecord(withID: id)
+            do {
+                try await privateDatabase.deleteRecord(withID: id)
+            } catch {
+                logger.warning("Failed to delete cloud record \(id.recordName): \(error.localizedDescription)")
+            }
         }
     }
 
