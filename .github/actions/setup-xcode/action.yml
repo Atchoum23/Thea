@@ -28,8 +28,12 @@ runs:
     - name: Install XcodeGen
       shell: bash
       run: |
+        # Always link from Cellar first (cache restore populates Cellar but not bin symlink)
+        brew link --overwrite xcodegen 2>/dev/null || true
+        # Install if still not in PATH after linking
         if ! command -v xcodegen &>/dev/null; then
-          brew link --overwrite xcodegen 2>/dev/null || brew install xcodegen
+          brew install xcodegen
+          brew link --overwrite xcodegen 2>/dev/null || true
         fi
         xcodegen --version
 
