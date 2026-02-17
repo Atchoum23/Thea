@@ -116,6 +116,8 @@ extension UnifiedDeviceAwareness {
         // Synchronous connectivity check using NWPathMonitor snapshot
         let monitor = NWPathMonitor()
         let semaphore = DispatchSemaphore(value: 0)
+        // nonisolated(unsafe): local variable shared between semaphore-synchronized blocks;
+        // write happens before semaphore.signal(), read after semaphore.wait() — no concurrent access
         nonisolated(unsafe) var isConnected = false
 
         monitor.pathUpdateHandler = { path in

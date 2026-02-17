@@ -477,6 +477,53 @@ final class SettingsManager: ObservableObject {
             .sink { [weak self] _ in
                 self?.reloadFromDefaults()
             }
+
+        // One-time Keychain migration audit: scan UserDefaults for leftover API keys
+        // and force-migrate them to Keychain. Runs once per install/device.
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            self?.auditAndMigrateAPIKeys()
+        }
+    }
+
+    /// Scan UserDefaults for any remaining `*_api_key` or `apiKey_*` patterns,
+    /// migrate them to Keychain, and remove from UserDefaults.
+    private func auditAndMigrateAPIKeys() {
+        let defaults = UserDefaults.standard
+        let auditKey = "settings.keychainAuditCompleted.v1"
+        guard !defaults.bool(forKey: auditKey) else { return }
+
+        var migrated = 0
+        var found = 0
+
+        for key in defaults.dictionaryRepresentation().keys {
+            let isLegacyKey = key.hasSuffix("_api_key") || key.hasPrefix("apiKey_")
+            guard isLegacyKey, let value = defaults.string(forKey: key), !value.isEmpty else { continue }
+            found += 1
+
+            // Derive provider name from key
+            let provider: String
+            if key.hasSuffix("_api_key") {
+                provider = String(key.dropLast("_api_key".count))
+            } else {
+                provider = String(key.dropFirst("apiKey_".count))
+            }
+
+            do {
+                try SecureStorage.shared.saveAPIKey(value, for: provider)
+                defaults.removeObject(forKey: key)
+                migrated += 1
+                logger.info("Keychain audit: migrated '\(provider, privacy: .public)' API key from UserDefaults")
+            } catch {
+                logger.error("Keychain audit: failed to migrate '\(provider, privacy: .public)': \(error.localizedDescription, privacy: .public)")
+            }
+        }
+
+        if found > 0 {
+            logger.info("Keychain audit complete: \(migrated)/\(found) keys migrated to Keychain")
+        }
+
+        defaults.set(true, forKey: auditKey)
     }
 
 }

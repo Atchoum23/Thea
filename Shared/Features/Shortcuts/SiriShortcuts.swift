@@ -11,6 +11,7 @@ import OSLog
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, *)
 public struct SiriAskTheaIntent: AppIntent {
+    // nonisolated(unsafe): AppIntent protocol requires static var; set at declaration and never mutated
     nonisolated(unsafe) public static var title: LocalizedStringResource = "Ask Thea"
     nonisolated(unsafe) public static var description = IntentDescription("Ask Thea AI a question and get an intelligent response")
 
