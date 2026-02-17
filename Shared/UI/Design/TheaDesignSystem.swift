@@ -398,6 +398,7 @@ public struct TheaStreamingIndicatorView: View {
     let modelName: String?
 
     @State private var dotOpacity: [Double] = [1, 0.5, 0.2]
+    @State private var dotTimer: Timer?
 
     public init(modelName: String? = nil) {
         self.modelName = modelName
@@ -418,7 +419,11 @@ public struct TheaStreamingIndicatorView: View {
                 }
             }
             .onAppear {
-                animateDots()
+                startDotAnimation()
+            }
+            .onDisappear {
+                dotTimer?.invalidate()
+                dotTimer = nil
             }
 
             Text("THEA is thinking...")
@@ -430,8 +435,9 @@ public struct TheaStreamingIndicatorView: View {
         .frostedGlass(cornerRadius: TheaRadius.pill, tint: TheaBrandColors.gold)
     }
 
-    private func animateDots() {
-        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [self] _ in
+    private func startDotAnimation() {
+        dotTimer?.invalidate()
+        dotTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
             Task { @MainActor in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     let last = dotOpacity.removeLast()
