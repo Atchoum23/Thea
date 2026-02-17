@@ -928,7 +928,7 @@ struct FirewallAuditDetailView: View {
                         VStack(spacing: 2) {
                             Text("\(stats.passed)")
                                 .font(.theaTitle2)
-                                .foregroundStyle(.green)
+                                .foregroundStyle(Color.theaSuccess)
                             Text("Passed")
                                 .font(.theaCaption2)
                                 .foregroundStyle(.secondary)

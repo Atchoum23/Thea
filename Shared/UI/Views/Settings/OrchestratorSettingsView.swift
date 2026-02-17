@@ -540,7 +540,7 @@ extension OrchestratorSettingsView {
 
             HStack {
                 Image(systemName: config.preferCheaperModels ? "leaf.fill" : "bolt.fill")
-                    .foregroundStyle(config.preferCheaperModels ? .green : .orange)
+                    .foregroundStyle(config.preferCheaperModels ? .theaSuccess : .theaWarning)
                 Text(config.preferCheaperModels
                     ? "Optimizing for cost - local and cheaper models preferred"
                     : "Optimizing for performance - best model for each task")
