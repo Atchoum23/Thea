@@ -9,7 +9,23 @@ import Foundation
 // MARK: - Known Models
 
 public extension AIModel {
-    // MARK: - Anthropic Models (Claude 4.5 - Latest)
+    // MARK: - Anthropic Models (Claude 4.6 - Latest)
+
+    static let claude46Opus = AIModel(
+        id: "claude-opus-4-6",
+        name: "Claude Opus 4.6",
+        provider: "anthropic",
+        description: "Most capable model — adaptive thinking, 1M context, interleaved tool use",
+        contextWindow: 1_000_000,
+        maxOutputTokens: 32_000,
+        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.015"),
+        outputCostPer1K: Decimal(string: "0.075"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
+    // MARK: - Anthropic Models (Claude 4.5)
 
     static let claude45Opus = AIModel(
         id: "claude-opus-4-5-20251101",
@@ -352,6 +368,20 @@ public extension AIModel {
 
     // MARK: - OpenRouter Models
 
+    static let orClaude46Opus = AIModel(
+        id: "anthropic/claude-opus-4-6",
+        name: "Claude Opus 4.6 (OpenRouter)",
+        provider: "openrouter",
+        description: "Claude Opus 4.6 via OpenRouter — adaptive thinking, 1M context",
+        contextWindow: 1_000_000,
+        maxOutputTokens: 32_000,
+        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.015"),
+        outputCostPer1K: Decimal(string: "0.075"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
     static let orClaude45Sonnet = AIModel(
         id: "anthropic/claude-sonnet-4-5-20250929",
         name: "Claude Sonnet 4.5 (OpenRouter)",
@@ -483,7 +513,7 @@ public extension AIModel {
     // MARK: - Common Model Lists
 
     static var anthropicModels: [AIModel] {
-        [claude45Opus, claude45Sonnet, claude45Haiku, claude4Opus, claude4Sonnet, claude35Haiku]
+        [claude46Opus, claude45Opus, claude45Sonnet, claude45Haiku, claude4Opus, claude4Sonnet, claude35Haiku]
     }
 
     static var openaiModels: [AIModel] {
@@ -507,7 +537,7 @@ public extension AIModel {
     }
 
     static var openRouterModels: [AIModel] {
-        [orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
+        [orClaude46Opus, orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
     }
 
     static var localModels: [AIModel] {
