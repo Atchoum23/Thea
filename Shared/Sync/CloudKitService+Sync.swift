@@ -7,6 +7,14 @@
 
 import CloudKit
 import Foundation
+import os.log
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+    /// Posted when CloudKit reports quota exceeded — UI should inform the user.
+    public static let theaCloudKitQuotaExceeded = Notification.Name("app.thea.cloudkit.quotaExceeded")
+}
 
 // MARK: - Sync Operations
 
@@ -28,9 +36,39 @@ extension CloudKitService {
         }
     }
 
-    /// Perform delta sync using CKServerChangeToken
-    /// This only fetches records that have changed since the last sync
+    /// Perform delta sync with automatic retry on transient network failures.
+    /// - CKError.networkUnavailable: retries up to 3 times (2s/4s/8s exponential backoff)
+    /// - CKError.quotaExceeded: sets error status and posts notification for UI display
     func performDeltaSync() async throws {
+        let maxRetries = 3
+        var lastError: Error?
+
+        for attempt in 0..<maxRetries {
+            do {
+                try await performDeltaSyncAttempt()
+                return // Success
+            } catch let ckError as CKError where ckError.code == .networkUnavailable || ckError.code == .networkFailure {
+                lastError = ckError
+                if attempt < maxRetries - 1 {
+                    let delay: Double = pow(2.0, Double(attempt + 1)) // 2s, 4s, 8s
+                    logger.warning("CloudKit network unavailable (attempt \(attempt + 1)/\(maxRetries)), retrying in \(delay)s")
+                    try await Task.sleep(for: .seconds(delay))
+                }
+            } catch let ckError as CKError where ckError.code == .quotaExceeded {
+                logger.error("CloudKit quota exceeded — iCloud storage is full")
+                await MainActor.run {
+                    syncStatus = .error("iCloud storage full")
+                }
+                NotificationCenter.default.post(name: .theaCloudKitQuotaExceeded, object: nil)
+                return // Don't retry quota errors
+            }
+        }
+
+        throw lastError ?? CKError(.networkUnavailable)
+    }
+
+    /// Internal: performs the actual delta sync operation without retry logic.
+    private func performDeltaSyncAttempt() async throws {
         guard let privateDatabase else { return }
         let zoneID = Self.theaZoneID
 
