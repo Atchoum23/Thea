@@ -164,7 +164,7 @@ enum XcodeContextExtractor {
                     // Get line start to calculate column
                     var lineText: CFTypeRef?
                     var lineRange = CFRange(location: 0, length: rangeValue.location)
-                    var lineRangeValue = AXValueCreate(.cfRange, &lineRange)
+                    let lineRangeValue = AXValueCreate(.cfRange, &lineRange)
 
                     let lineResult = AXUIElementCopyParameterizedAttributeValue(
                         element as! AXUIElement,

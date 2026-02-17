@@ -297,7 +297,7 @@ final class PasswordManager: ObservableObject {
 
     private func storePassword(_ password: String, for id: UUID) {
         guard let data = password.data(using: .utf8) else { return }
-        KeychainHelper.save(key: keychainPrefix + id.uuidString, data: data)
+        _ = KeychainHelper.save(key: keychainPrefix + id.uuidString, data: data)
     }
 
     private func saveMetadata() {

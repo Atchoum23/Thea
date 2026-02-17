@@ -11,6 +11,8 @@ import Foundation
 // MARK: - Tool Execution
 
 extension THEAMCPServer {
+    @available(macOS, deprecated: 26.0, message: "searchLocation/getDirections use deprecated MapKit APIs")
+    @available(iOS, deprecated: 26.0, message: "searchLocation/getDirections use deprecated MapKit APIs")
     func executeTool(name: String, arguments: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         switch name {
         case "thea_execute_command":

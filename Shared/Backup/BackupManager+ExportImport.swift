@@ -53,7 +53,7 @@ extension BackupManager {
         }
 
         let fileSize = (try? fileManager.attributesOfItem(atPath: destPath.path)[.size] as? Int64) ?? 0
-        let backupInfo = try BackupInfo(
+        let backupInfo = BackupInfo(
             id: UUID().uuidString,
             name: backupName,
             type: .imported,
