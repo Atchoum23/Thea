@@ -162,6 +162,8 @@ struct CompactModelSelectorView: View {
             .cornerRadius(6)
         }
         .help("Select AI model")
+        .accessibilityLabel("AI model selector")
+        .accessibilityHint("Select which AI model to use for responses")
         .task {
             await catalogManager.refreshIfNeeded()
         }
