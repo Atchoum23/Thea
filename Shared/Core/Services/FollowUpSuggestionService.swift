@@ -34,7 +34,7 @@ final class FollowUpSuggestionService: ObservableObject {
     // MARK: - Generation
 
     /// Generate follow-up suggestions based on AI response content and task type.
-    func generate(
+    func generate( // swiftlint:disable:this function_body_length
         response: String,
         query: String,
         taskType: String?,

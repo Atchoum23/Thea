@@ -15,7 +15,7 @@ func configure(_ app: Application) async throws {
     if app.environment == .production {
         // Production: Use PostgreSQL via environment variable
         // DATABASE_URL should be set in the environment
-        guard let _ = Environment.get("DATABASE_URL") else {
+        guard Environment.get("DATABASE_URL") != nil else {
             app.logger.warning("DATABASE_URL not set, falling back to SQLite")
             app.databases.use(.sqlite(.file("thea.sqlite")), as: .sqlite)
             return

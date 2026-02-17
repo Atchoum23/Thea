@@ -291,6 +291,58 @@ final class TelegramChannel: ObservableObject {
         return messages
     }
 
+    // MARK: - Export Parsing Helpers
+
+    private func chatTypeFromExport(_ typeStr: String?) -> TelegramChatType {
+        switch typeStr {
+        case "personal_chat": return .privateChat
+        case "bot_chat": return .bot
+        case "private_group", "public_group": return .group
+        case "private_supergroup", "public_supergroup": return .supergroup
+        case "private_channel", "public_channel": return .channel
+        default: return .privateChat
+        }
+    }
+
+    private func extractTextContent(from msgDict: [String: Any]) -> String {
+        if let textArray = msgDict["text"] as? [Any] {
+            return textArray.compactMap { item -> String? in
+                if let str = item as? String { return str }
+                if let dict = item as? [String: Any] { return dict["text"] as? String }
+                return nil
+            }.joined()
+        } else if let text = msgDict["text"] as? String {
+            return text
+        }
+        return ""
+    }
+
+    private func extractAttachments(from msgDict: [String: Any]) -> [TelegramAttachment] {
+        var attachments: [TelegramAttachment] = []
+        if let photo = msgDict["photo"] as? String {
+            attachments.append(TelegramAttachment(type: .photo, fileName: photo))
+        }
+        if let file = msgDict["file"] as? String {
+            let mimeType = msgDict["mime_type"] as? String
+            let size = msgDict["file_size_bytes"] as? Int
+            let attachType = classifyAttachment(mediaType: msgDict["media_type"] as? String, mimeType: mimeType)
+            attachments.append(TelegramAttachment(type: attachType, mimeType: mimeType, fileName: file, sizeBytes: size))
+        }
+        return attachments
+    }
+
+    private func classifyAttachment(mediaType: String?, mimeType: String?) -> TelegramAttachmentType {
+        switch mediaType {
+        case "voice_message": return .voiceMessage
+        case "video_message": return .videoNote
+        case "sticker": return .sticker
+        default: break
+        }
+        if mimeType?.hasPrefix("audio/") == true { return .audio }
+        if mimeType?.hasPrefix("video/") == true { return .video }
+        return .document
+    }
+
     // MARK: - Contact & Group Management
 
     private func updateContactFromMessage(_ message: TelegramMessage) {

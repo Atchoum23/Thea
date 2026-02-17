@@ -171,9 +171,9 @@ struct AuthController: RouteCollection {
         return Data(bytes).base64EncodedString()
     }
 
-    private func hashIP(_ ip: String?) -> String? {
-        guard let ip = ip else { return nil }
-        return SHA256.hash(data: Data(ip.utf8)).hexString
+    private func hashIP(_ address: String?) -> String? {
+        guard let address else { return nil }
+        return SHA256.hash(data: Data(address.utf8)).hexString
     }
 }
 

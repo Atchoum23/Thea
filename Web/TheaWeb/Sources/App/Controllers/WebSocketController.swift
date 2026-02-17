@@ -10,8 +10,8 @@ actor WebSocketManager {
 
     private var connections: [UUID: WebSocket] = [:]
 
-    func add(userId: UUID, ws: WebSocket) {
-        connections[userId] = ws
+    func add(userId: UUID, socket: WebSocket) {
+        connections[userId] = socket
     }
 
     func remove(userId: UUID) {
@@ -19,10 +19,10 @@ actor WebSocketManager {
     }
 
     func send(to userId: UUID, message: WebSocketMessage) async {
-        guard let ws = connections[userId] else { return }
+        guard let socket = connections[userId] else { return }
         do {
             let data = try JSONEncoder().encode(message)
-            try await ws.send(raw: data, opcode: .text)
+            try await socket.send(raw: data, opcode: .text)
         } catch {
             connections.removeValue(forKey: userId)
         }
@@ -35,9 +35,9 @@ actor WebSocketManager {
         } catch {
             return
         }
-        for (userId, ws) in connections {
+        for (userId, socket) in connections {
             do {
-                try await ws.send(raw: data, opcode: .text)
+                try await socket.send(raw: data, opcode: .text)
             } catch {
                 connections.removeValue(forKey: userId)
             }
@@ -111,25 +111,25 @@ struct WebSocketMessage: Codable, Sendable {
 /// Registers WebSocket upgrade route
 struct WebSocketController {
     static func register(on app: Application) {
-        app.webSocket("api", "v1", "ws") { req, ws async in
+        app.webSocket("api", "v1", "ws") { req, socket async in
             // Authenticate via query parameter token
             guard let token = req.query[String.self, at: "token"] else {
-                try? await ws.close(code: .policyViolation)
+                try? await socket.close(code: .policyViolation)
                 return
             }
 
             // Validate token
             guard let session = try? await authenticateToken(token, on: req.db) else {
-                try? await ws.close(code: .policyViolation)
+                try? await socket.close(code: .policyViolation)
                 return
             }
 
             let userId = session.$user.id
-            await WebSocketManager.shared.add(userId: userId, ws: ws)
+            await WebSocketManager.shared.add(userId: userId, socket: socket)
             req.logger.info("WebSocket connected for user: \(userId)")
 
             // Handle incoming messages
-            ws.onText { ws, text async in
+            socket.onText { _, text async in
                 do {
                     let msg = try JSONDecoder().decode(WSClientMessage.self, from: Data(text.utf8))
                     await handleClientMessage(msg, userId: userId, req: req)
@@ -138,7 +138,7 @@ struct WebSocketController {
                 }
             }
 
-            ws.onClose.whenComplete { _ in
+            socket.onClose.whenComplete { _ in
                 Task {
                     await WebSocketManager.shared.remove(userId: userId)
                     req.logger.info("WebSocket disconnected for user: \(userId)")
@@ -147,9 +147,9 @@ struct WebSocketController {
         }
     }
 
-    private static func authenticateToken(_ token: String, on db: Database) async throws -> Session? {
+    private static func authenticateToken(_ token: String, on database: Database) async throws -> Session? {
         let tokenHash = SHA256Helper.hash(token)
-        return try await Session.query(on: db)
+        return try await Session.query(on: database)
             .filter(\.$tokenHash == tokenHash)
             .filter(\.$isValid == true)
             .with(\.$user)

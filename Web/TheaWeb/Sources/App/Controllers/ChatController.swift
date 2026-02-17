@@ -31,23 +31,7 @@ struct ChatController: RouteCollection {
             throw Abort(.badRequest, reason: "Message exceeds maximum length")
         }
 
-        // Find or create conversation
-        let conversation: Conversation
-        if let convId = input.conversationId,
-           let existing = try await Conversation.query(on: req.db)
-            .filter(\.$id == convId)
-            .filter(\.$user.$id == user.id!)
-            .first() {
-            conversation = existing
-        } else {
-            let title = String(input.message.prefix(80))
-            conversation = Conversation(
-                userID: user.id!,
-                title: title,
-                model: input.preferredModel ?? "claude-sonnet"
-            )
-            try await conversation.save(on: req.db)
-        }
+        let conversation = try await findOrCreateConversation(for: user, input: input, on: req.db)
 
         // Save user message
         let messageCount = try await Message.query(on: req.db)
@@ -69,7 +53,39 @@ struct ChatController: RouteCollection {
             req: req
         )
 
-        // Save assistant message
+        // Save assistant response and update conversation
+        return try await saveAssistantResponse(
+            theaResponse, conversation: conversation,
+            messageCount: messageCount, on: req.db
+        )
+    }
+
+    private func findOrCreateConversation(
+        for user: User, input: ChatRequest, on database: Database
+    ) async throws -> Conversation {
+        if let convId = input.conversationId,
+           let existing = try await Conversation.query(on: database)
+            .filter(\.$id == convId)
+            .filter(\.$user.$id == user.id!)
+            .first() {
+            return existing
+        }
+        let title = String(input.message.prefix(80))
+        let conversation = Conversation(
+            userID: user.id!,
+            title: title,
+            model: input.preferredModel ?? "claude-sonnet"
+        )
+        try await conversation.save(on: database)
+        return conversation
+    }
+
+    private func saveAssistantResponse(
+        _ theaResponse: TheaInternalResponse,
+        conversation: Conversation,
+        messageCount: Int,
+        on database: Database
+    ) async throws -> ChatResponse {
         let assistantMessage = Message(
             conversationID: conversation.id!,
             role: "assistant",
@@ -78,11 +94,10 @@ struct ChatController: RouteCollection {
             tokensUsed: theaResponse.tokensUsed,
             orderIndex: messageCount + 1
         )
-        try await assistantMessage.save(on: req.db)
+        try await assistantMessage.save(on: database)
 
-        // Update conversation
         conversation.messageCount = messageCount + 2
-        try await conversation.save(on: req.db)
+        try await conversation.save(on: database)
 
         return ChatResponse(
             id: assistantMessage.id ?? UUID(),

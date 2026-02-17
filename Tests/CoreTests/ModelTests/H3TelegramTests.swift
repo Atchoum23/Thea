@@ -747,24 +747,48 @@ private enum TestMessagingChannelType: String, CaseIterable {
 // MARK: - Telegram Parser (Mirrors Production Logic)
 
 /// Parse Telegram Desktop export JSON — mirrors TelegramChannel.parseExportJSON()
+private func tgChatTypeFromExport(_ typeStr: String?) -> TGTestChatType {
+    switch typeStr {
+    case "personal_chat": return .privateChat
+    case "bot_chat": return .bot
+    case "private_group", "public_group": return .group
+    case "private_supergroup", "public_supergroup": return .supergroup
+    case "private_channel", "public_channel": return .channel
+    default: return .privateChat
+    }
+}
+
+private func extractTGTextContent(from msgDict: [String: Any]) -> String {
+    if let textArray = msgDict["text"] as? [Any] {
+        return textArray.compactMap { item -> String? in
+            if let str = item as? String { return str }
+            if let dict = item as? [String: Any] { return dict["text"] as? String }
+            return nil
+        }.joined()
+    } else if let text = msgDict["text"] as? String {
+        return text
+    }
+    return ""
+}
+
+private func classifyTGAttachment(mediaType: String?, mimeType: String?) -> TGTestAttachmentType {
+    switch mediaType {
+    case "voice_message": return .voiceMessage
+    case "video_message": return .videoNote
+    case "sticker": return .sticker
+    default: break
+    }
+    if mimeType?.hasPrefix("audio/") == true { return .audio }
+    if mimeType?.hasPrefix("video/") == true { return .video }
+    return .document
+}
+
 private func parseTGExport(_ json: [String: Any]) -> [TGTestMessage] {
     var messages: [TGTestMessage] = []
 
     let chatName = json["name"] as? String ?? "Unknown"
     let chatID = "export_\(chatName.hashValue)"
-    let chatType: TGTestChatType
-    if let typeStr = json["type"] as? String {
-        switch typeStr {
-        case "personal_chat": chatType = .privateChat
-        case "bot_chat": chatType = .bot
-        case "private_group", "public_group": chatType = .group
-        case "private_supergroup", "public_supergroup": chatType = .supergroup
-        case "private_channel", "public_channel": chatType = .channel
-        default: chatType = .privateChat
-        }
-    } else {
-        chatType = .privateChat
-    }
+    let chatType = tgChatTypeFromExport(json["type"] as? String)
 
     guard let messageList = json["messages"] as? [[String: Any]] else { return [] }
 
@@ -776,23 +800,13 @@ private func parseTGExport(_ json: [String: Any]) -> [TGTestMessage] {
         guard let idRaw = msgDict["id"],
               let dateStr = msgDict["date"] as? String else { continue }
 
+        // Skip service messages (member join/leave, etc.)
+        if msgDict["type"] as? String == "service" { continue }
+
         let msgID = "\(idRaw)"
         _ = msgID  // Used for identification in production code
         let timestamp = dateFormatter.date(from: dateStr) ?? Date()
-
-        let content: String
-        if let textArray = msgDict["text"] as? [Any] {
-            content = textArray.compactMap { item -> String? in
-                if let str = item as? String { return str }
-                if let dict = item as? [String: Any] { return dict["text"] as? String }
-                return nil
-            }.joined()
-        } else if let text = msgDict["text"] as? String {
-            content = text
-        } else {
-            content = ""
-        }
-
+        let content = extractTGTextContent(from: msgDict)
         let senderName = msgDict["from"] as? String ?? "Unknown"
         let senderID = msgDict["from_id"] as? String ?? senderName
 
@@ -803,15 +817,11 @@ private func parseTGExport(_ json: [String: Any]) -> [TGTestMessage] {
         if let file = msgDict["file"] as? String {
             let mimeType = msgDict["mime_type"] as? String
             let size = msgDict["file_size_bytes"] as? Int
-            let attachType: TGTestAttachmentType
-            if msgDict["media_type"] as? String == "voice_message" { attachType = .voiceMessage } else if msgDict["media_type"] as? String == "video_message" { attachType = .videoNote } else if msgDict["media_type"] as? String == "sticker" { attachType = .sticker } else if mimeType?.hasPrefix("audio/") == true { attachType = .audio } else if mimeType?.hasPrefix("video/") == true { attachType = .video } else { attachType = .document }
+            let attachType = classifyTGAttachment(mediaType: msgDict["media_type"] as? String, mimeType: mimeType)
             attachments.append(TGTestAttachment(type: attachType, mimeType: mimeType, fileName: file, sizeBytes: size))
         }
 
-        let replyToID: String?
-        if let replyTo = msgDict["reply_to_message_id"] { replyToID = "\(replyTo)" } else { replyToID = nil }
-
-        if msgDict["type"] as? String == "service" { continue }
+        let replyToID = (msgDict["reply_to_message_id"]).map { "\($0)" }
 
         messages.append(TGTestMessage(
             chatID: chatID, senderID: senderID, senderName: senderName,

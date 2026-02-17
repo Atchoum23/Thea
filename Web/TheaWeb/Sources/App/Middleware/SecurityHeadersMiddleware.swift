@@ -24,7 +24,11 @@ struct SecurityHeadersMiddleware: AsyncMiddleware {
         // Permissions Policy - restrict browser features
         response.headers.add(
             name: "Permissions-Policy",
-            value: "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+            value: [
+                "accelerometer=()", "camera=()", "geolocation=()",
+                "gyroscope=()", "magnetometer=()", "microphone=()",
+                "payment=()", "usb=()"
+            ].joined(separator: ", ")
         )
 
         // Content Security Policy
