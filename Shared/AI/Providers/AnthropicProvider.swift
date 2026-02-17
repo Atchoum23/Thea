@@ -486,15 +486,24 @@ final class AnthropicProvider: AIProvider, Sendable {
                         else { continue }
 
                         switch type {
+                        case "content_block_start":
+                            break // Block type tracking handled by delta type
                         case "content_block_delta":
-                            if let delta = json["delta"] as? [String: Any], let text = delta["text"] as? String {
-                                accumulatedText += text
-                                continuation.yield(.delta(text))
+                            if let delta = json["delta"] as? [String: Any] {
+                                let deltaType = delta["type"] as? String ?? ""
+                                if deltaType == "thinking_delta", let thinking = delta["thinking"] as? String {
+                                    accumulatedThinking += thinking
+                                    continuation.yield(.thinkingDelta(thinking))
+                                } else if let text = delta["text"] as? String {
+                                    accumulatedText += text
+                                    continuation.yield(.delta(text))
+                                }
                             }
                         case "message_stop":
                             let finalMessage = AIMessage(
                                 id: UUID(), conversationID: messages.first?.conversationID ?? UUID(),
-                                role: .assistant, content: .text(accumulatedText), timestamp: Date(), model: model
+                                role: .assistant, content: .text(accumulatedText), timestamp: Date(), model: model,
+                                thinkingTrace: accumulatedThinking.isEmpty ? nil : accumulatedThinking
                             )
                             continuation.yield(.complete(finalMessage))
                         default: break

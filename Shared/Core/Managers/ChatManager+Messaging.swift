@@ -508,6 +508,14 @@ extension ChatManager {
             }
         }
 
+        // Record user messaging activity in BehavioralFingerprint (Pipeline 2)
+        BehavioralFingerprint.shared.recordActivity(.communication)
+
+        // Extract entities from conversation into PersonalKnowledgeGraph (Pipeline 5)
+        Task { @MainActor in
+            await ConversationMemoryExtractor.shared.extractFromConversation(conversation)
+        }
+
         // Response notifications
         let preview = streamingText
         Task {

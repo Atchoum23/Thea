@@ -35,6 +35,9 @@ public enum DataSourceType: String, CaseIterable, Sendable {
     case documentEditing = "document_editing"
     case inputActivity = "input_activity"
 
+    // V2.2 Environment
+    case weather = "weather"
+
     public var displayName: String {
         switch self {
         case .browserExtension: return "Browser"
@@ -57,6 +60,7 @@ public enum DataSourceType: String, CaseIterable, Sendable {
         case .notifications: return "Notifications"
         case .documentEditing: return "Documents"
         case .inputActivity: return "Input Activity"
+        case .weather: return "Weather"
         }
     }
 
@@ -82,6 +86,7 @@ public enum DataSourceType: String, CaseIterable, Sendable {
         case .notifications: return "bell"
         case .documentEditing: return "doc.text"
         case .inputActivity: return "keyboard"
+        case .weather: return "cloud.sun"
         }
     }
 }
@@ -327,6 +332,9 @@ public enum LifeEventType: String, Codable, Sendable {
     case notificationReceived = "notification_received"
     case notificationInteracted = "notification_interacted"
     case notificationDismissed = "notification_dismissed"
+
+    // Weather (V2.2)
+    case weatherChange = "weather_change"
 }
 
 public enum EventSignificance: Int, Codable, Comparable, Sendable {

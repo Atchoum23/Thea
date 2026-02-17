@@ -32,6 +32,7 @@ struct MessageBubble: View {
 
     @State private var isHovering = false
     @State private var showCopiedFeedback = false
+    @State private var isThinkingExpanded = false
     @StateObject private var settingsManager = SettingsManager.shared
 
     /// Info about branches for this message position
@@ -106,15 +107,42 @@ struct MessageBubble: View {
         let text = message.content.textValue
 
         if message.messageRole == .assistant {
-            Markdown(text)
-                .markdownTheme(theaMarkdownTheme)
-                .markdownCodeSyntaxHighlighter(TheaCodeHighlighter())
-                .textSelection(.enabled)
+            VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+                // Collapsible thinking trace (from extended thinking / adaptive thinking)
+                if let thinkingTrace = message.metadata?.thinkingTrace, !thinkingTrace.isEmpty {
+                    thinkingTraceView(thinkingTrace)
+                }
+
+                Markdown(text)
+                    .markdownTheme(theaMarkdownTheme)
+                    .markdownCodeSyntaxHighlighter(TheaCodeHighlighter())
+                    .textSelection(.enabled)
+            }
         } else {
             Text(text)
                 .font(.theaBody)
                 .textSelection(.enabled)
         }
+    }
+
+    @ViewBuilder
+    private func thinkingTraceView(_ trace: String) -> some View {
+        DisclosureGroup(isExpanded: $isThinkingExpanded) {
+            Text(trace)
+                .font(.theaCaption)
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .padding(.top, TheaSpacing.xs)
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "brain.head.profile")
+                    .font(.system(size: 10))
+                Text("Thinking")
+                    .font(.theaCaption2.weight(.medium))
+            }
+            .foregroundStyle(Color.theaPrimaryDefault.opacity(0.8))
+        }
+        .tint(Color.theaPrimaryDefault.opacity(0.6))
     }
 
     // MARK: - Metadata Row
@@ -151,15 +179,19 @@ struct MessageBubble: View {
                     .foregroundStyle(.tertiary)
             }
 
-            // Confidence badge
+            // Confidence badge with hallucination warning
             if let confidence = message.metadata?.confidence, confidence > 0 {
                 HStack(spacing: 2) {
-                    Image(systemName: confidence >= 0.8 ? "checkmark.shield.fill" : "shield")
+                    let hasHallucinationFlags = !(message.metadata?.hallucinationFlags ?? []).isEmpty
+                    Image(systemName: hasHallucinationFlags
+                        ? "exclamationmark.triangle.fill"
+                        : confidence >= 0.8 ? "checkmark.shield.fill" : "shield")
                         .font(.system(size: 8))
                     Text("\(Int(confidence * 100))%")
                         .font(.theaCaption2)
                 }
                 .foregroundStyle(confidence >= 0.8 ? Color.theaSuccess : confidence >= 0.5 ? Color.theaWarning : Color.theaError)
+                .help(confidenceHelpText)
             }
 
             // Respect timestampDisplay setting
@@ -433,6 +465,19 @@ extension MessageBubble {
         let content = message.content.textValue
         let truncated = content.count > 200 ? String(content.prefix(200)) + "..." : content
         return "\(role), \(time): \(truncated)"
+    }
+
+    private var confidenceHelpText: String {
+        guard let confidence = message.metadata?.confidence else { return "" }
+        let flags = message.metadata?.hallucinationFlags ?? []
+        var text = "Confidence: \(Int(confidence * 100))%"
+        if !flags.isEmpty {
+            let highRisk = flags.filter { $0.riskLevel == .high }.count
+            let medRisk = flags.filter { $0.riskLevel == .medium }.count
+            if highRisk > 0 { text += "\n\(highRisk) high-risk claim(s) flagged" }
+            if medRisk > 0 { text += "\n\(medRisk) medium-risk claim(s) flagged" }
+        }
+        return text
     }
 }
 
