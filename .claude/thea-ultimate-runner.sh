@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# THEA ULTIMATE AUTONOMOUS QA RUNNER v4.0
+# THEA ULTIMATE AUTONOMOUS QA RUNNER v6.0
 # MSM3U (Mac Studio M3 Ultra, 256GB RAM)
 #
 # Coverage:
@@ -16,8 +16,16 @@
 #   Research: Latest 2026 APIs, Swift 6, SwiftUI 6, HealthKit, MLX
 #   Sanitizers: ASan, TSan, Clang analyzer
 #   Privacy/Compliance: April 2026, Privacy Manifest, AssistantSchema
+#   AI Innovation: Extended thinking, RAG, ReAct, multimodal, MLX updates
+#   Architecture: SOLID, file splitting, concurrency audit, docs
+#   Gap Analysis: Systematic gap discovery, all addenda phases, opportunities
+#   Dynamic Intelligence: Replace hardcoded values with system-aware decisions
+#   Pre-G Phases: All priorities 1-4, QA phases 0-11.5 verified
+#   Performance: Launch time, memory, energy, offline resilience, localization
+#   GUI Builds: Xcode GUI builds triggered after CLI builds clean
 #
 # INVIOLABLE: Never remove. Only add, fix, and improve.
+# NOTIFICATIONS: ntfy topic "thea-runner" — progress on every agent start/stop
 # =============================================================================
 
 set -euo pipefail
@@ -27,18 +35,29 @@ LOG_DIR="$HOME/.claude/thea-qa"
 SESSION="thea-qa"
 MODEL="claude-opus-4-6"
 C="$THEA_DIR/.claude"
+NTFY_TOPIC="thea-runner"
 
 mkdir -p "$LOG_DIR"
 
+# ntfy notification helper
+notify() {
+  local title="$1"
+  local body="${2:-}"
+  ntfy pub --title "$title" "$NTFY_TOPIC" "$body" 2>/dev/null || true
+}
+
 echo "════════════════════════════════════════════════════════"
-echo "  THEA ULTIMATE QA RUNNER v4.0"
+echo "  THEA ULTIMATE QA RUNNER v6.0"
 echo "  Machine: $(hostname -s) | RAM: 256GB M3 Ultra"
 echo "  Started: $(date)"
 echo "════════════════════════════════════════════════════════"
 
+notify "🚀 Thea QA Runner v6.0 starting on $(hostname -s)" "$(date)"
+
 # Verify prerequisites
 command -v claude &>/dev/null || { echo "ERROR: claude CLI not found"; exit 1; }
 command -v tmux &>/dev/null  || { echo "ERROR: tmux not found"; exit 1; }
+command -v ntfy &>/dev/null  || echo "⚠  ntfy not found — install with: brew install ntfy"
 [ -f "$C/mission-main.txt" ] || { echo "ERROR: mission files not found in $C"; exit 1; }
 
 echo "✓ Prerequisites verified"
@@ -47,7 +66,7 @@ echo "✓ Prerequisites verified"
 tmux kill-session -t "$SESSION" 2>/dev/null && echo "✓ Cleared previous session" || true
 sleep 1
 
-# Create 14-window tmux session
+# Create 21-window tmux session (0-20)
 tmux new-session   -d -s "$SESSION" -n "monitor"          -x 250 -y 60
 tmux new-window    -t "$SESSION" -n "main"
 tmux new-window    -t "$SESSION" -n "web"
@@ -62,15 +81,23 @@ tmux new-window    -t "$SESSION" -n "compliance"
 tmux new-window    -t "$SESSION" -n "g1-g2-h"
 tmux new-window    -t "$SESSION" -n "gui-sanitize"
 tmux new-window    -t "$SESSION" -n "research"
+tmux new-window    -t "$SESSION" -n "ai-innovation"
+tmux new-window    -t "$SESSION" -n "architecture"
+tmux new-window    -t "$SESSION" -n "gap-analysis"
+tmux new-window    -t "$SESSION" -n "dynamic-intel"
+tmux new-window    -t "$SESSION" -n "pregphases"
+tmux new-window    -t "$SESSION" -n "performance"
+tmux new-window    -t "$SESSION" -n "gui-builds"
 
-echo "✓ 14-window tmux session: $SESSION"
+echo "✓ 21-window tmux session: $SESSION"
 
-# Helper: launch agent in window
+# Helper: launch agent in window with ntfy notifications
 launch() {
   local win="$1" name="$2" turns="$3" mission="$4" brief="$5"
   echo "→ Launching $name (window $win)..."
+  notify "▶ $name started" "Window $win | Mission: $mission"
   tmux send-keys -t "${SESSION}:${win}" \
-    "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== $name START ===' && echo '$brief Read .claude/${mission} carefully and execute it step by step, autonomously and completely. NEVER remove existing functionality. Do not stop until all success criteria are met. Commit after every fix.' | claude --dangerously-skip-permissions -p - --model $MODEL --max-turns $turns --verbose --output-format stream-json 2>&1 | tee '$LOG_DIR/${mission%.txt}.log'; echo '=== $name EXIT: '\\$?' ===' | tee -a '$LOG_DIR/${mission%.txt}.log'" Enter
+    "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== $name START ===' && echo '$brief Read .claude/${mission} carefully and execute it step by step, autonomously and completely. NEVER remove existing functionality. Do not stop until all success criteria are met. Commit after every fix.' | claude --dangerously-skip-permissions -p - --model $MODEL --max-turns $turns --verbose --output-format stream-json 2>&1 | tee '$LOG_DIR/${mission%.txt}.log'; EXIT_CODE=\$?; echo '=== $name EXIT: '\$EXIT_CODE' ===' | tee -a '$LOG_DIR/${mission%.txt}.log'; ntfy pub --title \"$([ \$EXIT_CODE -eq 0 ] && echo '✅' || echo '⚠️') $name done\" $NTFY_TOPIC \"Exit \$EXIT_CODE — check window $win\" 2>/dev/null || true" Enter
   sleep 1
 }
 

@@ -119,7 +119,7 @@ struct BehavioralPatternsView: View {
     private func color(for a: BehavioralActivityType) -> Color {
         switch a {
         case .deepWork: .blue; case .communication: .green; case .browsing: .orange
-        case .leisure: .purple; case .sleep: .gray; case .idle: Color(.separator)
+        case .leisure: .purple; case .sleep: .gray; case .idle: .secondary
         case .meetings: .teal; case .exercise: .pink; case .healthSuggestion: .mint
         }
     }
@@ -139,7 +139,7 @@ struct BehavioralPatternsView: View {
 
     private var legendItems: [(String, Color)] {
         [("Deep Work", .blue), ("Comms", .green), ("Browse", .orange), ("Leisure", .purple),
-         ("Sleep", .gray), ("Meetings", .teal), ("Exercise", .pink), ("Idle", Color(.separator))]
+         ("Sleep", .gray), ("Meetings", .teal), ("Exercise", .pink), ("Idle", .secondary)]
     }
 }
 
