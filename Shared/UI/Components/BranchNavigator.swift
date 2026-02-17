@@ -76,14 +76,14 @@ struct MessageEditSheet: View {
             // Info banner
             HStack(spacing: 8) {
                 Image(systemName: "arrow.triangle.branch")
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.theaInfo)
                     .accessibilityHidden(true)
                 Text("Editing creates a new branch. The original message is preserved.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             .padding(12)
-            .background(Color.blue.opacity(0.1))
+            .background(Color.theaInfo.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             // Text editor
