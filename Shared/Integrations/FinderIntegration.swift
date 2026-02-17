@@ -34,6 +34,7 @@ public actor FinderIntegration: AppIntegrationModule {
 
     // MARK: - Connection
 
+    /// Activates the Finder integration (macOS only).
     public func connect() async throws {
         #if os(macOS)
             isConnected = true
@@ -42,10 +43,12 @@ public actor FinderIntegration: AppIntegrationModule {
         #endif
     }
 
+    /// Deactivates the Finder integration.
     public func disconnect() async {
         isConnected = false
     }
 
+    /// Returns whether Finder is available on this platform.
     public func isAvailable() async -> Bool {
         #if os(macOS)
             return true // Finder is always available on macOS

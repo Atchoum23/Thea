@@ -35,6 +35,7 @@ public actor SafariIntegration: AppIntegrationModule {
 
     // MARK: - Connection
 
+    /// Connects to a running Safari instance (macOS only).
     public func connect() async throws {
         #if os(macOS)
             guard NSWorkspace.shared.runningApplications.contains(where: { $0.bundleIdentifier == bundleIdentifier }) else {
@@ -46,10 +47,12 @@ public actor SafariIntegration: AppIntegrationModule {
         #endif
     }
 
+    /// Disconnects from Safari.
     public func disconnect() async {
         isConnected = false
     }
 
+    /// Returns whether Safari is currently running.
     public func isAvailable() async -> Bool {
         #if os(macOS)
             return NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == bundleIdentifier }

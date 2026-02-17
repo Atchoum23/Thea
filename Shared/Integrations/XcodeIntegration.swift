@@ -27,6 +27,7 @@ public actor XcodeIntegration: AppIntegrationModule {
 
     private init() {}
 
+    /// Connects to a running Xcode instance (macOS only).
     public func connect() async throws {
         #if os(macOS)
             guard NSWorkspace.shared.runningApplications.contains(where: { $0.bundleIdentifier == bundleIdentifier }) else {
@@ -38,8 +39,10 @@ public actor XcodeIntegration: AppIntegrationModule {
         #endif
     }
 
+    /// Disconnects from Xcode.
     public func disconnect() async { isConnected = false }
 
+    /// Returns whether Xcode is installed on this system.
     public func isAvailable() async -> Bool {
         #if os(macOS)
             return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) != nil

@@ -28,6 +28,7 @@ public actor ShortcutsIntegration: AppIntegrationModule {
 
     private init() {}
 
+    /// Activates the Shortcuts integration and refreshes the available shortcuts list (macOS only).
     public func connect() async throws {
         #if os(macOS)
             isConnected = true
@@ -37,11 +38,13 @@ public actor ShortcutsIntegration: AppIntegrationModule {
         #endif
     }
 
+    /// Disconnects and clears the cached shortcuts list.
     public func disconnect() async {
         isConnected = false
         cachedShortcuts = []
     }
 
+    /// Returns whether the Shortcuts app is installed.
     public func isAvailable() async -> Bool {
         #if os(macOS)
             return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) != nil
@@ -279,6 +282,7 @@ public struct ShortcutBuilder {
 
     public init() {}
 
+    /// Appends a shortcut run item to the builder's action sequence.
     public mutating func addAction(_ action: ShortcutRunItem) {
         actions.append(action)
     }

@@ -29,13 +29,13 @@ public actor TodoistClient {
 
     // MARK: - Configuration
 
+    /// Stores OAuth client credentials for token migration and revocation flows.
     public func configureOAuth(clientId: String, clientSecret: String) {
         self.clientId = clientId
         self.clientSecret = clientSecret
     }
 
-    // MARK: - Configuration
-
+    /// Sets the bearer token used for all subsequent API requests.
     public func configure(accessToken: String) {
         self.accessToken = accessToken
     }
@@ -660,6 +660,7 @@ public actor TodoistIntegration {
 
     public init() {}
 
+    /// Configures the underlying Todoist client with the given access token.
     public func configure(accessToken: String) async {
         await client.configure(accessToken: accessToken)
         isConfigured = true
