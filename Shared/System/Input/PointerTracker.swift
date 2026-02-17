@@ -138,16 +138,8 @@ final class PointerTracker {
         return currentPosition
     }
 
-    deinit {
-        // Clean up event tap directly (avoid calling @MainActor method from nonisolated deinit)
-        if let tap = eventTap {
-            CGEvent.tapEnable(tap: tap, enable: false)
-            CFMachPortInvalidate(tap)
-        }
-        if let source = runLoopSource {
-            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
-        }
-    }
+    // No deinit needed — singleton never deallocates, and
+    // @MainActor properties can't be accessed from nonisolated deinit
 }
 
 // MARK: - Errors
