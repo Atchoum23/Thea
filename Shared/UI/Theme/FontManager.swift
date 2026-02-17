@@ -143,6 +143,7 @@ public final class FontManager {
 
 // MARK: - Font Configuration
 
+/// Font configuration specifying family, design, scale factor, and spacing adjustments.
 public struct FontConfiguration: Codable, Sendable, Equatable {
     /// Font family selection
     public var fontFamily: FontFamily = .system
@@ -181,6 +182,7 @@ public struct FontConfiguration: Codable, Sendable, Equatable {
 
 // MARK: - Font Family
 
+/// Available font families including system defaults and custom font names.
 public enum FontFamily: Codable, Sendable, Equatable, Hashable {
     case system
     case monospaced
@@ -205,6 +207,7 @@ public enum FontFamily: Codable, Sendable, Equatable, Hashable {
 
 // MARK: - Font Design
 
+/// Font design styles mapping to SwiftUI's `Font.Design` options.
 public enum FontDesign: String, Codable, Sendable, CaseIterable {
     case `default`
     case rounded
@@ -223,6 +226,7 @@ public enum FontDesign: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Font Style
 
+/// Semantic font styles with predefined base sizes and weights, analogous to SwiftUI's text styles.
 public enum FontStyle: String, CaseIterable, Sendable {
     case largeTitle
     case title

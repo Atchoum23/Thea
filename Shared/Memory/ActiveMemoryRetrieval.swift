@@ -196,10 +196,12 @@ public final class ActiveMemoryRetrieval {
 
     // MARK: - Statistics
 
+    /// Returns the current retrieval performance statistics, including total retrieval count and average latency.
     public func getStatistics() -> RetrievalStatistics {
         retrievalStats
     }
 
+    /// Resets all retrieval statistics to their default zero values.
     public func resetStatistics() {
         retrievalStats = RetrievalStatistics()
     }

@@ -205,6 +205,7 @@ public final class AppUpdateService: ObservableObject {
 
     // MARK: - Check for Updates
 
+    /// Checks CloudKit for available app updates published by other devices and presents a notification if a newer version is found.
     public func checkForUpdates() async {
         guard let database = await getPrivateDatabase() else {
             logger.debug("CloudKit not available - skipping update check")
@@ -370,6 +371,10 @@ public final class AppUpdateService: ObservableObject {
 
     // MARK: - Handle Notification Action
 
+    /// Handles the user's response to an update notification, either triggering an immediate update or scheduling a reminder.
+    /// - Parameters:
+    ///   - actionID: The identifier of the notification action the user tapped.
+    ///   - userInfo: The notification's payload containing update details.
     public func handleNotificationAction(_ actionID: String, userInfo: [AnyHashable: Any]) {
         switch actionID {
         case Self.updateNowActionID:
@@ -459,6 +464,7 @@ public final class AppUpdateService: ObservableObject {
 
     // MARK: - Dismiss Update
 
+    /// Dismisses the current update notification by clearing the available update state.
     public func dismissUpdate() {
         availableUpdate = nil
     }

@@ -697,6 +697,7 @@ private struct PairingSession {
 
 // MARK: - Connection Security Error
 
+/// Errors related to connection security operations such as encryption, key management, and authentication challenges.
 public enum ConnectionSecurityError: Error, LocalizedError, Sendable {
     case keyNotInitialized
     case challengeGenerationFailed

@@ -86,6 +86,8 @@ public final class MemoryManager: ObservableObject {
 
     // MARK: - Setup (SwiftData compatibility stub)
 
+    /// Sets the SwiftData model context for memory persistence and marks the manager as initialized.
+    /// - Parameter context: The model context to use for SwiftData operations.
     public func setModelContext(_ context: Any) {
         modelContext = context
         isInitialized = true

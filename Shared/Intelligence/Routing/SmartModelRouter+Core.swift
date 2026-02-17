@@ -35,6 +35,7 @@ public final class SmartModelRouter: ObservableObject {
 
     // MARK: - Model Registration
 
+    /// Registers a new AI model for routing. If a model with the same `modelId` is already registered, the call is ignored.
     public func registerModel(_ model: RouterModelCapability) {
         if !availableModels.contains(where: { $0.modelId == model.modelId }) {
             availableModels.append(model)
@@ -42,6 +43,7 @@ public final class SmartModelRouter: ObservableObject {
         }
     }
 
+    /// Removes the model with the given identifier from the routing pool. No-op if the model is not registered.
     public func removeModel(modelId: String) {
         availableModels.removeAll { $0.modelId == modelId }
     }

@@ -24,6 +24,7 @@ public struct QuickPromptModifierFlags: OptionSet, Codable, Equatable, Sendable 
     public static let command = QuickPromptModifierFlags(rawValue: 1 << 3)
 }
 
+/// Configuration for the global quick prompt, including hotkey, window size, and display preferences.
 public struct QuickPromptConfiguration: Codable, Equatable {
     public var hotkeyKeyCode: Int = 49 // Space
     public var hotkeyModifiers: QuickPromptModifierFlags = .option
@@ -33,6 +34,7 @@ public struct QuickPromptConfiguration: Codable, Equatable {
     public var defaultShowInlineResponse: Bool = true
     public var theme: QuickPromptTheme = .system
 
+    /// Visual theme for the quick prompt overlay window.
     public enum QuickPromptTheme: String, Codable, CaseIterable {
         case system
         case light
@@ -72,12 +74,14 @@ public struct QuickPromptConfiguration: Codable, Equatable {
 
 // MARK: - Types
 
+/// Response data returned from a quick prompt interaction, including the text, timestamp, and success status.
 public struct QuickPromptResponse {
     public let text: String
     public let timestamp: Date
     public let success: Bool
 }
 
+/// A recently used prompt stored for quick reuse in the prompt overlay.
 public struct RecentPrompt: Identifiable, Codable {
     public let id: UUID
     public let text: String
@@ -342,6 +346,7 @@ public struct QuickPromptOverlayView: View {
 
 // MARK: - Settings View for Quick Prompt
 
+/// Settings view for configuring quick prompt hotkey, theme, and display behavior.
 public struct QuickPromptSettingsView: View {
     @ObservedObject var manager = GlobalQuickPromptManager.shared
     @State private var isRecordingHotkey = false
@@ -543,6 +548,7 @@ public struct QuickPromptSettingsView: View {
 // MARK: - Menu Bar Integration
 
 #if os(macOS)
+    /// Menu bar item providing quick access to the prompt overlay via keyboard shortcut.
     public struct QuickPromptMenuBarItem: View {
         @ObservedObject var manager = GlobalQuickPromptManager.shared
 

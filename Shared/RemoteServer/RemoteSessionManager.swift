@@ -191,6 +191,8 @@ public class RemoteSessionManager: ObservableObject {
 
 // MARK: - Remote Session
 
+/// Represents an active remote connection session, wrapping the network connection,
+/// authentication state, permissions, and message send/receive capabilities.
 // @unchecked Sendable: contains NWConnection (non-Sendable); managed by @MainActor RemoteSessionManager
 public struct RemoteSession: Identifiable, @unchecked Sendable {
     public let id: String
@@ -242,12 +244,20 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
 
     // MARK: - Permission Check
 
+    /// Checks whether this session has been granted a specific permission.
+    /// - Parameter permission: The ``RemotePermission`` to check.
+    /// - Returns: `true` if the session's permission set contains the specified permission.
     public func hasPermission(for permission: RemotePermission) -> Bool {
         permissions.contains(permission)
     }
 
     // MARK: - Message Sending
 
+    /// Sends a message to the remote client over the session's network connection.
+    ///
+    /// The message is encoded and framed with a 4-byte big-endian length prefix before transmission.
+    /// - Parameter message: The ``RemoteMessage`` to send.
+    /// - Throws: An `NWError` if the underlying network send fails, or an encoding error if the message cannot be serialized.
     public func send(message: RemoteMessage) async throws {
         let data = try message.encode()
 
@@ -269,6 +279,13 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
 
     // MARK: - Message Receiving
 
+    /// Waits for a message from the remote client, failing if none arrives within the specified timeout.
+    ///
+    /// Uses a task group to race the receive operation against a sleep timer.
+    /// - Parameter timeout: Maximum number of seconds to wait for a message.
+    /// - Returns: The received ``RemoteMessage``.
+    /// - Throws: ``RemoteServerError/timeout`` if no message arrives before the deadline.
+    /// - Throws: An `NWError` or decoding error if the receive or deserialization fails.
     public func receiveWithTimeout(timeout: TimeInterval) async throws -> RemoteMessage {
         try await withThrowingTaskGroup(of: RemoteMessage.self) { group in
             group.addTask {
@@ -325,6 +342,7 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
 
 // MARK: - Session Record
 
+/// Historical record of a remote session including client info, timestamps, and disconnect reason.
 public struct SessionRecord: Identifiable, Codable, Sendable {
     public let id: String
     public let clientName: String

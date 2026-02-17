@@ -2,6 +2,7 @@
 import SwiftUI
 
 @MainActor
+/// Settings view for configuring conversation context window, history retention, and meta-AI options.
 public struct ConversationSettingsView: View {
     @State private var config = ConversationConfiguration.load()
     @State private var showingProviderInfo = false

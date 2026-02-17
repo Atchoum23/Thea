@@ -9,6 +9,7 @@ import Foundation
 
 // MARK: - Clipboard Messages
 
+/// Request types for remote clipboard operations such as get, set, and sync.
 public enum ClipboardRequest: Codable, Sendable {
     case getClipboard
     case setClipboard(ClipboardData)
@@ -16,6 +17,7 @@ public enum ClipboardRequest: Codable, Sendable {
     case stopSync
 }
 
+/// Response types returned from remote clipboard operations.
 public enum ClipboardResponse: Codable, Sendable {
     case clipboardData(ClipboardData)
     case syncStarted
@@ -23,6 +25,7 @@ public enum ClipboardResponse: Codable, Sendable {
     case error(String)
 }
 
+/// Clipboard content payload with type, raw data, optional UTI, and timestamp.
 public struct ClipboardData: Codable, Sendable {
     public let type: ClipboardContentType
     public let data: Data
@@ -36,6 +39,7 @@ public struct ClipboardData: Codable, Sendable {
         self.timestamp = timestamp
     }
 
+    /// The type of content stored on the clipboard (text, image, file reference, or RTF).
     public enum ClipboardContentType: String, Codable, Sendable {
         case text
         case image

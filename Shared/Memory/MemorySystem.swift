@@ -205,6 +205,7 @@ public actor MemorySystem {
 
     // MARK: - Statistics
 
+    /// Returns overall memory system statistics, including the current short-term memory count and capacity.
     public func getStatistics() -> MemorySystemStats {
         MemorySystemStats(
             shortTermCount: shortTermMemories.count,

@@ -296,6 +296,7 @@ public struct ClassificationResult: Codable, Sendable {
         }
     }
 
+    /// Encodes this classification result, converting `alternativeTypes` tuples into a serializable array-of-arrays format.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(taskType, forKey: .taskType)

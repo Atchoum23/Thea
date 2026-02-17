@@ -62,6 +62,8 @@ public class RemoteInputService: ObservableObject {
             isEnabled = trusted
         }
 
+        /// Requests macOS Accessibility permission, prompting the user if not already granted.
+        /// - Returns: `true` if the process is trusted for accessibility access, `false` otherwise.
         public func requestAccessibilityPermission() -> Bool {
             // Request accessibility permission with prompt option
             let trusted = checkAccessibilityTrustedWithPrompt()
@@ -72,6 +74,15 @@ public class RemoteInputService: ObservableObject {
 
     // MARK: - Request Handling
 
+    /// Processes an incoming remote input request by dispatching it to the appropriate handler.
+    ///
+    /// Supports mouse operations (move, click, down, up, drag, scroll), keyboard operations
+    /// (key press, key down, key up, text typing), and clipboard operations.
+    /// Increments the input counter and updates ``lastInputTime`` on success.
+    ///
+    /// - Parameter request: The ``InputRequest`` describing the input event to simulate.
+    /// - Throws: ``RemoteInputError/accessibilityNotEnabled`` if Accessibility permission has not been granted (macOS).
+    /// - Throws: ``RemoteInputError/notSupportedOnPlatform`` on non-macOS platforms.
     public func handleRequest(_ request: InputRequest) async throws {
         #if os(macOS)
             guard isEnabled else {
@@ -126,6 +137,8 @@ public class RemoteInputService: ObservableObject {
 
     // MARK: - Clipboard
 
+    /// Retrieves the current plain-text content from the system clipboard.
+    /// - Returns: The clipboard string, or an empty string if no text is available.
     public func getClipboardContent() async throws -> String {
         #if os(macOS)
             let pasteboard = NSPasteboard.general
@@ -341,6 +354,7 @@ public class RemoteInputService: ObservableObject {
 
 // MARK: - Remote Input Error
 
+/// Errors that can occur when processing remote keyboard and mouse input events.
 public enum RemoteInputError: Error, LocalizedError, Sendable {
     case accessibilityNotEnabled
     case notSupportedOnPlatform

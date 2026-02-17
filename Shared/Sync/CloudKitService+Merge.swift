@@ -235,6 +235,12 @@ extension CloudKitService {
         case merge
     }
 
+    /// Resolves a CloudKit sync conflict between local and remote conversation records using the specified strategy.
+    /// - Parameters:
+    ///   - local: The local version of the conversation.
+    ///   - remote: The remote version of the conversation from CloudKit.
+    ///   - resolution: The conflict resolution strategy to apply (keep local, keep remote, or merge).
+    /// - Returns: The resolved conversation after applying the chosen strategy.
     public func resolveConflict(
         local: CloudConversation,
         remote: CloudConversation,

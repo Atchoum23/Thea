@@ -18,10 +18,12 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Stream Management
 
+    /// Adds a new income stream to tracking.
     public func addStream(_ stream: IncomeStream) async throws {
         streams[stream.id] = stream
     }
 
+    /// Updates an existing income stream, throwing if not found.
     public func updateStream(_ stream: IncomeStream) async throws {
         guard streams[stream.id] != nil else {
             throw IncomeError.streamNotFound
@@ -29,16 +31,19 @@ public actor IncomeService: IncomeServiceProtocol {
         streams[stream.id] = stream
     }
 
+    /// Returns all income streams sorted by monthly amount descending.
     public func fetchStreams() async throws -> [IncomeStream] {
         Array(streams.values).sorted { $0.monthlyAmount > $1.monthlyAmount }
     }
 
+    /// Removes an income stream by its identifier.
     public func deleteStream(id: UUID) async throws {
         streams.removeValue(forKey: id)
     }
 
     // MARK: - Entry Management
 
+    /// Records an income entry, validating that the amount is positive.
     public func addEntry(_ entry: IncomeEntry) async throws {
         guard entry.amount > 0 else {
             throw IncomeError.invalidAmount
@@ -47,6 +52,7 @@ public actor IncomeService: IncomeServiceProtocol {
         entries[entry.id] = entry
     }
 
+    /// Returns income entries within the given date range, sorted most recent first.
     public func fetchEntries(for dateRange: DateInterval) async throws -> [IncomeEntry] {
         entries.values.filter { entry in
             dateRange.contains(entry.receivedDate)
@@ -55,6 +61,7 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Reporting
 
+    /// Generates an income report for the given period with stream, category, and type breakdowns.
     public func generateReport(for period: DateInterval) async throws -> IncomeReport {
         let periodEntries = try await fetchEntries(for: period)
 
@@ -101,6 +108,7 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Tax Estimation
 
+    /// Calculates an estimated tax liability for the given calendar year based on recorded income.
     public func calculateTaxEstimate(for year: Int) async throws -> TaxEstimate {
         guard let yearStart = Calendar.current.date(from: DateComponents(year: year, month: 1, day: 1)),
               let yearEnd = Calendar.current.date(from: DateComponents(year: year, month: 12, day: 31))
@@ -117,14 +125,17 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Analytics
 
+    /// Returns the number of currently active income streams.
     public func getActiveStreamsCount() async -> Int {
         streams.values.count { $0.isActive }
     }
 
+    /// Returns the total projected monthly income across all active streams.
     public func getTotalMonthlyProjection() async -> Double {
         streams.values.filter(\.isActive).reduce(0.0) { $0 + $1.monthlyAmount }
     }
 
+    /// Returns the income category with the highest total monthly amount, or nil if no streams exist.
     public func getTopCategory() async -> IncomeCategory? {
         let categoryAmounts = streams.values.reduce(into: [IncomeCategory: Double]()) { result, stream in
             result[stream.category, default: 0] += stream.monthlyAmount
@@ -146,6 +157,7 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
 
     public init() {}
 
+    /// Connects a gig platform using the provided API key and records the sync timestamp.
     public func connect(platform: GigPlatform, apiKey: String) async throws {
         var updatedPlatform = platform
         updatedPlatform.apiKey = apiKey
@@ -155,6 +167,7 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
         connectedPlatforms[platform.id] = updatedPlatform
     }
 
+    /// Disconnects a gig platform and clears its API key.
     public func disconnect(platform: GigPlatform) async throws {
         var updatedPlatform = platform
         updatedPlatform.isConnected = false
@@ -165,6 +178,7 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
 
     // MARK: - Data Sync
 
+    /// Syncs income entries from a connected gig platform, falling back to demo data if the API is unavailable.
     public func syncIncome(from platform: GigPlatform) async throws -> [IncomeEntry] {
         guard platform.isConnected, let apiKey = platform.apiKey else {
             throw IncomeError.platformNotConnected
@@ -196,6 +210,7 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
         return entries
     }
 
+    /// Returns the connection status and sync metadata for the specified gig platform.
     public func getStatus(for platform: GigPlatform) async throws -> PlatformStatus {
         guard let connected = connectedPlatforms[platform.id] else {
             return PlatformStatus(isConnected: false)

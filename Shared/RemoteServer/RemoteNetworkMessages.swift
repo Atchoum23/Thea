@@ -9,6 +9,7 @@ import Foundation
 
 // MARK: - Network Proxy Messages
 
+/// Request types for network proxy operations including HTTP requests, TCP connections, and LAN scans.
 public enum NetworkProxyRequest: Codable, Sendable {
     case httpRequest(url: URL, method: String, headers: [String: String], body: Data?)
     case tcpConnect(host: String, port: Int)

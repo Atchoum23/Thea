@@ -10,6 +10,7 @@ import Foundation
 
 // MARK: - Transfer Statistics
 
+/// Cumulative statistics for data transferred during remote sessions (bytes, messages, frames, files).
 public struct TransferStatistics: Sendable {
     public var bytesReceived: Int64 = 0
     public var bytesSent: Int64 = 0
@@ -23,6 +24,7 @@ public struct TransferStatistics: Sendable {
 
 // MARK: - Security Event
 
+/// A recorded security-relevant event with type, human-readable details, and timestamp.
 public struct SecurityEvent: Identifiable, Sendable {
     public let id = UUID()
     public let type: SecurityEventType
@@ -36,6 +38,7 @@ public struct SecurityEvent: Identifiable, Sendable {
     }
 }
 
+/// Categories of security events logged during remote server operation.
 public enum SecurityEventType: String, Codable, Sendable {
     case serverStarted
     case serverStopped
@@ -62,6 +65,7 @@ public enum SecurityEventType: String, Codable, Sendable {
 
 // MARK: - Authentication Method
 
+/// Supported authentication methods for remote client connections.
 public enum AuthenticationMethod: String, Codable, Sendable, CaseIterable {
     case pairingCode // One-time pairing code
     case sharedSecret // Pre-shared secret
@@ -86,6 +90,7 @@ public enum AuthenticationMethod: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Server Status
 
+/// Operational states of the remote server lifecycle.
 public enum ServerStatus: Sendable, Equatable {
     case stopped
     case starting
@@ -103,6 +108,7 @@ public enum ServerStatus: Sendable, Equatable {
 
 // MARK: - Remote Client
 
+/// Information about a connected remote client including identity, device type, IP, and granted permissions.
 public struct RemoteClient: Identifiable, Codable, Sendable {
     public let id: String
     public let name: String
@@ -112,6 +118,7 @@ public struct RemoteClient: Identifiable, Codable, Sendable {
     public var lastActivityAt: Date
     public let permissions: Set<RemotePermission>
 
+    /// Device type classification for remote clients (Mac, iPhone, iPad, TV, or unknown).
     public enum DeviceType: String, Codable, Sendable {
         case mac
         case iPhone
@@ -141,6 +148,7 @@ public struct RemoteClient: Identifiable, Codable, Sendable {
 
 // MARK: - Remote Permission
 
+/// Granular permissions that can be granted to remote clients for screen, file, command, and network access.
 public enum RemotePermission: String, Codable, Sendable, CaseIterable {
     case viewScreen
     case controlScreen
@@ -177,6 +185,7 @@ public enum RemotePermission: String, Codable, Sendable, CaseIterable {
         }
     }
 
+    /// Risk severity classification for remote permissions, from low to critical.
     public enum RiskLevel: Int, Sendable, Comparable {
         case low = 0
         case medium = 1
@@ -191,6 +200,7 @@ public enum RemotePermission: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Remote Server Error
 
+/// Errors originating from remote server operations including authentication, permissions, and connectivity.
 public enum RemoteServerError: Error, LocalizedError, Sendable {
     case notSupported(String)
     case notRunning

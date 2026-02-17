@@ -63,18 +63,21 @@ public struct AdaptiveLayout: Codable, Sendable {
     public var quickActions: [String]
     public var theme: AdaptiveTheme
 
+    /// Position of input controls relative to content.
     public enum InputPosition: String, Codable, Sendable {
         case bottom
         case top
         case floating
     }
 
+    /// Content density level controlling message spacing and padding.
     public enum DisplayDensity: String, Codable, Sendable {
         case compact
         case comfortable
         case spacious
     }
 
+    /// Theme configuration for adaptive UI rendering, including color scheme, font size, and accessibility options.
     public struct AdaptiveTheme: Codable, Sendable {
         public var colorScheme: ColorSchemePreference
         public var accentColor: String
@@ -82,6 +85,7 @@ public struct AdaptiveLayout: Codable, Sendable {
         public var reduceMotion: Bool
         public var highContrast: Bool
 
+        /// User's preferred color scheme, including an auto mode that adapts to time of day.
         public enum ColorSchemePreference: String, Codable, Sendable {
             case system
             case light
@@ -89,6 +93,7 @@ public struct AdaptiveLayout: Codable, Sendable {
             case auto  // Changes based on time of day
         }
 
+        /// User's preferred font size category, including a dynamic mode that adjusts based on content.
         public enum FontSizePreference: String, Codable, Sendable {
             case small
             case medium
@@ -140,6 +145,7 @@ public struct UIContext: Sendable {
     public let currentTask: String?
     public let sessionDuration: TimeInterval
 
+    /// Time-of-day classification used for adaptive theming and layout decisions.
     public enum TimeOfDay: String, Sendable {
         case morning    // 5-12
         case afternoon  // 12-17
@@ -147,6 +153,7 @@ public struct UIContext: Sendable {
         case night      // 21-5
     }
 
+    /// Device type used for adaptive layout decisions across Apple platforms.
     public enum DeviceType: String, Sendable {
         case mac
         case iPhone

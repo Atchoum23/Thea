@@ -26,6 +26,9 @@ import Foundation
 
         // MARK: - Authorization
 
+        /// Requests HealthKit read authorization for all monitored data types (sleep, heart rate, activity, blood pressure, VO2 max).
+        /// - Returns: `true` if authorization was granted.
+        /// - Throws: ``HealthError/healthKitUnavailable`` if HealthKit is not supported, or ``HealthError/authorizationDenied`` on failure.
         public func requestAuthorization() async throws -> Bool {
             guard HKHealthStore.isHealthDataAvailable() else {
                 throw HealthError.healthKitUnavailable
@@ -56,6 +59,10 @@ import Foundation
 
         // MARK: - Sleep Data
 
+        /// Fetches sleep analysis samples from HealthKit and groups them into consolidated sleep sessions.
+        /// - Parameter dateRange: The date interval to query. Must have positive duration.
+        /// - Returns: An array of ``SleepRecord`` values with stage breakdowns and quality scores.
+        /// - Throws: ``HealthError/authorizationDenied`` if not authorized, ``HealthError/invalidDateRange`` if duration is zero, or ``HealthError/fetchFailed(_:)`` on query failure.
         public func fetchSleepData(for dateRange: DateInterval) async throws -> [SleepRecord] {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -163,6 +170,10 @@ import Foundation
 
         // MARK: - Heart Rate Data
 
+        /// Fetches heart rate samples from HealthKit with inferred activity context.
+        /// - Parameter dateRange: The date interval to query. Must have positive duration.
+        /// - Returns: An array of ``HeartRateRecord`` values with BPM and context (resting, active, workout, sleep).
+        /// - Throws: ``HealthError/authorizationDenied`` if not authorized, ``HealthError/invalidDateRange`` if duration is zero, or ``HealthError/fetchFailed(_:)`` on query failure.
         public func fetchHeartRateData(for dateRange: DateInterval) async throws -> [HeartRateRecord] {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -219,6 +230,10 @@ import Foundation
 
         // MARK: - Activity Data
 
+        /// Fetches a full-day activity summary (steps, calories, distance, exercise minutes, flights climbed) from HealthKit.
+        /// - Parameter date: The calendar day to summarize. The entire day from midnight to midnight is queried.
+        /// - Returns: An ``ActivitySummary`` aggregating all activity metrics for the day.
+        /// - Throws: ``HealthError/authorizationDenied`` if not authorized.
         public func fetchActivityData(for date: Date) async throws -> ActivitySummary {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -312,6 +327,10 @@ import Foundation
 
         // MARK: - Blood Pressure Data
 
+        /// Fetches blood pressure readings by correlating systolic and diastolic samples within a 60-second window.
+        /// - Parameter dateRange: The date interval to query.
+        /// - Returns: An array of ``BloodPressureReading`` values with paired systolic/diastolic measurements.
+        /// - Throws: ``HealthError/authorizationDenied`` if not authorized.
         public func fetchBloodPressureData(for dateRange: DateInterval) async throws -> [BloodPressureReading] {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -368,6 +387,9 @@ import Foundation
 
         // MARK: - Anomaly Detection
 
+        /// Detects cardiac anomalies (tachycardia and bradycardia) in resting heart rate records.
+        /// - Parameter records: Heart rate records to analyze. Only records with a `.resting` context are evaluated.
+        /// - Returns: An array of ``CardiacAnomaly`` values with severity levels (mild, moderate, severe).
         public func detectCardiacAnomalies(in records: [HeartRateRecord]) async throws -> [CardiacAnomaly] {
             var anomalies: [CardiacAnomaly] = []
 
@@ -404,6 +426,10 @@ import Foundation
 
         // MARK: - VO2 Max Data
 
+        /// Fetches VO2 max samples from HealthKit, sorted by most recent first.
+        /// - Parameter dateRange: The date interval to query. Must have positive duration.
+        /// - Returns: An array of ``VO2MaxRecord`` values in mL/kg/min.
+        /// - Throws: ``HealthError/authorizationDenied`` if not authorized, ``HealthError/invalidDateRange`` if duration is zero, or ``HealthError/fetchFailed(_:)`` on query failure.
         public func fetchVO2MaxData(for dateRange: DateInterval) async throws -> [VO2MaxRecord] {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -444,34 +470,41 @@ import Foundation
 
 #else
 
-    /// Stub implementation for platforms without HealthKit
+    /// Stub implementation for platforms without HealthKit. All methods throw ``HealthError/healthKitUnavailable``.
     public actor HealthKitService: HealthDataProvider {
         public init() {}
 
+        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func requestAuthorization() async throws -> Bool {
             throw HealthError.healthKitUnavailable
         }
 
+        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchSleepData(for _: DateInterval) async throws -> [SleepRecord] {
             throw HealthError.healthKitUnavailable
         }
 
+        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchHeartRateData(for _: DateInterval) async throws -> [HeartRateRecord] {
             throw HealthError.healthKitUnavailable
         }
 
+        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchActivityData(for _: Date) async throws -> ActivitySummary {
             throw HealthError.healthKitUnavailable
         }
 
+        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchBloodPressureData(for _: DateInterval) async throws -> [BloodPressureReading] {
             throw HealthError.healthKitUnavailable
         }
 
+        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func detectCardiacAnomalies(in _: [HeartRateRecord]) async throws -> [CardiacAnomaly] {
             throw HealthError.healthKitUnavailable
         }
 
+        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchVO2MaxData(for _: DateInterval) async throws -> [VO2MaxRecord] {
             throw HealthError.healthKitUnavailable
         }

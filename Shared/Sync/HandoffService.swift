@@ -236,6 +236,7 @@ public final class HandoffService {
         isEnabled = config.handoffEnabled
     }
 
+    /// Returns the current Handoff configuration, including per-activity-type enable flags and network requirements.
     public func getConfiguration() -> HandoffConfiguration {
         configuration
     }
@@ -327,6 +328,7 @@ public struct HandoffConfiguration: Codable, Sendable {
         return HandoffConfiguration()
     }
 
+    /// Persists the current Handoff configuration to UserDefaults as JSON.
     public func save() {
         if let data = try? JSONEncoder().encode(self) {
             UserDefaults.standard.set(data, forKey: HandoffConfiguration.configKey)

@@ -664,10 +664,12 @@ extension ModelRouter {
 
     // MARK: - Statistics
 
+    /// Returns the performance statistics for the given model across all task types, or `nil` if no data has been recorded.
     public func getModelStatistics(for modelId: String) -> [TaskType: ModelTaskPerformance]? {
         modelPerformance[modelId]
     }
 
+    /// Returns the highest-scoring model for the given task type using the current routing weights and context, or `nil` if no candidates are available.
     public func getBestModel(for taskType: TaskType) -> AIModel? {
         let candidates = getCandidateModels(for: taskType)
         let scored = scoreModels(candidates, for: taskType, context: RoutingContext())
@@ -676,6 +678,7 @@ extension ModelRouter {
 
     // MARK: - Reset
 
+    /// Resets all accumulated model performance tracking data and clears the routing history.
     public func resetPerformanceData() {
         modelPerformance.removeAll()
         routingHistory.removeAll()

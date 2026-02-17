@@ -110,6 +110,7 @@ public actor UnifiedContextSync {
         }
     }
 
+    /// Stops the background context synchronization timer, halting periodic delta syncs.
     public func stopSync() {
         syncTimer?.cancel()
         syncTimer = nil

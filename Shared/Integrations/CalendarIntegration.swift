@@ -25,6 +25,7 @@ public actor CalendarIntegration: AppIntegrationModule {
 
     private init() {}
 
+    /// Requests full access to calendar events and marks the integration as connected.
     public func connect() async throws {
         let granted = try await eventStore.requestFullAccessToEvents()
         guard granted else {

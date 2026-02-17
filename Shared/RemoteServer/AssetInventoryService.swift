@@ -385,6 +385,7 @@ public class AssetInventoryService: ObservableObject {
 
 // MARK: - Inventory Report
 
+/// Summary report containing hardware and software inventory data collected at a point in time.
 public struct InventoryReport: Codable, Sendable {
     public let collectedAt: Date
     public let hardware: HardwareInventory

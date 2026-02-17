@@ -222,6 +222,7 @@ func parseResponseBlocks(_ text: String) -> [ParsedBlock] {
 
 // MARK: - Quick Actions
 
+/// Quick actions available on message bubbles for common operations like copy, regenerate, and translate.
 public enum MessageQuickAction: String, CaseIterable {
     case copy
     case regenerate

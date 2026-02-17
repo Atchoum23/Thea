@@ -201,6 +201,7 @@ public class UnattendedAccessManager: ObservableObject {
 
 // MARK: - Unattended Access Profile
 
+/// Configuration profile for unattended access, defining permissions, time restrictions, and target device.
 public struct UnattendedAccessProfile: Codable, Sendable, Identifiable {
     public let id: String
     public var name: String
@@ -212,6 +213,7 @@ public struct UnattendedAccessProfile: Codable, Sendable, Identifiable {
     public var createdAt: Date
     public var lastUsedAt: Date?
 
+    /// A recurring time window defined by start/end hours and days of the week during which unattended access is permitted.
     public struct TimeWindow: Codable, Sendable {
         public let startHour: Int
         public let endHour: Int
@@ -263,6 +265,7 @@ public struct UnattendedAccessProfile: Codable, Sendable, Identifiable {
 
 // MARK: - Unattended Access Error
 
+/// Errors from unattended access operations such as weak passwords, Keychain failures, or denied access.
 public enum UnattendedAccessError: Error, LocalizedError, Sendable {
     case passwordTooShort
     case keychainError

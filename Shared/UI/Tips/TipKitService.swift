@@ -15,6 +15,7 @@ import SwiftUI
 
     @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     @MainActor
+    /// Manages TipKit tip configuration, lifecycle, and testing utilities across the app.
     public class TipKitManager: ObservableObject {
         public static let shared = TipKitManager()
 
@@ -366,6 +367,7 @@ import SwiftUI
     // MARK: - Tip Events
 
     @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
+    /// Container for TipKit event recording methods that trigger tip rule evaluations.
     public struct TipEvents {
         /// Record when user starts their first chat
         public static func recordFirstChat() {
@@ -407,6 +409,7 @@ import SwiftUI
 
 // MARK: - Fallback for Older OS
 
+/// Fallback utilities for checking TipKit availability on older OS versions.
 public enum TipKitFallback {
     public static func isAvailable() -> Bool {
         if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {

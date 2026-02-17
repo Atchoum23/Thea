@@ -556,6 +556,7 @@ public actor HealthDataSync {
 
 // MARK: - Data Models
 
+/// A single health measurement record for cross-device synchronization.
 public struct HealthDataRecord: Sendable, Codable {
     public let id: UUID
     public var dataType: HealthDataType
@@ -564,6 +565,14 @@ public struct HealthDataRecord: Sendable, Codable {
     public var timestamp: Date
     public var sourceDevice: String
 
+    /// Creates a health data record.
+    /// - Parameters:
+    ///   - id: Unique identifier (defaults to a new UUID).
+    ///   - dataType: The type of health metric (e.g., heart rate, steps).
+    ///   - value: The numeric measurement value.
+    ///   - unit: The unit string for the measurement (e.g., "bpm", "count").
+    ///   - timestamp: When the measurement was taken.
+    ///   - sourceDevice: Identifier of the device that recorded the measurement.
     public init(
         id: UUID = UUID(),
         dataType: HealthDataType,
@@ -581,6 +590,7 @@ public struct HealthDataRecord: Sendable, Codable {
     }
 }
 
+/// Supported health metric types for sync records.
 public enum HealthDataType: String, Sendable, Codable {
     case sleepDuration
     case sleepQuality
@@ -599,12 +609,19 @@ public enum HealthDataType: String, Sendable, Codable {
     case oxygenSaturation
 }
 
+/// A versioned package of health records prepared for cloud upload or received from cloud download.
 public struct SyncPackage: Sendable, Codable {
     public var version: String
     public var timestamp: Date
     public var deviceIdentifier: String
     public var records: [HealthDataRecord]
 
+    /// Creates a sync package.
+    /// - Parameters:
+    ///   - version: Schema version string (currently "1.0").
+    ///   - timestamp: When the package was created.
+    ///   - deviceIdentifier: Identifier of the originating device.
+    ///   - records: The health data records included in this package.
     public init(version: String, timestamp: Date, deviceIdentifier: String, records: [HealthDataRecord]) {
         self.version = version
         self.timestamp = timestamp
@@ -625,6 +642,7 @@ public protocol HealthDataSyncObserver: AnyObject, Sendable {
 
 // MARK: - Sync Coordinator
 
+/// Observable coordinator that drives health data sync from SwiftUI views, exposing status and last-sync date.
 @MainActor
 public final class HealthDataSyncCoordinator: ObservableObject {
     @Published public var syncStatus: HealthDataSync.SyncStatus = .idle
@@ -635,6 +653,7 @@ public final class HealthDataSyncCoordinator: ObservableObject {
 
     public init() {}
 
+    /// Initiates a cloud sync, uploading local health data. Updates ``syncStatus`` and ``isSyncing`` throughout.
     public func startSync() async {
         isSyncing = true
         syncStatus = .syncing
@@ -650,12 +669,14 @@ public final class HealthDataSyncCoordinator: ObservableObject {
         isSyncing = false
     }
 
+    /// Cancels any active sync operation and resets status to idle.
     public func cancelSync() async {
         await syncService.cancelSync()
         isSyncing = false
         syncStatus = .idle
     }
 
+    /// Returns whether a sync is needed, delegating to the underlying ``HealthDataSync`` service.
     public func shouldSync() async -> Bool {
         await syncService.shouldSync()
     }

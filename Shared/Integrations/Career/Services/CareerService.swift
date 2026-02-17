@@ -16,6 +16,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
 
     // MARK: - Goal Management
 
+    /// Creates a new career goal, validating that its title is non-empty.
     public func createGoal(_ goal: CareerGoal) async throws {
         guard !goal.title.isEmpty else {
             throw CareerError.invalidGoal("Title cannot be empty")
@@ -23,6 +24,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         goals[goal.id] = goal
     }
 
+    /// Updates an existing career goal, throwing if the goal is not found.
     public func updateGoal(_ goal: CareerGoal) async throws {
         guard goals[goal.id] != nil else {
             throw CareerError.invalidGoal("Goal not found")
@@ -30,19 +32,23 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         goals[goal.id] = goal
     }
 
+    /// Deletes a career goal by its identifier.
     public func deleteGoal(id: UUID) async throws {
         goals.removeValue(forKey: id)
     }
 
+    /// Returns all career goals sorted by start date, most recent first.
     public func fetchGoals() async throws -> [CareerGoal] {
         Array(goals.values).sorted { $0.startDate > $1.startDate }
     }
 
+    /// Returns career goals filtered by the given status, sorted by start date descending.
     public func fetchGoals(status: CareerGoalStatus) async throws -> [CareerGoal] {
         goals.values.filter { $0.status == status }
             .sorted { $0.startDate > $1.startDate }
     }
 
+    /// Adds a milestone to the specified career goal (milestone management delegated to CareerGoalTracker).
     public func addMilestone(_: Milestone, to goalID: UUID) async throws {
         guard let goal = goals[goalID] else {
             throw CareerError.invalidGoal("Goal not found")
@@ -53,6 +59,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         goals[goalID] = goal
     }
 
+    /// Marks a milestone as completed within the specified goal (milestone management delegated to CareerGoalTracker).
     public func completeMilestone(milestoneID _: UUID, in goalID: UUID) async throws {
         guard let goal = goals[goalID] else {
             throw CareerError.invalidGoal("Goal not found")
@@ -71,6 +78,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
 
     // MARK: - Skill Tracking
 
+    /// Adds a new skill to tracking, validating that its name is non-empty.
     public func addSkill(_ skill: Skill) async throws {
         guard !skill.name.isEmpty else {
             throw CareerError.invalidSkill("Skill name cannot be empty")
@@ -78,6 +86,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         skills[skill.id] = skill
     }
 
+    /// Updates the proficiency level of a skill and records the current date as last practiced.
     public func updateProficiency(skillID: UUID, proficiency: ProficiencyLevel) async throws {
         guard var skill = skills[skillID] else {
             throw CareerError.invalidSkill("Skill not found")
@@ -87,6 +96,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         skills[skillID] = skill
     }
 
+    /// Logs practice hours for a skill and auto-upgrades proficiency when the investment threshold is reached.
     public func logPracticeHours(skillID: UUID, hours: Double) async throws {
         guard var skill = skills[skillID] else {
             throw CareerError.invalidSkill("Skill not found")
@@ -106,15 +116,18 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         skills[skillID] = skill
     }
 
+    /// Returns all tracked skills sorted alphabetically by name.
     public func fetchSkills() async throws -> [Skill] {
         Array(skills.values).sorted { $0.name < $1.name }
     }
 
+    /// Returns skills filtered by category, sorted alphabetically by name.
     public func fetchSkills(category: SkillCategory) async throws -> [Skill] {
         skills.values.filter { $0.category == category }
             .sorted { $0.name < $1.name }
     }
 
+    /// Associates a learning resource with the specified skill (resource management handled separately).
     public func addResource(_: LearningResource, to skillID: UUID) async throws {
         guard skills[skillID] != nil else {
             throw CareerError.invalidSkill("Skill not found")
@@ -126,10 +139,12 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
 
     // MARK: - CareerReflection
 
+    /// Stores a new career reflection entry.
     public func createCareerReflection(_ reflection: CareerReflection) async throws {
         reflections[reflection.id] = reflection
     }
 
+    /// Updates an existing career reflection, throwing if not found.
     public func updateCareerReflection(_ reflection: CareerReflection) async throws {
         guard reflections[reflection.id] != nil else {
             throw CareerError.invalidCareerReflection("CareerReflection not found")
@@ -137,6 +152,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         reflections[reflection.id] = reflection
     }
 
+    /// Returns the career reflection recorded on the given date, if any.
     public func fetchCareerReflection(for date: Date) async throws -> CareerReflection? {
         let startOfDay = Calendar.current.startOfDay(for: date)
         let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
@@ -146,12 +162,14 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         }
     }
 
+    /// Returns career reflections within the given date range, sorted most recent first.
     public func fetchCareerReflections(from startDate: Date, to endDate: Date) async throws -> [CareerReflection] {
         reflections.values.filter { reflection in
             reflection.date >= startDate && reflection.date <= endDate
         }.sorted { $0.date > $1.date }
     }
 
+    /// Analyzes career mood trends over the specified number of days, comparing first-half vs second-half averages.
     public func analyzeMoodTrends(days: Int) async throws -> MoodTrend {
         let endDate = Date()
         let startDate = Calendar.current.date(byAdding: .day, value: -days, to: endDate) ?? endDate.addingTimeInterval(Double(-days) * 86400)
@@ -220,6 +238,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
 
     // MARK: - Growth Recommendations
 
+    /// Generates growth recommendations based on skill gaps, goal alignment, and wellbeing signals.
     public func generateRecommendations(
         goals: [CareerGoal],
         skills: [Skill],
@@ -248,6 +267,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         return newRecommendations
     }
 
+    /// Dismisses a growth recommendation so it no longer appears in active results.
     public func dismissRecommendation(id: UUID) async throws {
         guard var recommendation = recommendations[id] else {
             return
@@ -256,6 +276,7 @@ public actor CareerService: CareerServiceProtocol, SkillTrackingProtocol, Career
         recommendations[id] = recommendation
     }
 
+    /// Returns all non-dismissed recommendations sorted by priority descending.
     public func fetchActiveRecommendations() async throws -> [GrowthRecommendation] {
         recommendations.values.filter { !$0.dismissed }
             .sorted { $0.priority > $1.priority }

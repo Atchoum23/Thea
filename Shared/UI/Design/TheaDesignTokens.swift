@@ -175,6 +175,7 @@ public enum TheaShadow {
     /// Glow effect for interactive elements
     public static let glow = Shadow(color: Color.blue.opacity(0.3), radius: 20, x: 0, y: 0)
 
+    /// Design token representing a shadow with color, blur radius, and offset.
     public struct Shadow: Sendable {
         public let color: Color
         public let radius: CGFloat
@@ -226,6 +227,7 @@ public struct AdaptiveTheme: Equatable {
     public let accentVariant: AccentVariant
     public let intensity: Intensity
 
+    /// Available theme modes including a midnight option for extra-dark late-night use.
     public enum ThemeMode: String, CaseIterable {
         case system
         case light
@@ -233,6 +235,7 @@ public struct AdaptiveTheme: Equatable {
         case midnight  // Extra dark for late night
     }
 
+    /// Accent color variant options defining the app's gradient palette.
     public enum AccentVariant: String, CaseIterable {
         case ocean      // Blue-cyan gradient (default)
         case aurora     // Purple-green gradient
@@ -241,6 +244,7 @@ public struct AdaptiveTheme: Equatable {
         case monochrome // Grayscale with subtle accent
     }
 
+    /// Visual intensity level controlling how rich or muted UI colors appear.
     public enum Intensity: String, CaseIterable {
         case subtle     // Minimal color, focus on content
         case balanced   // Default balanced approach

@@ -105,6 +105,9 @@ public enum MemoryTriggerCondition: Codable, CustomStringConvertible {
         }
     }
 
+    /// Checks whether this trigger condition is satisfied by the given context snapshot.
+    /// - Parameter context: The current context snapshot to evaluate against.
+    /// - Returns: `true` if the condition is met (e.g., time reached, keyword matched, activity detected).
     public func isSatisfied(by context: MemoryContextSnapshot) -> Bool {
         switch self {
         case .time(let date):

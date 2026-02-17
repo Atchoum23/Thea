@@ -244,6 +244,7 @@ public actor CrossDeviceService {
         syncEnabled = config.autoSyncEnabled
     }
 
+    /// Returns the current cross-device sync configuration, including auto-sync, conflict resolution, and sync interval settings.
     public func getConfiguration() -> CrossDeviceSyncConfiguration {
         configuration
     }
@@ -311,6 +312,7 @@ public struct CrossDeviceSyncConfiguration: Codable, Sendable {
         return CrossDeviceSyncConfiguration()
     }
 
+    /// Persists the current cross-device sync configuration to UserDefaults as JSON.
     public func save() {
         if let data = try? JSONEncoder().encode(self) {
             UserDefaults.standard.set(data, forKey: CrossDeviceSyncConfiguration.configKey)
