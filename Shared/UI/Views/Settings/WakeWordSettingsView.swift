@@ -235,7 +235,7 @@ struct WakeWordSettingsView: View {
                     Text("False Acceptances")
                     Spacer()
                     Text("\(wakeWordEngine.falseAcceptances)")
-                        .foregroundStyle(wakeWordEngine.falseAcceptances > 0 ? .red : .secondary)
+                        .foregroundStyle(wakeWordEngine.falseAcceptances > 0 ? Color.theaError : .secondary)
                 }
 
                 Button("Report False Rejection") {
@@ -320,7 +320,7 @@ struct WakeWordSettingsView: View {
 
     private var statusColor: Color {
         if wakeWordEngine.isListening && wakeWordEngine.isActive {
-            return .green
+            return .theaSuccess
         } else if wakeWordEngine.isListening {
             return .yellow
         } else {
@@ -340,10 +340,10 @@ struct WakeWordSettingsView: View {
 
     private func confidenceColor(_ confidence: Float) -> Color {
         switch confidence {
-        case 0.9...: return .green
-        case 0.7..<0.9: return .blue
-        case 0.5..<0.7: return .orange
-        default: return .red
+        case 0.9...: return .theaSuccess
+        case 0.7..<0.9: return .theaInfo
+        case 0.5..<0.7: return .theaWarning
+        default: return .theaError
         }
     }
 
@@ -392,11 +392,11 @@ struct SpeakerTrainingView: View {
                 // Recording indicator
                 ZStack {
                     Circle()
-                        .fill(isRecording ? Color.red.opacity(0.2) : Color.gray.opacity(0.1))
+                        .fill(isRecording ? Color.theaError.opacity(0.2) : Color.gray.opacity(0.1))
                         .frame(width: 150, height: 150)
 
                     Circle()
-                        .fill(isRecording ? Color.red : Color.gray)
+                        .fill(isRecording ? Color.theaError : Color.gray)
                         .frame(width: 80, height: 80)
                         .overlay {
                             Image(systemName: "mic.fill")
@@ -435,7 +435,7 @@ struct SpeakerTrainingView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isRecording ? Color.red : Color.theaPrimary)
+                        .background(isRecording ? Color.theaError : Color.theaPrimary)
                         .cornerRadius(12)
                 }
                 .padding(.horizontal)
@@ -451,7 +451,7 @@ struct SpeakerTrainingView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.green)
+                            .background(Color.theaSuccess)
                             .cornerRadius(12)
                     }
                     .padding(.horizontal)
