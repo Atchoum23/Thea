@@ -121,7 +121,6 @@ jobs:
           echo "Building version: $VERSION"
 
       - name: Import Code Signing Certificate
-        if: secrets.APPLE_CERTIFICATE_BASE64 != ''
         env:
           CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -139,7 +138,7 @@ jobs:
           echo "SIGNING_ENABLED=true" >> $GITHUB_ENV
 
       - name: Install macOS Provisioning Profiles
-        if: matrix.platform == 'macOS' && secrets.PROVISIONING_PROFILE_MACOS != ''
+        if: matrix.platform == 'macOS'
         env:
           PP_MACOS: ${{ secrets.PROVISIONING_PROFILE_MACOS }}
           PP_FINDER: ${{ secrets.PROVISIONING_PROFILE_FINDER_EXT }}
