@@ -102,6 +102,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case privacy = "Privacy"
 
     // Group 4: Customization
+    case responseStyles = "Response Styles"
+    case personalization = "Personalization"
     case theme = "Theme"
     case advanced = "Advanced"
 

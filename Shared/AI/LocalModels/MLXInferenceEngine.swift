@@ -39,8 +39,9 @@ final class MLXInferenceEngine {
     /// Tracks session access order for LRU eviction
     private var sessionAccessOrder: [UUID] = []
 
-    /// Maximum cached chat sessions before LRU eviction
-    private let maxCachedSessions = 20
+    /// Maximum cached chat sessions before LRU eviction.
+    /// Initialized from SystemCapabilityService for hardware-aware scaling.
+    private let maxCachedSessions = SystemCapabilityService.shared.maxMLXCachedSessions
 
     /// Model factory for loading models
     private let modelFactory = LLMModelFactory.shared
@@ -528,31 +529,62 @@ enum MLXInferenceError: LocalizedError {
 // MARK: - Generation Parameters Extension
 
 extension GenerateParameters {
-    /// Create parameters optimized for chat/assistant use
-    static var chat: GenerateParameters {
-        GenerateParameters(
+    /// Create parameters optimized for chat/assistant use.
+    /// - Parameter taskType: Optional task type to use `recommendedTemperature`. Defaults to 0.7.
+    static func chat(taskType: TaskType? = nil) -> GenerateParameters {
+        let temperature = taskType?.recommendedTemperature ?? 0.7
+        return GenerateParameters(
             maxTokens: 2048,
-            temperature: 0.7,
+            temperature: Float(temperature),
             topP: 0.9
         )
     }
 
-    /// Create parameters for deterministic/factual responses
-    static var deterministic: GenerateParameters {
-        GenerateParameters(
-            maxTokens: 2048,
-            temperature: 0.0
+    /// Backward-compatible static property: chat with default temperature.
+    static var chat: GenerateParameters { chat(taskType: nil) }
+
+    /// Create parameters for deterministic/factual responses.
+    /// - Parameters:
+    ///   - model: Optional model to scale maxTokens via `ResponseLength.scaledMaxTokens(for:)`.
+    ///   - taskType: Task type for temperature (defaults to 0.15 for deterministic output).
+    static func deterministic(model: AIModel? = nil, taskType: TaskType? = nil) -> GenerateParameters {
+        let temperature = taskType?.recommendedTemperature ?? 0.15
+        let maxTokens: Int
+        if let model = model {
+            maxTokens = ResponseLength.medium.scaledMaxTokens(for: model)
+        } else {
+            maxTokens = 2048
+        }
+        return GenerateParameters(
+            maxTokens: maxTokens,
+            temperature: Float(temperature)
         )
     }
 
-    /// Create parameters for creative/diverse responses
-    static var creative: GenerateParameters {
-        GenerateParameters(
-            maxTokens: 4096,
-            temperature: 1.0,
+    /// Backward-compatible static property: deterministic with default parameters.
+    static var deterministic: GenerateParameters { deterministic(model: nil, taskType: nil) }
+
+    /// Create parameters for creative/diverse responses.
+    /// - Parameters:
+    ///   - model: Optional model to scale maxTokens.
+    ///   - taskType: Task type for temperature (defaults to 0.85).
+    static func creative(model: AIModel? = nil, taskType: TaskType? = nil) -> GenerateParameters {
+        let temperature = taskType?.recommendedTemperature ?? 0.85
+        let maxTokens: Int
+        if let model = model {
+            maxTokens = ResponseLength.long.scaledMaxTokens(for: model)
+        } else {
+            maxTokens = 4096
+        }
+        return GenerateParameters(
+            maxTokens: maxTokens,
+            temperature: Float(temperature),
             topP: 0.95
         )
     }
+
+    /// Backward-compatible static property: creative with default parameters.
+    static var creative: GenerateParameters { creative(model: nil, taskType: nil) }
 }
 
 #endif // os(macOS)

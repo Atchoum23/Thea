@@ -223,12 +223,12 @@ public final class SystemCapabilityService {
         let logger = Logger(subsystem: "com.thea.intelligence", category: "SystemCapability")
         logger.info("""
             SystemCapabilityService initialized: \
-            \(String(format: "%.0f", physicalMemoryGB))GB RAM, \
-            chip=\(chipFamily.rawValue), \
-            cores=\(performanceCoreCount), \
-            maxLocalModel=\(String(format: "%.0f", maxLocalModelGB))GB, \
-            embeddingBatch=\(embeddingBatchSize), \
-            mlxSessions=\(maxMLXCachedSessions)
+            \(String(format: "%.0f", self.physicalMemoryGB))GB RAM, \
+            chip=\(self.chipFamily.rawValue), \
+            cores=\(self.performanceCoreCount), \
+            maxLocalModel=\(String(format: "%.0f", self.maxLocalModelGB))GB, \
+            embeddingBatch=\(self.embeddingBatchSize), \
+            mlxSessions=\(self.maxMLXCachedSessions)
             """)
     }
 
