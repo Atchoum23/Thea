@@ -242,100 +242,33 @@ final class AnthropicProvider: AIProvider, Sendable {
     // MARK: - Models
 
     func listModels() async throws -> [ProviderAIModel] {
-        [
-            // Claude 4.6 models (latest generation — adaptive thinking, interleaved tool use)
-            ProviderAIModel(
-                id: "claude-opus-4-6",
-                name: "Claude Opus 4.6",
-                description: "Most capable model — adaptive thinking, 1M context, interleaved tool use",
-                contextWindow: 1_000_000,
-                maxOutputTokens: 32_000,
-                inputPricePerMillion: 15.00,
-                outputPricePerMillion: 75.00,
-                supportsVision: true,
-                supportsFunctionCalling: true
-            ),
-            // Claude 4.5 models
-            ProviderAIModel(
-                id: "claude-opus-4-5-20251101",
-                name: "Claude Opus 4.5",
-                description: "Previous gen flagship with effort control",
-                contextWindow: 200_000,
-                maxOutputTokens: 32_000,
-                inputPricePerMillion: 15.00,
-                outputPricePerMillion: 75.00,
-                supportsVision: true,
-                supportsFunctionCalling: true
-            ),
-            ProviderAIModel(
-                id: "claude-sonnet-4-5-20250929",
-                name: "Claude Sonnet 4.5",
-                description: "Balanced intelligence and speed",
-                contextWindow: 200_000,
-                maxOutputTokens: 32_000,
-                inputPricePerMillion: 3.00,
-                outputPricePerMillion: 15.00,
-                supportsVision: true,
-                supportsFunctionCalling: true
-            ),
-            ProviderAIModel(
-                id: "claude-haiku-4-5-20251001",
-                name: "Claude Haiku 4.5",
-                description: "Fast and cost-effective",
-                contextWindow: 200_000,
-                maxOutputTokens: 32_000,
-                inputPricePerMillion: 1.00,
-                outputPricePerMillion: 5.00,
-                supportsVision: true,
-                supportsFunctionCalling: true
-            ),
-            // Claude 4 models
-            ProviderAIModel(
-                id: "claude-opus-4-20250514",
-                name: "Claude Opus 4",
-                description: "Previous generation flagship model",
-                contextWindow: 200_000,
-                maxOutputTokens: 8192,
-                inputPricePerMillion: 15.00,
-                outputPricePerMillion: 75.00,
-                supportsVision: true,
-                supportsFunctionCalling: true
-            ),
-            ProviderAIModel(
-                id: "claude-sonnet-4-20250514",
-                name: "Claude Sonnet 4",
-                description: "Previous generation balanced model",
-                contextWindow: 200_000,
-                maxOutputTokens: 8192,
-                inputPricePerMillion: 3.00,
-                outputPricePerMillion: 15.00,
-                supportsVision: true,
-                supportsFunctionCalling: true
-            ),
-            // Claude 3.5 models (legacy)
-            ProviderAIModel(
-                id: "claude-3-5-sonnet-20241022",
-                name: "Claude 3.5 Sonnet",
-                description: "Legacy balanced model",
-                contextWindow: 200_000,
-                maxOutputTokens: 8192,
-                inputPricePerMillion: 3.00,
-                outputPricePerMillion: 15.00,
-                supportsVision: true,
-                supportsFunctionCalling: true
-            ),
-            ProviderAIModel(
-                id: "claude-3-5-haiku-20241022",
-                name: "Claude 3.5 Haiku",
-                description: "Legacy fast model",
-                contextWindow: 200_000,
-                maxOutputTokens: 8192,
-                inputPricePerMillion: 1.00,
-                outputPricePerMillion: 5.00,
-                supportsVision: true,
-                supportsFunctionCalling: true
+        // Delegate to AIModelCatalog to eliminate duplication.
+        // Convert per-1K costs to per-million for ProviderAIModel (×1000).
+        AIModel.anthropicModels.map { model in
+            let inputPPM: Decimal
+            let outputPPM: Decimal
+            if let inputPer1K = model.inputCostPer1K {
+                inputPPM = inputPer1K * 1000
+            } else {
+                inputPPM = .zero
+            }
+            if let outputPer1K = model.outputCostPer1K {
+                outputPPM = outputPer1K * 1000
+            } else {
+                outputPPM = .zero
+            }
+            return ProviderAIModel(
+                id: model.id,
+                name: model.name,
+                description: model.description,
+                contextWindow: model.contextWindow,
+                maxOutputTokens: model.maxOutputTokens,
+                inputPricePerMillion: inputPPM,
+                outputPricePerMillion: outputPPM,
+                supportsVision: model.supportsVision,
+                supportsFunctionCalling: model.supportsFunctionCalling
             )
-        ]
+        }
     }
 
     // MARK: - Advanced Chat (with Claude API 2026 features)
