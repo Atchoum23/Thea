@@ -53,14 +53,14 @@ struct DailyLifeSnapshot: Codable, Sendable {
 
 // MARK: - Correlation Strength
 
-enum CorrelationStrength: String, Codable, Sendable {
+enum CDCorrelationStrength: String, Codable, Sendable {
     case negligible   // |r| < 0.1
     case weak         // 0.1 <= |r| < 0.3
     case moderate     // 0.3 <= |r| < 0.5
     case strong       // 0.5 <= |r| < 0.7
     case veryStrong   // |r| >= 0.7
 
-    static func from(coefficient: Double) -> CorrelationStrength {
+    static func from(coefficient: Double) -> CDCorrelationStrength {
         let absR = abs(coefficient)
         switch absR {
         case ..<0.1:  return .negligible
@@ -79,7 +79,7 @@ struct CorrelationResult: Codable, Sendable, Identifiable {
     let metric1: String
     let metric2: String
     let coefficient: Double
-    let strength: CorrelationStrength
+    let strength: CDCorrelationStrength
     let sampleSize: Int
     let insight: String
     let discoveredAt: Date
@@ -96,7 +96,7 @@ struct CorrelationResult: Codable, Sendable, Identifiable {
         self.metric1 = metric1
         self.metric2 = metric2
         self.coefficient = coefficient
-        self.strength = CorrelationStrength.from(coefficient: coefficient)
+        self.strength = CDCorrelationStrength.from(coefficient: coefficient)
         self.sampleSize = sampleSize
         self.insight = insight
         self.discoveredAt = discoveredAt
@@ -264,7 +264,7 @@ final class CrossDomainCorrelationEngine {
             let r = pearsonCorrelation(xValues, yValues)
             guard !r.isNaN && r.isFinite else { continue }
 
-            let strength = CorrelationStrength.from(coefficient: r)
+            let strength = CDCorrelationStrength.from(coefficient: r)
             // Only store moderate or stronger correlations
             guard strength != .negligible && strength != .weak else { continue }
 
@@ -508,7 +508,7 @@ final class CrossDomainCorrelationEngine {
         if deepSleepValues.count >= 7 {
             let r = pearsonCorrelation(deepSleepValues, nextDayProductivity)
             if !r.isNaN && r.isFinite {
-                let strength = CorrelationStrength.from(coefficient: r)
+                let strength = CDCorrelationStrength.from(coefficient: r)
                 if strength != .negligible && strength != .weak {
                     let percentageChange = abs(r) * 100
                     let direction = r > 0 ? "higher" : "lower"
