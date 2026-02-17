@@ -118,10 +118,14 @@ extension ChatManager {
             autoGenerateTitle(for: conversation)
             try context.save()
 
-            await runPostResponseActions(
-                text: enhancedText, taskType: taskType,
-                assistantMessage: assistantMessage, conversation: conversation
+            let responseContext = PostResponsePipeline.ResponseContext(
+                userQuery: enhancedText,
+                responseText: streamingText,
+                taskType: taskType,
+                assistantMessage: assistantMessage,
+                conversation: conversation
             )
+            await PostResponsePipeline.run(responseContext, agentState: agentState)
 
             processQueue()
         } catch {
@@ -485,113 +489,7 @@ extension ChatManager {
         return false
     }
 
-    private func runPostResponseActions(
-        text: String, taskType: TaskType?,
-        assistantMessage: Message, conversation: Conversation
-    ) async {
-        // Confidence verification + hallucination detection
-        #if os(macOS) || os(iOS)
-        do {
-            let responseText = streamingText
-            let verificationTaskType = taskType ?? .general
-            Task { @MainActor in
-                let confidenceSystem = ConfidenceSystem.shared
-                let result = await confidenceSystem.validateResponse(
-                    responseText, query: text, taskType: verificationTaskType
-                )
 
-                // Hallucination detection via semantic entropy heuristics
-                let hallucinationFlags = await confidenceSystem.detectHallucinations(
-                    responseText, query: text
-                )
-
-                var meta = assistantMessage.metadata ?? MessageMetadata()
-                meta.confidence = result.overallConfidence
-                if !hallucinationFlags.isEmpty {
-                    meta.hallucinationFlags = hallucinationFlags
-                }
-                do {
-                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
-                    try assistantMessage.modelContext?.save()
-                } catch {
-                    msgLogger.error("❌ Failed to save confidence: \(error.localizedDescription)")
-                }
-                let flagCount = hallucinationFlags.count
-                msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100)), hallucination flags: \(flagCount)")
-            }
-        }
-        #endif
-
-        agentState.transition(to: .verifyResults)
-
-        // Autonomy evaluation
-        await evaluateAutonomy(for: taskType)
-
-        agentState.transition(to: .done)
-        agentState.currentTask?.status = .completed
-        agentState.updateProgress(1.0, message: "Response complete")
-
-        // Auto-create plan from planning responses
-        autoCreatePlanIfNeeded(text: text, taskType: taskType, conversation: conversation)
-
-        // Voice output routing
-        if AudioOutputRouter.shared.isVoiceOutputActive {
-            AudioOutputRouter.shared.routeResponse(streamingText)
-        }
-
-        // Follow-up suggestion generation (G1)
-        let responseForSuggestions = streamingText
-        let queryForSuggestions = text
-        let taskTypeRaw = taskType?.rawValue
-        Task { @MainActor in
-            let suggestions = FollowUpSuggestionService.shared.generate(
-                response: responseForSuggestions,
-                query: queryForSuggestions,
-                taskType: taskTypeRaw
-            )
-            if !suggestions.isEmpty {
-                var meta = assistantMessage.metadata ?? MessageMetadata()
-                meta.followUpSuggestions = suggestions
-                do {
-                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
-                    try assistantMessage.modelContext?.save()
-                } catch {
-                    msgLogger.error("Failed to save follow-up suggestions: \(error.localizedDescription)")
-                }
-            }
-        }
-
-        // Record user messaging activity in BehavioralFingerprint (Pipeline 2)
-        BehavioralFingerprint.shared.recordActivity(.communication)
-
-        // Extract entities from conversation into PersonalKnowledgeGraph (Pipeline 5)
-        Task { @MainActor in
-            await ConversationMemoryExtractor.shared.extractFromConversation(conversation)
-        }
-
-        // Response notifications
-        let preview = streamingText
-        Task {
-            await ResponseNotificationHandler.shared.notifyResponseComplete(
-                conversationId: conversation.id,
-                conversationTitle: conversation.title,
-                previewText: preview
-            )
-            do {
-                try await CrossDeviceNotificationService.shared.notifyAIResponseReady(
-                    conversationId: conversation.id.uuidString,
-                    preview: preview
-                )
-            } catch {
-                msgLogger.debug("Cross-device notification skipped: \(error.localizedDescription)")
-            }
-        }
-    }
-
-    private func evaluateAutonomy(for taskType: TaskType?) async {
-        guard AutonomyController.shared.autonomyLevel != .disabled,
-              let taskType, taskType.isActionable
-        else { return }
 
         let action = AutonomousAction(
             category: .analysis,
@@ -610,8 +508,6 @@ extension ChatManager {
         }
     }
 
-    private func autoCreatePlanIfNeeded(text: String, taskType: TaskType?, conversation: Conversation) {
-        guard taskType == .planning, PlanManager.shared.activePlan == nil else { return }
         let planSteps = Self.extractPlanSteps(from: streamingText)
         guard planSteps.count >= 2 else { return }
 
