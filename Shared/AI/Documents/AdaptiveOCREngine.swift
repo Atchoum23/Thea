@@ -131,6 +131,7 @@ protocol OCRProvider: Sendable {
 // MARK: - Apple Vision OCR Provider
 
 /// Built-in Apple Vision framework provider
+// @unchecked Sendable: stateless — all properties are immutable lets or computed
 final class VisionOCRProvider: OCRProvider, @unchecked Sendable {
     let providerName = "Apple Vision"
     let accuracyTier = OCRAccuracyTier.standard

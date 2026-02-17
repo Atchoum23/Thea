@@ -21,6 +21,7 @@ import OSLog
 // MARK: - Model Quality Benchmark
 
 /// Tracks and analyzes model quality over time
+// @unchecked Sendable: mutable state (modelMetrics) only accessed from single evaluation context
 final class ModelQualityBenchmark: @unchecked Sendable {
     private let logger = Logger(subsystem: "ai.thea.app", category: "ModelQualityBenchmark")
 

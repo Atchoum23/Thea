@@ -234,6 +234,7 @@
     // MARK: - Accessibility Monitoring
 
     /// Monitor for Terminal content changes using Accessibility observers
+    // @unchecked Sendable: AXObserver mutable state only accessed from main run loop
     final class TerminalAccessibilityMonitor: @unchecked Sendable {
         private var observer: AXObserver?
         private var terminalPID: pid_t?

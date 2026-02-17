@@ -14,6 +14,7 @@ import AVFoundation
 ///
 /// Used internally by ``VoiceProactivity`` to bridge
 /// `AVSpeechSynthesizerDelegate` callbacks into async/await.
+// @unchecked Sendable: NSObject delegate — bridges AVSpeechSynthesizer callbacks into async/await
 class VoiceProactivitySpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     let completion: () -> Void
 

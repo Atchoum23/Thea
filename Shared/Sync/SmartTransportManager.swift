@@ -541,6 +541,7 @@ actor SmartTransportManager {
     }
 
     /// Thread-safe one-shot guard for continuation resumption
+    // @unchecked Sendable: thread-safe via NSLock — single-shot guard for continuation resumption
     private final class ContinuationGuard: @unchecked Sendable {
         private let lock = NSLock()
         private var resumed = false

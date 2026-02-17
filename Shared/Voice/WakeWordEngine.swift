@@ -368,6 +368,7 @@ final class WakeWordEngine {
 // MARK: - Audio Processor (Nonisolated)
 
 /// Handles all audio processing off the main thread
+// @unchecked Sendable: mutable state serialized on dedicated processingQueue DispatchQueue
 private final class AudioProcessor: @unchecked Sendable {
     private var audioEngine: AVAudioEngine?
     private let processingQueue = DispatchQueue(label: "app.thea.wakeword.processing", qos: .userInteractive)
@@ -557,6 +558,7 @@ private final class AudioProcessor: @unchecked Sendable {
 
 // MARK: - Speaker Trainer (Nonisolated)
 
+// @unchecked Sendable: all stored properties are immutable lets; methods are pure functions
 private final class SpeakerTrainer: @unchecked Sendable {
     private let embeddingSize = 128
 

@@ -5,6 +5,7 @@ import Fluent
 import Vapor
 
 /// User model for Sign in with Apple authentication
+// @unchecked Sendable: Fluent Model — thread safety managed by database layer
 final class User: Model, Content, @unchecked Sendable {
     static let schema = "users"
 

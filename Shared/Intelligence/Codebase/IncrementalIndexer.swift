@@ -401,6 +401,7 @@ public actor IncrementalIndexer {
 // MARK: - Directory Monitor
 
 /// Low-level directory monitor using GCD
+// @unchecked Sendable: mutable state serialized on dedicated DispatchQueue; GCD source lifecycle
 private final class DirectoryMonitor: @unchecked Sendable {
     private let path: String
     private let callback: () -> Void

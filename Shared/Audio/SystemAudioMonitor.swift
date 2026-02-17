@@ -306,6 +306,7 @@ final class SystemAudioMonitor {
 
 #if os(macOS)
 @available(macOS 13.0, *)
+// @unchecked Sendable: SCStreamOutput delegate — callbacks serialized by ScreenCaptureKit
 private class AudioStreamOutput: NSObject, SCStreamOutput, @unchecked Sendable {
     private weak var monitor: SystemAudioMonitor?
 

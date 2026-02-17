@@ -340,6 +340,7 @@ final class VoiceActivationEngine {
 
 // MARK: - Speech Delegate
 
+// @unchecked Sendable: NSObject delegate — immutable onComplete closure set during init
 private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     let onComplete: () -> Void
 

@@ -8,6 +8,7 @@ import OSLog
 
 // MARK: - Perplexity Provider
 
+// @unchecked Sendable: stateless provider — all stored properties are immutable configuration
 public final class PerplexityProvider: AIProvider, @unchecked Sendable {
     public let id = "perplexity"
     public let name = "Perplexity"

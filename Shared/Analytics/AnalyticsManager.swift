@@ -543,6 +543,7 @@ public protocol AnalyticsProvider: Sendable {
 
 // MARK: - Local Analytics Provider
 
+// @unchecked Sendable: all stored properties are immutable lets; no mutable state
 public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.app", category: "Analytics.Local")
     private let fileURL: URL
@@ -583,6 +584,7 @@ public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendabl
 
 // MARK: - Console Analytics Provider (Debug)
 
+// @unchecked Sendable: stateless — only stored property is immutable Logger
 public final class ConsoleAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.app", category: "Analytics.Console")
 

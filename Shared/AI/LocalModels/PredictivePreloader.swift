@@ -34,6 +34,7 @@ import OSLog
 ///
 /// State is persisted to `UserDefaults` and restored on init, so learning
 /// accumulates across app launches.
+// @unchecked Sendable: mutable state (transitionMatrix, hourlyDistribution) only accessed from single Task context
 final class PredictivePreloader: @unchecked Sendable {
     let logger = Logger(subsystem: "ai.thea.app", category: "PredictivePreloader")
 

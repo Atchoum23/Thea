@@ -348,6 +348,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
 // MARK: - Accessory Delegate
 
 #if canImport(HomeKit)
+    // @unchecked Sendable: NSObject delegate — HomeKit serializes accessory callbacks
     private final class AccessoryDelegate: NSObject, HMAccessoryDelegate, @unchecked Sendable {
         let accessoryId: String
         let homeName: String

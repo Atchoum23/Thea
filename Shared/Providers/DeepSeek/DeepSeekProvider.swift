@@ -10,6 +10,7 @@ import OSLog
 
 // MARK: - DeepSeek Provider
 
+// @unchecked Sendable: stateless provider — all stored properties are immutable configuration
 public final class DeepSeekProvider: AIProvider, @unchecked Sendable {
     public let id = "deepseek"
     public let name = "DeepSeek"

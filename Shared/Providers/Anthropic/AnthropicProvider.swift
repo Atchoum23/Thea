@@ -8,6 +8,7 @@ import OSLog
 
 // MARK: - Anthropic Provider
 
+// @unchecked Sendable: stateless provider — all stored properties are immutable configuration
 public final class AnthropicProvider: AIProvider, @unchecked Sendable {
     public let id = "anthropic"
     public let name = "Anthropic"

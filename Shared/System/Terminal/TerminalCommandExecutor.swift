@@ -2,6 +2,7 @@
     import Foundation
 
     /// Executes terminal commands either directly via Process or through Terminal.app
+    // @unchecked Sendable: stateless command executor — no mutable state
     final class TerminalCommandExecutor: @unchecked Sendable {
         enum ExecutorError: LocalizedError {
             case commandBlocked(String)

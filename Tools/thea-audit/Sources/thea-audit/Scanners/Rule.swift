@@ -33,6 +33,7 @@ protocol Rule: Sendable {
 // MARK: - Base Rule Implementation
 
 /// Base class for regex-based rules
+// @unchecked Sendable: all stored properties are immutable lets set during init
 class RegexRule: Rule, @unchecked Sendable {
     let id: String
     let name: String
@@ -131,6 +132,7 @@ class RegexRule: Rule, @unchecked Sendable {
 // MARK: - AST-based Rule (for Swift)
 
 /// Base class for AST-based rules that analyze Swift code structure
+// @unchecked Sendable: all stored properties are immutable lets set during init
 class ASTRule: Rule, @unchecked Sendable {
     let id: String
     let name: String

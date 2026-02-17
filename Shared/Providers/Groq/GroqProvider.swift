@@ -8,6 +8,7 @@ import OSLog
 
 // MARK: - Groq Provider
 
+// @unchecked Sendable: stateless provider — all stored properties are immutable configuration
 public final class GroqProvider: AIProvider, @unchecked Sendable {
     public let id = "groq"
     public let name = "Groq"

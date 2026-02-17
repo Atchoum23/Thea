@@ -687,6 +687,7 @@ struct MCPToolCallParams: Codable, Sendable {
 }
 
 /// Type-erased Codable wrapper for heterogeneous dictionary values in MCP context
+// @unchecked Sendable: wraps only primitive JSON types (String, Int, Double, Bool, Array, Dict)
 struct MCPAnyCodable: Codable, @unchecked Sendable {
     let value: Any
 

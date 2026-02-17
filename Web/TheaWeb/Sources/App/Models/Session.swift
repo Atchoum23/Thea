@@ -5,6 +5,7 @@ import Fluent
 import Vapor
 
 /// Session model for tracking authenticated sessions
+// @unchecked Sendable: Fluent Model — thread safety managed by database layer
 final class Session: Model, Content, @unchecked Sendable {
     static let schema = "sessions"
 

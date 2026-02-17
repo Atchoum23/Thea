@@ -450,6 +450,7 @@ public enum NotificationActionResult: Sendable {
 
 // MARK: - Notification Delegate
 
+// @unchecked Sendable: NSObject delegate — singleton, callbacks dispatched by system on main thread
 public class TheaNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     public static let shared = TheaNotificationDelegate()
 

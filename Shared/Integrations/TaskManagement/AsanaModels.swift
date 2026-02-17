@@ -392,6 +392,7 @@ public struct AsanaCustomField: Codable, Sendable {
 
 // MARK: - Batch API Models
 
+// @unchecked Sendable: data is [String: Any] for Asana Batch API flexibility; values are JSON primitives
 public struct AsanaBatchAction: @unchecked Sendable {
     public let relativePath: String
     public let method: String
@@ -486,6 +487,7 @@ public struct AsanaWebhookResource: Codable, Sendable {
 
 // MARK: - Helper Types
 
+// @unchecked Sendable: type-erased Codable wrapper; wraps only JSON-primitive values
 public struct AsanaAnyCodable: Codable, @unchecked Sendable {
     public let value: Any
 

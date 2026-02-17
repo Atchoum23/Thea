@@ -6,6 +6,7 @@ import OSLog
 
 // MARK: - Session Delegate
 
+// @unchecked Sendable: URLSession serializes all delegate callbacks on its internal queue
 class NetworkSessionDelegate: NSObject, URLSessionDelegate, URLSessionDataDelegate, URLSessionDownloadDelegate, @unchecked Sendable {
     private var streamHandlers: [URLSessionTask: (onData: (Data) -> Void, onComplete: (Error?) -> Void)] = [:]
 
@@ -33,6 +34,7 @@ class NetworkSessionDelegate: NSObject, URLSessionDelegate, URLSessionDataDelega
 
 // MARK: - WebSocket Connection
 
+// @unchecked Sendable: URLSessionWebSocketTask wrapper — task is thread-safe, isConnected set from delegate
 public final class WebSocketConnection: ObservableObject, @unchecked Sendable {
     private let task: URLSessionWebSocketTask
     @Published public private(set) var isConnected = false

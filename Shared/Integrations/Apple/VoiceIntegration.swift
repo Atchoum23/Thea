@@ -616,6 +616,7 @@ public enum VoiceIntegrationError: LocalizedError {
 // MARK: - Synthesizer Delegate
 
 #if canImport(AVFoundation)
+// @unchecked Sendable: NSObject delegate — completion handlers called by AVFoundation
 private class SynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     var completionHandler: (() -> Void)?
     var errorHandler: ((Error) -> Void)?

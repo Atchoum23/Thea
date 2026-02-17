@@ -446,6 +446,7 @@ final class VoiceInteractionEngine {
 
 // MARK: - Synthesizer Delegate
 
+// @unchecked Sendable: NSObject delegate — callbacks forwarded to @MainActor engine
 private class SynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     weak var engine: VoiceInteractionEngine?
 
