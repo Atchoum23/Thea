@@ -375,6 +375,8 @@ public final class GlobalQuickPromptManager: ObservableObject {
             switch chunk.type {
             case let .delta(delta):
                 result += delta
+            case .thinkingDelta:
+                break
             case let .complete(finalMessage):
                 result = finalMessage.content.textValue
             case let .error(error):

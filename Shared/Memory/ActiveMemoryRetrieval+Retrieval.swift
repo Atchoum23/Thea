@@ -156,37 +156,33 @@ extension ActiveMemoryRetrieval {
 
         let graph = PersonalKnowledgeGraph.shared
 
-        // Query the knowledge graph with the user's query
-        let result = await graph.query(query)
+        // Use hybrid search (BM25 + connectivity + recency) for ranked results
+        let hybridResults = await graph.hybridSearch(query: query, limit: config.maxKnowledgeGraphResults)
 
-        // Convert matched entities to retrieval sources
-        for entity in result.entities {
+        for result in hybridResults {
+            let entity = result.entity
             let attributeStr = entity.attributes.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
             let content = "\(entity.name) (\(entity.type.rawValue))"
                 + (attributeStr.isEmpty ? "" : " — \(attributeStr)")
-
-            // Score based on reference count and recency
-            let recencyDays = Date().timeIntervalSince(entity.lastUpdatedAt) / 86400
-            let recencyFactor = max(0.3, 1.0 - recencyDays * 0.05)
-            let referenceFactor = min(1.0, Double(entity.referenceCount) / 10.0)
-            let relevance = (recencyFactor * 0.5 + referenceFactor * 0.5)
 
             sources.append(RetrievalSource(
                 type: .knowledgeNode,
                 tier: .semantic,
                 content: content,
-                relevanceScore: min(relevance, 1.0),
+                relevanceScore: min(result.score, 1.0),
                 timestamp: entity.lastUpdatedAt,
                 metadata: [
                     "entityId": entity.id,
                     "entityType": entity.type.rawValue,
-                    "referenceCount": String(entity.referenceCount)
+                    "referenceCount": String(entity.referenceCount),
+                    "matchType": result.matchType.rawValue
                 ]
             ))
         }
 
-        // Convert relationships to retrieval sources (provide connection context)
-        for edge in result.edges {
+        // Also query for relationship paths between mentioned entities
+        let queryResult = await graph.query(query)
+        for edge in queryResult.edges {
             let sourceEntity = await graph.getEntity(edge.sourceID)
             let targetEntity = await graph.getEntity(edge.targetID)
             let sourceName = sourceEntity?.name ?? edge.sourceID
@@ -206,7 +202,7 @@ extension ActiveMemoryRetrieval {
             ))
         }
 
-        // Also add recently referenced entities for broader context
+        // Fallback: add recently referenced entities for broader context
         if sources.isEmpty {
             let recentEntities = await graph.recentEntities(limit: 5)
             for entity in recentEntities {

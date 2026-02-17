@@ -10,10 +10,9 @@ import XCTest
 
 // MARK: - Test Double
 
-@MainActor
-private final class TestErrorLogger {
-    static var lastLoggedError: (any Error, String)?
-    static var lastWarning: String?
+private final class TestErrorLogger: @unchecked Sendable {
+    nonisolated(unsafe) static var lastLoggedError: (any Error, String)?
+    nonisolated(unsafe) static var lastWarning: String?
 
     static func reset() {
         lastLoggedError = nil
