@@ -154,12 +154,9 @@ public class CloudKitService: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let resolution = notification.userInfo?["resolution"] as? ConflictResolution,
-                  let conflictId = notification.userInfo?["conflictId"] as? UUID
-            else { return }
+            let conflictId = notification.userInfo?["conflictId"] as? UUID
             Task { @MainActor [weak self] in
-                self?.logger.info("Conflict \(conflictId) resolved with \(String(describing: resolution))")
-                // The conflict was already auto-merged; user resolution is logged for audit
+                self?.logger.info("Conflict resolved: \(conflictId?.uuidString ?? "unknown")")
             }
         }
     }
