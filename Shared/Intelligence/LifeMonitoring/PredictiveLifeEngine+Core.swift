@@ -29,13 +29,13 @@ public final class PredictiveLifeEngine: ObservableObject {
     // MARK: - Published State
 
     /// Currently active predictions, sorted by relevance x confidence.
-    @Published public private(set) var activePredictions: [LifePrediction] = []
+    @Published public internal(set) var activePredictions: [LifePrediction] = []
     /// Overall accuracy of past predictions (0-1).
-    @Published public private(set) var predictionAccuracy: Double = 0.7
+    @Published public internal(set) var predictionAccuracy: Double = 0.7
     /// Timestamp of the most recent prediction cycle.
-    @Published public private(set) var lastPredictionRun: Date?
+    @Published public internal(set) var lastPredictionRun: Date?
     /// Whether a prediction cycle is currently running.
-    @Published public private(set) var isProcessing = false
+    @Published public internal(set) var isProcessing = false
 
     // MARK: - Configuration
 
