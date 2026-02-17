@@ -341,7 +341,8 @@ extension ChatManager {
         agentState.transition(to: .takeAction)
 
         // Retry with exponential backoff, then fallback to alternative provider
-        let maxRetries = 2
+        // maxRetries is configurable via TheaConfig so it can be tuned without recompile
+        let maxRetries = TheaConfig.shared.providers.maxRetries
         var lastError: Error?
 
         for attempt in 0...maxRetries {

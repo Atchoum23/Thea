@@ -249,17 +249,25 @@ public final class OfflineQueueService {
     // MARK: - Persistence
 
     func loadPendingRequests() {
-        guard let data = userDefaults.data(forKey: "offline.pendingRequests"),
-              let requests = try? JSONDecoder().decode([OfflineQueuedRequest].self, from: data)
-        else { return }
-
-        pendingRequests = requests
-        logger.info("Loaded \(requests.count) pending requests from storage")
+        guard let data = userDefaults.data(forKey: "offline.pendingRequests") else { return }
+        do {
+            let requests = try JSONDecoder().decode([OfflineQueuedRequest].self, from: data)
+            pendingRequests = requests
+            logger.info("Loaded \(requests.count) pending requests from storage")
+        } catch {
+            // Corrupted data — clear so we don't block future queuing
+            logger.error("Failed to decode offline queue from UserDefaults: \(error.localizedDescription, privacy: .public)")
+            userDefaults.removeObject(forKey: "offline.pendingRequests")
+        }
     }
 
     func savePendingRequests() {
-        guard let data = try? JSONEncoder().encode(pendingRequests) else { return }
-        userDefaults.set(data, forKey: "offline.pendingRequests")
+        do {
+            let data = try JSONEncoder().encode(pendingRequests)
+            userDefaults.set(data, forKey: "offline.pendingRequests")
+        } catch {
+            logger.error("Failed to encode offline queue for persistence: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     // MARK: - Queue Status
