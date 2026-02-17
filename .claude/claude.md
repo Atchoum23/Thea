@@ -149,12 +149,15 @@ done
 
 ## Project Facts
 
-- **Swift 6.0** with strict concurrency (actors, async/await)
+- **Swift 6.0** with `SWIFT_STRICT_CONCURRENCY: complete` (full data-race safety)
 - **XcodeGen** generates project from `project.yml`
 - **Schemes**: Thea-macOS, Thea-iOS, Thea-watchOS, Thea-tvOS
 - **Local models**: `~/.cache/huggingface/hub/`
 - **Architecture**: MVVM with SwiftUI + SwiftData
 - **Remote**: `https://github.com/Atchoum23/Thea.git`
+- **HealthKit**: Modern `HKSampleQueryDescriptor`/`HKStatisticsQueryDescriptor` async/await (iOS 15.4+)
+- **Concurrency**: `Task.sleep(for: .seconds(...))` Duration-based API throughout (no nanoseconds)
+- **Tests**: 3654 tests across 746 suites via `swift test`
 
 ## Orchestrator System (ACTIVE in macOS build)
 
