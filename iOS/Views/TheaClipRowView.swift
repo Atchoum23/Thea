@@ -70,6 +70,7 @@ struct TheaClipRowView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .clipShape(RoundedRectangle(cornerRadius: 4))
+                            .accessibilityLabel("Clipboard image thumbnail")
                     }
                 #endif
             } else {
@@ -88,16 +89,19 @@ struct TheaClipRowView: View {
                 Image(systemName: "star.fill")
                     .font(.caption2)
                     .foregroundStyle(.theaWarning)
+                    .accessibilityHidden(true)
             }
             if entry.isPinned {
                 Image(systemName: "pin.fill")
                     .font(.caption2)
                     .foregroundStyle(.theaWarning)
+                    .accessibilityHidden(true)
             }
             if entry.isSensitive {
                 Image(systemName: "lock.fill")
                     .font(.caption2)
                     .foregroundStyle(.theaError)
+                    .accessibilityHidden(true)
             }
         }
     }
