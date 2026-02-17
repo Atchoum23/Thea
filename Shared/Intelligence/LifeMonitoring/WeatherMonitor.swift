@@ -1,8 +1,6 @@
 // WeatherMonitor.swift
 // Thea - Weather Monitoring Service
-//
-// Polls WeatherKit every 30 minutes for current conditions at the user's location.
-// Persists the latest snapshot to disk and feeds weather changes to LifeMonitoringCoordinator.
+// Polls WeatherKit every 30 min, persists to disk, feeds LifeMonitoringCoordinator.
 
 import CoreLocation
 import Foundation
@@ -15,13 +13,13 @@ import WeatherKit
 // MARK: - Weather Snapshot
 
 public struct WeatherSnapshot: Codable, Sendable {
-    public let temperature: Double    // Celsius
-    public let feelsLike: Double      // Celsius
-    public let humidity: Double       // 0.0-1.0
+    public let temperature: Double   // Celsius
+    public let feelsLike: Double     // Celsius
+    public let humidity: Double      // 0.0-1.0
     public let uvIndex: Int
-    public let condition: String      // Human-readable description
-    public let pressure: Double       // hPa
-    public let windSpeed: Double      // m/s
+    public let condition: String     // Human-readable description
+    public let pressure: Double      // hPa
+    public let windSpeed: Double     // m/s
     public let timestamp: Date
 }
 
@@ -37,19 +35,11 @@ public protocol WeatherMonitorDelegate: AnyObject, Sendable {
 @Observable
 public final class WeatherMonitor: NSObject, Sendable {
     public static let shared = WeatherMonitor()
-
     private let logger = Logger(subsystem: "ai.thea.app", category: "WeatherMonitor")
-
-    // MARK: - Published State
 
     public private(set) var currentWeather: WeatherSnapshot?
     public private(set) var isRunning = false
-
-    // MARK: - Delegate
-
     public weak var delegate: WeatherMonitorDelegate?
-
-    // MARK: - Private State
 
     private let locationManager = CLLocationManager()
     private var pollTask: Task<Void, Never>?
@@ -62,8 +52,6 @@ public final class WeatherMonitor: NSObject, Sendable {
         return dir.appendingPathComponent("weather.json")
     }()
 
-    // MARK: - Init
-
     private override init() {
         super.init()
         locationManager.delegate = self
@@ -74,17 +62,11 @@ public final class WeatherMonitor: NSObject, Sendable {
     // MARK: - Lifecycle
 
     public func start() {
-        guard !isRunning else {
-            logger.warning("Weather monitor already running")
-            return
-        }
-
+        guard !isRunning else { return }
         locationManager.requestWhenInUseAuthorization()
         isRunning = true
-
         pollTask = Task { [weak self] in
             guard let self else { return }
-            // Fetch immediately, then poll
             await self.fetchWeather()
             while !Task.isCancelled {
                 try? await Task.sleep(for: self.pollInterval)
@@ -92,7 +74,6 @@ public final class WeatherMonitor: NSObject, Sendable {
                 await self.fetchWeather()
             }
         }
-
         logger.info("Weather monitor started (30-min interval)")
     }
 
@@ -182,38 +163,33 @@ public final class WeatherMonitor: NSObject, Sendable {
 
     private func persistSnapshot(_ snapshot: WeatherSnapshot) {
         do {
-            let data = try JSONEncoder().encode(snapshot)
-            try data.write(to: Self.persistenceURL, options: .atomic)
+            let encoded = try JSONEncoder().encode(snapshot)
+            try encoded.write(to: Self.persistenceURL, options: .atomic)
         } catch {
             logger.error("Failed to persist weather: \(error.localizedDescription)")
         }
     }
 
     private func loadPersistedSnapshot() {
-        guard FileManager.default.fileExists(atPath: Self.persistenceURL.path) else { return }
-        do {
-            let data = try Data(contentsOf: Self.persistenceURL)
-            currentWeather = try JSONDecoder().decode(WeatherSnapshot.self, from: data)
-            logger.info("Loaded persisted weather snapshot")
-        } catch {
-            logger.warning("Failed to load persisted weather: \(error.localizedDescription)")
-        }
+        guard FileManager.default.fileExists(atPath: Self.persistenceURL.path),
+              let data = try? Data(contentsOf: Self.persistenceURL),
+              let snapshot = try? JSONDecoder().decode(WeatherSnapshot.self, from: data) else { return }
+        currentWeather = snapshot
+        logger.info("Loaded persisted weather snapshot")
     }
 }
 
 // MARK: - CLLocationManagerDelegate
 
 extension WeatherMonitor: CLLocationManagerDelegate {
-    nonisolated public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    nonisolated public func locationManager(_: CLLocationManager, didUpdateLocations _: [CLLocation]) {
         Task { @MainActor in
-            if currentWeather == nil {
-                await fetchWeather()
-            }
+            if currentWeather == nil { await fetchWeather() }
         }
     }
 
-    nonisolated public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        let logger = Logger(subsystem: "ai.thea.app", category: "WeatherMonitor")
-        logger.error("Location error: \(error.localizedDescription)")
+    nonisolated public func locationManager(_: CLLocationManager, didFailWithError error: Error) {
+        Logger(subsystem: "ai.thea.app", category: "WeatherMonitor")
+            .error("Location error: \(error.localizedDescription)")
     }
 }
