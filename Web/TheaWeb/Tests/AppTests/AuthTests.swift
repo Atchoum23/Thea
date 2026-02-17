@@ -58,7 +58,7 @@ final class AuthTests: XCTestCase {
     }
 
     func testChatRequiresAuth() async throws {
-        try await app.test(.POST, "api/v1/chat/message") { res async in
+        try await app.test(.POST, "api/v1/chat/send") { res async in
             XCTAssertEqual(res.status, .unauthorized)
         }
     }
