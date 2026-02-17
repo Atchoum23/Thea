@@ -362,7 +362,11 @@ final class MessagingHub: ObservableObject {
             in: .userDomainMask
         ).first ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/Messaging", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            ErrorLogger.log(error, context: "MessagingHub.init.createDirectory")
+        }
         self.storageURL = dir.appendingPathComponent("messaging_state.json")
         loadState()
     }
@@ -580,17 +584,32 @@ final class MessagingHub: ObservableObject {
         )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(state) {
-            try? data.write(to: storageURL, options: .atomic)
+        do {
+            let data = try encoder.encode(state)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            ErrorLogger.log(error, context: "MessagingHub.saveState")
         }
     }
 
     private func loadState() {
-        guard let data = try? Data(contentsOf: storageURL) else { return }
+        guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
+
+        let data: Data
+        do {
+            data = try Data(contentsOf: storageURL)
+        } catch {
+            ErrorLogger.log(error, context: "MessagingHub.loadState.read")
+            return
+        }
+
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let state = try? decoder.decode(SaveableState.self, from: data) {
+        do {
+            let state = try decoder.decode(SaveableState.self, from: data)
             self.channels = state.channels
+        } catch {
+            ErrorLogger.log(error, context: "MessagingHub.loadState.decode")
         }
     }
 }

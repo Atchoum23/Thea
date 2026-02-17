@@ -6,6 +6,9 @@
 // pattern matching — no external API calls (privacy-first).
 
 import Foundation
+import OSLog
+
+private let msgComprehensionLogger = Logger(subsystem: \"ai.thea.app\", category: \"MessageComprehension\")
 
 /// Analyzes messages to extract structured understanding.
 enum MsgComprehensionEngine {
@@ -319,7 +322,13 @@ enum MsgComprehensionEngine {
     // MARK: - Regex Helper
 
     private static func matches(for pattern: String, in text: String) -> [String] {
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            msgComprehensionLogger.error("Invalid regex pattern: \(error.localizedDescription)")
+            return []
+        }
         let range = NSRange(text.startIndex..., in: text)
         return regex.matches(in: text, range: range).compactMap { match in
             guard let range = Range(match.range, in: text) else { return nil }

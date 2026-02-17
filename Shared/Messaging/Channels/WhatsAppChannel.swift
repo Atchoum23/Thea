@@ -44,7 +44,11 @@ final class WhatsAppChannel: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         storageDir = appSupport.appendingPathComponent("Thea/WhatsApp")
-        try? FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create WhatsApp storage directory: \(error.localizedDescription)")
+        }
         loadState()
     }
 
@@ -221,7 +225,7 @@ final class WhatsAppChannel: ObservableObject {
             let client = OpenClawClient()
             try await client.send(command: .getHistory(channelID: chatID, limit: limit))
             // History comes back as events — they'll be processed by handleOpenClawMessage
-            try? await Task.sleep(for: .milliseconds(500))
+            do { try await Task.sleep(for: .milliseconds(500)) } catch { return [] }
             return Array((conversationCache[chatID] ?? []).suffix(limit))
         } catch {
             logger.error("Failed to load history: \(error.localizedDescription)")
@@ -240,7 +244,13 @@ final class WhatsAppChannel: ObservableObject {
 
     /// Parse WhatsApp chat export file (txt format from "Export Chat" feature).
     func importChatExport(from url: URL) -> [WhatsAppMessage] {
-        guard let content = try? String(contentsOf: url, encoding: .utf8) else { return [] }
+        let content: String
+        do {
+            content = try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            logger.error("Failed to read WhatsApp export file: \(error.localizedDescription)")
+            return []
+        }
         return parseChatExport(content)
     }
 
@@ -254,8 +264,14 @@ final class WhatsAppChannel: ObservableObject {
         let bracketPattern = #"^\[(\d{1,2}/\d{1,2}/\d{2,4}),?\s*(\d{1,2}:\d{2}(?::\d{2})?)\]\s*(.+?):\s*(.+)$"#
         let dashPattern = #"^(\d{1,2}\.\d{1,2}\.\d{2,4}),?\s*(\d{1,2}:\d{2})\s*-\s*(.+?):\s*(.+)$"#
 
-        let bracketRegex = try? NSRegularExpression(pattern: bracketPattern)
-        let dashRegex = try? NSRegularExpression(pattern: dashPattern)
+        var bracketRegex: NSRegularExpression?
+        var dashRegex: NSRegularExpression?
+        do {
+            bracketRegex = try NSRegularExpression(pattern: bracketPattern)
+            dashRegex = try NSRegularExpression(pattern: dashPattern)
+        } catch {
+            logger.debug("Failed to compile WhatsApp export regex patterns: \(error.localizedDescription)")
+        }
 
         let dateFormatterBracket = DateFormatter()
         dateFormatterBracket.locale = Locale(identifier: "en_US_POSIX")
@@ -474,7 +490,7 @@ final class WhatsAppChannel: ObservableObject {
 
     private func isGroupChat(_ channelID: String) -> Bool {
         // WhatsApp group IDs typically end with @g.us
-        channelID.hasSuffix("@g.us") || groups.contains { $0.id == channelID }
+        channelID.hasSuffix("@g.us") || groups.contains(where: { $0.id == channelID })
     }
 
     // MARK: - Helpers
@@ -516,13 +532,18 @@ final class WhatsAppChannel: ObservableObject {
 
     private func loadState() {
         let url = storageDir.appendingPathComponent("state.json")
-        guard let data = try? Data(contentsOf: url),
-              let state = try? JSONDecoder().decode(WhatsAppState.self, from: data) else { return }
-        contacts = state.contacts
-        groups = state.groups
-        messageCount = state.messageCount
-        lastSyncAt = state.lastSyncAt
-        processedMessageIDs = Set(state.processedIDs)
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        do {
+            let data = try Data(contentsOf: url)
+            let state = try JSONDecoder().decode(WhatsAppState.self, from: data)
+            contacts = state.contacts
+            groups = state.groups
+            messageCount = state.messageCount
+            lastSyncAt = state.lastSyncAt
+            processedMessageIDs = Set(state.processedIDs)
+        } catch {
+            logger.debug("Could not load WhatsApp state: \(error.localizedDescription)")
+        }
     }
 }
 

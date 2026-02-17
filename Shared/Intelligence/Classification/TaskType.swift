@@ -9,42 +9,68 @@ import Foundation
 
 /// Represents the type of task a query represents
 public enum TaskType: String, Codable, Sendable, CaseIterable {
-    case codeGeneration      // Writing new code
-    case codeAnalysis        // Analyzing code structure/quality
-    case codeDebugging       // Fixing code issues (alias for debugging)
-    case debugging           // Fixing code issues
-    case codeExplanation     // Explaining code
-    case codeRefactoring     // Improving existing code
-    case factual             // Questions with factual answers
-    case creative            // Creative writing, brainstorming
-    case analysis            // Analyzing data or code
-    case research            // Searching for information
-    case conversation        // General chat
-    case system              // System operations (files, terminal)
-    case math                // Mathematical calculations
-    case translation         // Language translation
-    case summarization       // Summarizing content
-    case planning            // Task planning, project management
-    case unknown             // Cannot determine
+    /// Writing new code from scratch.
+    case codeGeneration
+    /// Analyzing code structure, quality, or patterns.
+    case codeAnalysis
+    /// Fixing code issues (alias for debugging).
+    case codeDebugging
+    /// Fixing code issues.
+    case debugging
+    /// Explaining how code works.
+    case codeExplanation
+    /// Improving existing code without changing behavior.
+    case codeRefactoring
+    /// Questions with definitive factual answers.
+    case factual
+    /// Creative writing, brainstorming, or ideation.
+    case creative
+    /// Analyzing data, arguments, or complex topics.
+    case analysis
+    /// Searching for and synthesizing information.
+    case research
+    /// General conversational exchange.
+    case conversation
+    /// System operations (files, terminal, OS commands).
+    case system
+    /// Mathematical calculations or proofs.
+    case math
+    /// Language translation between human languages.
+    case translation
+    /// Summarizing or condensing content.
+    case summarization
+    /// Task planning, project management, or roadmapping.
+    case planning
+    /// Cannot determine the task type.
+    case unknown
 
-    // V1 compatibility aliases (legacy names)
-    case simpleQA            // Legacy: use factual
-    case complexReasoning    // Legacy: use analysis
-    case creativeWriting     // Legacy: use creative
-    case mathLogic           // Legacy: use math
-    case informationRetrieval // Legacy: use research
-    case appDevelopment      // Legacy: use codeGeneration
-    case contentCreation     // Legacy: use creative
-    case workflowAutomation  // Legacy: use system
-    case creation            // Legacy: use creative
-    case general             // Legacy: use conversation
+    /// Legacy alias: use `factual` instead.
+    case simpleQA
+    /// Legacy alias: use `analysis` instead.
+    case complexReasoning
+    /// Legacy alias: use `creative` instead.
+    case creativeWriting
+    /// Legacy alias: use `math` instead.
+    case mathLogic
+    /// Legacy alias: use `research` instead.
+    case informationRetrieval
+    /// Legacy alias: use `codeGeneration` instead.
+    case appDevelopment
+    /// Legacy alias: use `creative` instead.
+    case contentCreation
+    /// Legacy alias: use `system` instead.
+    case workflowAutomation
+    /// Legacy alias: use `creative` instead.
+    case creation
+    /// Legacy alias: use `conversation` instead.
+    case general
 
-    /// Human-readable display name (V1 compatibility alias)
+    /// Human-readable display name (V1 compatibility alias).
     public var displayName: String {
         description
     }
 
-    /// Human-readable description
+    /// Human-readable description of this task type.
     public var description: String {
         switch self {
         case .codeGeneration, .appDevelopment: return "Code Generation"
@@ -66,7 +92,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Suggested model capabilities for this task type
+    /// Model capabilities recommended for handling this task type.
     public var preferredCapabilities: Set<ModelCapability> {
         switch self {
         case .codeGeneration, .debugging, .codeDebugging, .codeRefactoring, .appDevelopment:
@@ -96,7 +122,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Whether this task type benefits from extended reasoning
+    /// Whether this task type benefits from extended chain-of-thought reasoning.
     public var benefitsFromReasoning: Bool {
         switch self {
         case .debugging, .codeDebugging, .codeAnalysis, .analysis, .complexReasoning, .math, .mathLogic, .planning, .codeRefactoring:
@@ -106,8 +132,8 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Whether this is a simple query that can be handled by a local model
-    /// Simple = short response, no complex reasoning, no code generation
+    /// Whether this is a simple query suitable for a local or lightweight model.
+    /// Simple tasks require short responses with no complex reasoning or code generation.
     public var isSimple: Bool {
         switch self {
         case .conversation, .general, .factual, .simpleQA, .translation:
@@ -117,7 +143,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Whether this task type represents an actionable operation (code, system, planning)
+    /// Whether this task type represents an actionable operation (code, system, planning).
     public var isActionable: Bool {
         switch self {
         case .codeGeneration, .appDevelopment, .codeRefactoring, .debugging, .codeDebugging,
@@ -128,7 +154,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Whether this task type typically needs web search
+    /// Whether this task type typically benefits from web search augmentation.
     public var needsWebSearch: Bool {
         switch self {
         case .research, .factual, .simpleQA, .informationRetrieval:
@@ -138,7 +164,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Typical response length expectation
+    /// Expected response length for this task type, used for token budgeting.
     public var expectedResponseLength: ResponseLength {
         switch self {
         case .conversation, .general:
@@ -155,11 +181,16 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Response Length
 
+/// Expected response length category, used for token budget estimation.
 public enum ResponseLength: String, Codable, Sendable {
-    case short   // < 100 tokens
-    case medium  // 100-500 tokens
-    case long    // > 500 tokens
+    /// Short response, under 100 tokens.
+    case short
+    /// Medium response, 100-500 tokens.
+    case medium
+    /// Long response, over 500 tokens.
+    case long
 
+    /// Suggested maxTokens value for this response length.
     public var suggestedMaxTokens: Int {
         switch self {
         case .short: return 500
@@ -171,35 +202,55 @@ public enum ResponseLength: String, Codable, Sendable {
 
 // MARK: - Classification Result
 
-/// V1 compatibility typealias
+/// V1 compatibility typealias for `ClassificationResult`.
 public typealias TaskClassification = ClassificationResult
 
-/// Classification method used to classify the query
+/// Method used to classify a query into a task type.
 public enum ClassificationMethodType: String, Codable, Sendable {
-    case ai         // Full AI classification
-    case embedding  // Semantic embedding similarity
-    case pattern    // Learned pattern matching
-    case cache      // Cache hit
+    /// Full AI model classification.
+    case ai
+    /// Semantic embedding similarity matching.
+    case embedding
+    /// Learned pattern matching from prior classifications.
+    case pattern
+    /// Previously cached classification result.
+    case cache
 }
 
-/// Result of task classification
+/// Result of classifying a user query into a task type.
 public struct ClassificationResult: Codable, Sendable {
+    /// Primary classified task type.
     public let taskType: TaskType
+    /// Classification confidence score (0.0 - 1.0).
     public let confidence: Double
+    /// Human-readable explanation of why this type was chosen.
     public let reasoning: String?
+    /// Alternative task types with their confidence scores.
     public let alternativeTypes: [(TaskType, Double)]?
+    /// Model suggested by the classifier for this task.
     public let suggestedModel: String?
+    /// When the classification was performed.
     public let timestamp: Date
+    /// Method used for classification.
     public let classificationMethod: ClassificationMethodType
 
-    /// V1 compatibility alias for taskType
+    /// V1 compatibility alias for `taskType`.
     public var primaryType: TaskType { taskType }
 
-    /// V1 compatibility - secondary types from alternatives
+    /// V1 compatibility: secondary types extracted from alternatives.
     public var secondaryTypes: [TaskType] {
         alternativeTypes?.map { $0.0 } ?? []
     }
 
+    /// Creates a classification result.
+    /// - Parameters:
+    ///   - taskType: Primary classified task type.
+    ///   - confidence: Confidence score (0.0 - 1.0).
+    ///   - reasoning: Explanation of the classification.
+    ///   - alternativeTypes: Other candidate types with scores.
+    ///   - suggestedModel: Recommended model for the task.
+    ///   - timestamp: When classification occurred.
+    ///   - classificationMethod: Method used.
     public init(
         taskType: TaskType,
         confidence: Double,
@@ -260,7 +311,7 @@ public struct ClassificationResult: Codable, Sendable {
         }
     }
 
-    /// Whether the classification is confident enough to act on
+    /// Whether the classification confidence is high enough to act on (>= 0.7).
     public var isConfident: Bool {
         confidence >= 0.7
     }

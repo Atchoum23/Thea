@@ -188,6 +188,25 @@ struct ExtractedMailAmount: Codable, Sendable, Identifiable {
     }
 }
 
+// MARK: - Error Types
+
+enum PhysicalMailError: LocalizedError, Sendable {
+    case storageDirectoryCreationFailed(Error)
+    case saveItemsFailed(Error)
+    case loadItemsFailed(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .storageDirectoryCreationFailed(let error):
+            "Failed to create mail storage directory: \(error.localizedDescription)"
+        case .saveItemsFailed(let error):
+            "Failed to save mail items: \(error.localizedDescription)"
+        case .loadItemsFailed(let error):
+            "Failed to load mail items: \(error.localizedDescription)"
+        }
+    }
+}
+
 // MARK: - Physical Mail Channel
 
 /// Bridges physical mail scanning into MessagingHub.
@@ -200,6 +219,7 @@ final class PhysicalMailChannel: ObservableObject {
     @Published private(set) var mailItems: [PhysicalMailItem] = []
     @Published private(set) var scanCount = 0
     @Published private(set) var lastScanDate: Date?
+    @Published var lastError: PhysicalMailError?
 
     // MARK: - Configuration
 
@@ -223,7 +243,12 @@ final class PhysicalMailChannel: ObservableObject {
             in: .userDomainMask
         ).first ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/PhysicalMail", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            pmLogger.error("Failed to create mail storage directory: \(error.localizedDescription)")
+            lastError = .storageDirectoryCreationFailed(error)
+        }
         self.storageURL = dir.appendingPathComponent("mail_items.json")
         loadItems()
     }
@@ -381,7 +406,7 @@ final class PhysicalMailChannel: ObservableObject {
     // MARK: - OCR
 
     private func performOCR(on imageData: Data) async -> String {
-        await withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             #if os(macOS)
             guard let nsImage = NSImage(data: imageData),
                   let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil)
@@ -575,11 +600,17 @@ final class PhysicalMailChannel: ObservableObject {
             (#"€\s*([\d.]+,?\d*)"#, "EUR"),
             (#"([\d.]+,?\d*)\s*€"#, "EUR"),
             // USD patterns
-            (#"\$\s*([\d,]+\.?\d*)"#, "USD")
+            (#"\$\s*([\d,]+\.?\d*)"#, "USD"),
         ]
 
         for (pattern, currency) in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern)
+            } catch {
+                pmLogger.debug("Invalid amount regex pattern: \(error.localizedDescription)")
+                continue
+            }
             let range = NSRange(text.startIndex..., in: text)
             let matches = regex.matches(in: text, range: range)
 
@@ -615,7 +646,7 @@ final class PhysicalMailChannel: ObservableObject {
 
         let dateFormats = [
             "dd.MM.yyyy", "dd/MM/yyyy", "yyyy-MM-dd",
-            "d. MMMM yyyy", "d MMMM yyyy", "dd MMMM yyyy"
+            "d. MMMM yyyy", "d MMMM yyyy", "dd MMMM yyyy",
         ]
         let locales = ["de_CH", "fr_CH", "en_US"]
 
@@ -638,7 +669,13 @@ final class PhysicalMailChannel: ObservableObject {
                     continue
                 }
 
-                guard let regex = try? NSRegularExpression(pattern: datePattern) else { continue }
+                let regex: NSRegularExpression
+                do {
+                    regex = try NSRegularExpression(pattern: datePattern)
+                } catch {
+                    pmLogger.debug("Invalid date regex pattern: \(error.localizedDescription)")
+                    continue
+                }
                 let range = NSRange(text.startIndex..., in: text)
                 for match in regex.matches(in: text, range: range) {
                     guard let matchRange = Range(match.range, in: text) else { continue }
@@ -662,7 +699,7 @@ final class PhysicalMailChannel: ObservableObject {
         }
 
         let firstLine = text.components(separatedBy: .newlines)
-            .first { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+            .first(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty })
             ?? "Scanned Mail"
 
         let truncated = firstLine.count > 60 ? String(firstLine.prefix(57)) + "..." : firstLine
@@ -726,7 +763,11 @@ final class PhysicalMailChannel: ObservableObject {
         let imagesDir = storageURL
             .deletingLastPathComponent()
             .appendingPathComponent("Images", isDirectory: true)
-        try? FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
+        } catch {
+            pmLogger.debug("Could not create images directory: \(error.localizedDescription)")
+        }
 
         let name = fileName ?? "\(UUID().uuidString).png"
         let fileURL = imagesDir.appendingPathComponent(name)
@@ -766,7 +807,7 @@ final class PhysicalMailChannel: ObservableObject {
             metadata: [
                 "category": item.category.rawValue,
                 "urgency": item.urgency.rawValue,
-                "actionRequired": item.actionRequired ? "true" : "false"
+                "actionRequired": item.actionRequired ? "true" : "false",
             ]
         )
     }
@@ -806,7 +847,7 @@ final class PhysicalMailChannel: ObservableObject {
             $0.title.lowercased().contains(lower) ||
             $0.ocrText.lowercased().contains(lower) ||
             ($0.sender?.lowercased().contains(lower) ?? false) ||
-            $0.tags.contains { $0.lowercased().contains(lower) }
+            $0.tags.contains(where: { $0.lowercased().contains(lower) })
         }
     }
 
@@ -823,19 +864,27 @@ final class PhysicalMailChannel: ObservableObject {
     // MARK: - Persistence
 
     private func saveItems() {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(mailItems) {
-            try? data.write(to: storageURL, options: .atomic)
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            let data = try encoder.encode(mailItems)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            pmLogger.error("Failed to save mail items: \(error.localizedDescription)")
+            lastError = .saveItemsFailed(error)
         }
     }
 
     private func loadItems() {
-        guard let data = try? Data(contentsOf: storageURL) else { return }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        if let items = try? decoder.decode([PhysicalMailItem].self, from: data) {
-            self.mailItems = items
+        guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: storageURL)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            self.mailItems = try decoder.decode([PhysicalMailItem].self, from: data)
+        } catch {
+            pmLogger.error("Failed to load mail items: \(error.localizedDescription)")
+            lastError = .loadItemsFailed(error)
         }
     }
 
@@ -852,13 +901,25 @@ final class PhysicalMailChannel: ObservableObject {
 
             // Initial scan
             let fm = FileManager.default
-            if let contents = try? fm.contentsOfDirectory(atPath: path) {
-                knownFiles = Set(contents)
+            do {
+                knownFiles = Set(try fm.contentsOfDirectory(atPath: path))
+            } catch {
+                pmLogger.debug("Could not scan watch folder: \(error.localizedDescription)")
             }
 
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(5))
-                guard let contents = try? fm.contentsOfDirectory(atPath: path) else { continue }
+                do {
+                    try await Task.sleep(for: .seconds(5))
+                } catch {
+                    break // Task cancelled
+                }
+                let contents: [String]
+                do {
+                    contents = try fm.contentsOfDirectory(atPath: path)
+                } catch {
+                    pmLogger.debug("Could not list watch folder: \(error.localizedDescription)")
+                    continue
+                }
                 let newFiles = Set(contents).subtracting(knownFiles)
                 for file in newFiles {
                     let filePath = (path as NSString).appendingPathComponent(file)
@@ -867,8 +928,11 @@ final class PhysicalMailChannel: ObservableObject {
                     if ext == "pdf" {
                         _ = await self.processPDF(at: url)
                     } else if ["png", "jpg", "jpeg", "tiff", "heic"].contains(ext) {
-                        if let data = try? Data(contentsOf: url) {
+                        do {
+                            let data = try Data(contentsOf: url)
                             _ = await self.processImage(data, fileName: file)
+                        } catch {
+                            pmLogger.debug("Could not read image file \(file): \(error.localizedDescription)")
                         }
                     }
                 }

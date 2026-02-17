@@ -37,7 +37,7 @@ final class NotificationChannel: NSObject, ObservableObject {
 
     // MARK: - Init
 
-    override private init() {
+    private override init() {
         super.init()
     }
 
@@ -51,7 +51,11 @@ final class NotificationChannel: NSObject, ObservableObject {
             while !Task.isCancelled {
                 await self?.checkDeliveredNotifications()
                 let interval = self?.pollInterval ?? 30
-                try? await Task.sleep(for: .seconds(interval))
+                do {
+                    try await Task.sleep(for: .seconds(interval))
+                } catch {
+                    break
+                }
             }
         }
 

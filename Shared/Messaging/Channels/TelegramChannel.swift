@@ -41,7 +41,11 @@ final class TelegramChannel: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         storageDir = appSupport.appendingPathComponent("Thea/Telegram")
-        try? FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create Telegram storage directory: \(error.localizedDescription)")
+        }
         loadState()
     }
 
@@ -206,7 +210,7 @@ final class TelegramChannel: ObservableObject {
         do {
             let client = OpenClawClient()
             try await client.send(command: .getHistory(channelID: chatID, limit: limit))
-            try? await Task.sleep(for: .milliseconds(500))
+            do { try await Task.sleep(for: .milliseconds(500)) } catch { return [] }
             return Array((conversationCache[chatID] ?? []).suffix(limit))
         } catch {
             logger.error("Failed to load Telegram history: \(error.localizedDescription)")
@@ -225,13 +229,24 @@ final class TelegramChannel: ObservableObject {
 
     /// Parse Telegram Desktop JSON export (result.json from "Export chat history").
     func importDesktopExport(from url: URL) -> [TelegramMessage] {
-        guard let data = try? Data(contentsOf: url) else { return [] }
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch {
+            logger.error("Failed to read Telegram export file: \(error.localizedDescription)")
+            return []
+        }
         return parseDesktopExport(data)
     }
 
     /// Parse Telegram Desktop JSON export data.
     func parseDesktopExport(_ data: Data) -> [TelegramMessage] {
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [] }
+            json = parsed
+        } catch {
+            logger.error("Failed to parse Telegram export JSON: \(error.localizedDescription)")
             return []
         }
         return parseExportJSON(json)
@@ -243,7 +258,19 @@ final class TelegramChannel: ObservableObject {
 
         let chatName = json["name"] as? String ?? "Unknown"
         let chatID = "export_\(chatName.hashValue)"
-        let chatType = chatTypeFromExport(json["type"] as? String)
+        let chatType: TelegramChatType
+        if let typeStr = json["type"] as? String {
+            switch typeStr {
+            case "personal_chat": chatType = .privateChat
+            case "bot_chat": chatType = .bot
+            case "private_group", "public_group": chatType = .group
+            case "private_supergroup", "public_supergroup": chatType = .supergroup
+            case "private_channel", "public_channel": chatType = .channel
+            default: chatType = .privateChat
+            }
+        } else {
+            chatType = .privateChat
+        }
 
         guard let messageList = json["messages"] as? [[String: Any]] else {
             return []
@@ -257,16 +284,68 @@ final class TelegramChannel: ObservableObject {
             guard let idRaw = msgDict["id"],
                   let dateStr = msgDict["date"] as? String else { continue }
 
-            // Skip service messages (member join/leave, etc.)
-            if msgDict["type"] as? String == "service" { continue }
-
             let msgID = "\(idRaw)"
             let timestamp = dateFormatter.date(from: dateStr) ?? Date()
-            let content = extractTextContent(from: msgDict)
+
+            // Extract text content
+            let content: String
+            if let textArray = msgDict["text"] as? [Any] {
+                content = textArray.compactMap { item -> String? in
+                    if let str = item as? String { return str }
+                    if let dict = item as? [String: Any] { return dict["text"] as? String }
+                    return nil
+                }.joined()
+            } else if let text = msgDict["text"] as? String {
+                content = text
+            } else {
+                content = ""
+            }
+
             let senderName = msgDict["from"] as? String ?? "Unknown"
             let senderID = msgDict["from_id"] as? String ?? senderName
-            let attachments = extractAttachments(from: msgDict)
-            let replyToID = (msgDict["reply_to_message_id"]).map { "\($0)" }
+
+            // Extract attachments
+            var attachments: [TelegramAttachment] = []
+            if let photo = msgDict["photo"] as? String {
+                attachments.append(TelegramAttachment(type: .photo, fileName: photo))
+            }
+            if let file = msgDict["file"] as? String {
+                let mimeType = msgDict["mime_type"] as? String
+                let size = msgDict["file_size_bytes"] as? Int
+                let attachType: TelegramAttachmentType
+                // Check media_type first — voice/video messages have audio/video mime types
+                // but should be classified by their specific media_type
+                if msgDict["media_type"] as? String == "voice_message" {
+                    attachType = .voiceMessage
+                } else if msgDict["media_type"] as? String == "video_message" {
+                    attachType = .videoNote
+                } else if msgDict["media_type"] as? String == "sticker" {
+                    attachType = .sticker
+                } else if mimeType?.hasPrefix("audio/") == true {
+                    attachType = .audio
+                } else if mimeType?.hasPrefix("video/") == true {
+                    attachType = .video
+                } else {
+                    attachType = .document
+                }
+                attachments.append(TelegramAttachment(
+                    type: attachType,
+                    mimeType: mimeType,
+                    fileName: file,
+                    sizeBytes: size
+                ))
+            }
+
+            // Reply detection
+            let replyToID: String?
+            if let replyTo = msgDict["reply_to_message_id"] {
+                replyToID = "\(replyTo)"
+            } else {
+                replyToID = nil
+            }
+
+            // Skip service messages (member join/leave, etc.)
+            if msgDict["type"] as? String == "service" { continue }
 
             let message = TelegramMessage(
                 id: msgID,
@@ -289,58 +368,6 @@ final class TelegramChannel: ObservableObject {
 
         logger.info("Parsed \(messages.count) messages from Telegram export '\(chatName)'")
         return messages
-    }
-
-    // MARK: - Export Parsing Helpers
-
-    private func chatTypeFromExport(_ typeStr: String?) -> TelegramChatType {
-        switch typeStr {
-        case "personal_chat": return .privateChat
-        case "bot_chat": return .bot
-        case "private_group", "public_group": return .group
-        case "private_supergroup", "public_supergroup": return .supergroup
-        case "private_channel", "public_channel": return .channel
-        default: return .privateChat
-        }
-    }
-
-    private func extractTextContent(from msgDict: [String: Any]) -> String {
-        if let textArray = msgDict["text"] as? [Any] {
-            return textArray.compactMap { item -> String? in
-                if let str = item as? String { return str }
-                if let dict = item as? [String: Any] { return dict["text"] as? String }
-                return nil
-            }.joined()
-        } else if let text = msgDict["text"] as? String {
-            return text
-        }
-        return ""
-    }
-
-    private func extractAttachments(from msgDict: [String: Any]) -> [TelegramAttachment] {
-        var attachments: [TelegramAttachment] = []
-        if let photo = msgDict["photo"] as? String {
-            attachments.append(TelegramAttachment(type: .photo, fileName: photo))
-        }
-        if let file = msgDict["file"] as? String {
-            let mimeType = msgDict["mime_type"] as? String
-            let size = msgDict["file_size_bytes"] as? Int
-            let attachType = classifyAttachment(mediaType: msgDict["media_type"] as? String, mimeType: mimeType)
-            attachments.append(TelegramAttachment(type: attachType, mimeType: mimeType, fileName: file, sizeBytes: size))
-        }
-        return attachments
-    }
-
-    private func classifyAttachment(mediaType: String?, mimeType: String?) -> TelegramAttachmentType {
-        switch mediaType {
-        case "voice_message": return .voiceMessage
-        case "video_message": return .videoNote
-        case "sticker": return .sticker
-        default: break
-        }
-        if mimeType?.hasPrefix("audio/") == true { return .audio }
-        if mimeType?.hasPrefix("video/") == true { return .video }
-        return .document
     }
 
     // MARK: - Contact & Group Management
@@ -453,15 +480,20 @@ final class TelegramChannel: ObservableObject {
 
     private func loadState() {
         let url = storageDir.appendingPathComponent("state.json")
-        guard let data = try? Data(contentsOf: url),
-              let state = try? JSONDecoder().decode(TelegramState.self, from: data) else { return }
-        contacts = state.contacts
-        groups = state.groups
-        subscribedChannels = state.subscribedChannels
-        messageCount = state.messageCount
-        lastSyncAt = state.lastSyncAt
-        botUsername = state.botUsername
-        processedMessageIDs = Set(state.processedIDs)
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        do {
+            let data = try Data(contentsOf: url)
+            let state = try JSONDecoder().decode(TelegramState.self, from: data)
+            contacts = state.contacts
+            groups = state.groups
+            subscribedChannels = state.subscribedChannels
+            messageCount = state.messageCount
+            lastSyncAt = state.lastSyncAt
+            botUsername = state.botUsername
+            processedMessageIDs = Set(state.processedIDs)
+        } catch {
+            logger.debug("Could not load Telegram state: \(error.localizedDescription)")
+        }
     }
 }
 
