@@ -103,7 +103,11 @@ extension ChatManager {
         if let inputTokenCount {
             var meta = assistantMessage.metadata ?? MessageMetadata()
             meta.inputTokens = inputTokenCount
-            assistantMessage.metadataData = try? JSONEncoder().encode(meta)
+            do {
+                assistantMessage.metadataData = try JSONEncoder().encode(meta)
+            } catch {
+                msgLogger.error("Failed to encode assistant message metadata: \(error.localizedDescription)")
+            }
         }
         conversation.messages.append(assistantMessage)
         context.insert(assistantMessage)
@@ -535,7 +539,14 @@ extension ChatManager {
         messages: [AIMessage], model: String, provider: any AIProvider
     ) async -> Int? {
         let isAnthropicModel = model.contains("claude")
-        if isAnthropicModel, let apiKey = try? SecureStorage.shared.loadAPIKey(for: "anthropic") {
+        let anthropicApiKey: String?
+        do {
+            anthropicApiKey = try SecureStorage.shared.loadAPIKey(for: "anthropic")
+        } catch {
+            msgLogger.error("Failed to load Anthropic API key for token counting: \(error.localizedDescription)")
+            anthropicApiKey = nil
+        }
+        if isAnthropicModel, let apiKey = anthropicApiKey {
             let counter = AnthropicTokenCounter(apiKey: apiKey)
             do {
                 let result = try await counter.countTokens(messages: messages, model: model)
@@ -660,7 +671,11 @@ extension ChatManager {
                     message.contentData = (try? JSONEncoder().encode(finalMessage.content)) ?? Data()
                     message.tokenCount = finalMessage.tokenCount
                     if let meta = finalMessage.metadata {
-                        message.metadataData = try? JSONEncoder().encode(meta)
+                        do {
+                            message.metadataData = try JSONEncoder().encode(meta)
+                        } catch {
+                            msgLogger.error("Failed to encode comparison response metadata: \(error.localizedDescription)")
+                        }
                     }
                 case .error:
                     break
