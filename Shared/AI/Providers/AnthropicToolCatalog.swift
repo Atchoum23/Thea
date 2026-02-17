@@ -241,8 +241,8 @@ final class AnthropicToolCatalog: Sendable {
 
 /// Caches tool call results to avoid redundant calls for identical inputs.
 /// Entries expire after a configurable TTL (default 5 minutes).
-actor ToolResultCache {
-    static let shared = ToolResultCache()
+actor AnthropicToolResultCache {
+    static let shared = AnthropicToolResultCache()
 
     private struct CacheEntry: Sendable {
         let result: String

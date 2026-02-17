@@ -397,7 +397,7 @@ public actor VoiceProactivity {
 
         // Use delegate pattern for completion
         await withCheckedContinuation { continuation in
-            let delegate = SpeechDelegate {
+            let delegate = VoiceProactivitySpeechDelegate {
                 continuation.resume()
             }
 

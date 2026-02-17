@@ -143,8 +143,8 @@ public final class TestGenerator {
         for try await chunk in stream {
             switch chunk.type {
             case .delta(let text):
-            case .thinkingDelta: break
                 aiResponse += text
+            case .thinkingDelta: break
             case .complete:
                 break
             case .error(let error):

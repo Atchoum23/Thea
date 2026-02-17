@@ -546,6 +546,7 @@
 		3C7DDA275F7A66287876FB2C /* Scriptsauto-build-check.sh in Resources */ = {isa = PBXBuildFile; fileRef = BF2FC2452F4073DE14D592B3 /* Scriptsauto-build-check.sh */; };
 		3C853DEEE4CF44AB1ED7C07D /* ProactivityEngine+Suggestions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0AC8D553251C3CA3B7DE69E /* ProactivityEngine+Suggestions.swift */; };
 		3CB65A76F79E19A6CD446333 /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2911664A56A58207367D3FC /* SecureStorage.swift */; };
+		3CC0900F9E5F3B978A5D2FDC /* HealthInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79557C9EFB7AA956DAFB5675 /* HealthInsightsView.swift */; };
 		3CC65E3B1551ED894006CBFB /* HolisticPatternIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A8A95327B2A4EB28FB4D10 /* HolisticPatternIntelligence.swift */; };
 		3CD843C7325EB74F47024FE2 /* EndpointSecurityObserver+EventHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50637D271844BF9E2C597842 /* EndpointSecurityObserver+EventHandling.swift */; };
 		3CF66128200027D38FAC588D /* Highlightr in Frameworks */ = {isa = PBXBuildFile; productRef = D423498831C5861F5C038909 /* Highlightr */; };
@@ -686,6 +687,7 @@
 		4C7A529A2667F6364D656395 /* RemoteServerSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9D43FD55B86BF84B401B5C /* RemoteServerSettingsView.swift */; };
 		4C8A51D6BEE6347D6F696FC3 /* LocalModelRecommendationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E53CCBB36EACEEDD52CBC17B /* LocalModelRecommendationTypes.swift */; };
 		4C9DAD361C93706421E9A89D /* LifeTrackingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60B75DBB338713F2D295F771 /* LifeTrackingSettingsView.swift */; };
+		4CED8575C04ADF6EDA922BA4 /* FocusModeIntelligence+StatusSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C56BD5A3A16BFE649C9DC8C /* FocusModeIntelligence+StatusSync.swift */; };
 		4CF0E351511AC67878F4F8C6 /* SchemaVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A26B67B1AB9F3025FEE1FCD /* SchemaVersions.swift */; };
 		4CFAE957B2DF2FE6662EC62E /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2911664A56A58207367D3FC /* SecureStorage.swift */; };
 		4D1E2AB720250EC5F586D113 /* BlueprintExecutor+StepExecution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62DE0D31409DA5BB1ABB0B51 /* BlueprintExecutor+StepExecution.swift */; };
@@ -777,6 +779,7 @@
 		56416B5B749C53DCD9ABF8A5 /* NotificationPayloadTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AABB4A30E8D88394B584502 /* NotificationPayloadTypes.swift */; };
 		56457C33A6B0B3F6588FCC1B /* KnowledgeSourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8E9DB2095CD2E63C86350D /* KnowledgeSourceManager.swift */; };
 		564E34BD7D4BF1E8145A841F /* LocalModelProviderChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F12D17EF36121477D2546D /* LocalModelProviderChat.swift */; };
+		56772DF2B09C32753D61DD7E /* FocusModeIntelligence+LanguageDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7D2EA319E3C2AB6AF21D0C /* FocusModeIntelligence+LanguageDetection.swift */; };
 		568147FF7569FE9699205F13 /* ProjectKnowledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFB0818D878F283B3234A6D /* ProjectKnowledge.swift */; };
 		568D884225509AF1A8421C0B /* SmartTriggerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DECDD9F2AA7C808068DAF255 /* SmartTriggerEngine.swift */; };
 		56A85D28B5E8D3EED11A75EF /* LifeInsightsAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE5A49A68758127D8A64E42 /* LifeInsightsAnalyzer.swift */; };
@@ -1029,6 +1032,7 @@
 		75E2B22FBB60B26ABECA997E /* AutonomousAgentV3+Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BDEB2AA02F3F213CE132340 /* AutonomousAgentV3+Types.swift */; };
 		760497A0FECC56059B78EE79 /* ExtensionSyncBridgeTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F1C7F07EC4F76B494BE6DC /* ExtensionSyncBridgeTypes.swift */; };
 		764962CEB9F766B33034A710 /* TestGenerator+Templates.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5D4CCAF4CBEF43B45B75F70 /* TestGenerator+Templates.swift */; };
+		764E617C448D307451B8DB8E /* FocusModeIntelligence+LanguageDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7D2EA319E3C2AB6AF21D0C /* FocusModeIntelligence+LanguageDetection.swift */; };
 		76BF0B81039217FCC74532B5 /* SafariExtensionActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA42D2DD59388237D024C130 /* SafariExtensionActions.swift */; };
 		76CDE208BBBFD1C3684A6DB4 /* ActiveMemoryRetrieval.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5AF516C256474DA060B95C /* ActiveMemoryRetrieval.swift */; };
 		76F1BA72DDBA0A0430F17262 /* AgentObservability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347B7549B7C7FF8E8EAA92DF /* AgentObservability.swift */; };
@@ -1487,6 +1491,7 @@
 		AC1CCE5F6A90F076A78DAE11 /* PredictiveJourneyMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD143F72DBC69EBD427C138 /* PredictiveJourneyMapper.swift */; };
 		AC3795774AD417AF841C511F /* BatteryOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDA0136BF5B66976C838A6C /* BatteryOptimizer.swift */; };
 		AC3B640C8722D9523FBFD367 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C01C4C607C750D6280C839D /* SettingsView.swift */; };
+		ACC3246738C2C388AA25358B /* FocusModeIntelligence+StatusSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C56BD5A3A16BFE649C9DC8C /* FocusModeIntelligence+StatusSync.swift */; };
 		ACDC0C0E9D4B4619621418C2 /* AgentCommunicationBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8714BF79EB3CEF3694A28693 /* AgentCommunicationBus.swift */; };
 		ACFFABA96C1BD3C4CABB0508 /* TipKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494E4D469F08A1B62549F29 /* TipKitService.swift */; };
 		AD25D2CF0EDA7120F80FAD39 /* AgentEnhancements.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8971C9CB1631EF6F27458F3 /* AgentEnhancements.swift */; };
@@ -2584,6 +2589,7 @@
 		3C308B84D560FA8B4A711AD3 /* AutonomousImprovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutonomousImprovement.swift; sourceTree = "<group>"; };
 		3C4CDD9209F0E34FA8F6560D /* TheaClipCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaClipCardView.swift; sourceTree = "<group>"; };
 		3C78730D32ADCBCBD4C2C99A /* PredictivePreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictivePreloader.swift; sourceTree = "<group>"; };
+		3C7D2EA319E3C2AB6AF21D0C /* FocusModeIntelligence+LanguageDetection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FocusModeIntelligence+LanguageDetection.swift"; sourceTree = "<group>"; };
 		3C99C11F4BBFF59A307C700D /* DocumentIntelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentIntelligence.swift; sourceTree = "<group>"; };
 		3C9FDB7F3ACBD92C1F195F9E /* AgentEnhancements+Visibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AgentEnhancements+Visibility.swift"; sourceTree = "<group>"; };
 		3CD6635DED3AD58EE2F69EB6 /* WatchComplicationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchComplicationProvider.swift; sourceTree = "<group>"; };
@@ -3067,6 +3073,7 @@
 		9BD18CFEB891FE7709779479 /* ExtendedThinkingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtendedThinkingView.swift; sourceTree = "<group>"; };
 		9BDEB2AA02F3F213CE132340 /* AutonomousAgentV3+Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutonomousAgentV3+Types.swift"; sourceTree = "<group>"; };
 		9C1192AD4066E806EED1771B /* TheaNotificationServiceExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TheaNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C56BD5A3A16BFE649C9DC8C /* FocusModeIntelligence+StatusSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FocusModeIntelligence+StatusSync.swift"; sourceTree = "<group>"; };
 		9C70C04DA109FD80452C3450 /* THEATypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = THEATypes.swift; sourceTree = "<group>"; };
 		9CB67EA67420FBC43C68A26B /* RemoteFileMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFileMessages.swift; sourceTree = "<group>"; };
 		9DAD9BF51CB2C2E1E41635F3 /* KeyboardExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KeyboardExtension.entitlements; sourceTree = "<group>"; };
@@ -4742,12 +4749,14 @@
 				0D94D21F385461EB33084A9C /* FocusModeIntelligence+Communication.swift */,
 				8C622829C026C144D9F1B396 /* FocusModeIntelligence+Configuration.swift */,
 				018C9DCC28AF78C9A9F1F012 /* FocusModeIntelligence+EventHandlers.swift */,
+				3C7D2EA319E3C2AB6AF21D0C /* FocusModeIntelligence+LanguageDetection.swift */,
 				0F22503DCE5ACECB40BD3B10 /* FocusModeIntelligence+Learning.swift */,
 				C2039B22B909F743E832A576 /* FocusModeIntelligence+Monitoring.swift */,
 				1D84A92E12B1BC58712AB2F6 /* FocusModeIntelligence+Persistence.swift */,
 				068D4894411AA19CE2DA302A /* FocusModeIntelligence+Prediction.swift */,
 				E457A55D61E528E40A7C1955 /* FocusModeIntelligence+Reliability.swift */,
 				2A77D387CC5E5DD170256C6B /* FocusModeIntelligence+SessionAnalytics.swift */,
+				9C56BD5A3A16BFE649C9DC8C /* FocusModeIntelligence+StatusSync.swift */,
 				AFEAED359AA78ECF8BDC0DCD /* FocusModeIntelligence+UrgencyAssessment.swift */,
 				290923DAE98B50F9E1709BA2 /* FocusModeIntelligence+VIP.swift */,
 				4FD288E2F8C0F9E0BD8C5A90 /* FocusModeModels.swift */,
@@ -8017,12 +8026,14 @@
 				6A6CF391A11418DAC03B6AFF /* FocusModeIntelligence+Communication.swift in Sources */,
 				FDEE9C4F8B7015E458EFD21D /* FocusModeIntelligence+Configuration.swift in Sources */,
 				3235AB27B0DEBD513D25661E /* FocusModeIntelligence+EventHandlers.swift in Sources */,
+				764E617C448D307451B8DB8E /* FocusModeIntelligence+LanguageDetection.swift in Sources */,
 				376FF3865AAF7968B9E4174A /* FocusModeIntelligence+Learning.swift in Sources */,
 				48632F6D3A2C3279D745B528 /* FocusModeIntelligence+Monitoring.swift in Sources */,
 				7013087753F3A5AAA5EF9CE8 /* FocusModeIntelligence+Persistence.swift in Sources */,
 				C5B5B851F6CB4F190EF1F101 /* FocusModeIntelligence+Prediction.swift in Sources */,
 				E5D32BF4006E0395C8584E60 /* FocusModeIntelligence+Reliability.swift in Sources */,
 				4E6940CAB07296463AD337CF /* FocusModeIntelligence+SessionAnalytics.swift in Sources */,
+				4CED8575C04ADF6EDA922BA4 /* FocusModeIntelligence+StatusSync.swift in Sources */,
 				DC8E7BBC48CDF744EEF803C2 /* FocusModeIntelligence+UrgencyAssessment.swift in Sources */,
 				FBB77FF3A1F892DE83F607CE /* FocusModeIntelligence+VIP.swift in Sources */,
 				6FF7CB82CB6340306A0B8B03 /* FocusModeIntelligence.swift in Sources */,
@@ -9127,12 +9138,14 @@
 				28096F88E29D31148FA1FCAB /* FocusModeIntelligence+Communication.swift in Sources */,
 				5B6BB56E1D9949FC4C2505C4 /* FocusModeIntelligence+Configuration.swift in Sources */,
 				830E1E7CDABEA4F16758EE16 /* FocusModeIntelligence+EventHandlers.swift in Sources */,
+				56772DF2B09C32753D61DD7E /* FocusModeIntelligence+LanguageDetection.swift in Sources */,
 				1D77CBFC7CCB355C52A04CB9 /* FocusModeIntelligence+Learning.swift in Sources */,
 				6ABF25AFA201C5D427FA57E5 /* FocusModeIntelligence+Monitoring.swift in Sources */,
 				5BB9CC155C54EAD25A29B5A5 /* FocusModeIntelligence+Persistence.swift in Sources */,
 				B387C726B0DEAD72463D9268 /* FocusModeIntelligence+Prediction.swift in Sources */,
 				F6696C988C78E5C39F94E2A0 /* FocusModeIntelligence+Reliability.swift in Sources */,
 				C52E85B4D69AEE745343183E /* FocusModeIntelligence+SessionAnalytics.swift in Sources */,
+				ACC3246738C2C388AA25358B /* FocusModeIntelligence+StatusSync.swift in Sources */,
 				781C595BD6EA492E2ED35C5D /* FocusModeIntelligence+UrgencyAssessment.swift in Sources */,
 				6E0275F6BD165B8ECC03DC98 /* FocusModeIntelligence+VIP.swift in Sources */,
 				EAB79EC3C7DF5E4AB1BA07EB /* FocusModeIntelligence.swift in Sources */,
@@ -9171,6 +9184,7 @@
 				188D6B2F3AA94642C8CE2017 /* HealthDataSync.swift in Sources */,
 				E50F22AC53D05E7A7F499B2C /* HealthGoalsView.swift in Sources */,
 				F9F4340E0CB504E660132406 /* HealthInsightsDetailView.swift in Sources */,
+				3CC0900F9E5F3B978A5D2FDC /* HealthInsightsView.swift in Sources */,
 				3A508EED3AC7AF163574829B /* HealthIntelligence.swift in Sources */,
 				7E9AF99ACC84DF7E7DA073F5 /* HealthKitService.swift in Sources */,
 				EE4E4E84B075C3A8A480DE62 /* HealthModels.swift in Sources */,

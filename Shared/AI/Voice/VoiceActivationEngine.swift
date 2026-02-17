@@ -237,8 +237,8 @@ final class VoiceActivationEngine {
         for try await chunk in stream {
             switch chunk.type {
             case let .delta(text):
-            case .thinkingDelta: break
                 response += text
+            case .thinkingDelta: break
             case .complete:
                 break
             case let .error(error):

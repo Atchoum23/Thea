@@ -153,8 +153,8 @@ final class ResilientAIFallbackChain {
         for try await response in responseStream {
             switch response.type {
             case let .delta(text):
-            case .thinkingDelta: break
                 result += text
+            case .thinkingDelta: break
             case let .complete(msg):
                 result = msg.content.textValue
             case .error:
@@ -186,8 +186,8 @@ final class ResilientAIFallbackChain {
         for try await response in responseStream {
             switch response.type {
             case let .delta(text):
-            case .thinkingDelta: break
                 result += text
+            case .thinkingDelta: break
             case let .complete(msg):
                 result = msg.content.textValue
             case .error:

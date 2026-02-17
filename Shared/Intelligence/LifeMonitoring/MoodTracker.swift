@@ -25,7 +25,7 @@ enum MoodSource: String, Codable, Sendable {
     case timePattern
 }
 
-enum MoodTrend: String, Sendable {
+enum MoodTrendDirection: String, Sendable {
     case improving, stable, declining
 }
 
@@ -154,7 +154,7 @@ final class MoodTracker {
     var currentMood: Double { currentMoodScore }
 
     /// Trend over the last N hours (default 6)
-    func moodTrend(hours: Int = 6) -> MoodTrend {
+    func moodTrend(hours: Int = 6) -> MoodTrendDirection {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = samples.filter { $0.timestamp >= cutoff }
         guard recent.count >= 2 else { return .stable }

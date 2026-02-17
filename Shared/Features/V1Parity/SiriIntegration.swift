@@ -278,8 +278,8 @@ public final class SiriIntegrationService {
             for try await chunk in stream {
                 switch chunk.type {
                 case .delta(let text):
-            case .thinkingDelta: break
                     response += text
+                case .thinkingDelta: break
                 case .complete(let message):
                     response = message.content.textValue
                 case .error(let error):

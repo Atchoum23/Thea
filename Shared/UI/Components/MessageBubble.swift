@@ -129,7 +129,7 @@ struct MessageBubble: View {
     private func thinkingTraceView(_ trace: String) -> some View {
         DisclosureGroup(isExpanded: $isThinkingExpanded) {
             Text(trace)
-                .font(.theaCaption)
+                .font(.theaCaption1)
                 .foregroundStyle(.secondary)
                 .textSelection(.enabled)
                 .padding(.top, TheaSpacing.xs)

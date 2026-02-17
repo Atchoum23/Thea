@@ -455,8 +455,8 @@ public final class LifeAssistantService {
         for try await response in stream {
             switch response.type {
             case .delta(let text):
-            case .thinkingDelta: break
                 result += text
+            case .thinkingDelta: break
             case .complete(let msg):
                 result = msg.content.textValue
             case .error(let error):

@@ -417,8 +417,8 @@ public final class LiveAutoCorrect {
             for try await response in stream {
                 switch response.type {
                 case .delta(let text):
-            case .thinkingDelta: break
                     corrected += text
+                case .thinkingDelta: break
                 case .complete(let msg):
                     corrected = msg.content.textValue
                 case .error(let error):
