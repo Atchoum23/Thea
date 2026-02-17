@@ -4,301 +4,351 @@
     "Chat" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Chat" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Chat" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Discussion" } }
       }
     },
     "Projects" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Projects" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Projects" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Projets" } }
       }
     },
     "Knowledge" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Knowledge" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Knowledge" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Connaissances" } }
       }
     },
     "Financial" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Financial" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Financial" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Finances" } }
       }
     },
     "Settings" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Réglages" } }
       }
     },
     "Conversations" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Conversations" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Conversations" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Conversations" } }
       }
     },
     "New Conversation" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "New Conversation" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "New Conversation" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Nouvelle conversation" } }
       }
     },
     "Cancel" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Annuler" } }
       }
     },
     "Delete" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Supprimer" } }
       }
     },
     "Save" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Enregistrer" } }
       }
     },
     "Rename" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rename" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rename" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Renommer" } }
       }
     },
     "Export" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Export" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Export" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Exporter" } }
       }
     },
     "Search conversations" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search conversations" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search conversations" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Rechercher des conversations" } }
       }
     },
     "Search messages…" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search messages…" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Search messages…" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Rechercher des messages…" } }
       }
     },
     "Message Thea..." : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Message Thea..." } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Message Thea..." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Envoyer un message à Thea..." } }
       }
     },
     "Pinned" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pinned" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pinned" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Épinglé" } }
       }
     },
     "Today" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Today" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Today" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aujourd'hui" } }
       }
     },
     "Yesterday" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Yesterday" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Yesterday" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Hier" } }
       }
     },
     "Previous 7 Days" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Previous 7 Days" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Previous 7 Days" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "7 derniers jours" } }
       }
     },
     "Older" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Older" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Older" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Plus ancien" } }
       }
     },
     "Recent" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Recent" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Recent" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Récent" } }
       }
     },
     "No Conversations" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No Conversations" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No Conversations" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aucune conversation" } }
       }
     },
     "No Results" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "No Results" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No Results" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aucun résultat" } }
       }
     },
     "Thinking..." : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Thinking..." } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Thinking..." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Réflexion en cours…" } }
       }
     },
     "Copy text" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy text" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy text" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Copier le texte" } }
       }
     },
     "Edit & resend" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit & resend" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit & resend" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Modifier et renvoyer" } }
       }
     },
     "Regenerate" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Regenerate" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Regenerate" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Régénérer" } }
       }
     },
     "Continue from here" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Continue from here" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Continue from here" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Continuer à partir d'ici" } }
       }
     },
     "Read aloud" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Read aloud" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Read aloud" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Lire à voix haute" } }
       }
     },
     "Share" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Partager" } }
       }
     },
     "Pin" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pin" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pin" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Épingler" } }
       }
     },
     "Unpin" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unpin" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unpin" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Désépingler" } }
       }
     },
     "Mark as Read" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mark as Read" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mark as Read" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Marquer comme lu" } }
       }
     },
     "Mark as Unread" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mark as Unread" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mark as Unread" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Marquer comme non lu" } }
       }
     },
     "Archive" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Archive" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Archive" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Archiver" } }
       }
     },
     "Code" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Code" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Code" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Code" } }
       }
     },
     "Migration" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Migration" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Migration" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Migration" } }
       }
     },
     "THEA" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "THEA" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "THEA" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "THEA" } }
       }
     },
     "System Prompt" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "System Prompt" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "System Prompt" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Invite système" } }
       }
     },
     "Clear" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Effacer" } }
       }
     },
     "Create" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Create" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Create" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Créer" } }
       }
     },
     "Copied" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copied" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copied" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Copié" } }
       }
     },
     "Copy" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Copier" } }
       }
     },
     "Voice" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Voice" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Voice" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Voix" } }
       }
     },
     "Privacy" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Privacy" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Privacy" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Confidentialité" } }
       }
     },
     "Sync" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sync" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sync" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Synchronisation" } }
       }
     },
     "Tap to speak" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to speak" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to speak" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Appuyer pour parler" } }
       }
     },
     "Listening..." : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Listening..." } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Listening..." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Écoute en cours…" } }
       }
     },
     "Tell me more" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tell me more" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tell me more" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Dis m'en plus" } }
       }
     },
     "Thanks" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Thanks" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Thanks" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Merci" } }
       }
     }
   },
