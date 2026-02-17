@@ -521,30 +521,37 @@ import Foundation
 
         private init() {}
 
+        /// No-op on non-macOS platforms.
         public func discoverFromRegistry() async {
             // Not supported on iOS
         }
 
+        /// Throws; MCP server installation requires macOS.
         public func install(_: MCPRegistryServer) async throws {
             throw MCPServerError.executionFailed("MCP servers are not supported on this platform")
         }
 
+        /// Throws; MCP server execution requires macOS.
         public func start(_: MCPInstalledServer) async throws {
             throw MCPServerError.executionFailed("MCP servers are not supported on this platform")
         }
 
+        /// No-op on non-macOS platforms.
         public func stop(_: String) {
             // No-op on iOS
         }
 
+        /// No-op on non-macOS platforms.
         public func stopAll() {
             // No-op on iOS
         }
 
+        /// Throws; MCP tool execution requires macOS.
         public func executeTool(toolId _: String, arguments _: [String: Any]) async throws -> MCPServerToolResult {
             throw MCPServerError.executionFailed("MCP servers are not supported on this platform")
         }
 
+        /// Throws; exporting server config requires macOS.
         public func exportToClaude(_: MCPInstalledServer) throws {
             throw MCPServerError.executionFailed("MCP servers are not supported on this platform")
         }

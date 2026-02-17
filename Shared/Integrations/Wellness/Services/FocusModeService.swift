@@ -13,6 +13,7 @@ public actor FocusModeService: FocusModeServiceProtocol {
 
     // MARK: - Session Management
 
+    /// Starts a new focus session with the given mode and duration in minutes.
     public func startSession(mode: WellnessFocusMode, duration: Int) async throws -> FocusSession {
         guard activeSession == nil else {
             throw WellnessError.sessionAlreadyActive
@@ -34,6 +35,7 @@ public actor FocusModeService: FocusModeServiceProtocol {
         return session
     }
 
+    /// Ends the active focus session, recording whether it was completed or interrupted.
     public func endSession(completed: Bool) async throws -> FocusSession {
         guard var session = activeSession else {
             throw WellnessError.sessionNotFound
@@ -59,16 +61,19 @@ public actor FocusModeService: FocusModeServiceProtocol {
         return session
     }
 
+    /// Returns the currently active focus session, if any.
     public func getActiveSession() async -> FocusSession? {
         activeSession
     }
 
+    /// Returns the most recent focus sessions up to the given limit.
     public func getSessionHistory(limit: Int = 20) async -> [FocusSession] {
         Array(sessionHistory.prefix(limit))
     }
 
     // MARK: - Ambient Audio
 
+    /// Starts looping playback of the specified ambient audio at the given volume (0.0-1.0).
     public func playAmbientAudio(_ audio: AmbientAudio, volume: Double) async throws {
         await stopAmbientAudio()
 
@@ -89,6 +94,7 @@ public actor FocusModeService: FocusModeServiceProtocol {
         audioPlayer = player
     }
 
+    /// Stops any currently playing ambient audio.
     public func stopAmbientAudio() async {
         audioPlayer?.stop()
         audioPlayer = nil
@@ -102,6 +108,7 @@ public actor FocusModeService: FocusModeServiceProtocol {
 
     // MARK: - Statistics
 
+    /// Computes session statistics (count, completion rate, total minutes) for the given date range.
     public func getSessionStats(for period: DateInterval) async -> SessionStats {
         let sessionsInPeriod = sessionHistory.filter { session in
             session.startDate >= period.start && session.startDate <= period.end
@@ -124,11 +131,13 @@ public actor FocusModeService: FocusModeServiceProtocol {
 
     // MARK: - Observer Management
 
+    /// Registers an observer for focus session and ambient audio change notifications.
     public func addObserver(_ observer: WellnessObserver) {
         observers.append(WeakObserver(observer))
         cleanupObservers()
     }
 
+    /// Removes a previously registered observer.
     public func removeObserver(_ observer: WellnessObserver) {
         observers.removeAll { $0.value === observer }
     }

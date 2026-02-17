@@ -16,12 +16,14 @@ public actor AssessmentService: AssessmentServiceProtocol {
 
     // MARK: - Assessment Management
 
+    /// Creates and tracks a new assessment of the given type.
     public func startAssessment(_ type: AssessmentType) async throws -> AssessmentProgress {
         let progress = AssessmentProgress(assessmentType: type)
         activeProgress[progress.id] = progress
         return progress
     }
 
+    /// Records a question response and advances the assessment progress.
     public func submitResponse(assessmentID: UUID, response: QuestionResponse) async throws {
         guard var progress = activeProgress[assessmentID] else {
             throw AssessmentError.assessmentNotFound
@@ -38,6 +40,7 @@ public actor AssessmentService: AssessmentServiceProtocol {
         activeProgress[assessmentID] = progress
     }
 
+    /// Finalizes a completed assessment by scoring responses and generating an interpretation.
     public func completeAssessment(assessmentID: UUID) async throws -> Assessment {
         guard let progress = activeProgress[assessmentID], progress.isCompleted else {
             throw AssessmentError.assessmentNotFound
@@ -77,14 +80,17 @@ public actor AssessmentService: AssessmentServiceProtocol {
         return assessment
     }
 
+    /// Returns all completed assessments sorted by date descending.
     public func fetchCompletedAssessments() async throws -> [Assessment] {
         Array(completedAssessments.values).sorted { $0.completedDate > $1.completedDate }
     }
 
+    /// Returns the in-progress state for the given assessment, if it exists.
     public func fetchProgress(assessmentID: UUID) async throws -> AssessmentProgress? {
         activeProgress[assessmentID]
     }
 
+    /// Returns the question set for the given assessment type.
     public func getQuestions(for type: AssessmentType) async throws -> [AssessmentQuestion] {
         switch type {
         case .emotionalIntelligence:
@@ -105,6 +111,7 @@ public actor AssessmentService: AssessmentServiceProtocol {
 public actor AssessmentScoringEngine: AssessmentScoringProtocol {
     public init() {}
 
+    /// Calculates the overall and sub-dimension scores for the given assessment type.
     public func calculateScore(
         type: AssessmentType,
         responses: [QuestionResponse]
@@ -125,6 +132,7 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
         }
     }
 
+    /// Produces a human-readable interpretation of the assessment score.
     public func generateInterpretation(
         type: AssessmentType,
         score: AssessmentScore
@@ -157,6 +165,7 @@ public actor AssessmentScoringEngine: AssessmentScoringProtocol {
         }
     }
 
+    /// Returns actionable recommendations based on the assessment type and score.
     public func generateRecommendations(
         type: AssessmentType,
         score: AssessmentScore

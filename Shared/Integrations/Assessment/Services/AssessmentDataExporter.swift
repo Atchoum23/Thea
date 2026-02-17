@@ -290,6 +290,7 @@ public final class AssessmentExportCoordinator: ObservableObject {
 
     public init() {}
 
+    /// Exports a single assessment in the specified format and stores the result.
     public func exportSingle(_ assessment: Assessment, format: AssessmentDataExporter.ExportFormat) async {
         isExporting = true
         errorMessage = nil
@@ -304,6 +305,7 @@ public final class AssessmentExportCoordinator: ObservableObject {
         isExporting = false
     }
 
+    /// Exports multiple assessments in the specified format and stores the result.
     public func exportMultiple(_ assessments: [Assessment], format: AssessmentDataExporter.ExportFormat) async {
         isExporting = true
         errorMessage = nil
@@ -318,6 +320,7 @@ public final class AssessmentExportCoordinator: ObservableObject {
         isExporting = false
     }
 
+    /// Saves exported content to a file with the given name.
     public func saveToFile(_ content: String, filename: String) throws {
         // Would implement file saving to user's directory
         // Mock implementation
@@ -325,6 +328,7 @@ public final class AssessmentExportCoordinator: ObservableObject {
         print("Content length: \(content.count) characters")
     }
 
+    /// Prepares content for sharing via the system share sheet.
     public func shareContent(_ content: String) {
         // Would implement system share sheet
         exportedContent = content
