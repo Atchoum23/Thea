@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import OSLog
 import UserNotifications
 #if os(macOS)
 import AppKit
@@ -18,6 +19,8 @@ import UIKit
 #endif
 
 // MARK: - Response Notification Handler
+
+private let notifLogger = Logger(subsystem: "ai.thea.app", category: "ResponseNotificationHandler")
 
 @MainActor
 final class ResponseNotificationHandler: ObservableObject {
@@ -58,7 +61,7 @@ final class ResponseNotificationHandler: ObservableObject {
             isAuthorized = granted
             return granted
         } catch {
-            print("❌ Notification authorization failed: \(error)")
+            notifLogger.error("Notification authorization failed: \(error.localizedDescription)")
             return false
         }
     }
@@ -153,7 +156,7 @@ final class ResponseNotificationHandler: ObservableObject {
             try await center.add(request)
             updateBadgeCount()
         } catch {
-            print("❌ Failed to send response notification: \(error)")
+            notifLogger.error("Failed to send response notification: \(error.localizedDescription)")
         }
     }
 
@@ -192,7 +195,7 @@ final class ResponseNotificationHandler: ObservableObject {
             try await center.add(request)
             updateBadgeCount()
         } catch {
-            print("❌ Failed to send attention notification: \(error)")
+            notifLogger.error("Failed to send attention notification: \(error.localizedDescription)")
         }
     }
 
@@ -223,7 +226,7 @@ final class ResponseNotificationHandler: ObservableObject {
         do {
             try await center.add(request)
         } catch {
-            print("❌ Failed to send task notification: \(error)")
+            notifLogger.error("Failed to send task notification: \(error.localizedDescription)")
         }
     }
 
@@ -353,7 +356,11 @@ final class ResponseNotificationDelegate: NSObject, UNUserNotificationCenterDele
 
     private func regenerateResponse(for conversationId: UUID) async {
         if let conversation = ChatManager.shared.conversations.first(where: { $0.id == conversationId }) {
-            try? await ChatManager.shared.regenerateLastMessage(in: conversation)
+            do {
+                try await ChatManager.shared.regenerateLastMessage(in: conversation)
+            } catch {
+                notifLogger.error("Failed to regenerate message from notification action: \(error.localizedDescription)")
+            }
         }
     }
 }
