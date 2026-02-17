@@ -98,4 +98,19 @@ public final class EnergyAdaptiveThrottler {
         throttleReason = reason
         logger.info("Energy throttle: \(multiplier)x (\(reason))")
     }
+
+    // MARK: - Memory Pressure Integration
+
+    /// Called from the macOS DispatchSource memory pressure handler.
+    /// Temporarily raises the interval multiplier to reduce polling load.
+    public func applyMemoryPressure(isCritical: Bool) {
+        let multiplier: Double = isCritical ? 5.0 : 3.0
+        let reason = isCritical ? "Critical memory pressure" : "Memory pressure warning"
+        setMultiplier(multiplier, reason: reason)
+        // Auto-restore after 60s — thermalState check will normalise if pressure eases
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(60))
+            await self?.updateMultiplier()
+        }
+    }
 }

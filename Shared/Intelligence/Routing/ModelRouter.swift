@@ -32,12 +32,14 @@ public final class ModelRouter: ObservableObject {
 
     // MARK: - Configuration
 
-    /// Weight for quality vs cost vs speed (should sum to 1.0)
+    /// Weight for quality vs cost vs speed (should sum to 1.0).
+    /// Initialized from TheaConfig if available; defaults to 0.5/0.3/0.2.
     public var qualityWeight: Double = 0.5
     public var costWeight: Double = 0.3
     public var speedWeight: Double = 0.2
 
-    /// Exploration rate for trying different models
+    /// Exploration rate for trying different models.
+    /// Configurable via TheaConfig.ai; defaults to 0.1.
     public var explorationRate: Double = 0.1
 
     /// Enable adaptive routing based on learned performance (vs static rules)
@@ -155,15 +157,21 @@ extension ModelRouter {
     private func getCandidateModels(for taskType: TaskType) -> [AIModel] {
         let allModels = dynamicModels ?? AIModel.allKnownModels
 
+        // Filter local models by hardware capability — skip models that won't fit in RAM
+        let capabilityService = SystemCapabilityService.shared
+        let memoryFiltered = allModels.filter { model in
+            capabilityService.canRunLocalModel(model)
+        }
+
         // Filter by required capabilities
         let requiredCapabilities = taskType.preferredCapabilities
 
-        let suitable = allModels.filter { model in
+        let suitable = memoryFiltered.filter { model in
             !requiredCapabilities.isDisjoint(with: model.capabilities)
         }
 
-        // If we have suitable models, use them; otherwise fall back to all models
-        return suitable.isEmpty ? allModels : suitable
+        // If we have suitable models, use them; otherwise fall back to all memory-filtered models
+        return suitable.isEmpty ? memoryFiltered : suitable
     }
 
     // MARK: - Scoring

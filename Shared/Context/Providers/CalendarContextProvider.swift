@@ -10,6 +10,8 @@ public actor CalendarContextProvider: ContextProvider {
     public let displayName = "Calendar"
 
     private let logger = Logger(subsystem: "app.thea", category: "CalendarProvider")
+    // nonisolated(unsafe): EKEventStore is thread-safe but lacks Sendable conformance;
+    // initialized once in actor init, then used only from within actor-isolated methods
     nonisolated(unsafe) private let eventStore = EKEventStore()
 
     private var state: ContextProviderState = .idle

@@ -270,7 +270,30 @@ struct TheamacOSApp: App {
             BackgroundServiceMonitor.shared.startMonitoring()
             logger.info("BackgroundServiceMonitor started")
         }
+
+        // macOS memory pressure handler — clears URL cache and non-essential resources
+        // under OS-level memory warning/critical pressure signals.
+        let memorySource = DispatchSource.makeMemoryPressureSource(
+            eventMask: [.warning, .critical],
+            queue: .main
+        )
+        memorySource.setEventHandler {
+            let event = memorySource.mask
+            let level = event.contains(.critical) ? "critical" : "warning"
+            logger.warning("⚠️ Memory pressure (\(level, privacy: .public)) — purging URL cache")
+            URLCache.shared.removeAllCachedResponses()
+            // Notify EnergyAdaptiveThrottler to increase throttling under memory pressure
+            Task { @MainActor in
+                EnergyAdaptiveThrottler.shared.applyMemoryPressure(isCritical: event.contains(.critical))
+            }
+        }
+        memorySource.resume()
+        // Store source in a nonisolated(unsafe) static so it stays alive
+        TheamacOSApp.memoryPressureSource = memorySource
     }
+
+    /// Retained memory pressure DispatchSource — must stay alive for handler to fire.
+    nonisolated(unsafe) private static var memoryPressureSource: DispatchSourceMemoryPressure?
 
     private func configureWindow() {
         guard let window = NSApp.windows.first else { return }

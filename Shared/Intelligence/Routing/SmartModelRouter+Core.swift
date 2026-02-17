@@ -18,7 +18,8 @@ public final class SmartModelRouter: ObservableObject {
 
     @Published public private(set) var availableModels: [RouterModelCapability] = []
     @Published public private(set) var usageByModel: [String: ModelUsage] = [:]
-    @Published public private(set) var dailyBudget: Double = 10.0  // USD
+    /// Daily API budget in USD — initialized from SystemCapabilityService for hardware-aware scaling.
+    @Published public private(set) var dailyBudget: Double = SystemCapabilityService.shared.recommendedDailyBudget
     @Published public private(set) var dailySpent: Double = 0.0
     @Published public private(set) var defaultStrategy: RoutingStrategy = .balanced
 
@@ -288,6 +289,13 @@ public final class SmartModelRouter: ObservableObject {
     public func resetDailySpending() {
         dailySpent = 0
         logger.info("Reset daily spending")
+    }
+
+    /// Update the daily budget cap.
+    /// - Parameter amount: New budget in USD.
+    public func updateBudget(_ amount: Double) {
+        dailyBudget = amount
+        logger.info("Daily budget updated to $\(String(format: "%.2f", amount))")
     }
 
     // MARK: - Statistics

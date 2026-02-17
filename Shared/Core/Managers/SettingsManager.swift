@@ -601,6 +601,21 @@ extension SettingsManager {
     }
 }
 
+// MARK: - Response Styles (computed from built-ins + custom)
+
+extension SettingsManager {
+    /// All available response styles: built-in defaults merged with user-created styles.
+    var allResponseStyles: [ResponseStyle] {
+        ResponseStyle.builtInStyles + customResponseStyles
+    }
+
+    /// Returns the currently selected style, or nil if none is selected.
+    var activeResponseStyle: ResponseStyle? {
+        guard let id = selectedResponseStyleID else { return nil }
+        return allResponseStyles.first { $0.id == id }
+    }
+}
+
 // MARK: - API Key Management (Keychain - NEVER synced to iCloud KVS)
 
 extension SettingsManager {
