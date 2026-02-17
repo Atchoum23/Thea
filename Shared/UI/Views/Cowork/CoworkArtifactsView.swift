@@ -170,8 +170,8 @@
                             .font(.caption2)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.2))
-                            .foregroundStyle(.orange)
+                            .background(Color.theaWarning.opacity(0.2))
+                            .foregroundStyle(.theaWarning)
                             .cornerRadius(2)
                     }
                 }
@@ -309,12 +309,12 @@
 
         private func colorForType(_ type: CoworkArtifact.ArtifactType) -> Color {
             switch type {
-            case .document: .blue
-            case .spreadsheet: .green
-            case .presentation: .orange
+            case .document: .theaInfo
+            case .spreadsheet: .theaSuccess
+            case .presentation: .theaWarning
             case .image: .purple
             case .code: .cyan
-            case .data: .yellow
+            case .data: .theaWarning
             case .archive: .brown
             case .other: .secondary
             }

@@ -279,10 +279,10 @@
                         if !manager.lastError.isEmpty {
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(.theaError)
                                     .accessibilityHidden(true)
                                 Text(manager.lastError)
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(.theaError)
                             }
                             .padding()
                             .background(Color.theaError.opacity(0.1))
@@ -309,7 +309,7 @@
                 // Command line
                 HStack {
                     Text("$")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.theaSuccess)
                         .fontWeight(.bold)
                         .accessibilityHidden(true)
                     Text(command.command)
@@ -321,11 +321,11 @@
 
                     if command.wasSuccessful {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+                            .foregroundStyle(.theaSuccess)
                             .accessibilityLabel("Succeeded")
                     } else {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.red)
+                            .foregroundStyle(.theaError)
                             .accessibilityLabel("Failed")
                     }
                 }
@@ -340,7 +340,7 @@
                 if !command.errorOutput.isEmpty {
                     Text(command.errorOutput)
                         .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.red)
+                        .foregroundStyle(.theaError)
                         .padding(.leading, 16)
                 }
 

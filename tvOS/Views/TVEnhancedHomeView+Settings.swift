@@ -62,7 +62,7 @@ struct TVEnhancedSettingsView: View {
                     NavigationLink {
                         Text("Indexers")
                     } label: {
-                        SettingsRow(icon: "magnifyingglass", color: .orange, title: "Indexers", subtitle: "Torrent sources")
+                        SettingsRow(icon: "magnifyingglass", color: .theaWarning, title: "Indexers", subtitle: "Torrent sources")
                     }
                 }
 
@@ -85,13 +85,13 @@ struct TVEnhancedSettingsView: View {
                     NavigationLink {
                         TVHealthSettingsView()
                     } label: {
-                        SettingsRow(icon: "heart.fill", color: .red, title: "Health Monitor", subtitle: "Service status & alerts")
+                        SettingsRow(icon: "heart.fill", color: .theaError, title: "Health Monitor", subtitle: "Service status & alerts")
                     }
 
                     NavigationLink {
                         Text("iCloud Sync")
                     } label: {
-                        SettingsRow(icon: "icloud.fill", color: .blue, title: "iCloud Sync", subtitle: "Sync across devices")
+                        SettingsRow(icon: "icloud.fill", color: .theaInfo, title: "iCloud Sync", subtitle: "Sync across devices")
                     }
                 }
             }
@@ -191,7 +191,7 @@ struct TVStreamingSettingsView: View {
                 ForEach(streamingService.accounts) { account in
                     HStack {
                         Image(systemName: account.appID.iconName)
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(.theaInfo)
                         VStack(alignment: .leading) {
                             Text(account.appID.displayName)
                             Text(account.accountName)

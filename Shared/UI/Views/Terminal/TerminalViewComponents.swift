@@ -77,12 +77,12 @@
                 ForEach(window.tabs) { tab in
                     HStack {
                         Image(systemName: tab.isBusy ? "play.fill" : "terminal")
-                            .foregroundStyle(tab.isBusy ? .green : .secondary)
+                            .foregroundStyle(tab.isBusy ? .theaSuccess : .secondary)
                             .accessibilityHidden(true)
                         Text("Tab \(tab.index)")
                         if tab.isBusy {
                             Text("(busy)")
-                                .foregroundStyle(.orange)
+                                .foregroundStyle(.theaWarning)
                         }
                         Spacer()
                         Text(tab.tty)
@@ -147,7 +147,7 @@
                 }
 
                 Text("$")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(.theaSuccess)
                     .fontWeight(.bold)
                     .accessibilityHidden(true)
 

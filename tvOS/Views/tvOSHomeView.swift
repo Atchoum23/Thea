@@ -153,7 +153,7 @@ struct tvOSChatView: View {
             HStack(spacing: TVSpacing.lg) {
                 Image(systemName: isListening ? "waveform" : "mic.fill")
                     .font(.system(size: 36))
-                    .foregroundStyle(isListening ? .red : Color.tvPrimary)
+                    .foregroundStyle(isListening ? .theaError : Color.tvPrimary)
                     .symbolEffect(.variableColor, isActive: isListening)
 
                 VStack(alignment: .leading, spacing: TVSpacing.xs) {
@@ -169,7 +169,7 @@ struct tvOSChatView: View {
             }
             .padding(TVSpacing.xl)
             .frame(maxWidth: 800)
-            .background(isListening ? AnyShapeStyle(Color.red.opacity(0.15)) : AnyShapeStyle(.ultraThinMaterial))
+            .background(isListening ? AnyShapeStyle(Color.theaError.opacity(0.15)) : AnyShapeStyle(.ultraThinMaterial))
             .clipShape(RoundedRectangle(cornerRadius: TVCornerRadius.xl))
         }
         .buttonStyle(.plain)
