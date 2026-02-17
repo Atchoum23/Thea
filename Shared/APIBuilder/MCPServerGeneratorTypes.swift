@@ -215,6 +215,7 @@ public enum MCPGeneratorError: Error, LocalizedError, Sendable {
 
 // MARK: - MCP Protocol Types
 
+/// An actor that implements the Model Context Protocol server interface for tool-based AI interactions.
 public protocol MCPServer: Actor {
     var serverMetadata: MCPGeneratedServerMetadata { get }
     func start() async throws

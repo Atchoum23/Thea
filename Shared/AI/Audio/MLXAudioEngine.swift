@@ -36,7 +36,25 @@ final class MLXAudioEngine {
     private(set) var isLoadingSTT = false
     private(set) var lastError: Error?
 
-    private init() {}
+    private var memoryPressureSource: DispatchSourceMemoryPressure?
+
+    private init() {
+        setupMemoryPressureHandler()
+    }
+
+    private func setupMemoryPressureHandler() {
+        let source = DispatchSource.makeMemoryPressureSource(eventMask: [.warning, .critical], queue: .main)
+        source.setEventHandler { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.logger.warning("MLXAudioEngine: Memory pressure detected, unloading models")
+                self.unloadTTSModel()
+                self.unloadSTTModel()
+            }
+        }
+        source.resume()
+        memoryPressureSource = source
+    }
 
     // MARK: - TTS Model Loading
 

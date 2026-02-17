@@ -12,6 +12,7 @@ import os.log
 
 // MARK: - Clipboard Monitor Protocol
 
+/// Delegate that receives notifications when the system clipboard content changes.
 public protocol ClipboardMonitorDelegate: AnyObject, Sendable {
     nonisolated func clipboardMonitor(_ _monitor: ClipboardMonitor, didCapture content: MonitoredClipboardContent)
 }

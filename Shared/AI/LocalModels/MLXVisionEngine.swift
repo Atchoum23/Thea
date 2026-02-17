@@ -26,8 +26,24 @@ final class MLXVisionEngine {
     private(set) var lastError: Error?
 
     private let modelFactory = VLMModelFactory.shared
+    private var memoryPressureSource: DispatchSourceMemoryPressure?
 
-    private init() {}
+    private init() {
+        setupMemoryPressureHandler()
+    }
+
+    private func setupMemoryPressureHandler() {
+        let source = DispatchSource.makeMemoryPressureSource(eventMask: [.warning, .critical], queue: .main)
+        source.setEventHandler { [weak self] in
+            Task { @MainActor in
+                guard let self, !self.isLoading else { return }
+                print("⚠️ MLXVisionEngine: Memory pressure detected, unloading model")
+                self.unloadModel()
+            }
+        }
+        source.resume()
+        memoryPressureSource = source
+    }
 
     // MARK: - Model Loading
 

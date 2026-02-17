@@ -96,10 +96,12 @@ public final class WebSocketConnection: ObservableObject, @unchecked Sendable {
 
 // MARK: - Interceptors
 
+/// Intercepts outgoing URL requests before they are sent, allowing header injection or request modification.
 public protocol RequestInterceptor: Sendable {
     func intercept(_ request: URLRequest) async -> URLRequest
 }
 
+/// Intercepts incoming response data before it reaches the caller, allowing transformation or logging.
 public protocol ResponseInterceptor: Sendable {
     func intercept(_ data: Data, response: URLResponse) async -> Data
 }

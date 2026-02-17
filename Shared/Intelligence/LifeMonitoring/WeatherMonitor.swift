@@ -25,6 +25,7 @@ public struct WeatherSnapshot: Codable, Sendable {
 
 // MARK: - Weather Monitor Delegate
 
+/// Delegate that receives weather snapshot updates from the ``WeatherMonitor``.
 public protocol WeatherMonitorDelegate: AnyObject, Sendable {
     nonisolated func weatherMonitor(_ monitor: WeatherMonitor, didUpdate snapshot: WeatherSnapshot)
 }

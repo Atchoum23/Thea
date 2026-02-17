@@ -534,6 +534,7 @@ public struct AnyCodable: Codable {
 
 // MARK: - Analytics Provider Protocol
 
+/// Backend provider for analytics event tracking and user property management.
 public protocol AnalyticsProvider: Sendable {
     func track(_ event: AnalyticsEvent)
     func setUserProperty(_ key: String, value: Any)

@@ -154,6 +154,7 @@ public actor MonitoringService {
 
 // MARK: - Activity Monitor Protocol
 
+/// An actor that monitors a specific type of user activity (e.g., app switching, idle time).
 public protocol ActivityMonitor: Actor {
     var type: MonitorType { get }
     var isActive: Bool { get }

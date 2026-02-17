@@ -17,7 +17,38 @@ final class CoreMLInferenceEngine {
     private(set) var isLoading = false
     private(set) var lastError: Error?
 
-    private init() {}
+    private var memoryPressureSource: DispatchSourceMemoryPressure?
+
+    private init() {
+        setupMemoryPressureHandler()
+    }
+
+    private func setupMemoryPressureHandler() {
+        #if os(macOS)
+        let source = DispatchSource.makeMemoryPressureSource(eventMask: [.warning, .critical], queue: .main)
+        source.setEventHandler { [weak self] in
+            Task { @MainActor in
+                guard let self, !self.isLoading else { return }
+                print("⚠️ CoreMLInferenceEngine: Memory pressure detected, unloading model")
+                self.unloadModel()
+            }
+        }
+        source.resume()
+        memoryPressureSource = source
+        #else
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, !self.isLoading else { return }
+                print("⚠️ CoreMLInferenceEngine: Memory warning, unloading model")
+                self.unloadModel()
+            }
+        }
+        #endif
+    }
 
     // MARK: - Model Discovery
 

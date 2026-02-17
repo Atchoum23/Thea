@@ -615,6 +615,7 @@ public struct SyncPackage: Sendable, Codable {
 
 // MARK: - Sync Observer Protocol
 
+/// Observer that receives lifecycle callbacks during HealthKit data synchronization.
 public protocol HealthDataSyncObserver: AnyObject, Sendable {
     func syncDidStart()
     func syncDidComplete()

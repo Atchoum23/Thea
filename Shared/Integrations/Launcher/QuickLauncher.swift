@@ -598,6 +598,7 @@ public enum LauncherResult: Identifiable, Sendable {
     }
 }
 
+/// A plug-in that extends the quick launcher with custom search results.
 public protocol LauncherExtension: Sendable {
     var name: String { get }
     func search(query: String) async -> [LauncherResult]?

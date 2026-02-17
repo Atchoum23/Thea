@@ -12,6 +12,7 @@ import os.log
 
 // MARK: - File System Monitor Protocol
 
+/// Delegate that receives notifications when file system changes are detected via FSEvents.
 public protocol FileSystemMonitorDelegate: AnyObject, Sendable {
     nonisolated func fileSystemMonitor(_ _monitor: FileSystemMonitor, didDetect change: FileSystemChange)
 }
