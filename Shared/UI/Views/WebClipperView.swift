@@ -46,6 +46,8 @@ struct WebClipperView: View {
                     }
                 }
                 .disabled(urlInput.isEmpty || clipper.isClipping)
+                .accessibilityLabel(clipper.isClipping ? "Clipping article" : "Clip article from URL")
+                .accessibilityHint("Saves the web article for offline reading")
             }
             .padding()
 
@@ -80,7 +82,11 @@ struct WebClipperView: View {
                     articleRow(article)
                         .tag(article.id)
                         .contextMenu {
-                            Button("Toggle Favorite") { clipper.toggleFavorite(article.id) }
+                            Button {
+                                clipper.toggleFavorite(article.id)
+                            } label: {
+                                Label(article.isFavorite ? "Remove from favorites" : "Add to favorites", systemImage: article.isFavorite ? "star.slash" : "star")
+                            }
                             Divider()
                             Button("Delete", role: .destructive) { clipper.deleteArticle(article) }
                         }

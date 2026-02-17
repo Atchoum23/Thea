@@ -490,6 +490,8 @@ private struct DocumentDetailView: View {
                             titleText = document.title
                             editingTitle = true
                         }
+                        .accessibilityLabel("Document title: \(document.title)")
+                        .accessibilityHint("Double tap to edit title")
                 }
 
                 Spacer()
@@ -498,9 +500,10 @@ private struct DocumentDetailView: View {
                     scanner.toggleFavorite(document.id)
                 } label: {
                     Image(systemName: document.isFavorite ? "star.fill" : "star")
-                        .foregroundStyle(document.isFavorite ? .yellow : .secondary)
+                        .foregroundStyle(document.isFavorite ? Color.theaWarning : .secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(document.isFavorite ? "Remove from favorites" : "Add to favorites")
             }
 
             // Tags

@@ -104,7 +104,7 @@
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Circle()
-                        .fill(manager.isConnected ? Color.green : Color.red)
+                        .fill(manager.isConnected ? Color.theaSuccess : Color.theaError)
                         .frame(width: 8, height: 8)
                         .accessibilityHidden(true)
                     Text(manager.isConnected ? "Connected" : "Disconnected")
@@ -263,7 +263,7 @@
                                     .foregroundStyle(.red)
                             }
                             .padding()
-                            .background(Color.red.opacity(0.1))
+                            .background(Color.theaError.opacity(0.1))
                             .cornerRadius(8)
                         }
 

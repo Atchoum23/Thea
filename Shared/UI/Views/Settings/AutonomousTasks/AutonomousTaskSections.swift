@@ -147,7 +147,7 @@ extension AutonomousTaskSettingsView {
                         .font(.caption2)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color.blue.opacity(0.2))
+                        .background(Color.theaInfo.opacity(0.2))
                         .cornerRadius(4)
                 }
             }

@@ -3,7 +3,7 @@
  * Main AI conversation interface
  */
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation';
 import { useChatStore } from '../stores/chatStore';
@@ -41,9 +41,10 @@ export function ChatPage() {
     ? conversations.find((c) => c.id === conversationId)
     : conversations[0];
 
-  const currentMessages = currentConversation
-    ? messages[currentConversation.id] || []
-    : [];
+  const currentMessages = useMemo(() =>
+    currentConversation ? messages[currentConversation.id] || [] : [],
+    [currentConversation, messages]
+  );
 
   // Set active conversation
   useEffect(() => {

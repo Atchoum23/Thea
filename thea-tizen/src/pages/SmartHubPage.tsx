@@ -4,7 +4,7 @@
  * Provides deep-linking to streaming apps and torrent search
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation';
 import { FocusableButton, FocusableList } from '../components/ui/FocusableCard';
 import { ColorButtonHints } from '../components/ui/ColorButtonHints';
@@ -34,15 +34,7 @@ export function SmartHubPage() {
   const [showTorrentModal, setShowTorrentModal] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
 
-  // Load data on mount
-  useEffect(() => {
-    loadData();
-    // Refresh downloads periodically
-    const interval = setInterval(loadDownloads, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const newReleases = await smartHubService.getNewReleases({

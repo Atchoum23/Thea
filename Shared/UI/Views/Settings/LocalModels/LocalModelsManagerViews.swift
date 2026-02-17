@@ -436,7 +436,7 @@ extension LocalModelsSettingsView {
             .font(.caption)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(selected ? Color.blue : Color.secondary.opacity(0.2))
+            .background(selected ? Color.theaPrimaryDefault : Color.secondary.opacity(0.2))
             .foregroundStyle(selected ? .white : .primary)
             .cornerRadius(16)
     }

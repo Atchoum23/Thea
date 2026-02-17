@@ -51,6 +51,8 @@ struct ModelSelectorView: View {
                 .cornerRadius(6)
             }
             .help("Model category: \(selectedCategory.description)")
+            .accessibilityLabel("Model category: \(selectedCategory.rawValue)")
+            .accessibilityHint("Select AI model category")
 
             // Model picker
             Picker("", selection: $selectedModel) {
