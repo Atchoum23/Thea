@@ -87,17 +87,18 @@ jobs:
           # Find first available iPhone simulator (macOS 26 has iPhone 17 Pro, not 16 Pro)
           SIM_NAME=$(xcrun simctl list devices available | grep "iPhone" | head -1 | sed 's/^[[:space:]]*//' | sed 's/ (.*//')
           echo "Building for simulator: $SIM_NAME"
+          # Xcode 26 Debug builds use preview dylibs instead of real executables.
+          # Use Release configuration to get a proper app bundle with executable.
           xcodebuild build \
             -project Thea.xcodeproj \
             -scheme Thea-iOS \
             -destination "platform=iOS Simulator,name=$SIM_NAME" \
-            -configuration Debug \
+            -configuration Release \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             ONLY_ACTIVE_ARCH=YES \
-            ENABLE_DEBUG_DYLIB=NO \
             MARKETING_VERSION="1.5.0" \
             CURRENT_PROJECT_VERSION="15" \
             SWIFT_STRICT_CONCURRENCY=complete \
