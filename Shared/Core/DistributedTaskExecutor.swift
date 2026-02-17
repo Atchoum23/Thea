@@ -170,7 +170,11 @@ public actor DistributedTaskExecutor {
         // Push update to CloudKit for remote tasks
         let localDeviceId = await DeviceRegistry.shared.currentDevice.id
         if task.targetDeviceId != localDeviceId {
-            try? await pushTaskUpdate(task)
+            do {
+                try await pushTaskUpdate(task)
+            } catch {
+                logger.error("Failed to push task update to CloudKit for task \(taskId): \(error.localizedDescription)")
+            }
         }
 
         onTaskProgress?(taskId, task.progress, task.statusMessage)
@@ -343,8 +347,12 @@ public struct DistributedTask: Identifiable, Sendable {
         record["updatedAt"] = Date()
 
         // Encode payload as JSON data
-        if let payloadData = try? JSONEncoder().encode(payload) {
+        do {
+            let payloadData = try JSONEncoder().encode(payload)
             record["payload"] = payloadData
+        } catch {
+            Logger(subsystem: "app.thea.distributed", category: "TaskExecutor")
+                .warning("Failed to encode task payload: \(error.localizedDescription)")
         }
 
         return record
