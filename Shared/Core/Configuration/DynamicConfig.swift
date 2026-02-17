@@ -157,53 +157,52 @@ public final class DynamicConfig {
     // MARK: - Private Implementation
 
     private func determineOptimalModel(for task: AITaskCategory) async -> String {
-        // Check what providers are available
-        let providers = ProviderRegistry.shared.availableProviders
-
-        // Prefer local models for privacy-sensitive tasks
-        let hasLocalModel = providers.contains { $0.id.contains("mlx") || $0.id.contains("local") }
-
+        // Map AITaskCategory to TaskType for capability lookup
+        let taskType: TaskType
         switch task {
-        case .codeGeneration, .codeReview, .bugFix:
-            // Need high capability
-            if providers.contains(where: { $0.id.contains("anthropic") }) {
-                return "claude-sonnet-4-20250514"
-            }
-            return "gpt-4o"
-
-        case .classification, .correction:
-            // Can use faster/cheaper models
-            return "gpt-4o-mini"
-
-        case .creative, .brainstorming:
-            // Benefit from larger models
-            if providers.contains(where: { $0.id.contains("anthropic") }) {
-                return "claude-sonnet-4-20250514"
-            }
-            return "gpt-4o"
-
-        case .conversation, .assistance:
-            // Balance speed and quality
-            if hasLocalModel {
-                return "mlx-community/Llama-3.2-3B-Instruct-4bit" // Fast local
-            }
-            return "gpt-4o-mini"
-
-        case .analysis:
-            return "gpt-4o"
-
-        case .translation:
-            return "gpt-4o-mini" // Good at translation
+        case .codeGeneration:   taskType = .codeGeneration
+        case .codeReview:       taskType = .codeAnalysis
+        case .bugFix:           taskType = .codeDebugging
+        case .creative:         taskType = .creative
+        case .brainstorming:    taskType = .creative
+        case .conversation:     taskType = .conversation
+        case .assistance:       taskType = .conversation
+        case .analysis:         taskType = .analysis
+        case .classification:   taskType = .factual
+        case .translation:      taskType = .translation
+        case .correction:       taskType = .factual
         }
+
+        let required = taskType.preferredCapabilities
+        let preferLocal = SystemCapabilityService.shared.physicalMemoryGB >= 16
+
+        // Prefer cheap cloud models for simple tasks
+        let maxCost: Decimal? = taskType.isSimple ? Decimal(string: "0.005") : nil
+
+        if let best = AIModel.bestModel(
+            capabilities: required,
+            maxCostPer1KOutput: maxCost,
+            preferLocal: preferLocal && taskType.isSimple
+        ) {
+            return best.id
+        }
+
+        return defaultModel(for: task)
     }
 
     private func defaultModel(for task: AITaskCategory) -> String {
+        let required: Set<ModelCapability>
         switch task {
-        case .codeGeneration, .codeReview, .bugFix, .creative, .analysis:
-            return "gpt-4o"
+        case .codeGeneration, .codeReview, .bugFix:
+            required = [.codeGeneration, .chat]
+        case .creative, .brainstorming:
+            required = [.chat]
+        case .analysis:
+            required = [.analysis, .chat]
         default:
-            return "gpt-4o-mini"
+            required = [.chat]
         }
+        return AIModel.bestModel(capabilities: required)?.id ?? "gpt-4o-mini"
     }
 
     private func determineOptimalInterval(for task: PeriodicTask) async -> TimeInterval {
