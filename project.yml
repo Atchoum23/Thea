@@ -270,7 +270,7 @@ packages:
   # Provides: MLXAudioTTS, MLXAudioSTT, MLXAudioCore
   mlx-audio-swift:
     url: https://github.com/Blaizzy/mlx-audio-swift
-    revision: a59f149
+    branch: main
 
 # ============================================
 # Targets
