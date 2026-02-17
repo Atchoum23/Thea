@@ -298,7 +298,7 @@ targets:
           - "**/AI/Audio/MLXAudioEngine.swift"
           - "**/Voice/MLXVoiceBackend.swift"
           - "**/AI/LiveGuidance/LocalVisionGuidance.swift"
-          # LiveGuidanceSettingsView — ACTIVATED (wired into MacSettingsView)
+          - "**/Settings/LiveGuidanceSettingsView.swift"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
           # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
           # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
@@ -544,7 +544,7 @@ targets:
           - "System/Input/ActionExecutor.swift"
           - "Integrations/ForegroundAppMonitor.swift"
           - "AI/LiveGuidance/LocalVisionGuidance.swift"
-          # LiveGuidanceSettingsView — ACTIVATED (wired into MacSettingsView)
+          - "UI/Views/Settings/LiveGuidanceSettingsView.swift"
           - "UI/Views/Settings/AppPairingSettingsView.swift"
           - "**/InputTrackingManager.swift"
           - "**/*AutomationEngine.swift"
