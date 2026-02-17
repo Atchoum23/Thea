@@ -28,12 +28,31 @@ final class ChatManager: ObservableObject {
 
     private init() {}
 
-    /// Save model context with error logging instead of silent `try?`
+    /// Consecutive save failure count for retry logic
+    private var consecutiveSaveFailures = 0
+
+    /// Save model context with error logging and retry on transient failures
     func saveContext(operation: String = #function) {
         do {
             try modelContext?.save()
+            consecutiveSaveFailures = 0
         } catch {
-            chatLogger.error("❌ Save failed in \(operation): \(error.localizedDescription)")
+            consecutiveSaveFailures += 1
+            chatLogger.error("❌ Save failed in \(operation) (\(self.consecutiveSaveFailures)x): \(error.localizedDescription)")
+
+            // Retry once after a brief delay for transient DB lock failures
+            if consecutiveSaveFailures <= 2 {
+                Task {
+                    try? await Task.sleep(for: .milliseconds(100))
+                    do {
+                        try self.modelContext?.save()
+                        self.consecutiveSaveFailures = 0
+                        chatLogger.info("✅ Save retry succeeded for \(operation)")
+                    } catch {
+                        chatLogger.error("❌ Save retry also failed in \(operation): \(error.localizedDescription)")
+                    }
+                }
+            }
         }
     }
 

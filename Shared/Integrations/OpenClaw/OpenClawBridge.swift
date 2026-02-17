@@ -78,9 +78,18 @@ final class OpenClawBridge {
             return
         }
 
-        // Route to AI
+        // Route to AI with timeout to prevent hung responses
         do {
-            let response = try await generateAIResponse(for: message)
+            let response = try await withThrowingTaskGroup(of: String.self) { group in
+                group.addTask { try await self.generateAIResponse(for: message) }
+                group.addTask {
+                    try await Task.sleep(for: .seconds(30))
+                    throw OpenClawBridgeError.responseTimeout
+                }
+                let result = try await group.next()!
+                group.cancelAll()
+                return result
+            }
 
             // Sanitize outbound response through privacy guard
             let outcome = await OutboundPrivacyGuard.shared.sanitize(response, channel: "messaging")
@@ -160,24 +169,36 @@ final class OpenClawBridge {
     }
 
     /// Sanitize user input to prevent prompt injection attacks.
-    /// Strips control characters, zero-width Unicode, and dangerous patterns.
+    /// Strips control characters, zero-width Unicode, Unicode Tag characters,
+    /// and dangerous patterns. Applies NFKC normalization per 2026 best practices.
     private func sanitizeUserInput(_ input: String) -> String {
-        var result = input
+        // Step 1: NFKC normalization — catches homoglyph attacks and ligature tricks
+        var result = input.precomposedStringWithCompatibilityMapping
 
-        // Strip zero-width and invisible Unicode characters
-        let invisibleChars = CharacterSet(
-            charactersIn: "\u{200B}\u{200C}\u{200D}\u{FEFF}\u{00AD}\u{2060}\u{180E}"
-        )
-        result = result.unicodeScalars
-            .filter { !invisibleChars.contains($0) }
-            .map(String.init).joined()
+        // Step 2: Strip zero-width, invisible, and Unicode Tag characters
+        // Unicode Tags (U+E0000-U+E007F) can embed hidden instructions
+        result = result.unicodeScalars.filter { scalar in
+            // Block zero-width and invisible chars
+            let invisibleScalars: [UInt32] = [
+                0x200B, 0x200C, 0x200D, 0xFEFF, 0x00AD, 0x2060, 0x180E,
+                0x200E, 0x200F, 0x202A, 0x202B, 0x202C, 0x202D, 0x202E,
+                0x2066, 0x2067, 0x2068, 0x2069
+            ]
+            if invisibleScalars.contains(scalar.value) { return false }
+            // Block Unicode Tag range (U+E0000-U+E007F)
+            if scalar.value >= 0xE0000 && scalar.value <= 0xE007F { return false }
+            // Block C0/C1 control characters except tab, newline, carriage return
+            if scalar.value < 0x20 && scalar.value != 0x09 && scalar.value != 0x0A && scalar.value != 0x0D { return false }
+            if scalar.value >= 0x7F && scalar.value <= 0x9F { return false }
+            return true
+        }.map(String.init).joined()
 
-        // Collapse excessive newlines (prevent separator injection)
+        // Step 3: Collapse excessive newlines (prevent separator injection)
         result = result.replacingOccurrences(
             of: "\\n{3,}", with: "\n\n", options: .regularExpression
         )
 
-        // Truncate to prevent context window flooding
+        // Step 4: Truncate to prevent context window flooding
         if result.count > 4096 {
             result = String(result.prefix(4096))
         }
@@ -191,6 +212,7 @@ final class OpenClawBridge {
 enum OpenClawBridgeError: Error, LocalizedError {
     case noProviderAvailable
     case emptyResponse
+    case responseTimeout
 
     var errorDescription: String? {
         switch self {
@@ -198,6 +220,8 @@ enum OpenClawBridgeError: Error, LocalizedError {
             "No AI provider configured"
         case .emptyResponse:
             "AI returned an empty response"
+        case .responseTimeout:
+            "AI response timed out after 30 seconds"
         }
     }
 }

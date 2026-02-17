@@ -143,9 +143,21 @@ public class CloudKitService: ObservableObject {
         changeTokens[zoneID.zoneName]
     }
 
+    /// Tracks pending token changes for batched saving
+    private var hasUnsavedTokenChanges = false
+
     func setChangeToken(_ token: CKServerChangeToken?, for zoneID: CKRecordZone.ID) {
         changeTokens[zoneID.zoneName] = token
-        saveChangeTokens()
+        // Batch token saves — defer to avoid N consecutive UserDefaults writes during multi-zone sync
+        if !hasUnsavedTokenChanges {
+            hasUnsavedTokenChanges = true
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(1))
+                guard let self else { return }
+                self.saveChangeTokens()
+                self.hasUnsavedTokenChanges = false
+            }
+        }
     }
 
     private func setupConflictResolutionObserver() {
@@ -170,6 +182,17 @@ public class CloudKitService: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.syncEnabled = SettingsManager.shared.iCloudSyncEnabled
+            }
+        }
+
+        // Re-check iCloud status when account changes (sign in/out mid-session)
+        NotificationCenter.default.addObserver(
+            forName: .CKAccountChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                await self?.checkiCloudStatus()
             }
         }
     }

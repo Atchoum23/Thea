@@ -181,17 +181,20 @@ public final class ConfidenceSystem {
     public var enableStaticAnalysis: Bool = true
     public var enableFeedbackLearning: Bool = true
 
-    // Weights for each source type
+    // Weights for each source type (normalized to sum to 1.0)
     public var sourceWeights: [ConfidenceSource.SourceType: Double] = [
-        .modelConsensus: 0.35,
-        .webVerification: 0.20,
-        .codeExecution: 0.25,
-        .staticAnalysis: 0.10,
-        .userFeedback: 0.10,
-        .cachedKnowledge: 0.05,
-        .patternMatch: 0.05,
-        .semanticAnalysis: 0.15
+        .modelConsensus: 0.30,
+        .webVerification: 0.17,
+        .codeExecution: 0.22,
+        .staticAnalysis: 0.09,
+        .userFeedback: 0.09,
+        .cachedKnowledge: 0.04,
+        .patternMatch: 0.04,
+        .semanticAnalysis: 0.05
     ]
+
+    /// Per-verifier timeout (seconds) — prevents slow verifiers from blocking others
+    public var verifierTimeout: TimeInterval = 8.0
 
     private init() {}
 
@@ -210,47 +213,68 @@ public final class ConfidenceSystem {
         var factors: [ConfidenceDecomposition.DecompositionFactor] = []
         var conflicts: [ConfidenceDecomposition.ConflictInfo] = []
 
-        // 1. Multi-model consensus
-        if enableMultiModel && context.allowMultiModel {
-            let consensusResult = await multiModelConsensus.validate(
-                query: query,
-                response: response,
-                taskType: taskType
-            )
-            sources.append(consensusResult.source)
-            factors.append(contentsOf: consensusResult.factors)
-            conflicts.append(contentsOf: consensusResult.conflicts)
-        }
+        // Run enabled verifiers in parallel with per-verifier timeout
+        await withTaskGroup(of: VerifierOutput?.self) { group in
+            let timeout = self.verifierTimeout
 
-        // 2. Web verification (for factual claims)
-        if enableWebVerification && context.allowWebSearch && taskType.requiresFactualVerification {
-            let webResult = await webVerifier.verify(response: response, query: query)
-            sources.append(webResult.source)
-            factors.append(contentsOf: webResult.factors)
-        }
+            // 1. Multi-model consensus
+            if enableMultiModel && context.allowMultiModel {
+                group.addTask {
+                    await Self.withTimeout(seconds: timeout) { [multiModelConsensus] in
+                        let r = await multiModelConsensus.validate(query: query, response: response, taskType: taskType)
+                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: r.conflicts)
+                    }
+                }
+            }
 
-        // 3. Code execution (for code responses)
-        if enableCodeExecution && context.allowCodeExecution && taskType.isCodeRelated {
-            let execResult = await codeExecutor.verify(response: response, language: context.language)
-            sources.append(execResult.source)
-            factors.append(contentsOf: execResult.factors)
-        }
+            // 2. Web verification (for factual claims)
+            if enableWebVerification && context.allowWebSearch && taskType.requiresFactualVerification {
+                group.addTask {
+                    await Self.withTimeout(seconds: timeout) { [webVerifier] in
+                        let r = await webVerifier.verify(response: response, query: query)
+                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
+                    }
+                }
+            }
 
-        // 4. Static analysis (for code)
-        if enableStaticAnalysis && taskType.isCodeRelated {
-            let analysisResult = await staticAnalyzer.analyze(response: response, language: context.language)
-            sources.append(analysisResult.source)
-            factors.append(contentsOf: analysisResult.factors)
-        }
+            // 3. Code execution (for code responses)
+            if enableCodeExecution && context.allowCodeExecution && taskType.isCodeRelated {
+                let lang = context.language
+                group.addTask {
+                    await Self.withTimeout(seconds: timeout) { [codeExecutor] in
+                        let r = await codeExecutor.verify(response: response, language: lang)
+                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
+                    }
+                }
+            }
 
-        // 5. User feedback history
-        if enableFeedbackLearning {
-            let feedbackResult = await feedbackLearner.assessFromHistory(
-                taskType: taskType,
-                responsePattern: response
-            )
-            sources.append(feedbackResult.source)
-            factors.append(contentsOf: feedbackResult.factors)
+            // 4. Static analysis (for code)
+            if enableStaticAnalysis && taskType.isCodeRelated {
+                let lang = context.language
+                group.addTask {
+                    await Self.withTimeout(seconds: timeout) { [staticAnalyzer] in
+                        let r = await staticAnalyzer.analyze(response: response, language: lang)
+                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
+                    }
+                }
+            }
+
+            // 5. User feedback history
+            if enableFeedbackLearning {
+                group.addTask {
+                    await Self.withTimeout(seconds: timeout) { [feedbackLearner] in
+                        let r = await feedbackLearner.assessFromHistory(taskType: taskType, responsePattern: response)
+                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
+                    }
+                }
+            }
+
+            for await output in group {
+                guard let output else { continue }
+                sources.append(output.source)
+                factors.append(contentsOf: output.factors)
+                conflicts.append(contentsOf: output.conflicts)
+            }
         }
 
         // Calculate overall confidence
@@ -305,6 +329,35 @@ public final class ConfidenceSystem {
         }
 
         return totalWeight > 0 ? weightedSum / totalWeight : 0.0
+    }
+
+    // MARK: - Helpers
+
+    /// Intermediate result from a verifier
+    private struct VerifierOutput: Sendable {
+        let source: ConfidenceSource
+        let factors: [ConfidenceDecomposition.DecompositionFactor]
+        let conflicts: [ConfidenceDecomposition.ConflictInfo]
+    }
+
+    /// Run an async closure with a timeout; returns nil if timeout exceeded
+    private static func withTimeout<T: Sendable>(
+        seconds: TimeInterval,
+        operation: @escaping @Sendable () async -> T
+    ) async -> T? {
+        await withTaskGroup(of: T?.self) { group in
+            group.addTask { await operation() }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(seconds))
+                return nil
+            }
+            // Return whichever finishes first
+            for await result in group {
+                group.cancelAll()
+                return result
+            }
+            return nil
+        }
     }
 
     private func generateDecomposition(

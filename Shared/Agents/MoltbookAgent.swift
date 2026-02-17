@@ -100,6 +100,9 @@ actor MoltbookAgent {
         }
     }
 
+    /// Consecutive heartbeat failures for exponential backoff
+    private var consecutiveFailures = 0
+
     private func performHeartbeat() async {
         lastHeartbeat = Date()
         resetDailyCountIfNeeded()
@@ -112,8 +115,13 @@ actor MoltbookAgent {
             for discussion in discussions {
                 await processInboundDiscussion(discussion)
             }
+            consecutiveFailures = 0 // Reset on success
         } catch {
-            logger.error("Heartbeat failed: \(error.localizedDescription)")
+            consecutiveFailures += 1
+            let backoffSeconds = min(3600, heartbeatInterval * pow(2.0, Double(consecutiveFailures - 1)))
+            logger.error("Heartbeat failed (\(self.consecutiveFailures)x): \(error.localizedDescription). Next retry in \(Int(backoffSeconds))s")
+            // Sleep extra time as exponential backoff
+            try? await Task.sleep(for: .seconds(backoffSeconds))
         }
     }
 

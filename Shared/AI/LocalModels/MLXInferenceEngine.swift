@@ -33,8 +33,14 @@ final class MLXInferenceEngine {
     /// Last error encountered
     private(set) var lastError: Error?
 
-    /// Active chat sessions with KV cache for multi-turn conversations
+    /// Active chat sessions with KV cache for multi-turn conversations (LRU eviction at maxCachedSessions)
     private var chatSessions: [UUID: ChatSession] = [:]
+
+    /// Tracks session access order for LRU eviction
+    private var sessionAccessOrder: [UUID] = []
+
+    /// Maximum cached chat sessions before LRU eviction
+    private let maxCachedSessions = 20
 
     /// Model factory for loading models
     private let modelFactory = LLMModelFactory.shared
@@ -356,6 +362,9 @@ final class MLXInferenceEngine {
     ///   - systemPrompt: Optional custom system prompt (uses default if nil)
     func getChatSession(for conversationID: UUID, systemPrompt: String? = nil) async throws -> ChatSession {
         if let session = chatSessions[conversationID] {
+            // Update LRU access order
+            sessionAccessOrder.removeAll { $0 == conversationID }
+            sessionAccessOrder.append(conversationID)
             return session
         }
 
@@ -363,10 +372,18 @@ final class MLXInferenceEngine {
             throw MLXInferenceError.noModelLoaded
         }
 
+        // LRU eviction: remove least recently used session if at capacity
+        if chatSessions.count >= maxCachedSessions, let oldest = sessionAccessOrder.first {
+            chatSessions.removeValue(forKey: oldest)
+            sessionAccessOrder.removeFirst()
+            print("♻️ MLXInferenceEngine: Evicted LRU chat session")
+        }
+
         // Create session with system instructions
         let instructions = systemPrompt ?? Self.defaultSystemPrompt
         let session = ChatSession(model, instructions: instructions)
         chatSessions[conversationID] = session
+        sessionAccessOrder.append(conversationID)
         return session
     }
 
@@ -441,11 +458,13 @@ final class MLXInferenceEngine {
     /// Clear the chat history for a conversation (resets KV cache)
     func clearChatSession(for conversationID: UUID) {
         chatSessions.removeValue(forKey: conversationID)
+        sessionAccessOrder.removeAll { $0 == conversationID }
     }
 
     /// Clear all chat sessions
     func clearAllChatSessions() {
         chatSessions.removeAll()
+        sessionAccessOrder.removeAll()
     }
 
     // MARK: - Model Information

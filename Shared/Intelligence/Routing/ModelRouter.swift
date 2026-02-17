@@ -242,10 +242,20 @@ extension ModelRouter {
     }
 
     private func calculateCostScore(_ model: AIModel, context: RoutingContext) -> Double {
-        // Lower cost = higher score
+        // Lower cost = higher score. Cost scoring uses 2026 pricing model:
+        // Most providers now offer tiered pricing — input tokens much cheaper than output.
+        // Flagship models (Opus, o1) ~$15-75/M output; mid-tier (Sonnet, GPT-4o) ~$3-15/M;
+        // Budget (Haiku, Flash, mini) <$1/M. Local models cost $0 (speed-only score).
         guard let inputCost = model.inputCostPer1K,
               let outputCost = model.outputCostPer1K else {
-            return 0.5 // Unknown cost, neutral score
+            // Use historical average if available, otherwise neutral
+            if let perf = modelPerformance[model.id],
+               let anyPerf = perf.values.first,
+               anyPerf.totalCost > 0 {
+                let avgCost = NSDecimalNumber(decimal: anyPerf.averageCost).doubleValue
+                return max(0.1, min(1.0, 1.0 / (1.0 + (avgCost * 100))))
+            }
+            return 0.5
         }
 
         // Estimate total cost for expected token usage
