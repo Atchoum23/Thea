@@ -158,6 +158,12 @@ jobs:
 
       - name: Build ${{ matrix.scheme }}
         run: |
+          # macOS needs ARCHS=arm64 to prevent SPM packages building x86_64
+          # (mlx-audio-swift uses Float16 which requires arm64)
+          EXTRA_ARGS=""
+          if [ "${{ matrix.platform }}" = "macOS" ]; then
+            EXTRA_ARGS="ARCHS=arm64"
+          fi
           xcodebuild build \
             -project Thea.xcodeproj \
             -scheme ${{ matrix.scheme }} \
@@ -168,6 +174,7 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
+            $EXTRA_ARGS \
             2>&1 | tee build-${{ matrix.platform }}.log
 
       - name: Check for Warnings
