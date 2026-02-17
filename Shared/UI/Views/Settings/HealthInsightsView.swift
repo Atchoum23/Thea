@@ -97,8 +97,11 @@ struct HealthInsightsView: View {
                 LabeledContent("Coaching") { Text(pipeline.isEnabled ? "Enabled" : "Disabled").foregroundStyle(pipeline.isEnabled ? .green : .red) }
                 LabeledContent("Cooldown") { Text("\(pipeline.analysisCooldownHours)h") }
                 LabeledContent("Last Run") {
-                    if let d = pipeline.lastAnalysisDate { Text(d.formatted(.relative(presentation: .named))) }
-                    else { Text("Never").foregroundStyle(.secondary) }
+                    if let d = pipeline.lastAnalysisDate {
+                        Text(d.formatted(.relative(presentation: .named)))
+                    } else {
+                        Text("Never").foregroundStyle(.secondary)
+                    }
                 }
             }.font(.theaCaption1)
         } header: { Text("Status").font(.theaHeadline) }

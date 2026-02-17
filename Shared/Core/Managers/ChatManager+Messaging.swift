@@ -230,7 +230,7 @@ extension ChatManager {
         var systemPrompt = buildFullSystemPrompt(for: conversation, taskType: taskType)
 
         // Proactive memory injection: retrieve relevant context from all memory tiers
-        let lastUserText = conversation.messages.last(where: { $0.messageRole == .user })?.content.textValue ?? ""
+        let lastUserText = conversation.messages.last { $0.messageRole == .user }?.content.textValue ?? ""
         if !lastUserText.isEmpty {
             let memoryResult = await ActiveMemoryRetrieval.shared.retrieveContext(
                 for: lastUserText,
