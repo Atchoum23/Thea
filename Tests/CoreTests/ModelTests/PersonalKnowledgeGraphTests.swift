@@ -20,8 +20,8 @@ private struct PKGEntity: Identifiable, Sendable, Codable {
     var lastUpdatedAt: Date
     var referenceCount: Int
 
-    init(name: String, type: PKGEntityType, attributes: [String: String] = [:]) {
-        self.id = "\(type.rawValue):\(name.lowercased().replacingOccurrences(of: " ", with: "_"))"
+    init(id: String? = nil, name: String, type: PKGEntityType, attributes: [String: String] = [:]) {
+        self.id = id ?? "\(type.rawValue):\(name.lowercased().replacingOccurrences(of: " ", with: "_"))"
         self.name = name
         self.type = type
         self.attributes = attributes
@@ -297,7 +297,7 @@ private final class TestPersonalKnowledgeGraph: @unchecked Sendable {
 
     // MARK: - Helpers
 
-    private func tokenize(_ text: String) -> [String] {
+    func tokenize(_ text: String) -> [String] {
         text.lowercased()
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { $0.count > 1 }
@@ -415,24 +415,24 @@ struct PKGHybridSearchTests {
         #expect(results[0].matchType == .keyword)
     }
 
-    @Test("Search ranks by BM25 relevance")
+    @Test("Search ranks entity with higher TF-IDF higher")
     func bm25Ranking() {
         let graph = TestPersonalKnowledgeGraph()
-        // Entity with "swift" in both name and attributes should rank higher
-        graph.addEntity(PKGEntity(name: "Swift", type: .skill, attributes: ["description": "Swift programming language"]))
-        graph.addEntity(PKGEntity(name: "SwiftUI", type: .skill, attributes: ["description": "UI framework"]))
+        // Entity with "swift" in both name and attributes should have higher TF
+        graph.addEntity(PKGEntity(id: "skill:swift_lang", name: "Swift Language", type: .skill, attributes: ["description": "Swift is a fast programming language by Apple"]))
+        graph.addEntity(PKGEntity(id: "skill:python_lang", name: "Python Language", type: .skill, attributes: ["description": "Versatile scripting language"]))
 
-        let results = graph.hybridSearch(query: "swift")
-        #expect(results.count == 2)
-        // "Swift" should rank higher because it has "swift" in name AND attributes
-        #expect(results[0].entity.name == "Swift")
+        let results = graph.hybridSearch(query: "swift language")
+        #expect(results.count >= 1)
+        // "Swift Language" should rank first because it matches both query terms
+        #expect(results[0].entity.name == "Swift Language")
     }
 
     @Test("Search respects limit parameter")
     func limitRespected() {
         let graph = TestPersonalKnowledgeGraph()
         for i in 0..<20 {
-            graph.addEntity(PKGEntity(name: "Topic \(i)", type: .topic))
+            graph.addEntity(PKGEntity(id: "topic:topic_\(i)", name: "Topic \(i)", type: .topic))
         }
         let results = graph.hybridSearch(query: "topic", limit: 5)
         #expect(results.count == 5)
@@ -441,14 +441,14 @@ struct PKGHybridSearchTests {
     @Test("Connected entities get connectivity boost")
     func connectivityBoost() {
         let graph = TestPersonalKnowledgeGraph()
-        let connected = PKGEntity(name: "Hub Topic", type: .topic)
-        let isolated = PKGEntity(name: "Hub Concept", type: .topic)
+        let connected = PKGEntity(id: "topic:hub_connected", name: "Hub Topic", type: .topic)
+        let isolated = PKGEntity(id: "topic:hub_isolated", name: "Hub Concept", type: .topic)
         graph.addEntity(connected)
         graph.addEntity(isolated)
 
         // Add many connections to first entity
         for i in 0..<10 {
-            let neighbor = PKGEntity(name: "Related \(i)", type: .topic)
+            let neighbor = PKGEntity(id: "topic:related_\(i)", name: "Related \(i)", type: .topic)
             graph.addEntity(neighbor)
             graph.addRelationship(from: connected.id, to: neighbor.id, relationship: "related")
         }
@@ -456,7 +456,7 @@ struct PKGHybridSearchTests {
         let results = graph.hybridSearch(query: "hub")
         #expect(results.count == 2)
         // The highly-connected entity should rank higher
-        #expect(results[0].entity.name == "Hub Topic")
+        #expect(results[0].entity.id == connected.id)
     }
 
     @Test("Search matches attributes not just name")
@@ -474,25 +474,25 @@ struct PKGHybridSearchTests {
 
 @Suite("PersonalKnowledgeGraph — Deduplication")
 struct PKGDeduplicationTests {
-    @Test("Identical names of same type are merged")
-    func identicalNamesMerged() {
+    @Test("Entities with identical multi-word names of same type are merged")
+    func identicalMultiWordNamesMerged() {
         let graph = TestPersonalKnowledgeGraph()
-        var e1 = PKGEntity(name: "Swift", type: .skill)
+        // Use explicit IDs to have two distinct entities with similar names
+        var e1 = PKGEntity(id: "skill:swift_programming_v1", name: "Swift Programming", type: .skill)
         e1.referenceCount = 5
-        var e2 = PKGEntity(name: "Swift", type: .skill)
+        var e2 = PKGEntity(id: "skill:swift_programming_v2", name: "Swift Programming", type: .skill)
         e2.referenceCount = 3
         graph.addEntity(e1)
         graph.addEntity(e2)
 
-        // With threshold 0.85, identical single-word names (Jaccard = 1.0) should merge
+        // Jaccard similarity of {"swift", "programming"} and {"swift", "programming"} = 1.0
         graph.deduplicateEntities(similarityThreshold: 0.85)
         #expect(graph.entities.count == 1)
-        // Survivor should have combined reference count
         let survivor = graph.entities.values.first!
         #expect(survivor.referenceCount == 8)
     }
 
-    @Test("Different types are not merged")
+    @Test("Different types are not merged even with same name")
     func differentTypesNotMerged() {
         let graph = TestPersonalKnowledgeGraph()
         graph.addEntity(PKGEntity(name: "Swift", type: .skill))
@@ -505,8 +505,8 @@ struct PKGDeduplicationTests {
     @Test("Dissimilar names are not merged")
     func dissimilarNotMerged() {
         let graph = TestPersonalKnowledgeGraph()
-        graph.addEntity(PKGEntity(name: "Machine Learning", type: .skill))
-        graph.addEntity(PKGEntity(name: "Web Development", type: .skill))
+        graph.addEntity(PKGEntity(id: "skill:ml", name: "Machine Learning", type: .skill))
+        graph.addEntity(PKGEntity(id: "skill:webdev", name: "Web Development", type: .skill))
 
         graph.deduplicateEntities(similarityThreshold: 0.85)
         #expect(graph.entities.count == 2)
@@ -515,28 +515,28 @@ struct PKGDeduplicationTests {
     @Test("Edges are re-pointed after merge")
     func edgesRepointed() {
         let graph = TestPersonalKnowledgeGraph()
-        var e1 = PKGEntity(name: "Swift", type: .skill)
+        var e1 = PKGEntity(id: "skill:swift_v1", name: "Swift Programming", type: .skill)
         e1.referenceCount = 5
-        let e2 = PKGEntity(name: "Swift", type: .skill) // referenceCount = 1
-        let other = PKGEntity(name: "Xcode", type: .topic)
+        let e2 = PKGEntity(id: "skill:swift_v2", name: "Swift Programming", type: .skill)
+        let other = PKGEntity(id: "topic:xcode", name: "Xcode", type: .topic)
         graph.addEntity(e1)
         graph.addEntity(e2)
         graph.addEntity(other)
         graph.addRelationship(from: e2.id, to: other.id, relationship: "used_in")
 
         graph.deduplicateEntities(similarityThreshold: 0.85)
-        // Edge should now point from survivor (e1) to other
         let edges = graph.edges
         #expect(edges.count == 1)
-        #expect(edges[0].sourceID == e1.id || edges[0].targetID == e1.id)
+        // Edge should now reference the survivor (e1)
+        #expect(edges[0].sourceID == e1.id)
     }
 
     @Test("Attributes are merged from removed entity")
     func attributesMerged() {
         let graph = TestPersonalKnowledgeGraph()
-        var e1 = PKGEntity(name: "Swift", type: .skill, attributes: ["level": "advanced"])
+        var e1 = PKGEntity(id: "skill:swift_v1", name: "Swift Programming", type: .skill, attributes: ["level": "advanced"])
         e1.referenceCount = 5
-        let e2 = PKGEntity(name: "Swift", type: .skill, attributes: ["platform": "Apple"])
+        let e2 = PKGEntity(id: "skill:swift_v2", name: "Swift Programming", type: .skill, attributes: ["platform": "Apple"])
         graph.addEntity(e1)
         graph.addEntity(e2)
 
@@ -544,6 +544,17 @@ struct PKGDeduplicationTests {
         let survivor = graph.entities.values.first!
         #expect(survivor.attributes["level"] == "advanced")
         #expect(survivor.attributes["platform"] == "Apple")
+    }
+
+    @Test("Single-word names need Jaccard >= threshold to merge")
+    func singleWordJaccard() {
+        let graph = TestPersonalKnowledgeGraph()
+        // "swift" tokenizes to ["swift"], "swiftui" tokenizes to ["swiftui"]
+        // Jaccard = 0 (no common tokens), so should NOT merge
+        graph.addEntity(PKGEntity(id: "skill:swift", name: "Swift", type: .skill))
+        graph.addEntity(PKGEntity(id: "skill:swiftui", name: "SwiftUI", type: .skill))
+        graph.deduplicateEntities(similarityThreshold: 0.85)
+        #expect(graph.entities.count == 2)
     }
 }
 
@@ -576,7 +587,6 @@ struct PKGStatisticsTests {
         #expect(stats.edgeCount == 1)
         #expect(stats.typeDistribution[.skill] == 2)
         #expect(stats.typeDistribution[.person] == 1)
-        // averageConnections = (1 * 2) / 3
         #expect(abs(stats.averageConnections - 2.0 / 3.0) < 0.001)
     }
 }
@@ -602,9 +612,7 @@ struct PKGEntityExtractionTests {
         let graph = TestPersonalKnowledgeGraph()
         graph.addEntity(PKGEntity(name: "swift", type: .skill))
 
-        // "the" and "is" are short and lowercase — should not match
         graph.extractAndStore(from: "the language is great")
-        // "swift" entity won't be matched because words in text that are capitalized are checked
         let ref = graph.entities.values.first!.referenceCount
         #expect(ref == 1) // unchanged
     }
@@ -615,9 +623,8 @@ struct PKGEntityExtractionTests {
         graph.addEntity(PKGEntity(name: "AI", type: .topic))
 
         graph.extractAndStore(from: "AI is amazing")
-        // "AI" is only 2 chars, trimmed word must be > 2
         let ref = graph.entities.values.first!.referenceCount
-        #expect(ref == 1) // unchanged because "AI" is too short
+        #expect(ref == 1) // unchanged because "AI" is too short (2 chars)
     }
 }
 
@@ -629,7 +636,7 @@ struct PKGRelationshipDedupTests {
     func noDuplicateEdge() {
         let graph = TestPersonalKnowledgeGraph()
         let a = PKGEntity(name: "Alpha", type: .topic)
-        let b = PKGEntity(name: "Beta", type: .topic)
+        let b = PKGEntity(id: "topic:beta", name: "Beta", type: .topic)
         graph.addEntity(a)
         graph.addEntity(b)
 
@@ -642,7 +649,7 @@ struct PKGRelationshipDedupTests {
     func differentRelTypes() {
         let graph = TestPersonalKnowledgeGraph()
         let a = PKGEntity(name: "Alpha", type: .topic)
-        let b = PKGEntity(name: "Beta", type: .topic)
+        let b = PKGEntity(id: "topic:beta", name: "Beta", type: .topic)
         graph.addEntity(a)
         graph.addEntity(b)
 
@@ -659,9 +666,9 @@ struct PKGRecentEntitiesTests {
     @Test("Recent entities are sorted by lastUpdatedAt descending")
     func sortedByRecency() {
         let graph = TestPersonalKnowledgeGraph()
-        var old = PKGEntity(name: "Old", type: .topic)
+        var old = PKGEntity(id: "topic:old", name: "Old", type: .topic)
         old.lastUpdatedAt = Date().addingTimeInterval(-3600)
-        var recent = PKGEntity(name: "Recent", type: .topic)
+        var recent = PKGEntity(id: "topic:recent", name: "Recent", type: .topic)
         recent.lastUpdatedAt = Date()
         graph.addEntity(old)
         graph.addEntity(recent)
@@ -675,9 +682,36 @@ struct PKGRecentEntitiesTests {
     func limitRespected() {
         let graph = TestPersonalKnowledgeGraph()
         for i in 0..<30 {
-            graph.addEntity(PKGEntity(name: "Entity \(i)", type: .topic))
+            graph.addEntity(PKGEntity(id: "topic:entity_\(i)", name: "Entity \(i)", type: .topic))
         }
         let results = graph.recentEntities(limit: 5)
         #expect(results.count == 5)
+    }
+}
+
+// MARK: - Tests: Tokenizer
+
+@Suite("PersonalKnowledgeGraph — Tokenizer")
+struct PKGTokenizerTests {
+    @Test("Tokenizer lowercases and splits on non-alphanumeric")
+    func basicTokenization() {
+        let graph = TestPersonalKnowledgeGraph()
+        let tokens = graph.tokenize("Hello World!")
+        #expect(tokens == ["hello", "world"])
+    }
+
+    @Test("Tokenizer filters single-char tokens")
+    func filtersSingleChar() {
+        let graph = TestPersonalKnowledgeGraph()
+        let tokens = graph.tokenize("I am a dev")
+        // "i", "a" filtered (length <= 1), "am" kept, "dev" kept
+        #expect(tokens == ["am", "dev"])
+    }
+
+    @Test("Tokenizer handles empty string")
+    func emptyString() {
+        let graph = TestPersonalKnowledgeGraph()
+        let tokens = graph.tokenize("")
+        #expect(tokens.isEmpty)
     }
 }

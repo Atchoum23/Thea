@@ -6,7 +6,7 @@ import ServiceManagement
 #endif
 
 @MainActor
-final class SettingsManager: ObservableObject {
+final class SettingsManager: ObservableObject, SettingsProviding {
     static let shared = SettingsManager()
     private let logger = Logger(subsystem: "ai.thea.app", category: "SettingsManager")
 

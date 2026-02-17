@@ -2084,7 +2084,6 @@
 		F0E5ADAE72D1814038B2B8F4 /* APIBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9A602963894A83668CD0A8 /* APIBuilderView.swift */; };
 		F178B51D2A681F917A01F4F8 /* AnthropicTokenCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6F51E687FBF6463C0177F2 /* AnthropicTokenCounter.swift */; };
 		F17E1431A9E3F3AB35F27F8C /* LifeMonitoringCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3940AC8AE9EBFA601406EFF /* LifeMonitoringCoordinator.swift */; };
-		F1828BF4B42F90A001D96179 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 648B18CCC2E11CF81E8EE874 /* FeatureFlags.swift */; };
 		F1874E397F6E4495049AA300 /* IntegratedTestRunnerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77F8C7122289092A3F2C418 /* IntegratedTestRunnerTypes.swift */; };
 		F1894B8AC3C474023ECB91B9 /* privacy-shield.js in Resources */ = {isa = PBXBuildFile; fileRef = B4617ABB1048A46E05D36170 /* privacy-shield.js */; };
 		F1C35DCF12DC4B21771D04D1 /* VoiceProactivity+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A744F0B8BBA1B6BD9491F2 /* VoiceProactivity+Convenience.swift */; };
@@ -2839,7 +2838,6 @@
 		637130673210A50F403CA48F /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		6404ED56E90ACC76AEE2CB42 /* MissionOrchestrator+Analysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MissionOrchestrator+Analysis.swift"; sourceTree = "<group>"; };
 		641AABBD961397347B846F20 /* PatternDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternDetector.swift; sourceTree = "<group>"; };
-		648B18CCC2E11CF81E8EE874 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		64BEC0A96C2F4BAE27B5C351 /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
 		65047875E449994016D285AA /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
 		650D021B02177CE39497D64F /* TheaProducts.storekit */ = {isa = PBXFileReference; path = TheaProducts.storekit; sourceTree = "<group>"; };
@@ -3912,7 +3910,6 @@
 				010A46FB9A7C5C68902D3A47 /* DeviceCapabilityRouter.swift */,
 				C2AE425B0B8FE0D50096C3F4 /* DistributedTaskExecutor.swift */,
 				37B73D4B47836A3252300979 /* ErrorLogger.swift */,
-				648B18CCC2E11CF81E8EE874 /* FeatureFlags.swift */,
 				66C8ECE96F68E07389334095 /* MemoryService.swift */,
 				1929BDC645D1ABE08396E35E /* SendableValue.swift */,
 				55A74D3D8CF3D0113B136682 /* UniversalNotificationService.swift */,
@@ -8074,7 +8071,6 @@
 				9F0759F17D789F8EFFDB8F57 /* ExtensionSyncBridgeTypes.swift in Sources */,
 				7540CBBCC577C60B7DF9BE14 /* ExternalSubscriptionManager.swift in Sources */,
 				561EB0F198ED23B9905D67D9 /* ExternalSubscriptionsView.swift in Sources */,
-				F1828BF4B42F90A001D96179 /* FeatureFlags.swift in Sources */,
 				DA7AA9ED0674311A55BFBAB3 /* FeatureFlags.swift in Sources */,
 				65E9884484C6A9750D3F783B /* FeatureGate.swift in Sources */,
 				93199EDC028E75C609D146CE /* FileAttachmentManager.swift in Sources */,

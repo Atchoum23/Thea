@@ -6,35 +6,60 @@ import Foundation
 
 // MARK: - PII Sanitizer
 
-/// Detects and masks Personally Identifiable Information before sending to AI
-/// Compliant with GDPR, CCPA, and OWASP LLM security guidelines
+/// Detects and masks Personally Identifiable Information before sending to AI.
+/// Compliant with GDPR, CCPA, and OWASP LLM security guidelines.
 @MainActor
 @Observable
 final class PIISanitizer {
+    /// Shared singleton instance.
     static let shared = PIISanitizer()
 
     // MARK: - Configuration
 
+    /// Settings controlling which PII types to detect and mask.
     struct Configuration: Codable, Sendable {
+        /// Master toggle for PII sanitization.
         var enablePIISanitization: Bool = true
+        /// Whether to mask email addresses.
         var maskEmails: Bool = true
+        /// Whether to mask phone numbers.
         var maskPhoneNumbers: Bool = true
+        /// Whether to mask credit card numbers.
         var maskCreditCards: Bool = true
+        /// Whether to mask Social Security Numbers.
         var maskSSNs: Bool = true
+        /// Whether to mask IP addresses.
         var maskIPAddresses: Bool = true
+        /// Whether to mask physical addresses.
         var maskAddresses: Bool = true
-        var maskNames: Bool = false // Disabled by default - may be needed in context
+        /// Whether to mask personal names (disabled by default as names may be needed in context).
+        var maskNames: Bool = false
+        /// Whether to log detection events for statistics.
         var logDetections: Bool = false
+        /// User-defined custom regex patterns to detect.
         var customPatterns: [CustomPattern] = []
     }
 
+    /// A user-defined regex pattern for detecting custom PII types.
     struct CustomPattern: Codable, Sendable, Identifiable {
+        /// Unique pattern identifier.
         let id: UUID
+        /// Human-readable name for this pattern.
         var name: String
+        /// Regex pattern string.
         var pattern: String
+        /// Replacement text for matched content.
         var replacement: String
+        /// Whether this custom pattern is active.
         var isEnabled: Bool
 
+        /// Creates a custom PII detection pattern.
+        /// - Parameters:
+        ///   - id: Pattern identifier.
+        ///   - name: Pattern name.
+        ///   - pattern: Regex pattern.
+        ///   - replacement: Replacement text.
+        ///   - isEnabled: Whether active.
         init(id: UUID = UUID(), name: String, pattern: String, replacement: String, isEnabled: Bool = true) {
             self.id = id
             self.name = name
@@ -44,21 +69,33 @@ final class PIISanitizer {
         }
     }
 
+    /// Current sanitization configuration.
     private(set) var configuration = Configuration()
+    /// History of PII detections for statistics (limited to 1000 entries).
     private(set) var detectionHistory: [PIIDetection] = []
 
     // MARK: - Detection Types
 
+    /// Types of PII that can be detected and masked.
     enum PIIType: String, Codable, Sendable, CaseIterable {
+        /// Email address (user@example.com).
         case email
+        /// Phone number (domestic or international).
         case phoneNumber
+        /// Credit card number (Visa, MC, Amex, Discover).
         case creditCard
+        /// US Social Security Number.
         case ssn
+        /// IPv4 or IPv6 address.
         case ipAddress
+        /// US physical/mailing address.
         case address
+        /// Personal name.
         case name
+        /// User-defined custom pattern.
         case custom
 
+        /// Human-readable display name for this PII type.
         var displayName: String {
             switch self {
             case .email: "Email Address"
@@ -72,6 +109,7 @@ final class PIISanitizer {
             }
         }
 
+        /// Replacement text used when masking this PII type.
         var maskText: String {
             switch self {
             case .email: "[EMAIL_REDACTED]"
@@ -86,13 +124,23 @@ final class PIISanitizer {
         }
     }
 
+    /// Record of a single PII detection event (stores only metadata, not the PII itself).
     struct PIIDetection: Identifiable, Codable, Sendable {
+        /// Unique detection identifier.
         let id: UUID
+        /// When the detection occurred.
         let timestamp: Date
+        /// Type of PII detected.
         let type: PIIType
+        /// Character length of the original PII (for statistics, not content).
         let originalLength: Int
-        let contextHint: String // First/last chars for verification
+        /// First and last character hint for verification (e.g. "j...n").
+        let contextHint: String
 
+        /// Creates a PII detection record from a matched string.
+        /// - Parameters:
+        ///   - type: Type of PII found.
+        ///   - original: The matched PII string (only metadata is stored).
         init(type: PIIType, original: String) {
             self.id = UUID()
             self.timestamp = Date()
@@ -109,6 +157,7 @@ final class PIISanitizer {
 
     // MARK: - Regex Patterns
 
+    /// Pre-compiled regex patterns for each PII type.
     private let patterns: [(PIIType, NSRegularExpression)] = {
         var result: [(PIIType, NSRegularExpression)] = []
 
@@ -187,7 +236,9 @@ final class PIISanitizer {
 
     // MARK: - Sanitization
 
-    /// Sanitize text by masking detected PII
+    /// Scans text for PII and replaces detected instances with mask tokens.
+    /// - Parameter text: Input text to sanitize.
+    /// - Returns: A result containing the sanitized text, detections, and whether modifications were made.
     func sanitize(_ text: String) -> SanitizationResult {
         guard configuration.enablePIISanitization else {
             return SanitizationResult(sanitizedText: text, detections: [], wasModified: false)
@@ -250,7 +301,9 @@ final class PIISanitizer {
         )
     }
 
-    /// Check if we should mask this type based on configuration
+    /// Checks whether the given PII type should be masked based on current configuration.
+    /// - Parameter type: The PII type to check.
+    /// - Returns: Whether masking is enabled for this type.
     private func shouldMask(_ type: PIIType) -> Bool {
         switch type {
         case .email: configuration.maskEmails
@@ -264,7 +317,11 @@ final class PIISanitizer {
         }
     }
 
-    /// Validate that a match is actually PII (reduce false positives)
+    /// Validates that a regex match is actually PII to reduce false positives.
+    /// - Parameters:
+    ///   - match: The matched string.
+    ///   - type: The PII type the match was detected as.
+    /// - Returns: Whether the match is valid PII.
     private func validateMatch(_ match: String, for type: PIIType) -> Bool {
         switch type {
         case .creditCard:
@@ -285,7 +342,9 @@ final class PIISanitizer {
         }
     }
 
-    /// Luhn algorithm for credit card validation
+    /// Validates a credit card number using the Luhn algorithm.
+    /// - Parameter number: Digits-only card number string.
+    /// - Returns: Whether the number passes Luhn validation.
     private func validateLuhn(_ number: String) -> Bool {
         let digits = number.compactMap { $0.wholeNumberValue }
         guard digits.count >= 13, digits.count <= 19 else { return false }
@@ -304,21 +363,28 @@ final class PIISanitizer {
 
     // MARK: - Configuration
 
+    /// Replaces the current configuration with a new one and persists it.
+    /// - Parameter config: New configuration to apply.
     func updateConfiguration(_ config: Configuration) {
         configuration = config
         saveConfiguration()
     }
 
+    /// Adds a custom PII detection pattern and persists the updated configuration.
+    /// - Parameter pattern: Custom pattern to add.
     func addCustomPattern(_ pattern: CustomPattern) {
         configuration.customPatterns.append(pattern)
         saveConfiguration()
     }
 
+    /// Removes a custom PII detection pattern by ID and persists the updated configuration.
+    /// - Parameter id: Identifier of the pattern to remove.
     func removeCustomPattern(id: UUID) {
         configuration.customPatterns.removeAll { $0.id == id }
         saveConfiguration()
     }
 
+    /// Loads configuration from UserDefaults.
     private func loadConfiguration() {
         if let data = UserDefaults.standard.data(forKey: "PIISanitizer.config"),
            let config = try? JSONDecoder().decode(Configuration.self, from: data) {
@@ -326,6 +392,7 @@ final class PIISanitizer {
         }
     }
 
+    /// Persists the current configuration to UserDefaults.
     private func saveConfiguration() {
         if let data = try? JSONEncoder().encode(configuration) {
             UserDefaults.standard.set(data, forKey: "PIISanitizer.config")
@@ -334,6 +401,8 @@ final class PIISanitizer {
 
     // MARK: - Statistics
 
+    /// Returns aggregate statistics about PII detection history.
+    /// - Returns: Statistics including total detections and breakdown by type.
     func getStatistics() -> PIISanitizerStats {
         PIISanitizerStats(
             totalDetections: detectionHistory.count,
@@ -343,6 +412,7 @@ final class PIISanitizer {
         )
     }
 
+    /// Clears all detection history.
     func clearHistory() {
         detectionHistory.removeAll()
     }
@@ -350,14 +420,22 @@ final class PIISanitizer {
 
 // MARK: - Supporting Types
 
+/// Result of sanitizing a text string for PII.
 struct SanitizationResult: Sendable {
+    /// Text with PII replaced by mask tokens.
     let sanitizedText: String
+    /// Individual PII detections that were made.
     let detections: [PIISanitizer.PIIDetection]
+    /// Whether any PII was detected and masked.
     let wasModified: Bool
 }
 
+/// Aggregate statistics about PII detection activity.
 struct PIISanitizerStats: Sendable {
+    /// Total number of PII instances detected.
     let totalDetections: Int
+    /// Detection count broken down by PII type.
     let detectionsByType: [PIISanitizer.PIIType: Int]
+    /// Timestamp of the most recent detection.
     let lastDetection: Date?
 }
