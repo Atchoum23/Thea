@@ -407,20 +407,82 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         // 1. Store in memory system
         await storeInMemory(event)
 
-        // 2. Run AI analysis if significant
+        // 2. Feed BehavioralFingerprint for temporal pattern learning
+        feedBehavioralFingerprint(event)
+
+        // 3. Run AI analysis if significant
         if event.significance >= .moderate {
             await analyzeWithAI(event)
         }
 
-        // 3. Check for proactive opportunities
+        // 4. Check for proactive opportunities
         await checkProactiveOpportunities(event)
 
-        // 4. Publish to EventBus for UI updates
+        // 5. Publish to EventBus for UI updates
         publishToEventBus(event)
 
-        // 5. Queue for iCloud sync (significant events only to save bandwidth)
+        // 6. Queue for iCloud sync (significant events only to save bandwidth)
         if event.significance >= .minor {
             queueForCloudSync(event)
+        }
+    }
+
+    /// Maps life event types to BehavioralFingerprint activity types and records them
+    private func feedBehavioralFingerprint(_ event: LifeEvent) {
+        let activity: BehavioralActivityType = switch event.type {
+        // Communication
+        case .messageSent, .messageReceived, .emailReceived, .emailSent,
+             .socialCall, .socialVideoCall:
+            .communication
+        // Meetings / Calendar
+        case .eventStart, .calendarEventCreated, .calendarEventModified, .calendarEventDeleted:
+            .meetings
+        // Browsing
+        case .pageVisit, .pageRead, .linkClick, .searchQuery, .formSubmit:
+            .browsing
+        // Deep work (file/document/code activity)
+        case .fileActivity, .documentActivity, .inputActivity, .behaviorPattern:
+            .deepWork
+        // Health / Exercise
+        case .healthMetric, .activityGoal:
+            .exercise
+        // Leisure (social, media, TV, photos)
+        case .socialLike, .socialComment, .socialFollow, .socialMention, .socialMatch,
+             .socialStoryView,
+             .musicPlaying, .musicPaused, .musicStopped, .musicSessionEnded,
+             .videoPlaying, .videoPaused, .videoStopped, .videoSessionEnded,
+             .tvWatching, .tvAppLaunch, .tvChannelChange, .tvPowerState, .tvVolumeChange,
+             .photoTaken, .screenshotTaken, .photoEdited, .photoFavorited, .photoDeleted:
+            .leisure
+        // App switch — categorize by app data
+        case .appSwitch:
+            mapAppToActivity(event.data)
+        // Everything else
+        default:
+            .idle
+        }
+
+        BehavioralFingerprint.shared.recordActivity(activity)
+    }
+
+    /// Maps app usage events to behavioral activity types based on app category
+    private func mapAppToActivity(_ data: [String: String]) -> BehavioralActivityType {
+        let category = data["category"] ?? ""
+        switch category {
+        case "productivity", "development", "developer_tools":
+            return .deepWork
+        case "communication", "email":
+            return .communication
+        case "social", "social_media":
+            return .leisure
+        case "entertainment", "music", "video", "games":
+            return .leisure
+        case "health", "fitness":
+            return .exercise
+        case "browser", "reference":
+            return .browsing
+        default:
+            return .idle
         }
     }
 
