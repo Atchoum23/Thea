@@ -36,7 +36,7 @@ private final class TestErrorLogger: @unchecked Sendable {
         }
     }
 
-    static func tryOrNilAsync<T>(context: String, _ body: () async throws -> T) async -> T? {
+    static func tryOrNilAsync<T>(context: String, _ body: @Sendable () async throws -> T) async -> T? {
         do {
             return try await body()
         } catch {
