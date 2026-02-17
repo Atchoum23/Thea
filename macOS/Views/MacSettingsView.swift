@@ -57,6 +57,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case moltbook = "Moltbook"
     case knowledge = "Knowledge"
     case appPairing = "App Pairing"
+    case liveGuidance = "Live Guidance"
 
     // Group 2: Features
     case clipboard = "Clipboard"
@@ -115,6 +116,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .moltbook: "bubble.left.and.text.bubble.right"
         case .knowledge: "books.vertical"
         case .appPairing: "app.connected.to.app.below.fill"
+        case .liveGuidance: "eye.circle.fill"
         case .clipboard: "doc.on.clipboard"
         case .translation: "character.bubble"
         case .voiceInput: "mic.fill"
@@ -158,7 +160,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .moltbook, .knowledge, .appPairing: 1
+        case .providers, .memory, .agent, .moltbook, .knowledge, .appPairing, .liveGuidance: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
@@ -276,6 +278,8 @@ struct MacSettingsView: View {
             KnowledgeScannerConfigurationView()
         case .appPairing:
             AppPairingSettingsView()
+        case .liveGuidance:
+            LiveGuidanceSettingsView()
         case .clipboard:
             TheaClipSettingsView()
         case .translation:
