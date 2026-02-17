@@ -234,7 +234,7 @@ class StreamingAvailabilityService {
     title: string,
     type: 'movie' | 'show',
     season?: number,
-    episode?: number
+    _episode?: number
   ): Promise<AvailabilityRecommendation> {
     // Check for show-specific override first
     const override = this.preferences.showOverrides.get(showId);
@@ -475,7 +475,7 @@ class StreamingAvailabilityService {
     title: string,
     type: 'movie' | 'show',
     account: StreamingAccount,
-    season?: number
+    _season?: number
   ): Promise<StreamingContentInfo | null> {
     // In production, this would call JustWatch API or similar
     // For now, return mock data based on account configuration

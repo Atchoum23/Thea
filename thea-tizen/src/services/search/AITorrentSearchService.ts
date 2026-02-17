@@ -55,6 +55,7 @@ const CODEC_PATTERNS = {
   'av1': ['AV1'],
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AUDIO_PATTERNS = {
   'atmos': ['Atmos', 'TrueHD.Atmos', 'DDP5.1.Atmos'],
   'truehd': ['TrueHD', 'True-HD'],

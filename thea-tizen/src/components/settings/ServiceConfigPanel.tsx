@@ -20,7 +20,7 @@ interface ServiceConfigPanelProps {
   onClose?: () => void;
 }
 
-export const ServiceConfigPanel: React.FC<ServiceConfigPanelProps> = ({ onClose }) => {
+export const ServiceConfigPanel: React.FC<ServiceConfigPanelProps> = ({ onClose: _onClose }) => {
   const [selectedService, setSelectedService] = useState<ServiceConfig | null>(null);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);

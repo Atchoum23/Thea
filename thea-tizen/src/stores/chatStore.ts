@@ -81,7 +81,8 @@ export const useChatStore = create<ChatState>()(
 
       deleteConversation: (id: string) => {
         set(state => {
-          const { [id]: _, ...remainingMessages } = state.messages;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [id]: _removed, ...remainingMessages } = state.messages;
           const conversations = state.conversations.filter(c => c.id !== id);
           const activeId = state.activeConversationId === id
             ? conversations[0]?.id || null

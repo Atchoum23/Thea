@@ -110,6 +110,7 @@ const QUALITY_RANKINGS: Record<string, number> = {
   'SD': 30,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CODEC_RANKINGS: Record<string, number> = {
   'x265': 100,
   'HEVC': 100,

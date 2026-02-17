@@ -74,6 +74,7 @@ export interface SmartHubItem {
 }
 
 // JustWatch-like service IDs mapped to app names
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const STREAMING_SERVICE_MAP: Record<string, string[]> = {
   'netflix': ['Netflix', 'com.netflix.ninja', '3201907018807'],
   'amazon': ['Prime Video', 'com.amazon.avod', '3201910019365'],
@@ -127,6 +128,7 @@ class SmartHubService {
     includeWatchlist?: boolean;
     includeProgress?: boolean;
   } = {}): Promise<SmartHubItem[]> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { days = 7, includeWatchlist = true, includeProgress = true } = options;
 
     try {
@@ -518,6 +520,7 @@ class SmartHubService {
   private async getExternalIds(item: TraktCalendarItem): Promise<StreamingAvailability['externalIds']> {
     // In production, this would query JustWatch API or similar
     // For now, we return the IDs we have from Trakt
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const ids = item.type === 'episode' ? item.show?.ids : item.movie?.ids;
     return {
       // These would be populated from JustWatch/Streaming availability API
@@ -526,8 +529,8 @@ class SmartHubService {
 
   private async checkPlatformAvailability(
     app: InstalledApp,
-    item: TraktCalendarItem,
-    externalIds: StreamingAvailability['externalIds']
+    _item: TraktCalendarItem,
+    _externalIds: StreamingAvailability['externalIds']
   ): Promise<boolean> {
     // In production, this would check against JustWatch or streaming APIs
     // For now, we return true for Plex (where torrents go) and randomize others for demo
@@ -538,7 +541,7 @@ class SmartHubService {
     return Math.random() > 0.5;
   }
 
-  private getContentId(appName: string, externalIds?: StreamingAvailability['externalIds']): string {
+  private getContentId(_appName: string, _externalIds?: StreamingAvailability['externalIds']): string {
     // In production, map the external IDs to platform-specific content IDs
     return '';
   }

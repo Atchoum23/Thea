@@ -17,7 +17,6 @@ export function MessageBubble({
   streamingText,
 }: MessageBubbleProps) {
   const isUser = message.role === 'user';
-  const isAssistant = message.role === 'assistant';
   const isSystem = message.role === 'system';
 
   const content = isStreaming && streamingText !== undefined

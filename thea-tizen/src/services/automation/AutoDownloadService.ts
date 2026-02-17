@@ -803,7 +803,7 @@ class AutoDownloadService {
           timestamp: new Date().toISOString(),
         }),
       });
-    } catch (error) {
+    } catch {
       // Ignore notification failures
     }
   }

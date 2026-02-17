@@ -15,9 +15,8 @@ import { traktCalendarService, TraktCalendarItem } from '../trakt/TraktCalendarS
 import { plexService } from '../plex/PlexService';
 import { watchAvailabilityService } from '../streaming/WatchAvailabilityService';
 import { torrentQualityService, TorrentInfo } from '../torrent/TorrentQualityService';
-import { releaseIntelligenceService, DownloadDecision } from './ReleaseIntelligenceService';
+import { releaseIntelligenceService } from './ReleaseIntelligenceService';
 import { secureConfigService } from '../config/SecureConfigService';
-import { SYNC_BRIDGE_URL } from '../../config/constants';
 
 export interface MonitoredEpisode {
   show: {

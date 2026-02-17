@@ -7,7 +7,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation';
 import { useChatStore } from '../stores/chatStore';
-import { MessageBubble, EmptyConversation, TypingIndicator } from '../components/chat/MessageBubble';
+import { MessageBubble, EmptyConversation } from '../components/chat/MessageBubble';
 import { FocusableButton, FocusableCard, FocusableList } from '../components/ui/FocusableCard';
 import { ColorButtonHints, CommonHints } from '../components/ui/ColorButtonHints';
 import { useTVRemote } from '../hooks/useTVRemote';

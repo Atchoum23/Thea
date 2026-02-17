@@ -17,7 +17,7 @@ interface AutoDownloadSettingsProps {
   onClose?: () => void;
 }
 
-export function AutoDownloadSettings({ onClose }: AutoDownloadSettingsProps) {
+export function AutoDownloadSettings({ onClose: _onClose }: AutoDownloadSettingsProps) {
   const { ref, focusKey } = useFocusable({
     focusable: false,
     saveLastFocusedChild: true,

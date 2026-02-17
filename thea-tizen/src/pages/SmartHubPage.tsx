@@ -4,9 +4,9 @@
  * Provides deep-linking to streaming apps and torrent search
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { FocusContext, useFocusable, setFocus } from '@noriginmedia/norigin-spatial-navigation';
-import { FocusableCard, FocusableButton, FocusableList } from '../components/ui/FocusableCard';
+import { useState, useEffect } from 'react';
+import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation';
+import { FocusableButton, FocusableList } from '../components/ui/FocusableCard';
 import { ColorButtonHints } from '../components/ui/ColorButtonHints';
 import { useTVRemote } from '../hooks/useTVRemote';
 import {

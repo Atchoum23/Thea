@@ -17,7 +17,6 @@
  * @see https://radarr.video/
  */
 
-import { secureConfigService } from '../config/SecureConfigService';
 
 // ============================================================
 // TYPES

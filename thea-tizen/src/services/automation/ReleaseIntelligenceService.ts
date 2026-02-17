@@ -12,7 +12,6 @@
  */
 
 import { torrentQualityService, TorrentInfo, ScoredTorrent } from '../torrent/TorrentQualityService';
-import { secureConfigService } from '../config/SecureConfigService';
 
 export interface ReleasePattern {
   showId: string; // Trakt or TMDB ID
@@ -253,7 +252,7 @@ class ReleaseIntelligenceService {
     network?: string;
     searchResults?: TorrentInfo[];
   }): Promise<DownloadDecision> {
-    const { showId, showTitle, season, episode, airTime, network, searchResults } = params;
+    const { showId, showTitle, airTime, network, searchResults } = params;
     const now = new Date();
     const minutesSinceAir = (now.getTime() - airTime.getTime()) / (1000 * 60);
 
@@ -416,7 +415,7 @@ class ReleaseIntelligenceService {
   /**
    * Estimate when a show will be available
    */
-  estimateAvailability(showId: string, airTime: Date): {
+  estimateAvailability(showId: string, _airTime: Date): {
     earliestMinutes: number;
     expectedMinutes: number;
     latestMinutes: number;

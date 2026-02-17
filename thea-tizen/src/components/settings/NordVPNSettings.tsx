@@ -73,7 +73,7 @@ export const NordVPNSettings: React.FC<NordVPNSettingsProps> = ({ onClose }) => 
       } else {
         setError('Failed to fetch credentials. Please check your token.');
       }
-    } catch (err) {
+    } catch {
       setError('Authentication failed. Please try again.');
     } finally {
       setLoading(false);

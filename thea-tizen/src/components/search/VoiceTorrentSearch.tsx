@@ -11,7 +11,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { FocusContext, useFocusable, setFocus } from '@noriginmedia/norigin-spatial-navigation';
-import { FocusableButton, FocusableList, FocusableCard } from '../ui/FocusableCard';
+import { FocusableList } from '../ui/FocusableCard';
 import { useTVRemote } from '../../hooks/useTVRemote';
 import {
   aiTorrentSearchService,

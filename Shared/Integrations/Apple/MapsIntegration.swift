@@ -8,7 +8,7 @@ import Foundation
 import OSLog
 
 #if canImport(MapKit)
-import MapKit
+@preconcurrency import MapKit
 #endif
 
 #if canImport(CoreLocation)
@@ -474,21 +474,27 @@ public actor MapsIntegration {
         #if canImport(MapKit)
         let request = MKDirections.Request()
 
-        let sourcePlacemark = MKPlacemark(
-            coordinate: CLLocationCoordinate2D(
-                latitude: source.latitude,
-                longitude: source.longitude
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            let sourceLocation = CLLocation(latitude: source.latitude, longitude: source.longitude)
+            let destLocation = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
+            request.source = MKMapItem(location: sourceLocation, address: nil)
+            request.destination = MKMapItem(location: destLocation, address: nil)
+        } else {
+            let sourcePlacemark = MKPlacemark(
+                coordinate: CLLocationCoordinate2D(
+                    latitude: source.latitude,
+                    longitude: source.longitude
+                )
             )
-        )
-        let destPlacemark = MKPlacemark(
-            coordinate: CLLocationCoordinate2D(
-                latitude: destination.latitude,
-                longitude: destination.longitude
+            let destPlacemark = MKPlacemark(
+                coordinate: CLLocationCoordinate2D(
+                    latitude: destination.latitude,
+                    longitude: destination.longitude
+                )
             )
-        )
-
-        request.source = MKMapItem(placemark: sourcePlacemark)
-        request.destination = MKMapItem(placemark: destPlacemark)
+            request.source = MKMapItem(placemark: sourcePlacemark)
+            request.destination = MKMapItem(placemark: destPlacemark)
+        }
         request.requestsAlternateRoutes = true
 
         request.transportType = mapTransportType(transportType)
@@ -572,21 +578,27 @@ public actor MapsIntegration {
         #if canImport(MapKit)
         let request = MKDirections.Request()
 
-        let sourcePlacemark = MKPlacemark(
-            coordinate: CLLocationCoordinate2D(
-                latitude: source.latitude,
-                longitude: source.longitude
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            let sourceLocation = CLLocation(latitude: source.latitude, longitude: source.longitude)
+            let destLocation = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
+            request.source = MKMapItem(location: sourceLocation, address: nil)
+            request.destination = MKMapItem(location: destLocation, address: nil)
+        } else {
+            let sourcePlacemark = MKPlacemark(
+                coordinate: CLLocationCoordinate2D(
+                    latitude: source.latitude,
+                    longitude: source.longitude
+                )
             )
-        )
-        let destPlacemark = MKPlacemark(
-            coordinate: CLLocationCoordinate2D(
-                latitude: destination.latitude,
-                longitude: destination.longitude
+            let destPlacemark = MKPlacemark(
+                coordinate: CLLocationCoordinate2D(
+                    latitude: destination.latitude,
+                    longitude: destination.longitude
+                )
             )
-        )
-
-        request.source = MKMapItem(placemark: sourcePlacemark)
-        request.destination = MKMapItem(placemark: destPlacemark)
+            request.source = MKMapItem(placemark: sourcePlacemark)
+            request.destination = MKMapItem(placemark: destPlacemark)
+        }
         request.transportType = mapTransportType(transportType)
 
         let directions = MKDirections(request: request)
@@ -631,12 +643,18 @@ public actor MapsIntegration {
 
     @discardableResult
     public func openInMaps(location: TheaLocation) async -> Bool {
-        let coordinate = CLLocationCoordinate2D(
-            latitude: location.coordinate.latitude,
-            longitude: location.coordinate.longitude
-        )
-        let placemark = MKPlacemark(coordinate: coordinate)
-        let mapItem = MKMapItem(placemark: placemark)
+        let mapItem: MKMapItem
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            let clLocation = CLLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+            mapItem = MKMapItem(location: clLocation, address: nil)
+        } else {
+            let coordinate = CLLocationCoordinate2D(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+            let placemark = MKPlacemark(coordinate: coordinate)
+            mapItem = MKMapItem(placemark: placemark)
+        }
         mapItem.name = location.name
         if #available(macOS 14.0, iOS 17.0, *) {
             #if os(macOS)
@@ -663,24 +681,35 @@ public actor MapsIntegration {
         var mapItems: [MKMapItem] = []
 
         if let source = source {
-            let sourcePlacemark = MKPlacemark(
-                coordinate: CLLocationCoordinate2D(
-                    latitude: source.latitude,
-                    longitude: source.longitude
+            if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+                let sourceLocation = CLLocation(latitude: source.latitude, longitude: source.longitude)
+                mapItems.append(MKMapItem(location: sourceLocation, address: nil))
+            } else {
+                let sourcePlacemark = MKPlacemark(
+                    coordinate: CLLocationCoordinate2D(
+                        latitude: source.latitude,
+                        longitude: source.longitude
+                    )
                 )
-            )
-            mapItems.append(MKMapItem(placemark: sourcePlacemark))
+                mapItems.append(MKMapItem(placemark: sourcePlacemark))
+            }
         } else {
             mapItems.append(MKMapItem.forCurrentLocation())
         }
 
-        let destPlacemark = MKPlacemark(
-            coordinate: CLLocationCoordinate2D(
-                latitude: destination.latitude,
-                longitude: destination.longitude
+        let destMapItem: MKMapItem
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            let destLocation = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
+            destMapItem = MKMapItem(location: destLocation, address: nil)
+        } else {
+            let destPlacemark = MKPlacemark(
+                coordinate: CLLocationCoordinate2D(
+                    latitude: destination.latitude,
+                    longitude: destination.longitude
+                )
             )
-        )
-        let destMapItem = MKMapItem(placemark: destPlacemark)
+            destMapItem = MKMapItem(placemark: destPlacemark)
+        }
         destMapItem.name = destinationName
         mapItems.append(destMapItem)
 
@@ -710,10 +739,18 @@ public actor MapsIntegration {
         _ mapItem: MKMapItem,
         searchCenter: TheaCoordinate?
     ) -> TheaLocation {
-        let coordinate = TheaCoordinate(
-            latitude: mapItem.placemark.coordinate.latitude,
-            longitude: mapItem.placemark.coordinate.longitude
-        )
+        let coordinate: TheaCoordinate
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            coordinate = TheaCoordinate(
+                latitude: mapItem.location.coordinate.latitude,
+                longitude: mapItem.location.coordinate.longitude
+            )
+        } else {
+            coordinate = TheaCoordinate(
+                latitude: mapItem.placemark.coordinate.latitude,
+                longitude: mapItem.placemark.coordinate.longitude
+            )
+        }
 
         var distanceFromCenter: Double?
         if let center = searchCenter {
@@ -727,9 +764,17 @@ public actor MapsIntegration {
             }
         }
 
+        let locationID: String
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            locationID = mapItem.location.coordinate.latitude.description +
+                mapItem.location.coordinate.longitude.description
+        } else {
+            locationID = mapItem.placemark.coordinate.latitude.description +
+                mapItem.placemark.coordinate.longitude.description
+        }
+
         return TheaLocation(
-            id: mapItem.placemark.coordinate.latitude.description +
-                mapItem.placemark.coordinate.longitude.description,
+            id: locationID,
             name: mapItem.name ?? "Unknown",
             address: formatAddress(from: mapItem),
             coordinate: coordinate,
@@ -923,36 +968,47 @@ public actor MapsIntegration {
     #if canImport(MapKit)
 
     private func formatAddress(from mapItem: MKMapItem) -> String {
-        // Use MKMapItem's placemark (CLPlacemark) properties for address formatting
-        // This avoids direct MKPlacemark usage deprecated in iOS 26
-        let placemark = mapItem.placemark as CLPlacemark
-        var components: [String] = []
-
-        if let thoroughfare = placemark.thoroughfare {
-            var street = thoroughfare
-            if let subThoroughfare = placemark.subThoroughfare {
-                street = "\(subThoroughfare) \(thoroughfare)"
+        if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+            // Use new MKAddress / MKAddressRepresentations API
+            if let representations = mapItem.addressRepresentations {
+                if let full = representations.fullAddress(includingRegion: true, singleLine: true) {
+                    return full
+                }
             }
-            components.append(street)
-        }
+            if let address = mapItem.address {
+                return address.fullAddress
+            }
+            return ""
+        } else {
+            let placemark = mapItem.placemark as CLPlacemark
+            var components: [String] = []
 
-        if let locality = placemark.locality {
-            components.append(locality)
-        }
+            if let thoroughfare = placemark.thoroughfare {
+                var street = thoroughfare
+                if let subThoroughfare = placemark.subThoroughfare {
+                    street = "\(subThoroughfare) \(thoroughfare)"
+                }
+                components.append(street)
+            }
 
-        if let administrativeArea = placemark.administrativeArea {
-            components.append(administrativeArea)
-        }
+            if let locality = placemark.locality {
+                components.append(locality)
+            }
 
-        if let postalCode = placemark.postalCode {
-            components.append(postalCode)
-        }
+            if let administrativeArea = placemark.administrativeArea {
+                components.append(administrativeArea)
+            }
 
-        if let country = placemark.country {
-            components.append(country)
-        }
+            if let postalCode = placemark.postalCode {
+                components.append(postalCode)
+            }
 
-        return components.joined(separator: ", ")
+            if let country = placemark.country {
+                components.append(country)
+            }
+
+            return components.joined(separator: ", ")
+        }
     }
     #endif
 }

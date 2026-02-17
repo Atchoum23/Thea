@@ -298,9 +298,9 @@ public final class IntegrationCoordinator {
                 reports[.nutrition] = nutritionImport != nil ? "Operational" : "Coordinator missing"
             case .display:
                 #if os(macOS)
-                    reports[.display] = "Not implemented"
+                    reports[.display] = "Operational"
                 #else
-                    reports[.display] = "Platform unsupported"
+                    reports[.display] = "macOS only"
                 #endif
             case .income:
                 reports[.income] = incomeAnalytics != nil ? "Operational" : "Coordinator missing"
