@@ -174,10 +174,15 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
         // Each method attempts the real API call; falls back to demo data on failure
         let entries: [IncomeEntry]
         switch platform.category {
-        case .upwork:
-            entries = try await syncUpwork(apiKey: apiKey, streamID: platform.id)
-        case .fiverr:
-            entries = try await syncFiverr(apiKey: apiKey, streamID: platform.id)
+        case .freelancing:
+            switch platform.name.lowercased() {
+            case "upwork":
+                entries = try await syncUpwork(apiKey: apiKey, streamID: platform.id)
+            case "fiverr":
+                entries = try await syncFiverr(apiKey: apiKey, streamID: platform.id)
+            default:
+                entries = generateDemoEntries(streamID: platform.id, platformName: platform.name)
+            }
         default:
             entries = generateDemoEntries(streamID: platform.id, platformName: platform.name)
         }
