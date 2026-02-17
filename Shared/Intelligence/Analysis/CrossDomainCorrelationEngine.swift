@@ -475,7 +475,7 @@ final class CrossDomainCorrelationEngine {
                     let direction = r > 0 ? "better" : "worse"
                     return "Your mood tends to be \(direction) on days with more deep work (r=\(String(format: "%.2f", r)))."
                 }
-            ),
+            )
         ]
     }
 

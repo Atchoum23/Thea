@@ -37,7 +37,7 @@ final class NotificationChannel: NSObject, ObservableObject {
 
     // MARK: - Init
 
-    private override init() {
+    override private init() {
         super.init()
     }
 

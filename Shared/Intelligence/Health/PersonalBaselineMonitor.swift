@@ -66,7 +66,7 @@ struct AnomalyAlert: Codable, Sendable, Identifiable {
 
 @MainActor
 @Observable
-final class PersonalBaselineMonitor: Sendable {
+final class PersonalBaselineMonitor {
 
     // MARK: Singleton
 
@@ -89,13 +89,13 @@ final class PersonalBaselineMonitor: Sendable {
 
     /// Metric-name to HealthKit mapping.
     private static let metricDefinitions: [(name: String, quantityType: HKQuantityTypeIdentifier?, categoryType: HKCategoryTypeIdentifier?, unit: HKUnit)] = [
-        ("restingHeartRate",      .restingHeartRate,            nil,            HKUnit.count().unitDivided(by: .minute())),
-        ("heartRateVariability",  .heartRateVariabilitySDNN,    nil,            HKUnit.secondUnit(with: .milli)),
-        ("stepCount",             .stepCount,                   nil,            .count()),
-        ("exerciseMinutes",       .appleExerciseTime,           nil,            .minute()),
-        ("activeCalories",        .activeEnergyBurned,          nil,            .kilocalorie()),
-        ("respiratoryRate",       .respiratoryRate,             nil,            HKUnit.count().unitDivided(by: .minute())),
-        ("sleepDuration",         nil,                          .sleepAnalysis, .hour()),
+        ("restingHeartRate", .restingHeartRate, nil, HKUnit.count().unitDivided(by: .minute())),
+        ("heartRateVariability", .heartRateVariabilitySDNN, nil, HKUnit.secondUnit(with: .milli)),
+        ("stepCount", .stepCount, nil, .count()),
+        ("exerciseMinutes", .appleExerciseTime, nil, .minute()),
+        ("activeCalories", .activeEnergyBurned, nil, .kilocalorie()),
+        ("respiratoryRate", .respiratoryRate, nil, HKUnit.count().unitDivided(by: .minute())),
+        ("sleepDuration", nil, .sleepAnalysis, .hour())
     ]
 
     // MARK: Init

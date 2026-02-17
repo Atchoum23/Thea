@@ -562,4 +562,3 @@ final class BackgroundServiceMonitor: ObservableObject {
         }
     }
 }
-

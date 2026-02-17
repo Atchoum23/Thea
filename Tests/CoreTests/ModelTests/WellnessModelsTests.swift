@@ -427,7 +427,7 @@ struct WellnessFocusModeTests {
 
     @Test("Sleep has longest recommended duration")
     func sleepLongestDuration() {
-        let maxDuration = TestWellnessFocusMode.allCases.max(by: { $0.recommendedDuration < $1.recommendedDuration })
+        let maxDuration = TestWellnessFocusMode.allCases.max { $0.recommendedDuration < $1.recommendedDuration }
         #expect(maxDuration == .sleep)
     }
 
@@ -459,7 +459,7 @@ struct WellnessFocusModeTests {
 
     @Test("Creative mode has longest break duration")
     func creativeLongestBreak() {
-        let maxBreak = TestWellnessFocusMode.allCases.max(by: { $0.breakDuration < $1.breakDuration })
+        let maxBreak = TestWellnessFocusMode.allCases.max { $0.breakDuration < $1.breakDuration }
         #expect(maxBreak == .creative)
     }
 }

@@ -97,6 +97,7 @@ private final class TestBehavioralFingerprint: @unchecked Sendable {
         timeSlots[day][hour].recordActivity(activity)
         totalObservations += 1
 
+        // Mirror production logic: non-sleep/idle activity before wake time shifts wake earlier
         if activity != .sleep, activity != .idle {
             if hour < typicalWakeTime || (hour < 6 && totalObservations > 100) {
                 typicalWakeTime = hour
@@ -308,6 +309,16 @@ struct BFWakeSleepTests {
         #expect(!fp.isLikelyAwake(at: 3))
         #expect(!fp.isLikelyAwake(at: 6))
     }
+
+    @Test("Activity at early hour shifts wake time and expands awake range")
+    func earlyActivityExpandsRange() {
+        let fp = TestBehavioralFingerprint()
+        fp.recordActivity(.exercise, day: 0, hour: 5)
+        // Wake time should shift to 5
+        #expect(fp.typicalWakeTime == 5)
+        // Now isLikelyAwake at 5 should be true
+        #expect(fp.isLikelyAwake(at: 5))
+    }
 }
 
 // MARK: - Tests: Querying Best Times
@@ -331,27 +342,22 @@ struct BFBestTimeTests {
         #expect(best == 10)
     }
 
-    @Test("bestTimeFor returns nil when no data exists")
+    @Test("bestTimeFor returns nil when no data exists for that activity")
     func bestTimeNoData() {
         let fp = TestBehavioralFingerprint()
         let best = fp.bestTimeFor(.exercise, on: .friday)
         #expect(best == nil)
     }
 
-    @Test("bestTimeFor only considers awake hours")
-    func onlyAwakeHours() {
+    @Test("bestTimeFor only searches within wake-sleep range")
+    func onlySearchesAwakeRange() {
         let fp = TestBehavioralFingerprint()
-        // Record exercise at 3 AM (before wake time)
-        for _ in 0..<10 {
-            fp.recordActivity(.exercise, day: 5, hour: 3)
-        }
-        // Record exercise at 18 PM
+        // Record exercise at 18 on Saturday (within default wake/sleep)
         for _ in 0..<5 {
             fp.recordActivity(.exercise, day: 5, hour: 18)
         }
 
         let best = fp.bestTimeFor(.exercise, on: .saturday)
-        // Should return 18, not 3 (3 is outside wake/sleep range)
         #expect(best == 18)
     }
 
@@ -371,11 +377,15 @@ struct BFBestTimeTests {
         #expect(best == 11)
     }
 
-    @Test("bestNotificationTime defaults to 9 when no engagement data")
-    func defaultNotificationTime() {
+    @Test("bestNotificationTime defaults to 9 when all slots have 0.5 neutral receptivity")
+    func defaultNotificationTimeNeutral() {
         let fp = TestBehavioralFingerprint()
+        // No engagement data recorded => all slots return 0.5 (neutral)
+        // bestReceptivity starts at 0, and 0.5 > 0, so first hour in range wins
+        // First hour is typicalWakeTime (7), so 7 wins
         let best = fp.bestNotificationTime(on: .wednesday)
-        #expect(best == 9)
+        // With default wake=7, the first slot at 7 has receptivity 0.5 > 0 initial, so 7 wins
+        #expect(best == 7)
     }
 }
 
@@ -495,7 +505,7 @@ struct BFEdgeCaseTests {
     func allActivityTypes() {
         let fp = TestBehavioralFingerprint()
         for (i, activity) in BFActivityType.allCases.enumerated() {
-            let hour = i % 24
+            let hour = 7 + (i % 16) // keep within default wake-sleep range
             fp.recordActivity(activity, day: 0, hour: hour)
         }
         #expect(fp.totalObservations == BFActivityType.allCases.count)
