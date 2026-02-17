@@ -251,7 +251,7 @@ struct ChatView: View {
             }
             .alert(error: $showingError)
             .sheet(item: $syncConflictManager.activeConflict) { conflict in
-                SyncConflictResolutionView(conflict: conflict) { resolution in
+                SyncConflictResolutionView(conflict: conflict) { @MainActor resolution in
                     syncConflictManager.resolveActiveConflict(with: resolution)
                 }
             }

@@ -38,7 +38,7 @@ extension CloudKitService {
         try await ensureZoneExists(zoneID)
 
         // Configure the fetch with our saved change token
-        var previousToken = getChangeToken(for: zoneID)
+        let previousToken = getChangeToken(for: zoneID)
 
         // Collect changed and deleted records using actor-isolated storage
         let collector = RecordCollector()

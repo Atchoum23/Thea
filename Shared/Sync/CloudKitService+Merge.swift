@@ -5,7 +5,7 @@
 //  Merge operations, conflict resolution, local storage helpers, and sharing
 //
 
-import CloudKit
+@preconcurrency import CloudKit
 import Foundation
 
 // MARK: - Merge Operations
@@ -106,7 +106,7 @@ extension CloudKitService {
     func getLocalConversation(_ id: UUID) async -> CloudConversation? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-            var observerRef: NSObjectProtocol?
+            nonisolated(unsafe) var observerRef: NSObjectProtocol?
 
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalConversationResponse,
@@ -151,7 +151,7 @@ extension CloudKitService {
     func getLocalKnowledgeItem(_ id: UUID) async -> CloudKnowledgeItem? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-            var observerRef: NSObjectProtocol?
+            nonisolated(unsafe) var observerRef: NSObjectProtocol?
 
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalKnowledgeItemResponse,
@@ -195,7 +195,7 @@ extension CloudKitService {
     func getLocalProject(_ id: UUID) async -> CloudProject? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-            var observerRef: NSObjectProtocol?
+            nonisolated(unsafe) var observerRef: NSObjectProtocol?
 
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalProjectResponse,
