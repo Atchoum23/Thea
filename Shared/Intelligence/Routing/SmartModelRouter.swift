@@ -64,6 +64,95 @@ public struct RouterModelCapability: Sendable {
     }
 }
 
+// MARK: - RouterModelCapability Catalog Init
+
+extension RouterModelCapability {
+    /// Convenience initializer that maps an `AIModel` from AIModelCatalog.
+    /// Provides heuristic latency and quality scores based on model characteristics.
+    /// - Parameter model: The catalog model to convert.
+    init(from model: AIModel) {
+        // Map ModelCapability → RouterModelCapability.Capability
+        var caps: Set<Capability> = [.textGeneration]
+        for cap in model.capabilities {
+            switch cap {
+            case .codeGeneration:   caps.insert(.codeGeneration)
+            case .reasoning:        caps.insert(.reasoning)
+            case .vision:           caps.insert(.vision)
+            case .functionCalling:  caps.insert(.functionCalling)
+            case .analysis:         caps.insert(.analysis)
+            case .multimodal:       caps.insert(.vision)
+            case .search:           caps.insert(.analysis) // search models are good at analysis
+            case .chat, .completion, .embedding: break
+            }
+        }
+
+        if model.contextWindow >= 100_000 { caps.insert(.longContext) }
+        if model.supportsStreaming { caps.insert(.streaming) }
+        if model.supportsFunctionCalling { caps.insert(.functionCalling) }
+
+        // Cost categorization
+        let outputCostDouble = model.outputCostPer1K.map { NSDecimalNumber(decimal: $0).doubleValue } ?? 0
+        if outputCostDouble < 0.002 { caps.insert(.lowCost) }
+        if outputCostDouble == 0 { caps.insert(.lowCost) } // local models
+
+        // Quality heuristics based on model tier
+        let id = model.id.lowercased()
+        let qualityScore: Float
+        if id.contains("opus") || id.contains("o1") || id.contains("120b") || id.contains("pro") {
+            qualityScore = 0.92
+            caps.insert(.highQuality)
+        } else if id.contains("sonnet") || id.contains("gpt-4o") && !id.contains("mini") || id.contains("70b") {
+            qualityScore = 0.85
+        } else if id.contains("haiku") || id.contains("flash") || id.contains("mini") || id.contains("8b") {
+            qualityScore = 0.72
+            caps.insert(.fastResponse)
+        } else if model.isLocal {
+            qualityScore = 0.70
+        } else {
+            qualityScore = 0.78
+        }
+
+        // Latency heuristics
+        let averageLatency: TimeInterval
+        if model.isLocal {
+            averageLatency = 2.0
+        } else if id.contains("haiku") || id.contains("flash") || id.contains("mini") || id.contains("instant") {
+            averageLatency = 0.5
+        } else if id.contains("opus") || id.contains("o1") {
+            averageLatency = 4.0
+        } else {
+            averageLatency = 1.5
+        }
+
+        // Cost conversion: AIModel stores cost per 1K tokens; RouterModelCapability uses per 1M
+        let inputCostPerM: Double
+        let outputCostPerM: Double
+        if let inputPer1K = model.inputCostPer1K {
+            inputCostPerM = NSDecimalNumber(decimal: inputPer1K).doubleValue * 1000
+        } else {
+            inputCostPerM = 0
+        }
+        if let outputPer1K = model.outputCostPer1K {
+            outputCostPerM = NSDecimalNumber(decimal: outputPer1K).doubleValue * 1000
+        } else {
+            outputCostPerM = 0
+        }
+
+        self.init(
+            modelId: model.id,
+            provider: model.provider,
+            contextWindow: model.contextWindow,
+            maxOutputTokens: model.maxOutputTokens,
+            capabilities: caps,
+            costPerInputToken: inputCostPerM,
+            costPerOutputToken: outputCostPerM,
+            averageLatency: averageLatency,
+            qualityScore: qualityScore,
+            isLocalModel: model.isLocal
+        )
+    }
+}
+
 // MARK: - Routing Decision
 
 /// A model routing decision

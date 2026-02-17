@@ -3,12 +3,22 @@
 //
 // Extracted from SmartModelRouter.swift for file size compliance.
 // Contains all hardcoded model registrations organized by provider.
+//
+// Registration strategy:
+// 1. Catalog-driven loop registers all models from AIModelCatalog with auto-mapping.
+// 2. Provider-specific methods (below) then override/supplement with hand-tuned values
+//    (latency, qualityScore, capability flags) that the catalog doesn't capture.
+// registerModel() ignores duplicates (first registration wins) — so the catalog loop
+// runs first to ensure coverage, then provider methods refine details.
 
 import Foundation
 
 extension SmartModelRouter {
 
     func setupDefaultModels() {
+        // Phase 1: Register all catalog models automatically (no duplication risk)
+        registerCatalogModels()
+        // Phase 2: Hand-tuned provider registrations supplement/override catalog values
         registerAnthropicModels()
         registerOpenAIModels()
         registerGoogleModels()
@@ -16,6 +26,17 @@ extension SmartModelRouter {
         registerGroqModels()
         registerPerplexityModels()
         registerLocalModels()
+    }
+
+    // MARK: - Catalog-Driven Registration
+
+    /// Register all models from AIModelCatalog that are not yet registered.
+    /// Maps AIModel → RouterModelCapability with heuristic latency and quality scores.
+    private func registerCatalogModels() {
+        for model in AIModel.allKnownModels {
+            let capability = RouterModelCapability(from: model)
+            registerModel(capability)
+        }
     }
 
     // MARK: - Anthropic

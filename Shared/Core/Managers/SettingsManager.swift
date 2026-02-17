@@ -344,6 +344,39 @@ final class SettingsManager: ObservableObject {
         }
     }
 
+    // MARK: - Response Styles Settings
+
+    /// ID of the currently active response style (nil = no style active)
+    @Published var selectedResponseStyleID: String? {
+        didSet { persist(selectedResponseStyleID as Any, forKey: "selectedResponseStyleID") }
+    }
+
+    /// JSON-encoded array of ResponseStyle values (includes built-in + custom)
+    @Published var customResponseStyles: [ResponseStyle] {
+        didSet {
+            if let data = try? JSONEncoder().encode(customResponseStyles) {
+                persist(data, forKey: "customResponseStyles")
+            }
+        }
+    }
+
+    // MARK: - Personalization Settings
+
+    /// Free-text block the user fills in about themselves
+    @Published var personalizationContext: String {
+        didSet { persist(personalizationContext, forKey: "personalizationContext") }
+    }
+
+    /// How the user prefers responses to be formatted / phrased
+    @Published var personalizationResponsePreference: String {
+        didSet { persist(personalizationResponsePreference, forKey: "personalizationResponsePreference") }
+    }
+
+    /// When true, personalization context is injected into every system prompt
+    @Published var personalizationEnabled: Bool {
+        didSet { persist(personalizationEnabled, forKey: "personalizationEnabled") }
+    }
+
     // MARK: - Init
 
     private init() {
@@ -426,6 +459,18 @@ final class SettingsManager: ObservableObject {
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
         favoriteModels = Set(d.array(forKey: "favoriteModels") as? [String] ?? [])
+        // Response Styles
+        selectedResponseStyleID = d.string(forKey: "selectedResponseStyleID")
+        if let data = d.data(forKey: "customResponseStyles"),
+           let decoded = try? JSONDecoder().decode([ResponseStyle].self, from: data) {
+            customResponseStyles = decoded
+        } else {
+            customResponseStyles = []
+        }
+        // Personalization
+        personalizationContext = d.string(forKey: "personalizationContext") ?? ""
+        personalizationResponsePreference = d.string(forKey: "personalizationResponsePreference") ?? ""
+        personalizationEnabled = d.bool(forKey: "personalizationEnabled")
         syncObserver = NotificationCenter.default
             .publisher(for: .preferenceSyncDidPull)
             .receive(on: RunLoop.main)
@@ -543,6 +588,16 @@ extension SettingsManager {
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
+        // Response Styles
+        selectedResponseStyleID = d.string(forKey: "selectedResponseStyleID")
+        if let data = d.data(forKey: "customResponseStyles"),
+           let decoded = try? JSONDecoder().decode([ResponseStyle].self, from: data) {
+            customResponseStyles = decoded
+        }
+        // Personalization
+        personalizationContext = d.string(forKey: "personalizationContext") ?? ""
+        personalizationResponsePreference = d.string(forKey: "personalizationResponsePreference") ?? ""
+        personalizationEnabled = d.bool(forKey: "personalizationEnabled")
     }
 }
 

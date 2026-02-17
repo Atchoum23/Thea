@@ -37,7 +37,9 @@
         private var onProcessTerminated: ((AppProcessInfo) -> Void)?
         private var onActiveProcessChanged: ((AppProcessInfo) -> Void)?
 
-        // Workspace observers (accessed only from MainActor)
+        // Workspace observers — NSObjectProtocol tokens returned by NotificationCenter.
+        // nonisolated(unsafe): stored only from actor-isolated start(), removed only from stop()
+        // or deinit — no concurrent mutations possible.
         nonisolated(unsafe) private var launchObserver: NSObjectProtocol?
         nonisolated(unsafe) private var terminateObserver: NSObjectProtocol?
         nonisolated(unsafe) private var activateObserver: NSObjectProtocol?
