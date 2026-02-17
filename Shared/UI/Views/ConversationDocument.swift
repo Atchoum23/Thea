@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 // MARK: - Conversation Document (for export)
 
+// @unchecked Sendable: Conversation (@Model) isn't Sendable, but used read-only for export on main thread
 struct ConversationDocument: FileDocument, @unchecked Sendable {
     static var readableContentTypes: [UTType] { [.json] }
 
