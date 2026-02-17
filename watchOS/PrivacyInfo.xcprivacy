@@ -8,7 +8,7 @@
     <array/>
     <key>NSPrivacyCollectedDataTypes</key>
     <array>
-        <!-- Chat messages sent to AI providers -->
+        <!-- Chat messages sent to AI providers via inference relay -->
         <dict>
             <key>NSPrivacyCollectedDataType</key>
             <string>NSPrivacyCollectedDataTypeOtherUserContent</string>
@@ -21,7 +21,7 @@
                 <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
             </array>
         </dict>
-        <!-- Health data may appear in AI coaching context -->
+        <!-- Health data from HealthKit for coaching -->
         <dict>
             <key>NSPrivacyCollectedDataType</key>
             <string>NSPrivacyCollectedDataTypeHealth</string>
@@ -35,7 +35,7 @@
                 <string>NSPrivacyCollectedDataTypePurposeProductPersonalization</string>
             </array>
         </dict>
-        <!-- Fitness/activity data may appear in AI coaching context -->
+        <!-- Fitness/activity data from HealthKit for coaching -->
         <dict>
             <key>NSPrivacyCollectedDataType</key>
             <string>NSPrivacyCollectedDataTypeFitness</string>
