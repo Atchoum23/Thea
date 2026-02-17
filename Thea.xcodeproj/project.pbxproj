@@ -799,6 +799,7 @@
 		581EBB5DBB01C9F20957C1F5 /* OllamaAgentLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB5C8EEF65B9FE928E53EDA /* OllamaAgentLoop.swift */; };
 		583D47C5E9FAC3CC36925D22 /* PersonalKnowledgeGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D779B8BB68E7BE9F25201F /* PersonalKnowledgeGraph.swift */; };
 		589F99AF66AB61FE7AC35FC1 /* CodeAssistantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C850E2AFDC68702CF96BCE /* CodeAssistantView.swift */; };
+		58BC1F0E194F4E80E7F49AE7 /* FocusModeIntelligence+Escalation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB64299013093DB585C2B94 /* FocusModeIntelligence+Escalation.swift */; };
 		58D3CDEDD269E1C31555ADFC /* KeyboardAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC886AE87E5DF7E3F2CB2125 /* KeyboardAIService.swift */; };
 		58E2305BCE7FC49D61F23839 /* OpenClawSecurityGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6525D56321E15FE9AB783974 /* OpenClawSecurityGuard.swift */; };
 		591614B431A7C20216FA9B54 /* OrchestratorSettingsViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25663A06DB0B6830B3824E4E /* OrchestratorSettingsViewSections.swift */; };
@@ -1304,6 +1305,7 @@
 		95556B1D0F9518EAEE10868D /* TheaClipModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE0F80561949E45736F96EC /* TheaClipModels.swift */; };
 		955D09776429208AF47BBAD9 /* AppUsageMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5981EE45534F8BD517361F83 /* AppUsageMonitor.swift */; };
 		957FCBD45BA949980B256E31 /* writing-assistant.js in Resources */ = {isa = PBXBuildFile; fileRef = 1D395678DA91951D20705A95 /* writing-assistant.js */; };
+		959293DC2762EA8CB8BAA2B4 /* FocusModeIntelligence+Escalation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB64299013093DB585C2B94 /* FocusModeIntelligence+Escalation.swift */; };
 		959D04C48B2F72F4833A9940 /* MissionOrchestrator+Execution.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA367DFBF48E97B5129C1048 /* MissionOrchestrator+Execution.swift */; };
 		95A840B0DB91BB3B8DDE77FC /* FocusModeTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDFADF41C672BD8282A4DD0 /* FocusModeTemplates.swift */; };
 		95C1ED0B0435BD6C2B8D0EF5 /* DynamicResourceAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A370F41AF3D13C8686F664 /* DynamicResourceAllocator.swift */; };
@@ -3454,6 +3456,7 @@
 		EF57B50C0C8F2FF6FBB9B9AB /* PackageTrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageTrackerView.swift; sourceTree = "<group>"; };
 		EF60BA560FBA4895E380B63B /* FontManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontManager.swift; sourceTree = "<group>"; };
 		EF8BD9573C645676A2A987FE /* FinderSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinderSync.swift; sourceTree = "<group>"; };
+		EFB64299013093DB585C2B94 /* FocusModeIntelligence+Escalation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FocusModeIntelligence+Escalation.swift"; sourceTree = "<group>"; };
 		EFF846BD7C72F3F070222F23 /* CodeBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeBlockView.swift; sourceTree = "<group>"; };
 		F04FB5BD48ADABFD806D9C46 /* RemoteSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSessionManager.swift; sourceTree = "<group>"; };
 		F06E3F1D7127665046903780 /* ChatView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatView+Extensions.swift"; sourceTree = "<group>"; };
@@ -4748,6 +4751,7 @@
 				DC9570D9D51D09A2B3515196 /* FocusModeIntelligence+CallHandling.swift */,
 				0D94D21F385461EB33084A9C /* FocusModeIntelligence+Communication.swift */,
 				8C622829C026C144D9F1B396 /* FocusModeIntelligence+Configuration.swift */,
+				EFB64299013093DB585C2B94 /* FocusModeIntelligence+Escalation.swift */,
 				018C9DCC28AF78C9A9F1F012 /* FocusModeIntelligence+EventHandlers.swift */,
 				3C7D2EA319E3C2AB6AF21D0C /* FocusModeIntelligence+LanguageDetection.swift */,
 				0F22503DCE5ACECB40BD3B10 /* FocusModeIntelligence+Learning.swift */,
@@ -8025,6 +8029,7 @@
 				66A6EC14B0B34E879EDA07A3 /* FocusModeIntelligence+CallHandling.swift in Sources */,
 				6A6CF391A11418DAC03B6AFF /* FocusModeIntelligence+Communication.swift in Sources */,
 				FDEE9C4F8B7015E458EFD21D /* FocusModeIntelligence+Configuration.swift in Sources */,
+				959293DC2762EA8CB8BAA2B4 /* FocusModeIntelligence+Escalation.swift in Sources */,
 				3235AB27B0DEBD513D25661E /* FocusModeIntelligence+EventHandlers.swift in Sources */,
 				764E617C448D307451B8DB8E /* FocusModeIntelligence+LanguageDetection.swift in Sources */,
 				376FF3865AAF7968B9E4174A /* FocusModeIntelligence+Learning.swift in Sources */,
@@ -9137,6 +9142,7 @@
 				07779B9D902D51995166BBCD /* FocusModeIntelligence+CallHandling.swift in Sources */,
 				28096F88E29D31148FA1FCAB /* FocusModeIntelligence+Communication.swift in Sources */,
 				5B6BB56E1D9949FC4C2505C4 /* FocusModeIntelligence+Configuration.swift in Sources */,
+				58BC1F0E194F4E80E7F49AE7 /* FocusModeIntelligence+Escalation.swift in Sources */,
 				830E1E7CDABEA4F16758EE16 /* FocusModeIntelligence+EventHandlers.swift in Sources */,
 				56772DF2B09C32753D61DD7E /* FocusModeIntelligence+LanguageDetection.swift in Sources */,
 				1D77CBFC7CCB355C52A04CB9 /* FocusModeIntelligence+Learning.swift in Sources */,

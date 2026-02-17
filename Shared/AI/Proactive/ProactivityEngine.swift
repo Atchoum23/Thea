@@ -42,13 +42,13 @@ public final class ProactivityEngine: ObservableObject {
     @Published public private(set) var isEnabled = true
 
     /// Suggestions awaiting user review, ordered by arrival time.
-    @Published public private(set) var pendingSuggestions: [AIProactivitySuggestion] = []
+    @Published public internal(set) var pendingSuggestions: [AIProactivitySuggestion] = []
 
     /// Currently registered and running ambient agents.
-    @Published public private(set) var activeAmbientAgents: [AmbientAgent] = []
+    @Published public internal(set) var activeAmbientAgents: [AmbientAgent] = []
 
     /// The most recent user intent prediction, if any.
-    @Published public private(set) var lastPrediction: UserIntentPrediction?
+    @Published public internal(set) var lastPrediction: UserIntentPrediction?
 
     // MARK: - Configuration
 
@@ -78,10 +78,10 @@ public final class ProactivityEngine: ObservableObject {
     // MARK: - Context Watch State
 
     /// Registered context watches for contradiction detection.
-    @Published public private(set) var contextWatches: [ContextWatch] = []
+    @Published public internal(set) var contextWatches: [ContextWatch] = []
 
     /// Detected context changes/contradictions awaiting user review.
-    @Published public private(set) var pendingProactiveContextChanges: [ProactiveContextChange] = []
+    @Published public internal(set) var pendingProactiveContextChanges: [ProactiveContextChange] = []
 
     /// Background task for periodic context watch checking.
     internal var contextWatchTask: Task<Void, Never>?
