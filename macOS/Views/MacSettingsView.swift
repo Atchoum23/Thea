@@ -56,6 +56,10 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case agent = "Agent"
     case moltbook = "Moltbook"
     case knowledge = "Knowledge"
+    case behavioralPatterns = "Behavioral Patterns"
+    case knowledgeGraph = "Knowledge Graph"
+    case healthInsights = "Health Insights"
+    case notificationSchedule = "Smart Scheduling"
     case appPairing = "App Pairing"
     case liveGuidance = "Live Guidance"
 
@@ -115,6 +119,10 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .agent: "person.2.circle"
         case .moltbook: "bubble.left.and.text.bubble.right"
         case .knowledge: "books.vertical"
+        case .behavioralPatterns: "chart.bar.xaxis"
+        case .knowledgeGraph: "point.3.connected.trianglepath.dotted"
+        case .healthInsights: "heart.text.square"
+        case .notificationSchedule: "bell.and.waves.left.and.right"
         case .appPairing: "app.connected.to.app.below.fill"
         case .liveGuidance: "eye.circle.fill"
         case .clipboard: "doc.on.clipboard"
@@ -160,7 +168,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .moltbook, .knowledge, .appPairing, .liveGuidance: 1
+        case .providers, .memory, .agent, .moltbook, .knowledge, .behavioralPatterns, .knowledgeGraph, .healthInsights, .notificationSchedule, .appPairing, .liveGuidance: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
@@ -276,6 +284,14 @@ struct MacSettingsView: View {
             MoltbookSettingsView()
         case .knowledge:
             KnowledgeScannerConfigurationView()
+        case .behavioralPatterns:
+            BehavioralPatternsView()
+        case .knowledgeGraph:
+            KnowledgeGraphExplorerView()
+        case .healthInsights:
+            HealthInsightsView()
+        case .notificationSchedule:
+            NotificationScheduleView()
         case .appPairing:
             AppPairingSettingsView()
         case .liveGuidance:
