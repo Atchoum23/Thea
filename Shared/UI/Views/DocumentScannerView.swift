@@ -759,6 +759,7 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
         Coordinator(onCapture: onCapture)
     }
 
+    @MainActor
     class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
         let onCapture: ([Data]) -> Void
 
