@@ -22,7 +22,17 @@ final class TaskPlanDAG {
     private(set) var activePlans: [TaskPlan] = []
     private(set) var isPlanning = false
 
-    private init() {}
+    private let storageURL: URL = {
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("Thea", isDirectory: true)
+            .appendingPathComponent("TaskPlans", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("plans.json")
+    }()
+
+    private init() {
+        loadFromDisk()
+    }
 
     // MARK: - Plan Creation
 
@@ -51,6 +61,7 @@ final class TaskPlanDAG {
         }
 
         activePlans.append(plan)
+        saveToDisk()
         return plan
     }
 
@@ -123,6 +134,7 @@ final class TaskPlanDAG {
 
         let allSuccess = activePlans[index].nodes.allSatisfy { $0.status == .completed }
         activePlans[index].status = allSuccess ? .completed : .partiallyCompleted
+        saveToDisk()
 
         return TaskPlanResult(
             planID: plan.id,
@@ -340,23 +352,47 @@ final class TaskPlanDAG {
 
     func removePlan(_ planID: UUID) {
         activePlans.removeAll { $0.id == planID }
+        saveToDisk()
     }
 
     func clearCompletedPlans() {
         activePlans.removeAll { $0.status == .completed }
+        saveToDisk()
+    }
+
+    // MARK: - Persistence
+
+    private func saveToDisk() {
+        do {
+            let data = try JSONEncoder().encode(activePlans)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            logger.error("Failed to save task plans: \(error.localizedDescription)")
+        }
+    }
+
+    private func loadFromDisk() {
+        guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: storageURL)
+            activePlans = try JSONDecoder().decode([TaskPlan].self, from: data)
+            logger.info("Loaded \(self.activePlans.count) task plans from disk")
+        } catch {
+            logger.error("Failed to load task plans: \(error.localizedDescription)")
+        }
     }
 }
 
 // MARK: - Types
 
-struct TaskPlan: Identifiable, Sendable {
+struct TaskPlan: Identifiable, Sendable, Codable {
     let id: UUID
     let goal: String
     var nodes: [TaskPlanNode]
     let createdAt: Date
     var status: PlanStatus
 
-    enum PlanStatus: String, Sendable {
+    enum PlanStatus: String, Sendable, Codable {
         case ready
         case executing
         case completed
@@ -365,7 +401,7 @@ struct TaskPlan: Identifiable, Sendable {
     }
 }
 
-struct TaskPlanNode: Identifiable, Sendable {
+struct TaskPlanNode: Identifiable, Sendable, Codable {
     let id: UUID
     let title: String
     let action: String
@@ -382,14 +418,14 @@ struct TaskPlanNode: Identifiable, Sendable {
         self.dependsOn = dependsOn
     }
 
-    enum ActionType: String, Sendable {
+    enum ActionType: String, Sendable, Codable {
         case aiQuery       // Send to AI provider
         case integration   // Execute via FunctionGemma/integrations
         case compound      // Aggregate results from dependencies
         case userInput     // Wait for user input
     }
 
-    enum NodeStatus: String, Sendable {
+    enum NodeStatus: String, Sendable, Codable {
         case pending
         case executing
         case completed
