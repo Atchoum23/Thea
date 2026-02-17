@@ -92,7 +92,7 @@ struct MessageBubble: View {
         .accessibilityLabel(messageAccessibilityLabel)
         .accessibilityHint(message.messageRole == .assistant ? "AI response" : "Your message")
         .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
                 isHovering = hovering
             }
         }

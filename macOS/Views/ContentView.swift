@@ -223,7 +223,7 @@ struct ContentView: View {
     /// Cycles: .all → .doubleColumn (hide nav sidebar) → .detailOnly (hide conversations too) → .all
     private var sidebarToggleButton: some View {
         Button {
-            withAnimation(.easeInOut(duration: 0.25)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
                 switch columnVisibility {
                 case .all:
                     columnVisibility = .doubleColumn

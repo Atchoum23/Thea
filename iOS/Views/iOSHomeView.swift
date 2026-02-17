@@ -168,6 +168,11 @@ struct iOSChatListView: View {
 
     private var conversationList: some View {
         List {
+            if filteredConversations.isEmpty && !searchText.isEmpty {
+                ContentUnavailableView.search(text: searchText)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
             let pinned = filteredConversations.filter(\.isPinned)
             if !pinned.isEmpty {
                 Section("Pinned") {
