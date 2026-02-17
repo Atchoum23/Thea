@@ -114,13 +114,13 @@ struct SubscriptionSettingsView: View {
     private func expiredBanner(date: Date) -> some View {
         HStack {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
+                .foregroundStyle(.theaWarning)
             Text("Expired \(date, style: .date). Renew to restore Pro features.")
                 .font(.caption)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color.orange.opacity(0.1))
+        .background(Color.theaWarning.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
@@ -150,7 +150,7 @@ struct SubscriptionSettingsView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(.green, in: Capsule())
+                        .background(.theaSuccess, in: Capsule())
                 }
             }
 
@@ -171,7 +171,7 @@ struct SubscriptionSettingsView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark")
                             .font(.caption2)
-                            .foregroundStyle(.green)
+                            .foregroundStyle(.theaSuccess)
                         Text(feature.rawValue)
                             .font(.caption)
                             .lineLimit(1)
@@ -304,7 +304,7 @@ struct SubscriptionSettingsView: View {
             if let error = store.error {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.theaWarning)
                     Text(error.localizedDescription)
                         .font(.caption)
                         .foregroundStyle(.secondary)

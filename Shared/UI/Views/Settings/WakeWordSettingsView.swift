@@ -228,7 +228,7 @@ struct WakeWordSettingsView: View {
                     Text("False Rejections")
                     Spacer()
                     Text("\(wakeWordEngine.falseRejections)")
-                        .foregroundStyle(wakeWordEngine.falseRejections > 0 ? .orange : .secondary)
+                        .foregroundStyle(wakeWordEngine.falseRejections > 0 ? Color.theaWarning : .secondary)
                 }
 
                 HStack {

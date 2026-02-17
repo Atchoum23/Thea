@@ -68,15 +68,15 @@ struct BackupSettingsView: View {
         VStack(spacing: 12) {
             #if os(macOS)
             HStack(spacing: 16) {
-                overviewCard(title: "Backups", value: "\(backupConfig.backups.count)", icon: "arrow.clockwise.icloud.fill", color: .blue)
-                overviewCard(title: "Auto Backup", value: backupConfig.autoBackupEnabled ? "On" : "Off", icon: "clock.arrow.circlepath", color: backupConfig.autoBackupEnabled ? .green : .secondary)
+                overviewCard(title: "Backups", value: "\(backupConfig.backups.count)", icon: "arrow.clockwise.icloud.fill", color: .theaInfo)
+                overviewCard(title: "Auto Backup", value: backupConfig.autoBackupEnabled ? "On" : "Off", icon: "clock.arrow.circlepath", color: backupConfig.autoBackupEnabled ? .theaSuccess : .secondary)
                 overviewCard(title: "Total Size", value: backupConfig.totalBackupSize, icon: "externaldrive.fill", color: .purple)
                 overviewCard(title: "Last Backup", value: lastBackupText, icon: "calendar", color: .orange)
             }
             #else
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                overviewCard(title: "Backups", value: "\(backupConfig.backups.count)", icon: "arrow.clockwise.icloud.fill", color: .blue)
-                overviewCard(title: "Auto Backup", value: backupConfig.autoBackupEnabled ? "On" : "Off", icon: "clock.arrow.circlepath", color: backupConfig.autoBackupEnabled ? .green : .secondary)
+                overviewCard(title: "Backups", value: "\(backupConfig.backups.count)", icon: "arrow.clockwise.icloud.fill", color: .theaInfo)
+                overviewCard(title: "Auto Backup", value: backupConfig.autoBackupEnabled ? "On" : "Off", icon: "clock.arrow.circlepath", color: backupConfig.autoBackupEnabled ? .theaSuccess : .secondary)
                 overviewCard(title: "Total Size", value: backupConfig.totalBackupSize, icon: "externaldrive.fill", color: .purple)
                 overviewCard(title: "Last Backup", value: lastBackupText, icon: "calendar", color: .orange)
             }
@@ -211,8 +211,8 @@ struct BackupSettingsView: View {
                         Text("Auto")
                             .font(.caption2)
                             .padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.2))
-                            .foregroundStyle(.blue)
+                            .background(Color.theaInfo.opacity(0.2))
+                            .foregroundStyle(.theaInfo)
                             .cornerRadius(4)
                     }
                 }
@@ -261,9 +261,9 @@ struct BackupSettingsView: View {
 
     private func backupTypeColor(_ type: BackupSettingsType) -> Color {
         switch type {
-        case .full: .blue
-        case .incremental: .green
-        case .manual: .orange
+        case .full: .theaInfo
+        case .incremental: .theaSuccess
+        case .manual: .theaWarning
         }
     }
 }
@@ -317,7 +317,7 @@ extension BackupSettingsView {
 
             if backupConfig.backupAttachments {
                 Text("Including attachments significantly increases backup size")
-                    .font(.caption).foregroundStyle(.orange)
+                    .font(.caption).foregroundStyle(.theaWarning)
             }
 
             Divider()

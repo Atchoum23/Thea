@@ -131,7 +131,7 @@ struct HomeIntelligenceView: View {
                 if let result = commandResult {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(Color.theaSuccess)
                         Text(result)
                         Spacer()
                         Button {
@@ -142,14 +142,14 @@ struct HomeIntelligenceView: View {
                         .buttonStyle(.plain)
                     }
                     .padding(10)
-                    .background(Color.green.opacity(0.1))
+                    .background(Color.theaSuccess.opacity(0.1))
                     .cornerRadius(8)
                 }
 
                 if let error = commandError {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.red)
+                            .foregroundColor(Color.theaError)
                         Text(error)
                         Spacer()
                         Button {
@@ -160,7 +160,7 @@ struct HomeIntelligenceView: View {
                         .buttonStyle(.plain)
                     }
                     .padding(10)
-                    .background(Color.red.opacity(0.1))
+                    .background(Color.theaError.opacity(0.1))
                     .cornerRadius(8)
                 }
 
@@ -290,7 +290,7 @@ struct HomeIntelligenceView: View {
                     .foregroundColor(accessory.isReachable ? .accentColor : .secondary)
                 Spacer()
                 Circle()
-                    .fill(accessory.isReachable ? Color.green : Color.red)
+                    .fill(accessory.isReachable ? Color.theaSuccess : Color.theaError)
                     .frame(width: 8, height: 8)
             }
 
