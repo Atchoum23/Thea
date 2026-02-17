@@ -130,6 +130,7 @@ struct ContentView: View {
         .navigationTitle("THEA")
         .frame(minWidth: 160, idealWidth: 180)
         .listStyle(.sidebar)
+        .softEdges()
     }
 
     // MARK: - List Column
