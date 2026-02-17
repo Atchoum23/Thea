@@ -128,5 +128,5 @@ export const APP_INFO = {
   NAME: 'THEA',
   VERSION: '1.0.0',
   PLATFORM: 'samsung-tizen',
-  BUILD: process.env.NODE_ENV === 'production' ? 'release' : 'debug',
+  BUILD: import.meta.env.PROD ? 'release' : 'debug',
 } as const;
