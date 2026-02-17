@@ -181,10 +181,9 @@ struct ContentView: View {
                     welcomeInputText = ""
                     let conversation = chatManager.createConversation(title: "New Conversation")
                     selectedConversation = conversation
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        Task {
-                            try? await chatManager.sendMessage(prompt, in: conversation)
-                        }
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(200))
+                        try? await chatManager.sendMessage(prompt, in: conversation)
                     }
                 }
 
@@ -199,10 +198,9 @@ struct ContentView: View {
                         welcomeInputText = ""
                         let conversation = chatManager.createConversation(title: "New Conversation")
                         selectedConversation = conversation
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            Task {
-                                try? await chatManager.sendMessage(prompt, in: conversation)
-                            }
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(200))
+                            try? await chatManager.sendMessage(prompt, in: conversation)
                         }
                     },
                     onVoiceToggle: {

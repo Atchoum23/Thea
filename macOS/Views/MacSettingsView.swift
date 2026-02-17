@@ -28,7 +28,7 @@ private struct WindowResizableHelper: NSViewRepresentable {
             window.setFrameAutosaveName("TheaSettingsWindow")
 
             observation = window.observe(\.styleMask, options: [.new]) { win, _ in
-                DispatchQueue.main.async { @MainActor in
+                Task { @MainActor in
                     if !win.styleMask.contains(.resizable) {
                         win.styleMask.insert(.resizable)
                     }
