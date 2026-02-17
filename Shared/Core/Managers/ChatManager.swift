@@ -18,6 +18,7 @@ final class ChatManager: ObservableObject {
     @Published var activeConversation: Conversation?
     @Published var isStreaming: Bool = false
     @Published var streamingText: String = ""
+    @Published var streamingThinkingText: String = ""
     @Published var conversations: [Conversation] = []
     @Published var messageQueue: [(text: String, conversation: Conversation)] = []
 
@@ -226,6 +227,7 @@ struct AIMessage: Sendable {
     let model: String
     var tokenCount: Int?
     var metadata: MessageMetadata?
+    var thinkingTrace: String?
 
     init(
         id: UUID,
@@ -235,7 +237,8 @@ struct AIMessage: Sendable {
         timestamp: Date,
         model: String,
         tokenCount: Int? = nil,
-        metadata: MessageMetadata? = nil
+        metadata: MessageMetadata? = nil,
+        thinkingTrace: String? = nil
     ) {
         self.id = id
         self.conversationID = conversationID
@@ -245,6 +248,7 @@ struct AIMessage: Sendable {
         self.model = model
         self.tokenCount = tokenCount
         self.metadata = metadata
+        self.thinkingTrace = thinkingTrace
     }
 }
 

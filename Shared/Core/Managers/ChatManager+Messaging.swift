@@ -92,9 +92,11 @@ extension ChatManager {
         // Stream AI response
         isStreaming = true
         streamingText = ""
+        streamingThinkingText = ""
         defer {
             isStreaming = false
             streamingText = ""
+            streamingThinkingText = ""
         }
 
         let assistantMessage = createAssistantMessage(in: conversation, model: model, device: currentDevice)
@@ -364,21 +366,32 @@ extension ChatManager {
             stream: true
         )
 
+        var accumulatedThinking = ""
+
         for try await chunk in responseStream {
             switch chunk.type {
             case let .delta(text):
                 streamingText += text
                 assistantMessage.contentData = try JSONEncoder().encode(MessageContent.text(streamingText))
 
+            case let .thinkingDelta(thinking):
+                accumulatedThinking += thinking
+                streamingThinkingText += thinking
+
             case let .complete(finalMessage):
                 assistantMessage.contentData = try JSONEncoder().encode(finalMessage.content)
                 assistantMessage.tokenCount = finalMessage.tokenCount
-                if let metadata = finalMessage.metadata {
-                    do {
-                        assistantMessage.metadataData = try JSONEncoder().encode(metadata)
-                    } catch {
-                        msgLogger.error("❌ Failed to encode message metadata: \(error.localizedDescription)")
-                    }
+
+                // Merge thinking trace from both stream accumulation and finalMessage
+                let thinkingTrace = finalMessage.thinkingTrace ?? (accumulatedThinking.isEmpty ? nil : accumulatedThinking)
+                var meta = finalMessage.metadata ?? assistantMessage.metadata ?? MessageMetadata()
+                if let trace = thinkingTrace {
+                    meta.thinkingTrace = trace
+                }
+                do {
+                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
+                } catch {
+                    msgLogger.error("❌ Failed to encode message metadata: \(error.localizedDescription)")
                 }
 
             case let .error(error):
