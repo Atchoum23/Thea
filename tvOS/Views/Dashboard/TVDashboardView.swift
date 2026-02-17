@@ -83,7 +83,7 @@ struct TVDashboardView: View {
                 // Network Status
                 HStack(spacing: 8) {
                     Image(systemName: report.networkStatus.isConnected ? "wifi" : "wifi.slash")
-                        .foregroundStyle(report.networkStatus.isConnected ? .green : .red)
+                        .foregroundStyle(report.networkStatus.isConnected ? .theaSuccess : .theaError)
                     Text(report.networkStatus.connectionType)
                         .font(.subheadline)
                 }
@@ -91,7 +91,7 @@ struct TVDashboardView: View {
                 // Storage Status
                 HStack(spacing: 8) {
                     Image(systemName: "internaldrive")
-                        .foregroundStyle(report.storageStatus.percentUsed > 90 ? .orange : .secondary)
+                        .foregroundStyle(report.storageStatus.percentUsed > 90 ? .theaWarning : .secondary)
                     Text("\(Int(100 - report.storageStatus.percentUsed))% free")
                         .font(.subheadline)
                 }
@@ -100,7 +100,7 @@ struct TVDashboardView: View {
                 let healthyCount = report.services.filter { $0.status == .healthy }.count
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.theaSuccess)
                     Text("\(healthyCount)/\(report.services.count) services")
                         .font(.subheadline)
                 }
@@ -136,7 +136,7 @@ struct TVDashboardView: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 16)
-                    .background(selectedSection == section ? Color.blue : Color.clear)
+                    .background(selectedSection == section ? Color.theaPrimaryDefault : Color.clear)
                     .foregroundStyle(selectedSection == section ? .white : .primary)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
@@ -295,7 +295,7 @@ struct TVDashboardView: View {
                     .font(.callout)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(.blue.opacity(0.2))
+                    .background(Color.theaInfo.opacity(0.2))
                     .clipShape(Capsule())
             }
 
@@ -333,9 +333,9 @@ struct TVDashboardView: View {
 
     private func statusColor(for status: HealthStatus) -> Color {
         switch status {
-        case .healthy: .green
-        case .degraded: .yellow
-        case .unhealthy: .red
+        case .healthy: .theaSuccess
+        case .degraded: .theaWarning
+        case .unhealthy: .theaError
         case .unknown: .gray
         }
     }
@@ -386,7 +386,7 @@ struct UpNextCard: View {
 
             // Progress bar
             ProgressView(value: item.progress.percentComplete, total: 100)
-                .tint(.blue)
+                .tint(.theaInfo)
                 .frame(width: 200)
         }
         .padding(16)

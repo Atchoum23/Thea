@@ -337,11 +337,11 @@ public struct WellnessDashboardView: View {
     private func errorView(_ message: String) -> some View {
         HStack {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.red)
+                .foregroundColor(.theaError)
 
             Text(message)
                 .font(.caption)
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.theaError)
 
             Spacer()
 
@@ -351,7 +351,7 @@ public struct WellnessDashboardView: View {
             .font(.caption)
         }
         .padding()
-        .background(Color.red.opacity(0.1))
+        .background(Color.theaError.opacity(0.1))
         .cornerRadius(12)
     }
 }
@@ -440,7 +440,7 @@ private struct SessionHistoryRow: View {
             }
 
             Image(systemName: session.completed ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(session.completed ? .green : .red)
+                .foregroundColor(session.completed ? .theaSuccess : .theaError)
         }
         .padding()
         .background(Color.gray.opacity(0.1))
@@ -459,7 +459,7 @@ private struct WellnessStatCard: View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: icon)
                 .font(.caption)
-                .foregroundColor(.blue)
+                .foregroundColor(.theaInfo)
 
             Text(value)
                 .font(.title2)

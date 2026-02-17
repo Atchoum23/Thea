@@ -1,8 +1,8 @@
-// TVColors.swift
-// Thea TV — Design tokens for tvOS
+// WatchColors.swift
+// Thea Watch — Design tokens for watchOS
 //
-// Mirrors the subset of Shared/UI/Theme/Colors.swift needed by tvOS views.
-// The tvOS target does not include the full Shared/UI layer.
+// Mirrors the subset of Shared/UI/Theme/Colors.swift needed by watchOS views.
+// The watchOS target does not include the full Shared/UI layer.
 
 import SwiftUI
 

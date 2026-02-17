@@ -48,6 +48,8 @@
                                     try? await manager.openNewWindow()
                                 }
                             }
+                            .accessibilityLabel("Open Terminal")
+                            .accessibilityHint("Opens the Terminal application")
                         }
                     } else {
                         ForEach(manager.terminalWindows) { window in
@@ -63,6 +65,7 @@
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "macwindow")
+                        .accessibilityHidden(true)
                     Text("Window \(window.index)")
                         .font(.headline)
                     Spacer()
@@ -75,6 +78,7 @@
                     HStack {
                         Image(systemName: tab.isBusy ? "play.fill" : "terminal")
                             .foregroundStyle(tab.isBusy ? .green : .secondary)
+                            .accessibilityHidden(true)
                         Text("Tab \(tab.index)")
                         if tab.isBusy {
                             Text("(busy)")
@@ -86,6 +90,7 @@
                             .foregroundStyle(.secondary)
                     }
                     .padding(.leading, 20)
+                    .accessibilityElement(children: .combine)
 
                     if !tab.processes.isEmpty {
                         Text("Processes: \(tab.processes.joined(separator: ", "))")
@@ -105,6 +110,8 @@
                         }
                     }
                     .buttonStyle(.bordered)
+                    .accessibilityLabel("Read Content")
+                    .accessibilityHint("Reads the terminal content from window \(window.index)")
 
                     Button("Execute Here") {
                         if !commandInput.isEmpty {
@@ -116,6 +123,8 @@
                     }
                     .buttonStyle(.bordered)
                     .disabled(commandInput.isEmpty)
+                    .accessibilityLabel("Execute Here")
+                    .accessibilityHint("Executes the current command in window \(window.index)")
                 }
             }
             .padding()
