@@ -160,6 +160,7 @@ extension BlueprintExecutor {
             for try await chunk in stream {
                 switch chunk.type {
                 case .delta(let text): result += text
+                case .thinkingDelta: break
                 case .complete(let msg): result = msg.content.textValue
                 case .error(let err): throw err
                 }

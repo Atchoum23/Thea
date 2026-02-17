@@ -447,24 +447,35 @@ extension ChatManager {
         text: String, taskType: TaskType?,
         assistantMessage: Message, conversation: Conversation
     ) async {
-        // Confidence verification
+        // Confidence verification + hallucination detection
         #if os(macOS) || os(iOS)
         do {
             let responseText = streamingText
             let verificationTaskType = taskType ?? .general
             Task { @MainActor in
-                let result = await ConfidenceSystem.shared.validateResponse(
+                let confidenceSystem = ConfidenceSystem.shared
+                let result = await confidenceSystem.validateResponse(
                     responseText, query: text, taskType: verificationTaskType
                 )
+
+                // Hallucination detection via semantic entropy heuristics
+                let hallucinationFlags = await confidenceSystem.detectHallucinations(
+                    responseText, query: text
+                )
+
                 var meta = assistantMessage.metadata ?? MessageMetadata()
                 meta.confidence = result.overallConfidence
+                if !hallucinationFlags.isEmpty {
+                    meta.hallucinationFlags = hallucinationFlags
+                }
                 do {
                     assistantMessage.metadataData = try JSONEncoder().encode(meta)
                     try assistantMessage.modelContext?.save()
                 } catch {
                     msgLogger.error("❌ Failed to save confidence: \(error.localizedDescription)")
                 }
-                msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100))")
+                let flagCount = hallucinationFlags.count
+                msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100)), hallucination flags: \(flagCount)")
             }
         }
         #endif

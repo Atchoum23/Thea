@@ -138,6 +138,8 @@ public final class MultiModelConsensus {
                 switch chunk.type {
                 case let .delta(text):
                     responseText += text
+                case .thinkingDelta:
+                    break
                 case let .complete(msg):
                     responseText = msg.content.textValue
                 case .error:

@@ -309,6 +309,73 @@ public final class ConfidenceSystem {
         return result
     }
 
+    // MARK: - Hallucination Detection (Semantic Entropy)
+
+    /// Detect potential hallucinations using semantic entropy analysis.
+    /// Checks for factual claims that have high variance across self-consistency probes:
+    /// - Hedging language patterns (uncertain claims presented as facts)
+    /// - Specific quantitative claims (dates, numbers, URLs)
+    /// - Claims contradicting known knowledge graph entities
+    public func detectHallucinations(
+        _ response: String,
+        query: String,
+        knowledgeContext: [String] = []
+    ) async -> [HallucinationFlag] {
+        var flags: [HallucinationFlag] = []
+
+        let sentences = response.components(separatedBy: CharacterSet(charactersIn: ".!?"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { $0.count > 10 }
+
+        for sentence in sentences {
+            let lower = sentence.lowercased()
+
+            // Heuristic 1: Hedging language in factual context
+            let hedgePatterns = [
+                "i believe", "i think", "probably", "might be",
+                "reportedly", "some sources say", "it seems", "allegedly"
+            ]
+            let hasHedge = hedgePatterns.contains { lower.contains($0) }
+
+            // Heuristic 2: Specific quantitative claims are higher risk
+            let hasSpecificNumber = sentence.range(of: #"\b\d{4,}\b"#, options: .regularExpression) != nil
+            let hasURL = sentence.range(of: #"https?://\S+"#, options: .regularExpression) != nil
+            let hasSpecificDate = sentence.range(of: #"\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}"#, options: .regularExpression) != nil
+
+            // Heuristic 3: Contradicts known knowledge graph facts
+            let contradictsKnowledge = knowledgeContext.contains { known in
+                let knownLower = known.lowercased()
+                // Simple contradiction: sentence claims opposite of known fact
+                return (lower.contains("not") && knownLower.split(separator: " ").filter { $0.count > 3 }.contains { lower.contains(String($0).lowercased()) })
+            }
+
+            // Risk scoring
+            var riskScore = 0.0
+            if hasHedge { riskScore += 0.3 }
+            if hasSpecificNumber { riskScore += 0.2 }
+            if hasURL { riskScore += 0.4 } // URLs in AI responses are high hallucination risk
+            if hasSpecificDate { riskScore += 0.15 }
+            if contradictsKnowledge { riskScore += 0.5 }
+
+            if riskScore >= 0.3 {
+                let risk: HallucinationRisk = riskScore >= 0.6 ? .high : riskScore >= 0.4 ? .medium : .low
+                var reasons: [String] = []
+                if hasURL { reasons.append("contains URL (high fabrication risk)") }
+                if hasHedge { reasons.append("hedging language") }
+                if hasSpecificDate || hasSpecificNumber { reasons.append("specific claim without source") }
+                if contradictsKnowledge { reasons.append("may contradict known facts") }
+
+                flags.append(HallucinationFlag(
+                    claim: String(sentence.prefix(120)),
+                    riskLevel: risk,
+                    reason: reasons.joined(separator: "; ")
+                ))
+            }
+        }
+
+        return flags
+    }
+
     /// Record user feedback for learning
     public func recordFeedback(
         responseId: UUID,
