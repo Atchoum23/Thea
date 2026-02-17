@@ -489,39 +489,6 @@ extension ChatManager {
         return false
     }
 
-
-
-        let action = AutonomousAction(
-            category: .analysis,
-            title: "Execute suggested action from \(taskType.rawValue) response",
-            description: "AI response for \(taskType.description) may contain actionable steps",
-            riskLevel: .low
-        ) {
-            AutonomousAction.ActionResult(success: true, message: "Evaluated")
-        }
-        let decision = await AutonomyController.shared.requestAction(action)
-        switch decision {
-        case .autoExecute:
-            msgLogger.debug("🤖 Autonomy: auto-execute approved for \(taskType.rawValue)")
-        case let .requiresApproval(reason):
-            AutonomyController.shared.queueForApproval(action, reason: reason)
-        }
-    }
-
-        let planSteps = Self.extractPlanSteps(from: streamingText)
-        guard planSteps.count >= 2 else { return }
-
-        let planTitle = String(text.prefix(60))
-        _ = PlanManager.shared.createSimplePlan(
-            title: planTitle,
-            steps: planSteps,
-            conversationId: conversation.id
-        )
-        PlanManager.shared.startExecution()
-        PlanManager.shared.showPanel()
-        msgLogger.debug("📋 Auto-created plan with \(planSteps.count) steps")
-    }
-
     // MARK: - Message Queue
 
     /// Queue a message for sending. If currently streaming, it will be sent after the
