@@ -1,0 +1,162 @@
+# THEA PRE-G PHASES AND COMPREHENSIVE QA PHASES MISSION
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND IMPROVE.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Verify and complete ALL phases documented in the project's planning files,
+including: THEA_MASTER_IMPROVEMENT_PLAN.md (Priorities 1-4), COMPREHENSIVE_QA_PLAN.md
+(Phases 0-11.5), AUTONOMOUS_BUILD_QA.md, and any archive phase files.
+
+## PHASE 1: Read All Planning Documents
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+cat .claude/THEA_MASTER_IMPROVEMENT_PLAN.md
+cat .claude/COMPREHENSIVE_QA_PLAN.md
+cat .claude/AUTONOMOUS_BUILD_QA.md
+cat .claude/G1_FINAL_STATUS.md
+cat .claude/G1_IMPLEMENTATION_SUMMARY.md
+cat .claude/G1_VERIFICATION_PLAN.md
+cat .claude/G1_HANDOFF.md
+cat .claude/G2_TESTING_GUIDE.md
+
+# Archive phase files from v1
+ls .v1-archive/Shared/AI/MetaAI/SelfExecution/ 2>/dev/null | head -20
+```
+
+## PHASE 2: THEA_MASTER_IMPROVEMENT_PLAN.md — All 20 Items
+
+### Priority 1 (CRITICAL — CI/CD)
+1. ✅ Fix E2E Tests workflow — DONE (v2.0 single-job)
+2. ✅ Fix CI workflow timeout — DONE
+3. ✅ Fix Security Audit workflow — DONE (passing)
+4. Verify `gh` CLI authentication works
+5. ✅ Run QA plan — IN PROGRESS (this mission)
+
+### Priority 2 (HIGH — Code Health)
+6. MetaAI dead code: Review if any MetaAI files should be moved to Shared/ (not removed)
+7. Audit ALL `@unchecked Sendable` — justify each or replace with proper isolation
+8. Run Periphery dead code detection: `periphery scan` — verify truly unused code is wired in, not removed
+9. Test coverage: increase from current level to 60%+ — add tests for every untested service
+10. Maestro E2E tests: verify current e2e-tests.yml covers all Maestro test flows
+
+### Priority 3 (MEDIUM — Quality/UX)
+11. ✅ SwiftLint strictness — DONE (0 violations, 0 warnings)
+12. ✅ UI/UX improvements — IN PROGRESS (uxui agent)
+13. Performance profiling: launch time < 2s, memory < 200MB at rest
+14. ✅ Accessibility audit — verify VoiceOver labels, Dynamic Type support
+15. Documentation consolidation: verify all public APIs documented
+
+### Priority 4 (STANDARD — App Store Quality)
+16. ✅ April 2026 compliance — DONE (privacy-compliance agent)
+17. ✅ Privacy manifest — DONE (PrivacyInfo.xcprivacy for all 4 targets)
+18. Code signing for distribution: verify Automatic signing works for personal use
+19. Not applicable (personal use, no TestFlight)
+20. Not applicable (personal use, no App Store)
+
+## PHASE 3: COMPREHENSIVE_QA_PLAN.md — All Phases 0 through 11.5
+
+Read the full COMPREHENSIVE_QA_PLAN.md and for each phase (0, 1, 2, 3, 4, 5, 5.5, 6, 7, 8, 9, 10, 11, 11.5):
+
+**For each phase:**
+1. Read what the phase requires
+2. Verify if the requirement is currently met
+3. If not met: implement the fix
+4. Build to verify: 0 errors
+5. Commit
+
+Pay special attention to:
+- Phase 5: Swift Package tests (`swift test` — must pass ALL tests with 0 failures)
+- Phase 5.5: GUI builds — document when these will be triggered
+- Phase 6: iOS/watchOS/tvOS Release builds — verify arm64, ARCHS=arm64
+- Phase 7: E2E Maestro tests
+- Phase 8: Static analysis (SwiftLint, Periphery, Clang Analyzer)
+- Phase 9: Dynamic analysis (ASan, TSan, UBSan)
+- Phase 10: Localization completeness
+- Phase 11: Accessibility completeness
+- Phase 11.5: Memory leak verification
+
+## PHASE 4: `@unchecked Sendable` Audit
+
+```bash
+# Find all @unchecked Sendable uses
+grep -rn "@unchecked Sendable" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "//\|test\|Test" | sort
+```
+
+For each `@unchecked Sendable`:
+- Verify it's justified (e.g., delegate pattern with known-safe access)
+- Add a comment explaining WHY it's safe: `// @unchecked Sendable: NSObject delegate, callbacks on main thread`
+- If NOT justified: replace with proper actor isolation or `nonisolated(unsafe)`
+
+## PHASE 5: Test Coverage to 60%
+
+```bash
+# Run tests with coverage
+swift test --enable-code-coverage 2>&1 | tail -10
+
+# Find services without test files
+find . -name "*.swift" -path "*/Shared/*" -not -path "*/.build/*" \
+  -not -path "*/MetaAI/*" | xargs grep -l "class.*Service\|actor.*Service\|class.*Manager\|actor.*Manager" 2>/dev/null | sort
+```
+
+For each major service/manager without test coverage:
+- Add init test
+- Add happy path test (most common use case)
+- Add error path test (failure condition)
+- Use `swift test --filter ServiceName` to verify
+
+Target services needing tests:
+- SystemCapabilityService (from dynamic-intelligence mission)
+- HealthCoachingPipeline
+- SmartNotificationScheduler
+- BehavioralFingerprint
+- PersonalKnowledgeGraph (BFS pathfinding)
+- AgentMode phase transitions
+- AutonomyController risk assessment
+- ConfidenceSystem orchestration
+
+## PHASE 6: Periphery Dead Code Audit
+
+```bash
+# Install periphery if not present
+which periphery || brew install periphery
+
+# Run dead code scan (takes ~2 min)
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+periphery scan --project Thea.xcodeproj --schemes Thea-macOS \
+  --targets Thea-macOS --format xcode 2>&1 | grep "warning:" | head -40
+```
+
+For each reported unused declaration:
+- Is it actually unused? Look for callers.
+- If genuinely unused: WIRE IT IN (do not remove) — find where it should be called from
+- If it's dead for architectural reasons: add a comment `// Reserved for Phase X implementation`
+
+## PHASE 7: Performance Benchmarks
+
+```bash
+# Instrument launch time
+# Build and launch from command line, time to first frame
+time (open -W "/Applications/Thea.app" 2>/dev/null || echo "not installed")
+
+# Memory at rest (after 30s idle)
+# Use `leaks` for memory leak verification
+```
+
+Verify:
+- Launch time: < 3s cold, < 1s warm
+- Memory at rest: < 200MB RSS
+- Memory under load (during AI inference): < 2GB
+- No memory leaks from `leaks` command
+
+## SUCCESS CRITERIA
+- All 20 THEA_MASTER_IMPROVEMENT_PLAN.md items either complete or documented as N/A
+- All QA phases 0-11.5 verified and complete
+- @unchecked Sendable either justified with comment or replaced
+- Test coverage: 60%+ (swift test --enable-code-coverage)
+- All tests passing with 0 failures
+- Performance benchmarks within targets
+- 0 build errors, 0 warnings
