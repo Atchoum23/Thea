@@ -236,13 +236,39 @@ public final class FeatureFlags: ObservableObject {
         defaults.set(data, forKey: flagsKey)
     }
 
-    // MARK: - Remote Config Sync
+    // MARK: - Remote Config Sync via iCloud Key-Value Store
+
+    private let iCloudFlagsKey = "thea.feature.flags.remote"
 
     public func syncWithRemote() async throws {
-        // Placeholder for remote config sync
-        // Could integrate with Firebase Remote Config, LaunchDarkly, etc.
+        let store = NSUbiquitousKeyValueStore.default
+
+        // Pull remote overrides from iCloud KVS
+        store.synchronize()
+        if let remoteData = store.data(forKey: iCloudFlagsKey),
+           let remoteFlags = try? JSONDecoder().decode([String: FeatureFlag].self, from: remoteData)
+        {
+            // Merge: remote flags override local only if they're newer
+            for (key, remoteFlag) in remoteFlags {
+                if let localFlag = flags[key] {
+                    if remoteFlag.lastUpdated > localFlag.lastUpdated {
+                        flags[key] = remoteFlag
+                    }
+                } else {
+                    flags[key] = remoteFlag
+                }
+            }
+            saveFlags()
+            logger.info("Merged \(remoteFlags.count) remote feature flags from iCloud")
+        }
+
+        // Push local flags to iCloud KVS
+        if let localData = try? JSONEncoder().encode(flags) {
+            store.set(localData, forKey: iCloudFlagsKey)
+        }
+
         lastSyncDate = Date()
-        logger.info("Feature flags synced")
+        logger.info("Feature flags synced with iCloud")
     }
 }
 
