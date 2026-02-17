@@ -243,19 +243,7 @@ final class TelegramChannel: ObservableObject {
 
         let chatName = json["name"] as? String ?? "Unknown"
         let chatID = "export_\(chatName.hashValue)"
-        let chatType: TelegramChatType
-        if let typeStr = json["type"] as? String {
-            switch typeStr {
-            case "personal_chat": chatType = .privateChat
-            case "bot_chat": chatType = .bot
-            case "private_group", "public_group": chatType = .group
-            case "private_supergroup", "public_supergroup": chatType = .supergroup
-            case "private_channel", "public_channel": chatType = .channel
-            default: chatType = .privateChat
-            }
-        } else {
-            chatType = .privateChat
-        }
+        let chatType = chatTypeFromExport(json["type"] as? String)
 
         guard let messageList = json["messages"] as? [[String: Any]] else {
             return []
@@ -269,68 +257,16 @@ final class TelegramChannel: ObservableObject {
             guard let idRaw = msgDict["id"],
                   let dateStr = msgDict["date"] as? String else { continue }
 
-            let msgID = "\(idRaw)"
-            let timestamp = dateFormatter.date(from: dateStr) ?? Date()
-
-            // Extract text content
-            let content: String
-            if let textArray = msgDict["text"] as? [Any] {
-                content = textArray.compactMap { item -> String? in
-                    if let str = item as? String { return str }
-                    if let dict = item as? [String: Any] { return dict["text"] as? String }
-                    return nil
-                }.joined()
-            } else if let text = msgDict["text"] as? String {
-                content = text
-            } else {
-                content = ""
-            }
-
-            let senderName = msgDict["from"] as? String ?? "Unknown"
-            let senderID = msgDict["from_id"] as? String ?? senderName
-
-            // Extract attachments
-            var attachments: [TelegramAttachment] = []
-            if let photo = msgDict["photo"] as? String {
-                attachments.append(TelegramAttachment(type: .photo, fileName: photo))
-            }
-            if let file = msgDict["file"] as? String {
-                let mimeType = msgDict["mime_type"] as? String
-                let size = msgDict["file_size_bytes"] as? Int
-                let attachType: TelegramAttachmentType
-                // Check media_type first — voice/video messages have audio/video mime types
-                // but should be classified by their specific media_type
-                if msgDict["media_type"] as? String == "voice_message" {
-                    attachType = .voiceMessage
-                } else if msgDict["media_type"] as? String == "video_message" {
-                    attachType = .videoNote
-                } else if msgDict["media_type"] as? String == "sticker" {
-                    attachType = .sticker
-                } else if mimeType?.hasPrefix("audio/") == true {
-                    attachType = .audio
-                } else if mimeType?.hasPrefix("video/") == true {
-                    attachType = .video
-                } else {
-                    attachType = .document
-                }
-                attachments.append(TelegramAttachment(
-                    type: attachType,
-                    mimeType: mimeType,
-                    fileName: file,
-                    sizeBytes: size
-                ))
-            }
-
-            // Reply detection
-            let replyToID: String?
-            if let replyTo = msgDict["reply_to_message_id"] {
-                replyToID = "\(replyTo)"
-            } else {
-                replyToID = nil
-            }
-
             // Skip service messages (member join/leave, etc.)
             if msgDict["type"] as? String == "service" { continue }
+
+            let msgID = "\(idRaw)"
+            let timestamp = dateFormatter.date(from: dateStr) ?? Date()
+            let content = extractTextContent(from: msgDict)
+            let senderName = msgDict["from"] as? String ?? "Unknown"
+            let senderID = msgDict["from_id"] as? String ?? senderName
+            let attachments = extractAttachments(from: msgDict)
+            let replyToID = (msgDict["reply_to_message_id"]).map { "\($0)" }
 
             let message = TelegramMessage(
                 id: msgID,

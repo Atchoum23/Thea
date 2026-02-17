@@ -151,8 +151,8 @@ private enum TestPasswordAnalyzer {
     }
 
     static func generatePassword(length: Int = 16, includeUppercase: Bool = true,
-                                  includeLowercase: Bool = true, includeDigits: Bool = true,
-                                  includeSpecial: Bool = true) -> String {
+                                 includeLowercase: Bool = true, includeDigits: Bool = true,
+                                 includeSpecial: Bool = true) -> String {
         var chars = ""
         if includeLowercase { chars += "abcdefghijkmnpqrstuvwxyz" }
         if includeUppercase { chars += "ABCDEFGHJKLMNPQRSTUVWXYZ" }

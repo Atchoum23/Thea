@@ -401,7 +401,7 @@ struct AgentMemoryKGTests {
             model: "local",
             cost: "Free"
         )
-        #expect(attrs["resultSummary"] == "")
+        #expect(attrs["resultSummary"]?.isEmpty == true)
     }
 
     @Test("Entity name format matches convention")

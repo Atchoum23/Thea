@@ -338,7 +338,7 @@ struct DownloadItemTests {
 
     @Test func formattedSpeedEmpty() {
         let item = TestDownloadItem(url: "https://example.com/file.zip")
-        #expect(item.formattedSpeed == "")
+        #expect(item.formattedSpeed.isEmpty)
     }
 
     @Test func formattedSpeedMB() {

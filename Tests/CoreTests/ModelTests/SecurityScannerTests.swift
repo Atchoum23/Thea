@@ -136,7 +136,9 @@ struct ThreatLevelTests {
     }
 
     @Test func equality() {
-        #expect(!(TestThreatLevel.medium < TestThreatLevel.medium))
+        let a = TestThreatLevel.medium
+        let b = TestThreatLevel.medium
+        #expect(!(a < b))
     }
 
     @Test func uniqueIcons() {
