@@ -211,24 +211,67 @@ public final class DocumentationGroundingService: ObservableObject {
     }
 
     private func inferLibraryInfo(from name: String) async -> LibraryInfo? {
-        // Try to construct URLs from common patterns
-        let possibleRepoURLs = [
-            "https://github.com/\(name)/\(name)",
-            "https://github.com/\(name)js/\(name)",
-            "https://github.com/\(name)-team/\(name)"
+        let possibleRepoSlugs = [
+            "\(name)/\(name)",
+            "\(name)js/\(name)",
+            "\(name)-team/\(name)",
+            "apple/\(name)",
         ]
 
-        // For now, return basic info
+        // Try GitHub API to find the real repo
+        for slug in possibleRepoSlugs {
+            if let info = await fetchGitHubRepoInfo(slug: slug, name: name) {
+                return info
+            }
+        }
+
+        // Graceful fallback — return minimal info so the pipeline continues
         return LibraryInfo(
             id: "/\(name)/\(name)",
             name: name,
-            description: "Library: \(name)",
+            description: "Library: \(name) (could not resolve repository)",
             documentationURL: nil,
-            repositoryURL: URL(string: possibleRepoURLs[0]),
+            repositoryURL: nil,
             version: nil,
-            trustScore: 5,
+            trustScore: 2,
             cachedAt: Date()
         )
+    }
+
+    private func fetchGitHubRepoInfo(slug: String, name: String) async -> LibraryInfo? {
+        guard let url = URL(string: "https://api.github.com/repos/\(slug)") else { return nil }
+
+        var request = URLRequest(url: url)
+        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        request.timeoutInterval = 8
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
+
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+
+            let description = json["description"] as? String ?? "Library: \(name)"
+            let htmlURL = json["html_url"] as? String
+            let homepage = json["homepage"] as? String
+            let stars = json["stargazers_count"] as? Int ?? 0
+
+            // Trust score based on star count (0-10 scale)
+            let trustScore = min(10, max(1, stars / 500 + 3))
+
+            return LibraryInfo(
+                id: slug,
+                name: name,
+                description: description,
+                documentationURL: homepage.flatMap { URL(string: $0) },
+                repositoryURL: htmlURL.flatMap { URL(string: $0) },
+                version: nil,
+                trustScore: trustScore,
+                cachedAt: Date()
+            )
+        } catch {
+            return nil
+        }
     }
 
     private func fetchDocumentation(from url: URL, topic: String?) async -> String? {
