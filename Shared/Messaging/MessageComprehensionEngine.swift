@@ -8,7 +8,7 @@
 import Foundation
 import OSLog
 
-private let msgComprehensionLogger = Logger(subsystem: "ai.thea.app", category: "MessageComprehension")
+private let msgComprehensionLogger = Logger(subsystem: \"ai.thea.app\", category: \"MessageComprehension\")
 
 /// Analyzes messages to extract structured understanding.
 enum MsgComprehensionEngine {
