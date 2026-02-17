@@ -34,8 +34,8 @@ public actor ClipboardMonitor {
     private var monitorTask: Task<Void, Never>?
     private var lastChangeCount: Int = 0
 
-    // Configuration
-    private let pollIntervalMs: UInt64 = 500 // Check every 500ms
+    // Configuration — base 5s, scaled by EnergyAdaptiveThrottler at runtime
+    private let baseIntervalSeconds: Double = 5.0 // Was 500ms, now 5s for battery efficiency
     private let maxContentLength = 10000 // Max chars to capture
 
     // Privacy - patterns to skip
@@ -97,7 +97,8 @@ public actor ClipboardMonitor {
                 await captureMonitoredClipboardContent()
             }
 
-            try? await Task.sleep(for: .milliseconds(pollIntervalMs))
+            let interval = baseIntervalSeconds * EnergyAdaptiveThrottler.shared.intervalMultiplier
+            try? await Task.sleep(for: .seconds(interval))
         }
     }
 
