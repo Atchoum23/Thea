@@ -66,7 +66,7 @@ tmux send-keys -t "$SESSION:monitor" \
 # ─────────────────────────────────────────────────────────────
 echo "→ Launching MAIN QA agent (Apple platforms)..."
 tmux send-keys -t "$SESSION:main" \
-  "cd '$THEA_DIR' && echo '=== MAIN QA AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns $MAX_TURNS -p \"\$(cat '$MISSIONS_DIR/mission-main.txt')\" 2>&1 | tee '$LOG_DIR/main.log'; echo '=== MAIN AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/main.log'" Enter
+  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== MAIN QA AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns $MAX_TURNS -p \"\$(cat '$MISSIONS_DIR/mission-main.txt')\" 2>&1 | tee '$LOG_DIR/main.log'; echo '=== MAIN AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/main.log'" Enter
 
 sleep 2
 
@@ -75,7 +75,7 @@ sleep 2
 # ─────────────────────────────────────────────────────────────
 echo "→ Launching WEB APP agent (TheaWeb)..."
 tmux send-keys -t "$SESSION:web" \
-  "cd '$THEA_DIR' && echo '=== WEB AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns 80 -p \"\$(cat '$MISSIONS_DIR/mission-web.txt')\" 2>&1 | tee '$LOG_DIR/web.log'; echo '=== WEB AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/web.log'" Enter
+  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== WEB AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns 80 -p \"\$(cat '$MISSIONS_DIR/mission-web.txt')\" 2>&1 | tee '$LOG_DIR/web.log'; echo '=== WEB AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/web.log'" Enter
 
 sleep 2
 
@@ -84,7 +84,7 @@ sleep 2
 # ─────────────────────────────────────────────────────────────
 echo "→ Launching TIZEN agent..."
 tmux send-keys -t "$SESSION:tizen" \
-  "cd '$THEA_DIR' && echo '=== TIZEN AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns 80 -p \"\$(cat '$MISSIONS_DIR/mission-tizen.txt')\" 2>&1 | tee '$LOG_DIR/tizen.log'; echo '=== TIZEN AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/tizen.log'" Enter
+  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== TIZEN AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns 80 -p \"\$(cat '$MISSIONS_DIR/mission-tizen.txt')\" 2>&1 | tee '$LOG_DIR/tizen.log'; echo '=== TIZEN AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/tizen.log'" Enter
 
 sleep 2
 
