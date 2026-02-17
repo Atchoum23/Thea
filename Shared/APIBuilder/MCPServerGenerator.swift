@@ -232,7 +232,7 @@ public actor MCPServerGenerator {
             // MARK: - \(tool.name) Tool
 
             public func \(tool.name)(\(tool.parameters.map { "\($0.name): \($0.swiftType)" }.joined(separator: ", "))) async throws -> MCPToolResult {
-                // TODO: Implement \(tool.name) logic
+                // Add your \(tool.name) implementation here
                 return MCPToolResult(
                     content: [MCPContent(type: "text", text: "Result from \(tool.name)")],
                     isError: false
@@ -253,7 +253,7 @@ public actor MCPServerGenerator {
             // MARK: - \(resource.name) Resource
 
             private func read\(resource.name.capitalized)Resource(uri: String) async throws -> MCPResourceContent {
-                // TODO: Implement resource reading logic
+                // Add your resource reading implementation here
                 return MCPResourceContent(
                     uri: uri,
                     mimeType: "\(resource.mimeType)",
@@ -270,7 +270,7 @@ public actor MCPServerGenerator {
             // MARK: - \(prompt.name) Prompt
 
             private func get\(prompt.name.capitalized)Prompt(arguments: [String: String]) async throws -> MCPPromptResult {
-                // TODO: Implement prompt generation logic
+                // Add your prompt generation implementation here
                 return MCPPromptResult(
                     description: "\(prompt.description)",
                     messages: [
