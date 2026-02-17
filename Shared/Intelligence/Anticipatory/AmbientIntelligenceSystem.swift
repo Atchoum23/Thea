@@ -174,9 +174,12 @@ public final class AmbientIntelligenceSystem {
             isResting = false
         }
 
-        // Driving detection would require device motion APIs
-        // For now, placeholder
-        isDriving = false
+        // Driving detection: inferred from navigation/maps activity
+        if action.type.contains("navigation") || action.type.contains("maps") || action.type.contains("driving") {
+            isDriving = true
+        } else if isWorking || isInMeeting {
+            isDriving = false
+        }
     }
 
     private func hasContextChangedSignificantly(from old: AmbientContext, to new: AmbientContext) -> Bool {

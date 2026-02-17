@@ -459,9 +459,37 @@ public final class PredictiveLifeEngine: ObservableObject {
     }
 
     private func predictSchedulingConflicts() {
-        // Check calendar for potential conflicts
-        // This would integrate with CalendarMonitor
-        // Placeholder for now
+        Task {
+            let events = await CalendarMonitor.shared.getUpcomingEvents(hours: 24)
+            let sorted = events.sorted { $0.startDate < $1.startDate }
+
+            // Check for overlapping events
+            for i in 0 ..< sorted.count {
+                for j in (i + 1) ..< sorted.count {
+                    let a = sorted[i]
+                    let b = sorted[j]
+                    // Overlap: event B starts before event A ends
+                    if b.startDate < a.endDate {
+                        let prediction = LifePrediction(
+                            type: .schedulingConflict,
+                            title: "Scheduling Conflict",
+                            description: "\"\(a.title)\" overlaps with \"\(b.title)\"",
+                            confidence: 0.95,
+                            timeframe: .shortTerm,
+                            relevance: 0.9,
+                            actionability: .actionRequired,
+                            basedOn: [
+                                "\(a.title): \(a.startDate.formatted()) – \(a.endDate.formatted())",
+                                "\(b.title): \(b.startDate.formatted()) – \(b.endDate.formatted())"
+                            ]
+                        )
+                        await MainActor.run {
+                            addOrUpdatePrediction(prediction)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private func predictCommunicationNeed(for event: LifeEvent) {
