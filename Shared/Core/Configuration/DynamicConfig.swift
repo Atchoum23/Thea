@@ -55,20 +55,24 @@ public final class DynamicConfig {
         return optimal
     }
 
-    /// Get recommended temperature for a task
+    /// Get recommended temperature for a task.
+    /// Maps AITaskCategory to the canonical TaskType.recommendedTemperature.
     public func temperature(for task: AITaskCategory) -> Double {
+        let taskType: TaskType
         switch task {
-        case .codeGeneration, .codeReview, .bugFix:
-            return 0.1 // Low for deterministic code
-        case .creative, .brainstorming:
-            return 0.9 // High for creativity
-        case .conversation, .assistance:
-            return 0.7 // Balanced
-        case .analysis, .classification:
-            return 0.3 // Lower for accuracy
-        case .translation, .correction:
-            return 0.2 // Low for precision
+        case .codeGeneration:   taskType = .codeGeneration
+        case .codeReview:       taskType = .codeAnalysis
+        case .bugFix:           taskType = .codeDebugging
+        case .creative:         taskType = .creative
+        case .brainstorming:    taskType = .creative
+        case .conversation:     taskType = .conversation
+        case .assistance:       taskType = .conversation
+        case .analysis:         taskType = .analysis
+        case .classification:   taskType = .factual
+        case .translation:      taskType = .translation
+        case .correction:       taskType = .factual
         }
+        return taskType.recommendedTemperature
     }
 
     // MARK: - Timing Configuration
@@ -95,19 +99,10 @@ public final class DynamicConfig {
 
     // MARK: - Resource Limits
 
-    /// Get optimal cache size based on available memory
+    /// Get optimal cache size based on available memory.
+    /// Delegates to SystemCapabilityService for hardware-aware scaling.
     public var optimalCacheSize: Int {
-        let availableMemory = ProcessInfo.processInfo.physicalMemory
-        let memoryGB = Double(availableMemory) / 1_073_741_824
-
-        // Scale cache with available memory
-        if memoryGB >= 16 {
-            return 500
-        } else if memoryGB >= 8 {
-            return 200
-        } else {
-            return 100
-        }
+        SystemCapabilityService.shared.optimalCacheSize
     }
 
     /// Get optimal log retention count
