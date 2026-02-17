@@ -202,7 +202,7 @@ public final class LiveAutoCorrect {
             guard let self else { return }
 
             do {
-                try await Task.sleep(nanoseconds: UInt64(self.debounceInterval) * 1_000_000)
+                try await Task.sleep(for: .milliseconds(self.debounceInterval))
             } catch {
                 return // Task was cancelled
             }

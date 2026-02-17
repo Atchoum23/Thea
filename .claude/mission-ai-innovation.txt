@@ -1,0 +1,115 @@
+# THEA AI INNOVATION MISSION — 2026 STATE OF THE ART
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND IMPROVE.
+# Every AI capability that exists must be kept. Add newer, better capabilities on top.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Research and implement the latest (2026) advances in AI to make Thea's intelligence
+maximally powerful. Thea should use SOTA techniques across all dimensions: reasoning,
+planning, memory, multimodal, on-device inference, tool use, agentic behavior.
+
+## PHASE 1: Read Current AI Architecture
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+cat .claude/CLAUDE.md | grep -A 200 "## AI Capabilities"
+ls Shared/AI/ Shared/Intelligence/ AI/ 2>/dev/null | head -50
+```
+
+## PHASE 2: Research Latest AI Advances (Web Search Required)
+
+Search and apply findings for each topic:
+
+### Reasoning and Chain-of-Thought (2026)
+- Search: "chain of thought reasoning LLM implementation Swift 2026"
+- Search: "Claude extended thinking API interleaved tool use 2026"
+- Apply: Verify AnthropicProvider uses extended thinking (claude-opus-4-6 supports it)
+- Apply: Implement reasoning trace display in chat UI (collapsible thinking block)
+
+### Agentic Frameworks and ReAct (2026)
+- Search: "ReAct agent pattern Swift implementation 2026"
+- Search: "multi-agent orchestration patterns 2026"
+- Apply: Verify AgentMode uses proper ReAct (Reason + Act) cycles
+- Apply: Implement TaskPlanDAG visualization in UI (show task decomposition)
+- Apply: Add agent loop retry with exponential backoff on failures
+
+### RAG — Retrieval-Augmented Generation (2026)
+- Search: "RAG retrieval augmented generation best practices 2026"
+- Search: "vector embeddings local Swift macOS 2026"
+- Apply: Verify SemanticSearchService uses embeddings for RAG
+- Apply: Implement hybrid search (BM25 + vector) for PersonalKnowledgeGraph
+- Apply: Add context window management for long conversations
+
+### Multimodal AI (2026)
+- Search: "multimodal LLM vision text Swift 2026"
+- Search: "Qwen2-VL 7B MLX Swift integration 2026"
+- Apply: Verify MLXVisionEngine correctly uses Qwen2-VL
+- Apply: Add image-to-text capability in chat (paste image → analyze)
+- Apply: Wire vision analysis output to conversational responses
+
+### On-Device Models and MLX (2026)
+- Search: "MLX Swift latest models 2026 Apple Silicon"
+- Search: "Apple Intelligence API Swift integration 2026"
+- Search: "llama.cpp vs MLX performance comparison 2026"
+- Apply: Check if newer MLX models are available (Llama 3.3 70B, DeepSeek-R1, etc.)
+- Apply: Update model catalog in AIModel.swift with latest available models
+- Apply: Verify FunctionGemma (NL→function calls) is optimal
+
+### MCP — Model Context Protocol (2026)
+- Search: "Model Context Protocol MCP 2026 latest servers"
+- Search: "MCP Swift client implementation 2026"
+- Apply: Verify OpenClawClient correctly implements MCP protocol
+- Apply: Add any new standard MCP tools (file ops, web search, code execution)
+- Apply: Ensure MCP tool results are properly structured for Claude API
+
+### Tool Use and Function Calling (2026)
+- Search: "Claude API tool use best practices 2026"
+- Search: "parallel tool use Claude 2026"
+- Apply: Verify AnthropicToolCatalog has optimal tool definitions
+- Apply: Implement parallel tool use (multiple tools in one response)
+- Apply: Add tool result caching to avoid redundant calls
+
+### Memory and Persistent Context (2026)
+- Search: "LLM persistent memory systems 2026"
+- Search: "episodic memory AI assistant Swift 2026"
+- Apply: Verify PersonalKnowledgeGraph stores entities from every conversation
+- Apply: Implement proactive memory injection (relevant memories surfaced automatically)
+- Apply: Add memory relevance scoring
+
+### Confidence and Hallucination Detection (2026)
+- Search: "LLM hallucination detection 2026 techniques"
+- Search: "confidence scoring AI responses 2026"
+- Apply: Verify ConfidenceSystem calibration is accurate
+- Apply: Add UI indicator when Thea is uncertain (low confidence score)
+- Apply: Implement fact-checking for factual claims via WebSearchVerifier
+
+### Embeddings and Semantic Understanding (2026)
+- Search: "text embeddings 2026 best models local"
+- Apply: Verify SemanticSearchService uses best available local embedding model
+- Apply: Add semantic deduplication for PersonalKnowledgeGraph nodes
+
+## PHASE 3: Implement Each Improvement
+
+For each research finding that yields an actionable improvement:
+1. Read the relevant existing code
+2. Implement the improvement (add, not replace)
+3. Verify build: xcodebuild ... | grep error:
+4. Commit: "Auto-save: AI innovation — [specific improvement]"
+
+## PHASE 4: Verify AI Pipeline End-to-End
+
+```bash
+# Run AI-related tests
+swift test --filter AI 2>&1 | tail -20
+swift test --filter Intelligence 2>&1 | tail -20
+swift test --filter Confidence 2>&1 | tail -20
+swift test --filter Memory 2>&1 | tail -20
+```
+
+## SUCCESS CRITERIA
+- At least 8 AI capability improvements implemented
+- All AI tests pass
+- 0 build errors/warnings
+- Extended thinking wired for claude-opus-4-6
+- RAG pipeline verified end-to-end
+- Latest model catalog updated

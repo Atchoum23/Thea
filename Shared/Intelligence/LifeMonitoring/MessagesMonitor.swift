@@ -133,7 +133,7 @@ public actor MessagesMonitor {
     private func monitorLoop() async {
         while isRunning && !Task.isCancelled {
             await checkForNewMessages()
-            try? await Task.sleep(nanoseconds: pollIntervalSeconds * 1_000_000_000)
+            try? await Task.sleep(for: .seconds(pollIntervalSeconds))
         }
     }
 

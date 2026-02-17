@@ -515,7 +515,7 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         // Periodic sync every 5 minutes
         cloudSyncTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 5 * 60 * 1_000_000_000) // 5 minutes
+                try? await Task.sleep(for: .seconds(300)) // 5 minutes
                 guard !Task.isCancelled, configuration.iCloudSyncEnabled else { continue }
                 try? await cloudSync?.syncAll()
             }
