@@ -177,7 +177,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .providers, .memory, .agent, .moltbook, .knowledge, .behavioralPatterns, .knowledgeGraph, .healthInsights, .notificationSchedule, .lifeJournal, .appPairing, .liveGuidance: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
-        case .theme, .advanced: 4
+        case .responseStyles, .personalization, .theme, .advanced: 4
         case .subscription, .about: 5
         }
     }
@@ -377,6 +377,10 @@ struct MacSettingsView: View {
             SyncSettingsView()
         case .privacy:
             ConfigurationPrivacySettingsView()
+        case .responseStyles:
+            ResponseStylesSettingsView()
+        case .personalization:
+            PersonalizationSettingsView()
         case .theme:
             ThemeConfigurationView()
         case .advanced:

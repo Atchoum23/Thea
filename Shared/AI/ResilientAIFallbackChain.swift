@@ -33,11 +33,13 @@ final class ResilientAIFallbackChain {
 
     // MARK: - Configuration
 
-    /// Maximum consecutive failures before skipping a tier
-    var maxConsecutiveFailures = 3
+    /// Maximum consecutive failures before skipping a tier.
+    /// Computed from SystemCapabilityService: high-RAM machines tolerate more retries.
+    var maxConsecutiveFailures: Int = SystemCapabilityService.shared.recommendedMaxConsecutiveFailures
 
-    /// Cooldown before retrying a failed tier (seconds)
-    var failureCooldownSeconds: TimeInterval = 300
+    /// Cooldown before retrying a failed tier (seconds).
+    /// Computed from chip generation: M3+ chips recover faster.
+    var failureCooldownSeconds: TimeInterval = SystemCapabilityService.shared.recommendedFailureCooldownSeconds
 
     /// Whether to prefer local models when cloud latency exceeds threshold
     var latencyThresholdMs: Int = 5000

@@ -1,3 +1,4 @@
+import CoreSpotlight
 import os.log
 import SQLite3
 @preconcurrency import SwiftData
@@ -60,6 +61,9 @@ struct TheamacOSApp: App {
                     .onAppear {
                         setupManagers(container: container)
                         configureWindow()
+                    }
+                    .onContinueUserActivity(CSSearchableItemActionType) { activity in
+                        handleSpotlightActivity(activity)
                     }
                     .alert("Running in Temporary Mode", isPresented: $showingFallbackAlert) {
                         Button("Continue") { showingFallbackAlert = false }
