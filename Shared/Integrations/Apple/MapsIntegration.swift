@@ -272,8 +272,6 @@ public actor MapsIntegration {
     // MARK: - Location Search
 
     /// Search for locations
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
     public func searchLocations(criteria: LocationSearchCriteria) async throws -> [TheaLocation] {
         #if canImport(MapKit)
         let request = MKLocalSearch.Request()
@@ -349,8 +347,7 @@ public actor MapsIntegration {
     }
 
     /// Search for a specific address
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     public func searchAddress(_ address: String) async throws -> [TheaLocation] {
         let criteria = LocationSearchCriteria(
             query: address,
@@ -360,8 +357,7 @@ public actor MapsIntegration {
     }
 
     /// Search for nearby places
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     public func searchNearby(
         center: TheaCoordinate,
         category: LocationCategory? = nil,
@@ -381,8 +377,7 @@ public actor MapsIntegration {
     // MARK: - Geocoding
 
     /// Forward geocode an address to coordinates using MKLocalSearch
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     public func geocode(address: String) async throws -> TheaLocation? {
         #if canImport(MapKit)
         let request = MKLocalSearch.Request()
@@ -415,8 +410,7 @@ public actor MapsIntegration {
     }
 
     /// Reverse geocode coordinates to an address
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKReverseGeocodingRequest")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKReverseGeocodingRequest")
+
     public func reverseGeocode(coordinate: TheaCoordinate) async throws -> TheaLocation? {
         #if canImport(CoreLocation)
         let geocoder = CLGeocoder()
@@ -445,8 +439,7 @@ public actor MapsIntegration {
     // MARK: - Directions
 
     /// Get directions between two locations
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     public func getDirections(
         from source: TheaCoordinate,
         to destination: TheaCoordinate,
@@ -521,8 +514,7 @@ public actor MapsIntegration {
     }
 
     /// Get directions with named locations
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     public func getDirections(
         from sourceName: String,
         to destinationName: String,
@@ -545,8 +537,7 @@ public actor MapsIntegration {
     }
 
     /// Get estimated travel time
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     public func getETA(
         from source: TheaCoordinate,
         to destination: TheaCoordinate,
@@ -611,8 +602,7 @@ public actor MapsIntegration {
 
     #if canImport(MapKit)
     /// Open location in Maps app
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     @discardableResult
     public func openInMaps(location: TheaLocation) async -> Bool {
         let coordinate = CLLocationCoordinate2D(
@@ -636,8 +626,7 @@ public actor MapsIntegration {
     }
 
     /// Open directions in Maps app
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     @discardableResult
     public func openDirectionsInMaps(
         from source: TheaCoordinate?,
@@ -690,8 +679,7 @@ public actor MapsIntegration {
     // MARK: - Helper Methods
 
     #if canImport(MapKit)
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     private func convertToTheaLocation(
         _ mapItem: MKMapItem,
         searchCenter: TheaCoordinate?
@@ -874,8 +862,7 @@ public actor MapsIntegration {
     #endif
 
     #if canImport(CoreLocation)
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKReverseGeocodingRequest")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKReverseGeocodingRequest")
+
     private func formatAddress(from placemark: CLPlacemark) -> String {
         var components: [String] = []
 
@@ -908,8 +895,7 @@ public actor MapsIntegration {
     #endif
 
     #if canImport(MapKit)
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+
     private func formatAddress(from mapItem: MKMapItem) -> String {
         // Use MKMapItem's placemark (CLPlacemark) properties for address formatting
         // This avoids direct MKPlacemark usage deprecated in iOS 26

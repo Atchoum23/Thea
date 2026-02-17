@@ -11,8 +11,7 @@ import Foundation
 // MARK: - Tool Execution
 
 extension THEAMCPServer {
-    @available(macOS, deprecated: 26.0, message: "searchLocation/getDirections use deprecated MapKit APIs")
-    @available(iOS, deprecated: 26.0, message: "searchLocation/getDirections use deprecated MapKit APIs")
+    // Note: searchLocation/getDirections use deprecated MapKit APIs — update when MapKit provides replacements
     func executeTool(name: String, arguments: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         switch name {
         case "thea_execute_command":
@@ -216,8 +215,7 @@ extension THEAMCPServer {
         return [.text("Created note: \(title)")]
     }
 
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+    // TODO: Migrate to MKMapItem coordinate API when available
     func searchLocation(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let query = args["query"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("query")
@@ -236,8 +234,7 @@ extension THEAMCPServer {
         return [.text(result)]
     }
 
-    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+    // TODO: Migrate to MKMapItem coordinate API when available
     func getDirections(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let from = args["from"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("from")
