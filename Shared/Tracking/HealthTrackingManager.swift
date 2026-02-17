@@ -59,7 +59,7 @@ import Observation
             Task {
                 while isMonitoring {
                     await syncHealthData()
-                    try? await Task.sleep(nanoseconds: UInt64(config.healthSyncInterval * 1_000_000_000))
+                    try? await Task.sleep(for: .seconds(config.healthSyncInterval))
                 }
             }
         }
@@ -103,87 +103,74 @@ import Observation
         // MARK: - Individual Metrics
 
         private func fetchSteps(from start: Date, to end: Date) async -> Int {
-            guard let stepsType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
-                return 0
-            }
-
+            // Modern HKStatisticsQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let stepsType = HKQuantityType(.stepCount)
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-
-            return await withCheckedContinuation { continuation in
-                let query = HKStatisticsQuery(quantityType: stepsType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, _ in
-                    let steps = result?.sumQuantity()?.doubleValue(for: .count()) ?? 0
-                    continuation.resume(returning: Int(steps))
-                }
-                healthStore.execute(query)
-            }
+            let descriptor = HKStatisticsQueryDescriptor(
+                predicate: .quantitySample(type: stepsType, predicate: predicate),
+                options: .cumulativeSum
+            )
+            let result = try? await descriptor.result(for: healthStore)
+            return Int(result?.sumQuantity()?.doubleValue(for: .count()) ?? 0)
         }
 
         private func fetchActiveCalories(from start: Date, to end: Date) async -> Double {
-            guard let caloriesType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {
-                return 0
-            }
-
+            // Modern HKStatisticsQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let caloriesType = HKQuantityType(.activeEnergyBurned)
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-
-            return await withCheckedContinuation { continuation in
-                let query = HKStatisticsQuery(quantityType: caloriesType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, _ in
-                    let calories = result?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
-                    continuation.resume(returning: calories)
-                }
-                healthStore.execute(query)
-            }
+            let descriptor = HKStatisticsQueryDescriptor(
+                predicate: .quantitySample(type: caloriesType, predicate: predicate),
+                options: .cumulativeSum
+            )
+            let result = try? await descriptor.result(for: healthStore)
+            return result?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
         }
 
         private func fetchHeartRateStatistics(from start: Date, to end: Date) async -> (average: Double?, min: Double?, max: Double?) {
-            guard let heartRateType = HKQuantityType.quantityType(forIdentifier: .heartRate) else {
-                return (nil, nil, nil)
-            }
-
+            // Modern HKStatisticsQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let heartRateType = HKQuantityType(.heartRate)
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-
-            return await withCheckedContinuation { continuation in
-                let query = HKStatisticsQuery(quantityType: heartRateType, quantitySamplePredicate: predicate, options: [.discreteAverage, .discreteMin, .discreteMax]) { _, result, _ in
-                    let average = result?.averageQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute()))
-                    let min = result?.minimumQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute()))
-                    let max = result?.maximumQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute()))
-                    continuation.resume(returning: (average, min, max))
-                }
-                healthStore.execute(query)
-            }
+            let descriptor = HKStatisticsQueryDescriptor(
+                predicate: .quantitySample(type: heartRateType, predicate: predicate),
+                options: [.discreteAverage, .discreteMin, .discreteMax]
+            )
+            let result = try? await descriptor.result(for: healthStore)
+            let bpmUnit = HKUnit.count().unitDivided(by: .minute())
+            let average = result?.averageQuantity()?.doubleValue(for: bpmUnit)
+            let min = result?.minimumQuantity()?.doubleValue(for: bpmUnit)
+            let max = result?.maximumQuantity()?.doubleValue(for: bpmUnit)
+            return (average, min, max)
         }
 
         private func fetchSleepDuration(from start: Date, to end: Date) async -> TimeInterval {
-            guard let sleepType = HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) else {
-                return 0
-            }
-
+            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
+            let sleepType = HKCategoryType(.sleepAnalysis)
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-
-            return await withCheckedContinuation { continuation in
-                let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, _ in
-                    let sleepSamples = samples as? [HKCategorySample] ?? []
-                    let totalDuration = sleepSamples.reduce(0.0) { total, sample in
-                        total + sample.endDate.timeIntervalSince(sample.startDate)
-                    }
-                    continuation.resume(returning: totalDuration)
-                }
-                healthStore.execute(query)
+            let descriptor = HKSampleQueryDescriptor(
+                predicates: [.categorySample(type: sleepType, predicate: predicate)],
+                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
+                limit: nil
+            )
+            let samples = (try? await descriptor.result(for: healthStore)) ?? []
+            return samples.reduce(0.0) { total, sample in
+                total + sample.endDate.timeIntervalSince(sample.startDate)
             }
         }
 
         private func fetchWorkoutMinutes(from start: Date, to end: Date) async -> Int {
+            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-
-            return await withCheckedContinuation { continuation in
-                let query = HKSampleQuery(sampleType: .workoutType(), predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, _ in
-                    let workouts = samples as? [HKWorkout] ?? []
-                    let totalMinutes = workouts.reduce(0.0) { total, workout in
-                        total + workout.duration
-                    } / 60.0
-                    continuation.resume(returning: Int(totalMinutes))
-                }
-                healthStore.execute(query)
-            }
+            let descriptor = HKSampleQueryDescriptor(
+                predicates: [.sample(type: .workoutType(), predicate: predicate)],
+                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
+                limit: nil
+            )
+            let samples = (try? await descriptor.result(for: healthStore)) ?? []
+            let workouts = samples.compactMap { $0 as? HKWorkout }
+            let totalMinutes = workouts.reduce(0.0) { total, workout in
+                total + workout.duration
+            } / 60.0
+            return Int(totalMinutes)
         }
 
         // MARK: - Data Persistence
