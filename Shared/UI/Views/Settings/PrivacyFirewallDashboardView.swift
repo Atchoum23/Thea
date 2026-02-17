@@ -938,7 +938,7 @@ struct FirewallAuditDetailView: View {
                         VStack(spacing: 2) {
                             Text("\(stats.redacted)")
                                 .font(.theaTitle2)
-                                .foregroundStyle(.orange)
+                                .foregroundStyle(Color.theaWarning)
                             Text("Redacted")
                                 .font(.theaCaption2)
                                 .foregroundStyle(.secondary)
@@ -948,7 +948,7 @@ struct FirewallAuditDetailView: View {
                         VStack(spacing: 2) {
                             Text("\(stats.blocked)")
                                 .font(.theaTitle2)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.theaError)
                             Text("Blocked")
                                 .font(.theaCaption2)
                                 .foregroundStyle(.secondary)
@@ -1021,9 +1021,9 @@ struct FirewallAuditDetailView: View {
 
     private func colorForOutcome(_ outcome: PrivacyAuditEntry.AuditOutcome) -> Color {
         switch outcome {
-        case .passed: .green
-        case .redacted: .orange
-        case .blocked: .red
+        case .passed: .theaSuccess
+        case .redacted: .theaWarning
+        case .blocked: .theaError
         }
     }
 
