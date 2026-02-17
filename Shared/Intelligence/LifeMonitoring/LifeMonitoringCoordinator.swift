@@ -398,6 +398,30 @@ public final class LifeMonitoringCoordinator: ObservableObject {
             PredictiveLifeEngine.shared.start()
             logger.info("Predictive life engine started")
         }
+
+        // Mood Tracking (V2.3) — subscribes to eventStream via Combine
+        _ = MoodTracker.shared
+        logger.info("Mood tracker started")
+
+        // Stress Detection (V2.3) — subscribes to eventStream via Combine
+        StressDetector.shared.start()
+        logger.info("Stress detector started")
+
+        // Ambient Life Journal (V2.3) — captures daily snapshots
+        _ = AmbientLifeJournal.shared
+        logger.info("Ambient life journal initialized")
+
+        // Cross-Domain Correlation Engine (V2.3) — daily analysis
+        Task { @MainActor in
+            await CrossDomainCorrelationEngine.shared.captureToday()
+            logger.info("Cross-domain correlation engine captured today's snapshot")
+        }
+
+        // Personal Baseline Monitor (V2.3) — anomaly detection
+        Task { @MainActor in
+            await PersonalBaselineMonitor.shared.runDailyCheck()
+            logger.info("Personal baseline monitor ran daily check")
+        }
     }
 
     // MARK: - Event Processing
