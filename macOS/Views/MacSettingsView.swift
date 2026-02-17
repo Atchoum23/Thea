@@ -299,7 +299,7 @@ struct MacSettingsView: View {
         case .appPairing:
             AppPairingSettingsView()
         case .liveGuidance:
-            LiveGuidanceSettingsView()
+            liveGuidancePlaceholder
         case .clipboard:
             TheaClipSettingsView()
         case .translation:
