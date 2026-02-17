@@ -192,16 +192,19 @@ analyzer_rules:
 # RULE CONFIGURATIONS
 # ============================================
 
-# File Length - relaxed for test files which legitimately need many test cases
-# Production code aspiration: 500 lines; tests get 900 to avoid noise
+# File Length - aspirational: 500, error at current max + buffer
+# Worst active file: OrchestratorSettingsView.swift (936 lines)
+# Ratchet down error threshold as files are decomposed
 file_length:
-  warning: 900
+  warning: 500
   error: 950
   ignore_comment_only_lines: true
 
-# Type Body Length - relaxed to accommodate large view/test types
+# Type Body Length - aspirational: 400, error at current max + buffer
+# Worst active type: OrchestratorSettingsView (871 lines)
+# Ratchet down error threshold as types are decomposed
 type_body_length:
-  warning: 750
+  warning: 400
   error: 880
 
 # Function Body Length - aspirational: 80, error at current max + buffer

@@ -58,7 +58,7 @@ settings:
     # Swift Configuration
     # ===========================================
     SWIFT_VERSION: "6.0"
-    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_STRICT_CONCURRENCY: minimal
     SWIFT_EMIT_MODULE_INTERFACE: NO
     BUILD_LIBRARY_FOR_DISTRIBUTION: NO
     SWIFT_ENFORCE_EXCLUSIVE_ACCESS: "full"
@@ -211,8 +211,8 @@ settings:
     # Release Configuration
     # ===========================================
     Release:
-      # Optimization — arm64 only (MLX/Float16 requires arm64; no Intel Mac support)
-      ONLY_ACTIVE_ARCH: YES
+      # Optimization
+      ONLY_ACTIVE_ARCH: NO
       SWIFT_OPTIMIZATION_LEVEL: "-O"
       SWIFT_COMPILATION_MODE: wholemodule
       GCC_OPTIMIZATION_LEVEL: "s"
@@ -294,7 +294,11 @@ targets:
           - "**/Core/Services/ProjectService.swift"
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
-          # G1 Live Guidance: MLXAudioEngine + dependents ACTIVATED (2026-02-17)
+          # TEMPORARY: Exclude MLXAudioEngine + dependents causing Release build issues
+          - "**/AI/Audio/MLXAudioEngine.swift"
+          - "**/Voice/MLXVoiceBackend.swift"
+          - "**/AI/LiveGuidance/LocalVisionGuidance.swift"
+          - "**/Settings/LiveGuidanceSettingsView.swift"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
           # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
           # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)

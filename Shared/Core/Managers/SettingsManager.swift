@@ -551,8 +551,7 @@ extension SettingsManager {
 extension SettingsManager {
     func getAPIKey(for provider: String) -> String? {
         do {
-            let key = try SecureStorage.shared.loadAPIKey(for: provider)
-            if !key.isEmpty { return key }
+            if let key = try SecureStorage.shared.loadAPIKey(for: provider), !key.isEmpty { return key }
         } catch {
             logger.error("Failed to load API key for \(provider) from Keychain: \(error.localizedDescription)")
         }

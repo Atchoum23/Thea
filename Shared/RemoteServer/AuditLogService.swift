@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 // MARK: - Audit Log Service
 
@@ -13,6 +14,8 @@ import Foundation
 @MainActor
 public class AuditLogService: ObservableObject {
     // MARK: - Published State
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "AuditLogService")
 
     @Published public private(set) var recentEntries: [AuditEntry] = []
     @Published public private(set) var totalEntryCount: Int = 0
@@ -36,7 +39,11 @@ public class AuditLogService: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         storageDirectory = appSupport.appendingPathComponent("Thea/AuditLogs", isDirectory: true)
         entriesFileURL = storageDirectory.appendingPathComponent("audit_log.json")
-        try? FileManager.default.createDirectory(at: storageDirectory, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: storageDirectory, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create audit log directory: \(error.localizedDescription)")
+        }
         loadEntries()
         purgeExpiredEntries()
     }
@@ -187,7 +194,12 @@ public class AuditLogService: ObservableObject {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try? encoder.encode(allEntries)
+        do {
+            return try encoder.encode(allEntries)
+        } catch {
+            logger.error("Failed to encode audit log as JSON: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     /// Save export to file
@@ -209,7 +221,12 @@ public class AuditLogService: ObservableObject {
         guard let data else { return nil }
 
         let fileURL = storageDirectory.appendingPathComponent(filename)
-        try? data.write(to: fileURL)
+        do {
+            try data.write(to: fileURL)
+        } catch {
+            logger.error("Failed to write audit export to \(fileURL.lastPathComponent): \(error.localizedDescription)")
+            return nil
+        }
         return fileURL
     }
 
@@ -261,19 +278,26 @@ public class AuditLogService: ObservableObject {
     // MARK: - Private
 
     private func loadEntries() {
-        guard let data = try? Data(contentsOf: entriesFileURL),
-              let decoded = try? JSONDecoder().decode([AuditEntry].self, from: data)
-        else { return }
-        allEntries = decoded
-        recentEntries = Array(allEntries.prefix(maxInMemoryEntries))
-        totalEntryCount = allEntries.count
+        guard FileManager.default.fileExists(atPath: entriesFileURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: entriesFileURL)
+            allEntries = try JSONDecoder().decode([AuditEntry].self, from: data)
+            recentEntries = Array(allEntries.prefix(maxInMemoryEntries))
+            totalEntryCount = allEntries.count
+        } catch {
+            logger.error("Failed to load audit entries: \(error.localizedDescription)")
+        }
     }
 
     private func saveEntries() {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        guard let data = try? encoder.encode(allEntries) else { return }
-        try? data.write(to: entriesFileURL)
+        do {
+            let data = try encoder.encode(allEntries)
+            try data.write(to: entriesFileURL)
+        } catch {
+            logger.error("Failed to save audit entries: \(error.localizedDescription)")
+        }
     }
 
     private func escapeCSV(_ string: String) -> String {
