@@ -67,8 +67,9 @@ tmux send-keys -t "$SESSION:monitor" \
 # Sequential: lint → Debug builds → Release builds → tests → security → CI
 # ─────────────────────────────────────────────────────────────
 echo "→ Launching MAIN QA agent (Apple platforms)..."
+# Use short inline prompt pointing to mission file — same pattern as msm3u-qa-batch.sh
 tmux send-keys -t "$SESSION:main" \
-  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== MAIN QA AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns $MAX_TURNS -p \"\$(cat '$MISSIONS_DIR/mission-main.txt')\" 2>&1 | tee '$LOG_DIR/main.log'; echo '=== MAIN AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/main.log'" Enter
+  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== MAIN QA AGENT START ===' && echo 'Read .claude/mission-main.txt carefully and execute it step by step, autonomously and completely. Fix every issue found. Do not stop until all success criteria in the mission file are met. Commit after every fix.' | claude --dangerously-skip-permissions -p - --model $MODEL --max-turns $MAX_TURNS --output-format stream-json 2>&1 | tee '$LOG_DIR/main.log'; echo '=== MAIN AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/main.log'" Enter
 
 sleep 2
 
@@ -77,7 +78,7 @@ sleep 2
 # ─────────────────────────────────────────────────────────────
 echo "→ Launching WEB APP agent (TheaWeb)..."
 tmux send-keys -t "$SESSION:web" \
-  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== WEB AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns 80 -p \"\$(cat '$MISSIONS_DIR/mission-web.txt')\" 2>&1 | tee '$LOG_DIR/web.log'; echo '=== WEB AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/web.log'" Enter
+  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== WEB AGENT START ===' && echo 'Read .claude/mission-web.txt carefully and execute it step by step, autonomously and completely. Fix every issue found. Do not stop until all success criteria are met. Commit after every fix.' | claude --dangerously-skip-permissions -p - --model $MODEL --max-turns 80 --output-format stream-json 2>&1 | tee '$LOG_DIR/web.log'; echo '=== WEB AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/web.log'" Enter
 
 sleep 2
 
@@ -86,7 +87,7 @@ sleep 2
 # ─────────────────────────────────────────────────────────────
 echo "→ Launching TIZEN agent..."
 tmux send-keys -t "$SESSION:tizen" \
-  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== TIZEN AGENT START ===' && claude --dangerously-skip-permissions --verbose --model $MODEL --max-turns 80 -p \"\$(cat '$MISSIONS_DIR/mission-tizen.txt')\" 2>&1 | tee '$LOG_DIR/tizen.log'; echo '=== TIZEN AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/tizen.log'" Enter
+  "unset CLAUDECODE && cd '$THEA_DIR' && echo '=== TIZEN AGENT START ===' && echo 'Read .claude/mission-tizen.txt carefully and execute it step by step, autonomously and completely. Fix every issue found. Do not stop until all success criteria are met. Commit after every fix.' | claude --dangerously-skip-permissions -p - --model $MODEL --max-turns 80 --output-format stream-json 2>&1 | tee '$LOG_DIR/tizen.log'; echo '=== TIZEN AGENT EXIT: '\$?' ===' | tee -a '$LOG_DIR/tizen.log'" Enter
 
 sleep 2
 
