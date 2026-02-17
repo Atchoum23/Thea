@@ -61,11 +61,13 @@ public actor ClipboardContextProvider: ContextProvider {
             lastChangeCount = await MainActor.run { NSPasteboard.general.changeCount }
         #endif
 
-        // Start polling for clipboard changes
+        // Start polling for clipboard changes (base: 5s, scaled by EnergyAdaptiveThrottler)
         updateTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.checkClipboard()
-                try? await Task.sleep(for: .seconds(1))
+                let baseInterval: TimeInterval = 5.0
+                let interval = baseInterval * EnergyAdaptiveThrottler.shared.intervalMultiplier
+                try? await Task.sleep(for: .seconds(interval))
             }
         }
 

@@ -164,6 +164,33 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
+    /// Recommended LLM temperature for this task type.
+    /// Lower values produce more deterministic output; higher values produce more creative output.
+    public var recommendedTemperature: Double {
+        switch self {
+        case .codeGeneration, .codeDebugging, .debugging, .codeRefactoring, .appDevelopment:
+            return 0.1 // Deterministic code generation
+        case .factual, .simpleQA, .translation:
+            return 0.2 // Precision
+        case .math, .mathLogic:
+            return 0.15 // Exact computation
+        case .codeAnalysis, .codeExplanation:
+            return 0.25 // Structured but readable
+        case .analysis, .complexReasoning, .planning, .summarization:
+            return 0.3 // Thoughtful reasoning
+        case .research, .informationRetrieval:
+            return 0.4 // Exploratory
+        case .system, .workflowAutomation:
+            return 0.2 // Deterministic system operations
+        case .conversation, .general:
+            return 0.7 // Natural conversation
+        case .creative, .creativeWriting, .contentCreation, .creation:
+            return 0.8 // Creative output
+        case .unknown:
+            return 0.5 // Balanced default
+        }
+    }
+
     /// Expected response length for this task type, used for token budgeting.
     public var expectedResponseLength: ResponseLength {
         switch self {
@@ -197,6 +224,19 @@ public enum ResponseLength: String, Codable, Sendable {
         case .medium: return 2000
         case .long: return 8000
         }
+    }
+
+    /// Scaled max tokens proportional to the model's maximum output capacity.
+    /// Caps at 50% of the model's `maxOutputTokens` to leave room for reasoning.
+    /// - Parameter model: The AI model that will generate the response.
+    /// - Returns: Token budget appropriate for this response length and model.
+    public func scaledMaxTokens(for model: AIModel) -> Int {
+        let modelMax = model.maxOutputTokens
+        let cap = modelMax / 2 // 50% cap
+        let base = suggestedMaxTokens
+        // Scale proportionally: if model supports more output, give more tokens
+        let scaled = Int(Double(base) * Double(modelMax) / 8000.0)
+        return min(max(base, scaled), max(base, cap))
     }
 }
 
