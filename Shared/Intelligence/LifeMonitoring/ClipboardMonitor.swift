@@ -97,7 +97,8 @@ public actor ClipboardMonitor {
                 await captureMonitoredClipboardContent()
             }
 
-            let interval = baseIntervalSeconds * EnergyAdaptiveThrottler.shared.intervalMultiplier
+            let multiplier = await MainActor.run { EnergyAdaptiveThrottler.shared.intervalMultiplier }
+            let interval = baseIntervalSeconds * multiplier
             try? await Task.sleep(for: .seconds(interval))
         }
     }

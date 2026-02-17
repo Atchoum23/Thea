@@ -66,7 +66,8 @@ public actor ClipboardContextProvider: ContextProvider {
             while !Task.isCancelled {
                 await self?.checkClipboard()
                 let baseInterval: TimeInterval = 5.0
-                let interval = baseInterval * EnergyAdaptiveThrottler.shared.intervalMultiplier
+                let multiplier = await MainActor.run { EnergyAdaptiveThrottler.shared.intervalMultiplier }
+                let interval = baseInterval * multiplier
                 try? await Task.sleep(for: .seconds(interval))
             }
         }
