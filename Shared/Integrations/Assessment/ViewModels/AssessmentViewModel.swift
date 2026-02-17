@@ -25,6 +25,7 @@ public final class AssessmentViewModel {
 
     // MARK: - Data Loading
 
+    /// Fetches all completed assessments from the service.
     public func loadData() async {
         isLoading = true
         errorMessage = nil
@@ -40,6 +41,7 @@ public final class AssessmentViewModel {
 
     // MARK: - Assessment Management
 
+    /// Begins a new assessment and loads its questions.
     public func startAssessment(_ type: AssessmentType) async {
         do {
             currentProgress = try await assessmentService.startAssessment(type)
@@ -49,6 +51,7 @@ public final class AssessmentViewModel {
         }
     }
 
+    /// Submits a response for the current question and advances progress.
     public func submitResponse(assessmentID: UUID, questionID: UUID, value: Int) async {
         let response = QuestionResponse(questionID: questionID, value: value)
 
@@ -64,6 +67,7 @@ public final class AssessmentViewModel {
         }
     }
 
+    /// Finalizes the assessment, scores it, and adds it to the completed list.
     public func completeAssessment(assessmentID: UUID) async {
         do {
             let completed = try await assessmentService.completeAssessment(assessmentID: assessmentID)
@@ -75,6 +79,7 @@ public final class AssessmentViewModel {
         }
     }
 
+    /// Cancels the current assessment without saving.
     public func cancelAssessment() {
         currentProgress = nil
         currentQuestions = []

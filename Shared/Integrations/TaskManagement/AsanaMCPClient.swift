@@ -16,6 +16,7 @@ public actor AsanaMCPClient {
 
     public init() {}
 
+    /// Sets the bearer token used for authenticating MCP requests.
     public func configure(accessToken: String) {
         self.accessToken = accessToken
     }
