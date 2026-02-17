@@ -38,7 +38,17 @@ final class HealthCoachingPipeline {
     /// Whether to use smart notification scheduling for insight delivery
     var useSmartScheduling = true
 
-    private init() {}
+    private let storageURL: URL = {
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("Thea", isDirectory: true)
+            .appendingPathComponent("HealthCoaching", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("coaching_state.json")
+    }()
+
+    private init() {
+        loadFromDisk()
+    }
 
     // MARK: - Analysis Pipeline
 
@@ -84,6 +94,7 @@ final class HealthCoachingPipeline {
 
         lastAnalysis = report
         activeInsights = Array(insights.prefix(maxActiveInsights))
+        saveToDisk()
 
         // Step 4: Deliver top insight via smart notification
         if let topInsight = insights.first {
@@ -393,10 +404,79 @@ final class HealthCoachingPipeline {
 
     func dismissInsight(_ id: UUID) {
         activeInsights.removeAll { $0.id == id }
+        saveToDisk()
     }
 
     func clearAllInsights() {
         activeInsights.removeAll()
+        saveToDisk()
+    }
+
+    // MARK: - Persistence
+
+    private struct PersistedState: Codable {
+        let lastAnalysisDate: Date?
+        let insights: [PersistedInsight]
+        let lastReportScore: Double?
+        let lastReportDate: Date?
+    }
+
+    private struct PersistedInsight: Codable {
+        let category: String
+        let severity: String
+        let title: String
+        let message: String
+        let suggestion: String
+        let dataValue: Double
+    }
+
+    private func saveToDisk() {
+        let persistedInsights = activeInsights.map { insight in
+            PersistedInsight(
+                category: insight.category.rawValue,
+                severity: insight.severity.rawValue,
+                title: insight.title,
+                message: insight.message,
+                suggestion: insight.suggestion,
+                dataValue: insight.dataValue
+            )
+        }
+        let state = PersistedState(
+            lastAnalysisDate: lastAnalysisDate,
+            insights: persistedInsights,
+            lastReportScore: lastAnalysis?.overallScore,
+            lastReportDate: lastAnalysis?.date
+        )
+        do {
+            let data = try JSONEncoder().encode(state)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            logger.error("Failed to save coaching state: \(error.localizedDescription)")
+        }
+    }
+
+    private func loadFromDisk() {
+        guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: storageURL)
+            let state = try JSONDecoder().decode(PersistedState.self, from: data)
+            lastAnalysisDate = state.lastAnalysisDate
+            activeInsights = state.insights.compactMap { pi in
+                guard let category = CoachingInsightCategory(rawValue: pi.category),
+                      let severity = CoachingSeverity(rawValue: pi.severity) else { return nil }
+                return CoachingInsight(
+                    category: category,
+                    severity: severity,
+                    title: pi.title,
+                    message: pi.message,
+                    suggestion: pi.suggestion,
+                    dataValue: pi.dataValue
+                )
+            }
+            logger.info("Loaded \(self.activeInsights.count) coaching insights from disk")
+        } catch {
+            logger.error("Failed to load coaching state: \(error.localizedDescription)")
+        }
     }
 }
 
