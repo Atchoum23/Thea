@@ -1,6 +1,6 @@
 # Thea E2E Tests Workflow
-# Version: 1.4.0 - Updated to macOS 26 runners, added swift package resolve
-# Last Updated: February 10, 2026
+# Version: 1.5.0 - Fixed app packaging with ditto to preserve executable permissions
+# Last Updated: February 17, 2026
 
 name: E2E Tests
 
@@ -149,8 +149,8 @@ jobs:
         run: |
           APP_PATH="${{ steps.verify.outputs.app_path }}"
           mkdir -p artifacts
-          cp -R "$APP_PATH" artifacts/
-          cd artifacts && zip -r ../Thea-Simulator.zip Thea.app
+          ditto "$APP_PATH" artifacts/Thea.app
+          ditto -c -k --sequesterRsrc --keepParent artifacts/Thea.app Thea-Simulator.zip
 
       - name: Upload Simulator App
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
@@ -186,7 +186,9 @@ jobs:
           path: ./
 
       - name: Unzip App
-        run: unzip -o Thea-Simulator.zip -d app
+        run: |
+          mkdir -p app
+          ditto -x -k Thea-Simulator.zip app
 
       - name: Verify App Bundle
         run: |

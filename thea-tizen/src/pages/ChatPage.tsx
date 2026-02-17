@@ -94,7 +94,7 @@ export function ChatPage() {
 
   const handleVoiceInput = () => {
     // Voice input using Web Speech API
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const SpeechRecognitionAPI = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
 
     if (SpeechRecognitionAPI) {
@@ -103,7 +103,7 @@ export function ChatPage() {
       recognition.continuous = false;
       recognition.interimResults = false;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setInputText(transcript);

@@ -92,20 +92,20 @@ class MediaLibraryService {
   }
 
   generateMovieFolderName(m: { title: string; year?: number }): string {
-    let name = `${m.title} (${m.year || ''})`.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
+    const name = `${m.title} (${m.year || ''})`.replace(/:/g, ' - ').replace(/[<>"|?*/\\]/g, '').trim();
     return name.replace(/\s+/g, ' ');
   }
 
   generateMovieFileName(m: { title: string; year?: number }, r: ParsedRelease, ext = 'mkv'): string {
     const quality = this.buildQualityTags(r);
-    let name = `${m.title} (${m.year || ''}) ${quality}`.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
+    const name = `${m.title} (${m.year || ''}) ${quality}`.replace(/:/g, ' - ').replace(/[<>"|?*/\\]/g, '').trim();
     return `${name}.${ext}`;
   }
 
   generateSeriesFolderName(s: { title: string; year?: number }): string {
     let name = s.title;
     if (s.year) name = `${name} (${s.year})`;
-    return name.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
+    return name.replace(/:/g, ' - ').replace(/[<>"|?*/\\]/g, '').trim();
   }
 
   generateSeasonFolderName(seasonNumber: number): string {
@@ -116,8 +116,8 @@ class MediaLibraryService {
     const quality = this.buildQualityTags(r);
     const s = ep.season.toString().padStart(2, '0');
     const e = ep.episode.toString().padStart(2, '0');
-    let name = `${show.title} - S${s}E${e} - ${ep.title || 'Episode'} ${quality}`;
-    return `${name.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim()}.${ext}`;
+    const name = `${show.title} - S${s}E${e} - ${ep.title || 'Episode'} ${quality}`;
+    return `${name.replace(/:/g, ' - ').replace(/[<>"|?*/\\]/g, '').trim()}.${ext}`;
   }
 
   private buildQualityTags(r: ParsedRelease): string {
@@ -194,13 +194,13 @@ class MediaLibraryService {
   getAllTVShows(): TVShow[] { return Array.from(this.tvShows.values()); }
 
   getStats() {
-    let movieStats = { total: this.movies.size, monitored: 0, downloaded: 0, missing: 0, sizeOnDisk: 0 };
+    const movieStats = { total: this.movies.size, monitored: 0, downloaded: 0, missing: 0, sizeOnDisk: 0 };
     for (const m of this.movies.values()) {
       if (m.monitored) movieStats.monitored++;
       if (m.hasFile) { movieStats.downloaded++; if (m.mediaItem) movieStats.sizeOnDisk += m.mediaItem.fileSize; }
       else if (m.monitored) movieStats.missing++;
     }
-    let tvStats = { total: this.tvShows.size, monitored: 0, episodesTotal: 0, episodesDownloaded: 0, episodesMissing: 0, sizeOnDisk: 0 };
+    const tvStats = { total: this.tvShows.size, monitored: 0, episodesTotal: 0, episodesDownloaded: 0, episodesMissing: 0, sizeOnDisk: 0 };
     for (const show of this.tvShows.values()) {
       if (show.monitorStatus !== 'none') tvStats.monitored++;
       for (const season of show.seasons) {

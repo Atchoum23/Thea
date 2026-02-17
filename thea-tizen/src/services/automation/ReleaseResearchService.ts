@@ -373,7 +373,7 @@ class ReleaseResearchService {
     const hasAtmos = /\bAtmos\b/i.test(title);
 
     // Estimate bitrate from file size and duration (rough estimate for TV episodes ~45min)
-    let estimatedBitrate = 'Unknown';
+    const estimatedBitrate = 'Unknown';
     // This would need actual runtime data for accuracy
 
     return {
@@ -400,7 +400,7 @@ class ReleaseResearchService {
     }
 
     // Scene release detection (proper naming convention)
-    const isScene = /^[A-Za-z0-9\.\-]+\-[A-Z0-9]+$/.test(title.replace(/\s/g, '.'));
+    const isScene = /^[A-Za-z0-9.\-]+-[A-Z0-9]+$/.test(title.replace(/\s/g, '.'));
 
     // P2P release detection
     const isP2P = !isScene && /[-][A-Za-z0-9]+$/.test(title);
