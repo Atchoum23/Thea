@@ -137,6 +137,8 @@ final class OpenClawBridge {
             switch response.type {
             case let .delta(text):
                 result += text
+            case .thinkingDelta:
+                break // Thinking chunks not used in bridge responses
             case let .complete(msg):
                 result = msg.content.textValue
             case .error:
