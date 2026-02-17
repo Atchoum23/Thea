@@ -21,6 +21,14 @@ extension Color {
     static let theaError = Color.red
     static let theaInfo = Color.blue
 
+    // MARK: - Chat Bubble Colors
+
+    static let theaUserBubble = Color(hex: "0066FF")
+
+    static var theaAssistantBubble: Color {
+        Color.gray.opacity(0.2)
+    }
+
     // MARK: - Gradients
 
     static let theaHeroGradientDefault = LinearGradient(
