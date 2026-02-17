@@ -3,8 +3,8 @@ import SwiftUI
 
 /// Aggregated health insights dashboard with AI-powered recommendations
 @MainActor
-public struct HealthInsightsView: View {
-    @State private var viewModel = HealthInsightsViewModel()
+public struct HealthInsightsDetailView: View {
+    @State private var viewModel = HealthInsightsDetailViewModel()
     @State private var selectedTimeRange: TimeRange = .week
 
     public init() {}
@@ -678,7 +678,7 @@ public enum CorrelationStrength: Sendable {
 
 @MainActor
 @Observable
-final class HealthInsightsViewModel {
+final class HealthInsightsDetailViewModel {
     var healthScore: Double = 0
     var sleepScore: Double = 0
     var activityScore: Double = 0
@@ -875,6 +875,6 @@ final class HealthInsightsViewModel {
 
 #Preview {
     NavigationStack {
-        HealthInsightsView()
+        HealthInsightsDetailView()
     }
 }

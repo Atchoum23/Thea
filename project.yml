@@ -331,6 +331,7 @@ targets:
           # AIProvidersSettingsView — ACTIVATED
           # ResourceManagement — ACTIVATED
           # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
+          - "**/Settings/HealthInsightsView.swift"  # Duplicate of Integrations/Health/Views/HealthInsightsView.swift
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
