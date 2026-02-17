@@ -19,14 +19,14 @@ extension OrchestratorSettingsView {
                     title: "Status",
                     value: config.orchestratorEnabled ? "Active" : "Disabled",
                     icon: config.orchestratorEnabled ? "checkmark.circle.fill" : "xmark.circle",
-                    color: config.orchestratorEnabled ? .green : .gray
+                    color: config.orchestratorEnabled ? .theaSuccess : .gray
                 )
 
                 overviewCard(
                     title: "Model Preference",
                     value: config.localModelPreference.rawValue,
                     icon: preferenceIcon(config.localModelPreference),
-                    color: .blue
+                    color: .theaInfo
                 )
 
                 overviewCard(

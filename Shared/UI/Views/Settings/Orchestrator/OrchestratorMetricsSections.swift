@@ -214,7 +214,7 @@ extension OrchestratorSettingsView {
                     .font(.caption2)
                     .padding(.horizontal, 4)
                     .padding(.vertical, 2)
-                    .background(Color.blue.opacity(0.2))
+                    .background(Color.theaInfo.opacity(0.2))
                     .cornerRadius(4)
 
                 Text("\(String(format: "%.2f", execution.responseTime))s")

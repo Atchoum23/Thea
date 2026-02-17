@@ -58,7 +58,7 @@ struct ModelSettingsView: View {
 
                 HStack {
                     Image(systemName: "arrow.right.circle")
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.theaInfo)
                         .accessibilityHidden(true)
                     Text("Configure orchestration in the **Orchestrator** tab")
                         .font(.caption)
@@ -136,7 +136,7 @@ struct ModelSettingsView: View {
 
                 Text(model.pricing.formattedPromptPrice)
                     .font(.caption2)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.theaInfo)
             }
         }
         .padding(8)
@@ -331,7 +331,7 @@ struct ModelSettingsView: View {
                 if let error = catalogManager.fetchError {
                     HStack {
                         Image(systemName: "exclamationmark.triangle")
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(.theaWarning)
                             .accessibilityHidden(true)
                         Text("Error: \(error.localizedDescription)")
                             .font(.caption)
@@ -412,7 +412,7 @@ extension ModelSettingsView {
                 .font(.caption)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(selectedCategory == category ? Color.blue : Color.secondary.opacity(0.2))
+                .background(selectedCategory == category ? Color.theaPrimaryDefault : Color.secondary.opacity(0.2))
                 .foregroundStyle(selectedCategory == category ? .white : .primary)
                 .cornerRadius(16)
         }
@@ -425,7 +425,7 @@ extension ModelSettingsView {
                 toggleComparison(model.id)
             } label: {
                 Image(systemName: selectedForComparison.contains(model.id) ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(selectedForComparison.contains(model.id) ? .blue : .secondary)
+                    .foregroundStyle(selectedForComparison.contains(model.id) ? .theaInfo : .secondary)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(selectedForComparison.contains(model.id) ? "Remove from comparison" : "Add to comparison")
@@ -460,7 +460,7 @@ extension ModelSettingsView {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(model.pricing.formattedPromptPrice)
                     .font(.caption)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.theaInfo)
 
                 Text("input")
                     .font(.caption2)

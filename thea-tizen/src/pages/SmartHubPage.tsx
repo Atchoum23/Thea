@@ -34,6 +34,20 @@ export function SmartHubPage() {
   const [showTorrentModal, setShowTorrentModal] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
 
+  const showNotification = useCallback((message: string) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
+  }, []);
+
+  const loadDownloads = useCallback(async () => {
+    try {
+      const status = await smartHubService.getDownloadStatus();
+      setDownloads(status);
+    } catch (error) {
+      console.error('Failed to load downloads:', error);
+    }
+  }, []);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -49,21 +63,14 @@ export function SmartHubPage() {
     }
     setLoading(false);
     await loadDownloads();
-  };
+  }, [loadDownloads, showNotification]);
 
-  const loadDownloads = async () => {
-    try {
-      const status = await smartHubService.getDownloadStatus();
-      setDownloads(status);
-    } catch (error) {
-      console.error('Failed to load downloads:', error);
-    }
-  };
-
-  const showNotification = (message: string) => {
-    setNotification(message);
-    setTimeout(() => setNotification(null), 3000);
-  };
+  // Load data on mount
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(loadDownloads, 10000);
+    return () => clearInterval(interval);
+  }, [loadData, loadDownloads]);
 
   const handleItemSelect = async (item: SmartHubItem) => {
     setSelectedItem(item);

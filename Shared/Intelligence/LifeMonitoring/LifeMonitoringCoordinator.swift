@@ -39,8 +39,8 @@ public final class LifeMonitoringCoordinator: ObservableObject {
 
     // MARK: - Data Source References
 
-    // TODO: Create BrowserActivityMonitor for comprehensive browser monitoring
-    // private var browserMonitor: BrowserActivityMonitor?
+    // Browser activity is tracked via SafariContextExtractor and GenericContextExtractor
+    // in the AppPairing system rather than a dedicated BrowserActivityMonitor
     #if os(macOS)
     private var clipboardMonitor: ClipboardMonitor?
     private var messagesMonitor: MessagesMonitor?
