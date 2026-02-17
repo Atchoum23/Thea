@@ -38,6 +38,7 @@ struct IOSCompactModelSelectorView: View {
             #endif
                 .clipShape(Capsule())
         }
+        .accessibilityIdentifier("modelSelector")
     }
 }
 

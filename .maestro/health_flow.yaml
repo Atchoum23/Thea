@@ -1,0 +1,23 @@
+# Thea Health Flow - Test Health tab navigation
+appId: app.thea.ios
+---
+- launchApp
+
+# Navigate to Health tab
+- tapOn:
+    text: "Health"
+    timeout: 10000
+
+- takeScreenshot: health_tab_initial
+
+# Verify health overview is visible
+- assertVisible:
+    text: "Health"
+    timeout: 5000
+
+- takeScreenshot: health_tab_loaded
+
+# Navigate back to Chat
+- tapOn:
+    text: "Chat"
+- takeScreenshot: health_flow_complete

@@ -121,6 +121,7 @@ struct iOSChatView: View {
                 .lineLimit(1 ... 6)
                 .focused($isInputFocused)
                 .disabled(chatManager.isStreaming)
+                .accessibilityIdentifier("chatMessageInput")
                 .accessibilityLabel("Message input")
                 .onSubmit {
                     if !messageText.isEmpty {

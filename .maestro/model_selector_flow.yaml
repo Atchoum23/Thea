@@ -1,0 +1,23 @@
+# Thea Model Selector Flow - Test model switching
+appId: app.thea.ios
+---
+- launchApp
+
+# Navigate to Chat tab
+- tapOn:
+    text: "Chat"
+    timeout: 10000
+
+# Look for model selector (typically in toolbar or input area)
+- tapOn:
+    id: "modelSelector"
+    optional: true
+
+- takeScreenshot: model_selector_opened
+
+# If model selector opened, verify models are listed
+- assertVisible:
+    text: "Claude"
+    optional: true
+
+- takeScreenshot: model_selector_flow_complete

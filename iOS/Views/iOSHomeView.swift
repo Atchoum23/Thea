@@ -54,6 +54,7 @@ struct iOSHomeView: View {
                     Label(tab.rawValue, systemImage: tab.icon)
                 }
                 .tag(tab)
+                .accessibilityIdentifier("tab_\(tab.rawValue)")
             }
         }
         .sheet(isPresented: $showingNewConversation) {
