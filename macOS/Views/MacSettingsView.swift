@@ -60,6 +60,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case knowledgeGraph = "Knowledge Graph"
     case healthInsights = "Health Insights"
     case notificationSchedule = "Smart Scheduling"
+    case lifeJournal = "Life Journal"
     case appPairing = "App Pairing"
     case liveGuidance = "Live Guidance"
 
@@ -123,6 +124,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .knowledgeGraph: "point.3.connected.trianglepath.dotted"
         case .healthInsights: "heart.text.square"
         case .notificationSchedule: "bell.and.waves.left.and.right"
+        case .lifeJournal: "book.pages"
         case .appPairing: "app.connected.to.app.below.fill"
         case .liveGuidance: "eye.circle.fill"
         case .clipboard: "doc.on.clipboard"
@@ -168,7 +170,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .moltbook, .knowledge, .behavioralPatterns, .knowledgeGraph, .healthInsights, .notificationSchedule, .appPairing, .liveGuidance: 1
+        case .providers, .memory, .agent, .moltbook, .knowledge, .behavioralPatterns, .knowledgeGraph, .healthInsights, .notificationSchedule, .lifeJournal, .appPairing, .liveGuidance: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
@@ -292,6 +294,8 @@ struct MacSettingsView: View {
             HealthInsightsView()
         case .notificationSchedule:
             NotificationScheduleView()
+        case .lifeJournal:
+            LifeJournalView()
         case .appPairing:
             AppPairingSettingsView()
         case .liveGuidance:
