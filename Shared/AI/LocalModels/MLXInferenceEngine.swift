@@ -45,7 +45,24 @@ final class MLXInferenceEngine {
     /// Model factory for loading models
     private let modelFactory = LLMModelFactory.shared
 
-    private init() {}
+    private var memoryPressureSource: DispatchSourceMemoryPressure?
+
+    private init() {
+        setupMemoryPressureHandler()
+    }
+
+    private func setupMemoryPressureHandler() {
+        let source = DispatchSource.makeMemoryPressureSource(eventMask: [.warning, .critical], queue: .main)
+        source.setEventHandler { [weak self] in
+            Task { @MainActor in
+                guard let self, !self.isLoading else { return }
+                print("⚠️ MLXInferenceEngine: Memory pressure detected, unloading model and clearing sessions")
+                self.unloadModel()
+            }
+        }
+        source.resume()
+        memoryPressureSource = source
+    }
 
     // MARK: - Model Loading
 
