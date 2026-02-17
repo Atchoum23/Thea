@@ -30,8 +30,10 @@ public final class SemanticSearchService: ObservableObject {
     /// Enable automatic indexing of new messages
     public var autoIndexEnabled: Bool = true
 
-    /// Batch size for embedding requests
-    public var batchSize: Int = 20
+    /// Batch size for embedding requests.
+    /// Initialized from SystemCapabilityService for hardware-aware scaling:
+    /// more RAM → larger batches → faster indexing (10–50 depending on machine).
+    public var batchSize: Int = SystemCapabilityService.shared.embeddingBatchSize
 
     // MARK: - Published State
 
