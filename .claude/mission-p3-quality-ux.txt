@@ -1,0 +1,177 @@
+# THEA P3 QUALITY AND UX MISSION
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND IMPROVE.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PURPOSE
+Complete all Priority 3 (MEDIUM — Quality & UX) items from THEA_MASTER_IMPROVEMENT_PLAN.md.
+Items 11-15: SwiftLint strictness, UI/UX improvements, performance profiling,
+accessibility audit, and documentation consolidation.
+
+## ITEM 11: SwiftLint Strictness Increase
+
+Current: 0 violations at current ruleset. Now tighten it.
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+cat .swiftlint.yml
+```
+
+Add these stricter rules to .swiftlint.yml (if not already present):
+```yaml
+opt_in_rules:
+  - array_init
+  - closure_end_indentation
+  - collection_alignment
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - discouraged_optional_boolean
+  - empty_collection_literal
+  - empty_count
+  - empty_string
+  - enum_case_associated_values_count
+  - explicit_init
+  - fallthrough
+  - fatal_error_message
+  - file_header
+  - first_where
+  - flatmap_over_map_reduce
+  - identical_operands
+  - joined_default_parameter
+  - last_where
+  - legacy_multiple
+  - literal_expression_end_indentation
+  - lower_acl_than_parent
+  - modifier_order
+  - multiline_arguments
+  - multiline_function_chains
+  - multiline_parameters
+  - operator_usage_whitespace
+  - overridden_super_call
+  - prefer_self_in_static_references
+  - prefer_zero_over_explicit_init
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - static_operator
+  - toggle_bool
+  - unavailable_function
+  - unneeded_parentheses_in_closure_argument
+  - vertical_parameter_alignment_on_call
+  - yoda_condition
+```
+
+After adding each rule, run `swiftlint lint` and fix violations before adding the next.
+Goal: 0 violations at increased strictness. Never disable a rule by excluding code — fix the code.
+
+## ITEM 12: UI/UX Improvements (UI_UX_IMPLEMENTATION_PLAN.md remaining items)
+
+```bash
+cat .claude/UI_UX_IMPLEMENTATION_PLAN.md
+```
+
+Read every section. For each item marked incomplete or not yet implemented:
+1. Implement it (add, never replace/remove)
+2. Build to verify
+3. Commit
+
+Pay special attention to:
+- Liquid Glass materials: verify `.ultraThinMaterial`, `.regularMaterial` used consistently
+- Color tokens: verify `TheaDesignSystem` tokens used everywhere (no hardcoded Color values)
+- Typography: verify `.headline`, `.title2` etc. used (no hardcoded font sizes)
+- Animations: verify spring animations on all interactive elements
+- Empty states: every list/grid must have an illustrated empty state
+- Loading states: every async operation must show a `ProgressView` or skeleton
+
+## ITEM 13: Performance Profiling
+
+### Launch Time
+```bash
+# Build Release
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Release \
+  -destination "platform=macOS" -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO ARCHS=arm64 build 2>&1 | grep "BUILD\|error:" | tail -3
+
+# Find the built app
+APP=$(find /tmp/TheaBuild -name "Thea.app" -type d | head -1)
+echo "App: $APP"
+```
+
+Optimizations to implement if launch > 3s:
+- All service initializations deferred with `Task { await service.initialize() }`
+- MLX models: lazy-load on first use, not at app start
+- PersonalKnowledgeGraph: load async in background after UI appears
+- BehavioralFingerprint: restore from disk async (not blocking main thread)
+
+### Memory
+```bash
+# Check for obvious memory issues in code
+grep -rn "\.forEach\|for.*in.*where\|filter.*map\|flatMap" \
+  --include="*.swift" --exclude-dir=".build" . | wc -l
+```
+
+Verify:
+- No strong reference cycles in closures (all use `[weak self]` or `[unowned self]`)
+- StreamingTextView and chat history don't retain all messages in memory (use lazy loading for old messages)
+- MLX models unloaded when not in use (memory pressure notification handling)
+
+## ITEM 14: Accessibility Audit
+
+```bash
+# Find views missing accessibility labels
+grep -rn "\.onTapGesture\|Button {" --include="*.swift" \
+  --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "accessibilityLabel\|accessibilityHint\|accessibilityIdentifier" | head -20
+```
+
+For every interactive element:
+- Add `.accessibilityLabel("Description of what this does")`
+- Add `.accessibilityHint("Describes the result of activating this element")`
+- Add `.accessibilityIdentifier("snake_case_id")` (for Maestro E2E tests)
+
+For images used as UI (not decorative):
+- Add `.accessibilityLabel("Description")` 
+
+Verify Dynamic Type:
+- All text uses system font styles (`.headline`, `.body`, etc.) — not fixed sizes
+- All containers use flexible layouts — no fixed heights that clip large text
+
+Run VoiceOver mentally through key flows:
+- New conversation
+- Send message
+- Open settings
+- Enable/disable a feature
+
+## ITEM 15: Documentation Consolidation
+
+```bash
+# Find undocumented public APIs
+grep -rn "public func\|public var\|public class\|public struct\|public protocol\|public enum\|public actor" \
+  --include="*.swift" --exclude-dir=".build" --exclude-dir="MetaAI" . | \
+  grep -v "^.*///" | head -40
+```
+
+For every undocumented public declaration, add:
+```swift
+/// Brief one-line summary.
+///
+/// Extended description if needed.
+/// - Parameter name: Description
+/// - Returns: Description
+/// - Throws: Description
+public func doSomething(with value: String) throws -> Result
+```
+
+Priority order:
+1. All protocols (they define contracts)
+2. All public service/manager classes
+3. All public model types
+4. Individual public methods
+
+## SUCCESS CRITERIA
+- SwiftLint passes with stricter opt-in rules (0 violations)
+- UI_UX_IMPLEMENTATION_PLAN.md items verified complete
+- Launch time measured and optimised if needed  
+- Every interactive element has accessibility label + identifier
+- Every public API has doc comment (///)
+- 0 build errors, 0 warnings
