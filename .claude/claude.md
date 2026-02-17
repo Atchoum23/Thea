@@ -1,5 +1,24 @@
 # THEA Project
 
+## ⛔ INVIOLABLE RULE: NEVER REDUCE THEA'S CAPABILITIES
+
+**This overrides everything. No exceptions. No debate.**
+
+Thea is a personal life-monitoring assistant. Its entire value comes from its comprehensiveness.
+
+**NEVER remove, delete, disable, comment out, stub, or reduce:**
+- Any existing feature, class, function, view, service, manager, or integration
+- Any life-monitoring capability: location tracking, HealthKit data, behavioral fingerprinting, ambient intelligence, driving detection, screen time monitoring, calendar analysis, predictive modeling, focus mode monitoring, pattern learning — ALL of it stays, ALL of it must be wired and active
+- Any AI capability: local models, cloud providers, verification pipeline, agent mode, orchestrator
+- Any security or privacy feature
+- Any platform target (macOS, iOS, watchOS, tvOS, Tizen, Web)
+
+**If something appears "unused":** wire it in — do not remove it.
+**If something conflicts with App Store review policies:** keep it — Thea is personal-use only, not distributed.
+**The purpose of every change is MORE capability, not less.**
+
+---
+
 ## CRITICAL SAFETY RULES
 
 ### ⚠️ MANDATORY: Commit After Every Edit
