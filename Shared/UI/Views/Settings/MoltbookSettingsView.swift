@@ -7,6 +7,7 @@ struct MoltbookSettingsView: View {
     @StateObject private var settings = SettingsManager.shared
     @State private var pendingPostCount = 0
     @State private var insightCount = 0
+    @State private var unreadInsightCount = 0
     @State private var isRefreshing = false
 
     var body: some View {
@@ -68,25 +69,75 @@ struct MoltbookSettingsView: View {
                 Section("Status") {
                     LabeledContent("Pending Posts", value: "\(pendingPostCount)")
                     LabeledContent("Collected Insights", value: "\(insightCount)")
+                    LabeledContent("Unread Insights", value: "\(unreadInsightCount)")
 
                     Button("Refresh Status") {
                         isRefreshing = true
                         Task {
-                            pendingPostCount = await MoltbookAgent.shared.pendingPosts.count
-                            insightCount = await MoltbookAgent.shared.insights.count
+                            await refreshStatus()
                             isRefreshing = false
                         }
                     }
                     .disabled(isRefreshing)
+                }
+
+                if pendingPostCount > 0 {
+                    Section("Pending Post Actions") {
+                        Button("Approve All Pending Posts") {
+                            Task {
+                                let posts = await MoltbookAgent.shared.pendingPosts
+                                for post in posts {
+                                    await MoltbookAgent.shared.approvePendingPost(id: post.id)
+                                }
+                                await refreshStatus()
+                            }
+                        }
+
+                        Button("Reject All Pending Posts", role: .destructive) {
+                            Task {
+                                let posts = await MoltbookAgent.shared.pendingPosts
+                                for post in posts {
+                                    await MoltbookAgent.shared.rejectPendingPost(id: post.id)
+                                }
+                                await refreshStatus()
+                            }
+                        }
+
+                        Button("Clear All Pending Posts", role: .destructive) {
+                            Task {
+                                await MoltbookAgent.shared.clearPendingPosts()
+                                await refreshStatus()
+                            }
+                        }
+                    }
+                }
+
+                if unreadInsightCount > 0 {
+                    Section("Insight Actions") {
+                        Button("Mark All Insights Read") {
+                            Task {
+                                let unread = await MoltbookAgent.shared.getUnreadInsights()
+                                for insight in unread {
+                                    await MoltbookAgent.shared.markInsightRead(id: insight.id)
+                                }
+                                await refreshStatus()
+                            }
+                        }
+                    }
                 }
             }
         }
         .formStyle(.grouped)
         .task {
             if settings.moltbookAgentEnabled {
-                pendingPostCount = await MoltbookAgent.shared.pendingPosts.count
-                insightCount = await MoltbookAgent.shared.insights.count
+                await refreshStatus()
             }
         }
+    }
+
+    private func refreshStatus() async {
+        pendingPostCount = await MoltbookAgent.shared.pendingPosts.count
+        insightCount = await MoltbookAgent.shared.insights.count
+        unreadInsightCount = await MoltbookAgent.shared.getUnreadInsights().count
     }
 }
