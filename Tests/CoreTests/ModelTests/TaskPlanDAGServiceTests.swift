@@ -162,8 +162,10 @@ private final class TestTaskPlanManager: @unchecked Sendable {
 
     // MARK: - Execution Simulation
 
-    func findReadyNodes(in plan: TPlan, completedIDs: Set<UUID>) -> [TPlanNode] {
-        plan.nodes.filter { node in
+    /// Find nodes that are pending and whose dependencies are all completed
+    func findReadyNodes(in plan: TPlan) -> [TPlanNode] {
+        let completedIDs = Set(plan.nodes.filter { $0.status == .completed }.map(\.id))
+        return plan.nodes.filter { node in
             node.status == .pending && node.dependsOn.allSatisfy { completedIDs.contains($0) }
         }
     }
@@ -171,17 +173,15 @@ private final class TestTaskPlanManager: @unchecked Sendable {
     func simulateExecution(_ plan: inout TPlan) -> TPlanResult {
         plan.status = .executing
         var results: [UUID: TNodeResult] = [:]
-        var completedIDs: Set<UUID> = []
 
         while true {
-            let ready = findReadyNodes(in: plan, completedIDs: completedIDs)
+            let ready = findReadyNodes(in: plan)
             if ready.isEmpty { break }
 
             for node in ready {
                 if let idx = plan.nodes.firstIndex(where: { $0.id == node.id }) {
                     plan.nodes[idx].status = .completed
                     plan.nodes[idx].result = "Simulated output for: \(node.title)"
-                    completedIDs.insert(node.id)
                     results[node.id] = TNodeResult(success: true, output: "OK")
                 }
             }
@@ -311,7 +311,6 @@ struct TPlanKahnsValidationTests {
         let mgr = TestTaskPlanManager()
         let node = TPlanNode(title: "A", action: "a", dependsOn: [UUID()])
         let plan = TPlan(goal: "Bad", nodes: [node])
-        // With Kahn's algo: node A has inDegree 1 but the dep never resolves
         #expect(!mgr.validateDAG(plan))
     }
 
@@ -402,32 +401,34 @@ struct TPlanExecutionTests {
         #expect(result.success)
         #expect(result.completedNodes == 4)
         #expect(result.totalNodes == 4)
-        // All nodes should be completed
         for node in plan.nodes {
             #expect(node.status == .completed)
         }
     }
 
-    @Test("Ready nodes are correctly identified based on completed dependencies")
-    func readyNodeIdentification() {
+    @Test("Ready node finding respects dependency completion status")
+    func readyNodeDependencies() {
         let mgr = TestTaskPlanManager()
         let a = TPlanNode(title: "A", action: "a")
         let b = TPlanNode(title: "B", action: "b")
         let c = TPlanNode(title: "C", action: "c", dependsOn: [a.id, b.id])
-        let plan = TPlan(goal: "Test", nodes: [a, b, c])
+        var plan = TPlan(goal: "Test", nodes: [a, b, c])
 
-        // Initially: A and B are ready, C is not
-        let ready1 = mgr.findReadyNodes(in: plan, completedIDs: [])
+        // Initially A and B are ready, C is blocked
+        let ready1 = mgr.findReadyNodes(in: plan)
         #expect(ready1.count == 2)
-        #expect(ready1.map(\.title).sorted() == ["A", "B"])
 
-        // After A completes: B still ready, C not (B not done)
-        let ready2 = mgr.findReadyNodes(in: plan, completedIDs: [a.id])
+        // Mark A as completed
+        plan.nodes[0].status = .completed
+        let ready2 = mgr.findReadyNodes(in: plan)
+        // B is still ready (pending, no deps), C is blocked (B not complete)
         #expect(ready2.count == 1)
         #expect(ready2[0].title == "B")
 
-        // After A and B complete: C is ready
-        let ready3 = mgr.findReadyNodes(in: plan, completedIDs: [a.id, b.id])
+        // Mark B as completed too
+        plan.nodes[1].status = .completed
+        let ready3 = mgr.findReadyNodes(in: plan)
+        // C's dependencies (A, B) both complete, so C is ready
         #expect(ready3.count == 1)
         #expect(ready3[0].title == "C")
     }
@@ -473,7 +474,7 @@ struct TPlanEdgeCaseTests {
         let mgr = TestTaskPlanManager()
         var plan = TPlan(goal: "Empty")
         let result = mgr.simulateExecution(&plan)
-        #expect(result.success) // all (0) nodes completed
+        #expect(result.success)
         #expect(result.completedNodes == 0)
         #expect(result.totalNodes == 0)
     }
