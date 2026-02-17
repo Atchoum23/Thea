@@ -119,7 +119,7 @@ public final class ProactiveErrorPrevention {
         }
 
         return InputValidationResult(
-            isValid: issues.filter { $0.severity >= .warning }.isEmpty,
+            isValid: !issues.contains(where: { $0.severity >= .warning }),
             issues: issues
         )
     }

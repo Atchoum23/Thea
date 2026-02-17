@@ -210,8 +210,7 @@ final class FinancialIntegration {
             .reduce(0, +) / Double(max(transactions.count, 1))
 
         if let large = transactions
-            .filter({ abs($0.amount) > averageTransaction * 3 })
-            .first
+            .first(where: { abs($0.amount) > averageTransaction * 3 })
         {
             return FinancialInsight(
                 id: UUID(),

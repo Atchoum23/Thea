@@ -173,7 +173,7 @@ struct ConversationRow: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                if let lastMessage = conversation.messages.sorted(by: { $0.timestamp < $1.timestamp }).last {
+                if let lastMessage = conversation.messages.max(by: { $0.timestamp < $1.timestamp }) {
                     Text(lastMessage.content.textValue)
                         .font(.theaCaption1)
                         .foregroundStyle(.secondary)
