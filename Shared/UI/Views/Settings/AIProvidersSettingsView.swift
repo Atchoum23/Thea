@@ -110,8 +110,8 @@ struct AIProvidersSettingsView: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.2))
-                            .foregroundStyle(.blue)
+                            .background(Color.theaInfo.opacity(0.2))
+                            .foregroundStyle(.theaInfo)
                             .cornerRadius(4)
                     }
                 }
@@ -193,11 +193,11 @@ struct AIProvidersSettingsView: View {
 
             if settingsManager.hasAPIKey(for: provider) {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(.theaSuccess)
                     .accessibilityHidden(true)
             } else if !key.wrappedValue.isEmpty {
                 Image(systemName: "circle.dotted")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(.theaWarning)
                     .accessibilityHidden(true)
             }
         }
@@ -223,9 +223,9 @@ struct AIProvidersSettingsView: View {
             .padding(.vertical, 4)
 
             HStack(spacing: 16) {
-                metricCard(title: "Avg Latency", value: formatLatency(nil), icon: "clock", color: .blue)
+                metricCard(title: "Avg Latency", value: formatLatency(nil), icon: "clock", color: .theaInfo)
                 metricCard(title: "Tokens/sec", value: formatTokensPerSecond(nil), icon: "bolt", color: .orange)
-                metricCard(title: "Error Rate", value: formatErrorRate(nil), icon: "exclamationmark.triangle", color: .red)
+                metricCard(title: "Error Rate", value: formatErrorRate(nil), icon: "exclamationmark.triangle", color: .theaError)
             }
 
             Button("View Detailed History") { showingUsageHistory = true }

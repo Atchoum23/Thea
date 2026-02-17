@@ -137,7 +137,7 @@
                                     .buttonStyle(.bordered)
                                 } else {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(.green)
+                                        .foregroundStyle(.theaSuccess)
                                 }
                             }
                         }
@@ -157,21 +157,21 @@
                     Text("R")
                         .font(.caption2.bold())
                         .padding(2)
-                        .background(Color.blue.opacity(0.2))
+                        .background(Color.theaInfo.opacity(0.2))
                         .cornerRadius(2)
                 }
                 if permissions.contains(.write) {
                     Text("W")
                         .font(.caption2.bold())
                         .padding(2)
-                        .background(Color.green.opacity(0.2))
+                        .background(Color.theaSuccess.opacity(0.2))
                         .cornerRadius(2)
                 }
                 if permissions.contains(.delete) {
                     Text("D")
                         .font(.caption2.bold())
                         .padding(2)
-                        .background(Color.red.opacity(0.2))
+                        .background(Color.theaError.opacity(0.2))
                         .cornerRadius(2)
                 }
             }

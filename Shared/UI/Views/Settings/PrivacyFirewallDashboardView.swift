@@ -43,7 +43,7 @@ struct NetworkActivityMonitorView: View {
         Section {
             HStack {
                 Circle()
-                    .fill(isMonitoring ? Color.green : Color.red)
+                    .fill(isMonitoring ? Color.theaSuccess : Color.theaError)
                     .frame(width: 8, height: 8)
                 Text(isMonitoring ? "Monitoring Active" : "Monitoring Inactive")
                     .font(.theaSubhead)
@@ -68,9 +68,9 @@ struct NetworkActivityMonitorView: View {
     private var overviewSection: some View {
         Section("Overview") {
             HStack(spacing: TheaSpacing.lg) {
-                metricCard(label: "Total", value: "\(totalConnections)", icon: "network", color: .blue)
-                metricCard(label: "Blocked", value: "\(blockedCount)", icon: "xmark.shield", color: .red)
-                metricCard(label: "Concerns", value: "\(privacyConcernCount)", icon: "exclamationmark.triangle", color: .orange)
+                metricCard(label: "Total", value: "\(totalConnections)", icon: "network", color: .theaInfo)
+                metricCard(label: "Blocked", value: "\(blockedCount)", icon: "xmark.shield", color: .theaError)
+                metricCard(label: "Concerns", value: "\(privacyConcernCount)", icon: "exclamationmark.triangle", color: .theaWarning)
                 metricCard(label: "Today", value: formatBytes(dailyBytes), icon: "arrow.up.arrow.down", color: .purple)
             }
             .frame(maxWidth: .infinity)
@@ -143,7 +143,7 @@ struct NetworkActivityMonitorView: View {
                 ForEach(recentTraffic.prefix(50)) { record in
                     HStack {
                         Image(systemName: record.wasBlocked ? "xmark.circle.fill" : record.category.sfSymbol)
-                            .foregroundStyle(record.wasBlocked ? .red : (record.category.isPrivacyConcern ? .orange : .secondary))
+                            .foregroundStyle(record.wasBlocked ? Color.theaError : (record.category.isPrivacyConcern ? Color.theaWarning : .secondary))
                             .frame(width: 20)
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -157,7 +157,7 @@ struct NetworkActivityMonitorView: View {
                                 if record.wasBlocked, let reason = record.blockReason {
                                     Text("— \(reason)")
                                         .font(.theaCaption2)
-                                        .foregroundStyle(.red)
+                                        .foregroundStyle(Color.theaError)
                                 }
                             }
                         }
@@ -268,7 +268,7 @@ struct DNSBlocklistManagerView: View {
                     VStack(spacing: 2) {
                         Text("\(stats.enabledDomains)")
                             .font(.theaTitle2)
-                            .foregroundStyle(.green)
+                            .foregroundStyle(Color.theaSuccess)
                         Text("Active")
                             .font(.theaCaption2)
                             .foregroundStyle(.secondary)
@@ -278,7 +278,7 @@ struct DNSBlocklistManagerView: View {
                     VStack(spacing: 2) {
                         Text("\(stats.blockedToday)")
                             .font(.theaTitle2)
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(Color.theaWarning)
                         Text("Today")
                             .font(.theaCaption2)
                             .foregroundStyle(.secondary)
@@ -288,7 +288,7 @@ struct DNSBlocklistManagerView: View {
                     VStack(spacing: 2) {
                         Text("\(stats.blockedAllTime)")
                             .font(.theaTitle2)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.theaError)
                         Text("All Time")
                             .font(.theaCaption2)
                             .foregroundStyle(.secondary)
@@ -492,7 +492,7 @@ struct PrivacyTransparencyReportView: View {
         VStack(spacing: 2) {
             Text("\(score)")
                 .font(.system(.title, design: .rounded, weight: .bold))
-                .foregroundStyle(score >= 80 ? .green : score >= 50 ? .orange : .red)
+                .foregroundStyle(score >= 80 ? Color.theaSuccess : score >= 50 ? Color.theaWarning : Color.theaError)
             Text("/ 100")
                 .font(.theaCaption2)
                 .foregroundStyle(.secondary)
@@ -512,7 +512,7 @@ struct PrivacyTransparencyReportView: View {
                 VStack(spacing: 2) {
                     Text("\(firewallStats.passed)")
                         .font(.theaTitle3)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.theaSuccess)
                     Text("Passed")
                         .font(.theaCaption2)
                         .foregroundStyle(.secondary)
@@ -522,7 +522,7 @@ struct PrivacyTransparencyReportView: View {
                 VStack(spacing: 2) {
                     Text("\(firewallStats.redacted)")
                         .font(.theaTitle3)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Color.theaWarning)
                     Text("Redacted")
                         .font(.theaCaption2)
                         .foregroundStyle(.secondary)
@@ -532,7 +532,7 @@ struct PrivacyTransparencyReportView: View {
                 VStack(spacing: 2) {
                     Text("\(firewallStats.blocked)")
                         .font(.theaTitle3)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.theaError)
                     Text("Blocked")
                         .font(.theaCaption2)
                         .foregroundStyle(.secondary)
@@ -583,7 +583,7 @@ struct PrivacyTransparencyReportView: View {
                 ForEach(trafficByCategory, id: \.category) { item in
                     HStack {
                         Image(systemName: item.category.sfSymbol)
-                            .foregroundStyle(item.category.isPrivacyConcern ? .red : .secondary)
+                            .foregroundStyle(item.category.isPrivacyConcern ? Color.theaError : .secondary)
                             .frame(width: 20)
                         Text(item.category.rawValue)
                         Spacer()
@@ -631,7 +631,7 @@ struct PrivacyTransparencyReportView: View {
                             if stats.blockedCount > 0 {
                                 Text("\(stats.blockedCount) blocked")
                                     .font(.theaCaption2)
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(Color.theaError)
                             }
                         }
                     }
@@ -661,7 +661,7 @@ struct PrivacyTransparencyReportView: View {
                         if snapshot.blockedConnections > 0 {
                             Text("\(snapshot.blockedConnections) blocked")
                                 .font(.theaCaption2)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.theaError)
                                 .frame(width: 70, alignment: .trailing)
                         }
                     }
@@ -689,18 +689,18 @@ struct PrivacyTransparencyReportView: View {
                             Spacer()
                             Text("Score: \(report.privacyScore)/100")
                                 .font(.system(.caption, design: .rounded, weight: .semibold))
-                                .foregroundStyle(report.privacyScore >= 80 ? .green : report.privacyScore >= 50 ? .orange : .red)
+                                .foregroundStyle(report.privacyScore >= 80 ? Color.theaSuccess : report.privacyScore >= 50 ? Color.theaWarning : Color.theaError)
                         }
                         HStack(spacing: TheaSpacing.md) {
                             Label("\(report.totalConnections)", systemImage: "arrow.up.forward")
                                 .font(.theaCaption2)
                             Label("\(report.blockedConnections)", systemImage: "hand.raised.fill")
                                 .font(.theaCaption2)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.theaError)
                             if report.privacyConcerns > 0 {
                                 Label("\(report.privacyConcerns)", systemImage: "exclamationmark.triangle")
                                     .font(.theaCaption2)
-                                    .foregroundStyle(.orange)
+                                    .foregroundStyle(Color.theaWarning)
                             }
                         }
                         if !report.recommendations.isEmpty {
@@ -771,13 +771,13 @@ struct PrivacyTransparencyReportView: View {
             if firewallMode != "strict" {
                 Label("Enable strict firewall mode for maximum privacy protection", systemImage: "shield.checkered")
                     .font(.theaCaption1)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.theaWarning)
             }
 
             if networkStats.concerns > 0 {
                 Label("\(networkStats.concerns) privacy-concerning connections detected. Review network activity.", systemImage: "exclamationmark.triangle")
                     .font(.theaCaption1)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.theaWarning)
             }
 
             if (blocklistStats?.enabledDomains ?? 0) < 20 {

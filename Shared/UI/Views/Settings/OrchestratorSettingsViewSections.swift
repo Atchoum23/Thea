@@ -459,7 +459,7 @@ extension OrchestratorSettingsView {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Image(systemName: execution.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                    .foregroundStyle(execution.success ? .green : .red)
+                                    .foregroundStyle(execution.success ? Color.theaSuccess : Color.theaError)
 
                                 Text(execution.taskType)
                                     .font(.headline)
@@ -489,7 +489,7 @@ extension OrchestratorSettingsView {
                             if !execution.errorMessage.isEmpty {
                                 Text(execution.errorMessage)
                                     .font(.caption)
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(Color.theaError)
                             }
                         }
                         .padding(.vertical, 4)

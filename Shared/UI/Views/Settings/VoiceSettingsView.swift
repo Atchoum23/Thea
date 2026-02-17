@@ -196,7 +196,7 @@ struct VoiceSettingsView: View {
             } label: {
                 HStack {
                     Image(systemName: isTestingMic ? "mic.fill" : "mic")
-                        .foregroundStyle(isTestingMic ? .red : .primary)
+                        .foregroundStyle(isTestingMic ? .theaError : .primary)
                     Text(isTestingMic ? "Listening..." : "Test Microphone")
                     Spacer()
                     if isTestingMic {
@@ -218,7 +218,7 @@ struct VoiceSettingsView: View {
             } label: {
                 HStack {
                     Image(systemName: isTestingVoice ? "speaker.wave.3.fill" : "speaker.wave.2")
-                        .foregroundStyle(isTestingVoice ? .blue : .primary)
+                        .foregroundStyle(isTestingVoice ? .theaInfo : .primary)
                     Text(isTestingVoice ? "Speaking..." : "Test Voice Output")
                     Spacer()
                     if isTestingVoice {
@@ -234,7 +234,7 @@ struct VoiceSettingsView: View {
                 Spacer()
                 if engine.isAuthorized {
                     Label("Authorized", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.theaSuccess)
                 } else {
                     Button("Authorize") {
                         Task {
@@ -387,7 +387,7 @@ struct VoiceRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.2))
+                            .background(Color.theaInfo.opacity(0.2))
                             .cornerRadius(4)
                     }
                 }
@@ -407,7 +407,7 @@ struct VoiceRow: View {
 
             if isSelected {
                 Image(systemName: "checkmark")
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.theaInfo)
             }
         }
         .contentShape(Rectangle())
