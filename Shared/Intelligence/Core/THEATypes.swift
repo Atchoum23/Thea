@@ -9,6 +9,7 @@ import Foundation
 
 // MARK: - THEA Decision
 
+/// A model-routing decision made by the THEA orchestrator, including which model and strategy to use.
 public struct THEADecision: Identifiable, Sendable {
     public let id: UUID
     public let reasoning: THEAReasoning
@@ -42,6 +43,7 @@ public struct THEADecision: Identifiable, Sendable {
 
 // MARK: - THEA Reasoning
 
+/// Explanation of why a particular model and strategy were selected for a task.
 public struct THEAReasoning: Sendable {
     public let taskType: TaskType
     public let taskTypeDescription: String
@@ -72,6 +74,7 @@ public struct THEAReasoning: Sendable {
 
 // MARK: - Execution Strategy
 
+/// Strategy used by the orchestrator when executing a task.
 public enum THEAExecutionStrategy: String, Sendable {
     case direct
     case decomposed
@@ -82,6 +85,7 @@ public enum THEAExecutionStrategy: String, Sendable {
 
 // MARK: - Context Factor
 
+/// A single contextual signal that influenced a routing decision.
 public struct ContextFactor: Identifiable, Sendable {
     public let id: UUID
     public let name: String
@@ -89,6 +93,7 @@ public struct ContextFactor: Identifiable, Sendable {
     public let influence: InfluenceLevel
     public let description: String
 
+    /// How strongly this factor influenced the routing decision.
     public enum InfluenceLevel: String, Sendable {
         case critical
         case high
@@ -113,6 +118,7 @@ public struct ContextFactor: Identifiable, Sendable {
 
 // MARK: - THEA Suggestion
 
+/// A follow-up action or informational suggestion surfaced after a THEA response.
 public struct THEASuggestion: Identifiable, Sendable {
     public let id: UUID
     public let type: SuggestionType
@@ -120,6 +126,7 @@ public struct THEASuggestion: Identifiable, Sendable {
     public let description: String
     public let action: String
 
+    /// Category of the suggestion.
     public enum SuggestionType: String, Sendable {
         case action
         case followUp
@@ -143,6 +150,7 @@ public struct THEASuggestion: Identifiable, Sendable {
 
 // MARK: - Response Metadata
 
+/// Timing and token metrics for a single THEA response.
 public struct THEAResponseMetadata: Sendable {
     public let startTime: Date
     public let endTime: Date
@@ -171,6 +179,7 @@ public struct THEAResponseMetadata: Sendable {
 
 // MARK: - THEA Response
 
+/// A complete response from the THEA orchestrator, including content, routing decision, and suggestions.
 public struct THEAResponse: Identifiable, Sendable {
     public let id: UUID
     public let content: String
@@ -195,12 +204,14 @@ public struct THEAResponse: Identifiable, Sendable {
 
 // MARK: - THEA Learning
 
+/// A learning signal captured from system behavior for future routing optimization.
 public struct THEALearning: Identifiable, Sendable {
     public let id: UUID
     public let type: LearningType
     public let description: String
     public let confidence: Double
 
+    /// The category of observed learning signal.
     public enum LearningType: String, Sendable {
         case taskPattern
         case modelPerformance

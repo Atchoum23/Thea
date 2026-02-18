@@ -120,6 +120,7 @@ public final class DeepSeekProvider: AIProvider, @unchecked Sendable {
                             }
 
                             guard let data = jsonString.data(using: .utf8),
+                                  // Safe: malformed SSE line → skip (continue); stream parsing is best-effort
                                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                   let choices = json["choices"] as? [[String: Any]],
                                   let delta = choices.first?["delta"] as? [String: Any]
@@ -158,6 +159,7 @@ public final class DeepSeekProvider: AIProvider, @unchecked Sendable {
         }
 
         if httpResponse.statusCode != 200 {
+            // Safe: JSON error body parsing — if unparseable, fallback to generic status-code error below
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = json["error"] as? [String: Any],
                let message = error["message"] as? String {

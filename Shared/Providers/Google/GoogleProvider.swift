@@ -134,6 +134,7 @@ public final class GoogleProvider: AIProvider, @unchecked Sendable {
                             guard let data = line.data(using: .utf8) else { continue }
 
                             // Try to extract text from partial JSON
+                            // Safe: malformed SSE chunk → skip (no yield); stream parsing is best-effort
                             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                let candidates = json["candidates"] as? [[String: Any]],
                                let content = candidates.first?["content"] as? [String: Any],
@@ -162,6 +163,7 @@ public final class GoogleProvider: AIProvider, @unchecked Sendable {
         }
 
         if httpResponse.statusCode != 200 {
+            // Safe: JSON error body parsing — if unparseable, fallback to generic status-code error below
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = json["error"] as? [String: Any],
                let message = error["message"] as? String {
