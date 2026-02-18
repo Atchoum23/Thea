@@ -262,8 +262,8 @@ public final class FocusOrchestrator: ObservableObject {
                 do {
                     try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
                 } catch {
-                    // Task was cancelled - break out of wait
-                    break
+                    // Task was cancelled - return early
+                    return
                 }
                 do {
                     try await setFocus(nil)
