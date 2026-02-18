@@ -165,7 +165,8 @@
                     modifiedAt = Date()
                 }
             } catch {
-                coworkArtifactLogger.error("Failed to get file size for \(fileURL.lastPathComponent): \(error)")
+                let filename = fileURL.lastPathComponent; let errMsg = error.localizedDescription
+                coworkArtifactLogger.error("Failed to get file size for \(filename): \(errMsg)")
             }
         }
 
