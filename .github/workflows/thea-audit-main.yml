@@ -2,7 +2,7 @@
 # Version: 2.2.0 - Phase E: P0/P1 fixes (strict audit failures, python3 JSON parsing, concurrency, issue truncation)
 # Last Updated: February 18, 2026
 
-name: Security Audit (Full)
+name: Thea Security Audit
 
 on:
   push:

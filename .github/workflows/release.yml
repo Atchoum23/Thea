@@ -11,7 +11,7 @@
 # Until those are configured, builds use CODE_SIGNING_ALLOWED=NO (CI validation only)
 # The resulting artifacts are NOT suitable for distribution to end users.
 
-name: Release
+name: Thea Release
 
 on:
   push:
@@ -57,7 +57,7 @@ jobs:
               status: 'success',
               per_page: 10,
             });
-            const ciRun = runs.workflow_runs.find(r => r.name === 'CI' && r.head_sha === ref);
+            const ciRun = runs.workflow_runs.find(r => r.name === 'Thea CI' && r.head_sha === ref);
             if (!ciRun) {
               core.setFailed(`No successful CI run found for commit ${ref}. A passing CI run is required before releasing. Trigger CI first, then re-run this workflow.`);
             } else {

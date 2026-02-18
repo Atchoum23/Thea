@@ -237,6 +237,7 @@ struct CodeAssistantView: View {
 
     // MARK: - Project Detail
 
+    // swiftlint:disable:next function_body_length
     private func projectDetail(_ project: CodeProjectInfo) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -283,7 +284,7 @@ struct CodeAssistantView: View {
                 // Language breakdown
                 if !project.languages.isEmpty {
                     GroupBox("Language Breakdown") {
-                        ForEach(project.languages.sorted(by: { $0.value > $1.value }), id: \.key) { lang, lines in
+                        ForEach(project.languages.sorted { $0.value > $1.value }, id: \.key) { lang, lines in
                             HStack {
                                 Image(systemName: lang.icon)
                                     .frame(width: 20)

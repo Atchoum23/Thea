@@ -600,4 +600,3 @@ struct ComprehensionTests {
         #expect(comp.suggestedResponse == "I'll look into it.")
     }
 }
-

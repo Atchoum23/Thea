@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Test Doubles (mirroring HomeKitService types)
 
-fileprivate enum TestAccessoryCategory: String, CaseIterable, Sendable {
+private enum TestAccessoryCategory: String, CaseIterable, Sendable {
     case light = "Light"
     case thermostat = "Thermostat"
     case lock = "Lock"
@@ -23,7 +23,7 @@ fileprivate enum TestAccessoryCategory: String, CaseIterable, Sendable {
     case other = "Other"
 }
 
-fileprivate struct TestSmartHome: Identifiable, Sendable {
+private struct TestSmartHome: Identifiable, Sendable {
     let id: String
     let name: String
     let isPrimary: Bool
@@ -31,7 +31,7 @@ fileprivate struct TestSmartHome: Identifiable, Sendable {
     let accessoryCount: Int
 }
 
-fileprivate struct TestSmartAccessory: Identifiable, Sendable {
+private struct TestSmartAccessory: Identifiable, Sendable {
     let id: String
     let name: String
     let room: String?
@@ -41,20 +41,20 @@ fileprivate struct TestSmartAccessory: Identifiable, Sendable {
     let model: String?
 }
 
-fileprivate struct TestSmartScene: Identifiable, Sendable {
+private struct TestSmartScene: Identifiable, Sendable {
     let id: String
     let name: String
     let actionCount: Int
 }
 
-fileprivate struct TestSmartAutomation: Identifiable, Sendable {
+private struct TestSmartAutomation: Identifiable, Sendable {
     let id: String
     let name: String
     let isEnabled: Bool
     let triggerType: String
 }
 
-fileprivate enum TestHomeKitError: Error, LocalizedError, Sendable {
+private enum TestHomeKitError: Error, LocalizedError, Sendable {
     case notAvailable
     case accessoryNotFound
     case sceneNotFound
@@ -78,7 +78,7 @@ fileprivate enum TestHomeKitError: Error, LocalizedError, Sendable {
 
 // MARK: - NL Command Parser (mirrors HomeKitService logic)
 
-fileprivate enum TestCommandParser {
+private enum TestCommandParser {
     enum CommandIntent: Equatable {
         case turnOn(deviceName: String)
         case turnOff(deviceName: String)
@@ -226,7 +226,7 @@ struct SmartAccessoryModelTests {
         let accessories = [
             TestSmartAccessory(id: "1", name: "Lamp 1", room: "Bedroom", category: .light, isReachable: true, manufacturer: nil, model: nil),
             TestSmartAccessory(id: "2", name: "Lamp 2", room: "Kitchen", category: .light, isReachable: true, manufacturer: nil, model: nil),
-            TestSmartAccessory(id: "3", name: "Thermostat", room: "Bedroom", category: .thermostat, isReachable: true, manufacturer: nil, model: nil),
+            TestSmartAccessory(id: "3", name: "Thermostat", room: "Bedroom", category: .thermostat, isReachable: true, manufacturer: nil, model: nil)
         ]
         let bedroomDevices = accessories.filter { $0.room == "Bedroom" }
         #expect(bedroomDevices.count == 2)
@@ -237,7 +237,7 @@ struct SmartAccessoryModelTests {
         let accessories = [
             TestSmartAccessory(id: "1", name: "Lamp", room: nil, category: .light, isReachable: true, manufacturer: nil, model: nil),
             TestSmartAccessory(id: "2", name: "Lock", room: nil, category: .lock, isReachable: false, manufacturer: nil, model: nil),
-            TestSmartAccessory(id: "3", name: "Fan", room: nil, category: .fan, isReachable: true, manufacturer: nil, model: nil),
+            TestSmartAccessory(id: "3", name: "Fan", room: nil, category: .fan, isReachable: true, manufacturer: nil, model: nil)
         ]
         let reachable = accessories.filter(\.isReachable)
         #expect(reachable.count == 2)
@@ -284,7 +284,7 @@ struct HomeKitErrorTests {
         let errors: [TestHomeKitError] = [
             .notAvailable, .accessoryNotFound, .sceneNotFound,
             .characteristicNotFound, .commandNotRecognized,
-            .permissionDenied, .communicationFailed,
+            .permissionDenied, .communicationFailed
         ]
         for error in errors {
             #expect(error.errorDescription != nil)
@@ -309,7 +309,7 @@ struct HomeKitErrorTests {
             .characteristicNotFound,
             .commandNotRecognized,
             .permissionDenied,
-            .communicationFailed,
+            .communicationFailed
         ].compactMap(\.errorDescription)
         #expect(Set(descriptions).count == 7)
     }
@@ -431,7 +431,7 @@ struct AccessorySearchTests {
     fileprivate let accessories: [TestSmartAccessory] = [
         TestSmartAccessory(id: "1", name: "Living Room Light", room: "Living Room", category: .light, isReachable: true, manufacturer: nil, model: nil),
         TestSmartAccessory(id: "2", name: "Kitchen Thermostat", room: "Kitchen", category: .thermostat, isReachable: true, manufacturer: nil, model: nil),
-        TestSmartAccessory(id: "3", name: "Front Door Lock", room: "Hallway", category: .lock, isReachable: false, manufacturer: nil, model: nil),
+        TestSmartAccessory(id: "3", name: "Front Door Lock", room: "Hallway", category: .lock, isReachable: false, manufacturer: nil, model: nil)
     ]
 
     @Test("Find by exact name")
@@ -473,7 +473,7 @@ struct RoomGroupingTests {
             TestSmartAccessory(id: "1", name: "L1", room: "Living Room", category: .light, isReachable: true, manufacturer: nil, model: nil),
             TestSmartAccessory(id: "2", name: "L2", room: "Living Room", category: .light, isReachable: true, manufacturer: nil, model: nil),
             TestSmartAccessory(id: "3", name: "T1", room: "Kitchen", category: .thermostat, isReachable: true, manufacturer: nil, model: nil),
-            TestSmartAccessory(id: "4", name: "S1", room: nil, category: .sensor, isReachable: true, manufacturer: nil, model: nil),
+            TestSmartAccessory(id: "4", name: "S1", room: nil, category: .sensor, isReachable: true, manufacturer: nil, model: nil)
         ]
         let rooms = Array(Set(accessories.compactMap(\.room))).sorted()
         #expect(rooms.count == 2)
@@ -484,7 +484,7 @@ struct RoomGroupingTests {
     @Test("All nil rooms gives empty list")
     func allNilRooms() {
         let accessories = [
-            TestSmartAccessory(id: "1", name: "S1", room: nil, category: .sensor, isReachable: true, manufacturer: nil, model: nil),
+            TestSmartAccessory(id: "1", name: "S1", room: nil, category: .sensor, isReachable: true, manufacturer: nil, model: nil)
         ]
         let rooms = accessories.compactMap(\.room)
         #expect(rooms.isEmpty)

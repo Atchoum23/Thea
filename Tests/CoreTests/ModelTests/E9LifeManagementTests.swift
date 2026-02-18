@@ -366,15 +366,33 @@ struct TaskModelTests {
 
     @Test("isDueToday false for tomorrow")
     func isDueTodayFalseTomorrow() {
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        let task = TestTask(title: "Test", dueDate: tomorrow)
+        // Noon-anchored for consistency — avoids midnight-crossing flake
+        let cal = Calendar.current
+        let noonTomorrow = cal.date(byAdding: .day, value: 1,
+                                    to: cal.date(bySettingHour: 12, minute: 0, second: 0, of: Date())!)!
+        let task = TestTask(title: "Test", dueDate: noonTomorrow)
+        #expect(!task.isDueToday)
+    }
+
+    @Test("isDueToday false for yesterday")
+    func isDueTodayFalseYesterday() {
+        // Noon-anchored past date — also not today
+        let cal = Calendar.current
+        let noonYesterday = cal.date(byAdding: .day, value: -1,
+                                     to: cal.date(bySettingHour: 12, minute: 0, second: 0, of: Date())!)!
+        let task = TestTask(title: "Test", dueDate: noonYesterday)
         #expect(!task.isDueToday)
     }
 
     @Test("isDueThisWeek detects current week tasks")
     func isDueThisWeek() {
-        // Create a date within this week
-        let task = TestTask(title: "Test", dueDate: Date())
+        // Anchor to noon Wednesday of this week — avoids week-boundary flake regardless of locale
+        let cal = Calendar.current
+        let weekday = cal.component(.weekday, from: Date())
+        let daysToWed = (4 - weekday + 7) % 7  // 4 = Wednesday in 1-based Gregorian
+        let wednesday = cal.date(byAdding: .day, value: daysToWed == 0 ? 0 : daysToWed, to: Date())!
+        let noonWed = cal.date(bySettingHour: 12, minute: 0, second: 0, of: wednesday)!
+        let task = TestTask(title: "Test", dueDate: noonWed)
         #expect(task.isDueThisWeek)
     }
 
@@ -430,7 +448,7 @@ struct TaskCollectionLogicTests {
         var tasks = [
             TestTask(title: "Pending 1"),
             TestTask(title: "Completed 1"),
-            TestTask(title: "Pending 2"),
+            TestTask(title: "Pending 2")
         ]
         tasks[1].markCompleted()
 
@@ -443,7 +461,7 @@ struct TaskCollectionLogicTests {
         var tasks = [
             TestTask(title: "Task 1"),
             TestTask(title: "Task 2"),
-            TestTask(title: "Task 3"),
+            TestTask(title: "Task 3")
         ]
         tasks[0].markCompleted()
         tasks[2].markCompleted()
@@ -460,7 +478,7 @@ struct TaskCollectionLogicTests {
         let tasks = [
             TestTask(title: "Overdue", dueDate: yesterday),
             TestTask(title: "Future", dueDate: tomorrow),
-            TestTask(title: "No date"),
+            TestTask(title: "No date")
         ]
 
         let overdue = tasks.filter(\.isOverdue)
@@ -473,7 +491,7 @@ struct TaskCollectionLogicTests {
         let tasks = [
             TestTask(title: "Work 1", category: .work),
             TestTask(title: "Personal", category: .personal),
-            TestTask(title: "Work 2", category: .work),
+            TestTask(title: "Work 2", category: .work)
         ]
 
         let workTasks = tasks.filter { $0.category == .work }
@@ -486,7 +504,7 @@ struct TaskCollectionLogicTests {
             TestTask(title: "Task 1"),
             TestTask(title: "Task 2"),
             TestTask(title: "Task 3"),
-            TestTask(title: "Task 4"),
+            TestTask(title: "Task 4")
         ]
         tasks[0].markCompleted()
         tasks[2].markCompleted()
@@ -508,7 +526,7 @@ struct TaskCollectionLogicTests {
         var tasks = [
             TestTask(title: "Task 1"),
             TestTask(title: "Task 2"),
-            TestTask(title: "Task 3"),
+            TestTask(title: "Task 3")
         ]
         tasks[0].markCompleted()
         tasks[2].markCompleted()
@@ -603,7 +621,7 @@ struct TaskCollectionLogicTests {
         let tasks = [
             TestTask(title: "Buy groceries"),
             TestTask(title: "Write report"),
-            TestTask(title: "Buy birthday gift"),
+            TestTask(title: "Buy birthday gift")
         ]
 
         let searchText = "buy"
@@ -618,7 +636,7 @@ struct TaskCollectionLogicTests {
         let tasks = [
             TestTask(title: "Task 1", details: "urgent quarterly review"),
             TestTask(title: "Task 2", details: "normal thing"),
-            TestTask(title: "Task 3", details: "another quarterly item"),
+            TestTask(title: "Task 3", details: "another quarterly item")
         ]
 
         let searchText = "quarterly"
@@ -661,7 +679,7 @@ struct DashboardLogicTests {
             TestTask(title: "T2"),
             TestTask(title: "T3"),
             TestTask(title: "T4"),
-            TestTask(title: "T5"),
+            TestTask(title: "T5")
         ]
         tasks[0].markCompleted()
         tasks[1].markCompleted()
@@ -680,7 +698,7 @@ struct DashboardLogicTests {
             TestTask(title: "P1", category: .personal),
             TestTask(title: "H1", category: .health),
             TestTask(title: "H2", category: .health),
-            TestTask(title: "H3", category: .health),
+            TestTask(title: "H3", category: .health)
         ]
 
         let breakdown = Dictionary(grouping: tasks, by: \.category)
@@ -696,7 +714,7 @@ struct DashboardLogicTests {
             TestTask(title: "L", priority: .low),
             TestTask(title: "M1", priority: .medium),
             TestTask(title: "M2", priority: .medium),
-            TestTask(title: "U", priority: .urgent),
+            TestTask(title: "U", priority: .urgent)
         ]
 
         let breakdown = Dictionary(grouping: tasks, by: \.priority)
@@ -714,7 +732,7 @@ struct DashboardLogicTests {
         let tasks = [
             TestTask(title: "Today", dueDate: now),
             TestTask(title: "Tomorrow", dueDate: calendar.date(byAdding: .day, value: 1, to: now)),
-            TestTask(title: "Next month", dueDate: calendar.date(byAdding: .month, value: 1, to: now)),
+            TestTask(title: "Next month", dueDate: calendar.date(byAdding: .month, value: 1, to: now))
         ]
 
         let thisWeek = tasks.filter(\.isDueThisWeek)

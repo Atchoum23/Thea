@@ -746,7 +746,8 @@ private enum TestMessagingChannelType: String, CaseIterable {
 
 // MARK: - Telegram Parser (Mirrors Production Logic)
 
-/// Parse Telegram Desktop export JSON — mirrors TelegramChannel.parseExportJSON()
+// Parse Telegram Desktop export JSON — mirrors TelegramChannel.parseExportJSON()
+// swiftlint:disable:next cyclomatic_complexity
 private func parseTGExport(_ json: [String: Any]) -> [TGTestMessage] {
     var messages: [TGTestMessage] = []
 
@@ -804,18 +805,12 @@ private func parseTGExport(_ json: [String: Any]) -> [TGTestMessage] {
             let mimeType = msgDict["mime_type"] as? String
             let size = msgDict["file_size_bytes"] as? Int
             let attachType: TGTestAttachmentType
-            if msgDict["media_type"] as? String == "voice_message" { attachType = .voiceMessage }
-            else if msgDict["media_type"] as? String == "video_message" { attachType = .videoNote }
-            else if msgDict["media_type"] as? String == "sticker" { attachType = .sticker }
-            else if mimeType?.hasPrefix("audio/") == true { attachType = .audio }
-            else if mimeType?.hasPrefix("video/") == true { attachType = .video }
-            else { attachType = .document }
+            if msgDict["media_type"] as? String == "voice_message" { attachType = .voiceMessage } else if msgDict["media_type"] as? String == "video_message" { attachType = .videoNote } else if msgDict["media_type"] as? String == "sticker" { attachType = .sticker } else if mimeType?.hasPrefix("audio/") == true { attachType = .audio } else if mimeType?.hasPrefix("video/") == true { attachType = .video } else { attachType = .document }
             attachments.append(TGTestAttachment(type: attachType, mimeType: mimeType, fileName: file, sizeBytes: size))
         }
 
         let replyToID: String?
-        if let replyTo = msgDict["reply_to_message_id"] { replyToID = "\(replyTo)" }
-        else { replyToID = nil }
+        if let replyTo = msgDict["reply_to_message_id"] { replyToID = "\(replyTo)" } else { replyToID = nil }
 
         if msgDict["type"] as? String == "service" { continue }
 

@@ -210,7 +210,7 @@ struct QRIntelligenceView: View {
                         if !code.parsedData.isEmpty {
                             GroupBox("Parsed Data") {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    ForEach(code.parsedData.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                                    ForEach(code.parsedData.sorted { $0.key < $1.key }, id: \.key) { key, value in
                                         HStack(alignment: .top) {
                                             Text(key.capitalized)
                                                 .font(.caption)

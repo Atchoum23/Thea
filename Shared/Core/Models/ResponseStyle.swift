@@ -71,6 +71,6 @@ struct ResponseStyle: Identifiable, Codable, Hashable {
                 "Use vivid language and creative framing. " +
                 "Avoid overly structured or formulaic responses.",
             isBuiltIn: true
-        ),
+        )
     ]
 }

@@ -47,12 +47,12 @@ final class MigrationManager {
         isMigrating = false
     }
 
-    func migrateFromNexus(path _: URL) async throws {
+    func migrateFromCursor(path _: URL) async throws {
         isMigrating = true
-        migrationStatus = "Reading Nexus data..."
+        migrationStatus = "Reading Cursor data..."
         migrationProgress = 0.1
 
-        // Implementation for Nexus migration
+        // Implementation for Cursor migration
         try await Task.sleep(nanoseconds: 500_000_000)
 
         migrationProgress = 1.0

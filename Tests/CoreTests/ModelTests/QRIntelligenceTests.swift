@@ -45,6 +45,7 @@ private enum TestQRActionType: String, Sendable {
     case callPhone, sendSMS, connectWiFi, addContact, openMap, addCalendarEvent
 }
 
+// swiftlint:disable:next cyclomatic_complexity
 private func parseQR(_ content: String) -> (TestQRContentType, [String: String], [TestQRActionType]) {
     let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
 
