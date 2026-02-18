@@ -26,7 +26,7 @@ import SwiftUI
             Form {
                 // Server Status Section
                 Section {
-                    ServerStatusRow(server: server)
+                    ServerStatusRow(server: server, errorMessage: $errorMessage, showError: $showError)
 
                     if server.isRunning {
                         LabeledContent("Address") {
@@ -210,6 +210,8 @@ import SwiftUI
 
     private struct ServerStatusRow: View {
         @ObservedObject var server: TheaRemoteServer
+        @Binding var errorMessage: String?
+        @Binding var showError: Bool
 
         var body: some View {
             HStack {

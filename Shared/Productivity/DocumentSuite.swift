@@ -518,8 +518,7 @@ actor DocumentSuiteService {
 
     private func generatePDF(from content: String, title: String) throws -> Data {
         #if os(macOS)
-        let html = markdownToHTML(content, title: title)
-        // Use simple text-based PDF as fallback
+        _ = markdownToHTML(content, title: title) // HTML generation available but using simple PDF for now
         return try generateSimplePDF(content: content, title: title)
         #else
         return try generateSimplePDF(content: content, title: title)

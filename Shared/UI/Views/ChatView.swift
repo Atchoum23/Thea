@@ -252,7 +252,9 @@ struct ChatView: View {
             .alert(error: $showingError)
             .sheet(item: $syncConflictManager.activeConflict) { conflict in
                 SyncConflictResolutionView(conflict: conflict) { resolution in
-                    syncConflictManager.resolveActiveConflict(with: resolution)
+                    Task { @MainActor in
+                        syncConflictManager.resolveActiveConflict(with: resolution)
+                    }
                 }
             }
             .task {

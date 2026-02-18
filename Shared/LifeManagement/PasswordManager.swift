@@ -178,6 +178,7 @@ enum PasswordAnalyzer {
 private enum KeychainHelper {
     static let service = "ai.thea.passwordvault"
 
+    @discardableResult
     static func save(key: String, data: Data) -> Bool {
         delete(key: key)
         let query: [String: Any] = [

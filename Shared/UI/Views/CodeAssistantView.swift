@@ -65,7 +65,7 @@ struct CodeAssistantView: View {
             if case .success(let url) = result {
                 Task {
                     do {
-                        try await assistant.scanProject(at: url)
+                        _ = try await assistant.scanProject(at: url)
                     } catch {
                         codeAssistantViewLogger.error("Failed to scan project at \(url.path): \(error.localizedDescription)")
                     }
@@ -167,7 +167,7 @@ struct CodeAssistantView: View {
             Button("Rescan") {
                 Task {
                     do {
-                        try await assistant.scanProject(at: URL(fileURLWithPath: project.path))
+                        _ = try await assistant.scanProject(at: URL(fileURLWithPath: project.path))
                     } catch {
                         codeAssistantViewLogger.error("Failed to rescan project: \(error.localizedDescription)")
                     }
@@ -254,7 +254,7 @@ struct CodeAssistantView: View {
                     Button {
                         Task {
                             do {
-                                try await assistant.scanProject(at: URL(fileURLWithPath: project.path))
+                                _ = try await assistant.scanProject(at: URL(fileURLWithPath: project.path))
                             } catch {
                                 codeAssistantViewLogger.error("Failed to rescan project: \(error.localizedDescription)")
                             }

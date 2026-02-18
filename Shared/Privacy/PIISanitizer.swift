@@ -113,7 +113,7 @@ final class PIISanitizer {
     // MARK: - Regex Patterns
 
     // Not @Observable-tracked: compiled once at init, never changes
-    nonisolated(unsafe) private static let compiledPatterns: [(PIIType, NSRegularExpression)] = {
+    private static let compiledPatterns: [(PIIType, NSRegularExpression)] = {
         let patternDefinitions: [(PIIType, String, NSRegularExpression.Options)] = [
             (.email, #"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"#, .caseInsensitive),
             (.phoneNumber, #"(\+?1?[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}"#, []),

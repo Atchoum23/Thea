@@ -71,8 +71,9 @@ final class ModelCatalogManager {
 
         // Get OpenRouter API key if available
         do {
-            let apiKey = try SecureStorage.shared.loadAPIKey(for: "openrouter")
-            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            if let apiKey = try SecureStorage.shared.loadAPIKey(for: "openrouter") {
+                request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            }
         } catch {
             logger.debug("No OpenRouter API key available — fetching models without auth: \(error.localizedDescription)")
         }
