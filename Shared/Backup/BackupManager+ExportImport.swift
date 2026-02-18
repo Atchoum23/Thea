@@ -72,7 +72,7 @@ extension BackupManager {
             logger.debug("Could not read file size for imported backup: \(error.localizedDescription)")
             fileSize = 0
         }
-        let backupInfo = try BackupInfo(
+        let backupInfo = BackupInfo(
             id: UUID().uuidString,
             name: backupName,
             type: .imported,

@@ -474,7 +474,7 @@ extension AutonomousAgentV3 {
             return false
         }
         let range = NSRange(output.startIndex..., in: output)
-        let matches = regex.numberOfMatches(in: output, range: range) ?? 0
+        let matches = regex.numberOfMatches(in: output, range: range)
         let result = matches > 0 || output.contains(pattern)
         logger.info("Verification result: \(result)")
         return result
