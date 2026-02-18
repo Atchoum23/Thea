@@ -9,6 +9,7 @@ import Foundation
 
 // MARK: - Supporting Types
 
+/// Configuration controlling which memory sources are searched and how results are weighted.
 public struct RetrievalConfig: Sendable {
     // Enable/disable sources
     public var enableMemorySystemRetrieval: Bool = true
@@ -37,6 +38,7 @@ public struct RetrievalConfig: Sendable {
     public var minConfidenceToInject: Double = 0.4
 }
 
+/// The combined output of an active memory retrieval query, including context-ready text and source metadata.
 public struct ActiveRetrievalResult: Sendable {
     public let sources: [RetrievalSource]
     public let contextPrompt: String
@@ -49,6 +51,7 @@ public struct ActiveRetrievalResult: Sendable {
     }
 }
 
+/// A single source contributing memories to a retrieval result.
 public struct RetrievalSource: Sendable {
     public let type: SourceType
     public let tier: MemoryTierType
@@ -71,6 +74,7 @@ public struct RetrievalSource: Sendable {
     }
 }
 
+/// Which memory tier a retrieved entry came from.
 public enum MemoryTierType: String, Sendable {
     case working = "Working Memory"
     case longTerm = "Long-Term Memory"
@@ -81,6 +85,7 @@ public enum MemoryTierType: String, Sendable {
     public var displayName: String { rawValue }
 }
 
+/// A prompt augmented with relevant memories for context injection into an AI request.
 public struct EnhancedPrompt: Sendable {
     public let prompt: String
     public let hasInjectedContext: Bool
@@ -88,6 +93,7 @@ public struct EnhancedPrompt: Sendable {
     public let confidence: Double
 }
 
+/// Performance and coverage statistics from a single memory retrieval operation.
 public struct RetrievalStatistics: Sendable {
     public var totalRetrievals: Int = 0
     public var averageLatency: TimeInterval = 0.0

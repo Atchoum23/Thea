@@ -218,7 +218,7 @@ struct TheaMacTextInputField: NSViewRepresentable {
                 for url in urls {
                     let ext = url.pathExtension.lowercased()
                     if ["png", "jpg", "jpeg", "gif", "webp", "heic"].contains(ext) {
-                        if let imageData = try? Data(contentsOf: url) {
+                        if let imageData = try? Data(contentsOf: url) { // Safe: file read failure → skip this URL (pasteboard may contain other valid image URLs)
                             onPasteImage?(imageData)
                             return true
                         }

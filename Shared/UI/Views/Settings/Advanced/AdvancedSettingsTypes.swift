@@ -89,7 +89,7 @@ struct AdvancedSettingsConfiguration: Equatable, Codable {
     static func load() -> AdvancedSettingsConfiguration {
         var config: AdvancedSettingsConfiguration
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let loaded = try? JSONDecoder().decode(AdvancedSettingsConfiguration.self, from: data)
+           let loaded = try? JSONDecoder().decode(AdvancedSettingsConfiguration.self, from: data) // Safe: corrupt UserDefaults → use default config (else branch)
         {
             config = loaded
         } else {
