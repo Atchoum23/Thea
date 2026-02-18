@@ -13,6 +13,7 @@
             _ = ""
 
             let pattern = "\u{001B}\\[([0-9;]*)m"
+            // Safe: compile-time known ANSI escape pattern; invalid regex → return plain text segment
             guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
                 return [ANSISegment(text: text, style: currentStyle)]
             }
@@ -50,6 +51,7 @@
         /// Strip all ANSI codes from text
         static func stripANSI(_ text: String) -> String {
             let pattern = "\u{001B}\\[[0-9;]*m"
+            // Safe: compile-time known ANSI escape pattern; invalid regex → return text unmodified
             guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
                 return text
             }
@@ -69,7 +71,7 @@
         /// Parse JSON output
         static func parseJSON(_ text: String) -> Any? {
             guard let data = text.data(using: .utf8) else { return nil }
-            return try? JSONSerialization.jsonObject(with: data, options: [])
+            return try? JSONSerialization.jsonObject(with: data, options: []) // Safe: invalid JSON → returns nil (caller handles nil gracefully)
         }
 
         /// Detect if output looks like a table (columns aligned with spaces)

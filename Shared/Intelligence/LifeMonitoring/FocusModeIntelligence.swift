@@ -294,4 +294,28 @@ public actor FocusModeIntelligence {
         }
     }
 
+    func findRecentCommunication(by id: UUID) -> IncomingCommunication? {
+        recentCommunications.first { $0.id == id }
+    }
+
+    func updateRecentCommunication(_ updated: IncomingCommunication) {
+        if let index = recentCommunications.firstIndex(where: { $0.id == updated.id }) {
+            recentCommunications[index] = updated
+        }
+    }
+
+    // MARK: - Notification Helpers (used by +Communication.swift)
+
+    func notifyEmergencyDetected(_ communication: IncomingCommunication) {
+        onEmergencyDetected?(communication)
+    }
+
+    func notifyUrgentDetected(_ communication: IncomingCommunication) {
+        onUrgentDetected?(communication)
+    }
+
+    func notifySettingsChanged(_ settings: FocusModeGlobalSettings) {
+        onSettingsChanged?(settings)
+    }
+
 }
