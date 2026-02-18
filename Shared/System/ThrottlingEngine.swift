@@ -250,7 +250,7 @@ public final class ThrottlingEngine {
             do {
                 try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
             } catch {
-                break
+                return // Task was cancelled; don't restore config
             }
             await MainActor.run {
                 self.configuration = previousConfig
