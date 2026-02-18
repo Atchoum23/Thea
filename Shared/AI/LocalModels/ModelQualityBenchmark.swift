@@ -20,6 +20,8 @@ import OSLog
 
 // MARK: - Model Quality Benchmark
 
+// @unchecked Sendable: mutable state (modelMetrics dictionary) is accessed exclusively from
+// a single owner on a serial queue; emaAlpha and thresholds are immutable after init
 /// Tracks and analyzes model quality over time
 final class ModelQualityBenchmark: @unchecked Sendable {
     private let logger = Logger(subsystem: "ai.thea.app", category: "ModelQualityBenchmark")

@@ -19,6 +19,8 @@ import OSLog
 
 // MARK: - Predictive Preloader
 
+// @unchecked Sendable: mutable Markov chain state (transitionMatrix, timeOfDayPatterns) is owned
+// by a single PredictiveModelManager instance and accessed on its serial DispatchQueue
 /// Predicts upcoming model needs using learned behavior patterns
 final class PredictivePreloader: @unchecked Sendable {
     private let logger = Logger(subsystem: "ai.thea.app", category: "PredictivePreloader")

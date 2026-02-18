@@ -343,6 +343,8 @@ final class VoiceActivationEngine {
 
 // MARK: - Speech Delegate
 
+// @unchecked Sendable: NSObject subclass bridging AVSpeechSynthesizerDelegate; AVSpeechSynthesizer
+// dispatches callbacks on the main thread; the captured onComplete closure is safely invoked there
 private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     let onComplete: () -> Void
 
