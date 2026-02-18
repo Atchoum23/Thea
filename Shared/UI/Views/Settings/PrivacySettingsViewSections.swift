@@ -2,12 +2,9 @@
 // Supporting types and section views for PrivacySettingsView
 
 import OSLog
-import OSLog
 import SwiftUI
 
 // MARK: - Supporting Types
-
-private let privacySettingsLogger = Logger(subsystem: "ai.thea.app", category: "PrivacySettings")
 
 private let privacySettingsLogger = Logger(subsystem: "ai.thea.app", category: "PrivacySettings")
 

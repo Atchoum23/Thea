@@ -581,11 +581,3 @@ final class BackgroundServiceMonitor: ObservableObject {
         }
     }
 }
-
-// MARK: - Persistence Model
-
-private struct SaveableHealthHistory: Codable {
-    let snapshots: [TheaHealthSnapshot]
-    let recoveries: [TheaRecoveryAction]
-    let consecutiveFailures: [String: Int]
-}
