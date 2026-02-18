@@ -155,21 +155,21 @@ struct ConversationExporter: Sendable {
 
     // MARK: - JSON Export
 
-    private static func exportJSON(_ conversation: ExportedConversation) throws -> String {
+    private static func exportJSON(_ conversation: ExportedConversation) -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
 
-        let data = try encoder.encode(conversation)
+        let data = (try? encoder.encode(conversation)) ?? Data()
         return String(data: data, encoding: .utf8) ?? "{}"
     }
 
-    private static func exportJSONArray(_ conversations: [ExportedConversation]) throws -> String {
+    private static func exportJSONArray(_ conversations: [ExportedConversation]) -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
 
-        let data = try encoder.encode(conversations)
+        let data = (try? encoder.encode(conversations)) ?? Data()
         return String(data: data, encoding: .utf8) ?? "[]"
     }
 
