@@ -416,6 +416,8 @@ public actor IncrementalIndexer {
 
 // MARK: - Directory Monitor
 
+// @unchecked Sendable: mutable state (source DispatchSourceFileSystemObject) is exclusively
+// managed on the dedicated serial queue; all mutations guarded by queue-based serialization
 /// Low-level directory monitor using GCD
 private final class DirectoryMonitor: @unchecked Sendable {
     private let path: String

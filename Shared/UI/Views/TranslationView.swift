@@ -332,7 +332,7 @@ struct TranslationView: View {
             #else
             UIPasteboard.general.string = outputText
             #endif
-            withAnimation {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 showCopiedFeedback = true
             }
             Task {
@@ -341,7 +341,7 @@ struct TranslationView: View {
                 } catch {
                     logger.error("Task sleep interrupted: \(error.localizedDescription)")
                 }
-                withAnimation {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     showCopiedFeedback = false
                 }
             }

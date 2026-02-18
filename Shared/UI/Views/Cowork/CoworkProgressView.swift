@@ -94,7 +94,7 @@
 
         private func stepHeader(_ step: CoworkStep) -> some View {
             Button {
-                withAnimation {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     if expandedSteps.contains(step.id) {
                         expandedSteps.remove(step.id)
                     } else {

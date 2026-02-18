@@ -281,7 +281,7 @@
                     .padding()
                 }
                 .onChange(of: manager.currentSession?.commandHistory.count) { _, _ in
-                    withAnimation {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         proxy.scrollTo("bottom", anchor: .bottom)
                     }
                 }

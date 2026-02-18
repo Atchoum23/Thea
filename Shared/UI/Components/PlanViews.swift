@@ -38,7 +38,7 @@ struct CompactPlanBar: View {
                     .frame(width: 60)
 
                 Button {
-                    withAnimation {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         planManager.isPanelVisible = true
                         planManager.isPanelCollapsed = false
                     }
@@ -105,7 +105,7 @@ struct PlanPanel: View {
             Spacer()
 
             Button {
-                withAnimation {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                     planManager.isPanelCollapsed = true
                     planManager.isPanelVisible = false
                 }

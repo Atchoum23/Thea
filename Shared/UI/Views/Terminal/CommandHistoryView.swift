@@ -242,13 +242,14 @@
                         .help("Run again")
 
                         Button {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 isExpanded.toggle()
                             }
                         } label: {
                             Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(isExpanded ? "Collapse command output" : "Expand command output")
                     }
                 }
 
