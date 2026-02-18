@@ -145,7 +145,7 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
             case .json:
                 outputConfig["format"] = ["type": "json"]
             case let .jsonSchema(schemaData):
-                if let schema = try? JSONSerialization.jsonObject(with: schemaData) as? [String: Any] {
+                if let schema = try? JSONSerialization.jsonObject(with: schemaData) as? [String: Any] { // Safe: invalid schema data → skip json_schema format (graceful fallback)
                     outputConfig["format"] = [
                         "type": "json_schema",
                         "schema": schema
@@ -275,6 +275,7 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
                             let jsonString = String(line.dropFirst(6))
 
                             guard let data = jsonString.data(using: .utf8),
+                                  // Safe: malformed SSE line → skip (continue); stream parsing is best-effort
                                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                             else {
                                 continue
@@ -342,7 +343,7 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
         }
 
         if httpResponse.statusCode != 200 {
-            // Try to parse error message
+            // Safe: JSON error body parsing — if unparseable, fallback to generic status-code error below
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = json["error"] as? [String: Any],
                let message = error["message"] as? String {
