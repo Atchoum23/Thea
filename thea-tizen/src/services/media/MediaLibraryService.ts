@@ -194,7 +194,7 @@ class MediaLibraryService {
   getAllTVShows(): TVShow[] { return Array.from(this.tvShows.values()); }
 
   getStats() {
-    let movieStats = { total: this.movies.size, monitored: 0, downloaded: 0, missing: 0, sizeOnDisk: 0 };
+    const movieStats = { total: this.movies.size, monitored: 0, downloaded: 0, missing: 0, sizeOnDisk: 0 };
     for (const m of this.movies.values()) {
       if (m.monitored) movieStats.monitored++;
       if (m.hasFile) { movieStats.downloaded++; if (m.mediaItem) movieStats.sizeOnDisk += m.mediaItem.fileSize; }
