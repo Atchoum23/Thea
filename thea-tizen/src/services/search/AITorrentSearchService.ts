@@ -290,7 +290,7 @@ Be smart about:
     }
 
     // Remove extracted parts to get title
-    let title = normalized
+    const title = normalized
       .replace(/s(?:eason)?\s*\d+\s*e(?:pisode)?\s*\d+/gi, '')
       .replace(/season\s*\d+\s*episode\s*\d+/gi, '')
       .replace(/s(?:eason)?\s*\d+/gi, '')
@@ -375,7 +375,7 @@ Be smart about:
     for (const [canonical, aliases] of Object.entries(SHOW_ALIASES)) {
       if (titleLower.includes(canonical)) {
         for (const alias of aliases) {
-          let altQuery = primary.replace(new RegExp(canonical, 'gi'), alias);
+          const altQuery = primary.replace(new RegExp(canonical, 'gi'), alias);
           if (!alternatives.includes(altQuery)) {
             alternatives.push(altQuery);
           }

@@ -200,7 +200,7 @@ class MediaLibraryService {
       if (m.hasFile) { movieStats.downloaded++; if (m.mediaItem) movieStats.sizeOnDisk += m.mediaItem.fileSize; }
       else if (m.monitored) movieStats.missing++;
     }
-    let tvStats = { total: this.tvShows.size, monitored: 0, episodesTotal: 0, episodesDownloaded: 0, episodesMissing: 0, sizeOnDisk: 0 };
+    const tvStats = { total: this.tvShows.size, monitored: 0, episodesTotal: 0, episodesDownloaded: 0, episodesMissing: 0, sizeOnDisk: 0 };
     for (const show of this.tvShows.values()) {
       if (show.monitorStatus !== 'none') tvStats.monitored++;
       for (const season of show.seasons) {

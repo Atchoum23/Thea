@@ -1,0 +1,1252 @@
+findings:
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "$0")" && pwd)
+  file: Scripts/setup-mac-sync.sh
+  id: 0A8550E7-2BCC-48BC-ACDB-ED9AF31995CF
+  line: 15
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$SCRIPT_DIR/.." && pwd)
+  file: Scripts/setup-mac-sync.sh
+  id: 5C958AEE-AA4D-4235-A91F-2906271BFD01
+  line: 16
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cat "$LOCK_FILE" 2>/dev/null || echo "")
+  file: Scripts/setup-mac-sync.sh
+  id: 5B169262-36AE-4426-9EFE-73A6D7CBB222
+  line: 41
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Access Control
+  cweID: CWE-732
+  description: 'Detects potentially dangerous file operations:
+
+    - rm -rf without safeguards
+
+    - chmod 777
+
+    - Writing to system directories'
+  evidence: rm -rf /
+  file: Scripts/setup-mac-sync.sh
+  id: 7B325515-9921-417C-9685-F4081FED50BC
+  line: 102
+  recommendation: 'Add safeguards to file operations:
+
+    - Use variables for paths, verify before rm -rf
+
+    - Avoid chmod 777, use minimal permissions
+
+    - Don''t write to /etc, /usr, /bin without good reason
+
+    - Add dry-run options for destructive scripts'
+  ruleID: SCRIPT-FILE-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Dangerous File Operation
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(gpg --list-secret-keys --keyid-format LONG | grep -E "^sec" | head -1
+    | awk '{print $2}' | cut -d'/' -f2)
+  file: Scripts/setup-gpg-key.sh
+  id: 422710D5-F4C8-4011-A4EF-F291CAE0788C
+  line: 22
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(gpg --list-secret-keys --keyid-format LONG | grep -E "^sec" | head -1
+    | awk '{print $2}' | cut -d'/' -f2)
+  file: Scripts/setup-gpg-key.sh
+  id: 1ECF4F1D-730B-4866-9847-3A0CAB7C036B
+  line: 45
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  file: Scripts/verify_build.sh
+  id: 6154DA3B-4D64-468F-A674-BED58BDBA4E7
+  line: 7
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+  file: Scripts/build-with-all-errors.sh
+  id: 98703F01-50CA-46DF-B843-5295D70BCE9C
+  line: 23
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(grep "MARKETING_VERSION:" "$PROJECT_DIR/project.yml" | awk '{print $2}'
+    | tr -d '"')
+  file: Scripts/create-dmg.sh
+  id: DF193F7E-B15F-4463-B110-FEDBE154C909
+  line: 104
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(grep "CURRENT_PROJECT_VERSION:" "$PROJECT_DIR/project.yml" | awk '{print
+    $2}' | tr -d '"')
+  file: Scripts/create-dmg.sh
+  id: B868F365-10D6-4038-9160-5A14DB55F081
+  line: 105
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(defaults read "$APP_PATH/Contents/Info.plist" CFBundleShortVersionString
+    2>/dev/null || echo "UNKNOWN")
+  file: Scripts/create-dmg.sh
+  id: E3211B43-5806-4CCE-83A4-A0110DE95439
+  line: 231
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(defaults read "$MOUNTED_APP/Contents/Info.plist" CFBundleShortVersionString
+    2>/dev/null || echo "UNKNOWN")
+  file: Scripts/create-dmg.sh
+  id: 3792C738-697A-4AD1-98EC-966DD95EF48D
+  line: 309
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(du -h "$DMG_PATH" | cut -f1)
+  file: Scripts/create-dmg.sh
+  id: 5E743903-03A9-4082-8F5A-35A8C034A4FD
+  line: 329
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: eval "$
+  file: Scripts/finish-setup.sh
+  id: AA5659C7-39A2-4117-8A2F-B6E342C340C2
+  line: 16
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "$0")/.." && pwd)
+  file: Scripts/finish-setup.sh
+  id: 1C3C55F0-6B7E-4FE2-8D66-55ED2D7A93CA
+  line: 10
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "$0")" && pwd)
+  file: Scripts/build-and-notarize.sh
+  id: B71C2D33-CF46-4CC9-BA3F-28B45AAD20A7
+  line: 21
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(dirname "$SCRIPT_DIR")
+  file: Scripts/build-and-notarize.sh
+  id: 0D16B418-4F54-4513-AA20-28387A111702
+  line: 22
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(find "$DERIVED_DATA" -name "Thea.app" -path "*/Release/*" -type d 2>/dev/null
+    | head -1)
+  file: Scripts/build-and-notarize.sh
+  id: 9597071E-4986-4F4E-9027-1D2D91C15C7A
+  line: 79
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(du -h "$DMG_PATH" | cut -f1)
+  file: Scripts/create-dmg-v1.3.0.sh
+  id: 0281EA8F-CB55-4E9C-950A-BBA62DC2C942
+  line: 79
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  file: Scripts/install-automatic-checks.sh
+  id: 23971912-595F-465A-89C4-77F31BBF3CF6
+  line: 24
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(dirname "$0")
+  file: Scripts/push-changes.sh
+  id: 6680629B-83C2-4FBA-89D7-B33379625F58
+  line: 2
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  file: Scripts/validate-settings.sh
+  id: 549CE1C7-80CF-4903-B1D7-14D4052A05F7
+  line: 23
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(dirname "$SCRIPT_DIR")
+  file: Scripts/validate-settings.sh
+  id: C0007205-6361-45F2-9FFB-9F33376CF7E0
+  line: 24
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(grep "INFOPLIST_KEY_LSApplicationCategoryType" "$PBXPROJ" | head -1
+    | sed 's/.*= "\(.*\)";/\1/')
+  file: Scripts/validate-settings.sh
+  id: 4FA0BB52-2371-47A6-BBFA-280DBED10069
+  line: 264
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  file: Scripts/resolve_packages.sh
+  id: 823DA164-77E4-419A-A9A2-0646B3CC4995
+  line: 24
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(basename $PACKAGE_RESOLVED_DIR)
+  file: Scripts/resolve_packages.sh
+  id: 8FF7C717-0DB2-40E0-B22F-B560A9BB3C65
+  line: 115
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(find "$BUILD_DIR" -name "Package.resolved" -not -path "*/checkouts/*"
+    2>/dev/null | head -1)
+  file: Scripts/resolve_packages.sh
+  id: C10C7951-05F0-4A87-9CC0-EA5305A89365
+  line: 193
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(find "$PACKAGES_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d
+    ' ')
+  file: Scripts/resolve_packages.sh
+  id: 786E62CB-F3A9-424B-A886-2AA77C2366A5
+  line: 224
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+  file: Scripts/auto-build-check.sh
+  id: F12437C7-AA1D-40A2-827B-222300FD4546
+  line: 24
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(dirname "$0")
+  file: Scripts/complete-mission.sh
+  id: 871CA7E0-B906-4023-A578-299AD40E0048
+  line: 60
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(git show ":$file" 2>/dev/null || true)
+  file: Scripts/pre-commit
+  id: 33BC83AC-4446-4004-AB92-9F1A1AA875A4
+  line: 50
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(git diff --cached --name-only --diff-filter=d | grep "\.swift$" || true)
+  file: Scripts/pre-commit
+  id: 993A9635-B178-440F-9B4A-BAB01F4A8AEA
+  line: 173
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(echo "$SWIFT_FILES" | wc -l | tr -d ' ')
+  file: Scripts/pre-commit
+  id: 1FD6DBDC-F62D-4306-8E1D-14A507BF5F18
+  line: 177
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(echo "$SWIFT_FILES" | xargs swiftlint lint --force-exclude 2>&1 || true)
+  file: Scripts/pre-commit
+  id: 599F467D-8402-4C53-8A70-F8CCD947706E
+  line: 178
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+  file: Scripts/error-summary.sh
+  id: 5D2D01BC-D0FD-4A89-A27D-02DEA384BFFF
+  line: 16
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(echo "$LINT_OUTPUT" | grep -c "error:" || echo "0")
+  file: Scripts/error-summary.sh
+  id: 3238CA69-0936-4D04-9853-77814DBCE1DD
+  line: 35
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(echo "$LINT_OUTPUT" | grep -c "warning:" || echo "0")
+  file: Scripts/error-summary.sh
+  id: 9CEB8C61-919D-4457-933D-C7947E5CF872
+  line: 36
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+  file: Scripts/watch-and-check.sh
+  id: 712FC327-05A2-4338-9837-A5B5D2452F5C
+  line: 17
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(basename "$event")
+  file: Scripts/watch-and-check.sh
+  id: 11AF0F41-0087-480C-8235-2ED08C0AEA7F
+  line: 37
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "$0")/.." && pwd)
+  file: Scripts/build-and-install.sh
+  id: 788008B5-2F65-4643-8E66-1052CC91A1DE
+  line: 9
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+- category: Injection
+  cweID: CWE-78
+  description: 'Detects dangerous eval and exec patterns:
+
+    - eval with user input
+
+    - exec with dynamic content
+
+    - $() command substitution with variables
+
+    These patterns can lead to command injection.'
+  evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+  file: Scripts/build-release.sh
+  id: 81D0E488-BEEC-4029-9159-67BAE8427586
+  line: 23
+  recommendation: 'Avoid eval and exec where possible.
+
+    If required:
+
+    - Validate and sanitize all inputs
+
+    - Use allow-list validation
+
+    - Quote all variables properly
+
+    - Consider safer alternatives'
+  ruleID: SCRIPT-EVAL-001
+  severity: high
+  timestamp: '2026-02-18T19:11:24Z'
+  title: Unsafe Eval Usage
+metadata:
+  deltaMode: false
+  repositoryPath: .
+  timestamp: '2026-02-18T19:11:26Z'
+  version: 1.0.0
+summary:
+  categoryCounts:
+    Access Control: 1
+    Injection: 40
+  critical: 0
+  filesScanned: 19
+  high: 41
+  low: 0
+  medium: 0
+  totalFindings: 41
