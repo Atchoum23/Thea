@@ -112,9 +112,8 @@ final class PIISanitizer {
 
     // MARK: - Regex Patterns
 
-    private lazy var patterns: [(PIIType, NSRegularExpression)] = {
-        var result: [(PIIType, NSRegularExpression)] = []
-
+    // Not @Observable-tracked: compiled once at init, never changes
+    nonisolated(unsafe) private static let compiledPatterns: [(PIIType, NSRegularExpression)] = {
         let patternDefinitions: [(PIIType, String, NSRegularExpression.Options)] = [
             (.email, #"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"#, .caseInsensitive),
             (.phoneNumber, #"(\+?1?[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}"#, []),
@@ -125,19 +124,16 @@ final class PIISanitizer {
             (.ipAddress, #"\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b"#, []),
             (.address, #"\d+\s+[\w\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct)\.?,?\s+[\w\s]+,?\s+[A-Z]{2}\s+\d{5}(?:-\d{4})?"#, .caseInsensitive)
         ]
-
+        var result: [(PIIType, NSRegularExpression)] = []
         for (type, pattern, options) in patternDefinitions {
-            do {
-                let regex = try NSRegularExpression(pattern: pattern, options: options)
+            if let regex = try? NSRegularExpression(pattern: pattern, options: options) {
                 result.append((type, regex))
-            } catch {
-                logger.error("Failed to compile PII regex for \(type.rawValue): \(error.localizedDescription)")
-                logger.error("Pattern: \(pattern)")
             }
         }
-
         return result
     }()
+
+    private var patterns: [(PIIType, NSRegularExpression)] { Self.compiledPatterns }
 
     // MARK: - Initialization
 
