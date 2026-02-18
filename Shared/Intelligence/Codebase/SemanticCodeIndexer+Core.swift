@@ -281,7 +281,7 @@ extension SemanticCodeIndexer {
 
     private func discoverFiles(at rootPath: String) async throws -> [String] {
         // Move synchronous file enumeration off the async context
-        try await Task.detached(priority: .userInitiated) { [configuration] in
+        try await Task.detached(priority: .userInitiated) { [configuration, logger = self.logger] in
             var files: [String] = []
             let fileManager = FileManager.default
             let rootURL = URL(fileURLWithPath: rootPath)
