@@ -256,6 +256,7 @@ struct HabitRowView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(isCompletedToday ? "Mark \(habit.name) as incomplete" : "Mark \(habit.name) as complete")
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack {

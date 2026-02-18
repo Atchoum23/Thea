@@ -232,6 +232,7 @@
                             .background(selectedTab == tab ? Color.accentColor.opacity(0.2) : Color.clear)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
                 }
                 Spacer()
             }
