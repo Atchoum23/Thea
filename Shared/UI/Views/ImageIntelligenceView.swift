@@ -399,26 +399,28 @@ struct ImageIntelligenceView: View {
                     description: Text("Processed images will appear here.")
                 )
             } else {
-        List(processingHistory.suffix(50).reversed()) { record in
-            HStack {
-                Image(systemName: record.operation.icon)
-                    .foregroundStyle(Color.accentColor)
-                    .frame(width: 24)
-                VStack(alignment: .leading) {
-                    Text(record.fileName)
-                        .font(.subheadline)
-                    Text("\(record.operation.rawValue)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                VStack(alignment: .trailing) {
-                    Text(record.formattedInputSize)
-                        .font(.caption)
-                    if record.compressionRatio > 0 {
-                        Text("-\(Int(record.compressionRatio * 100))%")
-                            .font(.caption)
-                            .foregroundStyle(.green)
+                List(processingHistory.suffix(50).reversed()) { record in
+                    HStack {
+                        Image(systemName: record.operation.icon)
+                            .foregroundStyle(Color.accentColor)
+                            .frame(width: 24)
+                        VStack(alignment: .leading) {
+                            Text(record.fileName)
+                                .font(.subheadline)
+                            Text("\(record.operation.rawValue)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing) {
+                            Text(record.formattedInputSize)
+                                .font(.caption)
+                            if record.compressionRatio > 0 {
+                                Text("-\(Int(record.compressionRatio * 100))%")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            }
+                        }
                     }
                 }
             }

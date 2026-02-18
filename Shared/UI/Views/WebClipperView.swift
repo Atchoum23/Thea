@@ -86,6 +86,17 @@ struct WebClipperView: View {
                         }
                 }
             }
+            .overlay {
+                if filteredArticles.isEmpty {
+                    ContentUnavailableView(
+                        clipper.articles.isEmpty ? "No Clipped Articles" : "No Results",
+                        systemImage: clipper.articles.isEmpty ? "doc.text.magnifyingglass" : "magnifyingglass",
+                        description: Text(clipper.articles.isEmpty
+                            ? "Paste a URL above to clip an article."
+                            : "No articles match your search.")
+                    )
+                }
+            }
         }
     }
 

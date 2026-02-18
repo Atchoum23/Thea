@@ -12,7 +12,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "$0")" && pwd)
   file: Scripts/setup-mac-sync.sh
-  id: 5AE3D1F9-1C37-45E4-B1C3-2CC0E005D5B6
+  id: 69F2854C-64E4-4C69-9FB0-65509D25C16D
   line: 15
   recommendation: 'Avoid eval and exec where possible.
 
@@ -27,7 +27,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -42,7 +42,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$SCRIPT_DIR/.." && pwd)
   file: Scripts/setup-mac-sync.sh
-  id: C806240E-0157-47BA-99C3-E9121BD406A4
+  id: EFF18662-0401-442E-9567-CFE210556CB3
   line: 16
   recommendation: 'Avoid eval and exec where possible.
 
@@ -57,7 +57,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -72,7 +72,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cat "$LOCK_FILE" 2>/dev/null || echo "")
   file: Scripts/setup-mac-sync.sh
-  id: 5C36D9C2-EE66-4546-8AF3-E725441BF329
+  id: E9A80B18-7927-42D2-8025-C0F55FD0FD7D
   line: 41
   recommendation: 'Avoid eval and exec where possible.
 
@@ -87,7 +87,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Access Control
   cweID: CWE-732
@@ -100,7 +100,7 @@ findings:
     - Writing to system directories'
   evidence: rm -rf /
   file: Scripts/setup-mac-sync.sh
-  id: A087FA17-5057-4246-9A40-61D73A4070F6
+  id: 401BDA38-D10A-488B-BF2F-704D57785200
   line: 102
   recommendation: 'Add safeguards to file operations:
 
@@ -113,7 +113,7 @@ findings:
     - Add dry-run options for destructive scripts'
   ruleID: SCRIPT-FILE-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Dangerous File Operation
 - category: Injection
   cweID: CWE-78
@@ -129,7 +129,7 @@ findings:
   evidence: $(gpg --list-secret-keys --keyid-format LONG | grep -E "^sec" | head -1
     | awk '{print $2}' | cut -d'/' -f2)
   file: Scripts/setup-gpg-key.sh
-  id: 58D4ECC6-26D4-4970-8160-F9FFAA8E4FAB
+  id: 4EE38585-C214-4F8B-99DA-CFF46679C0BF
   line: 22
   recommendation: 'Avoid eval and exec where possible.
 
@@ -144,7 +144,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -160,7 +160,7 @@ findings:
   evidence: $(gpg --list-secret-keys --keyid-format LONG | grep -E "^sec" | head -1
     | awk '{print $2}' | cut -d'/' -f2)
   file: Scripts/setup-gpg-key.sh
-  id: 3CF88C04-BF39-4538-BB9A-8366BE604C2B
+  id: A71E6DAF-A433-402B-830E-668D8756C03D
   line: 45
   recommendation: 'Avoid eval and exec where possible.
 
@@ -175,7 +175,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -190,7 +190,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   file: Scripts/verify_build.sh
-  id: 4DCD15BC-41FF-474F-9F41-3F09D81951EC
+  id: 056B7ADA-85F5-4061-B4CA-0C959E80CAA6
   line: 7
   recommendation: 'Avoid eval and exec where possible.
 
@@ -205,7 +205,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -220,7 +220,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
   file: Scripts/build-with-all-errors.sh
-  id: 39F164B5-9198-4164-BE96-A5A9CD7ABC0F
+  id: 5EED919F-D3FC-45F2-926A-8C4CB0B87BA3
   line: 23
   recommendation: 'Avoid eval and exec where possible.
 
@@ -235,7 +235,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -251,7 +251,7 @@ findings:
   evidence: $(grep "MARKETING_VERSION:" "$PROJECT_DIR/project.yml" | awk '{print $2}'
     | tr -d '"')
   file: Scripts/create-dmg.sh
-  id: D73E2666-DF29-4D9C-9664-69ECC380A5A8
+  id: 3E2A8085-976D-4383-B042-1A06A48174F3
   line: 104
   recommendation: 'Avoid eval and exec where possible.
 
@@ -266,7 +266,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -282,7 +282,7 @@ findings:
   evidence: $(grep "CURRENT_PROJECT_VERSION:" "$PROJECT_DIR/project.yml" | awk '{print
     $2}' | tr -d '"')
   file: Scripts/create-dmg.sh
-  id: 8CE03105-210B-4195-956B-7635CD61A2C7
+  id: 7FD04ABC-704B-4643-B807-CB8FEBD7A2DD
   line: 105
   recommendation: 'Avoid eval and exec where possible.
 
@@ -297,7 +297,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -313,7 +313,7 @@ findings:
   evidence: $(defaults read "$APP_PATH/Contents/Info.plist" CFBundleShortVersionString
     2>/dev/null || echo "UNKNOWN")
   file: Scripts/create-dmg.sh
-  id: E3DAC8C2-B29E-4DC1-BBBF-52E6F06ABB91
+  id: FA4A8841-1424-4E87-A3FF-264DD728EBBE
   line: 231
   recommendation: 'Avoid eval and exec where possible.
 
@@ -328,7 +328,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -344,7 +344,7 @@ findings:
   evidence: $(defaults read "$MOUNTED_APP/Contents/Info.plist" CFBundleShortVersionString
     2>/dev/null || echo "UNKNOWN")
   file: Scripts/create-dmg.sh
-  id: A1788E7B-267A-4F86-842B-BF2296F6693A
+  id: 78CC4072-3AB1-461C-8A48-C6CA153FCE53
   line: 309
   recommendation: 'Avoid eval and exec where possible.
 
@@ -359,7 +359,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -374,7 +374,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(du -h "$DMG_PATH" | cut -f1)
   file: Scripts/create-dmg.sh
-  id: FAA2158D-8DC9-4ECE-9DD5-69E9CEACADF4
+  id: 227A8886-A36C-416F-A559-90506B31CE7D
   line: 329
   recommendation: 'Avoid eval and exec where possible.
 
@@ -389,7 +389,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -404,7 +404,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: eval "$
   file: Scripts/finish-setup.sh
-  id: 103FAF80-4CB7-452C-97E9-F1A0AA8BBD3A
+  id: C78E7A91-8B90-4154-8E29-CCE861418DA3
   line: 16
   recommendation: 'Avoid eval and exec where possible.
 
@@ -419,7 +419,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -434,7 +434,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "$0")/.." && pwd)
   file: Scripts/finish-setup.sh
-  id: 731F60CF-2743-4A87-9518-1DEC2DECBC16
+  id: D4688861-24CE-4F14-8880-2A16CBEA921F
   line: 10
   recommendation: 'Avoid eval and exec where possible.
 
@@ -449,7 +449,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -464,7 +464,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "$0")" && pwd)
   file: Scripts/build-and-notarize.sh
-  id: DFF43F5F-D5E6-4B23-AF68-3216358661DD
+  id: 5FA436A3-285F-486B-A43A-8F0DC0D0AB51
   line: 21
   recommendation: 'Avoid eval and exec where possible.
 
@@ -479,7 +479,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -494,7 +494,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(dirname "$SCRIPT_DIR")
   file: Scripts/build-and-notarize.sh
-  id: 5F6FF7F8-21C7-44D9-956D-75A1539819D3
+  id: D050DE16-77FC-4E07-934E-24C70293015C
   line: 22
   recommendation: 'Avoid eval and exec where possible.
 
@@ -509,7 +509,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -525,7 +525,7 @@ findings:
   evidence: $(find "$DERIVED_DATA" -name "Thea.app" -path "*/Release/*" -type d 2>/dev/null
     | head -1)
   file: Scripts/build-and-notarize.sh
-  id: 99C4C5B9-1751-4DC2-BF1A-B3CFDD7E785D
+  id: 3BA82E08-8558-40A8-9757-A486D604D7D8
   line: 79
   recommendation: 'Avoid eval and exec where possible.
 
@@ -540,7 +540,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -555,7 +555,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(du -h "$DMG_PATH" | cut -f1)
   file: Scripts/create-dmg-v1.3.0.sh
-  id: 51393A52-3101-4ACB-BCC3-D1AB21E3B3B6
+  id: 528808DB-6E85-4BA6-9F5A-F750CB6F048D
   line: 79
   recommendation: 'Avoid eval and exec where possible.
 
@@ -570,7 +570,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -585,7 +585,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   file: Scripts/install-automatic-checks.sh
-  id: 86A7AAE7-6AA1-4711-BFFB-07DD3D8E9E8A
+  id: 59285FFF-86BB-4957-AB3F-7EF744D3DBB6
   line: 24
   recommendation: 'Avoid eval and exec where possible.
 
@@ -600,7 +600,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -615,7 +615,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(dirname "$0")
   file: Scripts/push-changes.sh
-  id: 461AEA51-921E-43E4-9A7E-C92576E23315
+  id: 0B98E478-14A3-4EB8-B370-FEFA4497B3F8
   line: 2
   recommendation: 'Avoid eval and exec where possible.
 
@@ -630,7 +630,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -645,7 +645,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   file: Scripts/validate-settings.sh
-  id: F059484A-79FB-495C-836F-2F89381B4212
+  id: 3180A6A5-6E1E-49D9-842B-568F689A9595
   line: 23
   recommendation: 'Avoid eval and exec where possible.
 
@@ -660,7 +660,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -675,7 +675,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(dirname "$SCRIPT_DIR")
   file: Scripts/validate-settings.sh
-  id: AE3F7B7D-972A-4587-B965-343449A0F5C2
+  id: D949FEB3-9417-4C2E-934D-8FDD626A617F
   line: 24
   recommendation: 'Avoid eval and exec where possible.
 
@@ -690,7 +690,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -706,7 +706,7 @@ findings:
   evidence: $(grep "INFOPLIST_KEY_LSApplicationCategoryType" "$PBXPROJ" | head -1
     | sed 's/.*= "\(.*\)";/\1/')
   file: Scripts/validate-settings.sh
-  id: A21E8767-4087-4F73-9590-2453F8656213
+  id: 97AE1F29-BE9C-44E9-B77E-FB8A5E6ED5C5
   line: 264
   recommendation: 'Avoid eval and exec where possible.
 
@@ -721,7 +721,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -736,7 +736,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   file: Scripts/resolve_packages.sh
-  id: 64F45D5D-0688-450E-9D17-9FB8B157C96D
+  id: 9E9556A3-1F57-4F2B-8296-5FC42960C40D
   line: 24
   recommendation: 'Avoid eval and exec where possible.
 
@@ -751,7 +751,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -766,7 +766,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(basename $PACKAGE_RESOLVED_DIR)
   file: Scripts/resolve_packages.sh
-  id: AA733DC0-8BA3-4C73-B7EA-24597A021B90
+  id: A98B5E35-971E-4BBD-AE27-24E75CAB0990
   line: 115
   recommendation: 'Avoid eval and exec where possible.
 
@@ -781,7 +781,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -797,7 +797,7 @@ findings:
   evidence: $(find "$BUILD_DIR" -name "Package.resolved" -not -path "*/checkouts/*"
     2>/dev/null | head -1)
   file: Scripts/resolve_packages.sh
-  id: BE1CA01D-D78B-4C6F-AEA9-A8769F5208E2
+  id: CF672220-0980-44C9-B0A3-954E660D2258
   line: 193
   recommendation: 'Avoid eval and exec where possible.
 
@@ -812,7 +812,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -828,7 +828,7 @@ findings:
   evidence: $(find "$PACKAGES_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d
     ' ')
   file: Scripts/resolve_packages.sh
-  id: 896C1760-8FB7-49A1-B720-6924CE758AF7
+  id: A9682E27-391E-43CD-B7F0-D8C484F8BA89
   line: 224
   recommendation: 'Avoid eval and exec where possible.
 
@@ -843,7 +843,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -858,7 +858,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
   file: Scripts/auto-build-check.sh
-  id: D9A141FA-03EC-476F-BA5A-1892599DE53B
+  id: C0D880B3-553A-45F7-8BF9-5EFCC29B3926
   line: 24
   recommendation: 'Avoid eval and exec where possible.
 
@@ -873,7 +873,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -888,7 +888,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(dirname "$0")
   file: Scripts/complete-mission.sh
-  id: FCB246A1-91C9-4718-A247-5CA91005D3D2
+  id: 1C35CEC4-2BE7-4547-81D7-BC0DDAFAE692
   line: 60
   recommendation: 'Avoid eval and exec where possible.
 
@@ -903,7 +903,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -918,7 +918,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(git show ":$file" 2>/dev/null || true)
   file: Scripts/pre-commit
-  id: FE8ED600-237C-4CE2-B7D7-F564F07AE0B4
+  id: 72DE060C-83E0-4137-B410-15F41FB4D90B
   line: 50
   recommendation: 'Avoid eval and exec where possible.
 
@@ -933,7 +933,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -948,7 +948,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(git diff --cached --name-only --diff-filter=d | grep "\.swift$" || true)
   file: Scripts/pre-commit
-  id: 7D04A1F1-534D-477E-B163-E12BF9E26AFF
+  id: 09C184D6-885D-473E-820E-CDB34C5DFAAF
   line: 173
   recommendation: 'Avoid eval and exec where possible.
 
@@ -963,7 +963,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -978,7 +978,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(echo "$SWIFT_FILES" | wc -l | tr -d ' ')
   file: Scripts/pre-commit
-  id: 0F3A047A-FD9C-40D2-9009-CCC79D9239D4
+  id: A7913D57-706A-4BE7-966D-44E668D56FF1
   line: 177
   recommendation: 'Avoid eval and exec where possible.
 
@@ -993,7 +993,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -1008,7 +1008,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(echo "$SWIFT_FILES" | xargs swiftlint lint --force-exclude 2>&1 || true)
   file: Scripts/pre-commit
-  id: 4F885D78-2543-41CD-B1F0-D9260B99B35C
+  id: 0404B035-C400-4971-8F1E-107AECBBFC2A
   line: 178
   recommendation: 'Avoid eval and exec where possible.
 
@@ -1023,7 +1023,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -1038,7 +1038,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
   file: Scripts/error-summary.sh
-  id: F7F73565-4F55-4F65-BAAC-7034D48E8329
+  id: 1988885B-873C-4827-8DE9-0BE9C9262BCE
   line: 16
   recommendation: 'Avoid eval and exec where possible.
 
@@ -1053,7 +1053,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -1068,7 +1068,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(echo "$LINT_OUTPUT" | grep -c "error:" || echo "0")
   file: Scripts/error-summary.sh
-  id: 037BBD43-9AE9-405B-B790-97F12778F829
+  id: 25E892C9-BA1E-4244-9C74-168D5A3F3A49
   line: 35
   recommendation: 'Avoid eval and exec where possible.
 
@@ -1083,7 +1083,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -1098,7 +1098,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(echo "$LINT_OUTPUT" | grep -c "warning:" || echo "0")
   file: Scripts/error-summary.sh
-  id: 7F82193C-0FEF-4248-AD87-B4019888192C
+  id: DEF25944-27C1-47DE-AF30-EAEDEE10F6FA
   line: 36
   recommendation: 'Avoid eval and exec where possible.
 
@@ -1113,7 +1113,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -1128,7 +1128,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
   file: Scripts/watch-and-check.sh
-  id: 30B7E6B8-C0A2-4489-A88D-9EDCF10DA139
+  id: 94AD6138-FED2-4171-B527-64B6AAE85AAE
   line: 17
   recommendation: 'Avoid eval and exec where possible.
 
@@ -1143,7 +1143,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -1158,7 +1158,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(basename "$event")
   file: Scripts/watch-and-check.sh
-  id: B2CD78D9-27B6-4A76-84A8-769AC7554D13
+  id: A0F85B9A-398F-4402-B0CA-7AAC725C454E
   line: 37
   recommendation: 'Avoid eval and exec where possible.
 
@@ -1173,7 +1173,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -1188,7 +1188,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "$0")/.." && pwd)
   file: Scripts/build-and-install.sh
-  id: A105454A-6702-4DA2-9674-E0D20A522280
+  id: F5DE4BE9-2053-404B-96E2-5DDC85CE2323
   line: 9
   recommendation: 'Avoid eval and exec where possible.
 
@@ -1203,7 +1203,7 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 - category: Injection
   cweID: CWE-78
@@ -1218,7 +1218,7 @@ findings:
     These patterns can lead to command injection.'
   evidence: $(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
   file: Scripts/build-release.sh
-  id: 5EC1E72B-42BB-49D1-B137-4A4F0121F904
+  id: 290AE7CA-4077-402D-B835-15B116F4B672
   line: 23
   recommendation: 'Avoid eval and exec where possible.
 
@@ -1233,12 +1233,12 @@ findings:
     - Consider safer alternatives'
   ruleID: SCRIPT-EVAL-001
   severity: high
-  timestamp: '2026-02-18T19:11:31Z'
+  timestamp: '2026-02-18T19:12:20Z'
   title: Unsafe Eval Usage
 metadata:
   deltaMode: false
   repositoryPath: .
-  timestamp: '2026-02-18T19:11:32Z'
+  timestamp: '2026-02-18T19:12:21Z'
   version: 1.0.0
 summary:
   categoryCounts:
