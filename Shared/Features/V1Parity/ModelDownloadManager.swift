@@ -253,7 +253,7 @@ public final class ModelDownloadManager {
         // Filter to essential model files (weights, config, tokenizer)
         let essentialExtensions = ["safetensors", "json", "txt", "model", "bin", "gguf"]
         let filesToDownload = filenames.filter { name in
-            essentialExtensions.contains { name.hasSuffix(".\($0)") }
+            essentialExtensions.contains(where: { name.hasSuffix(".\($0)") })
         }
 
         guard !filesToDownload.isEmpty else {

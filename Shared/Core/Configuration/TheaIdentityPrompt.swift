@@ -141,7 +141,7 @@ enum TheaIdentityPrompt {
         if allDevices.count > 1 {
             let others = allDevices.filter { $0.id != current.id }
             let descriptions = others.map { device in
-                let status = (onlineDevices.contains { $0.id == device.id }) ? "online" : "offline"
+                let status = onlineDevices.contains(where: { $0.id == device.id }) ? "online" : "offline"
                 return "\(device.name) (\(device.type.displayName), \(status))"
             }
             lines.append("- Ecosystem: \(descriptions.joined(separator: ", "))")

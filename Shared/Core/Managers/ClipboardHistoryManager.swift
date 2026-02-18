@@ -84,7 +84,6 @@ final class ClipboardHistoryManager: ObservableObject {
             }
         }
 
-        // swiftlint:disable:next function_body_length
         private func handleClipboardChange(_ item: ClipboardItem) {
             guard isRecording, settings.clipboardHistoryEnabled else { return }
 

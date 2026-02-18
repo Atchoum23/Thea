@@ -169,8 +169,8 @@ struct LiveGuidanceSettingsView: View {
             Section("Permissions") {
                 permissionRow(
                     title: "Screen Recording",
-                    granted: guidance.screenCapture.isAuthorized
-                )                    {
+                    granted: guidance.screenCapture.isAuthorized,
+                    action: {
                         Task {
                             do {
                                 try await guidance.screenCapture.requestAuthorization()
@@ -180,20 +180,23 @@ struct LiveGuidanceSettingsView: View {
                             }
                         }
                     }
+                )
 
                 permissionRow(
                     title: "Accessibility (Pointer Tracking)",
-                    granted: guidance.pointerTracker.isAuthorized
-                )                    {
+                    granted: guidance.pointerTracker.isAuthorized,
+                    action: {
                         guidance.pointerTracker.requestAuthorization()
                     }
+                )
 
                 permissionRow(
                     title: "Accessibility (Control Handoff)",
-                    granted: guidance.actionExecutor.isAuthorized()
-                )                    {
+                    granted: guidance.actionExecutor.isAuthorized(),
+                    action: {
                         guidance.actionExecutor.requestAuthorization()
                     }
+                )
             }
 
             // Info

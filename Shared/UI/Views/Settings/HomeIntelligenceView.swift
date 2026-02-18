@@ -272,7 +272,7 @@ struct HomeIntelligenceView: View {
                 )
             } else {
                 LazyVGrid(columns: [
-                    GridItem(.adaptive(minimum: 180, maximum: 250))
+                    GridItem(.adaptive(minimum: 180, maximum: 250)),
                 ], spacing: 12) {
                     ForEach(filteredAccessories) { accessory in
                         accessoryCard(accessory)

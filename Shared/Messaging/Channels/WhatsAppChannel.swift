@@ -490,7 +490,7 @@ final class WhatsAppChannel: ObservableObject {
 
     private func isGroupChat(_ channelID: String) -> Bool {
         // WhatsApp group IDs typically end with @g.us
-        channelID.hasSuffix("@g.us") || groups.contains { $0.id == channelID }
+        channelID.hasSuffix("@g.us") || groups.contains(where: { $0.id == channelID })
     }
 
     // MARK: - Helpers

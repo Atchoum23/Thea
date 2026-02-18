@@ -338,7 +338,7 @@ struct DownloadItemTests {
 
     @Test func formattedSpeedEmpty() {
         let item = TestDownloadItem(url: "https://example.com/file.zip")
-        #expect(item.formattedSpeed.isEmpty)
+        #expect(item.formattedSpeed == "")
     }
 
     @Test func formattedSpeedMB() {
@@ -474,7 +474,7 @@ struct QueueLogicTests {
             TestDownloadItem(url: "https://example.com/b.zip")
         ]
         let newURL = "https://example.com/a.zip"
-        let isDuplicate = items.contains { $0.url == newURL && !$0.status.isTerminal }
+        let isDuplicate = items.contains(where: { $0.url == newURL && !$0.status.isTerminal })
         #expect(isDuplicate)
     }
 
@@ -482,7 +482,7 @@ struct QueueLogicTests {
         var item = TestDownloadItem(url: "https://example.com/a.zip")
         item.status = .completed
         let items = [item]
-        let isDuplicate = items.contains { $0.url == "https://example.com/a.zip" && !$0.status.isTerminal }
+        let isDuplicate = items.contains(where: { $0.url == "https://example.com/a.zip" && !$0.status.isTerminal })
         #expect(!isDuplicate) // Completed = terminal, so not a duplicate
     }
 

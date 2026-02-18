@@ -73,7 +73,8 @@ struct SecurityScannerView: View {
                 Toggle(isOn: Binding(
                     get: { selectedCategories.contains(category) },
                     set: { isOn in
-                        if isOn { selectedCategories.insert(category) } else { selectedCategories.remove(category) }
+                        if isOn { selectedCategories.insert(category) }
+                        else { selectedCategories.remove(category) }
                     }
                 )) {
                     Label(category.rawValue, systemImage: category.icon)

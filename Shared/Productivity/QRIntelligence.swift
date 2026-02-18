@@ -134,7 +134,6 @@ struct ScannedQRCode: Codable, Sendable, Identifiable {
 
 struct QRContentParser: Sendable {
 
-    // swiftlint:disable:next function_body_length
     static func parse(_ content: String) -> (QRContentType, [String: String], [QRAction]) {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
 

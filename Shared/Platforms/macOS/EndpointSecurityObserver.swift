@@ -17,9 +17,9 @@
 
     // MARK: - Endpoint Security Observer
 
-    // Observes system events via Endpoint Security framework
-    // Provides deep visibility into process execution, file operations, and system events
-    // NOTE: Requires Developer ID signing and special entitlement from Apple
+    /// Observes system events via Endpoint Security framework
+    /// Provides deep visibility into process execution, file operations, and system events
+    /// NOTE: Requires Developer ID signing and special entitlement from Apple
     // @unchecked Sendable: all mutable state (client, isRunning, recentEvents) is accessed on the
     // dedicated serial DispatchQueue (eventQueue); Endpoint Security callbacks arrive on that queue
     @available(macOS 11.0, *)

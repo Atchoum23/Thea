@@ -271,9 +271,7 @@ struct ACRiskLevelTests {
 
     @Test("Equal risk levels compare correctly")
     func equality() {
-        // swiftlint:disable:next identical_operands
         #expect(!(ACRiskLevel.low < ACRiskLevel.low))
-        // swiftlint:disable:next identical_operands
         #expect(ACRiskLevel.low <= ACRiskLevel.low)
     }
 
@@ -775,7 +773,6 @@ struct ACDecisionTypeTests {
 
     @Test("Two autoExecute decisions are equal")
     func autoExecuteEquality() {
-        // swiftlint:disable:next identical_operands
         #expect(ACDecision.autoExecute == ACDecision.autoExecute)
     }
 

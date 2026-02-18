@@ -22,7 +22,7 @@ public final class OfflineQueueService {
     private let monitorQueue = DispatchQueue(label: "app.thea.network.monitor")
 
     /// Non-nil only in test instances; overrides UserDefaults.standard for persistence
-    var testingUserDefaults: UserDefaults?
+    var testingUserDefaults: UserDefaults? = nil
 
     // MARK: - State
 

@@ -2,7 +2,7 @@
 # Version: 2.2.0 - Phase E: remove workflow_dispatch, permissions:read-all, bot comment fix
 # Last Updated: February 18, 2026
 
-name: Thea Security Audit (PR)
+name: Security Audit (PR)
 
 on:
   pull_request:

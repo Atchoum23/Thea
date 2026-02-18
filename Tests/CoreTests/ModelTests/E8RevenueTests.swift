@@ -286,7 +286,7 @@ struct StoreErrorTests {
             .failedVerification,
             .productNotFound,
             .purchaseFailed,
-            .failedToLoadProducts("network")
+            .failedToLoadProducts("network"),
         ]
         for error in errors {
             #expect(error.errorDescription?.isEmpty == false)

@@ -28,7 +28,6 @@ private enum TestSuggestionSource: String, Codable, Sendable {
 
 private struct TestSuggestionGenerator {
 
-    // swiftlint:disable:next function_body_length
     static func generate(
         response: String,
         query: String,

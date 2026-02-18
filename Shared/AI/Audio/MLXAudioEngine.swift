@@ -10,7 +10,7 @@ import MLXAudioCore
 // Native on-device TTS and STT using mlx-audio-swift
 // Enables private voice interaction without API calls
 
-// Sendable wrapper for ML model references that are only accessed from @MainActor.
+/// Sendable wrapper for ML model references that are only accessed from @MainActor.
 // @unchecked Sendable: generic wrapper transfers non-Sendable ML model refs across actor boundaries;
 // safe because the contained model is exclusively accessed from @MainActor (MLXAudioEngine)
 private struct SendableModelBox<T>: @unchecked Sendable {

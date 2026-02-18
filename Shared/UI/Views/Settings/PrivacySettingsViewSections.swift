@@ -357,7 +357,7 @@ extension PrivacySettingsView {
     // MARK: - Custom Pattern Editor Sheet
 
     var customPatternEditorSheet: some View {
-        CustomPatternEditorView { showingCustomPatternSheet = false }
+        CustomPatternEditorView(onDismiss: { showingCustomPatternSheet = false })
     }
 
     // MARK: - Export Options Sheet

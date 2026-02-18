@@ -236,7 +236,7 @@ extension ChatView {
                         // Same provider, different model
                         provider2 = provider1
                         let models = try await provider1.listModels()
-                        model2 = models.first { $0.id != model1 }?.id ?? model1
+                        model2 = models.first(where: { $0.id != model1 })?.id ?? model1
                     }
                     let results = try await chatManager.compareModels(
                         text,

@@ -244,7 +244,6 @@ final class BackgroundServiceMonitor: ObservableObject {
         return results
     }
 
-    // swiftlint:disable:next function_body_length
     private func checkSystemResources() -> [TheaServiceCheckResult] {
         var results: [TheaServiceCheckResult] = []
 

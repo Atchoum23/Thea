@@ -257,7 +257,6 @@ struct MacSettingsView: View {
     }
 
     @ViewBuilder
-    // swiftlint:disable:next function_body_length
     private func detailContent(for category: SettingsCategory) -> some View {
         switch category {
         case .general:

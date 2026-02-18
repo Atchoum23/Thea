@@ -495,3 +495,4 @@ struct SecurityResultTests {
         #expect(!result.isAllowed)
     }
 }
+

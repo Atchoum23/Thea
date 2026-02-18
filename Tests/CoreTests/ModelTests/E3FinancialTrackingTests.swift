@@ -581,7 +581,8 @@ private struct TestTransactionImporter {
         var current = ""
         var inQuotes = false
         for char in line {
-            if char == "\"" { inQuotes.toggle() } else if char == delimiter && !inQuotes {
+            if char == "\"" { inQuotes.toggle() }
+            else if char == delimiter && !inQuotes {
                 fields.append(current.trimmingCharacters(in: .whitespaces))
                 current = ""
             } else { current.append(char) }
@@ -605,7 +606,11 @@ private struct TestTransactionImporter {
         var mapping = TestColumnMapping()
         for (index, header) in headers.enumerated() {
             let h = header.lowercased()
-            if ["date", "datum", "buchungsdatum"].contains(where: { h.contains($0) }) { mapping.dateColumn = index } else if ["amount", "betrag", "montant"].contains(where: { h.contains($0) }) { mapping.amountColumn = index } else if ["description", "beschreibung", "buchungstext", "text"].contains(where: { h.contains($0) }) { mapping.descriptionColumn = index } else if ["category", "kategorie", "catégorie"].contains(where: { h.contains($0) }) { mapping.categoryColumn = index } else if ["currency", "währung", "devise"].contains(where: { h.contains($0) }) { mapping.currencyColumn = index }
+            if ["date", "datum", "buchungsdatum"].contains(where: { h.contains($0) }) { mapping.dateColumn = index }
+            else if ["amount", "betrag", "montant"].contains(where: { h.contains($0) }) { mapping.amountColumn = index }
+            else if ["description", "beschreibung", "buchungstext", "text"].contains(where: { h.contains($0) }) { mapping.descriptionColumn = index }
+            else if ["category", "kategorie", "catégorie"].contains(where: { h.contains($0) }) { mapping.categoryColumn = index }
+            else if ["currency", "währung", "devise"].contains(where: { h.contains($0) }) { mapping.currencyColumn = index }
         }
         return mapping
     }
@@ -640,7 +645,10 @@ private struct TestTransactionImporter {
             let avg = intervals.reduce(0, +) / Double(intervals.count)
             let dayInterval = avg / 86400
             let frequency: RecurringFrequency
-            if dayInterval < 10 { frequency = .weekly } else if dayInterval < 45 { frequency = .monthly } else if dayInterval < 100 { frequency = .quarterly } else { frequency = .annually }
+            if dayInterval < 10 { frequency = .weekly }
+            else if dayInterval < 45 { frequency = .monthly }
+            else if dayInterval < 100 { frequency = .quarterly }
+            else { frequency = .annually }
             let variance = intervals.map { abs($0 - avg) / avg }
             let maxVar = variance.max() ?? 1.0
             guard maxVar < 0.3 else { continue }
@@ -971,3 +979,4 @@ struct TestQuarterlyPayment: Identifiable, Codable {
     var paidDate: Date?
     var paidAmount: Double?
 }
+

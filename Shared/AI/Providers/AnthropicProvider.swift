@@ -324,19 +324,11 @@ final class AnthropicProvider: AIProvider, Sendable {
         model: String,
         options: AnthropicChatOptions
     ) -> [String: Any] {
-        // For assistant messages that have stored thinking blocks, the Anthropic API
-        // requires the exact original content block array to be sent back — not plain text.
-        // Sending plain text for a message that originally contained thinking blocks
-        // causes API Error 400: "thinking blocks cannot be modified".
-        let anthropicMessages: [[String: Any]] = messages.map { msg in
-            let role = msg.role == .user ? "user" : "assistant"
-            if msg.role == .assistant,
-               let blocksData = msg.metadata?.rawContentBlocksData,
-               let blocks = try? JSONSerialization.jsonObject(with: blocksData) as? [[String: Any]],
-               !blocks.isEmpty {
-                return ["role": role, "content": blocks]
-            }
-            return ["role": role, "content": msg.content.textValue]
+        let anthropicMessages = messages.map { msg in
+            [
+                "role": msg.role == .user ? "user" : "assistant",
+                "content": msg.content.textValue
+            ]
         }
 
         var body: [String: Any] = [
@@ -446,11 +438,6 @@ final class AnthropicProvider: AIProvider, Sendable {
                     }
 
                     var accumulatedText = ""
-                    // Track content blocks so thinking/redacted_thinking are preserved for multi-turn
-                    var contentBlocks: [[String: Any]] = []
-                    var currentBlockType = ""
-                    var currentThinking = ""
-
                     for try await line in asyncBytes.lines {
                         guard line.hasPrefix("data: ") else { continue }
                         let jsonString = String(line.dropFirst(6))
@@ -466,48 +453,15 @@ final class AnthropicProvider: AIProvider, Sendable {
                         guard let type = json["type"] as? String else { continue }
 
                         switch type {
-                        case "content_block_start":
-                            // redacted_thinking: full encrypted data is in the start event, not in deltas
-                            if let block = json["content_block"] as? [String: Any],
-                               let blockType = block["type"] as? String {
-                                currentBlockType = blockType
-                                currentThinking = ""
-                                if blockType == "redacted_thinking", let encData = block["data"] as? String {
-                                    contentBlocks.append(["type": "redacted_thinking", "data": encData])
-                                    currentBlockType = "" // already captured
-                                }
-                            }
                         case "content_block_delta":
-                            if let delta = json["delta"] as? [String: Any] {
-                                let deltaType = delta["type"] as? String ?? ""
-                                if deltaType == "text_delta" || deltaType == "text",
-                                   let text = delta["text"] as? String {
-                                    accumulatedText += text
-                                    continuation.yield(.delta(text))
-                                } else if deltaType == "thinking_delta",
-                                          let thinking = delta["thinking"] as? String {
-                                    currentThinking += thinking
-                                }
+                            if let delta = json["delta"] as? [String: Any], let text = delta["text"] as? String {
+                                accumulatedText += text
+                                continuation.yield(.delta(text))
                             }
-                        case "content_block_stop":
-                            // Seal the current block into our blocks array
-                            if currentBlockType == "thinking" {
-                                contentBlocks.append(["type": "thinking", "thinking": currentThinking])
-                            } else if currentBlockType == "text", !accumulatedText.isEmpty {
-                                contentBlocks.append(["type": "text", "text": accumulatedText])
-                            }
-                            currentBlockType = ""
                         case "message_stop":
-                            // Only store rawContentBlocksData when thinking blocks are present;
-                            // plain-text conversations don't need it.
-                            let hasThinking = contentBlocks.contains { ($0["type"] as? String) == "thinking" || ($0["type"] as? String) == "redacted_thinking" }
-                            let metadata: MessageMetadata? = hasThinking
-                                ? MessageMetadata(rawContentBlocksData: try? JSONSerialization.data(withJSONObject: contentBlocks))
-                                : nil
                             let finalMessage = AIMessage(
                                 id: UUID(), conversationID: messages.first?.conversationID ?? UUID(),
-                                role: .assistant, content: .text(accumulatedText),
-                                timestamp: Date(), model: model, metadata: metadata
+                                role: .assistant, content: .text(accumulatedText), timestamp: Date(), model: model
                             )
                             continuation.yield(.complete(finalMessage))
                         default: break
@@ -536,24 +490,16 @@ final class AnthropicProvider: AIProvider, Sendable {
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let contentBlocks = json["content"] as? [[String: Any]]
+              let content = json["content"] as? [[String: Any]],
+              let firstContent = content.first,
+              let text = firstContent["text"] as? String
         else {
             throw AnthropicError.noResponse
         }
 
-        // Extract the text content from whichever block carries it
-        let text = contentBlocks.compactMap { $0["text"] as? String }.joined()
-        guard !text.isEmpty else { throw AnthropicError.noResponse }
-
-        // Preserve content blocks for multi-turn thinking support
-        let hasThinking = contentBlocks.contains { ($0["type"] as? String) == "thinking" || ($0["type"] as? String) == "redacted_thinking" }
-        let metadata: MessageMetadata? = hasThinking
-            ? MessageMetadata(rawContentBlocksData: try? JSONSerialization.data(withJSONObject: contentBlocks))
-            : nil
-
         let finalMessage = AIMessage(
             id: UUID(), conversationID: messages.first?.conversationID ?? UUID(),
-            role: .assistant, content: .text(text), timestamp: Date(), model: model, metadata: metadata
+            role: .assistant, content: .text(text), timestamp: Date(), model: model
         )
         return AsyncThrowingStream { continuation in
             continuation.yield(.complete(finalMessage))

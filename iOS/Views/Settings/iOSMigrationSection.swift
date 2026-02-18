@@ -245,7 +245,7 @@ struct iOSMigrationImportView: View {
                 case .claude:
                     try await migrationManager.migrateFromClaude(exportPath: url)
                 case .cursor:
-                    try await migrationManager.migrateFromCursor(path: url)
+                    try await migrationManager.migrateFromNexus(path: url)
                 }
                 importComplete = true
                 isImporting = false

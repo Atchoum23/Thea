@@ -302,53 +302,53 @@ jobs:
             exit 0
           fi
           python3 << 'PYEOF'
-import json, sys
+          import json, sys
 
-CRITICAL_SUFFIXES = (
-    'Service.swift', 'Manager.swift', 'Engine.swift',
-    'Pipeline.swift', 'Orchestrator.swift', 'Controller.swift',
-    'Coordinator.swift',
-)
-THRESHOLD = 1.0  # 100%
+          CRITICAL_SUFFIXES = (
+              'Service.swift', 'Manager.swift', 'Engine.swift',
+              'Pipeline.swift', 'Orchestrator.swift', 'Controller.swift',
+              'Coordinator.swift',
+          )
+          THRESHOLD = 1.0  # 100%
 
-try:
-    d = json.load(open('coverage-macos.json'))
-    targets = d.get('targets', [])
+          try:
+              d = json.load(open('coverage-macos.json'))
+              targets = d.get('targets', [])
 
-    checked = []
-    failures = []
+              checked = []
+              failures = []
 
-    for target in targets:
-        for file in target.get('files', []):
-            name = file.get('name', '')
-            if not name.endswith(CRITICAL_SUFFIXES):
-                continue
-            cov = file.get('lineCoverage', 0.0)
-            checked.append((name, cov))
-            if cov < THRESHOLD:
-                failures.append((name, cov))
+              for target in targets:
+                  for file in target.get('files', []):
+                      name = file.get('name', '')
+                      if not name.endswith(CRITICAL_SUFFIXES):
+                          continue
+                      cov = file.get('lineCoverage', 0.0)
+                      checked.append((name, cov))
+                      if cov < THRESHOLD:
+                          failures.append((name, cov))
 
-    if not checked:
-        print('No critical class files found in coverage data — nothing to check')
-        sys.exit(0)
+              if not checked:
+                  print('No critical class files found in coverage data — nothing to check')
+                  sys.exit(0)
 
-    print(f'Critical class coverage ({len(checked)} files):')
-    for name, cov in sorted(checked):
-        mark = 'PASS' if cov >= THRESHOLD else 'FAIL'
-        print(f'  [{mark}] {name}: {cov:.1%}')
+              print(f'Critical class coverage ({len(checked)} files):')
+              for name, cov in sorted(checked):
+                  mark = 'PASS' if cov >= THRESHOLD else 'FAIL'
+                  print(f'  [{mark}] {name}: {cov:.1%}')
 
-    if failures:
-        print(f'\n::error::{len(failures)} critical class file(s) below 100% coverage:')
-        for name, cov in sorted(failures):
-            print(f'  {name}: {cov:.1%}')
-        sys.exit(1)
-    else:
-        print(f'\nAll {len(checked)} critical class files at 100% coverage')
+              if failures:
+                  print(f'\n::error::{len(failures)} critical class file(s) below 100% coverage:')
+                  for name, cov in sorted(failures):
+                      print(f'  {name}: {cov:.1%}')
+                  sys.exit(1)
+              else:
+                  print(f'\nAll {len(checked)} critical class files at 100% coverage')
 
-except Exception as e:
-    print(f'::warning::Could not parse coverage data: {e}')
-    sys.exit(0)
-PYEOF
+          except Exception as e:
+              print(f'::warning::Could not parse coverage data: {e}')
+              sys.exit(0)
+          PYEOF
 
       - name: Check Security-Critical File Coverage (100% branch)
         if: always()
@@ -361,63 +361,63 @@ PYEOF
             exit 0
           fi
           python3 << 'PYEOF'
-import json, sys
+          import json, sys
 
-SECURITY_FILES = {
-    'OutboundPrivacyGuard.swift',
-    'OpenClawSecurityGuard.swift',
-    'FunctionGemmaBridge.swift',
-    'ConversationLanguageService.swift',
-    'OpenClawBridge.swift',
-}
-THRESHOLD = 1.0  # 100% branch coverage
+          SECURITY_FILES = {
+              'OutboundPrivacyGuard.swift',
+              'OpenClawSecurityGuard.swift',
+              'FunctionGemmaBridge.swift',
+              'ConversationLanguageService.swift',
+              'OpenClawBridge.swift',
+          }
+          THRESHOLD = 1.0  # 100% branch coverage
 
-try:
-    d = json.load(open('coverage-macos.json'))
-    targets = d.get('targets', [])
+          try:
+              d = json.load(open('coverage-macos.json'))
+              targets = d.get('targets', [])
 
-    found = {}
-    for target in targets:
-        for file in target.get('files', []):
-            name = file.get('name', '')
-            if name in SECURITY_FILES:
-                line_cov = file.get('lineCoverage', 0.0)
-                # branchCoverage available in Xcode 13+ xccov JSON
-                branch_cov = file.get('branchCoverage', None)
-                found[name] = (line_cov, branch_cov)
+              found = {}
+              for target in targets:
+                  for file in target.get('files', []):
+                      name = file.get('name', '')
+                      if name in SECURITY_FILES:
+                          line_cov = file.get('lineCoverage', 0.0)
+                          # branchCoverage available in Xcode 13+ xccov JSON
+                          branch_cov = file.get('branchCoverage', None)
+                          found[name] = (line_cov, branch_cov)
 
-    missing = SECURITY_FILES - found.keys()
-    if missing:
-        print(f'::warning::Security files not found in coverage data (not in macOS target?): {", ".join(sorted(missing))}')
+              missing = SECURITY_FILES - found.keys()
+              if missing:
+                  print(f'::warning::Security files not found in coverage data (not in macOS target?): {", ".join(sorted(missing))}')
 
-    failures = []
-    print(f'Security-critical file branch coverage ({len(found)} files):')
-    for name in sorted(found):
-        line_cov, branch_cov = found[name]
-        if branch_cov is None:
-            # Fall back to line coverage if branch data unavailable
-            effective = line_cov
-            note = 'line (branch data unavailable)'
-        else:
-            effective = branch_cov
-            note = 'branch'
-        mark = 'PASS' if effective >= THRESHOLD else 'FAIL'
-        print(f'  [{mark}] {name}: {effective:.1%} {note}')
-        if effective < THRESHOLD:
-            failures.append((name, effective, note))
+              failures = []
+              print(f'Security-critical file branch coverage ({len(found)} files):')
+              for name in sorted(found):
+                  line_cov, branch_cov = found[name]
+                  if branch_cov is None:
+                      # Fall back to line coverage if branch data unavailable
+                      effective = line_cov
+                      note = 'line (branch data unavailable)'
+                  else:
+                      effective = branch_cov
+                      note = 'branch'
+                  mark = 'PASS' if effective >= THRESHOLD else 'FAIL'
+                  print(f'  [{mark}] {name}: {effective:.1%} {note}')
+                  if effective < THRESHOLD:
+                      failures.append((name, effective, note))
 
-    if failures:
-        print(f'\n::error::{len(failures)} security-critical file(s) below 100% branch coverage:')
-        for name, cov, note in sorted(failures):
-            print(f'  {name}: {cov:.1%} {note} — every branch must be tested')
-        sys.exit(1)
-    else:
-        print(f'\nAll {len(found)} security-critical files at 100% branch coverage')
+              if failures:
+                  print(f'\n::error::{len(failures)} security-critical file(s) below 100% branch coverage:')
+                  for name, cov, note in sorted(failures):
+                      print(f'  {name}: {cov:.1%} {note} — every branch must be tested')
+                  sys.exit(1)
+              else:
+                  print(f'\nAll {len(found)} security-critical files at 100% branch coverage')
 
-except Exception as e:
-    print(f'::warning::Could not parse coverage data: {e}')
-    sys.exit(0)
-PYEOF
+          except Exception as e:
+              print(f'::warning::Could not parse coverage data: {e}')
+              sys.exit(0)
+          PYEOF
 
       - name: Upload Test Results
         if: always()

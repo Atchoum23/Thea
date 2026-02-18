@@ -194,7 +194,7 @@ struct MaintenanceSchedule: Codable, Sendable {
             MaintenanceSchedule(serviceType: .battery, intervalKm: nil, intervalMonths: 48),
             MaintenanceSchedule(serviceType: .wipers, intervalKm: nil, intervalMonths: 12),
             MaintenanceSchedule(serviceType: .airFilter, intervalKm: 20_000, intervalMonths: 24),
-            MaintenanceSchedule(serviceType: .inspection, intervalKm: nil, intervalMonths: 12)
+            MaintenanceSchedule(serviceType: .inspection, intervalKm: nil, intervalMonths: 12),
         ]
         if fuelType != .electric {
             schedules.append(MaintenanceSchedule(serviceType: .oilChange, intervalKm: 10_000, intervalMonths: 12))

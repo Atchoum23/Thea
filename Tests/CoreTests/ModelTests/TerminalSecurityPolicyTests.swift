@@ -254,7 +254,8 @@ struct TerminalSudoPolicyTests {
         policy.allowSudo = true
         let result = policy.isAllowed("sudo apt update")
         if case .requiresConfirmation = result { } // Expected
-        else if case .allowed = result { } else { Issue.record("Expected allowed or requiresConfirmation") }
+        else if case .allowed = result { }
+        else { Issue.record("Expected allowed or requiresConfirmation") }
     }
 }
 
@@ -293,27 +294,32 @@ struct TerminalConfirmationTests {
 
     @Test("Requires confirmation for shutdown")
     func confirmShutdown() {
-        if case .requiresConfirmation = policy.isAllowed("shutdown -h now") { } else { Issue.record("Expected requiresConfirmation") }
+        if case .requiresConfirmation = policy.isAllowed("shutdown -h now") { }
+        else { Issue.record("Expected requiresConfirmation") }
     }
 
     @Test("Requires confirmation for reboot")
     func confirmReboot() {
-        if case .requiresConfirmation = policy.isAllowed("reboot") { } else { Issue.record("Expected requiresConfirmation") }
+        if case .requiresConfirmation = policy.isAllowed("reboot") { }
+        else { Issue.record("Expected requiresConfirmation") }
     }
 
     @Test("Requires confirmation for killall")
     func confirmKillall() {
-        if case .requiresConfirmation = policy.isAllowed("killall Finder") { } else { Issue.record("Expected requiresConfirmation") }
+        if case .requiresConfirmation = policy.isAllowed("killall Finder") { }
+        else { Issue.record("Expected requiresConfirmation") }
     }
 
     @Test("Requires confirmation for osascript")
     func confirmOsascript() {
-        if case .requiresConfirmation = policy.isAllowed("osascript -e 'tell app \"Finder\" to quit'") { } else { Issue.record("Expected requiresConfirmation") }
+        if case .requiresConfirmation = policy.isAllowed("osascript -e 'tell app \"Finder\" to quit'") { }
+        else { Issue.record("Expected requiresConfirmation") }
     }
 
     @Test("Requires confirmation for defaults write")
     func confirmDefaultsWrite() {
-        if case .requiresConfirmation = policy.isAllowed("defaults write com.apple.dock autohide -bool true") { } else { Issue.record("Expected requiresConfirmation") }
+        if case .requiresConfirmation = policy.isAllowed("defaults write com.apple.dock autohide -bool true") { }
+        else { Issue.record("Expected requiresConfirmation") }
     }
 }
 

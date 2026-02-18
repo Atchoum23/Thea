@@ -123,7 +123,7 @@ enum PasswordAnalyzer {
         let hasUpper = password.contains(where: \.isUppercase)
         let hasLower = password.contains(where: \.isLowercase)
         let hasDigit = password.contains(where: \.isNumber)
-        let hasSpecial = password.contains { !$0.isLetter && !$0.isNumber }
+        let hasSpecial = password.contains(where: { !$0.isLetter && !$0.isNumber })
 
         let variety = [hasUpper, hasLower, hasDigit, hasSpecial].filter { $0 }.count
         score += variety
@@ -186,7 +186,7 @@ private enum KeychainHelper {
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ]
         let status = SecItemAdd(query as CFDictionary, nil)
         return status == errSecSuccess
@@ -198,7 +198,7 @@ private enum KeychainHelper {
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
+            kSecMatchLimit as String: kSecMatchLimitOne,
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -210,7 +210,7 @@ private enum KeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: key
+            kSecAttrAccount as String: key,
         ]
         return SecItemDelete(query as CFDictionary) == errSecSuccess
     }

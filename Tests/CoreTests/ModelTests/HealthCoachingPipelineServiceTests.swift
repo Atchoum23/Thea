@@ -479,7 +479,7 @@ struct HCSleepAnalysisTests {
             .sleep(totalMinutes: 400, deepMinutes: 80, remMinutes: 80, quality: .poor, date: Date()),
             .sleep(totalMinutes: 380, deepMinutes: 70, remMinutes: 70, quality: .poor, date: Date()),
             .sleep(totalMinutes: 390, deepMinutes: 75, remMinutes: 75, quality: .poor, date: Date()),
-            .sleep(totalMinutes: 420, deepMinutes: 90, remMinutes: 90, quality: .good, date: Date())
+            .sleep(totalMinutes: 420, deepMinutes: 90, remMinutes: 90, quality: .good, date: Date()),
         ]
         let insights = pipeline.analyzeSleepData(from: data)
         #expect(insights.contains { $0.title == "Multiple poor sleep nights" })
@@ -491,7 +491,7 @@ struct HCSleepAnalysisTests {
         let data: [HCHealthDataPoint] = [
             .sleep(totalMinutes: 400, deepMinutes: 80, remMinutes: 80, quality: .poor, date: Date()),
             .sleep(totalMinutes: 380, deepMinutes: 70, remMinutes: 70, quality: .poor, date: Date()),
-            .sleep(totalMinutes: 420, deepMinutes: 90, remMinutes: 90, quality: .good, date: Date())
+            .sleep(totalMinutes: 420, deepMinutes: 90, remMinutes: 90, quality: .good, date: Date()),
         ]
         let insights = pipeline.analyzeSleepData(from: data)
         #expect(!insights.contains { $0.title == "Multiple poor sleep nights" })
@@ -784,7 +784,7 @@ struct HCInsightGenerationTests {
         let pipeline = TestHealthCoachingPipeline()
         let data: [HCHealthDataPoint] = [
             .activity(steps: 2000, activeCalories: 100, exerciseMinutes: 10, date: Date()),
-            .bloodPressure(systolic: 150, diastolic: 95, date: Date())
+            .bloodPressure(systolic: 150, diastolic: 95, date: Date()),
         ]
         let insights = pipeline.analyzeHealthData(data)
         #expect(!insights.isEmpty)
@@ -800,7 +800,7 @@ struct HCInsightGenerationTests {
             .sleep(totalMinutes: 200, deepMinutes: 20, remMinutes: 20, quality: .poor, date: Date()),
             .sleep(totalMinutes: 200, deepMinutes: 20, remMinutes: 20, quality: .poor, date: Date()),
             .activity(steps: 1000, activeCalories: 50, exerciseMinutes: 5, date: Date()),
-            .bloodPressure(systolic: 150, diastolic: 95, date: Date())
+            .bloodPressure(systolic: 150, diastolic: 95, date: Date()),
         ]
         pipeline.runAnalysis(with: data)
         #expect(pipeline.activeInsights.count <= 2)
@@ -965,7 +965,7 @@ struct HCScoringTests {
         let pipeline = TestHealthCoachingPipeline()
         let data: [HCHealthDataPoint] = [
             .sleep(totalMinutes: 480, deepMinutes: 100, remMinutes: 100, quality: .excellent, date: Date()),
-            .activity(steps: 10000, activeCalories: 500, exerciseMinutes: 30, date: Date())
+            .activity(steps: 10000, activeCalories: 500, exerciseMinutes: 30, date: Date()),
         ]
         let score = pipeline.calculateOverallScore(from: data)
         // sleep: 1.0, activity: 1.0, avg = 1.0
@@ -1028,7 +1028,7 @@ struct HCEdgeCaseTests {
             .sleep(totalMinutes: 480, deepMinutes: 100, remMinutes: 100, quality: .excellent, date: Date()),
             .activity(steps: 10000, activeCalories: 500, exerciseMinutes: 45, date: Date()),
             .heartRate(averageBPM: 70, restingBPM: 60, date: Date()),
-            .bloodPressure(systolic: 115, diastolic: 72, date: Date())
+            .bloodPressure(systolic: 115, diastolic: 72, date: Date()),
         ]
         let insights = pipeline.analyzeHealthData(data)
         #expect(insights.isEmpty)

@@ -2,7 +2,7 @@
 # Version: 2.0.0 - Phase E: OSV scanner direct CLI, gitleaks env var config, permissions, concurrency fix
 # Last Updated: February 18, 2026
 
-name: Security Scanning
+name: Thea Security Scanning
 
 on:
   push:
@@ -58,7 +58,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Go
-        uses: actions/setup-go@cdcb36043654635082a3a68ef0dd1a68b0be0036 # v5.0.0
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: 'stable'
           cache: false

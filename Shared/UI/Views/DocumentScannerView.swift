@@ -476,12 +476,12 @@ private struct DocumentDetailView: View {
                     .font(.title2)
 
                 if editingTitle {
-                    TextField("Title", text: $titleText) {
+                    TextField("Title", text: $titleText, onCommit: {
                         var updated = document
                         updated.title = titleText
                         onUpdate(updated)
                         editingTitle = false
-                    }
+                    })
                     .textFieldStyle(.roundedBorder)
                 } else {
                     Text(document.title)

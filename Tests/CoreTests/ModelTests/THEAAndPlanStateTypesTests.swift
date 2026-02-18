@@ -462,7 +462,7 @@ struct PlanPhaseProgressTests {
     func allPending() {
         let steps = [
             TestPlanStep(title: "A", activeDescription: "A..."),
-            TestPlanStep(title: "B", activeDescription: "B...")
+            TestPlanStep(title: "B", activeDescription: "B..."),
         ]
         let phase = TestPlanPhase(title: "Phase 1", steps: steps)
         #expect(phase.totalSteps == 2)
@@ -475,7 +475,7 @@ struct PlanPhaseProgressTests {
     func halfCompleted() {
         let steps = [
             TestPlanStep(title: "A", activeDescription: "A...", status: .completed),
-            TestPlanStep(title: "B", activeDescription: "B...", status: .pending)
+            TestPlanStep(title: "B", activeDescription: "B...", status: .pending),
         ]
         let phase = TestPlanPhase(title: "Phase 1", steps: steps)
         #expect(phase.progress == 0.5)
@@ -486,7 +486,7 @@ struct PlanPhaseProgressTests {
     func allCompleted() {
         let steps = [
             TestPlanStep(title: "A", activeDescription: "A...", status: .completed),
-            TestPlanStep(title: "B", activeDescription: "B...", status: .completed)
+            TestPlanStep(title: "B", activeDescription: "B...", status: .completed),
         ]
         let phase = TestPlanPhase(title: "Phase 1", steps: steps)
         #expect(phase.progress == 1.0)
@@ -497,7 +497,7 @@ struct PlanPhaseProgressTests {
     func skippedCountsAsComplete() {
         let steps = [
             TestPlanStep(title: "A", activeDescription: "A...", status: .completed),
-            TestPlanStep(title: "B", activeDescription: "B...", status: .skipped)
+            TestPlanStep(title: "B", activeDescription: "B...", status: .skipped),
         ]
         let phase = TestPlanPhase(title: "Phase 1", steps: steps)
         #expect(phase.isComplete)
@@ -510,7 +510,7 @@ struct PlanPhaseProgressTests {
     func failedPreventsComplete() {
         let steps = [
             TestPlanStep(title: "A", activeDescription: "A...", status: .completed),
-            TestPlanStep(title: "B", activeDescription: "B...", status: .failed)
+            TestPlanStep(title: "B", activeDescription: "B...", status: .failed),
         ]
         let phase = TestPlanPhase(title: "Phase 1", steps: steps)
         #expect(!phase.isComplete)
@@ -521,7 +521,7 @@ struct PlanPhaseProgressTests {
         let steps = [
             TestPlanStep(title: "A", activeDescription: "A...", status: .completed),
             TestPlanStep(title: "B", activeDescription: "Building...", status: .inProgress),
-            TestPlanStep(title: "C", activeDescription: "C...", status: .pending)
+            TestPlanStep(title: "C", activeDescription: "C...", status: .pending),
         ]
         let phase = TestPlanPhase(title: "Phase 1", steps: steps)
         #expect(phase.currentStep?.title == "B")
@@ -531,7 +531,7 @@ struct PlanPhaseProgressTests {
     func noCurrentStep() {
         let steps = [
             TestPlanStep(title: "A", activeDescription: "A...", status: .completed),
-            TestPlanStep(title: "B", activeDescription: "B...", status: .pending)
+            TestPlanStep(title: "B", activeDescription: "B...", status: .pending),
         ]
         let phase = TestPlanPhase(title: "Phase 1", steps: steps)
         #expect(phase.currentStep == nil)
@@ -596,11 +596,11 @@ struct PlanStateProgressTests {
     func multiPhaseProgress() {
         let phase1 = TestPlanPhase(title: "Setup", steps: [
             TestPlanStep(title: "A", activeDescription: "A...", status: .completed),
-            TestPlanStep(title: "B", activeDescription: "B...", status: .completed)
+            TestPlanStep(title: "B", activeDescription: "B...", status: .completed),
         ])
         let phase2 = TestPlanPhase(title: "Build", steps: [
             TestPlanStep(title: "C", activeDescription: "Building C...", status: .inProgress),
-            TestPlanStep(title: "D", activeDescription: "D...", status: .pending)
+            TestPlanStep(title: "D", activeDescription: "D...", status: .pending),
         ])
         let plan = TestPlanState(title: "Build Plan", phases: [phase1, phase2],
                                   status: .executing, originalQuery: "Build the app")

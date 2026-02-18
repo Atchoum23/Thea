@@ -335,7 +335,6 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Metric Pair Definitions
 
-    // swiftlint:disable:next function_body_length
     private func buildMetricPairs() -> [MetricPair] {
         [
             // Sleep hours vs productivity
