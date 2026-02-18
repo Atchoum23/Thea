@@ -731,7 +731,7 @@ final class DocumentScanner {
             doc.title.lowercased().contains(lower) ||
             doc.extractedText.lowercased().contains(lower) ||
             doc.category.rawValue.lowercased().contains(lower) ||
-            doc.tags.contains(where: { $0.contains(lower) }) ||
+            doc.tags.contains { $0.contains(lower) } ||
             (doc.sender?.lowercased().contains(lower) ?? false)
         }
     }
