@@ -463,6 +463,8 @@ final class VoiceInteractionEngine {
 
 // MARK: - Synthesizer Delegate
 
+// @unchecked Sendable: NSObject subclass bridging AVSpeechSynthesizerDelegate; callbacks dispatched
+// on main thread by AVSpeechSynthesizer; weak engine reference dispatches back via Task @MainActor
 private class SynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     weak var engine: VoiceInteractionEngine?
 
