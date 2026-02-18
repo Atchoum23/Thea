@@ -394,7 +394,7 @@ actor SystemSecurityScanner {
         }
 
         // Check for apps that have accessibility permission
-        let accessibilityPlist = "/Library/Application Support/com.apple.TCC/TCC.db"
+        _ = "/Library/Application Support/com.apple.TCC/TCC.db" // TCC database path (unused but kept for documentation)
         filesChecked += 1
 
         // Check for tracking-related files
